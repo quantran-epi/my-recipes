@@ -39,8 +39,8 @@
     "workbox-streams": "^6.6.0"
   },
   "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
+    "start": "node ./node_modules/@craco/craco/dist/bin/craco start",
+    "build": "node ./node_modules/@craco/craco/dist/bin/craco build GENERATE_SOURCEMAP=false",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
