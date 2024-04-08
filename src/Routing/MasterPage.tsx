@@ -8,6 +8,7 @@ import { Outlet, useNavigate } from "react-router-dom";
 import { MenuOutlined } from "@ant-design/icons";
 import { List } from "@components/List";
 import { RootRoutes } from "./RootRoutes";
+import { Box } from "@components/Layout/Box";
 
 const layoutStyles: React.CSSProperties = {
     height: "100%"
@@ -54,7 +55,9 @@ const SidebarDrawer = () => {
             <Button type="primary" onClick={showDrawer} icon={<MenuOutlined />} />
             <Drawer placement="left" title="Menu" onClose={onClose} open={open}>
                 <List dataSource={[
-                    { title: "Nguyên liệu", href: RootRoutes.AuthorizedRoutes.IngredientRoutes.List() },
+                    { title: "Ingredients", href: RootRoutes.AuthorizedRoutes.IngredientRoutes.List() },
+                    { title: "Dishes", href: RootRoutes.AuthorizedRoutes.IngredientRoutes.List() },
+                    { title: "Shopping List", href: RootRoutes.AuthorizedRoutes.IngredientRoutes.List() },
                 ]} renderItem={(item) => <List.Item>
                     <Button onClick={() => onNavigate(item)}>{item.title}</Button>
                 </List.Item>} />

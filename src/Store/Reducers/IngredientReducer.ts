@@ -30,6 +30,6 @@ export const ingredientSlice = createSlice({
 })
 
 // Action creators are generated for each case reducer function
-export const { } = ingredientSlice.actions
+export const { add: addIngredient, remove: removeIngredient } = ingredientSlice.actions
 
 export default ingredientSlice.reducer
