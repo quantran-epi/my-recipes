@@ -3,10 +3,12 @@ import storage from 'redux-persist/lib/storage';
 import { persistReducer, persistStore } from 'redux-persist';
 import IngredientReducer from "./Reducers/IngredientReducer";
 import AppContextReducer from "./Reducers/AppContextReducer";
+import DishesReducer from "./Reducers/DishesReducer";
 
 const combinedReducer = combineReducers({
     appContext: AppContextReducer,
-    ingredient: IngredientReducer
+    ingredient: IngredientReducer,
+    dishes: DishesReducer
 })
 
 const persistConfig = {

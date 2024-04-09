@@ -14,7 +14,7 @@ export const useScreenTitle = (props?: UseScreenTitleProps): UseScreenTitle => {
     const dispatch = useDispatch();
 
     useEffect(() => {
-        dispatch(updateCurrentFeatureName("Ingredient List"));
+        dispatch(updateCurrentFeatureName(props.value));
         return () => {
             dispatch(updateCurrentFeatureName(""));
         }

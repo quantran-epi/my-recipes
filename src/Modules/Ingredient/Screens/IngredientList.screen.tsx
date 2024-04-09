@@ -10,6 +10,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { IngredientAddWidget } from "./IngredientAdd.widget";
 import { Ingredient } from "@store/Models/Ingredient";
 import { IngredientEditWidget } from "./IngredientEdit.widget";
+import { EditOutlined, DeleteOutlined } from "@ant-design/icons";
 
 export const IngredientListScreen = () => {
     const ingredients = useSelector((state: RootState) => state.ingredient.ingredients);
@@ -54,8 +55,8 @@ export const IngredientItem: React.FunctionComponent<IngredientItemProps> = (pro
         <List.Item
             actions={
                 [
-                    <Button onClick={_onEdit}>Edit</Button>,
-                    <Button danger onClick={() => props.onDelete(props.item)}>Delete</Button>
+                    <Button size="small" onClick={_onEdit} icon={<EditOutlined />} />,
+                    <Button size="small" danger icon={<DeleteOutlined />} onClick={() => props.onDelete(props.item)} />
                 ]
             }>
             <Typography.Text>{props.item.name}</Typography.Text >
