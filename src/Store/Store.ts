@@ -2,8 +2,10 @@ import { combineReducers, configureStore } from "@reduxjs/toolkit";
 import storage from 'redux-persist/lib/storage';
 import { persistReducer, persistStore } from 'redux-persist';
 import IngredientReducer from "./Reducers/IngredientReducer";
+import AppContextReducer from "./Reducers/AppContextReducer";
 
 const combinedReducer = combineReducers({
+    appContext: AppContextReducer,
     ingredient: IngredientReducer
 })
 

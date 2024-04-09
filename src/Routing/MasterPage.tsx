@@ -9,6 +9,10 @@ import { MenuOutlined } from "@ant-design/icons";
 import { List } from "@components/List";
 import { RootRoutes } from "./RootRoutes";
 import { Box } from "@components/Layout/Box";
+import { Stack } from "@components/Layout/Stack";
+import { Typography } from "@components/Typography";
+import { useSelector } from "react-redux";
+import { RootState } from "@store/Store";
 
 const layoutStyles: React.CSSProperties = {
     height: "100%"
@@ -16,6 +20,7 @@ const layoutStyles: React.CSSProperties = {
 
 export const MasterPage = () => {
     const theme = useTheme();
+    const currentFeatureName = useSelector((state: RootState) => state.appContext.currentFeatureName);
 
     return <Layout style={layoutStyles}>
         <Header style={{
@@ -25,7 +30,10 @@ export const MasterPage = () => {
             backgroundColor: "#fff",
             borderBottom: "0.5px solid " + theme.token.colorBorder
         }}>
-            <SidebarDrawer />
+            <Stack fullwidth>
+                <SidebarDrawer />
+                <Typography.Text>{currentFeatureName}</Typography.Text>
+            </Stack>
         </Header>
         <Content>
             <Outlet />

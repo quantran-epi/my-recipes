@@ -17,6 +17,12 @@ export const ingredientSlice = createSlice({
         add: (state, action: PayloadAction<Ingredient>) => {
             state.ingredients.push(action.payload);
         },
+        edit: (state, action: PayloadAction<Ingredient>) => {
+            state.ingredients = state.ingredients.map(e => {
+                if (e.id === action.payload.id) return action.payload;
+                return e;
+            })
+        },
         remove: (state, action: PayloadAction<string[]>) => {
             state.ingredients = state.ingredients.filter(ingre => !action.payload.includes(ingre.id));
         },
@@ -30,6 +36,6 @@ export const ingredientSlice = createSlice({
 })
 
 // Action creators are generated for each case reducer function
-export const { add: addIngredient, remove: removeIngredient } = ingredientSlice.actions
+export const { add: addIngredient, edit: editIngredient, remove: removeIngredient } = ingredientSlice.actions
 
 export default ingredientSlice.reducer
