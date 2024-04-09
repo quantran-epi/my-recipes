@@ -65,7 +65,7 @@ const SidebarDrawer = () => {
                 <List dataSource={[
                     { title: "Ingredients", href: RootRoutes.AuthorizedRoutes.IngredientRoutes.List() },
                     { title: "Dishes", href: RootRoutes.AuthorizedRoutes.DishesRoutes.List() },
-                    { title: "Shopping List", href: RootRoutes.AuthorizedRoutes.IngredientRoutes.List() },
+                    { title: "Shopping List", href: RootRoutes.AuthorizedRoutes.ShoppingListRoutes.List() },
                 ]} renderItem={(item) => <List.Item>
                     <Button onClick={() => onNavigate(item)}>{item.title}</Button>
                 </List.Item>} />
