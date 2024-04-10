@@ -110,7 +110,7 @@ export const ShoppingListItem: React.FunctionComponent<ShoppingListItemProps> = 
                 </Stack>} />
         </List.Item>
         <Modal style={{ top: 50 }} open={toggleIngredient.value} title={"Lịch mua sắm (" + props.item.name + ")"} destroyOnClose={true} onCancel={toggleIngredient.hide} footer={null}>
-            <Box style={{ maxHeight: 400, overflowY: "auto" }}>
+            <Box style={{ maxHeight: 600, overflowY: "auto" }}>
                 <ShoppingListDetailScreen shoppingList={props.item} />
             </Box>
         </Modal>
