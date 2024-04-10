@@ -1,7 +1,7 @@
 import { Button } from "@components/Button";
 import { Content } from "@components/Layout/Content";
 import { Header } from "@components/Layout/Header";
-import { useTheme } from "@hooks";
+import { useTheme, useToggle } from "@hooks";
 import { Layout, Drawer } from "antd";
 import React, { useState } from "react";
 import { Outlet, useNavigate } from "react-router-dom";
@@ -13,6 +13,11 @@ import { Stack } from "@components/Layout/Stack";
 import { Typography } from "@components/Typography";
 import { useSelector } from "react-redux";
 import { RootState } from "@store/Store";
+import { Modal } from "@components/Modal";
+import { TextArea } from "@components/Form/Input";
+import { SmartForm, useSmartForm } from "@components/SmartForm";
+import { ObjectPropertyHelper } from "@common/Helpers/ObjectProperty";
+import { Space } from "@components/Layout/Space";
 
 const layoutStyles: React.CSSProperties = {
     height: "100%"
@@ -69,7 +74,52 @@ const SidebarDrawer = () => {
                 ]} renderItem={(item) => <List.Item>
                     <Button fullwidth onClick={() => onNavigate(item)}>{item.title}</Button>
                 </List.Item>} />
+                <DataBackup />
             </Drawer>
         </React.Fragment>
     );
 };
+
+export const DataBackup = () => {
+    const toggleShowData = useToggle();
+    const toggleImportData = useToggle();
+    const [exportedData, setExportedData] = useState<string>("");
+
+    const importDataForm = useSmartForm({
+        defaultValues: {
+            data: ""
+        },
+        onSubmit: (values) => {
+            localStorage.setItem("persist:root", values.transformValues.data);
+        },
+        itemDefinitions: defaultValues => ({
+            data: { name: ObjectPropertyHelper.nameof(defaultValues, e => e.data), label: "Data" }
+        })
+    })
+
+    return <React.Fragment>
+        <Space>
+            <Button onClick={() => {
+                setExportedData(localStorage.getItem("persist:root"));
+                toggleShowData.show();
+            }}>Export data</Button>
+
+            <Button onClick={toggleImportData.show}>Import data</Button>
+        </Space>
+
+        <Modal title="Export Data" open={toggleShowData.value} onCancel={toggleShowData.hide} footer={null}>
+            <Box style={{ height: 300, overflowY: "auto" }}>
+                {exportedData}
+            </Box>
+        </Modal>
+        <Modal title="Import Data" open={toggleImportData.value} onCancel={toggleImportData.hide} footer={null}>
+            <SmartForm {...importDataForm.defaultProps}>
+                <SmartForm.Item {...importDataForm.itemDefinitions.data}>
+                    <TextArea rows={10} />
+                </SmartForm.Item>
+            </SmartForm>
+
+            <Button onClick={importDataForm.submit}>Import</Button>
+        </Modal>
+    </React.Fragment>
+}

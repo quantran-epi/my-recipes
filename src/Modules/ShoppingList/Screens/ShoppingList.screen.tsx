@@ -18,6 +18,7 @@ import { Space } from "@components/Layout/Space";
 import { nanoid } from "@reduxjs/toolkit";
 import moment from "moment";
 import { Stack } from "@components/Layout/Stack";
+import { Box } from "@components/Layout/Box";
 
 export const ShoppingListScreen = () => {
     const shoppingLists = useSelector((state: RootState) => state.shoppingList.shoppingLists);
@@ -108,8 +109,10 @@ export const ShoppingListItem: React.FunctionComponent<ShoppingListItemProps> = 
                     </Space>
                 </Stack>} />
         </List.Item>
-        <Modal open={toggleIngredient.value} title={"Lịch mua sắm (" + props.item.name + ")"} destroyOnClose={true} onCancel={toggleIngredient.hide} footer={null}>
-            <ShoppingListDetailScreen shoppingList={props.item} />
+        <Modal style={{ top: 50 }} open={toggleIngredient.value} title={"Lịch mua sắm (" + props.item.name + ")"} destroyOnClose={true} onCancel={toggleIngredient.hide} footer={null}>
+            <Box style={{ maxHeight: 400, overflowY: "auto" }}>
+                <ShoppingListDetailScreen shoppingList={props.item} />
+            </Box>
         </Modal>
     </React.Fragment>
 }
