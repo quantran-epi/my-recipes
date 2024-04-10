@@ -17,9 +17,10 @@ export const ShoppingListAddWidget = () => {
     const addShoppingListForm = useSmartForm<ShoppingList>({
         defaultValues: {
             id: "",
-            name: "",
+            name: new Date().toLocaleString(),
             dishes: [],
-            ingredients: []
+            ingredients: [],
+            createdDate: new Date()
         },
         onSubmit: (values) => {
             dispatch(addShoppingList(values.transformValues));
@@ -30,6 +31,7 @@ export const ShoppingListAddWidget = () => {
             name: { label: "Name", name: ObjectPropertyHelper.nameof(defaultValues, e => e.name) },
             dishes: { label: "Choose dishes", name: ObjectPropertyHelper.nameof(defaultValues, e => e.dishes) },
             ingredients: { name: ObjectPropertyHelper.nameof(defaultValues, e => e.ingredients), noMarkup: true },
+            createdDate: { name: ObjectPropertyHelper.nameof(defaultValues, e => e.createdDate), noMarkup: true },
         }),
         transformFunc: (values) => ({
             ...values,
@@ -43,7 +45,7 @@ export const ShoppingListAddWidget = () => {
 
     return <SmartForm {...addShoppingListForm.defaultProps}>
         <SmartForm.Item {...addShoppingListForm.itemDefinitions.name}>
-            <Input placeholder="Nhập tên" autoFocus />
+            <Input placeholder="Nhập tên" autoFocus allowClear />
         </SmartForm.Item>
         <SmartForm.Item {...addShoppingListForm.itemDefinitions.dishes}>
             <Select

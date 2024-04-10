@@ -13,6 +13,9 @@ import { useDispatch, useSelector } from "react-redux";
 import { ShoppingListAddWidget } from "./ShoppingListAdd.widget";
 import { groupBy } from "lodash";
 import { ShoppingListDetailScreen } from "./ShoppingListDetail.screen";
+import { Tooltip } from "@components/Tootip";
+import { Space } from "@components/Layout/Space";
+import { nanoid } from "@reduxjs/toolkit";
 
 export const ShoppingListScreen = () => {
     const shoppingLists = useSelector((state: RootState) => state.shoppingList.shoppingLists);
@@ -57,12 +60,17 @@ export const ShoppingListItem: React.FunctionComponent<ShoppingListItemProps> = 
         dispatch(generateIngredient({
             shoppingListId: props.item.id,
             ingredientGroups: Object.keys(groups).map(key => ({
-                id: key,
+                id: key.concat('-gr-').concat(nanoid(10)),
+                ingredientId: key,
                 amounts: groups[key],
                 isDone: false
             }))
         }));
         toggleIngredient.show();
+    }
+
+    const _isAllIngredientDone = () => {
+        return props.item.ingredients.every(ingre => ingre.isDone);
     }
 
     const _onShow = () => {
@@ -81,8 +89,14 @@ export const ShoppingListItem: React.FunctionComponent<ShoppingListItemProps> = 
                     </Popconfirm>
                 ]
             }>
-            <Typography.Text>{props.item.name} ({props.item.dishes.length} dishes)</Typography.Text >
-        </List.Item >
+            <List.Item.Meta title={<Tooltip title={props.item.name}>
+                <Typography.Paragraph style={{ width: 180, marginBottom: 0, textDecorationLine: _isAllIngredientDone() ? "line-through" : undefined }} ellipsis>{props.item.name}</Typography.Paragraph>
+            </Tooltip>}
+                description={<Space>
+                    <Typography.Text>{props.item.dishes.length + " dishes"}</Typography.Text>
+                    <Typography.Text style={{ fontSize: 12 }}>({props.item.createdDate.toLocaleString()})</Typography.Text>
+                </Space>} />
+        </List.Item>
         <Modal open={toggleIngredient.value} title={"Ingredient List (" + props.item.name + ")"} destroyOnClose={true} onCancel={toggleIngredient.hide} footer={null}>
             <ShoppingListDetailScreen shoppingList={props.item} />
         </Modal>

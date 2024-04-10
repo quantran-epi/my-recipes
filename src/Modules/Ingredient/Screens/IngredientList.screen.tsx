@@ -11,6 +11,8 @@ import { IngredientAddWidget } from "./IngredientAdd.widget";
 import { Ingredient } from "@store/Models/Ingredient";
 import { IngredientEditWidget } from "./IngredientEdit.widget";
 import { EditOutlined, DeleteOutlined } from "@ant-design/icons";
+import { Tooltip } from "@components/Tootip";
+import { Popconfirm } from "@components/Popconfirm";
 
 export const IngredientListScreen = () => {
     const ingredients = useSelector((state: RootState) => state.ingredient.ingredients);
@@ -56,10 +58,14 @@ export const IngredientItem: React.FunctionComponent<IngredientItemProps> = (pro
             actions={
                 [
                     <Button size="small" onClick={_onEdit} icon={<EditOutlined />} />,
-                    <Button size="small" danger icon={<DeleteOutlined />} onClick={() => props.onDelete(props.item)} />
+                    <Popconfirm title="Delete?" onConfirm={() => props.onDelete(props.item)}>
+                        <Button size="small" danger icon={<DeleteOutlined />} />
+                    </Popconfirm>
                 ]
             }>
-            <Typography.Text>{props.item.name}</Typography.Text >
+            <List.Item.Meta description={<Tooltip title={props.item.name}>
+                <Typography.Paragraph style={{ width: 180, marginBottom: 0 }} ellipsis>{props.item.name}</Typography.Paragraph>
+            </Tooltip>} />
         </List.Item >
         <Modal open={toggleEdit.value} title="Edit Ingredient" destroyOnClose={true} onCancel={toggleEdit.hide} footer={null}>
             <IngredientEditWidget item={props.item} onDone={() => toggleEdit.hide()} />

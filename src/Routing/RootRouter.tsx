@@ -10,11 +10,13 @@ import { DishesListScreen } from "@modules/Dishes/Screens/DishesList.screen";
 import { DishesManageIngredientScreen } from "@modules/Dishes/Screens/DishesManageIngredient/DishesManageIngredient.screen";
 import { ShoppingListRouter } from "@modules/ShoppingList/Routing/ShoppingListRouter";
 import { ShoppingListScreen } from "@modules/ShoppingList/Screens/ShoppingList.screen";
+import { DashboardScreen } from "@modules/Home/Screens/Dashboard.screen";
 
 export const RootRouter = () => {
     return <BrowserRouter>
         <Routes>
             <Route path={RootRoutes.AuthorizedRoutes.Root()} element={<MasterPage />}>
+                <Route index element={<DashboardScreen />} />
                 <Route path={RootRoutes.AuthorizedRoutes.IngredientRoutes.Root()} element={<IngredientRouter />}>
                     <Route path={RootRoutes.AuthorizedRoutes.IngredientRoutes.List()} element={<IngredientListScreen />} />
                 </Route>

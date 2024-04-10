@@ -4,6 +4,7 @@ export type DishesIngredientAmount = {
     ingredientId: string;
     unit: IngredientUnit;
     amount: string;
+    dishesId: string;
 }
 
 export type Dishes = {

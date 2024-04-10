@@ -8,6 +8,12 @@ export type ShoppingListGenerateIngredientParams = {
     ingredientGroups: ShoppingList["ingredients"];
 }
 
+export type ShoppingListToggleDoneIngredientParams = {
+    shoppingListId: string;
+    ingredientGroupId: string;
+    isDone: boolean;
+}
+
 export interface ShoppingListState {
     shoppingLists: ShoppingList[];
 }
@@ -43,10 +49,29 @@ export const ShoppingListSlice = createSlice({
                 return e;
             })
         },
+        toggleDoneIngredient: (state, action: PayloadAction<ShoppingListToggleDoneIngredientParams>) => {
+            state.shoppingLists = state.shoppingLists.map(e => {
+                if (e.id === action.payload.shoppingListId) {
+                    return {
+                        ...e,
+                        ingredients: e.ingredients.map(ingre => {
+                            if (ingre.id === action.payload.ingredientGroupId) {
+                                return {
+                                    ...ingre,
+                                    isDone: action.payload.isDone
+                                }
+                            }
+                            return ingre;
+                        }),
+                    }
+                }
+                return e;
+            })
+        },
     }
 })
 
 // Action creators are generated for each case reducer function
-export const { add: addShoppingList, edit: editShoppingList, remove: removeShoppingList, generateIngredient } = ShoppingListSlice.actions
+export const { add: addShoppingList, edit: editShoppingList, remove: removeShoppingList, generateIngredient, toggleDoneIngredient } = ShoppingListSlice.actions
 
 export default ShoppingListSlice.reducer
