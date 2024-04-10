@@ -15,6 +15,7 @@ import { DishesAddIngredientWidget } from "./DishesAddIngredient.widget"
 import { Popconfirm } from "@components/Popconfirm"
 import { EditOutlined, DeleteOutlined, PlusOutlined } from "@ant-design/icons";
 import { Dishes, DishesIngredientAmount } from "@store/Models/Dishes"
+import { Stack } from "@components/Layout/Stack"
 
 export const DishesManageIngredientScreen = () => {
     const [params] = useSearchParams();
@@ -25,7 +26,7 @@ export const DishesManageIngredientScreen = () => {
     const toggleAddIngredientToDishes = useToggle({ defaultValue: false });
     const dispatch = useDispatch();
 
-    const { } = useScreenTitle({ value: "Ingredient for (" + currentDist.name + ")" });
+    const { } = useScreenTitle({ value: "Chi tiết (" + currentDist.name + ")" });
 
     const addDishesForm = useSmartForm<DishesIngredientAddParams>({
         defaultValues: {
@@ -58,12 +59,15 @@ export const DishesManageIngredientScreen = () => {
     }, [currentDist])
 
     return <Form {...addDishesForm.defaultProps}>
-        <Button fullwidth onClick={_onAddIngredient}>Add</Button>
+        <Button fullwidth onClick={_onAddIngredient}>Thêm</Button>
         <List
             dataSource={currentDist.ingredients}
             renderItem={(item) => <IngredientItem dish={currentDist} ingredientAmount={item} onDelete={_onDelete} />} />
 
-        <Modal open={toggleAddIngredientToDishes.value} title={"Add Ingredient (" + currentDist.name + ")"} destroyOnClose={true} onCancel={toggleAddIngredientToDishes.hide} footer={null}>
+        <Modal open={toggleAddIngredientToDishes.value} title={<Stack gap={0} direction="column" align="flex-start">
+            <Typography.Title level={5} style={{ margin: 0 }}>Thêm nguyên liệu</Typography.Title>
+            <Typography.Text style={{ fontSize: 12 }} type="secondary">{currentDist.name}</Typography.Text>
+        </Stack>} destroyOnClose={true} onCancel={toggleAddIngredientToDishes.hide} footer={null}>
             <DishesAddIngredientWidget dish={currentDist} onDone={() => toggleAddIngredientToDishes.hide()} />
         </Modal>
     </Form>
@@ -90,7 +94,7 @@ export const IngredientItem: React.FunctionComponent<IngredientItemProps> = (pro
     return <React.Fragment>
         <List.Item
             actions={[
-                <Popconfirm title="Delete?" onConfirm={() => props.onDelete(props.dish, props.ingredientAmount)}>
+                <Popconfirm title="Xóa?" onConfirm={() => props.onDelete(props.dish, props.ingredientAmount)}>
                     <Button size="small" danger icon={<DeleteOutlined />} />
                 </Popconfirm>
             ]}>

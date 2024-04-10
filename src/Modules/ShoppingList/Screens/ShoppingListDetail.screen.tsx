@@ -34,12 +34,12 @@ export const ShoppingListDetailScreen: React.FunctionComponent<ShoppingListDetai
             size="small"
             items={[
                 {
-                    key: 'dishes', label: 'Dishes ' + `(${props.shoppingList.dishes.length})`, children: <List
+                    key: 'dishes', label: 'Món ăn ' + `(${props.shoppingList.dishes.length})`, children: <List
                         size="small"
                         dataSource={_getDishesByIds(props.shoppingList.dishes)}
                         renderItem={(item) => <List.Item style={{ padding: 0 }}>
                             <Button style={{ paddingInline: 0 }} type="link" onClick={() => navigate(RootRoutes.AuthorizedRoutes.DishesRoutes.ManageIngredient(item.id))}>
-                                {item.name} ({item.ingredients.length} ingredients)
+                                {item.name} ({item.ingredients.length} nguyên liệu)
                             </Button>
                         </List.Item>
                         }
@@ -47,7 +47,7 @@ export const ShoppingListDetailScreen: React.FunctionComponent<ShoppingListDetai
                 },
                 {
                     key: 'ingredients', label: <Stack fullwidth justify="space-between">
-                        <Typography.Text>Ingredients</Typography.Text>
+                        <Typography.Text>Nguyên liệu</Typography.Text>
                         <Space>
                             <CheckSquareOutlined />
                             <Typography.Text strong>{`${props.shoppingList.ingredients.filter(e => e.isDone).length}/${props.shoppingList.ingredients.length}`}</Typography.Text>

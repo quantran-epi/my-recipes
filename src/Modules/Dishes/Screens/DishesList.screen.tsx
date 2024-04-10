@@ -20,7 +20,7 @@ export const DishesListScreen = () => {
     const dishes = useSelector((state: RootState) => state.dishes.dishes);
     const toggleAddModal = useToggle({ defaultValue: false });
     const dispatch = useDispatch();
-    const { } = useScreenTitle({ value: "Dishes List" });
+    const { } = useScreenTitle({ value: "Món ăn" });
 
     const _onAdd = () => {
         toggleAddModal.show();
@@ -31,13 +31,13 @@ export const DishesListScreen = () => {
     }
 
     return <React.Fragment>
-        <Button onClick={_onAdd}>Add</Button>
+        <Button onClick={_onAdd}>Thêm</Button>
         <List
             itemLayout="horizontal"
             dataSource={dishes}
             renderItem={(item) => <DishesItem item={item} onDelete={_onDelete} />}
         />
-        <Modal open={toggleAddModal.value} title="Add Dishes" destroyOnClose={true} onCancel={toggleAddModal.hide} footer={null}>
+        <Modal open={toggleAddModal.value} title="Thêm món ăn" destroyOnClose={true} onCancel={toggleAddModal.hide} footer={null}>
             <DishesAddWidget />
         </Modal>
     </React.Fragment>
@@ -66,7 +66,7 @@ export const DishesItem: React.FunctionComponent<DishesItemProps> = (props) => {
                 [
                     <Button size="small" onClick={_onEdit} icon={<EditOutlined />} />,
                     <Button size="small" onClick={_onManageIngredient} icon={<PlusOutlined />} />,
-                    <Popconfirm title="Delete?" onConfirm={() => props.onDelete(props.item)}>
+                    <Popconfirm title="Xóa?" onConfirm={() => props.onDelete(props.item)}>
                         <Button size="small" danger icon={<DeleteOutlined />} />
                     </Popconfirm>
                 ]
@@ -74,9 +74,9 @@ export const DishesItem: React.FunctionComponent<DishesItemProps> = (props) => {
             <List.Item.Meta title={<Tooltip title={props.item.name}>
                 <Typography.Paragraph style={{ width: 200, marginBottom: 0 }} ellipsis>{props.item.name}</Typography.Paragraph>
             </Tooltip>}
-                description={props.item.ingredients.length + " ingredients"} />
+                description={"Gồm " + props.item.ingredients.length + " nguyên liệu"} />
         </List.Item >
-        <Modal open={toggleEdit.value} title="Edit Dishes" destroyOnClose={true} onCancel={toggleEdit.hide} footer={null}>
+        <Modal open={toggleEdit.value} title="Chỉnh sửa món ăn" destroyOnClose={true} onCancel={toggleEdit.hide} footer={null}>
             <DishesEditWidget item={props.item} onDone={() => toggleEdit.hide()} />
         </Modal>
     </React.Fragment>

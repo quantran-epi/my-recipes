@@ -23,7 +23,7 @@ export const ShoppingListScreen = () => {
     const shoppingLists = useSelector((state: RootState) => state.shoppingList.shoppingLists);
     const toggleAddModal = useToggle({ defaultValue: false });
     const dispatch = useDispatch();
-    const { } = useScreenTitle({ value: "Shopping List" });
+    const { } = useScreenTitle({ value: "Lịch mua sắm" });
 
     const _onAdd = () => {
         toggleAddModal.show();
@@ -34,13 +34,13 @@ export const ShoppingListScreen = () => {
     }
 
     return <React.Fragment>
-        <Button onClick={_onAdd}>Add</Button>
+        <Button onClick={_onAdd}>Thêm</Button>
         <List
             itemLayout="horizontal"
             dataSource={shoppingLists}
             renderItem={(item) => <ShoppingListItem item={item} onDelete={_onDelete} />}
         />
-        <Modal open={toggleAddModal.value} title="Add Shopping List" destroyOnClose={true} onCancel={toggleAddModal.hide} footer={null}>
+        <Modal open={toggleAddModal.value} title="Thêm lịch mua sắm" destroyOnClose={true} onCancel={toggleAddModal.hide} footer={null}>
             <ShoppingListAddWidget />
         </Modal>
     </React.Fragment>
@@ -87,7 +87,7 @@ export const ShoppingListItem: React.FunctionComponent<ShoppingListItemProps> = 
                 [
                     props.item.ingredients.length > 0 ? <Button size="small" onClick={_onShow} icon={<FormOutlined />} />
                         : <Button size="small" onClick={_onGenerate} icon={<FormOutlined />} />,
-                    <Popconfirm title="Delete?" onConfirm={() => props.onDelete(props.item)} >
+                    <Popconfirm title="Xóa?" onConfirm={() => props.onDelete(props.item)} >
                         <Button size="small" danger icon={<DeleteOutlined />} />
                     </Popconfirm>
                 ]
@@ -98,17 +98,17 @@ export const ShoppingListItem: React.FunctionComponent<ShoppingListItemProps> = 
                 description={<Stack direction="column" align="flex-start" gap={2}>
                     <Space size={2}>
                         <CheckSquareOutlined />
-                        <Typography.Text>{`${props.item.ingredients.filter(e => e.isDone).length}/${props.item.ingredients.length}`} ingredients</Typography.Text>
+                        <Typography.Text>{`${props.item.ingredients.filter(e => e.isDone).length}/${props.item.ingredients.length}`} nguyên liệu</Typography.Text>
                     </Space>
                     <Space>
-                        <Typography.Text>{props.item.dishes.length + " dishes"}</Typography.Text>
+                        <Typography.Text style={{ fontSize: 12 }}>Gồm {props.item.dishes.length + " món ăn"}</Typography.Text>
                     </Space>
                     <Space>
-                        <Typography.Text style={{ fontSize: 12 }}>Created: {moment(props.item.createdDate).format("DD/MM/YYYY hh:mm:ss A")}</Typography.Text>
+                        <Typography.Text style={{ fontSize: 12 }}>Ngày tạo: {moment(props.item.createdDate).format("DD/MM/YYYY hh:mm:ss A")}</Typography.Text>
                     </Space>
                 </Stack>} />
         </List.Item>
-        <Modal open={toggleIngredient.value} title={"Ingredient List (" + props.item.name + ")"} destroyOnClose={true} onCancel={toggleIngredient.hide} footer={null}>
+        <Modal open={toggleIngredient.value} title={"Lịch mua sắm (" + props.item.name + ")"} destroyOnClose={true} onCancel={toggleIngredient.hide} footer={null}>
             <ShoppingListDetailScreen shoppingList={props.item} />
         </Modal>
     </React.Fragment>

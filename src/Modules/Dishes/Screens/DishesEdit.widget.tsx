@@ -32,7 +32,7 @@ export const DishesEditWidget = ({ item, onDone }) => {
             <Input placeholder="Nhập tên" autoFocus />
         </SmartForm.Item>
         <Stack fullwidth justify="flex-end">
-            <Button onClick={_onSave}>Save</Button>
+            <Button onClick={_onSave}>Lưu</Button>
         </Stack>
     </SmartForm>
 }

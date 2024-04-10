@@ -75,7 +75,7 @@ export const DishesAddIngredientWidget: React.FunctionComponent<DishesAddIngredi
         </SmartForm.Item>
 
         <Stack fullwidth justify="flex-end">
-            <Button onClick={_onSave}>Save</Button>
+            <Button onClick={_onSave}>Lưu</Button>
         </Stack>
     </SmartForm>
 }

@@ -18,7 +18,7 @@ export const IngredientListScreen = () => {
     const ingredients = useSelector((state: RootState) => state.ingredient.ingredients);
     const toggleAddModal = useToggle({ defaultValue: false });
     const dispatch = useDispatch();
-    const { } = useScreenTitle({ value: "Ingredient List" });
+    const { } = useScreenTitle({ value: "Nguyên liệu" });
 
     const _onAdd = () => {
         toggleAddModal.show();
@@ -29,13 +29,13 @@ export const IngredientListScreen = () => {
     }
 
     return <React.Fragment>
-        <Button onClick={_onAdd}>Add</Button>
+        <Button onClick={_onAdd}>Thêm</Button>
         <List
             itemLayout="horizontal"
             dataSource={ingredients}
             renderItem={(item) => <IngredientItem item={item} onDelete={_onDelete} />}
         />
-        <Modal open={toggleAddModal.value} title="Add Ingredient" destroyOnClose={true} onCancel={toggleAddModal.hide} footer={null}>
+        <Modal open={toggleAddModal.value} title="Thêm nguyên liệu" destroyOnClose={true} onCancel={toggleAddModal.hide} footer={null}>
             <IngredientAddWidget />
         </Modal>
     </React.Fragment>
@@ -58,7 +58,7 @@ export const IngredientItem: React.FunctionComponent<IngredientItemProps> = (pro
             actions={
                 [
                     <Button size="small" onClick={_onEdit} icon={<EditOutlined />} />,
-                    <Popconfirm title="Delete?" onConfirm={() => props.onDelete(props.item)}>
+                    <Popconfirm title="Xóa?" onConfirm={() => props.onDelete(props.item)}>
                         <Button size="small" danger icon={<DeleteOutlined />} />
                     </Popconfirm>
                 ]
@@ -67,7 +67,7 @@ export const IngredientItem: React.FunctionComponent<IngredientItemProps> = (pro
                 <Typography.Paragraph style={{ width: 200, marginBottom: 0 }} ellipsis>{props.item.name}</Typography.Paragraph>
             </Tooltip>} />
         </List.Item >
-        <Modal open={toggleEdit.value} title="Edit Ingredient" destroyOnClose={true} onCancel={toggleEdit.hide} footer={null}>
+        <Modal open={toggleEdit.value} title="Chỉnh sửa nguyên liệu" destroyOnClose={true} onCancel={toggleEdit.hide} footer={null}>
             <IngredientEditWidget item={props.item} onDone={() => toggleEdit.hide()} />
         </Modal>
     </React.Fragment>

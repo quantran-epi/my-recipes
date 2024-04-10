@@ -28,8 +28,8 @@ export const ShoppingListAddWidget = () => {
         },
         itemDefinitions: defaultValues => ({
             id: { name: ObjectPropertyHelper.nameof(defaultValues, e => e.id), noMarkup: true },
-            name: { label: "Name", name: ObjectPropertyHelper.nameof(defaultValues, e => e.name) },
-            dishes: { label: "Choose dishes", name: ObjectPropertyHelper.nameof(defaultValues, e => e.dishes) },
+            name: { label: "Tên gợi nhớ", name: ObjectPropertyHelper.nameof(defaultValues, e => e.name) },
+            dishes: { label: "Chọn món ăn", name: ObjectPropertyHelper.nameof(defaultValues, e => e.dishes) },
             ingredients: { name: ObjectPropertyHelper.nameof(defaultValues, e => e.ingredients), noMarkup: true },
             createdDate: { name: ObjectPropertyHelper.nameof(defaultValues, e => e.createdDate), noMarkup: true },
         }),
@@ -60,7 +60,7 @@ export const ShoppingListAddWidget = () => {
             </Select>
         </SmartForm.Item>
         <Stack fullwidth justify="flex-end">
-            <Button onClick={_onSave}>Save</Button>
+            <Button onClick={_onSave}>Lưu</Button>
         </Stack>
     </SmartForm>
 }

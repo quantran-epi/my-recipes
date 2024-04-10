@@ -61,13 +61,13 @@ const SidebarDrawer = () => {
     return (
         <React.Fragment>
             <Button type="primary" onClick={showDrawer} icon={<MenuOutlined />} />
-            <Drawer placement="left" title="Menu" onClose={onClose} open={open}>
+            <Drawer placement="left" title="Chức năng" onClose={onClose} open={open}>
                 <List dataSource={[
-                    { title: "Ingredients", href: RootRoutes.AuthorizedRoutes.IngredientRoutes.List() },
-                    { title: "Dishes", href: RootRoutes.AuthorizedRoutes.DishesRoutes.List() },
-                    { title: "Shopping List", href: RootRoutes.AuthorizedRoutes.ShoppingListRoutes.List() },
+                    { title: "Nguyên liệu", href: RootRoutes.AuthorizedRoutes.IngredientRoutes.List() },
+                    { title: "Món ăn", href: RootRoutes.AuthorizedRoutes.DishesRoutes.List() },
+                    { title: "Lịch mua sắm", href: RootRoutes.AuthorizedRoutes.ShoppingListRoutes.List() },
                 ]} renderItem={(item) => <List.Item>
-                    <Button onClick={() => onNavigate(item)}>{item.title}</Button>
+                    <Button fullwidth onClick={() => onNavigate(item)}>{item.title}</Button>
                 </List.Item>} />
             </Drawer>
         </React.Fragment>
