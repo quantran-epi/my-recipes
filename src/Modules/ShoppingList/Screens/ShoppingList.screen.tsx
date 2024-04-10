@@ -70,7 +70,7 @@ export const ShoppingListItem: React.FunctionComponent<ShoppingListItemProps> = 
     }
 
     const _isAllIngredientDone = () => {
-        return props.item.ingredients.every(ingre => ingre.isDone);
+        return props.item.ingredients.length > 0 && props.item.ingredients.every(ingre => ingre.isDone);
     }
 
     const _onShow = () => {
