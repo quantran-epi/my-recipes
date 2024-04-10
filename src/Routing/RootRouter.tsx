@@ -13,7 +13,7 @@ import { ShoppingListScreen } from "@modules/ShoppingList/Screens/ShoppingList.s
 import { DashboardScreen } from "@modules/Home/Screens/Dashboard.screen";
 
 export const RootRouter = () => {
-    return <BrowserRouter>
+    return <BrowserRouter basename="/my-recipes">
         <Routes>
             <Route path={RootRoutes.AuthorizedRoutes.Root()} element={<MasterPage />}>
                 <Route index element={<DashboardScreen />} />
