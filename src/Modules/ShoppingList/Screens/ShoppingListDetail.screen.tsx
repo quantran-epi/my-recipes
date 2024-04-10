@@ -1,12 +1,12 @@
+import { CheckSquareOutlined, ReloadOutlined } from "@ant-design/icons";
 import { Button } from "@components/Button";
 import { Collapse } from "@components/Collapse";
 import { Checkbox } from "@components/Form/Checkbox";
-import { Divider } from "@components/Layout/Divider";
 import { Stack } from "@components/Layout/Stack";
-import { List } from "@components/List"
+import { List } from "@components/List";
 import { Typography } from "@components/Typography";
 import { RootRoutes } from "@routing/RootRoutes";
-import { ShoppingList, ShoppingListIngredientGroup } from "@store/Models/ShoppingList"
+import { ShoppingList, ShoppingListIngredientGroup } from "@store/Models/ShoppingList";
 import { toggleDoneIngredient } from "@store/Reducers/ShoppingListReducer";
 import { RootState } from "@store/Store";
 import { Space } from "antd";
@@ -14,7 +14,6 @@ import { CheckboxChangeEvent } from "antd/es/checkbox";
 import React from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { CheckSquareOutlined } from "@ant-design/icons";
 
 type ShoppingListDetailScreenProps = {
     shoppingList: ShoppingList;

@@ -1,4 +1,4 @@
-import { DeleteOutlined, FormOutlined, CheckSquareOutlined } from "@ant-design/icons";
+import { DeleteOutlined, FormOutlined, CheckSquareOutlined, ReloadOutlined } from "@ant-design/icons";
 import { Button } from "@components/Button";
 import { List } from "@components/List";
 import { Modal } from "@components/Modal";
@@ -86,6 +86,7 @@ export const ShoppingListItem: React.FunctionComponent<ShoppingListItemProps> = 
         <List.Item
             actions={
                 [
+                    <Button size="small" onClick={_onGenerate} icon={<ReloadOutlined />} />,
                     props.item.ingredients.length > 0 ? <Button size="small" onClick={_onShow} icon={<FormOutlined />} />
                         : <Button size="small" onClick={_onGenerate} icon={<FormOutlined />} />,
                     <Popconfirm title="Xóa?" onConfirm={() => props.onDelete(props.item)} >
