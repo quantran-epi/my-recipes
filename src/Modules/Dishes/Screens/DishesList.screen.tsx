@@ -14,6 +14,7 @@ import { DishesEditWidget } from "./DishesEdit.widget";
 import { EditOutlined, DeleteOutlined, PlusOutlined } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
 import { RootRoutes } from "@routing/RootRoutes";
+import { Tooltip } from "@components/Tootip";
 
 export const DishesListScreen = () => {
     const dishes = useSelector((state: RootState) => state.dishes.dishes);
@@ -70,7 +71,10 @@ export const DishesItem: React.FunctionComponent<DishesItemProps> = (props) => {
                     </Popconfirm>
                 ]
             }>
-            <Typography.Text>{props.item.name}</Typography.Text>
+            <List.Item.Meta title={<Tooltip title={props.item.name}>
+                <Typography.Paragraph style={{ width: 130, marginBottom: 0 }} ellipsis>{props.item.name}</Typography.Paragraph>
+            </Tooltip>}
+                description={props.item.ingredients.length + " ingredients"} />
         </List.Item >
         <Modal open={toggleEdit.value} title="Edit Dishes" destroyOnClose={true} onCancel={toggleEdit.hide} footer={null}>
             <DishesEditWidget item={props.item} onDone={() => toggleEdit.hide()} />

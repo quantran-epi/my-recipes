@@ -1,9 +1,12 @@
 import type { PayloadAction } from '@reduxjs/toolkit';
 import { createSlice } from '@reduxjs/toolkit';
+import { DishesIngredientAmount } from '@store/Models/Dishes';
 import { ShoppingList } from '@store/Models/ShoppingList';
-import { store } from '@store/Store';
-import { groupBy } from 'lodash';
 
+export type ShoppingListGenerateIngredientParams = {
+    shoppingListId: string;
+    ingredientGroups: ShoppingList["ingredients"];
+}
 
 export interface ShoppingListState {
     shoppingLists: ShoppingList[];
@@ -29,8 +32,16 @@ export const ShoppingListSlice = createSlice({
         remove: (state, action: PayloadAction<string[]>) => {
             state.shoppingLists = state.shoppingLists.filter(dish => !action.payload.includes(dish.id));
         },
-        generateIngredient: (state, action: PayloadAction<string>) => {
-           
+        generateIngredient: (state, action: PayloadAction<ShoppingListGenerateIngredientParams>) => {
+            state.shoppingLists = state.shoppingLists.map(e => {
+                if (e.id === action.payload.shoppingListId) {
+                    return {
+                        ...e,
+                        ingredients: action.payload.ingredientGroups,
+                    }
+                }
+                return e;
+            })
         },
     }
 })

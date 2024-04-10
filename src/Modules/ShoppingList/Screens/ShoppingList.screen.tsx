@@ -12,6 +12,7 @@ import React from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { ShoppingListAddWidget } from "./ShoppingListAdd.widget";
 import { groupBy } from "lodash";
+import { ShoppingListDetailScreen } from "./ShoppingListDetail.screen";
 
 export const ShoppingListScreen = () => {
     const shoppingLists = useSelector((state: RootState) => state.shoppingList.shoppingLists);
@@ -50,14 +51,17 @@ export const ShoppingListItem: React.FunctionComponent<ShoppingListItemProps> = 
     const dishes = useSelector((state: RootState) => state.dishes.dishes);
     const dispatch = useDispatch();
 
-    // const _onEdit = () => {
-    //     toggleEdit.show();
-    // }
-
     const _onGenerate = () => {
-        debugger
         let ingredientAmounts = dishes.map(dish => dish.ingredients).flat();
-        let b = groupBy(ingredientAmounts, "ingredientId");
+        let groups = groupBy(ingredientAmounts, "ingredientId");
+        dispatch(generateIngredient({
+            shoppingListId: props.item.id,
+            ingredientGroups: Object.keys(groups).map(key => ({
+                id: key,
+                amounts: groups[key],
+                isDone: false
+            }))
+        }));
         toggleIngredient.show();
     }
 
@@ -80,7 +84,7 @@ export const ShoppingListItem: React.FunctionComponent<ShoppingListItemProps> = 
             <Typography.Text>{props.item.name} ({props.item.dishes.length} dishes)</Typography.Text >
         </List.Item >
         <Modal open={toggleIngredient.value} title={"Ingredient List (" + props.item.name + ")"} destroyOnClose={true} onCancel={toggleIngredient.hide} footer={null}>
-            {/* <IngredientEditWidget item={props.item} onDone={() => toggleEdit.hide()} /> */}
+            <ShoppingListDetailScreen shoppingList={props.item} />
         </Modal>
     </React.Fragment>
 }
