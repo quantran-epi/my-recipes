@@ -72,7 +72,7 @@ export const DishesItem: React.FunctionComponent<DishesItemProps> = (props) => {
                 ]
             }>
             <List.Item.Meta title={<Tooltip title={props.item.name}>
-                <Typography.Paragraph style={{ width: 180, marginBottom: 0 }} ellipsis>{props.item.name}</Typography.Paragraph>
+                <Typography.Paragraph style={{ width: 200, marginBottom: 0 }} ellipsis>{props.item.name}</Typography.Paragraph>
             </Tooltip>}
                 description={props.item.ingredients.length + " ingredients"} />
         </List.Item >

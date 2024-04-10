@@ -1,16 +1,20 @@
 import { Button } from "@components/Button";
 import { Collapse } from "@components/Collapse";
 import { Checkbox } from "@components/Form/Checkbox";
+import { Divider } from "@components/Layout/Divider";
+import { Stack } from "@components/Layout/Stack";
 import { List } from "@components/List"
 import { Typography } from "@components/Typography";
 import { RootRoutes } from "@routing/RootRoutes";
 import { ShoppingList, ShoppingListIngredientGroup } from "@store/Models/ShoppingList"
 import { toggleDoneIngredient } from "@store/Reducers/ShoppingListReducer";
 import { RootState } from "@store/Store";
+import { Space } from "antd";
 import { CheckboxChangeEvent } from "antd/es/checkbox";
 import React from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import { CheckSquareOutlined } from "@ant-design/icons";
 
 type ShoppingListDetailScreenProps = {
     shoppingList: ShoppingList;
@@ -26,23 +30,34 @@ export const ShoppingListDetailScreen: React.FunctionComponent<ShoppingListDetai
 
     return <React.Fragment>
         <Collapse
+            defaultActiveKey={"ingredients"}
             size="small"
-            items={[{
-                key: 'dishes', label: 'Dishes ' + `(${props.shoppingList.dishes.length})`, children: <List
-                    dataSource={_getDishesByIds(props.shoppingList.dishes)}
-                    renderItem={(item) => <List.Item>
-                        <Button type="link" onClick={() => navigate(RootRoutes.AuthorizedRoutes.DishesRoutes.ManageIngredient(item.id))}>
-                            {item.name} ({item.ingredients.length} ingredients)
-                        </Button>
-                    </List.Item>
-                    }
-                />
-            }]}
-        />
-        <List
-            itemLayout="horizontal"
-            dataSource={props.shoppingList.ingredients}
-            renderItem={(item) => <ShoppingListIngredientItem item={item} shoppingList={props.shoppingList} />}
+            items={[
+                {
+                    key: 'dishes', label: 'Dishes ' + `(${props.shoppingList.dishes.length})`, children: <List
+                        size="small"
+                        dataSource={_getDishesByIds(props.shoppingList.dishes)}
+                        renderItem={(item) => <List.Item style={{ padding: 0 }}>
+                            <Button style={{ paddingInline: 0 }} type="link" onClick={() => navigate(RootRoutes.AuthorizedRoutes.DishesRoutes.ManageIngredient(item.id))}>
+                                {item.name} ({item.ingredients.length} ingredients)
+                            </Button>
+                        </List.Item>
+                        }
+                    />
+                },
+                {
+                    key: 'ingredients', label: <Stack fullwidth justify="space-between">
+                        <Typography.Text>Ingredients</Typography.Text>
+                        <Space>
+                            <CheckSquareOutlined />
+                            <Typography.Text strong>{`${props.shoppingList.ingredients.filter(e => e.isDone).length}/${props.shoppingList.ingredients.length}`}</Typography.Text>
+                        </Space>
+                    </Stack>, children: <List
+                        dataSource={props.shoppingList.ingredients}
+                        renderItem={(item) => <ShoppingListIngredientItem item={item} shoppingList={props.shoppingList} />}
+                    />
+                }
+            ]}
         />
     </React.Fragment>
 
@@ -84,8 +99,9 @@ export const ShoppingListIngredientItem: React.FunctionComponent<ShoppingListIng
                 avatar={<Checkbox defaultChecked={props.item.isDone} onChange={_onCheckedChange} />}
                 title={<Typography.Text type={props.item.isDone ? "secondary" : undefined} style={{ textDecorationLine: props.item.isDone ? "line-through" : "none" }}>{_getIngredientNameById(props.item.ingredientId)}</Typography.Text>}
                 description={<List
+                    size="small"
                     dataSource={props.item.amounts}
-                    renderItem={(item) => <List.Item>
+                    renderItem={(item) => <List.Item style={{ padding: 0 }}>
                         <Typography.Text>{item.amount} {item.unit} ({_getDishesNameById(item.dishesId)})</Typography.Text>
                     </List.Item>} />} />
         </List.Item >

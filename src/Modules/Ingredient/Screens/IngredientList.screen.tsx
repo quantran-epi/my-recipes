@@ -64,7 +64,7 @@ export const IngredientItem: React.FunctionComponent<IngredientItemProps> = (pro
                 ]
             }>
             <List.Item.Meta description={<Tooltip title={props.item.name}>
-                <Typography.Paragraph style={{ width: 180, marginBottom: 0 }} ellipsis>{props.item.name}</Typography.Paragraph>
+                <Typography.Paragraph style={{ width: 200, marginBottom: 0 }} ellipsis>{props.item.name}</Typography.Paragraph>
             </Tooltip>} />
         </List.Item >
         <Modal open={toggleEdit.value} title="Edit Ingredient" destroyOnClose={true} onCancel={toggleEdit.hide} footer={null}>

@@ -1,4 +1,4 @@
-import { DeleteOutlined, FormOutlined } from "@ant-design/icons";
+import { DeleteOutlined, FormOutlined, CheckSquareOutlined } from "@ant-design/icons";
 import { Button } from "@components/Button";
 import { List } from "@components/List";
 import { Modal } from "@components/Modal";
@@ -16,6 +16,8 @@ import { ShoppingListDetailScreen } from "./ShoppingListDetail.screen";
 import { Tooltip } from "@components/Tootip";
 import { Space } from "@components/Layout/Space";
 import { nanoid } from "@reduxjs/toolkit";
+import moment from "moment";
+import { Stack } from "@components/Layout/Stack";
 
 export const ShoppingListScreen = () => {
     const shoppingLists = useSelector((state: RootState) => state.shoppingList.shoppingLists);
@@ -55,7 +57,9 @@ export const ShoppingListItem: React.FunctionComponent<ShoppingListItemProps> = 
     const dispatch = useDispatch();
 
     const _onGenerate = () => {
-        let ingredientAmounts = dishes.map(dish => dish.ingredients).flat();
+        let ingredientAmounts = dishes
+            .filter(e => props.item.dishes.includes(e.id))
+            .map(dish => dish.ingredients).flat();
         let groups = groupBy(ingredientAmounts, "ingredientId");
         dispatch(generateIngredient({
             shoppingListId: props.item.id,
@@ -81,7 +85,6 @@ export const ShoppingListItem: React.FunctionComponent<ShoppingListItemProps> = 
         <List.Item
             actions={
                 [
-                    // <Button size="small" onClick={_onEdit} icon={<EditOutlined />} />,
                     props.item.ingredients.length > 0 ? <Button size="small" onClick={_onShow} icon={<FormOutlined />} />
                         : <Button size="small" onClick={_onGenerate} icon={<FormOutlined />} />,
                     <Popconfirm title="Delete?" onConfirm={() => props.onDelete(props.item)} >
@@ -90,12 +93,20 @@ export const ShoppingListItem: React.FunctionComponent<ShoppingListItemProps> = 
                 ]
             }>
             <List.Item.Meta title={<Tooltip title={props.item.name}>
-                <Typography.Paragraph style={{ width: 180, marginBottom: 0, textDecorationLine: _isAllIngredientDone() ? "line-through" : undefined }} ellipsis>{props.item.name}</Typography.Paragraph>
+                <Typography.Paragraph style={{ width: 200, marginBottom: 0, textDecorationLine: _isAllIngredientDone() ? "line-through" : undefined }} ellipsis>{props.item.name}</Typography.Paragraph>
             </Tooltip>}
-                description={<Space>
-                    <Typography.Text>{props.item.dishes.length + " dishes"}</Typography.Text>
-                    <Typography.Text style={{ fontSize: 12 }}>({props.item.createdDate.toLocaleString()})</Typography.Text>
-                </Space>} />
+                description={<Stack direction="column" align="flex-start" gap={2}>
+                    <Space size={2}>
+                        <CheckSquareOutlined />
+                        <Typography.Text>{`${props.item.ingredients.filter(e => e.isDone).length}/${props.item.ingredients.length}`} ingredients</Typography.Text>
+                    </Space>
+                    <Space>
+                        <Typography.Text>{props.item.dishes.length + " dishes"}</Typography.Text>
+                    </Space>
+                    <Space>
+                        <Typography.Text style={{ fontSize: 12 }}>Created: {moment(props.item.createdDate).format("DD/MM/YYYY hh:mm:ss A")}</Typography.Text>
+                    </Space>
+                </Stack>} />
         </List.Item>
         <Modal open={toggleIngredient.value} title={"Ingredient List (" + props.item.name + ")"} destroyOnClose={true} onCancel={toggleIngredient.hide} footer={null}>
             <ShoppingListDetailScreen shoppingList={props.item} />
