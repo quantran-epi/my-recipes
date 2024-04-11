@@ -8,12 +8,14 @@ import { SmartForm, useSmartForm } from "@components/SmartForm"
 import { nanoid } from "@reduxjs/toolkit"
 import { Dishes } from "@store/Models/Dishes"
 import { addDishes } from "@store/Reducers/DishesReducer"
+import { RootState } from "@store/Store"
 import { range } from "lodash"
-import { useDispatch } from "react-redux"
+import { useDispatch, useSelector } from "react-redux"
 
 export const DishesAddWidget = () => {
     const dispatch = useDispatch();
     const message = useMessage();
+    const dishes = useSelector((state: RootState) => state.dishes.dishes);
 
     const addDishesForm = useSmartForm<Dishes>({
         defaultValues: {
@@ -21,7 +23,8 @@ export const DishesAddWidget = () => {
             name: "",
             ingredients: [],
             note: "",
-            servingSize: 2
+            servingSize: 2,
+            includeDishes: []
         },
         onSubmit: (values) => {
             dispatch(addDishes(values.transformValues));
@@ -33,6 +36,7 @@ export const DishesAddWidget = () => {
             name: { label: "Tên món ăn", name: ObjectPropertyHelper.nameof(defaultValues, e => e.name) },
             note: { label: "Ghi chú", name: ObjectPropertyHelper.nameof(defaultValues, e => e.note) },
             servingSize: { label: "Khẩu phần ăn", name: ObjectPropertyHelper.nameof(defaultValues, e => e.servingSize) },
+            includeDishes: { label: "Bao gồm món", name: ObjectPropertyHelper.nameof(defaultValues, e => e.includeDishes) },
             ingredients: { name: ObjectPropertyHelper.nameof(defaultValues, e => e.ingredients), noMarkup: true },
         }),
         transformFunc: (values) => ({
@@ -58,6 +62,18 @@ export const DishesAddWidget = () => {
                 }}
                 style={{ width: '100%' }}>
                 {range(1, 10, 1).map(servingSize => <Option key={servingSize} value={servingSize}>{servingSize} người</Option>)}
+            </Select>
+        </SmartForm.Item>
+        <SmartForm.Item {...addDishesForm.itemDefinitions.includeDishes}>
+            <Select
+                showSearch
+                mode="multiple"
+                filterOption={(inputValue, option) => {
+                    if (!option?.children) return false;
+                    return option?.children?.toString().toLowerCase().includes(inputValue.toLowerCase());
+                }}
+                style={{ width: '100%' }}>
+                {dishes.filter(e => e.includeDishes.length === 0).map(dish => <Option key={dish.id} value={dish.id}>{dish.name}</Option>)}
             </Select>
         </SmartForm.Item>
         <SmartForm.Item {...addDishesForm.itemDefinitions.note}>

@@ -49,7 +49,7 @@ export const DishesSlice = createSlice({
                 }
                 return e;
             })
-        },
+        }
     }
 })
 

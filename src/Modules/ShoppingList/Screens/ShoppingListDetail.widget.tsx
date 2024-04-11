@@ -1,4 +1,4 @@
-import { CheckSquareOutlined, QuestionCircleOutlined, TeamOutlined } from "@ant-design/icons";
+import { CheckSquareOutlined, QuestionCircleOutlined, TeamOutlined, OrderedListOutlined } from "@ant-design/icons";
 import { Button } from "@components/Button";
 import { Collapse } from "@components/Collapse";
 import { Checkbox } from "@components/Form/Checkbox";
@@ -39,22 +39,26 @@ export const ShoppingListDetailWidget: React.FunctionComponent<ShoppingListDetai
                         size="small"
                         dataSource={_getDishesByIds(props.shoppingList.dishes)}
                         renderItem={(item) => <List.Item style={{ padding: 0 }}>
-                            <Button style={{ paddingInline: 0 }} type="link" onClick={() => navigate(RootRoutes.AuthorizedRoutes.DishesRoutes.ManageIngredient(item.id))}>
-                                <Space size={3}>
+                            <Button fullwidth style={{ paddingInline: 0, textAlign: "left" }} type="link" onClick={() => navigate(RootRoutes.AuthorizedRoutes.DishesRoutes.ManageIngredient(item.id))}>
+                                <Stack gap={3} justify="space-between" fullwidth>
                                     <Typography.Paragraph style={{ width: 150, marginBottom: 0, color: "blue" }} ellipsis> {item.name}</Typography.Paragraph>
                                     <Box>
                                         (<Space size={2}>
                                             <Typography.Text>{item.ingredients.length} nguyên liệu</Typography.Text>
                                             <Typography.Text>-</Typography.Text>
-                                            <Box>
+                                            <Space size={3}>
                                                 <Space size={3}>
                                                     <Typography.Text>{item.servingSize}</Typography.Text>
                                                     <TeamOutlined />
                                                 </Space>
-                                            </Box>
+                                                <Space size={3}>
+                                                    <Typography.Text>{item.includeDishes.length}</Typography.Text>
+                                                    <OrderedListOutlined />
+                                                </Space>
+                                            </Space>
                                         </Space>)
                                     </Box>
-                                </Space>
+                                </Stack>
                             </Button>
                         </List.Item>
                         }

@@ -1,25 +1,25 @@
+import { DeleteOutlined, EditOutlined, OrderedListOutlined, PlusOutlined, TeamOutlined } from "@ant-design/icons";
 import { Button } from "@components/Button";
+import { Input } from "@components/Form/Input";
+import { Box } from "@components/Layout/Box";
+import { Space } from "@components/Layout/Space";
+import { Stack } from "@components/Layout/Stack";
 import { List } from "@components/List";
 import { Modal } from "@components/Modal";
 import { Popconfirm } from "@components/Popconfirm";
+import { Tooltip } from "@components/Tootip";
 import { Typography } from "@components/Typography";
 import { useScreenTitle, useToggle } from "@hooks";
+import { RootRoutes } from "@routing/RootRoutes";
 import { Dishes } from "@store/Models/Dishes";
 import { removeDishes } from "@store/Reducers/DishesReducer";
 import { RootState } from "@store/Store";
+import { debounce, sortBy } from "lodash";
 import React, { useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
 import { DishesAddWidget } from "./DishesAdd.widget";
 import { DishesEditWidget } from "./DishesEdit.widget";
-import { EditOutlined, DeleteOutlined, PlusOutlined, TeamOutlined } from "@ant-design/icons";
-import { useNavigate } from "react-router-dom";
-import { RootRoutes } from "@routing/RootRoutes";
-import { Tooltip } from "@components/Tootip";
-import { debounce, sortBy } from "lodash";
-import { Stack } from "@components/Layout/Stack";
-import { Input } from "@components/Form/Input";
-import { Space } from "@components/Layout/Space";
-import { Box } from "@components/Layout/Box";
 
 export const DishesListScreen = () => {
     const dishes = useSelector((state: RootState) => state.dishes.dishes);
@@ -46,7 +46,7 @@ export const DishesListScreen = () => {
         </Stack.Compact>
         <List
             pagination={{
-                position: "bottom", align: "center", pageSize: 7, size: "small"
+                position: "bottom", align: "center", pageSize: 8, size: "small"
             }}
             itemLayout="horizontal"
             dataSource={filteredDishes}
@@ -92,9 +92,15 @@ export const DishesItem: React.FunctionComponent<DishesItemProps> = (props) => {
                 description={<Space size={4}>
                     <Typography.Text type="secondary">{"Gồm " + props.item.ingredients.length + " nguyên liệu"}</Typography.Text>
                     <Box>
-                        (<Space size={3}>
-                            <Typography.Text type="secondary">{props.item.servingSize}</Typography.Text>
-                            <TeamOutlined />
+                        (<Space>
+                            <Space size={3}>
+                                <Typography.Text type="secondary">{props.item.servingSize}</Typography.Text>
+                                <TeamOutlined />
+                            </Space>
+                            <Space size={3}>
+                                <Typography.Text type="secondary">{props.item.includeDishes?.length}</Typography.Text>
+                                <OrderedListOutlined />
+                            </Space>
                         </Space>)
                     </Box>
                 </Space>} />

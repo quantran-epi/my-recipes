@@ -1,24 +1,25 @@
+import { DeleteOutlined, QuestionCircleOutlined } from "@ant-design/icons"
 import { ObjectPropertyHelper } from "@common/Helpers/ObjectProperty"
 import { Button } from "@components/Button"
 import { Form } from "@components/Form"
+import { Space } from "@components/Layout/Space"
+import { Stack } from "@components/Layout/Stack"
 import { List } from "@components/List"
 import { Modal } from "@components/Modal"
+import { Popconfirm } from "@components/Popconfirm"
 import { useSmartForm } from "@components/SmartForm"
+import { Tooltip } from "@components/Tootip"
 import { useScreenTitle, useToggle } from "@hooks"
+import { Dishes, DishesIngredientAmount } from "@store/Models/Dishes"
 import { DishesIngredientAddParams, removeIngredientsFromDish } from "@store/Reducers/DishesReducer"
 import { RootState } from "@store/Store"
 import { Typography } from "antd"
 import React, { useEffect, useMemo } from "react"
 import { useDispatch, useSelector } from "react-redux"
-import { useSearchParams } from "react-router-dom"
+import { useNavigate, useSearchParams } from "react-router-dom"
 import { DishesAddIngredientWidget } from "./DishesAddIngredient.widget"
-import { Popconfirm } from "@components/Popconfirm"
-import { EditOutlined, DeleteOutlined, QuestionCircleOutlined } from "@ant-design/icons";
-import { Dishes, DishesIngredientAmount } from "@store/Models/Dishes"
-import { Stack } from "@components/Layout/Stack"
-import { Space } from "@components/Layout/Space"
-import { Tooltip } from "@components/Tootip"
-import { useMessage } from "@components/Message"
+import { Divider } from "@components/Layout/Divider"
+import { RootRoutes } from "@routing/RootRoutes"
 
 export const DishesManageIngredientScreen = () => {
     const [params] = useSearchParams();
@@ -28,6 +29,7 @@ export const DishesManageIngredientScreen = () => {
     }, [params, dishes])
     const toggleAddIngredientToDishes = useToggle({ defaultValue: false });
     const dispatch = useDispatch();
+    const navigate = useNavigate();
 
     const { } = useScreenTitle({ value: "Chi tiết (" + currentDist.name + ")" });
 
@@ -41,6 +43,10 @@ export const DishesManageIngredientScreen = () => {
             ingres: { name: ObjectPropertyHelper.nameof(defaultValues, e => e.ingres), noMarkup: true },
         })
     })
+
+    const _getDishesByIds = (ids: string[]) => {
+        return dishes.filter(e => ids.includes(e.id));
+    }
 
     const _onDelete = (dish: Dishes, ingredientAmount: DishesIngredientAmount) => {
         dispatch(removeIngredientsFromDish({
@@ -62,8 +68,19 @@ export const DishesManageIngredientScreen = () => {
     }, [currentDist])
 
     return <Form {...addDishesForm.defaultProps}>
-        <Typography.Paragraph><Typography.Text strong>Ghi chú:</Typography.Text> {currentDist.note}</Typography.Paragraph>
-        <Button fullwidth onClick={_onAddIngredient}>Thêm</Button>
+        {currentDist.note && <Typography.Paragraph><Typography.Text strong>Ghi chú:</Typography.Text> {currentDist.note}</Typography.Paragraph>}
+
+        {currentDist.includeDishes.length > 0 && <React.Fragment>
+            <Divider orientation="left">Bao gồm món</Divider>
+            <Stack wrap="wrap" gap={5}>
+                {_getDishesByIds(currentDist.includeDishes).map(e =>
+                    <Button size="small"
+                        onClick={() => navigate(RootRoutes.AuthorizedRoutes.DishesRoutes.ManageIngredient(e.id))}>{e.name}</Button>)}
+            </Stack>
+        </React.Fragment>}
+
+        <Divider orientation="left">Danh sách nguyên liệu khác</Divider>
+        <Button fullwidth onClick={_onAddIngredient}>Thêm nguyên liệu</Button>
         <List
             dataSource={currentDist.ingredients}
             renderItem={(item) => <IngredientItem dish={currentDist} ingredientAmount={item} onDelete={_onDelete} />} />

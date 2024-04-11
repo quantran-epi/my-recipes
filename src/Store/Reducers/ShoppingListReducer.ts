@@ -49,10 +49,17 @@ export const ShoppingListSlice = createSlice({
             state.shoppingLists = state.shoppingLists.map(e => {
                 if (e.id === action.payload.shoppingListId) {
                     let shoppingList = state.shoppingLists.find(l => l.id === action.payload.shoppingListId);
-                    let ingredientAmounts = action.payload.allDishes
+                    let currentDishes = action.payload.allDishes
                         .filter(e => shoppingList.dishes.includes(e.id))
-                        .map(dish => dish.ingredients).flat();
-                    let groups = groupBy(ingredientAmounts, "ingredientId");
+                    let ingredientAmounts = currentDishes
+                        .map(dish => dish.ingredients)
+                        .flat();
+                    let includeIngredientAmounts = currentDishes.map(d => d.includeDishes)
+                        .flat()
+                        .map(d => action.payload.allDishes.find(d1 => d1.id === d))
+                        .map(e => e.ingredients)
+                        .flat();
+                    let groups = groupBy([...ingredientAmounts, ...includeIngredientAmounts], "ingredientId");
                     return {
                         ...e,
                         ingredients: Object.keys(groups).map(key => ({
