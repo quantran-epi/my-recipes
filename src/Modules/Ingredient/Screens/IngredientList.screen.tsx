@@ -5,20 +5,30 @@ import { Typography } from "@components/Typography";
 import { useScreenTitle, useToggle } from "@hooks";
 import { removeIngredient } from "@store/Reducers/IngredientReducer";
 import { RootState } from "@store/Store";
-import React from "react";
+import React, { useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { IngredientAddWidget } from "./IngredientAdd.widget";
 import { Ingredient } from "@store/Models/Ingredient";
 import { IngredientEditWidget } from "./IngredientEdit.widget";
-import { EditOutlined, DeleteOutlined } from "@ant-design/icons";
+import { EditOutlined, DeleteOutlined, SearchOutlined, PlusOutlined } from "@ant-design/icons";
 import { Tooltip } from "@components/Tootip";
 import { Popconfirm } from "@components/Popconfirm";
+import { Stack } from "@components/Layout/Stack";
+import { Input } from "@components/Form/Input";
+import { useSmartForm } from "@components/SmartForm";
+import { ObjectPropertyHelper } from "@common/Helpers/ObjectProperty";
+import { debounce, sortBy } from "lodash";
 
 export const IngredientListScreen = () => {
     const ingredients = useSelector((state: RootState) => state.ingredient.ingredients);
     const toggleAddModal = useToggle({ defaultValue: false });
     const dispatch = useDispatch();
     const { } = useScreenTitle({ value: "Nguyên liệu" });
+    const [searchText, setSearchText] = useState("");
+
+    const filteredIngredients = useMemo(() => {
+        return sortBy(ingredients.filter(e => e.name.trim().toLowerCase().includes(searchText.trim().toLowerCase())), "name");
+    }, [ingredients, searchText])
 
     const _onAdd = () => {
         toggleAddModal.show();
@@ -29,10 +39,16 @@ export const IngredientListScreen = () => {
     }
 
     return <React.Fragment>
-        <Button onClick={_onAdd}>Thêm</Button>
+        <Stack.Compact>
+            <Input autoFocus placeholder="Tìm kiếm" onChange={debounce((e) => setSearchText(e.target.value), 350)} />
+            <Button onClick={_onAdd} icon={<PlusOutlined />} />
+        </Stack.Compact>
         <List
+            pagination={{
+                position: "bottom", align: "center", pageSize: 12, size: "small"
+            }}
             itemLayout="horizontal"
-            dataSource={ingredients}
+            dataSource={filteredIngredients}
             renderItem={(item) => <IngredientItem item={item} onDelete={_onDelete} />}
         />
         <Modal open={toggleAddModal.value} title="Thêm nguyên liệu" destroyOnClose={true} onCancel={toggleAddModal.hide} footer={null}>

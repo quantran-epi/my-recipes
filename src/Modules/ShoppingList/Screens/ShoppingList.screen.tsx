@@ -1,4 +1,4 @@
-import { DeleteOutlined, FormOutlined, CheckSquareOutlined, ReloadOutlined } from "@ant-design/icons";
+import { DeleteOutlined, FormOutlined, CheckSquareOutlined, ReloadOutlined, PlusOutlined, HolderOutlined } from "@ant-design/icons";
 import { Button } from "@components/Button";
 import { List } from "@components/List";
 import { Modal } from "@components/Modal";
@@ -19,6 +19,7 @@ import { nanoid } from "@reduxjs/toolkit";
 import moment from "moment";
 import { Stack } from "@components/Layout/Stack";
 import { Box } from "@components/Layout/Box";
+import { Dropdown } from "@components/Dropdown";
 
 export const ShoppingListScreen = () => {
     const shoppingLists = useSelector((state: RootState) => state.shoppingList.shoppingLists);
@@ -71,6 +72,10 @@ export const ShoppingListItem: React.FunctionComponent<ShoppingListItemProps> = 
                 isDone: false
             }))
         }));
+    }
+
+    const _onGenerateAndShow = () => {
+        _onGenerate()
         toggleIngredient.show();
     }
 
@@ -82,16 +87,43 @@ export const ShoppingListItem: React.FunctionComponent<ShoppingListItemProps> = 
         toggleIngredient.show();
     }
 
+    const _onAddMoreDishes = () => {
+
+    }
+
+    const _onMoreActionClick = (e) => {
+        switch (e.key) {
+            case "reload": _onGenerate(); break;
+            case "add_dishes": _onAddMoreDishes(); break;
+        }
+    }
+
     return <React.Fragment>
         <List.Item
             actions={
                 [
-                    <Button size="small" onClick={_onGenerate} icon={<ReloadOutlined />} />,
                     props.item.ingredients.length > 0 ? <Button size="small" onClick={_onShow} icon={<FormOutlined />} />
-                        : <Button size="small" onClick={_onGenerate} icon={<FormOutlined />} />,
+                        : <Button size="small" onClick={_onGenerateAndShow} icon={<FormOutlined />} />,
                     <Popconfirm title="Xóa?" onConfirm={() => props.onDelete(props.item)} >
                         <Button size="small" danger icon={<DeleteOutlined />} />
-                    </Popconfirm>
+                    </Popconfirm>,
+                    <Dropdown menu={{
+                        items: [
+                            {
+                                label: 'Tải lại',
+                                key: 'reload',
+                                icon: <ReloadOutlined />,
+                            },
+                            {
+                                label: 'Thêm món ăn',
+                                key: 'add_dishes',
+                                icon: <PlusOutlined />,
+                            }
+                        ],
+                        onClick: _onMoreActionClick
+                    }} placement="bottom">
+                        <Button size="small" icon={<HolderOutlined />} />
+                    </Dropdown>
                 ]
             }>
             <List.Item.Meta title={<Tooltip title={props.item.name}>
@@ -106,7 +138,7 @@ export const ShoppingListItem: React.FunctionComponent<ShoppingListItemProps> = 
                         <Typography.Text style={{ fontSize: 12 }}>Gồm {props.item.dishes.length + " món ăn"}</Typography.Text>
                     </Space>
                     <Space>
-                        <Typography.Text style={{ fontSize: 12 }}>Ngày tạo: {moment(props.item.createdDate).format("DD/MM/YYYY hh:mm:ss A")}</Typography.Text>
+                        <Typography.Text style={{ fontSize: 12 }}>Tạo: {moment(props.item.createdDate).format("DD/MM/YYYY hh:mm:ss A")}</Typography.Text>
                     </Space>
                 </Stack>} />
         </List.Item>

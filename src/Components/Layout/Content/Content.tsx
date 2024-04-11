@@ -8,7 +8,7 @@ export const Content = ({
     ...props
 }) => {
     return <AntContent {...props}>
-        <Box style={{ padding: 15 }}>
+        <Box style={{ padding: 15, backgroundColor: "#f5f5f5" }}>
             {children}
         </Box>
     </AntContent>
