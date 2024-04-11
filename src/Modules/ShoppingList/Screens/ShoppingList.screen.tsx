@@ -8,10 +8,10 @@ import { useScreenTitle, useToggle } from "@hooks";
 import { ShoppingList } from "@store/Models/ShoppingList";
 import { generateIngredient, removeShoppingList } from "@store/Reducers/ShoppingListReducer";
 import { RootState } from "@store/Store";
-import React from "react";
+import React, { useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { ShoppingListAddWidget } from "./ShoppingListAdd.widget";
-import { groupBy } from "lodash";
+import { debounce, groupBy, orderBy } from "lodash";
 import { ShoppingListDetailScreen } from "./ShoppingListDetail.screen";
 import { Tooltip } from "@components/Tootip";
 import { Space } from "@components/Layout/Space";
@@ -20,12 +20,17 @@ import moment from "moment";
 import { Stack } from "@components/Layout/Stack";
 import { Box } from "@components/Layout/Box";
 import { Dropdown } from "@components/Dropdown";
+import { Input } from "@components/Form/Input";
 
 export const ShoppingListScreen = () => {
     const shoppingLists = useSelector((state: RootState) => state.shoppingList.shoppingLists);
     const toggleAddModal = useToggle({ defaultValue: false });
     const dispatch = useDispatch();
     const { } = useScreenTitle({ value: "Lịch mua sắm" });
+    const [searchText, setSearchText] = useState("");
+    const filteredShoppingLists = useMemo<ShoppingList[]>(() => {
+        return orderBy(shoppingLists.filter(e => e.name.trim().toLowerCase().includes(searchText.trim().toLowerCase())), [(obj) => new Date(obj.createdDate)], ['desc'])
+    }, [shoppingLists, searchText])
 
     const _onAdd = () => {
         toggleAddModal.show();
@@ -36,10 +41,16 @@ export const ShoppingListScreen = () => {
     }
 
     return <React.Fragment>
-        <Button onClick={_onAdd}>Thêm</Button>
+        <Stack.Compact>
+            <Input autoFocus placeholder="Tìm kiếm" onChange={debounce((e) => setSearchText(e.target.value), 350)} />
+            <Button onClick={_onAdd} icon={<PlusOutlined />} />
+        </Stack.Compact>
         <List
+            pagination={{
+                position: "bottom", align: "center", pageSize: 5, size: "small"
+            }}
             itemLayout="horizontal"
-            dataSource={shoppingLists}
+            dataSource={filteredShoppingLists}
             renderItem={(item) => <ShoppingListItem item={item} onDelete={_onDelete} />}
         />
         <Modal open={toggleAddModal.value} title="Thêm lịch mua sắm" destroyOnClose={true} onCancel={toggleAddModal.hide} footer={null}>
