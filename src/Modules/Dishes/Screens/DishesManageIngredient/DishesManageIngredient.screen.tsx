@@ -13,9 +13,11 @@ import { useDispatch, useSelector } from "react-redux"
 import { useSearchParams } from "react-router-dom"
 import { DishesAddIngredientWidget } from "./DishesAddIngredient.widget"
 import { Popconfirm } from "@components/Popconfirm"
-import { EditOutlined, DeleteOutlined, PlusOutlined } from "@ant-design/icons";
+import { EditOutlined, DeleteOutlined, QuestionCircleOutlined } from "@ant-design/icons";
 import { Dishes, DishesIngredientAmount } from "@store/Models/Dishes"
 import { Stack } from "@components/Layout/Stack"
+import { Space } from "@components/Layout/Space"
+import { Tooltip } from "@components/Tootip"
 
 export const DishesManageIngredientScreen = () => {
     const [params] = useSearchParams();
@@ -98,7 +100,12 @@ export const IngredientItem: React.FunctionComponent<IngredientItemProps> = (pro
                     <Button size="small" danger icon={<DeleteOutlined />} />
                 </Popconfirm>
             ]}>
-            <Typography.Text>{_getIngredientName(props.ingredientAmount.ingredientId)} - {props.ingredientAmount.amount} {props.ingredientAmount.unit}</Typography.Text>
+            <Space>
+                <Typography.Text>{_getIngredientName(props.ingredientAmount.ingredientId)} - {props.ingredientAmount.amount} {props.ingredientAmount.unit}</Typography.Text>
+                {!props.ingredientAmount.required && <Tooltip title="Tùy chọn">
+                    <QuestionCircleOutlined style={{ color: "orange" }} />
+                </Tooltip>}
+            </Space>
         </List.Item>
     </React.Fragment>
 }

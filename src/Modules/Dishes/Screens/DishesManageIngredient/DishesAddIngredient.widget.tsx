@@ -3,6 +3,7 @@ import { Button } from "@components/Button";
 import { Form } from "@components/Form"
 import { Input } from "@components/Form/Input";
 import { Option, Select } from "@components/Form/Select";
+import { Switch } from "@components/Form/Switch";
 import { Stack } from "@components/Layout/Stack";
 import { SmartForm, useSmartForm } from "@components/SmartForm";
 import { Dishes, DishesIngredientAmount } from "@store/Models/Dishes"
@@ -26,7 +27,8 @@ export const DishesAddIngredientWidget: React.FunctionComponent<DishesAddIngredi
             ingredientId: "",
             amount: "",
             unit: "g",
-            dishesId: props.dish.id
+            dishesId: props.dish.id,
+            required: true
         },
         onSubmit: (values) => {
             dispatch(addIngredientsToDish({
@@ -39,7 +41,8 @@ export const DishesAddIngredientWidget: React.FunctionComponent<DishesAddIngredi
             ingredientId: { label: "Ingredient", name: ObjectPropertyHelper.nameof(defaultValues, e => e.ingredientId) },
             amount: { label: "Amount", name: ObjectPropertyHelper.nameof(defaultValues, e => e.amount) },
             unit: { label: "Unit", name: ObjectPropertyHelper.nameof(defaultValues, e => e.unit) },
-            dishesId: { name: ObjectPropertyHelper.nameof(defaultValues, e => e.dishesId), noMarkup: true }
+            dishesId: { name: ObjectPropertyHelper.nameof(defaultValues, e => e.dishesId), noMarkup: true },
+            required: { name: ObjectPropertyHelper.nameof(defaultValues, e => e.required), valuePropName: "checked" }
         }),
     })
 
@@ -50,6 +53,7 @@ export const DishesAddIngredientWidget: React.FunctionComponent<DishesAddIngredi
     return <SmartForm {...addIngreToDishForm.defaultProps}>
         <SmartForm.Item {...addIngreToDishForm.itemDefinitions.ingredientId}>
             <Select
+                autoFocus
                 showSearch
                 filterOption={(inputValue, option) => {
                     if (!option?.children) return false;
@@ -73,7 +77,9 @@ export const DishesAddIngredientWidget: React.FunctionComponent<DishesAddIngredi
                 {ingredientUnits.map(unit => <Option key={unit} value={unit}>{unit}</Option>)}
             </Select>
         </SmartForm.Item>
-
+        <SmartForm.Item {...addIngreToDishForm.itemDefinitions.required}>
+            <Switch checkedChildren="Bắt buộc" unCheckedChildren="Tùy chọn" />
+        </SmartForm.Item>
         <Stack fullwidth justify="flex-end">
             <Button onClick={_onSave}>Lưu</Button>
         </Stack>

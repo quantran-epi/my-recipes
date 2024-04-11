@@ -1,26 +1,28 @@
-import { DeleteOutlined, FormOutlined, CheckSquareOutlined, ReloadOutlined, PlusOutlined, HolderOutlined } from "@ant-design/icons";
+import { CheckSquareOutlined, DeleteOutlined, FormOutlined, HolderOutlined, PlusOutlined, ReloadOutlined } from "@ant-design/icons";
 import { Button } from "@components/Button";
+import { Dropdown } from "@components/Dropdown";
+import { Input } from "@components/Form/Input";
+import { Box } from "@components/Layout/Box";
+import { Space } from "@components/Layout/Space";
+import { Stack } from "@components/Layout/Stack";
 import { List } from "@components/List";
 import { Modal } from "@components/Modal";
 import { Popconfirm } from "@components/Popconfirm";
+import { Tooltip } from "@components/Tootip";
 import { Typography } from "@components/Typography";
 import { useScreenTitle, useToggle } from "@hooks";
+import { nanoid } from "@reduxjs/toolkit";
 import { ShoppingList } from "@store/Models/ShoppingList";
 import { generateIngredient, removeShoppingList } from "@store/Reducers/ShoppingListReducer";
 import { RootState } from "@store/Store";
+import { debounce, groupBy, orderBy } from "lodash";
+import moment from "moment";
 import React, { useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { ShoppingListAddWidget } from "./ShoppingListAdd.widget";
-import { debounce, groupBy, orderBy } from "lodash";
-import { ShoppingListDetailScreen } from "./ShoppingListDetail.screen";
-import { Tooltip } from "@components/Tootip";
-import { Space } from "@components/Layout/Space";
-import { nanoid } from "@reduxjs/toolkit";
-import moment from "moment";
-import { Stack } from "@components/Layout/Stack";
-import { Box } from "@components/Layout/Box";
-import { Dropdown } from "@components/Dropdown";
-import { Input } from "@components/Form/Input";
+import { ShoppingListAddMoreDishesWidget } from "./ShoppingListAddMoreDishes.widget";
+import { ShoppingListDetailWidget } from "./ShoppingListDetail.widget";
+import { useModal } from "@components/Modal/ModalProvider";
 
 export const ShoppingListScreen = () => {
     const shoppingLists = useSelector((state: RootState) => state.shoppingList.shoppingLists);
@@ -66,27 +68,20 @@ type ShoppingListItemProps = {
 
 export const ShoppingListItem: React.FunctionComponent<ShoppingListItemProps> = (props) => {
     const toggleIngredient = useToggle({ defaultValue: false });
+    const toggleAddMoreDishes = useToggle({ defaultValue: false });
     const dishes = useSelector((state: RootState) => state.dishes.dishes);
     const dispatch = useDispatch();
+    const modal = useModal();
 
     const _onGenerate = () => {
-        let ingredientAmounts = dishes
-            .filter(e => props.item.dishes.includes(e.id))
-            .map(dish => dish.ingredients).flat();
-        let groups = groupBy(ingredientAmounts, "ingredientId");
         dispatch(generateIngredient({
             shoppingListId: props.item.id,
-            ingredientGroups: Object.keys(groups).map(key => ({
-                id: key.concat('-gr-').concat(nanoid(10)),
-                ingredientId: key,
-                amounts: groups[key],
-                isDone: false
-            }))
+            allDishes: dishes
         }));
     }
 
     const _onGenerateAndShow = () => {
-        _onGenerate()
+        _onGenerate();
         toggleIngredient.show();
     }
 
@@ -99,7 +94,7 @@ export const ShoppingListItem: React.FunctionComponent<ShoppingListItemProps> = 
     }
 
     const _onAddMoreDishes = () => {
-
+        toggleAddMoreDishes.show();
     }
 
     const _onMoreActionClick = (e) => {
@@ -126,7 +121,7 @@ export const ShoppingListItem: React.FunctionComponent<ShoppingListItemProps> = 
                                 icon: <ReloadOutlined />,
                             },
                             {
-                                label: 'Thêm món ăn',
+                                label: 'Sửa món ăn',
                                 key: 'add_dishes',
                                 icon: <PlusOutlined />,
                             }
@@ -155,7 +150,22 @@ export const ShoppingListItem: React.FunctionComponent<ShoppingListItemProps> = 
         </List.Item>
         <Modal style={{ top: 50 }} open={toggleIngredient.value} title={"Lịch mua sắm (" + props.item.name + ")"} destroyOnClose={true} onCancel={toggleIngredient.hide} footer={null}>
             <Box style={{ maxHeight: 600, overflowY: "auto" }}>
-                <ShoppingListDetailScreen shoppingList={props.item} />
+                <ShoppingListDetailWidget shoppingList={props.item} />
+            </Box>
+        </Modal>
+        <Modal style={{ top: 50 }} open={toggleAddMoreDishes.value} title={"Sửa món ăn (" + props.item.name + ")"} destroyOnClose={true} onCancel={toggleAddMoreDishes.hide} footer={null}>
+            <Box style={{ maxHeight: 600, overflowY: "auto" }}>
+                <ShoppingListAddMoreDishesWidget shoppingList={props.item} onDone={() => {
+                    toggleAddMoreDishes.hide();
+                    modal.confirm({
+                        content: "Tải lại danh sách nguyên liệu?",
+                        okText: "Đồng ý",
+                        cancelText: "Hủy",
+                        onOk: () => {
+                            _onGenerate();
+                        }
+                    })
+                }} />
             </Box>
         </Modal>
     </React.Fragment>

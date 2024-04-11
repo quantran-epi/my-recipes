@@ -4,6 +4,8 @@ import { persistor, store } from '@store/Store';
 import { PersistGate } from 'redux-persist/integration/react';
 import { RootRouter } from '@routing/RootRouter';
 import { ConfigProvider, theme } from 'antd';
+import { MessageProvider } from '@components/Message';
+import { ModalProvider } from '@components/Modal/ModalProvider';
 
 function App() {
   return (
@@ -14,11 +16,16 @@ function App() {
         colorBorderSecondary: "#d9d9d9",
       }
     }}>
-      <Provider store={store}>
-        <PersistGate loading={null} persistor={persistor}>
-          <RootRouter />
-        </PersistGate>
-      </Provider>
+
+      <MessageProvider>
+        <ModalProvider>
+          <Provider store={store}>
+            <PersistGate loading={null} persistor={persistor}>
+              <RootRouter />
+            </PersistGate>
+          </Provider>
+        </ModalProvider>
+      </MessageProvider>
     </ConfigProvider>
   );
 }

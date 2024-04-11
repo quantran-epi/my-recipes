@@ -7,7 +7,7 @@ import { useScreenTitle, useToggle } from "@hooks";
 import { Dishes } from "@store/Models/Dishes";
 import { removeDishes } from "@store/Reducers/DishesReducer";
 import { RootState } from "@store/Store";
-import React from "react";
+import React, { useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { DishesAddWidget } from "./DishesAdd.widget";
 import { DishesEditWidget } from "./DishesEdit.widget";
@@ -15,12 +15,19 @@ import { EditOutlined, DeleteOutlined, PlusOutlined } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
 import { RootRoutes } from "@routing/RootRoutes";
 import { Tooltip } from "@components/Tootip";
+import { debounce, sortBy } from "lodash";
+import { Stack } from "@components/Layout/Stack";
+import { Input } from "@components/Form/Input";
 
 export const DishesListScreen = () => {
     const dishes = useSelector((state: RootState) => state.dishes.dishes);
     const toggleAddModal = useToggle({ defaultValue: false });
     const dispatch = useDispatch();
     const { } = useScreenTitle({ value: "Món ăn" });
+    const [searchText, setSearchText] = useState("");
+    const filteredDishes = useMemo<Dishes[]>(() => {
+        return sortBy(dishes.filter(e => e.name.trim().toLowerCase().includes(searchText.trim().toLowerCase())), "name")
+    }, [dishes, searchText])
 
     const _onAdd = () => {
         toggleAddModal.show();
@@ -31,10 +38,16 @@ export const DishesListScreen = () => {
     }
 
     return <React.Fragment>
-        <Button onClick={_onAdd}>Thêm</Button>
+        <Stack.Compact>
+            <Input autoFocus placeholder="Tìm kiếm" onChange={debounce((e) => setSearchText(e.target.value), 350)} />
+            <Button onClick={_onAdd} icon={<PlusOutlined />} />
+        </Stack.Compact>
         <List
+            pagination={{
+                position: "bottom", align: "center", pageSize: 7, size: "small"
+            }}
             itemLayout="horizontal"
-            dataSource={dishes}
+            dataSource={filteredDishes}
             renderItem={(item) => <DishesItem item={item} onDelete={_onDelete} />}
         />
         <Modal open={toggleAddModal.value} title="Thêm món ăn" destroyOnClose={true} onCancel={toggleAddModal.hide} footer={null}>
