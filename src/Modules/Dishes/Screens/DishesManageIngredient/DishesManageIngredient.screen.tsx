@@ -18,6 +18,7 @@ import { Dishes, DishesIngredientAmount } from "@store/Models/Dishes"
 import { Stack } from "@components/Layout/Stack"
 import { Space } from "@components/Layout/Space"
 import { Tooltip } from "@components/Tootip"
+import { useMessage } from "@components/Message"
 
 export const DishesManageIngredientScreen = () => {
     const [params] = useSearchParams();
@@ -61,6 +62,7 @@ export const DishesManageIngredientScreen = () => {
     }, [currentDist])
 
     return <Form {...addDishesForm.defaultProps}>
+        <Typography.Paragraph><Typography.Text strong>Ghi chú:</Typography.Text> {currentDist.note}</Typography.Paragraph>
         <Button fullwidth onClick={_onAddIngredient}>Thêm</Button>
         <List
             dataSource={currentDist.ingredients}
@@ -70,7 +72,7 @@ export const DishesManageIngredientScreen = () => {
             <Typography.Title level={5} style={{ margin: 0 }}>Thêm nguyên liệu</Typography.Title>
             <Typography.Text style={{ fontSize: 12 }} type="secondary">{currentDist.name}</Typography.Text>
         </Stack>} destroyOnClose={true} onCancel={toggleAddIngredientToDishes.hide} footer={null}>
-            <DishesAddIngredientWidget dish={currentDist} onDone={() => toggleAddIngredientToDishes.hide()} />
+            <DishesAddIngredientWidget dish={currentDist} />
         </Modal>
     </Form>
 }
@@ -82,12 +84,7 @@ type IngredientItemProps = {
 }
 
 export const IngredientItem: React.FunctionComponent<IngredientItemProps> = (props) => {
-    const toggleEdit = useToggle({ defaultValue: false });
     const ingredients = useSelector((state: RootState) => state.ingredient.ingredients);
-
-    const _onEdit = () => {
-        toggleEdit.show();
-    }
 
     const _getIngredientName = (id) => {
         return ingredients.find(e => e.id === id)?.name || "N/A";

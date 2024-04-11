@@ -12,4 +12,6 @@ export type Dishes = {
     id: string;
     name: string;
     ingredients: DishesIngredientAmount[];
+    note: string;
+    servingSize: number;
 }

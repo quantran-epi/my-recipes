@@ -31,7 +31,9 @@ export const ShoppingListScreen = () => {
     const { } = useScreenTitle({ value: "Lịch mua sắm" });
     const [searchText, setSearchText] = useState("");
     const filteredShoppingLists = useMemo<ShoppingList[]>(() => {
-        return orderBy(shoppingLists.filter(e => e.name.trim().toLowerCase().includes(searchText.trim().toLowerCase())), [(obj) => new Date(obj.createdDate)], ['desc'])
+        return orderBy(shoppingLists.filter(e => e.name.trim().toLowerCase().includes(searchText.trim().toLowerCase())
+            || moment(e.createdDate).format("DD/MM/YYYY hh:mm:ss A").includes(searchText.trim().toLowerCase())),
+            [(obj) => new Date(obj.createdDate)], ['desc'])
     }, [shoppingLists, searchText])
 
     const _onAdd = () => {

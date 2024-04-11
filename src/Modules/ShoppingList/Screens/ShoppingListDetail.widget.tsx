@@ -1,7 +1,8 @@
-import { CheckSquareOutlined, QuestionCircleOutlined } from "@ant-design/icons";
+import { CheckSquareOutlined, QuestionCircleOutlined, TeamOutlined } from "@ant-design/icons";
 import { Button } from "@components/Button";
 import { Collapse } from "@components/Collapse";
 import { Checkbox } from "@components/Form/Checkbox";
+import { Box } from "@components/Layout/Box";
 import { Stack } from "@components/Layout/Stack";
 import { List } from "@components/List";
 import { Tooltip } from "@components/Tootip";
@@ -39,7 +40,21 @@ export const ShoppingListDetailWidget: React.FunctionComponent<ShoppingListDetai
                         dataSource={_getDishesByIds(props.shoppingList.dishes)}
                         renderItem={(item) => <List.Item style={{ padding: 0 }}>
                             <Button style={{ paddingInline: 0 }} type="link" onClick={() => navigate(RootRoutes.AuthorizedRoutes.DishesRoutes.ManageIngredient(item.id))}>
-                                {item.name} ({item.ingredients.length} nguyên liệu)
+                                <Space size={3}>
+                                    <Typography.Paragraph style={{ width: 150, marginBottom: 0, color: "blue" }} ellipsis> {item.name}</Typography.Paragraph>
+                                    <Box>
+                                        (<Space size={2}>
+                                            <Typography.Text>{item.ingredients.length} nguyên liệu</Typography.Text>
+                                            <Typography.Text>-</Typography.Text>
+                                            <Box>
+                                                <Space size={3}>
+                                                    <Typography.Text>{item.servingSize}</Typography.Text>
+                                                    <TeamOutlined />
+                                                </Space>
+                                            </Box>
+                                        </Space>)
+                                    </Box>
+                                </Space>
                             </Button>
                         </List.Item>
                         }

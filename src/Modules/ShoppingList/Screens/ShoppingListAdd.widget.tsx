@@ -3,6 +3,7 @@ import { Button } from "@components/Button"
 import { Input } from "@components/Form/Input"
 import { Option, Select } from "@components/Form/Select"
 import { Stack } from "@components/Layout/Stack"
+import { useMessage } from "@components/Message"
 import { SmartForm, useSmartForm } from "@components/SmartForm"
 import { nanoid } from "@reduxjs/toolkit"
 import { ShoppingList } from "@store/Models/ShoppingList"
@@ -13,6 +14,7 @@ import { useDispatch, useSelector } from "react-redux"
 export const ShoppingListAddWidget = () => {
     const dispatch = useDispatch();
     const dishes = useSelector((state: RootState) => state.dishes.dishes);
+    const message = useMessage();
 
     const addShoppingListForm = useSmartForm<ShoppingList>({
         defaultValues: {
@@ -24,6 +26,7 @@ export const ShoppingListAddWidget = () => {
         },
         onSubmit: (values) => {
             dispatch(addShoppingList(values.transformValues));
+            message.success();
             addShoppingListForm.reset();
         },
         itemDefinitions: defaultValues => ({

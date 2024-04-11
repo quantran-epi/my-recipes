@@ -2,6 +2,7 @@ import { ObjectPropertyHelper } from "@common/Helpers/ObjectProperty"
 import { Button } from "@components/Button"
 import { Input } from "@components/Form/Input"
 import { Stack } from "@components/Layout/Stack"
+import { useMessage } from "@components/Message"
 import { SmartForm, useSmartForm } from "@components/SmartForm"
 import { nanoid } from "@reduxjs/toolkit"
 import { Ingredient } from "@store/Models/Ingredient"
@@ -10,11 +11,13 @@ import { useDispatch } from "react-redux"
 
 export const IngredientEditWidget = ({ item, onDone }) => {
     const dispatch = useDispatch();
+    const message = useMessage();
 
     const editIngredientForm = useSmartForm<Ingredient>({
         defaultValues: item,
         onSubmit: (values) => {
             dispatch(editIngredient(values.transformValues));
+            message.success();
             onDone();
         },
         itemDefinitions: defaultValues => ({

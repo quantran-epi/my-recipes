@@ -5,6 +5,7 @@ import { Input } from "@components/Form/Input";
 import { Option, Select } from "@components/Form/Select";
 import { Switch } from "@components/Form/Switch";
 import { Stack } from "@components/Layout/Stack";
+import { useMessage } from "@components/Message";
 import { SmartForm, useSmartForm } from "@components/SmartForm";
 import { Dishes, DishesIngredientAmount } from "@store/Models/Dishes"
 import { IngredientUnit } from "@store/Models/Ingredient";
@@ -14,13 +15,14 @@ import { useDispatch, useSelector } from "react-redux";
 
 type DishesAddIngredientWidgetProps = {
     dish: Dishes;
-    onDone: () => void;
+    onDone?: () => void;
 }
 
 export const DishesAddIngredientWidget: React.FunctionComponent<DishesAddIngredientWidgetProps> = (props) => {
     const ingredients = useSelector((state: RootState) => state.ingredient.ingredients);
-    const ingredientUnits: Array<IngredientUnit> = ["g", "kg", "lít", "ml" , "lá", "chiếc", "củ", "nhánh" , "quả", "thanh", "thìa"];
+    const ingredientUnits: Array<IngredientUnit> = ["g", "kg", "lít", "ml", "lá", "chiếc", "củ", "nhánh", "quả", "thanh", "thìa"];
     const dispatch = useDispatch();
+    const message = useMessage();
 
     const addIngreToDishForm = useSmartForm<DishesIngredientAmount>({
         defaultValues: {
@@ -31,10 +33,16 @@ export const DishesAddIngredientWidget: React.FunctionComponent<DishesAddIngredi
             required: true
         },
         onSubmit: (values) => {
+            if (props.dish.ingredients.some(ingre => ingre.ingredientId === values.transformValues.ingredientId)) {
+                message.error("Đã tồn tại nguyên liệu trong món ăn");
+                return;
+            }
             dispatch(addIngredientsToDish({
                 dishId: props.dish.id,
                 ingres: [values.transformValues]
             }));
+            message.success();
+            addIngreToDishForm.reset();
             props.onDone();
         },
         itemDefinitions: defaultValues => ({

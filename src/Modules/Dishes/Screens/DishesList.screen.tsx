@@ -11,13 +11,15 @@ import React, { useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { DishesAddWidget } from "./DishesAdd.widget";
 import { DishesEditWidget } from "./DishesEdit.widget";
-import { EditOutlined, DeleteOutlined, PlusOutlined } from "@ant-design/icons";
+import { EditOutlined, DeleteOutlined, PlusOutlined, TeamOutlined } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
 import { RootRoutes } from "@routing/RootRoutes";
 import { Tooltip } from "@components/Tootip";
 import { debounce, sortBy } from "lodash";
 import { Stack } from "@components/Layout/Stack";
 import { Input } from "@components/Form/Input";
+import { Space } from "@components/Layout/Space";
+import { Box } from "@components/Layout/Box";
 
 export const DishesListScreen = () => {
     const dishes = useSelector((state: RootState) => state.dishes.dishes);
@@ -87,7 +89,15 @@ export const DishesItem: React.FunctionComponent<DishesItemProps> = (props) => {
             <List.Item.Meta title={<Tooltip title={props.item.name}>
                 <Typography.Paragraph style={{ width: 200, marginBottom: 0 }} ellipsis>{props.item.name}</Typography.Paragraph>
             </Tooltip>}
-                description={"Gồm " + props.item.ingredients.length + " nguyên liệu"} />
+                description={<Space size={4}>
+                    <Typography.Text type="secondary">{"Gồm " + props.item.ingredients.length + " nguyên liệu"}</Typography.Text>
+                    <Box>
+                        (<Space size={3}>
+                            <Typography.Text type="secondary">{props.item.servingSize}</Typography.Text>
+                            <TeamOutlined />
+                        </Space>)
+                    </Box>
+                </Space>} />
         </List.Item >
         <Modal open={toggleEdit.value} title="Chỉnh sửa món ăn" destroyOnClose={true} onCancel={toggleEdit.hide} footer={null}>
             <DishesEditWidget item={props.item} onDone={() => toggleEdit.hide()} />
