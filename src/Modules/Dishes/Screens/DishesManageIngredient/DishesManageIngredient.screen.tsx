@@ -79,7 +79,7 @@ export const DishesManageIngredientScreen = () => {
             </Stack>
         </React.Fragment>}
 
-        <Divider orientation="left">Danh sách nguyên liệu khác</Divider>
+        <Divider orientation="left">Danh sách nguyên liệu</Divider>
         <Button fullwidth onClick={_onAddIngredient}>Thêm nguyên liệu</Button>
         <List
             dataSource={currentDist.ingredients}
