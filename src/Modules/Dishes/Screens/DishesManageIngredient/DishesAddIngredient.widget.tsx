@@ -19,7 +19,7 @@ type DishesAddIngredientWidgetProps = {
 
 export const DishesAddIngredientWidget: React.FunctionComponent<DishesAddIngredientWidgetProps> = (props) => {
     const ingredients = useSelector((state: RootState) => state.ingredient.ingredients);
-    const ingredientUnits: Array<IngredientUnit> = ["g", "kg", "lít", "ml" , "lá", "chiếc"];
+    const ingredientUnits: Array<IngredientUnit> = ["g", "kg", "lít", "ml" , "lá", "chiếc", "củ", "nhánh" , "quả", "thanh", "thìa"];
     const dispatch = useDispatch();
 
     const addIngreToDishForm = useSmartForm<DishesIngredientAmount>({
