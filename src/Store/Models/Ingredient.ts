@@ -1,4 +1,4 @@
-export type IngredientUnit = "g" | "ml" | "lít" | "kg";
+export type IngredientUnit = "g" | "ml" | "lít" | "kg"  | "lá" | "chiếc";
 
 export type Ingredient = {
     id: string;
