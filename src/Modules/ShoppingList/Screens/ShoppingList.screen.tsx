@@ -37,6 +37,7 @@ export const ShoppingListScreen = () => {
             || moment(e.createdDate).format("DD/MM/YYYY hh:mm:ss A").includes(searchText.trim().toLowerCase())),
             [(obj) => new Date(obj.createdDate)], ['desc'])
     }, [shoppingLists, searchText])
+    const [selectedDate, setSelectedDate] = useState<Date>();
 
     const _onAdd = () => {
         toggleAddModal.show();
@@ -48,6 +49,11 @@ export const ShoppingListScreen = () => {
 
     const _onShowCalendar = () => {
         toggleCalendarModal.show();
+    }
+
+    const _onAddWithDate = (date: Date) => {
+        setSelectedDate(date);
+        _onAdd();
     }
 
     return <React.Fragment>
@@ -65,12 +71,12 @@ export const ShoppingListScreen = () => {
             renderItem={(item) => <ShoppingListItem item={item} onDelete={_onDelete} />}
         />
         <Modal open={toggleAddModal.value} title="Thêm lịch mua sắm" destroyOnClose={true} onCancel={toggleAddModal.hide} footer={null}>
-            <ShoppingListAddWidget />
+            <ShoppingListAddWidget date={selectedDate} onDone={toggleAddModal.hide} />
         </Modal>
 
         <Modal style={{ top: 50 }} open={toggleCalendarModal.value} title="Lịch mua sắm" destroyOnClose={true} onCancel={toggleCalendarModal.hide} footer={null}>
-            <Box style={{ maxHeight: "100vh", overflowY: "auto" }}>
-                <ShoppingListCalendarWidget />
+            <Box style={{ maxHeight: 600, overflowY: "auto" }}>
+                <ShoppingListCalendarWidget onAdd={_onAddWithDate} />
             </Box>
         </Modal>
     </React.Fragment>

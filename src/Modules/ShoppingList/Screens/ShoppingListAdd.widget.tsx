@@ -10,10 +10,12 @@ import { nanoid } from "@reduxjs/toolkit"
 import { ShoppingList } from "@store/Models/ShoppingList"
 import { addShoppingList } from "@store/Reducers/ShoppingListReducer"
 import { RootState } from "@store/Store"
+import dayjs from "dayjs"
 import moment from "moment"
+import { useEffect } from "react"
 import { useDispatch, useSelector } from "react-redux"
 
-export const ShoppingListAddWidget = () => {
+export const ShoppingListAddWidget = ({ date, onDone }) => {
     const dispatch = useDispatch();
     const dishes = useSelector((state: RootState) => state.dishes.dishes);
     const message = useMessage();
@@ -31,6 +33,7 @@ export const ShoppingListAddWidget = () => {
             dispatch(addShoppingList(values.transformValues));
             message.success();
             addShoppingListForm.reset();
+            onDone();
         },
         itemDefinitions: defaultValues => ({
             id: { name: ObjectPropertyHelper.nameof(defaultValues, e => e.id), noMarkup: true },
@@ -50,6 +53,10 @@ export const ShoppingListAddWidget = () => {
     const _onSave = () => {
         addShoppingListForm.submit();
     }
+
+    useEffect(() => {
+        if (date) addShoppingListForm.form.setFieldsValue({ plannedDate: dayjs(date) });
+    }, [date])
 
     return <SmartForm {...addShoppingListForm.defaultProps}>
         <SmartForm.Item {...addShoppingListForm.itemDefinitions.name}>

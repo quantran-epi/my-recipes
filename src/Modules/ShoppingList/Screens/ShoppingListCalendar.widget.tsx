@@ -9,8 +9,10 @@ import { ShoppingListItem } from "./ShoppingList.screen";
 import { removeShoppingList } from "@store/Reducers/ShoppingListReducer";
 import { orderBy } from "lodash";
 import { Badge } from "@components/Badge";
+import { Button } from "@components/Button";
+import { PlusOutlined } from "@ant-design/icons";
 
-export const ShoppingListCalendarWidget = () => {
+export const ShoppingListCalendarWidget = ({ onAdd }) => {
     const [selectedDate, setSelectedDate] = useState<Date>(new Date());
     const shoppingLists = useSelector((state: RootState) => state.shoppingList.shoppingLists);
     const dispatch = useDispatch();
@@ -44,6 +46,7 @@ export const ShoppingListCalendarWidget = () => {
         <Calendar fullscreen={false} onSelect={_onSelect} cellRender={_cellRender} />
 
         <Divider orientation="left">Lịch trong ngày {moment(selectedDate).format("DD/MM/YYYY")}</Divider>
+        <Button fullwidth onClick={() => onAdd(selectedDate)} icon={<PlusOutlined />} />
         <List
             pagination={{
                 position: "bottom", align: "center", pageSize: 5, size: "small"
