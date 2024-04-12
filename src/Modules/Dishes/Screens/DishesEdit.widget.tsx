@@ -61,7 +61,7 @@ export const DishesEditWidget = ({ item, onDone }) => {
                     return option?.children?.toString().toLowerCase().includes(inputValue.toLowerCase());
                 }}
                 style={{ width: '100%' }}>
-                {dishes.filter(e => e.includeDishes.length === 0).map(dish => <Option key={dish.id} value={dish.id}>{dish.name}</Option>)}
+                {dishes.map(dish => <Option key={dish.id} value={dish.id}>{dish.name}</Option>)}
             </Select>
         </SmartForm.Item>
         <SmartForm.Item {...editDishesForm.itemDefinitions.note}>
