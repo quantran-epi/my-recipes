@@ -14,6 +14,7 @@
     "@types/react-dom": "^18.2.24",
     "antd": "^5.16.1",
     "craco-less": "^3.0.1",
+    "dayjs": "^1.11.10",
     "lodash": "^4.17.21",
     "moment": "^2.30.1",
     "nanoid": "4.0.1",
