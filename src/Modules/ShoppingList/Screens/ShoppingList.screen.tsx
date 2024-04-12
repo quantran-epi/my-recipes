@@ -28,7 +28,7 @@ export const ShoppingListScreen = () => {
     const shoppingLists = useSelector((state: RootState) => state.shoppingList.shoppingLists);
     const toggleAddModal = useToggle({ defaultValue: false });
     const dispatch = useDispatch();
-    const { } = useScreenTitle({ value: "Lịch mua sắm" });
+    const { } = useScreenTitle({ value: "Lịch mua sắm", deps: [] });
     const [searchText, setSearchText] = useState("");
     const filteredShoppingLists = useMemo<ShoppingList[]>(() => {
         return orderBy(shoppingLists.filter(e => e.name.trim().toLowerCase().includes(searchText.trim().toLowerCase())

@@ -7,7 +7,7 @@ import { IngredientListScreen } from "@modules/Ingredient/Screens/IngredientList
 import { MasterPage } from "./MasterPage";
 import { DishesRouter } from "@modules/Dishes/Routing/DishesRouter";
 import { DishesListScreen } from "@modules/Dishes/Screens/DishesList.screen";
-import { DishesManageIngredientScreen } from "@modules/Dishes/Screens/DishesManageIngredient/DishesManageIngredient.screen";
+import { DishesDetailScreen } from "@modules/Dishes/Screens/DishesManageIngredient/DishesDetail.screen";
 import { ShoppingListRouter } from "@modules/ShoppingList/Routing/ShoppingListRouter";
 import { ShoppingListScreen } from "@modules/ShoppingList/Screens/ShoppingList.screen";
 import { DashboardScreen } from "@modules/Home/Screens/Dashboard.screen";
@@ -22,7 +22,7 @@ export const RootRouter = () => {
                 </Route>
                 <Route path={RootRoutes.AuthorizedRoutes.DishesRoutes.Root()} element={<DishesRouter />}>
                     <Route path={RootRoutes.AuthorizedRoutes.DishesRoutes.List()} element={<DishesListScreen />} />
-                    <Route path={RootRoutes.AuthorizedRoutes.DishesRoutes.ManageIngredient()} element={<DishesManageIngredientScreen />} />
+                    <Route path={RootRoutes.AuthorizedRoutes.DishesRoutes.ManageIngredient()} element={<DishesDetailScreen />} />
                 </Route>
                 <Route path={RootRoutes.AuthorizedRoutes.ShoppingListRoutes.Root()} element={<ShoppingListRouter />}>
                     <Route path={RootRoutes.AuthorizedRoutes.ShoppingListRoutes.List()} element={<ShoppingListScreen />} />

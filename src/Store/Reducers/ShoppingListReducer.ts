@@ -29,14 +29,18 @@ const initialState: ShoppingListState = {
     shoppingLists: []
 }
 
-const ShoppingListIngredientHelpers = {
+export const ShoppingListIngredientHelpers = {
     getIncludedDishesRecursive: (curDish: Dishes, allDishes: Dishes[]) => {
         if (curDish.includeDishes.length === 0) return [];
         let includedDishes = allDishes.filter(e => curDish.includeDishes.includes(e.id));
         return includedDishes.reduce((prev, cur) => [...prev, ...ShoppingListIngredientHelpers.getIncludedDishesRecursive(cur, allDishes)], curDish.includeDishes)
     },
-    isIncludeCircle: () => {
-        
+    isInclude: (dish: string, allDishes: Dishes[], includeDish: string) => {
+        let dishObj = allDishes.find(e => e.id === dish);
+        if (dishObj.includeDishes.length === 0) return false;
+        if (dishObj.includeDishes.includes(includeDish)) return true;
+        let includedDishes = allDishes.filter(e => dishObj.includeDishes.includes(e.id));
+        return includedDishes.some(e => ShoppingListIngredientHelpers.isInclude(e.id, allDishes, includeDish));
     }
 }
 
@@ -65,11 +69,6 @@ export const ShoppingListSlice = createSlice({
                     let ingredientAmounts = currentDishes
                         .map(dish => dish.ingredients)
                         .flat();
-                    // let includeIngredientAmounts = currentDishes.map(d => d.includeDishes)
-                    //     .flat()
-                    //     .map(d => action.payload.allDishes.find(d1 => d1.id === d))
-                    //     .map(e => e.ingredients)
-                    //     .flat();
                     let includeIngredientAmounts = currentDishes
                         .map(e => ShoppingListIngredientHelpers.getIncludedDishesRecursive(e, action.payload.allDishes))
                         .flat()

@@ -8,6 +8,14 @@ export type DishesIngredientAmount = {
     required: boolean;
 }
 
+export type DishesStep = {
+    id: string;
+    content: string;
+    order: number;
+    isDone: boolean;
+    required: boolean;
+}
+
 export type Dishes = {
     id: string;
     name: string;
@@ -15,4 +23,5 @@ export type Dishes = {
     note: string;
     servingSize: number;
     includeDishes: string[];
+    steps: DishesStep[];
 }

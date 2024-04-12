@@ -1,4 +1,4 @@
-import { DeleteOutlined, EditOutlined, OrderedListOutlined, PlusOutlined, TeamOutlined } from "@ant-design/icons";
+import { DeleteOutlined, EditOutlined, OrderedListOutlined, PlusOutlined, TeamOutlined, MonitorOutlined } from "@ant-design/icons";
 import { Button } from "@components/Button";
 import { Input } from "@components/Form/Input";
 import { Box } from "@components/Layout/Box";
@@ -25,7 +25,7 @@ export const DishesListScreen = () => {
     const dishes = useSelector((state: RootState) => state.dishes.dishes);
     const toggleAddModal = useToggle({ defaultValue: false });
     const dispatch = useDispatch();
-    const { } = useScreenTitle({ value: "Món ăn" });
+    const { } = useScreenTitle({ value: "Món ăn", deps: [] });
     const [searchText, setSearchText] = useState("");
     const filteredDishes = useMemo<Dishes[]>(() => {
         return sortBy(dishes.filter(e => e.name.trim().toLowerCase().includes(searchText.trim().toLowerCase())), "name")
@@ -80,7 +80,7 @@ export const DishesItem: React.FunctionComponent<DishesItemProps> = (props) => {
             actions={
                 [
                     <Button size="small" onClick={_onEdit} icon={<EditOutlined />} />,
-                    <Button size="small" onClick={_onManageIngredient} icon={<PlusOutlined />} />,
+                    <Button size="small" onClick={_onManageIngredient} icon={<MonitorOutlined />} />,
                     <Popconfirm title="Xóa?" onConfirm={() => props.onDelete(props.item)}>
                         <Button size="small" danger icon={<DeleteOutlined />} />
                     </Popconfirm>

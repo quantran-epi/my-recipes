@@ -1,8 +1,13 @@
 import { createSlice } from '@reduxjs/toolkit'
 import type { PayloadAction } from '@reduxjs/toolkit'
-import { Dishes, DishesIngredientAmount } from '@store/Models/Dishes';
+import { Dishes, DishesIngredientAmount, DishesStep } from '@store/Models/Dishes';
+import { max } from 'lodash';
 
 export type DishesIngredientAddParams = { dishId: string, ingres: DishesIngredientAmount[] };
+export type DishesStepAddParams = { dishId: string, steps: Omit<DishesStep, "order">[] };
+export type DishesStepAddNextParams = { dishId: string, steps: Omit<DishesStep, "order">[], order: number };
+export type DishesStepAddPrevParams = { dishId: string, steps: Omit<DishesStep, "order">[], order: number };
+export type DishStepAddType = "prev" | "next" | "default";
 
 export interface DishesState {
     dishes: Dishes[];
@@ -49,11 +54,70 @@ export const DishesSlice = createSlice({
                 }
                 return e;
             })
-        }
+        },
+        addStepsToDish: (state, action: PayloadAction<DishesStepAddParams>) => {
+            state.dishes = state.dishes.map(e => {
+                if (e.id === action.payload.dishId) {
+                    let lastOrder = e.steps.length === 0 ? 1 : max(e.steps.map(i => i.order));
+                    let stepsToAdd = action.payload.steps.map(st => ({
+                        ...st,
+                        order: ++lastOrder
+                    }));
+                    return {
+                        ...e,
+                        steps: [...e.steps, ...stepsToAdd]
+                    }
+                }
+                return e;
+            })
+        },
+        addStepToDishNext: (state, action: PayloadAction<DishesStepAddNextParams>) => {
+            state.dishes = state.dishes.map(e => {
+                if (e.id === action.payload.dishId) {
+                    let stepsToAdd = action.payload.steps.map(st => ({
+                        ...st,
+                        order: ++action.payload.order
+                    }));
+                    return {
+                        ...e,
+                        steps: [...e.steps, ...stepsToAdd]
+                    }
+                }
+                return e;
+            })
+        },
+        adStepToDishPrev: (state, action: PayloadAction<DishesStepAddPrevParams>) => {
+            state.dishes = state.dishes.map(e => {
+                if (e.id === action.payload.dishId) {
+                    let stepsToAdd = action.payload.steps.map(st => ({
+                        ...st,
+                        order: --action.payload.order
+                    }));
+                    return {
+                        ...e,
+                        steps: [...e.steps, ...stepsToAdd]
+                    }
+                }
+                return e;
+            })
+        },
+        removeStepsFromDish: (state, action: PayloadAction<DishesStepAddParams>) => {
+            state.dishes = state.dishes.map(e => {
+                if (e.id === action.payload.dishId) {
+                    return {
+                        ...e,
+                        steps: e.steps.filter(step => !action.payload.steps.map(t => t.id).includes(step.id))
+                    }
+                }
+                return e;
+            })
+        },
     }
 })
 
 // Action creators are generated for each case reducer function
-export const { add: addDishes, edit: editDishes, remove: removeDishes, addIngredientsToDish, removeIngredientsFromDish } = DishesSlice.actions
+export const {
+    add: addDishes, edit: editDishes, remove: removeDishes, addIngredientsToDish, removeIngredientsFromDish, addStepsToDish, adStepToDishPrev, addStepToDishNext, removeStepsFromDish
+} = DishesSlice.actions
 
 export default DishesSlice.reducer

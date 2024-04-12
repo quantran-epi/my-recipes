@@ -4,6 +4,7 @@ import { useDispatch } from "react-redux";
 
 type UseScreenTitleProps = {
     value: string;
+    deps: any[];
 }
 
 export type UseScreenTitle = {
@@ -18,6 +19,6 @@ export const useScreenTitle = (props?: UseScreenTitleProps): UseScreenTitle => {
         return () => {
             dispatch(updateCurrentFeatureName(""));
         }
-    }, [])
+    }, props.deps)
     return {}
 }

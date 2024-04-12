@@ -23,7 +23,7 @@ export const IngredientListScreen = () => {
     const ingredients = useSelector((state: RootState) => state.ingredient.ingredients);
     const toggleAddModal = useToggle({ defaultValue: false });
     const dispatch = useDispatch();
-    const { } = useScreenTitle({ value: "Nguyên liệu" });
+    const { } = useScreenTitle({ value: "Nguyên liệu", deps: [] });
     const [searchText, setSearchText] = useState("");
 
     const filteredIngredients = useMemo(() => {

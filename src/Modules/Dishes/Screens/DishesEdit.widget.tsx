@@ -7,6 +7,7 @@ import { useMessage } from "@components/Message"
 import { SmartForm, useSmartForm } from "@components/SmartForm"
 import { Dishes } from "@store/Models/Dishes"
 import { editDishes } from "@store/Reducers/DishesReducer"
+import { ShoppingListIngredientHelpers } from "@store/Reducers/ShoppingListReducer"
 import { RootState } from "@store/Store"
 import { range } from "lodash"
 import { useDispatch, useSelector } from "react-redux"
@@ -19,6 +20,11 @@ export const DishesEditWidget = ({ item, onDone }) => {
     const editDishesForm = useSmartForm<Dishes>({
         defaultValues: item,
         onSubmit: (values) => {
+            if (values.transformValues.includeDishes.some(e => ShoppingListIngredientHelpers.isInclude(e, dishes, values.transformValues.id))) {
+                message.error("Lỗi lặp vòng tròn");
+                return;
+            }
+
             dispatch(editDishes(values.transformValues));
             message.success();
             onDone();
@@ -29,7 +35,8 @@ export const DishesEditWidget = ({ item, onDone }) => {
             note: { label: "Ghi chú", name: ObjectPropertyHelper.nameof(defaultValues, e => e.note) },
             servingSize: { label: "Khẩu phần ăn", name: ObjectPropertyHelper.nameof(defaultValues, e => e.servingSize) },
             includeDishes: { label: "Bao gồm món", name: ObjectPropertyHelper.nameof(defaultValues, e => e.includeDishes) },
-            ingredients: { name: ObjectPropertyHelper.nameof(defaultValues, e => e.ingredients), noMarkup: true }
+            ingredients: { name: ObjectPropertyHelper.nameof(defaultValues, e => e.ingredients), noMarkup: true },
+            steps: { name: ObjectPropertyHelper.nameof(defaultValues, e => e.steps), noMarkup: true }
         })
     })
 
