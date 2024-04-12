@@ -13,7 +13,7 @@ import { useDispatch } from "react-redux";
 
 type DishesAddStepWidgetProps = {
     dish: Dishes;
-    onDone?: () => void;
+    onDone?: (addType: DishStepAddType) => void;
     currentOrder: number;
     addType: DishStepAddType;
 }
@@ -35,20 +35,25 @@ export const DishesAddStepWidget: React.FunctionComponent<DishesAddStepWidgetPro
                     dishId: props.dish.id,
                     steps: [values.transformValues],
                     order: props.currentOrder
-                })); break;
+                }));
+                    props.onDone("next");
+                    break;
                 case "prev": dispatch(adStepToDishPrev({
                     dishId: props.dish.id,
                     steps: [values.transformValues],
                     order: props.currentOrder
-                })); break;
+                }));
+                    props.onDone("prev");
+                    break;
                 default: dispatch(addStepsToDish({
                     dishId: props.dish.id,
                     steps: [values.transformValues]
                 }));
+                    props.onDone("default");
             }
             message.success();
             addStepToDishForm.reset();
-            props.onDone();
+
         },
         itemDefinitions: defaultValues => ({
             id: { name: ObjectPropertyHelper.nameof(defaultValues, e => e.id), noMarkup: true },

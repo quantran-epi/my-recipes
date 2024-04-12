@@ -58,7 +58,7 @@ export const DishesSlice = createSlice({
         addStepsToDish: (state, action: PayloadAction<DishesStepAddParams>) => {
             state.dishes = state.dishes.map(e => {
                 if (e.id === action.payload.dishId) {
-                    let lastOrder = e.steps.length === 0 ? 1 : max(e.steps.map(i => i.order));
+                    let lastOrder = e.steps.length === 0 ? 0 : max(e.steps.map(i => i.order));
                     let stepsToAdd = action.payload.steps.map(st => ({
                         ...st,
                         order: ++lastOrder
@@ -74,13 +74,20 @@ export const DishesSlice = createSlice({
         addStepToDishNext: (state, action: PayloadAction<DishesStepAddNextParams>) => {
             state.dishes = state.dishes.map(e => {
                 if (e.id === action.payload.dishId) {
+                    let curOrder = action.payload.order;
                     let stepsToAdd = action.payload.steps.map(st => ({
                         ...st,
-                        order: ++action.payload.order
+                        order: ++curOrder
                     }));
                     return {
                         ...e,
-                        steps: [...e.steps, ...stepsToAdd]
+                        steps: [...e.steps.map(st => {
+                            if (st.order <= action.payload.order) return st;
+                            return {
+                                ...st,
+                                order: st.order + 1
+                            }
+                        }), ...stepsToAdd]
                     }
                 }
                 return e;
@@ -89,13 +96,20 @@ export const DishesSlice = createSlice({
         adStepToDishPrev: (state, action: PayloadAction<DishesStepAddPrevParams>) => {
             state.dishes = state.dishes.map(e => {
                 if (e.id === action.payload.dishId) {
+                    let curOrder = action.payload.order;
                     let stepsToAdd = action.payload.steps.map(st => ({
                         ...st,
-                        order: --action.payload.order
+                        order: --curOrder
                     }));
                     return {
                         ...e,
-                        steps: [...e.steps, ...stepsToAdd]
+                        steps: [...e.steps.map(st => {
+                            if (st.order >= action.payload.order) return st;
+                            return {
+                                ...st,
+                                order: st.order - 1
+                            }
+                        }), ...stepsToAdd]
                     }
                 }
                 return e;

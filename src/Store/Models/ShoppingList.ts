@@ -13,4 +13,5 @@ export type ShoppingList = {
     dishes: string[];
     ingredients: ShoppingListIngredientGroup[];
     createdDate: Date;
+    plannedDate: Date;
 }

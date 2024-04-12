@@ -1,4 +1,4 @@
-import { CheckSquareOutlined, DeleteOutlined, FormOutlined, HolderOutlined, PlusOutlined, ReloadOutlined } from "@ant-design/icons";
+import { CheckSquareOutlined, DeleteOutlined, FormOutlined, HolderOutlined, PlusOutlined, ReloadOutlined, CalendarOutlined } from "@ant-design/icons";
 import { Button } from "@components/Button";
 import { Dropdown } from "@components/Dropdown";
 import { Input } from "@components/Form/Input";
@@ -23,9 +23,11 @@ import { ShoppingListAddWidget } from "./ShoppingListAdd.widget";
 import { ShoppingListAddMoreDishesWidget } from "./ShoppingListAddMoreDishes.widget";
 import { ShoppingListDetailWidget } from "./ShoppingListDetail.widget";
 import { useModal } from "@components/Modal/ModalProvider";
+import { ShoppingListCalendarWidget } from "./ShoppingListCalendar.widget";
 
 export const ShoppingListScreen = () => {
     const shoppingLists = useSelector((state: RootState) => state.shoppingList.shoppingLists);
+    const toggleCalendarModal = useToggle({ defaultValue: false });
     const toggleAddModal = useToggle({ defaultValue: false });
     const dispatch = useDispatch();
     const { } = useScreenTitle({ value: "Lịch mua sắm", deps: [] });
@@ -44,10 +46,15 @@ export const ShoppingListScreen = () => {
         dispatch(removeShoppingList([item.id]));
     }
 
+    const _onShowCalendar = () => {
+        toggleCalendarModal.show();
+    }
+
     return <React.Fragment>
         <Stack.Compact>
             <Input autoFocus placeholder="Tìm kiếm" onChange={debounce((e) => setSearchText(e.target.value), 350)} />
             <Button onClick={_onAdd} icon={<PlusOutlined />} />
+            <Button onClick={_onShowCalendar} icon={<CalendarOutlined />} />
         </Stack.Compact>
         <List
             pagination={{
@@ -59,6 +66,12 @@ export const ShoppingListScreen = () => {
         />
         <Modal open={toggleAddModal.value} title="Thêm lịch mua sắm" destroyOnClose={true} onCancel={toggleAddModal.hide} footer={null}>
             <ShoppingListAddWidget />
+        </Modal>
+
+        <Modal style={{ top: 50 }} open={toggleCalendarModal.value} title="Lịch mua sắm" destroyOnClose={true} onCancel={toggleCalendarModal.hide} footer={null}>
+            <Box style={{ maxHeight: "100vh", overflowY: "auto" }}>
+                <ShoppingListCalendarWidget />
+            </Box>
         </Modal>
     </React.Fragment>
 }
@@ -145,8 +158,13 @@ export const ShoppingListItem: React.FunctionComponent<ShoppingListItemProps> = 
                     <Space>
                         <Typography.Text style={{ fontSize: 12 }}>Gồm {props.item.dishes.length + " món ăn"}</Typography.Text>
                     </Space>
-                    <Space>
-                        <Typography.Text style={{ fontSize: 12 }}>Tạo: {moment(props.item.createdDate).format("DD/MM/YYYY hh:mm:ss A")}</Typography.Text>
+                    <Space size={3}>
+                        <FormOutlined />
+                        <Typography.Text style={{ fontSize: 12 }}>{moment(props.item.createdDate).format("DD/MM/YYYY hh:mm:ss A")}</Typography.Text>
+                    </Space>
+                    <Space size={3}>
+                        <CalendarOutlined />
+                        <Typography.Text style={{ fontSize: 12 }}>{moment(props.item.plannedDate).format("DD/MM/YYYY")}</Typography.Text>
                     </Space>
                 </Stack>} />
         </List.Item>

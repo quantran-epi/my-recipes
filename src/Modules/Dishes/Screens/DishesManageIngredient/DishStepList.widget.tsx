@@ -87,7 +87,9 @@ export const DishStepListWidget: FunctionComponent<DishStepListWidgetProps> = (p
             <Typography.Title level={5} style={{ margin: 0 }}>Thêm bước</Typography.Title>
             <Typography.Text type="secondary">{props.currentDist.name}</Typography.Text>
         </Stack>} destroyOnClose={true} onCancel={toggleAddStepToDishes.hide} footer={null}>
-            <DishesAddStepWidget dish={props.currentDist} currentOrder={currentOrder} addType={addType} />
+            <DishesAddStepWidget dish={props.currentDist} currentOrder={currentOrder} addType={addType} onDone={(addType) => {
+                if (addType !== "default") toggleAddStepToDishes.hide();
+            }} />
         </Modal>
     </Form>
 }
