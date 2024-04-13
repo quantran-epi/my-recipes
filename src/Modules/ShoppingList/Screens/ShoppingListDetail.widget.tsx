@@ -1,4 +1,4 @@
-import { CheckSquareOutlined, QuestionCircleOutlined, TeamOutlined, OrderedListOutlined } from "@ant-design/icons";
+import { CheckSquareOutlined, QuestionCircleOutlined, TeamOutlined, OrderedListOutlined, CalendarOutlined } from "@ant-design/icons";
 import { Button } from "@components/Button";
 import { Collapse } from "@components/Collapse";
 import { Checkbox } from "@components/Form/Checkbox";
@@ -13,6 +13,7 @@ import { toggleDoneIngredient } from "@store/Reducers/ShoppingListReducer";
 import { RootState } from "@store/Store";
 import { Space } from "antd";
 import { CheckboxChangeEvent } from "antd/es/checkbox";
+import moment from "moment";
 import React from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
@@ -24,9 +25,14 @@ type ShoppingListDetailScreenProps = {
 export const ShoppingListDetailWidget: React.FunctionComponent<ShoppingListDetailScreenProps> = (props) => {
     const navigate = useNavigate();
     const dishes = useSelector((state: RootState) => state.dishes.dishes);
+    const scheduledMeals = useSelector((state: RootState) => state.scheduledMeal.scheduledMeals);
 
     const _getDishesByIds = (ids: string[]) => {
         return dishes.filter(e => ids.includes(e.id));
+    }
+
+    const _getScheduledMealsByIds = (ids: string[]) => {
+        return scheduledMeals.filter(e => ids.includes(e.id));
     }
 
     return <React.Fragment>
@@ -39,7 +45,7 @@ export const ShoppingListDetailWidget: React.FunctionComponent<ShoppingListDetai
                         size="small"
                         dataSource={_getDishesByIds(props.shoppingList.dishes)}
                         renderItem={(item) => <List.Item style={{ padding: 0 }}>
-                            <Button fullwidth style={{ paddingInline: 0, textAlign: "left" }} type="link" onClick={() => navigate(RootRoutes.AuthorizedRoutes.DishesRoutes.ManageIngredient(item.id))}>
+                            <Button fullwidth style={{ paddingInline: 0, textAlign: "left", overflowX: "auto" }} type="link" onClick={() => navigate(RootRoutes.AuthorizedRoutes.DishesRoutes.ManageIngredient(item.id))}>
                                 <Stack gap={3} justify="space-between" fullwidth>
                                     <Typography.Paragraph style={{ width: 150, marginBottom: 0, color: "blue" }} ellipsis> {item.name}</Typography.Paragraph>
                                     <Box>
@@ -65,6 +71,32 @@ export const ShoppingListDetailWidget: React.FunctionComponent<ShoppingListDetai
                     />
                 },
                 {
+                    key: 'meals', label: 'Thực đơn ' + `(${props.shoppingList.scheduledMeals.length})`, children: <List
+                        size="small"
+                        dataSource={_getScheduledMealsByIds(props.shoppingList.scheduledMeals)}
+                        renderItem={(item) => <List.Item style={{ padding: 0 }}>
+                            <Button fullwidth style={{ paddingInline: 0, textAlign: "left", overflowX: "auto" }} type="text">
+                                <Stack gap={3} justify="space-between" fullwidth>
+                                    <Typography.Paragraph style={{ width: 150, marginBottom: 0, color: "blue" }} ellipsis> {item.name}</Typography.Paragraph>
+                                    <Box>
+                                        (<Space size={2}>
+                                            <Typography.Text>{Object.values(item.meals).flat().length} món</Typography.Text>
+                                            <Typography.Text>-</Typography.Text>
+                                            <Space size={3}>
+                                                <Space size={3}>
+                                                    <CalendarOutlined />
+                                                    <Typography.Text>{moment(item.plannedDate).format("DD/MM/YYYY")}</Typography.Text>
+                                                </Space>
+                                            </Space>
+                                        </Space>)
+                                    </Box>
+                                </Stack>
+                            </Button>
+                        </List.Item>
+                        }
+                    />
+                },
+                {
                     key: 'ingredients', label: <Stack fullwidth justify="space-between">
                         <Typography.Text>Nguyên liệu</Typography.Text>
                         <Space>
@@ -78,7 +110,7 @@ export const ShoppingListDetailWidget: React.FunctionComponent<ShoppingListDetai
                 }
             ]}
         />
-    </React.Fragment>
+    </React.Fragment >
 
 }
 

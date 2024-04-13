@@ -1,4 +1,4 @@
-import { DeleteOutlined, FormOutlined, PlusOutlined, CheckOutlined, CloseOutlined } from "@ant-design/icons";
+import { DeleteOutlined, FormOutlined, PlusOutlined, CheckOutlined, CloseOutlined, CheckCircleOutlined } from "@ant-design/icons";
 import { Badge } from "@components/Badge";
 import { Button } from "@components/Button";
 import { Space } from "@components/Layout/Space";
@@ -109,7 +109,10 @@ export const ScheduledMealItem = ({ item, onDelete }: { item: ScheduledMeal, onD
                 ]
             }>
             <List.Item.Meta
-                title={<Typography.Text strong style={{ color: _isSelected() ? "green" : undefined }}>{item.name}</Typography.Text>}
+                title={<Space>
+                    <Typography.Text strong style={{ color: _isSelected() ? "green" : undefined }}>{item.name}</Typography.Text>
+                    {_isSelected() && <CheckCircleOutlined style={{ color: "green" }} />}
+                </Space>}
                 description={<Stack gap={0} align="flex-start" direction="column">
                     <Space>
                         <Typography.Text>Bữa sáng: </Typography.Text>

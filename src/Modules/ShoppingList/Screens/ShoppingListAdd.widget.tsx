@@ -6,12 +6,13 @@ import { Option, Select } from "@components/Form/Select"
 import { Stack } from "@components/Layout/Stack"
 import { useMessage } from "@components/Message"
 import { SmartForm, useSmartForm } from "@components/SmartForm"
+import { Typography } from "@components/Typography"
 import { nanoid } from "@reduxjs/toolkit"
 import { ShoppingList } from "@store/Models/ShoppingList"
 import { addShoppingList } from "@store/Reducers/ShoppingListReducer"
 import { RootState } from "@store/Store"
 import dayjs from "dayjs"
-import { FunctionComponent, useEffect } from "react"
+import React, { FunctionComponent, useEffect } from "react"
 import { useDispatch, useSelector } from "react-redux"
 
 type ShoppingListAddWidgetProps = {
@@ -29,7 +30,7 @@ export const ShoppingListAddWidget: FunctionComponent<ShoppingListAddWidgetProps
     const addShoppingListForm = useSmartForm<ShoppingList>({
         defaultValues: {
             id: "",
-            name: new Date().toLocaleString(),
+            name: "No named",
             dishes: [],
             ingredients: [],
             scheduledMeals: [],
@@ -46,7 +47,7 @@ export const ShoppingListAddWidget: FunctionComponent<ShoppingListAddWidgetProps
             id: { name: ObjectPropertyHelper.nameof(defaultValues, e => e.id), noMarkup: true },
             name: { label: "Tên gợi nhớ", name: ObjectPropertyHelper.nameof(defaultValues, e => e.name) },
             dishes: { label: "Chọn món ăn", name: ObjectPropertyHelper.nameof(defaultValues, e => e.dishes) },
-            scheduledMeals: { name: ObjectPropertyHelper.nameof(defaultValues, e => e.scheduledMeals), noMarkup: true },
+            scheduledMeals: { name: ObjectPropertyHelper.nameof(defaultValues, e => e.scheduledMeals) },
             ingredients: { name: ObjectPropertyHelper.nameof(defaultValues, e => e.ingredients), noMarkup: true },
             createdDate: { name: ObjectPropertyHelper.nameof(defaultValues, e => e.createdDate), noMarkup: true },
             plannedDate: { label: "Ngày kế hoạch", name: ObjectPropertyHelper.nameof(defaultValues, e => e.plannedDate) },
@@ -54,7 +55,7 @@ export const ShoppingListAddWidget: FunctionComponent<ShoppingListAddWidgetProps
         transformFunc: (values) => ({
             ...values,
             id: values.name.concat(nanoid(10)),
-            plannedDate: new Date(values.plannedDate)
+            plannedDate: values.plannedDate ? new Date(values.plannedDate) : null
         })
     })
 
@@ -64,30 +65,44 @@ export const ShoppingListAddWidget: FunctionComponent<ShoppingListAddWidgetProps
 
     useEffect(() => {
         if (date) addShoppingListForm.form.setFieldsValue({ plannedDate: dayjs(date) });
-        if (scheduledMealIds) addShoppingListForm.form.setFieldsValue({ scheduledMeals: scheduledMeals.filter(e => scheduledMealIds.includes(e.id)) });
+        if (scheduledMealIds) addShoppingListForm.form.setFieldsValue({ scheduledMeals: scheduledMealIds });
     }, [date, scheduledMealIds, scheduledMeals])
 
-    return <SmartForm {...addShoppingListForm.defaultProps}>
-        <SmartForm.Item {...addShoppingListForm.itemDefinitions.name}>
-            <Input placeholder="Nhập tên" autoFocus allowClear />
-        </SmartForm.Item>
-        <SmartForm.Item {...addShoppingListForm.itemDefinitions.dishes}>
-            <Select
-                showSearch
-                mode="multiple"
-                filterOption={(inputValue, option) => {
-                    if (!option?.children) return false;
-                    return option?.children?.toString().toLowerCase().includes(inputValue.toLowerCase());
-                }}
-                style={{ width: '100%' }}>
-                {dishes.map(dish => <Option key={dish.id} value={dish.id}>{dish.name}</Option>)}
-            </Select>
-        </SmartForm.Item>
-        <SmartForm.Item {...addShoppingListForm.itemDefinitions.plannedDate}>
-            <DatePicker style={{ width: "100%" }} placeholder="Chọn ngày" format={"DD/MM/YYYY"} />
-        </SmartForm.Item>
-        <Stack fullwidth justify="flex-end">
-            <Button onClick={_onSave}>Lưu</Button>
-        </Stack>
-    </SmartForm>
+    return <React.Fragment>
+        <SmartForm {...addShoppingListForm.defaultProps}>
+            <SmartForm.Item {...addShoppingListForm.itemDefinitions.name}>
+                <Input placeholder="Nhập tên" autoFocus allowClear />
+            </SmartForm.Item>
+            <SmartForm.Item {...addShoppingListForm.itemDefinitions.dishes}>
+                <Select
+                    showSearch
+                    mode="multiple"
+                    filterOption={(inputValue, option) => {
+                        if (!option?.children) return false;
+                        return option?.children?.toString().toLowerCase().includes(inputValue.toLowerCase());
+                    }}
+                    style={{ width: '100%' }}>
+                    {dishes.map(dish => <Option key={dish.id} value={dish.id}>{dish.name}</Option>)}
+                </Select>
+            </SmartForm.Item>
+            <SmartForm.Item {...addShoppingListForm.itemDefinitions.scheduledMeals}>
+                <Select
+                    showSearch
+                    mode="multiple"
+                    filterOption={(inputValue, option) => {
+                        if (!option?.children) return false;
+                        return option?.children?.toString().toLowerCase().includes(inputValue.toLowerCase());
+                    }}
+                    style={{ width: '100%' }}>
+                    {scheduledMeals.map(meal => <Option key={meal.id} value={meal.id}>{meal.name}</Option>)}
+                </Select>
+            </SmartForm.Item>
+            <SmartForm.Item {...addShoppingListForm.itemDefinitions.plannedDate}>
+                <DatePicker style={{ width: "100%" }} placeholder="Chọn ngày" format={"DD/MM/YYYY"} />
+            </SmartForm.Item>
+            <Stack fullwidth justify="flex-end">
+                <Button onClick={_onSave}>Lưu</Button>
+            </Stack>
+        </SmartForm>
+    </React.Fragment>
 }

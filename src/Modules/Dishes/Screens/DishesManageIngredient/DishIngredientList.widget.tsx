@@ -9,17 +9,15 @@ import { Modal } from "@components/Modal"
 import { Popconfirm } from "@components/Popconfirm"
 import { useSmartForm } from "@components/SmartForm"
 import { Tooltip } from "@components/Tootip"
-import { useScreenTitle, useToggle } from "@hooks"
-import { Dishes, DishesIngredientAmount, DishesStep } from "@store/Models/Dishes"
+import { useToggle } from "@hooks"
+import { Dishes, DishesIngredientAmount } from "@store/Models/Dishes"
 import { DishesIngredientAddParams, removeIngredientsFromDish } from "@store/Reducers/DishesReducer"
 import { RootState } from "@store/Store"
 import { Typography } from "antd"
-import React, { FunctionComponent, useEffect, useMemo } from "react"
+import React, { FunctionComponent, useEffect } from "react"
 import { useDispatch, useSelector } from "react-redux"
-import { useNavigate, useSearchParams } from "react-router-dom"
 import { DishesAddIngredientWidget } from "./DishesAddIngredient.widget"
-import { Divider } from "@components/Layout/Divider"
-import { RootRoutes } from "@routing/RootRoutes"
+import { orderBy } from "lodash"
 
 type DishIngredientListWidgetProps = {
     currentDist: Dishes;
@@ -62,7 +60,7 @@ export const DishIngredientListWidget: FunctionComponent<DishIngredientListWidge
     return <Form {...addDishesForm.defaultProps}>
         <Button fullwidth onClick={_onAddIngredient}>Thêm nguyên liệu</Button>
         <List
-            dataSource={props.currentDist.ingredients}
+            dataSource={orderBy(props.currentDist.ingredients, [obj => obj.required], ['desc'])}
             renderItem={(item) => <IngredientItem dish={props.currentDist} ingredientAmount={item} onDelete={_onDelete} />} />
 
         <Modal open={toggleAddIngredientToDishes.value} title={<Stack gap={0} direction="column" align="flex-start">

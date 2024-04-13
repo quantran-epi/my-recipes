@@ -91,13 +91,15 @@ export const ShoppingListItem: React.FunctionComponent<ShoppingListItemProps> = 
     const toggleIngredient = useToggle({ defaultValue: false });
     const toggleAddMoreDishes = useToggle({ defaultValue: false });
     const dishes = useSelector((state: RootState) => state.dishes.dishes);
+    const scheduledMeals = useSelector((state: RootState) => state.scheduledMeal.scheduledMeals);
     const dispatch = useDispatch();
     const modal = useModal();
 
     const _onGenerate = () => {
         dispatch(generateIngredient({
             shoppingListId: props.item.id,
-            allDishes: dishes
+            allDishes: dishes,
+            allScheduledMeals: scheduledMeals
         }));
     }
 
@@ -162,15 +164,15 @@ export const ShoppingListItem: React.FunctionComponent<ShoppingListItemProps> = 
                         <Typography.Text>{`${props.item.ingredients.filter(e => e.isDone).length}/${props.item.ingredients.length}`} nguyên liệu</Typography.Text>
                     </Space>
                     <Space>
-                        <Typography.Text style={{ fontSize: 12 }}>Gồm {props.item.dishes.length + " món ăn"}</Typography.Text>
+                        <Typography.Text style={{ fontSize: 12 }}>Gồm {props.item.dishes.length + " món ăn, " + props.item.scheduledMeals?.length + " thực đơn"}</Typography.Text>
                     </Space>
                     <Space size={3}>
                         <FormOutlined />
-                        <Typography.Text style={{ fontSize: 12 }}>{moment(props.item.createdDate).format("DD/MM/YYYY hh:mm:ss A")}</Typography.Text>
+                        <Typography.Text style={{ fontSize: 12 }}>{moment(props.item.createdDate).format("ddd, DD/MM/YYYY hh:mm:ss A")}</Typography.Text>
                     </Space>
                     <Space size={3}>
                         <CalendarOutlined />
-                        <Typography.Text style={{ fontSize: 12 }}>{moment(props.item.plannedDate).format("DD/MM/YYYY")}</Typography.Text>
+                        <Typography.Text style={{ fontSize: 12 }}>{props.item.plannedDate ? moment(props.item.plannedDate).format("ddd, DD/MM/YYYY") : "N/A"}</Typography.Text>
                     </Space>
                 </Stack>} />
         </List.Item>

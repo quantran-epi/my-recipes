@@ -25,7 +25,7 @@ export const ScheduledMealAddWidget = ({ date, onDone }) => {
     const addScheduledMealForm = useSmartForm<ScheduledMeal>({
         defaultValues: {
             id: "",
-            name: new Date().toLocaleString(),
+            name: "No named",
             meals: {
                 breakfast: [],
                 dinner: [],

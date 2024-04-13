@@ -13,7 +13,7 @@ export type ShoppingList = {
     name: string;
     dishes: string[];
     ingredients: ShoppingListIngredientGroup[];
-    scheduledMeals: ScheduledMeal[];
+    scheduledMeals: string[];
     createdDate: Date;
     plannedDate: Date;
 }

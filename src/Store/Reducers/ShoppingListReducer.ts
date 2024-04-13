@@ -1,6 +1,7 @@
 import type { PayloadAction } from '@reduxjs/toolkit';
 import { createSlice } from '@reduxjs/toolkit';
 import { Dishes } from '@store/Models/Dishes';
+import { ScheduledMeal } from '@store/Models/ScheduledMeal';
 import { ShoppingList } from '@store/Models/ShoppingList';
 import { groupBy } from 'lodash';
 import { nanoid } from 'nanoid';
@@ -8,6 +9,7 @@ import { nanoid } from 'nanoid';
 export type ShoppingListGenerateIngredientParams = {
     shoppingListId: string;
     allDishes: Dishes[];
+    allScheduledMeals: ScheduledMeal[];
 }
 
 export type ShoppingListToggleDoneIngredientParams = {
@@ -64,8 +66,17 @@ export const ShoppingListSlice = createSlice({
             state.shoppingLists = state.shoppingLists.map(e => {
                 if (e.id === action.payload.shoppingListId) {
                     let shoppingList = state.shoppingLists.find(l => l.id === action.payload.shoppingListId);
-                    let currentDishes = action.payload.allDishes
-                        .filter(e => shoppingList.dishes.includes(e.id))
+
+                    //process meals
+                    let allMeals = action.payload.allScheduledMeals.filter(m => e.scheduledMeals.includes(m.id)).map(m1 => m1.meals);
+                    let allDishesFromMeals = Object.values(allMeals).map(meal => [...meal.breakfast, ...meal.lunch, ...meal.dinner]).flat()
+                        .map(d => action.payload.allDishes.find(d1 => d1.id === d));
+                    //end process meals
+
+                    let currentDishes = [...action.payload.allDishes
+                        .filter(e => shoppingList.dishes.includes(e.id)),
+                    ...allDishesFromMeals];
+
                     let ingredientAmounts = currentDishes
                         .map(dish => dish.ingredients)
                         .flat();
@@ -75,6 +86,7 @@ export const ShoppingListSlice = createSlice({
                         .map(d => action.payload.allDishes.find(d1 => d1.id === d))
                         .map(e => e.ingredients)
                         .flat();
+
                     let groups = groupBy([...ingredientAmounts, ...includeIngredientAmounts], "ingredientId");
                     return {
                         ...e,
