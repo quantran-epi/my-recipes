@@ -11,6 +11,8 @@ import { DishesDetailScreen } from "@modules/Dishes/Screens/DishesManageIngredie
 import { ShoppingListRouter } from "@modules/ShoppingList/Routing/ShoppingListRouter";
 import { ShoppingListScreen } from "@modules/ShoppingList/Screens/ShoppingList.screen";
 import { DashboardScreen } from "@modules/Home/Screens/Dashboard.screen";
+import { ScheduledMealRouter } from "@modules/ScheduledMeal/Routing/ScheduledMealRouter";
+import { ScheduledMealListScreen } from "@modules/ScheduledMeal/Screens/ScheduledMealList.screen";
 
 export const RootRouter = () => {
     return <BrowserRouter basename="/my-recipes">
@@ -26,6 +28,9 @@ export const RootRouter = () => {
                 </Route>
                 <Route path={RootRoutes.AuthorizedRoutes.ShoppingListRoutes.Root()} element={<ShoppingListRouter />}>
                     <Route path={RootRoutes.AuthorizedRoutes.ShoppingListRoutes.List()} element={<ShoppingListScreen />} />
+                </Route>
+                <Route path={RootRoutes.AuthorizedRoutes.ScheduledMealRoutes.Root()} element={<ScheduledMealRouter />}>
+                    <Route path={RootRoutes.AuthorizedRoutes.ScheduledMealRoutes.List()} element={<ScheduledMealListScreen />} />
                 </Route>
             </Route>
         </Routes>

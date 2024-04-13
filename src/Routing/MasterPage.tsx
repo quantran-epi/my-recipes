@@ -71,6 +71,7 @@ const SidebarDrawer = () => {
                     { title: "Nguyên liệu", href: RootRoutes.AuthorizedRoutes.IngredientRoutes.List() },
                     { title: "Món ăn", href: RootRoutes.AuthorizedRoutes.DishesRoutes.List() },
                     { title: "Lịch mua sắm", href: RootRoutes.AuthorizedRoutes.ShoppingListRoutes.List() },
+                    { title: "Thực đơn", href: RootRoutes.AuthorizedRoutes.ScheduledMealRoutes.List() },
                 ]} renderItem={(item) => <List.Item>
                     <List.Item.Meta
                         description={<Button fullwidth style={{ textAlign: "left" }} onClick={() => onNavigate(item)}>{item.title}</Button>} />

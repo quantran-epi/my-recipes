@@ -5,12 +5,14 @@ import IngredientReducer from "./Reducers/IngredientReducer";
 import AppContextReducer from "./Reducers/AppContextReducer";
 import DishesReducer from "./Reducers/DishesReducer";
 import ShoppingListReducer from "./Reducers/ShoppingListReducer";
+import ScheduledMealReducer from "./Reducers/ScheduledMealReducer";
 
 const combinedReducer = combineReducers({
     appContext: AppContextReducer,
     ingredient: IngredientReducer,
     dishes: DishesReducer,
-    shoppingList: ShoppingListReducer
+    shoppingList: ShoppingListReducer,
+    scheduledMeal: ScheduledMealReducer
 })
 
 const persistConfig = {

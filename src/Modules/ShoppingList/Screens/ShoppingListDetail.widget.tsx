@@ -44,7 +44,7 @@ export const ShoppingListDetailWidget: React.FunctionComponent<ShoppingListDetai
                                     <Typography.Paragraph style={{ width: 150, marginBottom: 0, color: "blue" }} ellipsis> {item.name}</Typography.Paragraph>
                                     <Box>
                                         (<Space size={2}>
-                                            <Typography.Text>{item.ingredients.length} nguyên liệu</Typography.Text>
+                                            <Typography.Text>{item.ingredients.length} NL</Typography.Text>
                                             <Typography.Text>-</Typography.Text>
                                             <Space size={3}>
                                                 <Space size={3}>
