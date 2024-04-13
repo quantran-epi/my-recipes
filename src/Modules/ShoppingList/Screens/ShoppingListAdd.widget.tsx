@@ -11,13 +11,19 @@ import { ShoppingList } from "@store/Models/ShoppingList"
 import { addShoppingList } from "@store/Reducers/ShoppingListReducer"
 import { RootState } from "@store/Store"
 import dayjs from "dayjs"
-import moment from "moment"
-import { useEffect } from "react"
+import { FunctionComponent, useEffect } from "react"
 import { useDispatch, useSelector } from "react-redux"
 
-export const ShoppingListAddWidget = ({ date, onDone }) => {
+type ShoppingListAddWidgetProps = {
+    date: Date;
+    scheduledMealIds?: string[];
+    onDone: () => void;
+}
+
+export const ShoppingListAddWidget: FunctionComponent<ShoppingListAddWidgetProps> = ({ date, scheduledMealIds, onDone }) => {
     const dispatch = useDispatch();
     const dishes = useSelector((state: RootState) => state.dishes.dishes);
+    const scheduledMeals = useSelector((state: RootState) => state.scheduledMeal.scheduledMeals);
     const message = useMessage();
 
     const addShoppingListForm = useSmartForm<ShoppingList>({
@@ -26,6 +32,7 @@ export const ShoppingListAddWidget = ({ date, onDone }) => {
             name: new Date().toLocaleString(),
             dishes: [],
             ingredients: [],
+            scheduledMeals: [],
             createdDate: new Date(),
             plannedDate: null
         },
@@ -39,6 +46,7 @@ export const ShoppingListAddWidget = ({ date, onDone }) => {
             id: { name: ObjectPropertyHelper.nameof(defaultValues, e => e.id), noMarkup: true },
             name: { label: "Tên gợi nhớ", name: ObjectPropertyHelper.nameof(defaultValues, e => e.name) },
             dishes: { label: "Chọn món ăn", name: ObjectPropertyHelper.nameof(defaultValues, e => e.dishes) },
+            scheduledMeals: { name: ObjectPropertyHelper.nameof(defaultValues, e => e.scheduledMeals), noMarkup: true },
             ingredients: { name: ObjectPropertyHelper.nameof(defaultValues, e => e.ingredients), noMarkup: true },
             createdDate: { name: ObjectPropertyHelper.nameof(defaultValues, e => e.createdDate), noMarkup: true },
             plannedDate: { label: "Ngày kế hoạch", name: ObjectPropertyHelper.nameof(defaultValues, e => e.plannedDate) },
@@ -56,7 +64,8 @@ export const ShoppingListAddWidget = ({ date, onDone }) => {
 
     useEffect(() => {
         if (date) addShoppingListForm.form.setFieldsValue({ plannedDate: dayjs(date) });
-    }, [date])
+        if (scheduledMealIds) addShoppingListForm.form.setFieldsValue({ scheduledMeals: scheduledMeals.filter(e => scheduledMealIds.includes(e.id)) });
+    }, [date, scheduledMealIds, scheduledMeals])
 
     return <SmartForm {...addShoppingListForm.defaultProps}>
         <SmartForm.Item {...addShoppingListForm.itemDefinitions.name}>

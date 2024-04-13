@@ -9,14 +9,16 @@ import { ScheduledMeal } from '@store/Models/ScheduledMeal';
 
 export interface ScheduledMealState {
     scheduledMeals: ScheduledMeal[];
+    selectedMeals: string[];
 }
 
 const initialState: ScheduledMealState = {
-    scheduledMeals: []
+    scheduledMeals: [],
+    selectedMeals: []
 }
 
 export const ScheduledMealSlice = createSlice({
-    name: 'shoppingList',
+    name: 'scheduledMeals',
     initialState,
     reducers: {
         add: (state, action: PayloadAction<ScheduledMeal>) => {
@@ -31,10 +33,19 @@ export const ScheduledMealSlice = createSlice({
         remove: (state, action: PayloadAction<string[]>) => {
             state.scheduledMeals = state.scheduledMeals.filter(dish => !action.payload.includes(dish.id));
         },
+        toggleSelectedMeals: (state, action: PayloadAction<{ ids: string[], selected: boolean }>) => {
+            if (action.payload.selected)
+                state.selectedMeals = [...state.selectedMeals, ...action.payload.ids]
+            else
+                state.selectedMeals = state.selectedMeals.filter(e => !action.payload.ids.includes(e));
+        },
+        test: (state) => {
+            state.selectedMeals = [];
+        }
     },
 })
 
 // Action creators are generated for each case reducer function
-export const { add: addScheduledMeal, edit: editScheduledMeal, remove: removeScheduledMeal } = ScheduledMealSlice.actions
+export const { add: addScheduledMeal, edit: editScheduledMeal, remove: removeScheduledMeal , toggleSelectedMeals, test} = ScheduledMealSlice.actions
 
 export default ScheduledMealSlice.reducer

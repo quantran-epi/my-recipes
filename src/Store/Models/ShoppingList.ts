@@ -1,4 +1,5 @@
 import { DishesIngredientAmount } from "./Dishes";
+import { ScheduledMeal } from "./ScheduledMeal";
 
 export type ShoppingListIngredientGroup = {
     id: string;
@@ -12,6 +13,7 @@ export type ShoppingList = {
     name: string;
     dishes: string[];
     ingredients: ShoppingListIngredientGroup[];
+    scheduledMeals: ScheduledMeal[];
     createdDate: Date;
     plannedDate: Date;
 }

@@ -1,4 +1,4 @@
-import { DeleteOutlined, FormOutlined, PlusOutlined } from "@ant-design/icons";
+import { DeleteOutlined, FormOutlined, PlusOutlined, CheckOutlined, CloseOutlined } from "@ant-design/icons";
 import { Badge } from "@components/Badge";
 import { Button } from "@components/Button";
 import { Space } from "@components/Layout/Space";
@@ -9,7 +9,7 @@ import { Popconfirm } from "@components/Popconfirm";
 import { Typography } from "@components/Typography";
 import { useScreenTitle, useToggle } from "@hooks";
 import { ScheduledMeal } from "@store/Models/ScheduledMeal";
-import { removeScheduledMeal } from "@store/Reducers/ScheduledMealReducer";
+import { removeScheduledMeal, toggleSelectedMeals } from "@store/Reducers/ScheduledMealReducer";
 import { RootState } from "@store/Store";
 import { Calendar, Divider } from "antd";
 import { SelectInfo } from "antd/es/calendar/generateCalendar";
@@ -78,15 +78,30 @@ export const ScheduledMealListScreen = () => {
 
 export const ScheduledMealItem = ({ item, onDelete }: { item: ScheduledMeal, onDelete }) => {
     const toggleEditModal = useToggle({ defaultValue: false });
+    const selectedMeals = useSelector((state: RootState) => state.scheduledMeal.selectedMeals);
+    const dispatch = useDispatch();
 
     const _onEdit = () => {
         toggleEditModal.show();
+    }
+
+    const _toggle = (selected: boolean) => {
+        dispatch(toggleSelectedMeals({
+            ids: [item.id],
+            selected
+        }))
+    }
+
+    const _isSelected = () => {
+        return selectedMeals.includes(item.id);
     }
 
     return <React.Fragment>
         <List.Item
             actions={
                 [
+                    _isSelected() ? <Button size="small" onClick={() => _toggle(false)} icon={<CloseOutlined />} />
+                        : <Button size="small" onClick={() => _toggle(true)} icon={<CheckOutlined />} />,
                     <Button size="small" onClick={_onEdit} icon={<FormOutlined />} />,
                     <Popconfirm title="Xóa?" onConfirm={() => onDelete(item)} >
                         <Button size="small" danger icon={<DeleteOutlined />} />
@@ -94,7 +109,7 @@ export const ScheduledMealItem = ({ item, onDelete }: { item: ScheduledMeal, onD
                 ]
             }>
             <List.Item.Meta
-                title={item.name}
+                title={<Typography.Text strong style={{ color: _isSelected() ? "green" : undefined }}>{item.name}</Typography.Text>}
                 description={<Stack gap={0} align="flex-start" direction="column">
                     <Space>
                         <Typography.Text>Bữa sáng: </Typography.Text>
@@ -114,5 +129,5 @@ export const ScheduledMealItem = ({ item, onDelete }: { item: ScheduledMeal, onD
         <Modal open={toggleEditModal.value} title="Sửa thực đơn" destroyOnClose={true} onCancel={toggleEditModal.hide} footer={null}>
             <ScheduledMealEditWidget item={item} onDone={toggleEditModal.hide} />
         </Modal>
-    </React.Fragment>
+    </React.Fragment >
 }

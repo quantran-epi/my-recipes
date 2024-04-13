@@ -18,6 +18,7 @@ import { TextArea } from "@components/Form/Input";
 import { SmartForm, useSmartForm } from "@components/SmartForm";
 import { ObjectPropertyHelper } from "@common/Helpers/ObjectProperty";
 import { Space } from "@components/Layout/Space";
+import { ScheduledMealToolkitWidget } from "@modules/ScheduledMeal/Screens/ScheduledMealToolkit.widget";
 
 const layoutStyles: React.CSSProperties = {
     height: "100%"
@@ -78,6 +79,7 @@ const SidebarDrawer = () => {
                 </List.Item>} />
                 <DataBackup />
             </Drawer>
+            <ScheduledMealToolkitWidget />
         </React.Fragment>
     );
 };
