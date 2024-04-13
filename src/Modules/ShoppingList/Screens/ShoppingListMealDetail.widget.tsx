@@ -1,8 +1,11 @@
 import { Divider } from "@components/Layout/Divider";
+import { Stack } from "@components/Layout/Stack";
 import { List } from "@components/List";
+import { Typography } from "@components/Typography";
 import { ScheduledMeal } from "@store/Models/ScheduledMeal";
 import { ShoppingList } from "@store/Models/ShoppingList"
 import { RootState } from "@store/Store";
+import moment from "moment";
 import React, { FunctionComponent, useMemo } from "react";
 import { useSelector } from "react-redux";
 
@@ -19,6 +22,12 @@ export const ShoppingListMealDetailWidget: FunctionComponent<ShoppingListMealDet
     }, [mealId, scheduledMeals])
 
     return <React.Fragment>
+        <Divider orientation="left">Thông tin chung</Divider>
+        <Stack gap={0} direction="column" align="flex-start">
+            <Typography.Text><Typography.Text strong>Tên gợi nhớ: </Typography.Text> {meal.name}</Typography.Text>
+            <Typography.Text><Typography.Text strong>Ngày thực hiện: </Typography.Text> {moment(meal.plannedDate).format("ddd, DD/MM/YYYY")}</Typography.Text>
+        </Stack>
+
         <Divider orientation="left">Bữa sáng</Divider>
         <List
             dataSource={meal.meals.breakfast}
