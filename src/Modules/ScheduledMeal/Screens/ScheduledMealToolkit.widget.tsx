@@ -1,17 +1,19 @@
-import { OrderedListOutlined, PlusOutlined } from "@ant-design/icons";
+import { OrderedListOutlined, PlusOutlined, DeleteOutlined } from "@ant-design/icons";
 import { Badge } from "@components/Badge";
 import { Modal } from "@components/Modal";
 import { useToggle } from "@hooks";
 import { ShoppingListAddWidget } from "@modules/ShoppingList/Screens/ShoppingListAdd.widget";
+import { removeAllSelectedMeals } from "@store/Reducers/ScheduledMealReducer";
 import { RootState } from "@store/Store"
 import { FloatButton } from "antd"
 import React from "react"
-import { useSelector } from "react-redux"
+import { useDispatch, useSelector } from "react-redux"
 
 export const ScheduledMealToolkitWidget = () => {
     const selectedMeals = useSelector((state: RootState) => state.scheduledMeal.selectedMeals);
     const toggle = useToggle();
     const toggleAddModal = useToggle();
+    const dispatch = useDispatch();
 
     return <React.Fragment>
         {selectedMeals.length > 0 && <FloatButton.Group badge={{ count: selectedMeals.length }} shape="circle"
@@ -22,6 +24,7 @@ export const ScheduledMealToolkitWidget = () => {
             open={toggle.value}
             trigger="click"
             icon={<OrderedListOutlined />}>
+            <FloatButton icon={<DeleteOutlined />} onClick={() => dispatch(removeAllSelectedMeals())} />
             <FloatButton icon={<PlusOutlined />} onClick={toggleAddModal.show} />
         </FloatButton.Group>}
 

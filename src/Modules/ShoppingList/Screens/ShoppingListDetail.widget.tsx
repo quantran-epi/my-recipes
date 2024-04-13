@@ -5,8 +5,10 @@ import { Checkbox } from "@components/Form/Checkbox";
 import { Box } from "@components/Layout/Box";
 import { Stack } from "@components/Layout/Stack";
 import { List } from "@components/List";
+import { Modal } from "@components/Modal";
 import { Tooltip } from "@components/Tootip";
 import { Typography } from "@components/Typography";
+import { useToggle } from "@hooks";
 import { RootRoutes } from "@routing/RootRoutes";
 import { ShoppingList, ShoppingListIngredientGroup } from "@store/Models/ShoppingList";
 import { toggleDoneIngredient } from "@store/Reducers/ShoppingListReducer";
@@ -14,9 +16,10 @@ import { RootState } from "@store/Store";
 import { Space } from "antd";
 import { CheckboxChangeEvent } from "antd/es/checkbox";
 import moment from "moment";
-import React from "react";
+import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import { ShoppingListMealDetailWidget } from "./ShoppingListMealDetail.widget";
 
 type ShoppingListDetailScreenProps = {
     shoppingList: ShoppingList;
@@ -26,6 +29,8 @@ export const ShoppingListDetailWidget: React.FunctionComponent<ShoppingListDetai
     const navigate = useNavigate();
     const dishes = useSelector((state: RootState) => state.dishes.dishes);
     const scheduledMeals = useSelector((state: RootState) => state.scheduledMeal.scheduledMeals);
+    const toggleMealModal = useToggle();
+    const [selectedMeal, setSelectedMeal] = useState<string>();
 
     const _getDishesByIds = (ids: string[]) => {
         return dishes.filter(e => ids.includes(e.id));
@@ -33,6 +38,11 @@ export const ShoppingListDetailWidget: React.FunctionComponent<ShoppingListDetai
 
     const _getScheduledMealsByIds = (ids: string[]) => {
         return scheduledMeals.filter(e => ids.includes(e.id));
+    }
+
+    const _onShowMeal = (mealId: string) => {
+        toggleMealModal.show();
+        setSelectedMeal(mealId)
     }
 
     return <React.Fragment>
@@ -43,9 +53,10 @@ export const ShoppingListDetailWidget: React.FunctionComponent<ShoppingListDetai
                 {
                     key: 'dishes', label: 'Món ăn ' + `(${props.shoppingList.dishes.length})`, children: <List
                         size="small"
+                        style={{ overflowX: "auto" }}
                         dataSource={_getDishesByIds(props.shoppingList.dishes)}
                         renderItem={(item) => <List.Item style={{ padding: 0 }}>
-                            <Button fullwidth style={{ paddingInline: 0, textAlign: "left", overflowX: "auto" }} type="link" onClick={() => navigate(RootRoutes.AuthorizedRoutes.DishesRoutes.ManageIngredient(item.id))}>
+                            <Button fullwidth style={{ paddingInline: 0, textAlign: "left" }} type="link" onClick={() => navigate(RootRoutes.AuthorizedRoutes.DishesRoutes.ManageIngredient(item.id))}>
                                 <Stack gap={3} justify="space-between" fullwidth>
                                     <Typography.Paragraph style={{ width: 150, marginBottom: 0, color: "blue" }} ellipsis> {item.name}</Typography.Paragraph>
                                     <Box>
@@ -73,9 +84,10 @@ export const ShoppingListDetailWidget: React.FunctionComponent<ShoppingListDetai
                 {
                     key: 'meals', label: 'Thực đơn ' + `(${props.shoppingList.scheduledMeals.length})`, children: <List
                         size="small"
+                        style={{ overflowX: "auto" }}
                         dataSource={_getScheduledMealsByIds(props.shoppingList.scheduledMeals)}
                         renderItem={(item) => <List.Item style={{ padding: 0 }}>
-                            <Button fullwidth style={{ paddingInline: 0, textAlign: "left", overflowX: "auto" }} type="text">
+                            <Button fullwidth style={{ paddingInline: 0, textAlign: "left" }} type="text" onClick={() => _onShowMeal(item.id)}>
                                 <Stack gap={3} justify="space-between" fullwidth>
                                     <Typography.Paragraph style={{ width: 150, marginBottom: 0, color: "blue" }} ellipsis> {item.name}</Typography.Paragraph>
                                     <Box>
@@ -110,6 +122,11 @@ export const ShoppingListDetailWidget: React.FunctionComponent<ShoppingListDetai
                 }
             ]}
         />
+        <Modal style={{ top: 50 }} open={toggleMealModal.value} title={"Thực đơn (" + props.shoppingList.name + ")"} destroyOnClose={true} onCancel={toggleMealModal.hide} footer={null}>
+            <Box style={{ maxHeight: 600, overflowY: "auto" }}>
+                <ShoppingListMealDetailWidget mealId={selectedMeal} />
+            </Box>
+        </Modal>
     </React.Fragment >
 
 }

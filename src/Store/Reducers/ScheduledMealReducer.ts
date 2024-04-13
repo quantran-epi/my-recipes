@@ -39,13 +39,13 @@ export const ScheduledMealSlice = createSlice({
             else
                 state.selectedMeals = state.selectedMeals.filter(e => !action.payload.ids.includes(e));
         },
-        test: (state) => {
+        removeAllSelectedMeals: (state) => {
             state.selectedMeals = [];
         }
     },
 })
 
 // Action creators are generated for each case reducer function
-export const { add: addScheduledMeal, edit: editScheduledMeal, remove: removeScheduledMeal , toggleSelectedMeals, test} = ScheduledMealSlice.actions
+export const { add: addScheduledMeal, edit: editScheduledMeal, remove: removeScheduledMeal, toggleSelectedMeals, removeAllSelectedMeals } = ScheduledMealSlice.actions
 
 export default ScheduledMealSlice.reducer
