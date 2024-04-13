@@ -36,21 +36,21 @@ export const ShoppingListMealDetailWidget: FunctionComponent<ShoppingListMealDet
         <List
             dataSource={meal.meals.breakfast}
             renderItem={item => <List.Item>
-                <Button onClick={() => navigate(RootRoutes.AuthorizedRoutes.DishesRoutes.ManageIngredient(item))} type="link">{dishes.find(e => e.id === item).name}</Button>
+                <Button onClick={() => navigate(RootRoutes.AuthorizedRoutes.DishesRoutes.ManageIngredient(item))} type="link" style={{ color: "blue" }}>{dishes.find(e => e.id === item).name}</Button>
             </List.Item>}
         />
         <Divider orientation="left">Bữa trưa</Divider>
         <List
             dataSource={meal.meals.lunch}
             renderItem={item => <List.Item>
-                <Button onClick={() => navigate(RootRoutes.AuthorizedRoutes.DishesRoutes.ManageIngredient(item))} type="link">{dishes.find(e => e.id === item).name}</Button>
+                <Button onClick={() => navigate(RootRoutes.AuthorizedRoutes.DishesRoutes.ManageIngredient(item))} type="link" style={{ color: "blue" }}>{dishes.find(e => e.id === item).name}</Button>
             </List.Item>}
         />
         <Divider orientation="left">Bữa tối</Divider>
         <List
             dataSource={meal.meals.dinner}
             renderItem={item => <List.Item>
-                <Button onClick={() => navigate(RootRoutes.AuthorizedRoutes.DishesRoutes.ManageIngredient(item))} type="link">{dishes.find(e => e.id === item).name}</Button>
+                <Button onClick={() => navigate(RootRoutes.AuthorizedRoutes.DishesRoutes.ManageIngredient(item))} type="link" style={{ color: "blue" }}>{dishes.find(e => e.id === item).name}</Button>
             </List.Item>}
         />
     </React.Fragment>
