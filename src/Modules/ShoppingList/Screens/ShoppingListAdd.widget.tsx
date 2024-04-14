@@ -13,6 +13,7 @@ import { removeAllSelectedMeals } from "@store/Reducers/ScheduledMealReducer"
 import { addShoppingList } from "@store/Reducers/ShoppingListReducer"
 import { RootState } from "@store/Store"
 import dayjs from "dayjs"
+import moment from "moment"
 import React, { FunctionComponent, useEffect } from "react"
 import { useDispatch, useSelector } from "react-redux"
 
@@ -95,7 +96,7 @@ export const ShoppingListAddWidget: FunctionComponent<ShoppingListAddWidgetProps
                         return option?.children?.toString().toLowerCase().includes(inputValue.toLowerCase());
                     }}
                     style={{ width: '100%' }}>
-                    {scheduledMeals.map(meal => <Option key={meal.id} value={meal.id}>{meal.name}</Option>)}
+                    {scheduledMeals.map(meal => <Option key={meal.id} value={meal.id}>{meal.name}-{moment(meal.plannedDate).format("DD/MM/YYYY")}</Option>)}
                 </Select>
             </SmartForm.Item>
             <SmartForm.Item {...addShoppingListForm.itemDefinitions.plannedDate}>

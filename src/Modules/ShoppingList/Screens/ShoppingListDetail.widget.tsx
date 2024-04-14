@@ -58,7 +58,7 @@ export const ShoppingListDetailWidget: React.FunctionComponent<ShoppingListDetai
                         renderItem={(item) => <List.Item style={{ padding: 0 }}>
                             <Button fullwidth style={{ paddingInline: 0, textAlign: "left" }} type="link" onClick={() => navigate(RootRoutes.AuthorizedRoutes.DishesRoutes.ManageIngredient(item.id))}>
                                 <Stack gap={3} justify="space-between" fullwidth>
-                                    <Typography.Paragraph style={{ width: 150, marginBottom: 0 }} ellipsis> {item.name}</Typography.Paragraph>
+                                    <Typography.Paragraph style={{ width: 150, marginBottom: 0, color: "blue" }} ellipsis> {item.name}</Typography.Paragraph>
                                     <Box>
                                         (<Space size={2}>
                                             <Typography.Text>{item.ingredients.length} NL</Typography.Text>

@@ -1,4 +1,4 @@
-import { CheckSquareOutlined, DeleteOutlined, FormOutlined, HolderOutlined, PlusOutlined, ReloadOutlined, CalendarOutlined } from "@ant-design/icons";
+import { CheckSquareOutlined, DeleteOutlined, FormOutlined, HolderOutlined, PlusOutlined, CalendarOutlined, ReloadOutlined, OrderedListOutlined, EditOutlined, MonitorOutlined } from "@ant-design/icons";
 import { Button } from "@components/Button";
 import { Dropdown } from "@components/Dropdown";
 import { Input } from "@components/Form/Input";
@@ -24,6 +24,7 @@ import { ShoppingListAddMoreDishesWidget } from "./ShoppingListAddMoreDishes.wid
 import { ShoppingListDetailWidget } from "./ShoppingListDetail.widget";
 import { useModal } from "@components/Modal/ModalProvider";
 import { ShoppingListCalendarWidget } from "./ShoppingListCalendar.widget";
+import { ShoppingListEditWidget } from "./ShoppingListEdit.widget";
 
 export const ShoppingListScreen = () => {
     const shoppingLists = useSelector((state: RootState) => state.shoppingList.shoppingLists);
@@ -94,6 +95,7 @@ export const ShoppingListItem: React.FunctionComponent<ShoppingListItemProps> = 
     const scheduledMeals = useSelector((state: RootState) => state.scheduledMeal.scheduledMeals);
     const dispatch = useDispatch();
     const modal = useModal();
+    const toggleEditModal = useToggle({ defaultValue: false });
 
     const _onGenerate = () => {
         dispatch(generateIngredient({
@@ -124,6 +126,7 @@ export const ShoppingListItem: React.FunctionComponent<ShoppingListItemProps> = 
         switch (e.key) {
             case "reload": _onGenerate(); break;
             case "add_dishes": _onAddMoreDishes(); break;
+            case "edit_shopping_list": toggleEditModal.show(); break;
         }
     }
 
@@ -131,8 +134,8 @@ export const ShoppingListItem: React.FunctionComponent<ShoppingListItemProps> = 
         <List.Item
             actions={
                 [
-                    props.item.ingredients.length > 0 ? <Button size="small" onClick={_onShow} icon={<FormOutlined />} />
-                        : <Button size="small" onClick={_onGenerateAndShow} icon={<FormOutlined />} />,
+                    props.item.ingredients.length > 0 ? <Button size="small" onClick={_onShow} icon={<MonitorOutlined />} />
+                        : <Button size="small" onClick={_onGenerateAndShow} icon={<MonitorOutlined />} />,
                     <Popconfirm title="Xóa?" onConfirm={() => props.onDelete(props.item)} >
                         <Button size="small" danger icon={<DeleteOutlined />} />
                     </Popconfirm>,
@@ -146,7 +149,12 @@ export const ShoppingListItem: React.FunctionComponent<ShoppingListItemProps> = 
                             {
                                 label: 'Sửa món ăn',
                                 key: 'add_dishes',
-                                icon: <PlusOutlined />,
+                                icon: <OrderedListOutlined />,
+                            },
+                            {
+                                label: 'Sửa lịch mua sắm',
+                                key: 'edit_shopping_list',
+                                icon: <EditOutlined />,
                             }
                         ],
                         onClick: _onMoreActionClick
@@ -195,6 +203,9 @@ export const ShoppingListItem: React.FunctionComponent<ShoppingListItemProps> = 
                     })
                 }} />
             </Box>
+        </Modal>
+        <Modal open={toggleEditModal.value} title="Sửa lịch mua sắm" destroyOnClose={true} onCancel={toggleEditModal.hide} footer={null}>
+            <ShoppingListEditWidget item={props.item} onDone={toggleEditModal.hide} />
         </Modal>
     </React.Fragment>
 }
