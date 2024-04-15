@@ -4,6 +4,7 @@ import { Dishes, DishesIngredientAmount, DishesStep } from '@store/Models/Dishes
 import { max } from 'lodash';
 
 export type DishesIngredientAddParams = { dishId: string, ingres: DishesIngredientAmount[] };
+export type DishesIngredientEditParams = { dishId: string, ingres: DishesIngredientAmount };
 export type DishesStepAddParams = { dishId: string, steps: Omit<DishesStep, "order">[] };
 export type DishesStepAddNextParams = { dishId: string, steps: Omit<DishesStep, "order">[], order: number };
 export type DishesStepAddPrevParams = { dishId: string, steps: Omit<DishesStep, "order">[], order: number };
@@ -39,6 +40,22 @@ export const DishesSlice = createSlice({
                     return {
                         ...e,
                         ingredients: [...e.ingredients, ...action.payload.ingres]
+                    }
+                }
+                return e;
+            })
+        },
+        editIngredientFromDish: (state, action: PayloadAction<DishesIngredientEditParams>) => {
+            state.dishes = state.dishes.map(e => {
+                if (e.id === action.payload.dishId) {
+                    return {
+                        ...e,
+                        ingredients: e.ingredients.map(ingre => {
+                            if (ingre.ingredientId === action.payload.ingres.ingredientId) {
+                                return action.payload.ingres;
+                            }
+                            return ingre;
+                        })
                     }
                 }
                 return e;
@@ -131,7 +148,7 @@ export const DishesSlice = createSlice({
 
 // Action creators are generated for each case reducer function
 export const {
-    add: addDishes, edit: editDishes, remove: removeDishes, addIngredientsToDish, removeIngredientsFromDish, addStepsToDish, adStepToDishPrev, addStepToDishNext, removeStepsFromDish
+    add: addDishes, edit: editDishes, remove: removeDishes, addIngredientsToDish, removeIngredientsFromDish, editIngredientFromDish, addStepsToDish, adStepToDishPrev, addStepToDishNext, removeStepsFromDish
 } = DishesSlice.actions
 
 export default DishesSlice.reducer

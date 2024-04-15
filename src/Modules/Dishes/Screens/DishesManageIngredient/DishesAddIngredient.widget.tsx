@@ -1,15 +1,14 @@
 import { ObjectPropertyHelper } from "@common/Helpers/ObjectProperty";
 import { Button } from "@components/Button";
-import { Form } from "@components/Form"
 import { Input } from "@components/Form/Input";
 import { Option, Select } from "@components/Form/Select";
 import { Switch } from "@components/Form/Switch";
 import { Stack } from "@components/Layout/Stack";
 import { useMessage } from "@components/Message";
 import { SmartForm, useSmartForm } from "@components/SmartForm";
-import { Dishes, DishesIngredientAmount } from "@store/Models/Dishes"
-import { IngredientUnit } from "@store/Models/Ingredient";
-import { DishesIngredientAddParams, addIngredientsToDish } from "@store/Reducers/DishesReducer";
+import { Dishes, DishesIngredientAmount } from "@store/Models/Dishes";
+import { INGREDIENT_UNITS } from "@store/Models/Ingredient";
+import { addIngredientsToDish } from "@store/Reducers/DishesReducer";
 import { RootState } from "@store/Store";
 import { useDispatch, useSelector } from "react-redux";
 
@@ -20,7 +19,6 @@ type DishesAddIngredientWidgetProps = {
 
 export const DishesAddIngredientWidget: React.FunctionComponent<DishesAddIngredientWidgetProps> = (props) => {
     const ingredients = useSelector((state: RootState) => state.ingredient.ingredients);
-    const ingredientUnits: Array<IngredientUnit> = ["g", "kg", "lít", "ml", "lá", "chiếc", "củ", "nhánh", "quả", "thanh", "thìa"];
     const dispatch = useDispatch();
     const message = useMessage();
 
@@ -82,7 +80,7 @@ export const DishesAddIngredientWidget: React.FunctionComponent<DishesAddIngredi
                     return option?.children?.toString().toLowerCase().includes(inputValue.toLowerCase());
                 }}
                 style={{ width: '100%' }}>
-                {ingredientUnits.map(unit => <Option key={unit} value={unit}>{unit}</Option>)}
+                {INGREDIENT_UNITS.map(unit => <Option key={unit} value={unit}>{unit}</Option>)}
             </Select>
         </SmartForm.Item>
         <SmartForm.Item {...addIngreToDishForm.itemDefinitions.required}>

@@ -1,4 +1,4 @@
-import { DeleteOutlined, QuestionCircleOutlined } from "@ant-design/icons"
+import { DeleteOutlined, QuestionCircleOutlined, EditOutlined } from "@ant-design/icons"
 import { ObjectPropertyHelper } from "@common/Helpers/ObjectProperty"
 import { Button } from "@components/Button"
 import { Form } from "@components/Form"
@@ -18,6 +18,7 @@ import React, { FunctionComponent, useEffect } from "react"
 import { useDispatch, useSelector } from "react-redux"
 import { DishesAddIngredientWidget } from "./DishesAddIngredient.widget"
 import { orderBy } from "lodash"
+import { DishesEditIngredientWidget } from "./DishesEditIngredient.widget"
 
 type DishIngredientListWidgetProps = {
     currentDist: Dishes;
@@ -80,14 +81,20 @@ type IngredientItemProps = {
 
 export const IngredientItem: React.FunctionComponent<IngredientItemProps> = (props) => {
     const ingredients = useSelector((state: RootState) => state.ingredient.ingredients);
+    const togglEditIngredientToDishes = useToggle();
 
     const _getIngredientName = (id) => {
         return ingredients.find(e => e.id === id)?.name || "N/A";
     }
 
+    const _onEdit = () => {
+        togglEditIngredientToDishes.show();
+    }
+
     return <React.Fragment>
         <List.Item
             actions={[
+                <Button size="small" icon={<EditOutlined />} onClick={_onEdit} />,
                 <Popconfirm title="Xóa?" onConfirm={() => props.onDelete(props.dish, props.ingredientAmount)}>
                     <Button size="small" danger icon={<DeleteOutlined />} />
                 </Popconfirm>
@@ -99,5 +106,11 @@ export const IngredientItem: React.FunctionComponent<IngredientItemProps> = (pro
                 </Tooltip>}
             </Space>
         </List.Item>
+        <Modal open={togglEditIngredientToDishes.value} title={<Stack gap={0} direction="column" align="flex-start">
+            <Typography.Title level={5} style={{ margin: 0 }}>Sửa nguyên liệu</Typography.Title>
+            <Typography.Text type="secondary">{props.dish.name}</Typography.Text>
+        </Stack>} destroyOnClose={true} onCancel={togglEditIngredientToDishes.hide} footer={null}>
+            <DishesEditIngredientWidget item={props.ingredientAmount} dish={props.dish} onDone={togglEditIngredientToDishes.hide} />
+        </Modal>
     </React.Fragment>
 }
