@@ -1,4 +1,4 @@
-import { DeleteOutlined, EditOutlined, OrderedListOutlined, PlusOutlined, TeamOutlined, MonitorOutlined, FileTextOutlined, CheckCircleOutlined } from "@ant-design/icons";
+import { DeleteOutlined, EditOutlined, OrderedListOutlined, PlusOutlined, TeamOutlined, MonitorOutlined, FileTextOutlined, CheckCircleOutlined, ProjectOutlined, QuestionCircleOutlined } from "@ant-design/icons";
 import { Button } from "@components/Button";
 import { Input } from "@components/Form/Input";
 import { Box } from "@components/Layout/Box";
@@ -48,7 +48,7 @@ export const DishesListScreen = () => {
         </Stack.Compact>
         <List
             pagination={{
-                position: "bottom", align: "center", pageSize: 5, size: "small"
+                position: "bottom", align: "center", pageSize: 4, size: "small"
             }}
             itemLayout="horizontal"
             dataSource={filteredDishes}
@@ -67,8 +67,11 @@ type DishesItemProps = {
 
 export const DishesItem: React.FunctionComponent<DishesItemProps> = (props) => {
     const toggleEdit = useToggle({ defaultValue: false });
+    const toggleIngredientsOverview = useToggle();
+    const toggleStepsOverview = useToggle();
     const navigate = useNavigate();
     const dishes = useSelector((state: RootState) => state.dishes.dishes);
+    const ingredients = useSelector((state: RootState) => state.ingredient.ingredients);
 
     const _onEdit = () => {
         toggleEdit.show();
@@ -97,25 +100,49 @@ export const DishesItem: React.FunctionComponent<DishesItemProps> = (props) => {
                         <CheckCircleOutlined style={{ color: "#52c41a" }} />
                         <Typography.Text type="success">{"Hoàn thiện"}</Typography.Text>
                     </Space>}
-                    <Space size={3}>
+                    <Space size={8}>
                         <TeamOutlined />
                         <Typography.Text type="secondary">{props.item.servingSize} người ăn</Typography.Text>
                     </Space>
-                    <Space size={3}>
-                        <OrderedListOutlined />
-                        <Typography.Text type="secondary">{props.item.ingredients.length + " nguyên liệu"}</Typography.Text>
-                    </Space>
-                    <Space size={3}>
-                        <FileTextOutlined />
-                        <Typography.Text type="secondary">{props.item.includeDishes.length} món ăn</Typography.Text>
-                        {props.item.includeDishes.length > 0 && <Popover title="Bao gồm các món ăn" content={props.item.includeDishes.map(dish => <Tag>{dishes.find(e => e.id === dish).name}</Tag>)}>
-                            <Button size="small" icon={<MonitorOutlined />} />
-                        </Popover>}
-                    </Space>
+                    <Button onClick={toggleIngredientsOverview.show} type="text" size="small" style={{ paddingInline: 0 }} icon={<OrderedListOutlined />}>{props.item.ingredients.length + " nguyên liệu"}</Button>
+                    <Button onClick={toggleStepsOverview.show} type="text" size="small" style={{ paddingInline: 0 }} icon={<ProjectOutlined />}>{props.item.steps.length + " bước thực hiện"}</Button>
+                    <Popover title="Bao gồm các món ăn" content={props.item.includeDishes.map(dish => <Tag>{dishes.find(e => e.id === dish).name}</Tag>)}>
+                        <Button type="text" size="small" style={{ paddingInline: 0 }} icon={<FileTextOutlined />}>{props.item.includeDishes.length} món ăn</Button>
+                    </Popover>
                 </Stack>} />
         </List.Item >
         <Modal open={toggleEdit.value} title="Chỉnh sửa món ăn" destroyOnClose={true} onCancel={toggleEdit.hide} footer={null}>
             <DishesEditWidget item={props.item} onDone={() => toggleEdit.hide()} />
+        </Modal>
+        <Modal open={toggleIngredientsOverview.value} title="Bao gồm các nguyên liệu" destroyOnClose={true} onCancel={toggleIngredientsOverview.hide} footer={null}>
+            <Box style={{ overflowY: "auto", maxHeight: 600 }}>
+                <List
+                    dataSource={props.item.ingredients}
+                    renderItem={(item) => <List.Item>
+                        <Space>
+                            <Typography.Text>{ingredients.find(ingre => ingre.id === item.ingredientId).name} - {item.amount} {item.unit}</Typography.Text>
+                            {!item.required && <Tooltip title="Tùy chọn">
+                                <QuestionCircleOutlined style={{ color: "orange" }} />
+                            </Tooltip>}
+                        </Space>
+                    </List.Item>} />
+            </Box>
+        </Modal>
+        <Modal open={toggleStepsOverview.value} title="Bao gồm các bước" destroyOnClose={true} onCancel={toggleStepsOverview.hide} footer={null}>
+            <Box style={{ overflowY: "auto", maxHeight: 600 }}>
+                <List
+                    dataSource={props.item.steps}
+                    renderItem={(item) => <List.Item>
+                        <Stack fullwidth justify="space-between">
+                            <Typography.Paragraph style={{ maxWidth: 250 }} ellipsis={{ rows: 3, expandable: true, symbol: "Xem thêm" }}>
+                                {item.content}
+                            </Typography.Paragraph>
+                            {!item.required && <Tooltip title="Tùy chọn">
+                                <QuestionCircleOutlined style={{ color: "orange" }} />
+                            </Tooltip>}
+                        </Stack>
+                    </List.Item>} />
+            </Box>
         </Modal>
     </React.Fragment>
 }
