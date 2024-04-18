@@ -143,12 +143,18 @@ export const DishesSlice = createSlice({
                 return e;
             })
         },
+        test: (state) => {
+            state.dishes = state.dishes.map(e=>({
+                ...e, 
+                isCompleted: false
+            }))
+        }
     }
 })
 
 // Action creators are generated for each case reducer function
 export const {
-    add: addDishes, edit: editDishes, remove: removeDishes, addIngredientsToDish, removeIngredientsFromDish, editIngredientFromDish, addStepsToDish, adStepToDishPrev, addStepToDishNext, removeStepsFromDish
+    add: addDishes, edit: editDishes, remove: removeDishes, addIngredientsToDish, removeIngredientsFromDish, editIngredientFromDish, addStepsToDish, adStepToDishPrev, addStepToDishNext, removeStepsFromDish, test
 } = DishesSlice.actions
 
 export default DishesSlice.reducer

@@ -2,6 +2,7 @@ import { ObjectPropertyHelper } from "@common/Helpers/ObjectProperty"
 import { Button } from "@components/Button"
 import { Input, TextArea } from "@components/Form/Input"
 import { Option, Select } from "@components/Form/Select"
+import { Switch } from "@components/Form/Switch"
 import { Stack } from "@components/Layout/Stack"
 import { useMessage } from "@components/Message"
 import { SmartForm, useSmartForm } from "@components/SmartForm"
@@ -36,7 +37,8 @@ export const DishesEditWidget = ({ item, onDone }) => {
             servingSize: { label: "Khẩu phần ăn", name: ObjectPropertyHelper.nameof(defaultValues, e => e.servingSize) },
             includeDishes: { label: "Bao gồm món", name: ObjectPropertyHelper.nameof(defaultValues, e => e.includeDishes) },
             ingredients: { name: ObjectPropertyHelper.nameof(defaultValues, e => e.ingredients), noMarkup: true },
-            steps: { name: ObjectPropertyHelper.nameof(defaultValues, e => e.steps), noMarkup: true }
+            steps: { name: ObjectPropertyHelper.nameof(defaultValues, e => e.steps), noMarkup: true },
+            isCompleted: { name: ObjectPropertyHelper.nameof(defaultValues, e => e.isCompleted)}
         })
     })
 
@@ -73,6 +75,9 @@ export const DishesEditWidget = ({ item, onDone }) => {
         </SmartForm.Item>
         <SmartForm.Item {...editDishesForm.itemDefinitions.note}>
             <TextArea rows={5} placeholder="Ghi chú" autoFocus />
+        </SmartForm.Item>
+        <SmartForm.Item {...editDishesForm.itemDefinitions.isCompleted}>
+            <Switch checkedChildren="Hoàn thiện" unCheckedChildren="Chưa hoàn thiện" />
         </SmartForm.Item>
         <Stack fullwidth justify="flex-end">
             <Button onClick={_onSave}>Lưu</Button>

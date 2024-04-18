@@ -25,7 +25,8 @@ export const DishesAddWidget = () => {
             note: "",
             servingSize: 2,
             includeDishes: [],
-            steps: []
+            steps: [],
+            isCompleted: false
         },
         onSubmit: (values) => {
             dispatch(addDishes(values.transformValues));
@@ -40,6 +41,7 @@ export const DishesAddWidget = () => {
             includeDishes: { label: "Bao gồm món", name: ObjectPropertyHelper.nameof(defaultValues, e => e.includeDishes) },
             ingredients: { name: ObjectPropertyHelper.nameof(defaultValues, e => e.ingredients), noMarkup: true },
             steps: { name: ObjectPropertyHelper.nameof(defaultValues, e => e.steps), noMarkup: true },
+            isCompleted: { name: ObjectPropertyHelper.nameof(defaultValues, e => e.isCompleted), noMarkup: true },
         }),
         transformFunc: (values) => ({
             ...values,

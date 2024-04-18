@@ -24,4 +24,5 @@ export type Dishes = {
     servingSize: number;
     includeDishes: string[];
     steps: DishesStep[];
+    isCompleted: boolean;
 }
