@@ -48,7 +48,7 @@ export const DishesListScreen = () => {
         </Stack.Compact>
         <List
             pagination={{
-                position: "bottom", align: "center", pageSize: 4, size: "small"
+                position: "bottom", align: "center", pageSize: 3, size: "small"
             }}
             itemLayout="horizontal"
             dataSource={filteredDishes}
