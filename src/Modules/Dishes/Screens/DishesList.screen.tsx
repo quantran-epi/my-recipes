@@ -1,4 +1,4 @@
-import { DeleteOutlined, EditOutlined, OrderedListOutlined, PlusOutlined, TeamOutlined, MonitorOutlined, FileTextOutlined, CheckCircleOutlined, ProjectOutlined, QuestionCircleOutlined } from "@ant-design/icons";
+import { CheckCircleOutlined, DeleteOutlined, EditOutlined, FileTextOutlined, MonitorOutlined, OrderedListOutlined, PlusOutlined, ProjectOutlined, QuestionCircleOutlined, TeamOutlined } from "@ant-design/icons";
 import { Button } from "@components/Button";
 import { Input } from "@components/Form/Input";
 import { Box } from "@components/Layout/Box";
@@ -7,21 +7,21 @@ import { Stack } from "@components/Layout/Stack";
 import { List } from "@components/List";
 import { Modal } from "@components/Modal";
 import { Popconfirm } from "@components/Popconfirm";
+import { Popover } from "@components/Popover";
+import { Tag } from "@components/Tag";
 import { Tooltip } from "@components/Tootip";
 import { Typography } from "@components/Typography";
 import { useScreenTitle, useToggle } from "@hooks";
 import { RootRoutes } from "@routing/RootRoutes";
 import { Dishes } from "@store/Models/Dishes";
-import { removeDishes, test } from "@store/Reducers/DishesReducer";
+import { removeDishes } from "@store/Reducers/DishesReducer";
 import { RootState } from "@store/Store";
 import { debounce, sortBy } from "lodash";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { DishesAddWidget } from "./DishesAdd.widget";
 import { DishesEditWidget } from "./DishesEdit.widget";
-import { Tag } from "@components/Tag";
-import { Popover } from "@components/Popover";
 
 export const DishesListScreen = () => {
     const dishes = useSelector((state: RootState) => state.dishes.dishes);

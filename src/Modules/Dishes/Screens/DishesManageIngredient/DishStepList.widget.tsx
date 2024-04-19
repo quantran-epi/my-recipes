@@ -1,4 +1,4 @@
-import { DeleteOutlined, DoubleLeftOutlined, DoubleRightOutlined, HolderOutlined, QuestionCircleOutlined } from "@ant-design/icons"
+import { DeleteOutlined, DoubleLeftOutlined, DoubleRightOutlined, HolderOutlined, QuestionCircleOutlined, EditOutlined } from "@ant-design/icons"
 import { ObjectPropertyHelper } from "@common/Helpers/ObjectProperty"
 import { Button } from "@components/Button"
 import { Dropdown } from "@components/Dropdown"
@@ -17,6 +17,7 @@ import React, { FunctionComponent, useEffect, useState } from "react"
 import { useDispatch } from "react-redux"
 import { DishesAddStepWidget } from "./DishAddStep.widget"
 import { sortBy } from "lodash"
+import { DishesEditStepWidget } from "./DishEditStep.widget"
 
 type DishStepListWidgetProps = {
     currentDist: Dishes;
@@ -104,11 +105,13 @@ type StepItemProps = {
 
 export const StepItem: React.FunctionComponent<StepItemProps> = (props) => {
     const modal = useModal();
+    const toggleEditStepToDishes = useToggle();
 
     const _onMoreActionClick = (e) => {
         switch (e.key) {
             case "add_next": props.onAddNext(props.step.order); break;
             case "add_prev": props.onAddPrev(props.step.order); break;
+            case "edit": toggleEditStepToDishes.show(); break;
             case "remove": modal.confirm({
                 content: "Xóa?",
                 okText: "Xóa",
@@ -141,6 +144,11 @@ export const StepItem: React.FunctionComponent<StepItemProps> = (props) => {
                             icon: <DoubleRightOutlined />,
                         },
                         {
+                            label: 'Chỉnh sửa',
+                            key: 'edit',
+                            icon: <EditOutlined />,
+                        },
+                        {
                             label: 'Xóa',
                             key: 'remove',
                             icon: <DeleteOutlined />,
@@ -156,6 +164,14 @@ export const StepItem: React.FunctionComponent<StepItemProps> = (props) => {
                 {props.step.content}
             </Typography.Paragraph>
         </List.Item>
+        <Modal open={toggleEditStepToDishes.value} title={<Stack gap={0} direction="column" align="flex-start">
+            <Typography.Title level={5} style={{ margin: 0 }}>Chỉnh sửa bước</Typography.Title>
+            <Typography.Text type="secondary">{props.dish.name}</Typography.Text>
+        </Stack>} destroyOnClose={true} onCancel={toggleEditStepToDishes.hide} footer={null}>
+            <DishesEditStepWidget item={props.step} dish={props.dish} onDone={() => {
+                toggleEditStepToDishes.hide();
+            }} />
+        </Modal>
     </React.Fragment >
 }
 

@@ -73,7 +73,7 @@ export const DishesAddStepWidget: React.FunctionComponent<DishesAddStepWidgetPro
 
     return <SmartForm {...addStepToDishForm.defaultProps}>
         <SmartForm.Item {...addStepToDishForm.itemDefinitions.content}>
-            <TextArea placeholder="Nhập nội dung" />
+            <TextArea placeholder="Nhập nội dung" rows={5} />
         </SmartForm.Item>
         <SmartForm.Item {...addStepToDishForm.itemDefinitions.required}>
             <Switch checkedChildren="Bắt buộc" unCheckedChildren="Tùy chọn" />
