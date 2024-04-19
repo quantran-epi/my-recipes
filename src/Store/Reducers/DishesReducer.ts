@@ -13,16 +13,26 @@ export type DishStepAddType = "prev" | "next" | "default";
 
 export interface DishesState {
     dishes: Dishes[];
+    searchText: string;
+    currentPage: number;
 }
 
 const initialState: DishesState = {
-    dishes: []
+    dishes: [],
+    searchText: "",
+    currentPage: 1
 }
 
 export const DishesSlice = createSlice({
     name: 'dishes',
     initialState,
     reducers: {
+        search: (state, action: PayloadAction<string>) => {
+            state.searchText = action.payload;
+        },
+        changePage: (state, action: PayloadAction<number>) => {
+            state.currentPage = action.payload;
+        },
         add: (state, action: PayloadAction<Dishes>) => {
             state.dishes.push(action.payload);
         },
@@ -161,8 +171,8 @@ export const DishesSlice = createSlice({
             })
         },
         test: (state) => {
-            state.dishes = state.dishes.map(e=>({
-                ...e, 
+            state.dishes = state.dishes.map(e => ({
+                ...e,
                 isCompleted: false
             }))
         }
@@ -171,7 +181,7 @@ export const DishesSlice = createSlice({
 
 // Action creators are generated for each case reducer function
 export const {
-    add: addDishes, edit: editDishes, remove: removeDishes, addIngredientsToDish, removeIngredientsFromDish, editIngredientFromDish, addStepsToDish, editStepFromDish, adStepToDishPrev, addStepToDishNext, removeStepsFromDish
+    add: addDishes, edit: editDishes, remove: removeDishes, addIngredientsToDish, removeIngredientsFromDish, editIngredientFromDish, addStepsToDish, editStepFromDish, adStepToDishPrev, addStepToDishNext, removeStepsFromDish, search: searchDishes, changePage
 } = DishesSlice.actions
 
 export default DishesSlice.reducer

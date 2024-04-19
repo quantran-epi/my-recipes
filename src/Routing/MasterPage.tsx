@@ -2,7 +2,7 @@ import { Button } from "@components/Button";
 import { Content } from "@components/Layout/Content";
 import { Header } from "@components/Layout/Header";
 import { useTheme, useToggle } from "@hooks";
-import { Layout, Drawer } from "antd";
+import { Layout, Drawer, Flex } from "antd";
 import React, { useState } from "react";
 import { Outlet, useNavigate } from "react-router-dom";
 import { MenuOutlined } from "@ant-design/icons";
@@ -19,6 +19,13 @@ import { SmartForm, useSmartForm } from "@components/SmartForm";
 import { ObjectPropertyHelper } from "@common/Helpers/ObjectProperty";
 import { Space } from "@components/Layout/Space";
 import { ScheduledMealToolkitWidget } from "@modules/ScheduledMeal/Screens/ScheduledMealToolkit.widget";
+import { Menu } from "@components/Menu";
+import DishesIcon from "../../assets/icons/dishes.png";
+import IngredientIcon from "../../assets/icons/ingredients.png";
+import MealsIcon from "../../assets/icons/meals.png";
+import ShoppingListIcon from "../../assets/icons/shoppingList.png";
+import { Image } from "@components/Image";
+import Icon from "@ant-design/icons";
 
 const layoutStyles: React.CSSProperties = {
     height: "100%"
@@ -59,25 +66,47 @@ const SidebarDrawer = () => {
         setOpen(false);
     };
 
-    const onNavigate = (item) => {
-        navigate(item.href);
+    const onNavigate = (href) => {
+        navigate(href);
         setOpen(false);
     }
 
     return (
         <React.Fragment>
             <Button type="primary" onClick={showDrawer} icon={<MenuOutlined />} />
-            <Drawer placement="left" title="Chức năng" onClose={onClose} open={open}>
-                <List dataSource={[
-                    { title: "Nguyên liệu", href: RootRoutes.AuthorizedRoutes.IngredientRoutes.List() },
-                    { title: "Món ăn", href: RootRoutes.AuthorizedRoutes.DishesRoutes.List() },
-                    { title: "Lịch mua sắm", href: RootRoutes.AuthorizedRoutes.ShoppingListRoutes.List() },
-                    { title: "Thực đơn", href: RootRoutes.AuthorizedRoutes.ScheduledMealRoutes.List() },
-                ]} renderItem={(item) => <List.Item>
-                    <List.Item.Meta
-                        description={<Button fullwidth style={{ textAlign: "left" }} onClick={() => onNavigate(item)}>{item.title}</Button>} />
-                </List.Item>} />
-                <DataBackup />
+            <Drawer placement="left" title={<Typography.Text style={{ fontFamily: "kanit", fontSize: 18}}>My Recipes</Typography.Text>} onClose={onClose} open={open} styles={{ body: { padding: 0 } }}>
+                <Flex vertical justify="space-between" style={{ height: "100%" }}>
+                    <Menu
+                        items={[
+                            {
+                                key: "ingredients", label: <Flex align="center">
+                                    <img src={IngredientIcon} width={32} style={{ marginRight: 10 }} />
+                                    {"Nguyên liệu"}
+                                </Flex>, onClick: () => onNavigate(RootRoutes.AuthorizedRoutes.IngredientRoutes.List())
+                            },
+                            {
+                                key: "dishes", label: <Flex align="center">
+                                    <img src={DishesIcon} width={32} style={{ marginRight: 10 }} />
+                                    {"Món ăn"}
+                                </Flex>, onClick: () => onNavigate(RootRoutes.AuthorizedRoutes.DishesRoutes.List())
+                            },
+                            {
+                                key: "shoppingList", label: <Flex align="center">
+                                    <img src={ShoppingListIcon} width={32} style={{ marginRight: 10 }} />
+                                    {"Lịch mua sắm"}
+                                </Flex>, onClick: () => onNavigate(RootRoutes.AuthorizedRoutes.ShoppingListRoutes.List())
+                            },
+                            {
+                                key: "meals", label: <Flex align="center">
+                                    <img src={MealsIcon} width={32} style={{ marginRight: 10 }} />
+                                    {"Thực đơn"}
+                                </Flex>, onClick: () => onNavigate(RootRoutes.AuthorizedRoutes.ScheduledMealRoutes.List())
+                            }
+                        ]}
+                    />
+
+                    <Box style={{ padding: 15 }}><DataBackup /> </Box>
+                </Flex>
             </Drawer>
             <ScheduledMealToolkitWidget />
         </React.Fragment>

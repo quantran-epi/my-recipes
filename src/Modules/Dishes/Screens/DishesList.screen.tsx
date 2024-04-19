@@ -14,23 +14,23 @@ import { Typography } from "@components/Typography";
 import { useScreenTitle, useToggle } from "@hooks";
 import { RootRoutes } from "@routing/RootRoutes";
 import { Dishes } from "@store/Models/Dishes";
-import { removeDishes } from "@store/Reducers/DishesReducer";
+import { changePage, removeDishes, searchDishes } from "@store/Reducers/DishesReducer";
 import { RootState } from "@store/Store";
 import { debounce, sortBy } from "lodash";
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { DishesAddWidget } from "./DishesAdd.widget";
 import { DishesEditWidget } from "./DishesEdit.widget";
 
 export const DishesListScreen = () => {
     const dishes = useSelector((state: RootState) => state.dishes.dishes);
     const toggleAddModal = useToggle({ defaultValue: false });
+    const [searchText, setSearchText] = useState<string>("");
     const dispatch = useDispatch();
     const { } = useScreenTitle({ value: "Món ăn", deps: [] });
-    const [searchText, setSearchText] = useState("");
     const filteredDishes = useMemo<Dishes[]>(() => {
-        return sortBy(dishes.filter(e => e.name.trim().toLowerCase().includes(searchText.trim().toLowerCase())), "name")
+        return sortBy(dishes.filter(e => e.name.trim().toLowerCase().includes(searchText?.trim().toLowerCase())), "name")
     }, [dishes, searchText])
 
     const _onAdd = () => {
@@ -96,7 +96,7 @@ export const DishesItem: React.FunctionComponent<DishesItemProps> = (props) => {
                 <Typography.Paragraph style={{ width: 220, marginBottom: 0 }} ellipsis>{props.item.name}</Typography.Paragraph>
             </Tooltip>}
                 description={<Stack direction="column" align="flex-start" gap={0}>
-                    {props.item.isCompleted && <Space size={3}>
+                    {props.item.isCompleted && <Space size={8}>
                         <CheckCircleOutlined style={{ color: "#52c41a" }} />
                         <Typography.Text type="success">{"Hoàn thiện"}</Typography.Text>
                     </Space>}
