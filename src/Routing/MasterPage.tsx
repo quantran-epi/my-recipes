@@ -45,7 +45,7 @@ export const MasterPage = () => {
         }}>
             <Stack fullwidth>
                 <SidebarDrawer />
-                <Typography.Text>{currentFeatureName}</Typography.Text>
+                <Typography.Text style={{ fontFamily: "kanit", fontSize: 18, fontWeight: "500" }}>{currentFeatureName}</Typography.Text>
             </Stack>
         </Header>
         <Content>
@@ -74,7 +74,7 @@ const SidebarDrawer = () => {
     return (
         <React.Fragment>
             <Button type="primary" onClick={showDrawer} icon={<MenuOutlined />} />
-            <Drawer placement="left" title={<Typography.Text style={{ fontFamily: "kanit", fontSize: 18}}>My Recipes</Typography.Text>} onClose={onClose} open={open} styles={{ body: { padding: 0 } }}>
+            <Drawer placement="left" title={<Typography.Text style={{ fontFamily: "kanit", fontSize: 18 }}>My Recipes</Typography.Text>} onClose={onClose} open={open} styles={{ body: { padding: 0 } }}>
                 <Flex vertical justify="space-between" style={{ height: "100%" }}>
                     <Menu
                         items={[
