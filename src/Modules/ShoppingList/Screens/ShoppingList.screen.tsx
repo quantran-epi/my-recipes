@@ -59,7 +59,7 @@ export const ShoppingListScreen = () => {
 
     return <React.Fragment>
         <Stack.Compact>
-            <Input allowClear autoFocus placeholder="Tìm kiếm" onChange={debounce((e) => setSearchText(e.target.value), 350)} />
+            <Input allowClear placeholder="Tìm kiếm" onChange={debounce((e) => setSearchText(e.target.value), 350)} />
             <Button onClick={_onAdd} icon={<PlusOutlined />} />
             <Button onClick={_onShowCalendar} icon={<CalendarOutlined />} />
         </Stack.Compact>

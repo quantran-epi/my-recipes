@@ -22,6 +22,8 @@ import { useDispatch, useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
 import { DishesAddWidget } from "./DishesAdd.widget";
 import { DishesEditWidget } from "./DishesEdit.widget";
+import { Card } from "@components/Card";
+import Meta from "antd/es/card/Meta";
 
 export const DishesListScreen = () => {
     const dishes = useSelector((state: RootState) => state.dishes.dishes);

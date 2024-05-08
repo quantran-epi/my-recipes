@@ -12,7 +12,7 @@ import { Tooltip } from "@components/Tootip"
 import { useToggle } from "@hooks"
 import { Dishes, DishesStep } from "@store/Models/Dishes"
 import { DishStepAddType, DishesStepAddParams, removeStepsFromDish } from "@store/Reducers/DishesReducer"
-import { Typography } from "antd"
+import { Timeline, Typography } from "antd"
 import React, { FunctionComponent, useEffect, useState } from "react"
 import { useDispatch } from "react-redux"
 import { DishesAddStepWidget } from "./DishAddStep.widget"
@@ -75,14 +75,26 @@ export const DishStepListWidget: FunctionComponent<DishStepListWidgetProps> = (p
 
     return <Form {...addStepForm.defaultProps}>
         <Button fullwidth onClick={_onAddStep}>Thêm bước</Button>
-        <List
+        {/* <List
             dataSource={sortBy(props.currentDist.steps, [step => step.order])}
             renderItem={(item) => <StepItem
                 step={item}
                 dish={props.currentDist}
                 onDelete={_onDeleteStep}
                 onAddNext={_onAddStepNext}
-                onAddPrev={_onAddStepPrev} />} />
+                onAddPrev={_onAddStepPrev} />} /> */}
+        <Timeline style={{ marginTop: 20 }}>
+            {sortBy(props.currentDist.steps, [step => step.order]).map(item =>
+                <Timeline.Item dot={!item.required && <QuestionCircleOutlined style={{ color: "orange", backgroundColor: "transparent" }} />}>
+                    <StepItem
+                        step={item}
+                        dish={props.currentDist}
+                        onDelete={_onDeleteStep}
+                        onAddNext={_onAddStepNext}
+                        onAddPrev={_onAddStepPrev} />
+                </Timeline.Item>
+            )}
+        </Timeline>
 
         <Modal open={toggleAddStepToDishes.value} title={<Stack gap={0} direction="column" align="flex-start">
             <Typography.Title level={5} style={{ margin: 0 }}>Thêm bước</Typography.Title>
@@ -126,44 +138,47 @@ export const StepItem: React.FunctionComponent<StepItemProps> = (props) => {
     }
 
     return <React.Fragment>
-        <List.Item
+        {/* <List.Item
             actions={[
-                !props.step.required && <Tooltip title="Tùy chọn">
-                    <Button size="small" type="text" icon={<QuestionCircleOutlined style={{ color: "orange" }} />} />
-                </Tooltip>,
-                <Dropdown menu={{
-                    items: [
-                        {
-                            label: 'Thêm vào trước',
-                            key: 'add_prev',
-                            icon: <DoubleLeftOutlined />,
-                        },
-                        {
-                            label: 'Thêm vào sau',
-                            key: 'add_next',
-                            icon: <DoubleRightOutlined />,
-                        },
-                        {
-                            label: 'Chỉnh sửa',
-                            key: 'edit',
-                            icon: <EditOutlined />,
-                        },
-                        {
-                            label: 'Xóa',
-                            key: 'remove',
-                            icon: <DeleteOutlined />,
-                            danger: true,
-                        },
-                    ],
-                    onClick: _onMoreActionClick
-                }} placement="bottom">
-                    <Button size="small" icon={<HolderOutlined />} />
-                </Dropdown>
+               
             ]}>
             <Typography.Paragraph style={{ maxWidth: 250 }} ellipsis={{ rows: 3, expandable: true, symbol: "Xem thêm" }}>
                 {props.step.content}
             </Typography.Paragraph>
-        </List.Item>
+        </List.Item> */}
+        <Stack fullwidth justify="space-between" align="flex-start">
+            <Typography.Paragraph style={{ maxWidth: 250 }} ellipsis={{ rows: 3, expandable: true, symbol: "Xem thêm" }}>
+                {props.step.content}
+            </Typography.Paragraph>
+            <Dropdown menu={{
+                items: [
+                    {
+                        label: 'Thêm vào trước',
+                        key: 'add_prev',
+                        icon: <DoubleLeftOutlined />,
+                    },
+                    {
+                        label: 'Thêm vào sau',
+                        key: 'add_next',
+                        icon: <DoubleRightOutlined />,
+                    },
+                    {
+                        label: 'Chỉnh sửa',
+                        key: 'edit',
+                        icon: <EditOutlined />,
+                    },
+                    {
+                        label: 'Xóa',
+                        key: 'remove',
+                        icon: <DeleteOutlined />,
+                        danger: true,
+                    },
+                ],
+                onClick: _onMoreActionClick
+            }} placement="bottom">
+                <Button size="small" icon={<HolderOutlined />} />
+            </Dropdown>
+        </Stack>
         <Modal open={toggleEditStepToDishes.value} title={<Stack gap={0} direction="column" align="flex-start">
             <Typography.Title level={5} style={{ margin: 0 }}>Chỉnh sửa bước</Typography.Title>
             <Typography.Text type="secondary">{props.dish.name}</Typography.Text>
