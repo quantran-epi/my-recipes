@@ -25,6 +25,7 @@ import { ShoppingListDetailWidget } from "./ShoppingListDetail.widget";
 import { useModal } from "@components/Modal/ModalProvider";
 import { ShoppingListCalendarWidget } from "./ShoppingListCalendar.widget";
 import { ShoppingListEditWidget } from "./ShoppingListEdit.widget";
+import ShoppingListIcon from "../../../../assets/icons/shoppingList.png"
 
 export const ShoppingListScreen = () => {
     const shoppingLists = useSelector((state: RootState) => state.shoppingList.shoppingLists);

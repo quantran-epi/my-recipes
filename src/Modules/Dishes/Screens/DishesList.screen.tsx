@@ -24,6 +24,8 @@ import { DishesAddWidget } from "./DishesAdd.widget";
 import { DishesEditWidget } from "./DishesEdit.widget";
 import { Card } from "@components/Card";
 import Meta from "antd/es/card/Meta";
+import { Image } from "@components/Image";
+import DishesIcon from "../../../../assets/icons/dishes.png";
 
 export const DishesListScreen = () => {
     const dishes = useSelector((state: RootState) => state.dishes.dishes);

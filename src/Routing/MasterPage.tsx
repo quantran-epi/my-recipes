@@ -25,7 +25,6 @@ import IngredientIcon from "../../assets/icons/ingredients.png";
 import MealsIcon from "../../assets/icons/meals.png";
 import ShoppingListIcon from "../../assets/icons/shoppingList.png";
 import { Image } from "@components/Image";
-import Icon from "@ant-design/icons";
 
 const layoutStyles: React.CSSProperties = {
     height: "100%"
@@ -35,17 +34,29 @@ export const MasterPage = () => {
     const theme = useTheme();
     const currentFeatureName = useSelector((state: RootState) => state.appContext.currentFeatureName);
 
+    const _featureIcon = () => {
+        switch (currentFeatureName) {
+            case "Món ăn": return DishesIcon;
+            case "Thực đơn": return MealsIcon;
+            case "Lịch mua sắm": return ShoppingListIcon;
+            case "Nguyên liệu": return IngredientIcon;
+        }
+    }
+
     return <Layout style={layoutStyles}>
         <Header style={{
-            height: 45,
-            lineHeight: "45px",
+            height: 50,
+            lineHeight: "50px",
             paddingInline: 5,
             backgroundColor: "#fff",
             borderBottom: "0.5px solid " + theme.token.colorBorder
         }}>
-            <Stack fullwidth>
-                <SidebarDrawer />
-                <Typography.Text style={{ fontFamily: "kanit", fontSize: 18, fontWeight: "500" }}>{currentFeatureName}</Typography.Text>
+            <Stack justify="space-between" align="center">
+                <Stack>
+                    <SidebarDrawer />
+                    <Typography.Text style={{ fontFamily: "kanit", fontSize: 18, fontWeight: "500" }}>{currentFeatureName}</Typography.Text>
+                </Stack>
+                <Image preview={false} src={_featureIcon()} height={36} style={{ marginBottom: 5 }} />
             </Stack>
         </Header>
         <Content>

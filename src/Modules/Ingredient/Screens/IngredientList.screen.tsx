@@ -18,6 +18,8 @@ import { Input } from "@components/Form/Input";
 import { useSmartForm } from "@components/SmartForm";
 import { ObjectPropertyHelper } from "@common/Helpers/ObjectProperty";
 import { debounce, sortBy } from "lodash";
+import { Box } from "@components/Layout/Box";
+import IngredientsIcon from "../../../../assets/icons/ingredients.png";
 
 export const IngredientListScreen = () => {
     const ingredients = useSelector((state: RootState) => state.ingredient.ingredients);
