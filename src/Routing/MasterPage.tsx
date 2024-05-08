@@ -56,7 +56,7 @@ export const MasterPage = () => {
                     <SidebarDrawer />
                     <Typography.Text style={{ fontFamily: "kanit", fontSize: 18, fontWeight: "500" }}>{currentFeatureName}</Typography.Text>
                 </Stack>
-                <Image preview={false} src={_featureIcon()} height={36} style={{ marginBottom: 5 }} />
+                <Image preview={false} src={_featureIcon()} height={36} style={{ marginBottom: 3 }} />
             </Stack>
         </Header>
         <Content>
