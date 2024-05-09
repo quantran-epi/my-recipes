@@ -25,6 +25,7 @@ export const DishesDetailScreen = () => {
     }
 
     return <React.Fragment>
+        <Typography.Text><Typography.Text strong>Khẩu phần ăn:</Typography.Text> {currentDist.servingSize} người</Typography.Text>
         {currentDist.note && <Typography.Paragraph><Typography.Text strong>Ghi chú:</Typography.Text> {currentDist.note}</Typography.Paragraph>}
 
         {currentDist.includeDishes.length > 0 && <React.Fragment>

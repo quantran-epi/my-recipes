@@ -52,7 +52,7 @@ export const DishesListScreen = () => {
         </Stack.Compact>
         <List
             pagination={{
-                position: "bottom", align: "center", pageSize: 3, size: "small"
+                position: "bottom", align: "center", pageSize: 5, size: "small"
             }}
             itemLayout="horizontal"
             dataSource={filteredDishes}
@@ -109,17 +109,10 @@ export const DishesItem: React.FunctionComponent<DishesItemProps> = (props) => {
                 ]
             }>
             <List.Item.Meta title={<Tooltip title={props.item.name}>
-                <Typography.Paragraph style={{ width: 220, marginBottom: 0 }} ellipsis>{props.item.name}</Typography.Paragraph>
+                <Typography.Paragraph style={{ width: 220, marginBottom: 0, color: !props.item.isCompleted ? "orangered" : undefined }} ellipsis>{props.item.name}</Typography.Paragraph>
             </Tooltip>}
                 description={<Stack direction="column" align="flex-start" gap={0}>
-                    {props.item.isCompleted && <Space size={8}>
-                        <CheckCircleOutlined style={{ color: "#52c41a" }} />
-                        <Typography.Text type="success">{"Hoàn thiện"}</Typography.Text>
-                    </Space>}
-                    <Space size={8}>
-                        <TeamOutlined />
-                        <Typography.Text type="secondary">{props.item.servingSize} người ăn</Typography.Text>
-                    </Space>
+                    {_hasSteps() && <Button onClick={toggleStepsOverview.show} type="text" size="small" style={{ paddingInline: 0 }} icon={<Image src={StepsIcon} preview={false} width={18} style={{ marginBottom: 3 }} />}>{props.item.steps.length + " bước thực hiện"}</Button>}
                     {_hasIngredients() && !_hasIncludeDishes() && <Button onClick={toggleIngredientsOverview.show} type="text" size="small" style={{ paddingInline: 0 }} icon={<Image src={VegetablesIcon} preview={false} width={18} style={{ marginBottom: 3 }} />}>{props.item.ingredients.length + " nguyên liệu"}</Button>}
                     {_hasIncludeDishes() &&
                         <Space size={3}>
@@ -128,7 +121,6 @@ export const DishesItem: React.FunctionComponent<DishesItemProps> = (props) => {
                             </Popover>
                             {_hasIngredients() && <Button onClick={toggleIngredientsOverview.show} type="text" size="small" style={{ paddingInline: 0 }}>+ {props.item.ingredients.length} nguyên liệu</Button>}
                         </Space>}
-                    {_hasSteps() && <Button onClick={toggleStepsOverview.show} type="text" size="small" style={{ paddingInline: 0 }} icon={<Image src={StepsIcon} preview={false} width={18} style={{ marginBottom: 3 }} />}>{props.item.steps.length + " bước thực hiện"}</Button>}
                 </Stack>} />
         </List.Item >
         <Modal open={toggleEdit.value} title="Chỉnh sửa món ăn" destroyOnClose={true} onCancel={toggleEdit.hide} footer={null}>
