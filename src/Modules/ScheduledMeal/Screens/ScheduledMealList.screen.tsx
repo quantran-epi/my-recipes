@@ -19,6 +19,11 @@ import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { ScheduledMealAddWidget } from "./ScheduledMealAdd.widget";
 import { ScheduledMealEditWidget } from "./ScheduledMealEdit.widget";
+import DishesIcon from "../../../../assets/icons/noodles.png";
+import MorningIcon from "../../../../assets/icons/sunrise.png";
+import NightIcon from "../../../../assets/icons/night.png";
+import NoonIcon from "../../../../assets/icons/time.png";
+import { Image } from "@components/Image";
 
 export const ScheduledMealListScreen = () => {
     const [selectedDate, setSelectedDate] = useState<Date>(new Date());
@@ -114,18 +119,36 @@ export const ScheduledMealItem = ({ item, onDelete }: { item: ScheduledMeal, onD
                     {_isSelected() && <CheckCircleOutlined style={{ color: "green" }} />}
                 </Space>}
                 description={<Stack gap={0} align="flex-start" direction="column">
-                    <Space>
-                        <Typography.Text>Bữa sáng: </Typography.Text>
-                        <Typography.Text>{item.meals.breakfast.length} món</Typography.Text>
-                    </Space>
-                    <Space>
-                        <Typography.Text>Bữa trưa: </Typography.Text>
-                        <Typography.Text>{item.meals.lunch.length} món</Typography.Text>
-                    </Space>
-                    <Space>
-                        <Typography.Text>Bữa tối: </Typography.Text>
-                        <Typography.Text>{item.meals.dinner.length} món</Typography.Text>
-                    </Space>
+                    <Stack justify="space-between" style={{ width: 150 }}>
+                        <Space>
+                            <Image src={MorningIcon} preview={false} width={16} style={{ marginBottom: 3 }} />
+                            <Typography.Text>Bữa sáng: </Typography.Text>
+                        </Space>
+                        <Space size={3}>
+                            <Typography.Text>{item.meals.breakfast.length}</Typography.Text>
+                            <Image src={DishesIcon} preview={false} width={16} style={{ marginBottom: 3 }} />
+                        </Space>
+                    </Stack>
+                    <Stack justify="space-between" style={{ width: 150 }}>
+                        <Space>
+                            <Image src={NoonIcon} preview={false} width={16} style={{ marginBottom: 3 }} />
+                            <Typography.Text>Bữa trưa: </Typography.Text>
+                        </Space>
+                        <Space size={3}>
+                            <Typography.Text>{item.meals.lunch.length}</Typography.Text>
+                            <Image src={DishesIcon} preview={false} width={16} style={{ marginBottom: 3 }} />
+                        </Space>
+                    </Stack>
+                    <Stack justify="space-between" style={{ width: 150 }}>
+                        <Space>
+                            <Image src={NightIcon} preview={false} width={16} style={{ marginBottom: 3 }} />
+                            <Typography.Text>Bữa tối: </Typography.Text>
+                        </Space>
+                        <Space size={3}>
+                            <Typography.Text>{item.meals.dinner.length}</Typography.Text>
+                            <Image src={DishesIcon} preview={false} width={16} style={{ marginBottom: 3 }} />
+                        </Space>
+                    </Stack>
                 </Stack>}
             />
         </List.Item>

@@ -1,21 +1,27 @@
 {
   "files": {
     "main.css": "/my-recipes/static/css/main.ad72e2fe.css",
-    "main.js": "/my-recipes/static/js/main.a413d9b6.js",
+    "main.js": "/my-recipes/static/js/main.8f925033.js",
     "static/js/453.b5018280.chunk.js": "/my-recipes/static/js/453.b5018280.chunk.js",
     "static/media/vegetable.png": "/my-recipes/static/media/vegetable.1607f383176c56ba43e3.png",
     "static/media/process.png": "/my-recipes/static/media/process.2d9eb2e0d6898551919e.png",
     "static/media/noodles.png": "/my-recipes/static/media/noodles.b62c5f697192ba81a558.png",
+    "static/media/night.png": "/my-recipes/static/media/night.1bfbd92981bc5bc48482.png",
     "service-worker.js": "/my-recipes/service-worker.js",
+    "static/media/done.png": "/my-recipes/static/media/done.815a1f74cff7ec5e25c2.png",
     "static/media/meals.png": "/my-recipes/static/media/meals.27a8d17ec40b2d8c48b4.png",
+    "static/media/time.png": "/my-recipes/static/media/time.7be30ab4672480d8c939.png",
+    "static/media/nineteen.png": "/my-recipes/static/media/nineteen.8e5aac60f00e0492e358.png",
+    "static/media/sunrise.png": "/my-recipes/static/media/sunrise.f250b0303eae6910c50d.png",
     "static/media/shoppingList.png": "/my-recipes/static/media/shoppingList.e26818c0ffe739d3f9e1.png",
+    "static/media/compose.png": "/my-recipes/static/media/compose.0bc3bfa11de9da064819.png",
     "index.html": "/my-recipes/index.html",
     "main.ad72e2fe.css.map": "/my-recipes/static/css/main.ad72e2fe.css.map",
-    "main.a413d9b6.js.map": "/my-recipes/static/js/main.a413d9b6.js.map",
+    "main.8f925033.js.map": "/my-recipes/static/js/main.8f925033.js.map",
     "453.b5018280.chunk.js.map": "/my-recipes/static/js/453.b5018280.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.ad72e2fe.css",
-    "static/js/main.a413d9b6.js"
+    "static/js/main.8f925033.js"
   ]
 }

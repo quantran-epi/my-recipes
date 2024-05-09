@@ -25,7 +25,10 @@ import { ShoppingListDetailWidget } from "./ShoppingListDetail.widget";
 import { useModal } from "@components/Modal/ModalProvider";
 import { ShoppingListCalendarWidget } from "./ShoppingListCalendar.widget";
 import { ShoppingListEditWidget } from "./ShoppingListEdit.widget";
-import ShoppingListIcon from "../../../../assets/icons/shoppingList.png"
+import CalendarIcon from "../../../../assets/icons/nineteen.png"
+import ComposeIcon from "../../../../assets/icons/compose.png"
+import ChecklistIcon from "../../../../assets/icons/done.png"
+import { Image } from "@components/Image";
 
 export const ShoppingListScreen = () => {
     const shoppingLists = useSelector((state: RootState) => state.shoppingList.shoppingLists);
@@ -168,21 +171,25 @@ export const ShoppingListItem: React.FunctionComponent<ShoppingListItemProps> = 
                 <Typography.Paragraph style={{ width: 200, marginBottom: 0, textDecorationLine: _isAllIngredientDone() ? "line-through" : undefined }} ellipsis>{props.item.name}</Typography.Paragraph>
             </Tooltip>}
                 description={<Stack direction="column" align="flex-start" gap={2}>
-                    <Space size={2}>
-                        <CheckSquareOutlined />
-                        <Typography.Text>{`${props.item.ingredients.filter(e => e.isDone).length}/${props.item.ingredients.length}`} nguyên liệu</Typography.Text>
+                    <Space size={5}>
+                        <Tooltip title="Đã hoàn thành"><Image src={ChecklistIcon} preview={false} width={18} style={{ marginBottom: 3 }} /></Tooltip>
+                        <Typography.Text style={{ fontSize: 16 }}>{`${props.item.ingredients.filter(e => e.isDone).length}/${props.item.ingredients.length}`} nguyên liệu</Typography.Text>
                     </Space>
-                    <Space>
-                        <Typography.Text style={{ fontSize: 12 }}>Gồm {props.item.dishes.length + " món ăn, " + props.item.scheduledMeals?.length + " thực đơn"}</Typography.Text>
+                    <Space size={5}>
+                        <Typography.Text style={{ fontSize: 14 }}>Gồm</Typography.Text>
+                        <Typography.Text style={{ fontSize: 14 }} strong>{props.item.dishes.length}</Typography.Text>
+                        <Typography.Text style={{ fontSize: 14 }}>món ăn, </Typography.Text>
+                        <Typography.Text style={{ fontSize: 14 }} strong>{props.item.scheduledMeals?.length}</Typography.Text>
+                        <Typography.Text style={{ fontSize: 14 }}>thực đơn</Typography.Text>
                     </Space>
-                    <Space size={3}>
-                        <FormOutlined />
-                        <Typography.Text style={{ fontSize: 12 }}>{moment(props.item.createdDate).format("ddd, DD/MM/YYYY hh:mm:ss A")}</Typography.Text>
+                    <Space size={5}>
+                        <Tooltip title="Ngày tạo"><Image src={ComposeIcon} preview={false} width={18} style={{ marginBottom: 3 }} /></Tooltip>
+                        <Typography.Text style={{ fontSize: 14 }}>{moment(props.item.createdDate).format("ddd, DD/MM/YY hh:mm:ss A")}</Typography.Text>
                     </Space>
-                    <Space size={3}>
-                        <CalendarOutlined />
-                        <Typography.Text style={{ fontSize: 12 }}>{props.item.plannedDate ? moment(props.item.plannedDate).format("ddd, DD/MM/YYYY") : "N/A"}</Typography.Text>
-                    </Space>
+                    {props.item.plannedDate && <Space size={10}>
+                        <Tooltip title="Ngày thực hiện"><Image src={CalendarIcon} preview={false} width={16} style={{ marginBottom: 3 }} /></Tooltip>
+                        <Typography.Text style={{ fontSize: 14 }}>{props.item.plannedDate ? moment(props.item.plannedDate).format("ddd, DD/MM/YY") : "N/A"}</Typography.Text>
+                    </Space>}
                 </Stack>} />
         </List.Item>
         <Modal style={{ top: 50 }} open={toggleIngredient.value} title={"Lịch mua sắm (" + props.item.name + ")"} destroyOnClose={true} onCancel={toggleIngredient.hide} footer={null}>
