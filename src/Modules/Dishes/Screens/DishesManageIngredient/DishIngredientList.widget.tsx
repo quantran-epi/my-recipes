@@ -19,6 +19,8 @@ import { useDispatch, useSelector } from "react-redux"
 import { DishesAddIngredientWidget } from "./DishesAddIngredient.widget"
 import { orderBy } from "lodash"
 import { DishesEditIngredientWidget } from "./DishesEditIngredient.widget"
+import { Image } from "@components/Image"
+import IngredientIcon from "../../../../../assets/icons/vegetable.png"
 
 type DishIngredientListWidgetProps = {
     currentDist: Dishes;
@@ -65,7 +67,10 @@ export const DishIngredientListWidget: FunctionComponent<DishIngredientListWidge
             renderItem={(item) => <IngredientItem dish={props.currentDist} ingredientAmount={item} onDelete={_onDelete} />} />
 
         <Modal open={toggleAddIngredientToDishes.value} title={<Stack gap={0} direction="column" align="flex-start">
-            <Typography.Title level={5} style={{ margin: 0 }}>Thêm nguyên liệu</Typography.Title>
+            <Space>
+                <Image src={IngredientIcon} preview={false} width={24} style={{ marginBottom: 3 }} />
+                <Typography.Title level={5} style={{ margin: 0 }}>Thêm nguyên liệu</Typography.Title>
+            </Space>
             <Typography.Text type="secondary">{props.currentDist.name}</Typography.Text>
         </Stack>} destroyOnClose={true} onCancel={toggleAddIngredientToDishes.hide} footer={null}>
             <DishesAddIngredientWidget dish={props.currentDist} />
@@ -110,7 +115,10 @@ export const IngredientItem: React.FunctionComponent<IngredientItemProps> = (pro
             </Space>
         </List.Item>
         <Modal open={togglEditIngredientToDishes.value} title={<Stack gap={0} direction="column" align="flex-start">
-            <Typography.Title level={5} style={{ margin: 0 }}>Sửa nguyên liệu</Typography.Title>
+            <Space>
+                <Image src={IngredientIcon} preview={false} width={24} style={{ marginBottom: 3 }} />
+                <Typography.Title level={5} style={{ margin: 0 }}>Sửa nguyên liệu</Typography.Title>
+            </Space>
             <Typography.Text type="secondary">{props.dish.name}</Typography.Text>
         </Stack>} destroyOnClose={true} onCancel={togglEditIngredientToDishes.hide} footer={null}>
             <DishesEditIngredientWidget item={props.ingredientAmount} dish={props.dish} onDone={togglEditIngredientToDishes.hide} />

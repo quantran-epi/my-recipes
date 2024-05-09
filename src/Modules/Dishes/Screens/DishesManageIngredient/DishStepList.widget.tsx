@@ -12,12 +12,14 @@ import { Tooltip } from "@components/Tootip"
 import { useToggle } from "@hooks"
 import { Dishes, DishesStep } from "@store/Models/Dishes"
 import { DishStepAddType, DishesStepAddParams, removeStepsFromDish } from "@store/Reducers/DishesReducer"
-import { Timeline, Typography } from "antd"
+import { Space, Timeline, Typography } from "antd"
 import React, { FunctionComponent, useEffect, useState } from "react"
 import { useDispatch } from "react-redux"
 import { DishesAddStepWidget } from "./DishAddStep.widget"
 import { sortBy } from "lodash"
 import { DishesEditStepWidget } from "./DishEditStep.widget"
+import StepIcon from "../../../../../assets/icons/process.png"
+import { Image } from "@components/Image"
 
 type DishStepListWidgetProps = {
     currentDist: Dishes;
@@ -97,7 +99,10 @@ export const DishStepListWidget: FunctionComponent<DishStepListWidgetProps> = (p
         </Timeline>
 
         <Modal open={toggleAddStepToDishes.value} title={<Stack gap={0} direction="column" align="flex-start">
-            <Typography.Title level={5} style={{ margin: 0 }}>Thêm bước</Typography.Title>
+            <Space>
+                <Image src={StepIcon} preview={false} width={24} style={{ marginBottom: 3 }} />
+                <Typography.Title level={5} style={{ margin: 0 }}>Thêm bước</Typography.Title>
+            </Space>
             <Typography.Text type="secondary">{props.currentDist.name}</Typography.Text>
         </Stack>} destroyOnClose={true} onCancel={toggleAddStepToDishes.hide} footer={null}>
             <DishesAddStepWidget dish={props.currentDist} currentOrder={currentOrder} addType={addType} onDone={(addType) => {
@@ -172,7 +177,11 @@ export const StepItem: React.FunctionComponent<StepItemProps> = (props) => {
             </Dropdown>
         </Stack>
         <Modal open={toggleEditStepToDishes.value} title={<Stack gap={0} direction="column" align="flex-start">
-            <Typography.Title level={5} style={{ margin: 0 }}>Chỉnh sửa bước</Typography.Title>
+            <Space>
+                <Image src={StepIcon} preview={false} width={24} style={{ marginBottom: 3 }} />
+                <Typography.Title level={5} style={{ margin: 0 }}>Chỉnh sửa bước</Typography.Title>
+            </Space>
+
             <Typography.Text type="secondary">{props.dish.name}</Typography.Text>
         </Stack>} destroyOnClose={true} onCancel={toggleEditStepToDishes.hide} footer={null}>
             <DishesEditStepWidget item={props.step} dish={props.dish} onDone={() => {
