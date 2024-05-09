@@ -8,6 +8,9 @@ import { RootState } from "@store/Store"
 import { FloatButton } from "antd"
 import React from "react"
 import { useDispatch, useSelector } from "react-redux"
+import ShoppinglistIcon from "../../../../assets/icons/shoppingList.png"
+import { Space } from "@components/Layout/Space";
+import { Image } from "@components/Image";
 
 export const ScheduledMealToolkitWidget = () => {
     const selectedMeals = useSelector((state: RootState) => state.scheduledMeal.selectedMeals);
@@ -28,7 +31,12 @@ export const ScheduledMealToolkitWidget = () => {
             <FloatButton icon={<PlusOutlined />} onClick={toggleAddModal.show} />
         </FloatButton.Group>}
 
-        <Modal open={toggleAddModal.value} title="Thêm lịch mua sắm" destroyOnClose={true} onCancel={toggleAddModal.hide} footer={null}>
+        <Modal open={toggleAddModal.value} title={
+            <Space>
+                <Image src={ShoppinglistIcon} preview={false} width={24} style={{ marginBottom: 3 }} />
+                Thêm lịch mua sắm
+            </Space>
+        } destroyOnClose={true} onCancel={toggleAddModal.hide} footer={null}>
             <ShoppingListAddWidget date={null} scheduledMealIds={selectedMeals} onDone={toggleAddModal.hide} />
         </Modal>
     </React.Fragment>

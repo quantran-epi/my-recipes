@@ -1,25 +1,24 @@
+import { DeleteOutlined, EditOutlined, PlusOutlined } from "@ant-design/icons";
 import { Button } from "@components/Button";
+import { Input } from "@components/Form/Input";
+import { Image } from "@components/Image";
+import { Space } from "@components/Layout/Space";
+import { Stack } from "@components/Layout/Stack";
 import { List } from "@components/List";
 import { Modal } from "@components/Modal";
+import { Popconfirm } from "@components/Popconfirm";
+import { Tooltip } from "@components/Tootip";
 import { Typography } from "@components/Typography";
 import { useScreenTitle, useToggle } from "@hooks";
+import { Ingredient } from "@store/Models/Ingredient";
 import { removeIngredient } from "@store/Reducers/IngredientReducer";
 import { RootState } from "@store/Store";
+import { debounce, sortBy } from "lodash";
 import React, { useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import VegetablesIcon from "../../../../assets/icons/vegetable.png";
 import { IngredientAddWidget } from "./IngredientAdd.widget";
-import { Ingredient } from "@store/Models/Ingredient";
 import { IngredientEditWidget } from "./IngredientEdit.widget";
-import { EditOutlined, DeleteOutlined, SearchOutlined, PlusOutlined } from "@ant-design/icons";
-import { Tooltip } from "@components/Tootip";
-import { Popconfirm } from "@components/Popconfirm";
-import { Stack } from "@components/Layout/Stack";
-import { Input } from "@components/Form/Input";
-import { useSmartForm } from "@components/SmartForm";
-import { ObjectPropertyHelper } from "@common/Helpers/ObjectProperty";
-import { debounce, sortBy } from "lodash";
-import { Box } from "@components/Layout/Box";
-import IngredientsIcon from "../../../../assets/icons/ingredients.png";
 
 export const IngredientListScreen = () => {
     const ingredients = useSelector((state: RootState) => state.ingredient.ingredients);
@@ -53,7 +52,12 @@ export const IngredientListScreen = () => {
             dataSource={filteredIngredients}
             renderItem={(item) => <IngredientItem item={item} onDelete={_onDelete} />}
         />
-        <Modal open={toggleAddModal.value} title="Thêm nguyên liệu" destroyOnClose={true} onCancel={toggleAddModal.hide} footer={null}>
+        <Modal open={toggleAddModal.value} title={
+            <Space>
+                <Image src={VegetablesIcon} preview={false} width={24} style={{ marginBottom: 3 }} />
+                Thêm nguyên liệu
+            </Space>
+        } destroyOnClose={true} onCancel={toggleAddModal.hide} footer={null}>
             <IngredientAddWidget />
         </Modal>
     </React.Fragment>
@@ -85,7 +89,12 @@ export const IngredientItem: React.FunctionComponent<IngredientItemProps> = (pro
                 <Typography.Paragraph style={{ width: 200, marginBottom: 0 }} ellipsis>{props.item.name}</Typography.Paragraph>
             </Tooltip>} />
         </List.Item >
-        <Modal open={toggleEdit.value} title="Chỉnh sửa nguyên liệu" destroyOnClose={true} onCancel={toggleEdit.hide} footer={null}>
+        <Modal open={toggleEdit.value} title={
+            <Space>
+                <Image src={VegetablesIcon} preview={false} width={24} style={{ marginBottom: 3 }} />
+                Chỉnh sửa nguyên liệu
+            </Space>
+        } destroyOnClose={true} onCancel={toggleEdit.hide} footer={null}>
             <IngredientEditWidget item={props.item} onDone={() => toggleEdit.hide()} />
         </Modal>
     </React.Fragment>

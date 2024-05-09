@@ -13,13 +13,19 @@ import { RootRoutes } from "@routing/RootRoutes";
 import { ShoppingList, ShoppingListIngredientGroup } from "@store/Models/ShoppingList";
 import { toggleDoneIngredient } from "@store/Reducers/ShoppingListReducer";
 import { RootState } from "@store/Store";
-import { Space } from "antd";
+import { Space, Tabs } from "antd";
 import { CheckboxChangeEvent } from "antd/es/checkbox";
 import moment from "moment";
 import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { ShoppingListMealDetailWidget } from "./ShoppingListMealDetail.widget";
+import IngredientIcon from "../../../../assets/icons/vegetable.png";
+import DishesIcon from "../../../../assets/icons/noodles.png";
+import MealsIcon from "../../../../assets/icons/meals.png";
+import CalendarIcon from "../../../../assets/icons/nineteen.png";
+import ChecklistIcon from "../../../../assets/icons/done.png";
+import { Image } from "@components/Image";
 
 type ShoppingListDetailScreenProps = {
     shoppingList: ShoppingList;
@@ -46,12 +52,24 @@ export const ShoppingListDetailWidget: React.FunctionComponent<ShoppingListDetai
     }
 
     return <React.Fragment>
-        <Collapse
-            defaultActiveKey={"ingredients"}
-            size="small"
-            items={[
-                {
-                    key: 'dishes', label: 'Món ăn ' + `(${props.shoppingList.dishes.length})`, children: <List
+        <Tabs defaultActiveKey="ingredients">
+            <Tabs.TabPane icon={<Image src={IngredientIcon} preview={false} width={22} style={{ marginBottom: 3 }} />} tab={"Nguyên liệu " + `(${props.shoppingList.ingredients.length})`} key="ingredients">
+                <Stack fullwidth justify="flex-start" style={{ marginBottom: 10 }}>
+                    <Space>
+                        <Image src={ChecklistIcon} preview={false} width={18} style={{ marginBottom: 3 }} />
+                        <Typography.Text strong>{`${props.shoppingList.ingredients.filter(e => e.isDone).length}/${props.shoppingList.ingredients.length}`}</Typography.Text>
+                    </Space>
+                </Stack>
+                <Box style={{ maxHeight: 500, overflowY: "auto" }}>
+                    <List
+                        dataSource={props.shoppingList.ingredients}
+                        renderItem={(item) => <ShoppingListIngredientItem item={item} shoppingList={props.shoppingList} />}
+                    />
+                </Box>
+            </Tabs.TabPane>
+            <Tabs.TabPane icon={<Image src={DishesIcon} preview={false} width={22} style={{ marginBottom: 3 }} />} tab={"Món ăn " + `(${props.shoppingList.dishes.length})`} key="dishes">
+                <Box style={{ maxHeight: 500, overflowY: "auto" }}>
+                    <List
                         size="small"
                         style={{ overflowX: "auto" }}
                         dataSource={_getDishesByIds(props.shoppingList.dishes)}
@@ -61,7 +79,10 @@ export const ShoppingListDetailWidget: React.FunctionComponent<ShoppingListDetai
                                     <Typography.Paragraph style={{ width: 150, marginBottom: 0, color: "blue" }} ellipsis> {item.name}</Typography.Paragraph>
                                     <Box>
                                         (<Space size={2}>
-                                            <Typography.Text>{item.ingredients.length} NL</Typography.Text>
+                                            <Space size={3}>
+                                                <Typography.Text>{item.ingredients.length}</Typography.Text>
+                                                <Image preview={false} src={IngredientIcon} width={16} style={{ marginBottom: 5 }} />
+                                            </Space>
                                             <Typography.Text>-</Typography.Text>
                                             <Space size={3}>
                                                 <Space size={3}>
@@ -70,7 +91,7 @@ export const ShoppingListDetailWidget: React.FunctionComponent<ShoppingListDetai
                                                 </Space>
                                                 <Space size={3}>
                                                     <Typography.Text>{item.includeDishes.length}</Typography.Text>
-                                                    <OrderedListOutlined />
+                                                    <Image preview={false} src={DishesIcon} width={16} style={{ marginBottom: 5 }} />
                                                 </Space>
                                             </Space>
                                         </Space>)
@@ -80,9 +101,11 @@ export const ShoppingListDetailWidget: React.FunctionComponent<ShoppingListDetai
                         </List.Item>
                         }
                     />
-                },
-                {
-                    key: 'meals', label: 'Thực đơn ' + `(${props.shoppingList.scheduledMeals.length})`, children: <List
+                </Box>
+            </Tabs.TabPane>
+            <Tabs.TabPane icon={<Image src={MealsIcon} preview={false} width={22} style={{ marginBottom: 3 }} />} tab={"Thực đơn " + `(${props.shoppingList.scheduledMeals.length})`} key="meals">
+                <Box style={{ maxHeight: 500, overflowY: "auto" }}>
+                    <List
                         size="small"
                         style={{ overflowX: "auto" }}
                         dataSource={_getScheduledMealsByIds(props.shoppingList.scheduledMeals)}
@@ -91,13 +114,16 @@ export const ShoppingListDetailWidget: React.FunctionComponent<ShoppingListDetai
                                 <Stack gap={3} justify="space-between" fullwidth>
                                     <Typography.Paragraph style={{ width: 150, marginBottom: 0, color: "blue" }} ellipsis> {item.name}</Typography.Paragraph>
                                     <Box>
-                                        (<Space size={2}>
-                                            <Typography.Text>{Object.values(item.meals).flat().length} món</Typography.Text>
+                                        (<Space size={5}>
+                                            <Space size={3}>
+                                                <Typography.Text>{Object.values(item.meals).flat().length}</Typography.Text>
+                                                <Image preview={false} src={DishesIcon} width={16} style={{ marginBottom: 5 }} />
+                                            </Space>
                                             <Typography.Text>-</Typography.Text>
                                             <Space size={3}>
                                                 <Space size={3}>
-                                                    <CalendarOutlined />
-                                                    <Typography.Text>{moment(item.plannedDate).format("DD/MM/YYYY")}</Typography.Text>
+                                                    <Image preview={false} src={CalendarIcon} width={16} style={{ marginBottom: 5 }} />
+                                                    <Typography.Text>{moment(item.plannedDate).format("DD/MM/YY")}</Typography.Text>
                                                 </Space>
                                             </Space>
                                         </Space>)
@@ -107,21 +133,9 @@ export const ShoppingListDetailWidget: React.FunctionComponent<ShoppingListDetai
                         </List.Item>
                         }
                     />
-                },
-                {
-                    key: 'ingredients', label: <Stack fullwidth justify="space-between">
-                        <Typography.Text>Nguyên liệu</Typography.Text>
-                        <Space>
-                            <CheckSquareOutlined />
-                            <Typography.Text strong>{`${props.shoppingList.ingredients.filter(e => e.isDone).length}/${props.shoppingList.ingredients.length}`}</Typography.Text>
-                        </Space>
-                    </Stack>, children: <List
-                        dataSource={props.shoppingList.ingredients}
-                        renderItem={(item) => <ShoppingListIngredientItem item={item} shoppingList={props.shoppingList} />}
-                    />
-                }
-            ]}
-        />
+                </Box>
+            </Tabs.TabPane>
+        </Tabs>
         <Modal style={{ top: 50 }} open={toggleMealModal.value} title={"Thực đơn"} destroyOnClose={true} onCancel={toggleMealModal.hide} footer={null}>
             <Box style={{ maxHeight: 600, overflowY: "auto" }}>
                 <ShoppingListMealDetailWidget mealId={selectedMeal} />

@@ -6,6 +6,7 @@ import { SmartForm, useSmartForm } from "@components/SmartForm";
 import { ShoppingList } from "@store/Models/ShoppingList";
 import { ShoppingListAddDishesParams, addDishesToShoppingList } from "@store/Reducers/ShoppingListReducer";
 import { RootState } from "@store/Store";
+import { Input } from "antd";
 import { useDispatch, useSelector } from "react-redux";
 
 type ShoppingListAddMoreDishesWidgetProps = {
@@ -38,6 +39,9 @@ export const ShoppingListAddMoreDishesWidget: React.FunctionComponent<ShoppingLi
     }
 
     return <SmartForm {...addDishesToShoppingListForm.defaultProps}>
+        <SmartForm.Item label="Lịch mua sắm">
+            <Input value={addDishesToShoppingListForm.getValues().shoppingList.name} disabled />
+        </SmartForm.Item>
         <SmartForm.Item {...addDishesToShoppingListForm.itemDefinitions.dishesIds}>
             <Select
                 showSearch

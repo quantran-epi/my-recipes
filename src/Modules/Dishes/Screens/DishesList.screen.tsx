@@ -58,7 +58,12 @@ export const DishesListScreen = () => {
             dataSource={filteredDishes}
             renderItem={(item) => <DishesItem item={item} onDelete={_onDelete} />}
         />
-        <Modal open={toggleAddModal.value} title="Thêm món ăn" destroyOnClose={true} onCancel={toggleAddModal.hide} footer={null}>
+        <Modal open={toggleAddModal.value} title={
+            <Space>
+                <Image src={NoodlesIcon} preview={false} width={24} style={{ marginBottom: 3 }} />
+                Thêm món ăn
+            </Space>
+        } destroyOnClose={true} onCancel={toggleAddModal.hide} footer={null}>
             <DishesAddWidget />
         </Modal>
     </React.Fragment>
@@ -123,10 +128,20 @@ export const DishesItem: React.FunctionComponent<DishesItemProps> = (props) => {
                         </Space>}
                 </Stack>} />
         </List.Item >
-        <Modal open={toggleEdit.value} title="Chỉnh sửa món ăn" destroyOnClose={true} onCancel={toggleEdit.hide} footer={null}>
+        <Modal open={toggleEdit.value} title={
+            <Space>
+                <Image src={NoodlesIcon} preview={false} width={24} style={{ marginBottom: 3 }} />
+                Chỉnh sửa món ăn
+            </Space>
+        } destroyOnClose={true} onCancel={toggleEdit.hide} footer={null}>
             <DishesEditWidget item={props.item} onDone={() => toggleEdit.hide()} />
         </Modal>
-        <Modal open={toggleIngredientsOverview.value} title="Bao gồm các nguyên liệu" destroyOnClose={true} onCancel={toggleIngredientsOverview.hide} footer={null}>
+        <Modal open={toggleIngredientsOverview.value} title={
+            <Space>
+                <Image src={VegetablesIcon} preview={false} width={24} style={{ marginBottom: 3 }} />
+                Bao gồm các nguyên liệu
+            </Space>
+        } destroyOnClose={true} onCancel={toggleIngredientsOverview.hide} footer={null}>
             <Box style={{ overflowY: "auto", maxHeight: 600 }}>
                 <List
                     dataSource={orderBy(props.item.ingredients, [obj => obj.required], ['desc'])}
@@ -140,7 +155,10 @@ export const DishesItem: React.FunctionComponent<DishesItemProps> = (props) => {
                     </List.Item>} />
             </Box>
         </Modal>
-        <Modal open={toggleStepsOverview.value} title="Bao gồm các bước" destroyOnClose={true} onCancel={toggleStepsOverview.hide} footer={null}>
+        <Modal open={toggleStepsOverview.value} title={<Space>
+            <Image src={StepsIcon} preview={false} width={18} style={{ marginBottom: 3 }} />
+            Bao gồm các bước
+        </Space>} destroyOnClose={true} onCancel={toggleStepsOverview.hide} footer={null}>
             <Box style={{ overflowY: "auto", maxHeight: 600 }}>
                 <List
                     dataSource={props.item.steps}

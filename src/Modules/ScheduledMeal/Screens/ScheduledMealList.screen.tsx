@@ -23,6 +23,7 @@ import DishesIcon from "../../../../assets/icons/noodles.png";
 import MorningIcon from "../../../../assets/icons/sunrise.png";
 import NightIcon from "../../../../assets/icons/night.png";
 import NoonIcon from "../../../../assets/icons/time.png";
+import MealsIcon from "../../../../assets/icons/meals.png"
 import { Image } from "@components/Image";
 
 export const ScheduledMealListScreen = () => {
@@ -75,7 +76,10 @@ export const ScheduledMealListScreen = () => {
             renderItem={(item) => <ScheduledMealItem item={item} onDelete={_onDelete} />}
         />
 
-        <Modal open={toggleAddModal.value} title="Thêm thực đơn" destroyOnClose={true} onCancel={toggleAddModal.hide} footer={null}>
+        <Modal open={toggleAddModal.value} title={<Space>
+            <Image src={MealsIcon} preview={false} width={24} style={{ marginBottom: 3 }} />
+            Thêm thực đơn
+        </Space>} destroyOnClose={true} onCancel={toggleAddModal.hide} footer={null}>
             <ScheduledMealAddWidget date={selectedDate} onDone={toggleAddModal.hide} />
         </Modal>
     </React.Fragment>
@@ -152,7 +156,10 @@ export const ScheduledMealItem = ({ item, onDelete }: { item: ScheduledMeal, onD
                 </Stack>}
             />
         </List.Item>
-        <Modal open={toggleEditModal.value} title="Sửa thực đơn" destroyOnClose={true} onCancel={toggleEditModal.hide} footer={null}>
+        <Modal open={toggleEditModal.value} title={<Space>
+            <Image src={MealsIcon} preview={false} width={24} style={{ marginBottom: 3 }} />
+            Sửa thực đơn
+        </Space>} destroyOnClose={true} onCancel={toggleEditModal.hide} footer={null}>
             <ScheduledMealEditWidget item={item} onDone={toggleEditModal.hide} />
         </Modal>
     </React.Fragment >

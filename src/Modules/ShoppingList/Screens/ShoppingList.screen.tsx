@@ -28,6 +28,7 @@ import { ShoppingListEditWidget } from "./ShoppingListEdit.widget";
 import CalendarIcon from "../../../../assets/icons/nineteen.png"
 import ComposeIcon from "../../../../assets/icons/compose.png"
 import ChecklistIcon from "../../../../assets/icons/done.png"
+import ShoppinglistIcon from "../../../../assets/icons/shoppingList.png"
 import { Image } from "@components/Image";
 
 export const ShoppingListScreen = () => {
@@ -75,11 +76,17 @@ export const ShoppingListScreen = () => {
             dataSource={filteredShoppingLists}
             renderItem={(item) => <ShoppingListItem item={item} onDelete={_onDelete} />}
         />
-        <Modal open={toggleAddModal.value} title="Thêm lịch mua sắm" destroyOnClose={true} onCancel={toggleAddModal.hide} footer={null}>
+        <Modal open={toggleAddModal.value} title={<Space>
+            <Image src={ShoppinglistIcon} preview={false} width={24} style={{ marginBottom: 3 }} />
+            Thêm lịch mua sắm
+        </Space>} destroyOnClose={true} onCancel={toggleAddModal.hide} footer={null}>
             <ShoppingListAddWidget date={selectedDate} onDone={toggleAddModal.hide} />
         </Modal>
 
-        <Modal style={{ top: 50 }} open={toggleCalendarModal.value} title="Lịch mua sắm" destroyOnClose={true} onCancel={toggleCalendarModal.hide} footer={null}>
+        <Modal style={{ top: 50 }} open={toggleCalendarModal.value} title={<Space>
+            <Image src={ShoppinglistIcon} preview={false} width={24} style={{ marginBottom: 3 }} />
+            Lịch mua sắm
+        </Space>} destroyOnClose={true} onCancel={toggleCalendarModal.hide} footer={null}>
             <Box style={{ maxHeight: 600, overflowY: "auto" }}>
                 <ShoppingListCalendarWidget onAdd={_onAddWithDate} />
             </Box>
@@ -168,7 +175,9 @@ export const ShoppingListItem: React.FunctionComponent<ShoppingListItemProps> = 
                 ]
             }>
             <List.Item.Meta title={<Tooltip title={props.item.name}>
-                <Typography.Paragraph style={{ width: 200, marginBottom: 0, textDecorationLine: _isAllIngredientDone() ? "line-through" : undefined }} ellipsis>{props.item.name}</Typography.Paragraph>
+                <Typography.Paragraph
+                    style={{ width: 200, marginBottom: 0, textDecorationLine: _isAllIngredientDone() ? "line-through" : undefined }}
+                    type={_isAllIngredientDone() ? "secondary" : undefined} ellipsis>{props.item.name}</Typography.Paragraph>
             </Tooltip>}
                 description={<Stack direction="column" align="flex-start" gap={2}>
                     <Space size={5}>
@@ -192,12 +201,16 @@ export const ShoppingListItem: React.FunctionComponent<ShoppingListItemProps> = 
                     </Space>}
                 </Stack>} />
         </List.Item>
-        <Modal style={{ top: 50 }} open={toggleIngredient.value} title={"Lịch mua sắm (" + props.item.name + ")"} destroyOnClose={true} onCancel={toggleIngredient.hide} footer={null}>
-            <Box style={{ maxHeight: 600, overflowY: "auto" }}>
-                <ShoppingListDetailWidget shoppingList={props.item} />
-            </Box>
+        <Modal style={{ top: 50 }} open={toggleIngredient.value} title={<Space>
+            <Image src={ShoppinglistIcon} preview={false} width={24} style={{ marginBottom: 3 }} />
+            {props.item.name}
+        </Space>} destroyOnClose={true} onCancel={toggleIngredient.hide} footer={null}>
+            <ShoppingListDetailWidget shoppingList={props.item} />
         </Modal>
-        <Modal style={{ top: 50 }} open={toggleAddMoreDishes.value} title={"Sửa món ăn (" + props.item.name + ")"} destroyOnClose={true} onCancel={toggleAddMoreDishes.hide} footer={null}>
+        <Modal style={{ top: 50 }} open={toggleAddMoreDishes.value} title={<Space>
+            <Image src={ShoppinglistIcon} preview={false} width={24} style={{ marginBottom: 3 }} />
+            Sửa món ăn
+        </Space>} destroyOnClose={true} onCancel={toggleAddMoreDishes.hide} footer={null}>
             <Box style={{ maxHeight: 600, overflowY: "auto" }}>
                 <ShoppingListAddMoreDishesWidget shoppingList={props.item} onDone={() => {
                     toggleAddMoreDishes.hide();
@@ -212,7 +225,12 @@ export const ShoppingListItem: React.FunctionComponent<ShoppingListItemProps> = 
                 }} />
             </Box>
         </Modal>
-        <Modal open={toggleEditModal.value} title="Sửa lịch mua sắm" destroyOnClose={true} onCancel={toggleEditModal.hide} footer={null}>
+        <Modal open={toggleEditModal.value} title={
+            <Space>
+                <Image src={ShoppinglistIcon} preview={false} width={24} style={{ marginBottom: 3 }} />
+                Sửa lịch mua sắm
+            </Space>
+        } destroyOnClose={true} onCancel={toggleEditModal.hide} footer={null}>
             <ShoppingListEditWidget item={props.item} onDone={toggleEditModal.hide} />
         </Modal>
     </React.Fragment>
