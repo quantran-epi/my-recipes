@@ -138,16 +138,8 @@ export const StepItem: React.FunctionComponent<StepItemProps> = (props) => {
     }
 
     return <React.Fragment>
-        {/* <List.Item
-            actions={[
-               
-            ]}>
-            <Typography.Paragraph style={{ maxWidth: 250 }} ellipsis={{ rows: 3, expandable: true, symbol: "Xem thêm" }}>
-                {props.step.content}
-            </Typography.Paragraph>
-        </List.Item> */}
         <Stack fullwidth justify="space-between" align="flex-start">
-            <Typography.Paragraph style={{ maxWidth: 250 }} ellipsis={{ rows: 3, expandable: true, symbol: "Xem thêm" }}>
+            <Typography.Paragraph style={{ maxWidth: 280 }} ellipsis={{ rows: 3, expandable: true, symbol: "Xem thêm" }}>
                 {props.step.content}
             </Typography.Paragraph>
             <Dropdown menu={{

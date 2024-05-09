@@ -84,7 +84,8 @@ export const IngredientItem: React.FunctionComponent<IngredientItemProps> = (pro
     const togglEditIngredientToDishes = useToggle();
 
     const _getIngredientName = (id) => {
-        return ingredients.find(e => e.id === id)?.name || "N/A";
+        let ingre = ingredients.find(e => e.id === id);
+        return (ingre?.name.length > 13 ? ingre?.name?.substring(0, 15) + "..." : ingre.name) || "N/A";
     }
 
     const _onEdit = () => {
@@ -100,7 +101,9 @@ export const IngredientItem: React.FunctionComponent<IngredientItemProps> = (pro
                 </Popconfirm>
             ]}>
             <Space>
-                <Typography.Text>{_getIngredientName(props.ingredientAmount.ingredientId)} - {props.ingredientAmount.amount} {props.ingredientAmount.unit}</Typography.Text>
+                <Typography.Text>
+                    <Typography.Text>{_getIngredientName(props.ingredientAmount.ingredientId)}</Typography.Text> - {props.ingredientAmount.amount} {props.ingredientAmount.unit}
+                </Typography.Text>
                 {!props.ingredientAmount.required && <Tooltip title="Tùy chọn">
                     <QuestionCircleOutlined style={{ color: "orange" }} />
                 </Tooltip>}
