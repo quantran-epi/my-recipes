@@ -1,6 +1,7 @@
-import { CheckCircleOutlined, DeleteOutlined, EditOutlined, FileTextOutlined, MonitorOutlined, OrderedListOutlined, PlusOutlined, ProjectOutlined, QuestionCircleOutlined, TeamOutlined } from "@ant-design/icons";
+import { CheckCircleOutlined, DeleteOutlined, EditOutlined, MonitorOutlined, PlusOutlined, ProjectOutlined, QuestionCircleOutlined, TeamOutlined } from "@ant-design/icons";
 import { Button } from "@components/Button";
 import { Input } from "@components/Form/Input";
+import { Image } from "@components/Image";
 import { Box } from "@components/Layout/Box";
 import { Space } from "@components/Layout/Space";
 import { Stack } from "@components/Layout/Stack";
@@ -14,18 +15,17 @@ import { Typography } from "@components/Typography";
 import { useScreenTitle, useToggle } from "@hooks";
 import { RootRoutes } from "@routing/RootRoutes";
 import { Dishes } from "@store/Models/Dishes";
-import { changePage, removeDishes, searchDishes } from "@store/Reducers/DishesReducer";
+import { removeDishes } from "@store/Reducers/DishesReducer";
 import { RootState } from "@store/Store";
-import { debounce, sortBy } from "lodash";
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import { debounce, orderBy, sortBy } from "lodash";
+import React, { useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import NoodlesIcon from "../../../../assets/icons/noodles.png";
+import VegetablesIcon from "../../../../assets/icons/vegetable.png";
+import StepsIcon from "../../../../assets/icons/process.png";
 import { DishesAddWidget } from "./DishesAdd.widget";
 import { DishesEditWidget } from "./DishesEdit.widget";
-import { Card } from "@components/Card";
-import Meta from "antd/es/card/Meta";
-import { Image } from "@components/Image";
-import DishesIcon from "../../../../assets/icons/dishes.png";
 
 export const DishesListScreen = () => {
     const dishes = useSelector((state: RootState) => state.dishes.dishes);
@@ -85,6 +85,18 @@ export const DishesItem: React.FunctionComponent<DishesItemProps> = (props) => {
         navigate(RootRoutes.AuthorizedRoutes.DishesRoutes.ManageIngredient(props.item.id));
     }
 
+    const _hasIncludeDishes = () => {
+        return props.item.includeDishes.length > 0;
+    }
+
+    const _hasIngredients = () => {
+        return props.item.ingredients.length > 0;
+    }
+
+    const _hasSteps = () => {
+        return props.item.steps.length > 0;
+    }
+
     return <React.Fragment>
         <List.Item
             actions={
@@ -108,11 +120,15 @@ export const DishesItem: React.FunctionComponent<DishesItemProps> = (props) => {
                         <TeamOutlined />
                         <Typography.Text type="secondary">{props.item.servingSize} người ăn</Typography.Text>
                     </Space>
-                    <Button onClick={toggleIngredientsOverview.show} type="text" size="small" style={{ paddingInline: 0 }} icon={<OrderedListOutlined />}>{props.item.ingredients.length + " nguyên liệu"}</Button>
-                    <Button onClick={toggleStepsOverview.show} type="text" size="small" style={{ paddingInline: 0 }} icon={<ProjectOutlined />}>{props.item.steps.length + " bước thực hiện"}</Button>
-                    <Popover title="Bao gồm các món ăn" content={props.item.includeDishes.map(dish => <Tag>{dishes.find(e => e.id === dish).name}</Tag>)}>
-                        <Button type="text" size="small" style={{ paddingInline: 0 }} icon={<FileTextOutlined />}>{props.item.includeDishes.length} món ăn</Button>
-                    </Popover>
+                    {_hasIngredients() && !_hasIncludeDishes() && <Button onClick={toggleIngredientsOverview.show} type="text" size="small" style={{ paddingInline: 0 }} icon={<Image src={VegetablesIcon} preview={false} width={18} style={{ marginBottom: 3 }} />}>{props.item.ingredients.length + " nguyên liệu"}</Button>}
+                    {_hasIncludeDishes() &&
+                        <Space size={3}>
+                            <Popover title="Bao gồm các món ăn" content={props.item.includeDishes.map(dish => <Tag>{dishes.find(e => e.id === dish).name}</Tag>)}>
+                                <Button type="text" size="small" style={{ paddingInline: 0 }} icon={<Image src={NoodlesIcon} preview={false} width={18} style={{ marginBottom: 3 }} />}>{props.item.includeDishes.length} món ăn</Button>
+                            </Popover>
+                            {_hasIngredients() && <Button onClick={toggleIngredientsOverview.show} type="text" size="small" style={{ paddingInline: 0 }}>+ {props.item.ingredients.length} nguyên liệu</Button>}
+                        </Space>}
+                    {_hasSteps() && <Button onClick={toggleStepsOverview.show} type="text" size="small" style={{ paddingInline: 0 }} icon={<Image src={StepsIcon} preview={false} width={18} style={{ marginBottom: 3 }} />}>{props.item.steps.length + " bước thực hiện"}</Button>}
                 </Stack>} />
         </List.Item >
         <Modal open={toggleEdit.value} title="Chỉnh sửa món ăn" destroyOnClose={true} onCancel={toggleEdit.hide} footer={null}>
@@ -121,7 +137,7 @@ export const DishesItem: React.FunctionComponent<DishesItemProps> = (props) => {
         <Modal open={toggleIngredientsOverview.value} title="Bao gồm các nguyên liệu" destroyOnClose={true} onCancel={toggleIngredientsOverview.hide} footer={null}>
             <Box style={{ overflowY: "auto", maxHeight: 600 }}>
                 <List
-                    dataSource={props.item.ingredients}
+                    dataSource={orderBy(props.item.ingredients, [obj => obj.required], ['desc'])}
                     renderItem={(item) => <List.Item>
                         <Space>
                             <Typography.Text>{ingredients.find(ingre => ingre.id === item.ingredientId).name} - {item.amount} {item.unit}</Typography.Text>
@@ -148,5 +164,5 @@ export const DishesItem: React.FunctionComponent<DishesItemProps> = (props) => {
                     </List.Item>} />
             </Box>
         </Modal>
-    </React.Fragment>
+    </React.Fragment >
 }

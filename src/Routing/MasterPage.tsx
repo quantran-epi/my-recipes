@@ -20,11 +20,12 @@ import { ObjectPropertyHelper } from "@common/Helpers/ObjectProperty";
 import { Space } from "@components/Layout/Space";
 import { ScheduledMealToolkitWidget } from "@modules/ScheduledMeal/Screens/ScheduledMealToolkit.widget";
 import { Menu } from "@components/Menu";
-import DishesIcon from "../../assets/icons/dishes.png";
-import IngredientIcon from "../../assets/icons/ingredients.png";
+import DishesIcon from "../../assets/icons/noodles.png";
+import IngredientIcon from "../../assets/icons/vegetable.png";
 import MealsIcon from "../../assets/icons/meals.png";
 import ShoppingListIcon from "../../assets/icons/shoppingList.png";
 import { Image } from "@components/Image";
+import { Tooltip } from "@components/Tootip";
 
 const layoutStyles: React.CSSProperties = {
     height: "100%"
@@ -40,6 +41,7 @@ export const MasterPage = () => {
             case "Thực đơn": return MealsIcon;
             case "Lịch mua sắm": return ShoppingListIcon;
             case "Nguyên liệu": return IngredientIcon;
+            default: return null;
         }
     }
 
@@ -54,9 +56,11 @@ export const MasterPage = () => {
             <Stack justify="space-between" align="center">
                 <Stack>
                     <SidebarDrawer />
-                    <Typography.Text style={{ fontFamily: "kanit", fontSize: 18, fontWeight: "500" }}>{currentFeatureName}</Typography.Text>
+                    <Tooltip title={currentFeatureName}>
+                        <Typography.Paragraph style={{ fontFamily: "kanit", fontSize: 18, fontWeight: "500", marginBottom: 0, width: 280 }} ellipsis>{currentFeatureName}</Typography.Paragraph>
+                    </Tooltip>
                 </Stack>
-                <Image preview={false} src={_featureIcon()} height={36} style={{ marginBottom: 3 }} />
+                {_featureIcon() && <Image preview={false} src={_featureIcon()} height={36} style={{ marginBottom: 5 }} />}
             </Stack>
         </Header>
         <Content>
