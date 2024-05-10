@@ -38,7 +38,8 @@ export const DishesEditWidget = ({ item, onDone }) => {
             includeDishes: { label: "Bao gồm món", name: ObjectPropertyHelper.nameof(defaultValues, e => e.includeDishes) },
             ingredients: { name: ObjectPropertyHelper.nameof(defaultValues, e => e.ingredients), noMarkup: true },
             steps: { name: ObjectPropertyHelper.nameof(defaultValues, e => e.steps), noMarkup: true },
-            isCompleted: { name: ObjectPropertyHelper.nameof(defaultValues, e => e.isCompleted)}
+            isCompleted: { name: ObjectPropertyHelper.nameof(defaultValues, e => e.isCompleted) },
+            image: { label: "Ảnh", name: ObjectPropertyHelper.nameof(defaultValues, e => e.image) }
         })
     })
 
@@ -75,6 +76,9 @@ export const DishesEditWidget = ({ item, onDone }) => {
         </SmartForm.Item>
         <SmartForm.Item {...editDishesForm.itemDefinitions.note}>
             <TextArea rows={5} placeholder="Ghi chú" autoFocus />
+        </SmartForm.Item>
+        <SmartForm.Item {...editDishesForm.itemDefinitions.image}>
+            <Input placeholder="Nhập đường dẫn" autoFocus />
         </SmartForm.Item>
         <SmartForm.Item {...editDishesForm.itemDefinitions.isCompleted}>
             <Switch checkedChildren="Hoàn thiện" unCheckedChildren="Chưa hoàn thiện" />

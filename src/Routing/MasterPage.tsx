@@ -47,9 +47,9 @@ export const MasterPage = () => {
 
     return <Layout style={layoutStyles}>
         <Header style={{
-            height: 50,
-            lineHeight: "50px",
-            paddingInline: 5,
+            height: 55,
+            lineHeight: "55px",
+            paddingInline: 10,
             backgroundColor: "#fff",
             borderBottom: "0.5px solid " + theme.token.colorBorder
         }}>
@@ -57,7 +57,7 @@ export const MasterPage = () => {
                 <Stack>
                     <SidebarDrawer />
                     <Tooltip title={currentFeatureName}>
-                        <Typography.Paragraph style={{ fontFamily: "kanit", fontSize: 18, fontWeight: "500", marginBottom: 0, width: 270 }} ellipsis>{currentFeatureName}</Typography.Paragraph>
+                        <Typography.Paragraph style={{ fontFamily: "kanit", fontSize: 24, fontWeight: "500", marginBottom: 0, width: 270 }} ellipsis>{currentFeatureName}</Typography.Paragraph>
                     </Tooltip>
                 </Stack>
                 {_featureIcon() && <Image preview={false} src={_featureIcon()} height={36} style={{ marginBottom: 5 }} />}

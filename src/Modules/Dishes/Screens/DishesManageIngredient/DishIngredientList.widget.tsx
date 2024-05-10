@@ -90,7 +90,7 @@ export const IngredientItem: React.FunctionComponent<IngredientItemProps> = (pro
 
     const _getIngredientName = (id) => {
         let ingre = ingredients.find(e => e.id === id);
-        return (ingre?.name.length > 13 ? ingre?.name?.substring(0, 15) + "..." : ingre.name) || "N/A";
+        return (ingre?.name.length > 15 ? ingre?.name?.substring(0, 15) + "..." : ingre.name) || "N/A";
     }
 
     const _onEdit = () => {

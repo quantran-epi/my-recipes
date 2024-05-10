@@ -87,7 +87,7 @@ export const ShoppingListScreen = () => {
             <Image src={ShoppinglistIcon} preview={false} width={24} style={{ marginBottom: 3 }} />
             Lịch mua sắm
         </Space>} destroyOnClose={true} onCancel={toggleCalendarModal.hide} footer={null}>
-            <Box style={{ maxHeight: 600, overflowY: "auto" }}>
+            <Box style={{ maxHeight: 550, overflowY: "auto" }}>
                 <ShoppingListCalendarWidget onAdd={_onAddWithDate} />
             </Box>
         </Modal>
@@ -216,7 +216,7 @@ export const ShoppingListItem: React.FunctionComponent<ShoppingListItemProps> = 
             <Image src={ShoppinglistIcon} preview={false} width={24} style={{ marginBottom: 3 }} />
             Sửa món ăn
         </Space>} destroyOnClose={true} onCancel={toggleAddMoreDishes.hide} footer={null}>
-            <Box style={{ maxHeight: 600, overflowY: "auto" }}>
+            <Box style={{ maxHeight: 550, overflowY: "auto" }}>
                 <ShoppingListAddMoreDishesWidget shoppingList={props.item} onDone={() => {
                     toggleAddMoreDishes.hide();
                     modal.confirm({

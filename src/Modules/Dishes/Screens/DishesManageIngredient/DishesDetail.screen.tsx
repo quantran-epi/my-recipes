@@ -10,6 +10,8 @@ import { useSelector } from "react-redux"
 import { useNavigate, useSearchParams } from "react-router-dom"
 import { DishIngredientListWidget } from "./DishIngredientList.widget"
 import { DishStepListWidget } from "./DishStepList.widget"
+import { Image } from "@components/Image"
+import { Box } from "@components/Layout/Box"
 
 export const DishesDetailScreen = () => {
     const [params] = useSearchParams();
@@ -25,6 +27,17 @@ export const DishesDetailScreen = () => {
     }
 
     return <React.Fragment>
+        {currentDist.image && <Box style={{
+            borderRadius: 10,
+            width: "100%",
+            height: 150,
+            backgroundImage: `url(${currentDist.image})`,
+            backgroundSize: "cover",
+            backgroundRepeat: "no-repeat",
+            backgroundPosition: "center"
+        }}></Box>}
+
+        <Divider orientation="left">Thông tin chung</Divider>
         <Typography.Text><Typography.Text strong>Khẩu phần ăn:</Typography.Text> {currentDist.servingSize} người</Typography.Text>
         {currentDist.note && <Typography.Paragraph><Typography.Text strong>Ghi chú:</Typography.Text> {currentDist.note}</Typography.Paragraph>}
 

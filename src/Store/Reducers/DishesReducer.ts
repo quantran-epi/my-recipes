@@ -173,7 +173,7 @@ export const DishesSlice = createSlice({
         test: (state) => {
             state.dishes = state.dishes.map(e => ({
                 ...e,
-                isCompleted: false
+                image: ""
             }))
         }
     }
@@ -181,7 +181,7 @@ export const DishesSlice = createSlice({
 
 // Action creators are generated for each case reducer function
 export const {
-    add: addDishes, edit: editDishes, remove: removeDishes, addIngredientsToDish, removeIngredientsFromDish, editIngredientFromDish, addStepsToDish, editStepFromDish, adStepToDishPrev, addStepToDishNext, removeStepsFromDish, search: searchDishes, changePage
+    add: addDishes, edit: editDishes, remove: removeDishes, addIngredientsToDish, removeIngredientsFromDish, editIngredientFromDish, addStepsToDish, editStepFromDish, adStepToDishPrev, addStepToDishNext, removeStepsFromDish, search: searchDishes, changePage, test
 } = DishesSlice.actions
 
 export default DishesSlice.reducer

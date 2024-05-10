@@ -137,7 +137,7 @@ export const ShoppingListDetailWidget: React.FunctionComponent<ShoppingListDetai
             </Tabs.TabPane>
         </Tabs>
         <Modal style={{ top: 50 }} open={toggleMealModal.value} title={"Thực đơn"} destroyOnClose={true} onCancel={toggleMealModal.hide} footer={null}>
-            <Box style={{ maxHeight: 600, overflowY: "auto" }}>
+            <Box style={{ maxHeight: 550, overflowY: "auto" }}>
                 <ShoppingListMealDetailWidget mealId={selectedMeal} />
             </Box>
         </Modal>

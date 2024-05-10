@@ -7,15 +7,20 @@ import { useMessage } from "@components/Message"
 import { SmartForm, useSmartForm } from "@components/SmartForm"
 import { nanoid } from "@reduxjs/toolkit"
 import { Dishes } from "@store/Models/Dishes"
-import { addDishes } from "@store/Reducers/DishesReducer"
+import { addDishes, test } from "@store/Reducers/DishesReducer"
 import { RootState } from "@store/Store"
 import { range } from "lodash"
+import { useEffect } from "react"
 import { useDispatch, useSelector } from "react-redux"
 
 export const DishesAddWidget = () => {
     const dispatch = useDispatch();
     const message = useMessage();
     const dishes = useSelector((state: RootState) => state.dishes.dishes);
+
+    useEffect(() => {
+        dispatch(test());
+    }, [])
 
     const addDishesForm = useSmartForm<Dishes>({
         defaultValues: {
@@ -26,7 +31,8 @@ export const DishesAddWidget = () => {
             servingSize: 2,
             includeDishes: [],
             steps: [],
-            isCompleted: false
+            isCompleted: false,
+            image: ""
         },
         onSubmit: (values) => {
             dispatch(addDishes(values.transformValues));
@@ -42,6 +48,7 @@ export const DishesAddWidget = () => {
             ingredients: { name: ObjectPropertyHelper.nameof(defaultValues, e => e.ingredients), noMarkup: true },
             steps: { name: ObjectPropertyHelper.nameof(defaultValues, e => e.steps), noMarkup: true },
             isCompleted: { name: ObjectPropertyHelper.nameof(defaultValues, e => e.isCompleted), noMarkup: true },
+            image: { label: "Ảnh", name: ObjectPropertyHelper.nameof(defaultValues, e => e.image) },
         }),
         transformFunc: (values) => ({
             ...values,
@@ -82,6 +89,9 @@ export const DishesAddWidget = () => {
         </SmartForm.Item>
         <SmartForm.Item {...addDishesForm.itemDefinitions.note}>
             <TextArea rows={5} placeholder="Ghi chú" autoFocus />
+        </SmartForm.Item>
+        <SmartForm.Item {...addDishesForm.itemDefinitions.image}>
+            <Input placeholder="Nhập đường dẫn" autoFocus />
         </SmartForm.Item>
         <Stack fullwidth justify="flex-end">
             <Button onClick={_onSave}>Lưu</Button>

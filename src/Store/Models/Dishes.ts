@@ -25,4 +25,5 @@ export type Dishes = {
     includeDishes: string[];
     steps: DishesStep[];
     isCompleted: boolean;
+    image?: string;
 }

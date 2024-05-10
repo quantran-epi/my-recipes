@@ -26,6 +26,7 @@ import VegetablesIcon from "../../../../assets/icons/vegetable.png";
 import StepsIcon from "../../../../assets/icons/process.png";
 import { DishesAddWidget } from "./DishesAdd.widget";
 import { DishesEditWidget } from "./DishesEdit.widget";
+import { Avatar } from "@components/Avatar";
 
 export const DishesListScreen = () => {
     const dishes = useSelector((state: RootState) => state.dishes.dishes);
@@ -113,21 +114,24 @@ export const DishesItem: React.FunctionComponent<DishesItemProps> = (props) => {
                     </Popconfirm>
                 ]
             }>
-            <List.Item.Meta title={<Tooltip title={props.item.name}>
-                <Typography.Paragraph style={{ width: 220, marginBottom: 0, color: !props.item.isCompleted ? "orangered" : undefined }} ellipsis>{props.item.name}</Typography.Paragraph>
-            </Tooltip>}
+            <List.Item.Meta
+                title={<Stack>
+                    <Tooltip title={props.item.name}>
+                        <Typography.Paragraph style={{ width: 220, marginBottom: 0, color: !props.item.isCompleted ? "orangered" : undefined }} ellipsis>{props.item.name}</Typography.Paragraph>
+                    </Tooltip>
+                </Stack>}
                 description={<Stack direction="column" align="flex-start" gap={0}>
-                    {_hasSteps() && <Button onClick={toggleStepsOverview.show} type="text" size="small" style={{ paddingInline: 0 }} icon={<Image src={StepsIcon} preview={false} width={18} style={{ marginBottom: 3 }} />}>{props.item.steps.length + " bước thực hiện"}</Button>}
-                    {_hasIngredients() && !_hasIncludeDishes() && <Button onClick={toggleIngredientsOverview.show} type="text" size="small" style={{ paddingInline: 0 }} icon={<Image src={VegetablesIcon} preview={false} width={18} style={{ marginBottom: 3 }} />}>{props.item.ingredients.length + " nguyên liệu"}</Button>}
+                    {_hasSteps() && <Button onClick={toggleStepsOverview.show} type="text" size="small" style={{ paddingInline: 0, fontSize: 14 }} icon={<Image src={StepsIcon} preview={false} width={18} style={{ marginBottom: 3 }} />}>{props.item.steps.length + " bước thực hiện"}</Button>}
+                    {_hasIngredients() && !_hasIncludeDishes() && <Button onClick={toggleIngredientsOverview.show} type="text" size="small" style={{ paddingInline: 0, fontSize: 14 }} icon={<Image src={VegetablesIcon} preview={false} width={18} style={{ marginBottom: 3 }} />}>{props.item.ingredients.length + " nguyên liệu"}</Button>}
                     {_hasIncludeDishes() &&
                         <Space size={3}>
                             <Popover title="Bao gồm các món ăn" content={props.item.includeDishes.map(dish => <Tag>{dishes.find(e => e.id === dish).name}</Tag>)}>
-                                <Button type="text" size="small" style={{ paddingInline: 0 }} icon={<Image src={NoodlesIcon} preview={false} width={18} style={{ marginBottom: 3 }} />}>{props.item.includeDishes.length} món ăn</Button>
+                                <Button type="text" size="small" style={{ paddingInline: 0, fontSize: 14 }} icon={<Image src={NoodlesIcon} preview={false} width={18} style={{ marginBottom: 3 }} />}>{props.item.includeDishes.length} món ăn</Button>
                             </Popover>
-                            {_hasIngredients() && <Button onClick={toggleIngredientsOverview.show} type="text" size="small" style={{ paddingInline: 0 }}>+ {props.item.ingredients.length} nguyên liệu</Button>}
+                            {_hasIngredients() && <Button onClick={toggleIngredientsOverview.show} type="text" size="small" style={{ paddingInline: 0, fontSize: 14 }}>+ {props.item.ingredients.length} nguyên liệu</Button>}
                         </Space>}
                 </Stack>} />
-        </List.Item >
+        </List.Item>
         <Modal open={toggleEdit.value} title={
             <Space>
                 <Image src={NoodlesIcon} preview={false} width={24} style={{ marginBottom: 3 }} />
@@ -142,7 +146,7 @@ export const DishesItem: React.FunctionComponent<DishesItemProps> = (props) => {
                 Bao gồm các nguyên liệu
             </Space>
         } destroyOnClose={true} onCancel={toggleIngredientsOverview.hide} footer={null}>
-            <Box style={{ overflowY: "auto", maxHeight: 600 }}>
+            <Box style={{ overflowY: "auto", maxHeight: 550 }}>
                 <List
                     dataSource={orderBy(props.item.ingredients, [obj => obj.required], ['desc'])}
                     renderItem={(item) => <List.Item>
@@ -159,7 +163,7 @@ export const DishesItem: React.FunctionComponent<DishesItemProps> = (props) => {
             <Image src={StepsIcon} preview={false} width={18} style={{ marginBottom: 3 }} />
             Bao gồm các bước
         </Space>} destroyOnClose={true} onCancel={toggleStepsOverview.hide} footer={null}>
-            <Box style={{ overflowY: "auto", maxHeight: 600 }}>
+            <Box style={{ overflowY: "auto", maxHeight: 550 }}>
                 <List
                     dataSource={props.item.steps}
                     renderItem={(item) => <List.Item>
