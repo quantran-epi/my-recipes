@@ -7,20 +7,15 @@ import { useMessage } from "@components/Message"
 import { SmartForm, useSmartForm } from "@components/SmartForm"
 import { nanoid } from "@reduxjs/toolkit"
 import { Dishes } from "@store/Models/Dishes"
-import { addDishes, test } from "@store/Reducers/DishesReducer"
+import { addDishes } from "@store/Reducers/DishesReducer"
 import { RootState } from "@store/Store"
 import { range } from "lodash"
-import { useEffect } from "react"
 import { useDispatch, useSelector } from "react-redux"
 
 export const DishesAddWidget = () => {
     const dispatch = useDispatch();
     const message = useMessage();
     const dishes = useSelector((state: RootState) => state.dishes.dishes);
-
-    useEffect(() => {
-        dispatch(test());
-    }, [])
 
     const addDishesForm = useSmartForm<Dishes>({
         defaultValues: {
@@ -88,7 +83,7 @@ export const DishesAddWidget = () => {
             </Select>
         </SmartForm.Item>
         <SmartForm.Item {...addDishesForm.itemDefinitions.note}>
-            <TextArea rows={5} placeholder="Ghi chú" autoFocus />
+            <TextArea rows={3} placeholder="Ghi chú" autoFocus />
         </SmartForm.Item>
         <SmartForm.Item {...addDishesForm.itemDefinitions.image}>
             <Input placeholder="Nhập đường dẫn" autoFocus />

@@ -75,7 +75,7 @@ export const DishesEditWidget = ({ item, onDone }) => {
             </Select>
         </SmartForm.Item>
         <SmartForm.Item {...editDishesForm.itemDefinitions.note}>
-            <TextArea rows={5} placeholder="Ghi chú" autoFocus />
+            <TextArea rows={3} placeholder="Ghi chú" autoFocus />
         </SmartForm.Item>
         <SmartForm.Item {...editDishesForm.itemDefinitions.image}>
             <Input placeholder="Nhập đường dẫn" autoFocus />
