@@ -57,7 +57,7 @@ export const MasterPage = () => {
                 <Stack>
                     <SidebarDrawer />
                     <Tooltip title={currentFeatureName}>
-                        <Typography.Paragraph style={{ fontFamily: "kanit", fontSize: 24, fontWeight: "500", marginBottom: 0, width: 250 }} ellipsis>{currentFeatureName}</Typography.Paragraph>
+                        <Typography.Paragraph style={{ fontFamily: "kanit", fontSize: 24, fontWeight: "500", marginBottom: 0, width: 230 }} ellipsis>{currentFeatureName}</Typography.Paragraph>
                     </Tooltip>
                 </Stack>
                 {_featureIcon() && <Image preview={false} src={_featureIcon()} height={36} style={{ marginBottom: 5 }} />}
