@@ -25,16 +25,17 @@ export const DishesDetailWidget: React.FunctionComponent<DishDetailWidgetProps> 
     const dishes = useSelector((state: RootState) => state.dishes.dishes);
     const toggleDishesDetail = useToggle();
     const [currentIncludeDish, setCurrentIncludeDish] = useState<string>();
+
+    const _getDishesById = (id: string) => {
+        return dishes.find(e => id === e.id);
+    }
+ 
     const dish = useMemo(() => {
         return _getDishesById(currentIncludeDish);
     },[currentIncludeDish, dishes])
 
     const _getDishesByIds = (ids: string[]) => {
         return dishes.filter(e => ids.includes(e.id));
-    }
-
-    const _getDishesById = (id: string) => {
-        return dishes.find(e => id === e.id);
     }
 
     const _showDish = (dish: Dishes) => {
