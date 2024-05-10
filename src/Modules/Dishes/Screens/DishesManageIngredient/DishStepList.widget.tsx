@@ -20,6 +20,7 @@ import { sortBy } from "lodash"
 import { DishesEditStepWidget } from "./DishEditStep.widget"
 import StepIcon from "../../../../../assets/icons/process.png"
 import { Image } from "@components/Image"
+import { Empty } from "@components/Empty"
 
 type DishStepListWidgetProps = {
     currentDist: Dishes;
@@ -77,17 +78,9 @@ export const DishStepListWidget: FunctionComponent<DishStepListWidgetProps> = (p
 
     return <Form {...addStepForm.defaultProps}>
         <Button fullwidth onClick={_onAddStep}>Thêm bước</Button>
-        {/* <List
-            dataSource={sortBy(props.currentDist.steps, [step => step.order])}
-            renderItem={(item) => <StepItem
-                step={item}
-                dish={props.currentDist}
-                onDelete={_onDeleteStep}
-                onAddNext={_onAddStepNext}
-                onAddPrev={_onAddStepPrev} />} /> */}
-        <Timeline style={{ marginTop: 20 }}>
+        {props.currentDist.steps.length > 0 ? <Timeline style={{ marginTop: 20 }}>
             {sortBy(props.currentDist.steps, [step => step.order]).map(item =>
-                <Timeline.Item dot={!item.required && <QuestionCircleOutlined style={{ color: "orange", backgroundColor: "transparent" }} />}>
+                <Timeline.Item dot={!item.required && <QuestionCircleOutlined style={{ fontSize: 14, color: "orange", backgroundColor: "transparent" }} />}>
                     <StepItem
                         step={item}
                         dish={props.currentDist}
@@ -96,7 +89,7 @@ export const DishStepListWidget: FunctionComponent<DishStepListWidgetProps> = (p
                         onAddPrev={_onAddStepPrev} />
                 </Timeline.Item>
             )}
-        </Timeline>
+        </Timeline> : <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} />}
 
         <Modal open={toggleAddStepToDishes.value} title={<Stack gap={0} direction="column" align="flex-start">
             <Space>
@@ -144,7 +137,7 @@ export const StepItem: React.FunctionComponent<StepItemProps> = (props) => {
 
     return <React.Fragment>
         <Stack fullwidth justify="space-between" align="flex-start">
-            <Typography.Paragraph style={{ maxWidth: 280 }} ellipsis={{ rows: 3, expandable: true, symbol: "Xem thêm" }}>
+            <Typography.Paragraph style={{ maxWidth: 250 }} ellipsis={{ rows: 3, expandable: true, symbol: "Xem thêm" }}>
                 {props.step.content}
             </Typography.Paragraph>
             <Dropdown menu={{

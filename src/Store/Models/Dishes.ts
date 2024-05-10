@@ -21,7 +21,6 @@ export type Dishes = {
     name: string;
     ingredients: DishesIngredientAmount[];
     note: string;
-    servingSize: number;
     includeDishes: string[];
     steps: DishesStep[];
     isCompleted: boolean;

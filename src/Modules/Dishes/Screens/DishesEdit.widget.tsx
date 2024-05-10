@@ -34,7 +34,6 @@ export const DishesEditWidget = ({ item, onDone }) => {
             id: { name: ObjectPropertyHelper.nameof(defaultValues, e => e.id), noMarkup: true },
             name: { label: "Tên món ăn", name: ObjectPropertyHelper.nameof(defaultValues, e => e.name) },
             note: { label: "Ghi chú", name: ObjectPropertyHelper.nameof(defaultValues, e => e.note) },
-            servingSize: { label: "Khẩu phần ăn", name: ObjectPropertyHelper.nameof(defaultValues, e => e.servingSize) },
             includeDishes: { label: "Bao gồm món", name: ObjectPropertyHelper.nameof(defaultValues, e => e.includeDishes) },
             ingredients: { name: ObjectPropertyHelper.nameof(defaultValues, e => e.ingredients), noMarkup: true },
             steps: { name: ObjectPropertyHelper.nameof(defaultValues, e => e.steps), noMarkup: true },
@@ -50,17 +49,6 @@ export const DishesEditWidget = ({ item, onDone }) => {
     return <SmartForm {...editDishesForm.defaultProps}>
         <SmartForm.Item {...editDishesForm.itemDefinitions.name}>
             <Input placeholder="Nhập tên" autoFocus />
-        </SmartForm.Item>
-        <SmartForm.Item {...editDishesForm.itemDefinitions.servingSize}>
-            <Select
-                showSearch
-                filterOption={(inputValue, option) => {
-                    if (!option?.children) return false;
-                    return option?.children?.toString().toLowerCase().includes(inputValue.toLowerCase());
-                }}
-                style={{ width: '100%' }}>
-                {range(1, 10, 1).map(servingSize => <Option key={servingSize} value={servingSize}>{servingSize} người</Option>)}
-            </Select>
         </SmartForm.Item>
         <SmartForm.Item {...editDishesForm.itemDefinitions.includeDishes}>
             <Select

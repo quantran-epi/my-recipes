@@ -37,15 +37,16 @@ export const DishesDetailScreen = () => {
             backgroundPosition: "center"
         }}></Box>}
 
-        <Divider orientation="left">Thông tin chung</Divider>
-        <Typography.Text><Typography.Text strong>Khẩu phần ăn:</Typography.Text> {currentDist.servingSize} người</Typography.Text>
-        {currentDist.note && <Typography.Paragraph><Typography.Text strong>Ghi chú:</Typography.Text> {currentDist.note}</Typography.Paragraph>}
+        {currentDist.note && <React.Fragment>
+            <Divider orientation="left">Thông tin chung</Divider>
+            <Typography.Paragraph><Typography.Text strong>Ghi chú:</Typography.Text> {currentDist.note}</Typography.Paragraph>
+        </React.Fragment>}
 
         {currentDist.includeDishes.length > 0 && <React.Fragment>
             <Divider orientation="left">Bao gồm món</Divider>
             <Stack wrap="wrap" gap={5}>
                 {_getDishesByIds(currentDist.includeDishes).map(e =>
-                    <Button size="small"
+                    <Button
                         onClick={() => navigate(RootRoutes.AuthorizedRoutes.DishesRoutes.ManageIngredient(e.id))}>{e.name}</Button>)}
             </Stack>
         </React.Fragment>}

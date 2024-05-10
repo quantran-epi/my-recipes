@@ -27,6 +27,7 @@ import StepsIcon from "../../../../assets/icons/process.png";
 import { DishesAddWidget } from "./DishesAdd.widget";
 import { DishesEditWidget } from "./DishesEdit.widget";
 import { Avatar } from "@components/Avatar";
+import { DishesDetailWidget } from "./DishesManageIngredient/DishDetail.widget";
 
 export const DishesListScreen = () => {
     const dishes = useSelector((state: RootState) => state.dishes.dishes);
@@ -79,6 +80,7 @@ export const DishesItem: React.FunctionComponent<DishesItemProps> = (props) => {
     const toggleEdit = useToggle({ defaultValue: false });
     const toggleIngredientsOverview = useToggle();
     const toggleStepsOverview = useToggle();
+    const toggleDishesDetail = useToggle();
     const navigate = useNavigate();
     const dishes = useSelector((state: RootState) => state.dishes.dishes);
     const ingredients = useSelector((state: RootState) => state.ingredient.ingredients);
@@ -88,7 +90,8 @@ export const DishesItem: React.FunctionComponent<DishesItemProps> = (props) => {
     }
 
     const _onManageIngredient = () => {
-        navigate(RootRoutes.AuthorizedRoutes.DishesRoutes.ManageIngredient(props.item.id));
+        // navigate(RootRoutes.AuthorizedRoutes.DishesRoutes.ManageIngredient(props.item.id));
+        toggleDishesDetail.show();
     }
 
     const _hasIncludeDishes = () => {
@@ -132,6 +135,16 @@ export const DishesItem: React.FunctionComponent<DishesItemProps> = (props) => {
                         </Space>}
                 </Stack>} />
         </List.Item>
+        <Modal style={{ top: 50 }} open={toggleDishesDetail.value} title={
+            <Space>
+                <Image src={NoodlesIcon} preview={false} width={24} style={{ marginBottom: 3 }} />
+                {props.item.name}
+            </Space>
+        } destroyOnClose={true} onCancel={toggleDishesDetail.hide} footer={null}>
+            <Box style={{ maxHeight: 550, overflowY: "auto" }}>
+                <DishesDetailWidget dish={props.item} />
+            </Box>
+        </Modal>
         <Modal open={toggleEdit.value} title={
             <Space>
                 <Image src={NoodlesIcon} preview={false} width={24} style={{ marginBottom: 3 }} />

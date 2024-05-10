@@ -1,7 +1,7 @@
-import { CheckSquareOutlined, QuestionCircleOutlined, TeamOutlined, OrderedListOutlined, CalendarOutlined } from "@ant-design/icons";
+import { QuestionCircleOutlined } from "@ant-design/icons";
 import { Button } from "@components/Button";
-import { Collapse } from "@components/Collapse";
 import { Checkbox } from "@components/Form/Checkbox";
+import { Image } from "@components/Image";
 import { Box } from "@components/Layout/Box";
 import { Stack } from "@components/Layout/Stack";
 import { List } from "@components/List";
@@ -9,7 +9,7 @@ import { Modal } from "@components/Modal";
 import { Tooltip } from "@components/Tootip";
 import { Typography } from "@components/Typography";
 import { useToggle } from "@hooks";
-import { RootRoutes } from "@routing/RootRoutes";
+import { Dishes } from "@store/Models/Dishes";
 import { ShoppingList, ShoppingListIngredientGroup } from "@store/Models/ShoppingList";
 import { toggleDoneIngredient } from "@store/Reducers/ShoppingListReducer";
 import { RootState } from "@store/Store";
@@ -18,21 +18,19 @@ import { CheckboxChangeEvent } from "antd/es/checkbox";
 import moment from "moment";
 import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
-import { ShoppingListMealDetailWidget } from "./ShoppingListMealDetail.widget";
-import IngredientIcon from "../../../../assets/icons/vegetable.png";
-import DishesIcon from "../../../../assets/icons/noodles.png";
+import ChecklistIcon from "../../../../assets/icons/done.png";
 import MealsIcon from "../../../../assets/icons/meals.png";
 import CalendarIcon from "../../../../assets/icons/nineteen.png";
-import ChecklistIcon from "../../../../assets/icons/done.png";
-import { Image } from "@components/Image";
+import DishesIcon from "../../../../assets/icons/noodles.png";
+import IngredientIcon from "../../../../assets/icons/vegetable.png";
+import { ShoppingListMealDetailWidget } from "./ShoppingListMealDetail.widget";
+import { DishesDetailWidget } from "@modules/Dishes/Screens/DishesManageIngredient/DishDetail.widget";
 
 type ShoppingListDetailScreenProps = {
     shoppingList: ShoppingList;
 }
 
 export const ShoppingListDetailWidget: React.FunctionComponent<ShoppingListDetailScreenProps> = (props) => {
-    const navigate = useNavigate();
     const dishes = useSelector((state: RootState) => state.dishes.dishes);
     const scheduledMeals = useSelector((state: RootState) => state.scheduledMeal.scheduledMeals);
     const toggleMealModal = useToggle();
@@ -73,33 +71,7 @@ export const ShoppingListDetailWidget: React.FunctionComponent<ShoppingListDetai
                         size="small"
                         style={{ overflowX: "auto" }}
                         dataSource={_getDishesByIds(props.shoppingList.dishes)}
-                        renderItem={(item) => <List.Item style={{ padding: 0 }}>
-                            <Button fullwidth style={{ paddingInline: 0, textAlign: "left" }} type="link" onClick={() => navigate(RootRoutes.AuthorizedRoutes.DishesRoutes.ManageIngredient(item.id))}>
-                                <Stack gap={3} justify="space-between" fullwidth>
-                                    <Typography.Paragraph style={{ width: 150, marginBottom: 0, color: "blue" }} ellipsis> {item.name}</Typography.Paragraph>
-                                    <Box>
-                                        (<Space size={2}>
-                                            <Space size={3}>
-                                                <Typography.Text>{item.ingredients.length}</Typography.Text>
-                                                <Image preview={false} src={IngredientIcon} width={16} style={{ marginBottom: 5 }} />
-                                            </Space>
-                                            <Typography.Text>-</Typography.Text>
-                                            <Space size={3}>
-                                                <Space size={3}>
-                                                    <Typography.Text>{item.servingSize}</Typography.Text>
-                                                    <TeamOutlined />
-                                                </Space>
-                                                <Space size={3}>
-                                                    <Typography.Text>{item.includeDishes.length}</Typography.Text>
-                                                    <Image preview={false} src={DishesIcon} width={16} style={{ marginBottom: 5 }} />
-                                                </Space>
-                                            </Space>
-                                        </Space>)
-                                    </Box>
-                                </Stack>
-                            </Button>
-                        </List.Item>
-                        }
+                        renderItem={(item) => <ShoppingListDishesItem dish={item} />}
                     />
                 </Box>
             </Tabs.TabPane>
@@ -191,4 +163,44 @@ export const ShoppingListIngredientItem: React.FunctionComponent<ShoppingListIng
                     </List.Item>} />} />
         </List.Item >
     </React.Fragment >
+}
+
+
+type ShoppingListDishesItemProps = {
+    dish: Dishes;
+}
+
+export const ShoppingListDishesItem: React.FunctionComponent<ShoppingListDishesItemProps> = (props) => {
+    const toggleDishesDetail = useToggle();
+
+    return <List.Item style={{ padding: 0 }}>
+        <Button fullwidth style={{ paddingInline: 0, textAlign: "left" }} type="link" onClick={toggleDishesDetail.show}>
+            <Stack gap={3} justify="space-between" fullwidth>
+                <Typography.Paragraph style={{ width: 150, marginBottom: 0, color: "blue" }} ellipsis> {props.dish.name}</Typography.Paragraph>
+                <Box>
+                    (<Space size={2}>
+                        <Space size={3}>
+                            <Typography.Text>{props.dish.ingredients.length}</Typography.Text>
+                            <Image preview={false} src={IngredientIcon} width={16} style={{ marginBottom: 5 }} />
+                        </Space>
+                        <Typography.Text>-</Typography.Text>
+                        <Space size={3}>
+                            <Typography.Text>{props.dish.includeDishes.length}</Typography.Text>
+                            <Image preview={false} src={DishesIcon} width={16} style={{ marginBottom: 5 }} />
+                        </Space>
+                    </Space>)
+                </Box>
+            </Stack>
+        </Button>
+        <Modal style={{ top: 50 }} open={toggleDishesDetail.value} title={
+            <Space>
+                <Image src={DishesIcon} preview={false} width={24} style={{ marginBottom: 3 }} />
+                {props.dish.name}
+            </Space>
+        } destroyOnClose={true} onCancel={toggleDishesDetail.hide} footer={null}>
+            <Box style={{ maxHeight: 550, overflowY: "auto" }}>
+                <DishesDetailWidget dish={props.dish} />
+            </Box>
+        </Modal>
+    </List.Item>
 }

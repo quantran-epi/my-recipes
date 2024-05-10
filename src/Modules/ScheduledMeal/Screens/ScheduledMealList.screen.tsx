@@ -1,4 +1,4 @@
-import { DeleteOutlined, FormOutlined, PlusOutlined, CheckOutlined, CloseOutlined, CheckCircleOutlined } from "@ant-design/icons";
+import { DeleteOutlined, EditOutlined, PlusOutlined, CheckOutlined, CloseOutlined, CheckCircleOutlined } from "@ant-design/icons";
 import { Badge } from "@components/Badge";
 import { Button } from "@components/Button";
 import { Space } from "@components/Layout/Space";
@@ -111,7 +111,7 @@ export const ScheduledMealItem = ({ item, onDelete }: { item: ScheduledMeal, onD
                 [
                     _isSelected() ? <Button size="small" onClick={() => _toggle(false)} icon={<CloseOutlined />} />
                         : <Button size="small" onClick={() => _toggle(true)} icon={<CheckOutlined />} />,
-                    <Button size="small" onClick={_onEdit} icon={<FormOutlined />} />,
+                    <Button size="small" onClick={_onEdit} icon={<EditOutlined />} />,
                     <Popconfirm title="Xóa?" onConfirm={() => onDelete(item)} >
                         <Button size="small" danger icon={<DeleteOutlined />} />
                     </Popconfirm>
