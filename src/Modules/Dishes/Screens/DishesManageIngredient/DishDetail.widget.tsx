@@ -10,7 +10,7 @@ import { RootRoutes } from "@routing/RootRoutes"
 import { Dishes } from "@store/Models/Dishes"
 import { RootState } from "@store/Store"
 import { Typography } from "antd"
-import React, { useState } from "react"
+import React, { useMemo, useState } from "react"
 import { useSelector } from "react-redux"
 import { useNavigate } from "react-router-dom"
 import NoodlesIcon from "../../../../../assets/icons/noodles.png"
@@ -24,14 +24,21 @@ type DishDetailWidgetProps = {
 export const DishesDetailWidget: React.FunctionComponent<DishDetailWidgetProps> = (props) => {
     const dishes = useSelector((state: RootState) => state.dishes.dishes);
     const toggleDishesDetail = useToggle();
-    const [currentIncludeDish, setCurrentIncludeDish] = useState<Dishes>();
+    const [currentIncludeDish, setCurrentIncludeDish] = useState<string>();
+    const dish = useMemo(() => {
+        return _getDishesById(currentIncludeDish);
+    },[currentIncludeDish, dishes])
 
     const _getDishesByIds = (ids: string[]) => {
         return dishes.filter(e => ids.includes(e.id));
     }
 
+    const _getDishesById = (id: string) => {
+        return dishes.find(e => id === e.id);
+    }
+
     const _showDish = (dish: Dishes) => {
-        setCurrentIncludeDish(dish);
+        setCurrentIncludeDish(dish.id);
         toggleDishesDetail.show();
     }
 
@@ -69,11 +76,11 @@ export const DishesDetailWidget: React.FunctionComponent<DishDetailWidgetProps> 
         {currentIncludeDish && <Modal style={{ top: 50 }} open={toggleDishesDetail.value} title={
             <Space>
                 <Image src={NoodlesIcon} preview={false} width={24} style={{ marginBottom: 3 }} />
-                {currentIncludeDish.name}
+                {dish.name}
             </Space>
         } destroyOnClose={true} onCancel={toggleDishesDetail.hide} footer={null}>
             <Box style={{ maxHeight: 550, overflowY: "auto" }}>
-                <DishesDetailWidget dish={currentIncludeDish} />
+                <DishesDetailWidget dish={dish} />
             </Box>
         </Modal>}
     </React.Fragment>

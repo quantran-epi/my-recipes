@@ -27,7 +27,6 @@ type ShoppingListMealDetailWidgetProps = {
 export const ShoppingListMealDetailWidget: FunctionComponent<ShoppingListMealDetailWidgetProps> = ({ mealId }) => {
     const dishes = useSelector((state: RootState) => state.dishes.dishes);
     const scheduledMeals = useSelector((state: RootState) => state.scheduledMeal.scheduledMeals);
-    const navigate = useNavigate();
 
     const meal = useMemo(() => {
         return scheduledMeals.find(e => e.id === mealId);
@@ -68,10 +67,9 @@ type ShoppingListMealDishesItemProps = {
 
 export const ShoppingListMealDishesItem: React.FunctionComponent<ShoppingListMealDishesItemProps> = (props) => {
     const toggleDishesDetail = useToggle();
-    const dishes = useSelector((state: RootState) => state.dishes.dishes);
 
     return <List.Item>
-        <Button onClick={toggleDishesDetail.show} type="link" style={{ color: "blue" }}>{dishes.find(e => e.id === props.dish.id).name}</Button>
+        <Button onClick={toggleDishesDetail.show} type="link" style={{ color: "blue" }}>{props.dish.name}</Button>
         <Modal style={{ top: 50 }} open={toggleDishesDetail.value} title={
             <Space>
                 <Image src={DishesIcon} preview={false} width={24} style={{ marginBottom: 3 }} />
