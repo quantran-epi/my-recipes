@@ -135,7 +135,12 @@ export const ShoppingListItem: React.FunctionComponent<ShoppingListItemProps> = 
 
     const _onMoreActionClick = (e) => {
         switch (e.key) {
-            case "reload": _onGenerate(); break;
+            case "reload": modal.confirm({
+                content: "Tải lại danh sách nguyên liệu?",
+                onOk: () => {
+                    _onGenerate();
+                }
+            }); break;
             case "add_dishes": _onAddMoreDishes(); break;
             case "edit_shopping_list": toggleEditModal.show(); break;
         }
@@ -193,7 +198,7 @@ export const ShoppingListItem: React.FunctionComponent<ShoppingListItemProps> = 
                     </Space>
                     <Space size={5}>
                         <Tooltip title="Ngày tạo"><Image src={ComposeIcon} preview={false} width={18} style={{ marginBottom: 3 }} /></Tooltip>
-                        <Typography.Text style={{ fontSize: 14 }}>{moment(props.item.createdDate).format("ddd, DD/MM/YY hh:mm:ss A")}</Typography.Text>
+                        <Typography.Text style={{ fontSize: 14 }}>{moment(props.item.createdDate).format("ddd, DD/MM/YY hh:mm A")}</Typography.Text>
                     </Space>
                     {props.item.plannedDate && <Space size={10}>
                         <Tooltip title="Ngày thực hiện"><Image src={CalendarIcon} preview={false} width={16} style={{ marginBottom: 3 }} /></Tooltip>
