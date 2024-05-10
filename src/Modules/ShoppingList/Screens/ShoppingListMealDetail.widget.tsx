@@ -1,9 +1,16 @@
 import { Button } from "@components/Button";
+import { Image } from "@components/Image";
+import { Box } from "@components/Layout/Box";
 import { Divider } from "@components/Layout/Divider";
+import { Space } from "@components/Layout/Space";
 import { Stack } from "@components/Layout/Stack";
 import { List } from "@components/List";
+import { Modal } from "@components/Modal";
 import { Typography } from "@components/Typography";
+import { useToggle } from "@hooks";
+import { DishesDetailWidget } from "@modules/Dishes/Screens/DishesManageIngredient/DishDetail.widget";
 import { RootRoutes } from "@routing/RootRoutes";
+import { Dishes } from "@store/Models/Dishes";
 import { ScheduledMeal } from "@store/Models/ScheduledMeal";
 import { ShoppingList } from "@store/Models/ShoppingList"
 import { RootState } from "@store/Store";
@@ -11,6 +18,7 @@ import moment from "moment";
 import React, { FunctionComponent, useMemo } from "react";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import DishesIcon from "../../../../assets/icons/noodles.png";
 
 type ShoppingListMealDetailWidgetProps = {
     mealId: string;
@@ -25,6 +33,10 @@ export const ShoppingListMealDetailWidget: FunctionComponent<ShoppingListMealDet
         return scheduledMeals.find(e => e.id === mealId);
     }, [mealId, scheduledMeals])
 
+    const _getDishesById = (id: string) => {
+        return dishes.find(e => e.id === id);
+    }
+
     return <React.Fragment>
         <Divider orientation="left">Thông tin chung</Divider>
         <Stack gap={0} direction="column" align="flex-start">
@@ -35,23 +47,41 @@ export const ShoppingListMealDetailWidget: FunctionComponent<ShoppingListMealDet
         <Divider orientation="left">Bữa sáng</Divider>
         <List
             dataSource={meal.meals.breakfast}
-            renderItem={item => <List.Item>
-                <Button onClick={() => navigate(RootRoutes.AuthorizedRoutes.DishesRoutes.ManageIngredient(item))} type="link" style={{ color: "blue" }}>{dishes.find(e => e.id === item).name}</Button>
-            </List.Item>}
+            renderItem={item => <ShoppingListMealDishesItem dish={_getDishesById(item)} />}
         />
         <Divider orientation="left">Bữa trưa</Divider>
         <List
             dataSource={meal.meals.lunch}
-            renderItem={item => <List.Item>
-                <Button onClick={() => navigate(RootRoutes.AuthorizedRoutes.DishesRoutes.ManageIngredient(item))} type="link" style={{ color: "blue" }}>{dishes.find(e => e.id === item).name}</Button>
-            </List.Item>}
+            renderItem={item => <ShoppingListMealDishesItem dish={_getDishesById(item)} />}
         />
         <Divider orientation="left">Bữa tối</Divider>
         <List
             dataSource={meal.meals.dinner}
-            renderItem={item => <List.Item>
-                <Button onClick={() => navigate(RootRoutes.AuthorizedRoutes.DishesRoutes.ManageIngredient(item))} type="link" style={{ color: "blue" }}>{dishes.find(e => e.id === item).name}</Button>
-            </List.Item>}
+            renderItem={item => <ShoppingListMealDishesItem dish={_getDishesById(item)} />}
         />
     </React.Fragment>
+}
+
+type ShoppingListMealDishesItemProps = {
+    dish: Dishes;
+}
+
+export const ShoppingListMealDishesItem: React.FunctionComponent<ShoppingListMealDishesItemProps> = (props) => {
+    const toggleDishesDetail = useToggle();
+    const dishes = useSelector((state: RootState) => state.dishes.dishes);
+
+    return <List.Item>
+        <Button onClick={toggleDishesDetail.show} type="link" style={{ color: "blue" }}>{dishes.find(e => e.id === props.dish.id).name}</Button>
+        <Modal style={{ top: 50 }} open={toggleDishesDetail.value} title={
+            <Space>
+                <Image src={DishesIcon} preview={false} width={24} style={{ marginBottom: 3 }} />
+                {props.dish.name}
+            </Space>
+        } destroyOnClose={true} onCancel={toggleDishesDetail.hide} footer={null}>
+            <Box style={{ maxHeight: 550, overflowY: "auto" }}>
+                <DishesDetailWidget dish={props.dish} />
+            </Box>
+        </Modal>
+    </List.Item>
+
 }
