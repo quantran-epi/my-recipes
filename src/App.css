@@ -40,3 +40,7 @@
 .ant-timeline .ant-timeline-item-head {
   background-color: transparent !important;
 }
+
+.ant-list-pagination {
+  margin-inline: -5px;
+}
