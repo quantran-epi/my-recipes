@@ -26,6 +26,8 @@ import MealsIcon from "../../assets/icons/meals.png";
 import ShoppingListIcon from "../../assets/icons/shoppingList.png";
 import { Image } from "@components/Image";
 import { Tooltip } from "@components/Tootip";
+import { CopyToClipboard } from 'react-copy-to-clipboard';
+import { useMessage } from "@components/Message";
 
 const layoutStyles: React.CSSProperties = {
     height: "100%"
@@ -132,6 +134,7 @@ export const DataBackup = () => {
     const toggleShowData = useToggle();
     const toggleImportData = useToggle();
     const [exportedData, setExportedData] = useState<string>("");
+    const message = useMessage();
 
     const importDataForm = useSmartForm({
         defaultValues: {
@@ -159,6 +162,12 @@ export const DataBackup = () => {
             <Box style={{ height: 300, overflowY: "auto" }}>
                 {exportedData}
             </Box>
+            <br />
+            <CopyToClipboard text={exportedData}
+                onCopy={() => message.success("Copied")}>
+                <Stack justify="flex-end"><Button>Copy</Button></Stack>
+            </CopyToClipboard>
+
         </Modal>
         <Modal title="Import Data" open={toggleImportData.value} onCancel={toggleImportData.hide} footer={null}>
             <SmartForm {...importDataForm.defaultProps}>
