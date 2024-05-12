@@ -70,7 +70,7 @@ export const ShoppingListScreen = () => {
         </Stack.Compact>
         <List
             pagination={{
-                position: "bottom", align: "center", pageSize: 3, size: "small"
+                position: "bottom", align: "center", pageSize: 3
             }}
             itemLayout="horizontal"
             dataSource={filteredShoppingLists}

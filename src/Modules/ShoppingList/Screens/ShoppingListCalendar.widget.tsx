@@ -49,7 +49,7 @@ export const ShoppingListCalendarWidget = ({ onAdd }) => {
         <Button fullwidth onClick={() => onAdd(selectedDate)} icon={<PlusOutlined />} />
         <List
             pagination={{
-                position: "bottom", align: "center", pageSize: 5, size: "small"
+                position: "bottom", align: "center", pageSize: 5
             }}
             itemLayout="horizontal"
             dataSource={_findShoppingListsByDate(selectedDate)}

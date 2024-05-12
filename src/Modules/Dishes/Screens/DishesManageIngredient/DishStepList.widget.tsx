@@ -80,7 +80,7 @@ export const DishStepListWidget: FunctionComponent<DishStepListWidgetProps> = (p
         <Button fullwidth onClick={_onAddStep}>Thêm bước</Button>
         {props.currentDist.steps.length > 0 ? <Timeline style={{ marginTop: 20 }}>
             {sortBy(props.currentDist.steps, [step => step.order]).map(item =>
-                <Timeline.Item dot={!item.required && <QuestionCircleOutlined style={{ fontSize: 14, color: "orange", backgroundColor: "transparent" }} />}>
+                <Timeline.Item dot={!item.required && <QuestionCircleOutlined style={{ fontSize: 11, color: "orange", backgroundColor: "transparent" }} />}>
                     <StepItem
                         step={item}
                         dish={props.currentDist}

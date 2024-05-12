@@ -69,7 +69,7 @@ export const ScheduledMealListScreen = () => {
         <Button fullwidth onClick={_onAdd} icon={<PlusOutlined />} />
         <List
             pagination={{
-                position: "bottom", align: "center", pageSize: 5, size: "small"
+                position: "bottom", align: "center", pageSize: 5
             }}
             itemLayout="horizontal"
             dataSource={_findScheduledMealsByDate(selectedDate)}

@@ -46,7 +46,7 @@ export const IngredientListScreen = () => {
         </Stack.Compact>
         <List
             pagination={{
-                position: "bottom", align: "center", pageSize: 11, size: "small"
+                position: "bottom", align: "center", pageSize: 11
             }}
             itemLayout="horizontal"
             dataSource={filteredIngredients}
