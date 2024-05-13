@@ -156,6 +156,7 @@ const BottomTabNavigator = () => {
             width: "100%",
             backgroundColor: "#fff",
             height: 80,
+            borderTop: "0.5px solid " + theme.token.colorBorder
         }
     }
 
