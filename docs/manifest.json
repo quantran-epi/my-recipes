@@ -1,6 +1,7 @@
 {
   "short_name": "My Recipes",
   "name": "My Recipes",
+  "description": "App for manage recipes and grocery list",
   "icons": [
     {
       "src": "logo.png",
@@ -20,6 +21,6 @@
   ],
   "start_url": ".",
   "display": "standalone",
-  "theme_color": "#000000",
+  "theme_color": "#3d4195",
   "background_color": "#ffffff"
 }
