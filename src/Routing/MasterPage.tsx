@@ -4,7 +4,7 @@ import { Header } from "@components/Layout/Header";
 import { useTheme, useToggle } from "@hooks";
 import { Layout, Drawer, Flex } from "antd";
 import React, { useState } from "react";
-import { Outlet, useNavigate } from "react-router-dom";
+import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import { MenuOutlined } from "@ant-design/icons";
 import { List } from "@components/List";
 import { RootRoutes } from "./RootRoutes";
@@ -68,6 +68,7 @@ export const MasterPage = () => {
         <Content>
             <Outlet />
         </Content>
+        <BottomTabNavigator />
     </Layout>
 }
 
@@ -130,6 +131,58 @@ const SidebarDrawer = () => {
     );
 };
 
+const BottomTabNavigator = () => {
+    const navigate = useNavigate();
+    const location = useLocation();
+    const theme = useTheme();
+
+    const _buttonStyles = (): React.CSSProperties => {
+        return {
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            height: 64,
+            width: 90
+        }
+    }
+
+    const _containerStyles = (): React.CSSProperties => {
+        return {
+            position: "fixed",
+            bottom: 0,
+            left: 0,
+            right: 0,
+            width: "100%",
+            backgroundColor: "#fff",
+            height: 80,
+        }
+    }
+
+    const _textStyles = (route: string): React.CSSProperties => {
+        return {
+            color: route === location.pathname ? theme.token.colorPrimary : undefined,
+            fontWeight: route === location.pathname ? "bold" : undefined
+        }
+    }
+
+    const onNavigate = (href) => {
+        navigate(href);
+    }
+
+    return <Stack justify="space-evenly" style={_containerStyles()}>
+        <Button type="text" style={_buttonStyles()} icon={<Image src={DishesIcon} preview={false} width={28} />} onClick={() => onNavigate(RootRoutes.AuthorizedRoutes.DishesRoutes.List())}>
+            <Typography.Text style={_textStyles(RootRoutes.AuthorizedRoutes.DishesRoutes.List())}>Món ăn</Typography.Text>
+        </Button>
+        <Button type="text" style={_buttonStyles()} icon={<Image src={ShoppingListIcon} preview={false} width={28} />} onClick={() => onNavigate(RootRoutes.AuthorizedRoutes.ShoppingListRoutes.List())}>
+            <Typography.Text style={_textStyles(RootRoutes.AuthorizedRoutes.ShoppingListRoutes.List())}>Mua sắm</Typography.Text>
+        </Button>
+        <Button type="text" style={_buttonStyles()} icon={<Image src={MealsIcon} preview={false} width={28} />} onClick={() => onNavigate(RootRoutes.AuthorizedRoutes.ScheduledMealRoutes.List())}>
+            <Typography.Text style={_textStyles(RootRoutes.AuthorizedRoutes.ScheduledMealRoutes.List())}>Thực đơn</Typography.Text>
+        </Button>
+    </Stack>
+}
+
 export const DataBackup = () => {
     const toggleShowData = useToggle();
     const toggleImportData = useToggle();
@@ -142,6 +195,7 @@ export const DataBackup = () => {
         },
         onSubmit: (values) => {
             localStorage.setItem("persist:root", values.transformValues.data);
+            message.success("Import thành công");
         },
         itemDefinitions: defaultValues => ({
             data: { name: ObjectPropertyHelper.nameof(defaultValues, e => e.data), label: "Data" }

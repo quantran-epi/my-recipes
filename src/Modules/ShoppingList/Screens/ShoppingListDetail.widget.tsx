@@ -145,6 +145,7 @@ export const ShoppingListIngredientItem: React.FunctionComponent<ShoppingListIng
 
     return <React.Fragment>
         <List.Item
+            style={{ backgroundColor: props.item.isDone ? "#f5f5f5" : undefined }}
             actions={
                 [
                 ]
