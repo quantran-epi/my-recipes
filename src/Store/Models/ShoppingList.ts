@@ -1,5 +1,4 @@
 import { DishesIngredientAmount } from "./Dishes";
-import { ScheduledMeal } from "./ScheduledMeal";
 
 export type ShoppingListIngredientGroup = {
     id: string;

@@ -48,7 +48,9 @@ export const DishesAddIngredientWidget: React.FunctionComponent<DishesAddIngredi
             amount: { label: "Số lượng", name: ObjectPropertyHelper.nameof(defaultValues, e => e.amount) },
             unit: { label: "Đơn vị tính", name: ObjectPropertyHelper.nameof(defaultValues, e => e.unit) },
             dishesId: { name: ObjectPropertyHelper.nameof(defaultValues, e => e.dishesId), noMarkup: true },
-            required: { name: ObjectPropertyHelper.nameof(defaultValues, e => e.required), valuePropName: "checked" }
+            required: { name: ObjectPropertyHelper.nameof(defaultValues, e => e.required), valuePropName: "checked" },
+            meal: { name: ObjectPropertyHelper.nameof(defaultValues, e => e.meal), noMarkup: true },
+            dish: { name: ObjectPropertyHelper.nameof(defaultValues, e => e.dish), noMarkup: true }
         }),
     })
 

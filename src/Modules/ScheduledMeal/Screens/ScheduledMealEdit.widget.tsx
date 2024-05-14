@@ -8,6 +8,7 @@ import { useMessage } from "@components/Message"
 import { SmartForm, useSmartForm } from "@components/SmartForm"
 import { ScheduledMeal } from "@store/Models/ScheduledMeal"
 import { editScheduledMeal } from "@store/Reducers/ScheduledMealReducer"
+import { updateShoppingListIngredientMealData } from "@store/Reducers/ShoppingListReducer"
 import { RootState } from "@store/Store"
 import dayjs from "dayjs"
 import { useDispatch, useSelector } from "react-redux"
@@ -23,8 +24,8 @@ export const ScheduledMealEditWidget = ({ item, onDone }) => {
             plannedDate: dayjs(item.plannedDate)
         },
         onSubmit: (values) => {
-            debugger
             dispatch(editScheduledMeal(values.transformValues));
+            dispatch(updateShoppingListIngredientMealData(values.transformValues));
             message.success();
             editScheduledMealForm.reset();
             onDone();

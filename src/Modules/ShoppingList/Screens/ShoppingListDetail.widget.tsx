@@ -1,4 +1,4 @@
-import { QuestionCircleOutlined } from "@ant-design/icons";
+import { QuestionCircleOutlined, ClockCircleOutlined } from "@ant-design/icons";
 import { Button } from "@components/Button";
 import { Checkbox } from "@components/Form/Checkbox";
 import { Image } from "@components/Image";
@@ -25,6 +25,8 @@ import DishesIcon from "../../../../assets/icons/noodles.png";
 import IngredientIcon from "../../../../assets/icons/vegetable.png";
 import { ShoppingListMealDetailWidget } from "./ShoppingListMealDetail.widget";
 import { DishesDetailWidget } from "@modules/Dishes/Screens/DishesManageIngredient/DishDetail.widget";
+import { DateHelpers } from "@common/Helpers/DateHelper";
+import { Tag } from "@components/Tag";
 
 type ShoppingListDetailScreenProps = {
     shoppingList: ShoppingList;
@@ -50,23 +52,27 @@ export const ShoppingListDetailWidget: React.FunctionComponent<ShoppingListDetai
     }
 
     return <React.Fragment>
-        <Tabs defaultActiveKey="ingredients">
-            <Tabs.TabPane icon={<Image src={IngredientIcon} preview={false} width={22} style={{ marginBottom: 3 }} />} tab={"Nguyên liệu " + `(${props.shoppingList.ingredients.length})`} key="ingredients">
-                <Stack fullwidth justify="flex-start" style={{ marginBottom: 10 }}>
-                    <Space>
-                        <Image src={ChecklistIcon} preview={false} width={18} style={{ marginBottom: 3 }} />
-                        <Typography.Text strong>{`${props.shoppingList.ingredients.filter(e => e.isDone).length}/${props.shoppingList.ingredients.length}`}</Typography.Text>
-                    </Space>
-                </Stack>
-                <Box style={{ maxHeight: 500, overflowY: "auto" }}>
-                    <List
-                        dataSource={props.shoppingList.ingredients}
-                        renderItem={(item) => <ShoppingListIngredientItem item={item} shoppingList={props.shoppingList} />}
-                    />
-                </Box>
-            </Tabs.TabPane>
-            <Tabs.TabPane icon={<Image src={DishesIcon} preview={false} width={22} style={{ marginBottom: 3 }} />} tab={"Món ăn " + `(${props.shoppingList.dishes.length})`} key="dishes">
-                <Box style={{ maxHeight: 500, overflowY: "auto" }}>
+        <Tabs defaultActiveKey="ingredients" items={[
+            {
+                key: "ingredients", icon: <Image src={IngredientIcon} preview={false} width={22} style={{ marginBottom: 3 }} />, label: "Nguyên liệu " + `(${props.shoppingList.ingredients.length})`,
+                children: <React.Fragment>
+                    <Stack fullwidth justify="flex-start" style={{ marginBottom: 10 }}>
+                        <Space>
+                            <Image src={ChecklistIcon} preview={false} width={18} style={{ marginBottom: 3 }} />
+                            <Typography.Text strong>{`${props.shoppingList.ingredients.filter(e => e.isDone).length}/${props.shoppingList.ingredients.length}`}</Typography.Text>
+                        </Space>
+                    </Stack>
+                    <Box style={{ maxHeight: 500, overflowY: "auto" }}>
+                        <List
+                            dataSource={props.shoppingList.ingredients}
+                            renderItem={(item) => <ShoppingListIngredientItem item={item} shoppingList={props.shoppingList} />}
+                        />
+                    </Box>
+                </React.Fragment>
+            },
+            {
+                key: "dishes", icon: <Image src={DishesIcon} preview={false} width={22} style={{ marginBottom: 3 }} />, label: "Món ăn " + `(${props.shoppingList.dishes.length})`,
+                children: <Box style={{ maxHeight: 500, overflowY: "auto" }}>
                     <List
                         size="small"
                         style={{ overflowX: "auto" }}
@@ -74,9 +80,10 @@ export const ShoppingListDetailWidget: React.FunctionComponent<ShoppingListDetai
                         renderItem={(item) => <ShoppingListDishesItem dish={item} />}
                     />
                 </Box>
-            </Tabs.TabPane>
-            <Tabs.TabPane icon={<Image src={MealsIcon} preview={false} width={22} style={{ marginBottom: 3 }} />} tab={"Thực đơn " + `(${props.shoppingList.scheduledMeals.length})`} key="meals">
-                <Box style={{ maxHeight: 500, overflowY: "auto" }}>
+            },
+            {
+                key: "meals", icon: <Image src={MealsIcon} preview={false} width={22} style={{ marginBottom: 3 }} />, label: "Thực đơn " + `(${props.shoppingList.scheduledMeals.length})`,
+                children: <Box style={{ maxHeight: 500, overflowY: "auto" }}>
                     <List
                         size="small"
                         style={{ overflowX: "auto" }}
@@ -106,8 +113,8 @@ export const ShoppingListDetailWidget: React.FunctionComponent<ShoppingListDetai
                         }
                     />
                 </Box>
-            </Tabs.TabPane>
-        </Tabs>
+            }
+        ]} />
         <Modal style={{ top: 50 }} open={toggleMealModal.value} title={"Thực đơn"} destroyOnClose={true} onCancel={toggleMealModal.hide} footer={null}>
             <Box style={{ maxHeight: 550, overflowY: "auto" }}>
                 <ShoppingListMealDetailWidget mealId={selectedMeal} />
@@ -126,6 +133,7 @@ export const ShoppingListIngredientItem: React.FunctionComponent<ShoppingListIng
     const dispatch = useDispatch();
     const ingredients = useSelector((state: RootState) => state.ingredient.ingredients);
     const dishes = useSelector((state: RootState) => state.dishes.dishes);
+    const meals = useSelector((state: RootState) => state.scheduledMeal.scheduledMeals);
 
     const _getIngredientNameById = (id: string) => {
         return ingredients.find(e => e.id === id)?.name || "";
@@ -158,8 +166,16 @@ export const ShoppingListIngredientItem: React.FunctionComponent<ShoppingListIng
                     dataSource={props.item.amounts}
                     renderItem={(item) => <List.Item style={{ padding: 0 }}>
                         <Space>
-                            <Typography.Text>{item.amount} {item.unit} ({_getDishesNameById(item.dishesId)})</Typography.Text>
-                            {!item.required && <Tooltip title="Tùy chọn"><QuestionCircleOutlined style={{ color: "orange" }} /></Tooltip>}
+                            <Typography.Text>{item.amount} {item.unit} ({item?.dish.name})</Typography.Text>
+                            <Space size={0}>
+                                {!item.required && <Tooltip title="Tùy chọn"><Tag color="gold" icon={<QuestionCircleOutlined />} /></Tooltip>}
+                                <Tooltip>
+                                    {item.meal && DateHelpers.calculateDaysBetween(new Date(), item.meal.plannedDate) > 1 && <Tooltip
+                                        title={`${DateHelpers.calculateDaysBetween(new Date(), item.meal.plannedDate)} days later`}>
+                                        <Tag color="volcano">{`${DateHelpers.calculateDaysBetween(new Date(), item.meal.plannedDate)}d`}</Tag>
+                                    </Tooltip>}
+                                </Tooltip>
+                            </Space>
                         </Space>
                     </List.Item>} />} />
         </List.Item >

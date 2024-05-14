@@ -8,7 +8,7 @@ import { useMessage } from "@components/Message"
 import { SmartForm, useSmartForm } from "@components/SmartForm"
 import { Dishes } from "@store/Models/Dishes"
 import { editDishes } from "@store/Reducers/DishesReducer"
-import { ShoppingListIngredientHelpers } from "@store/Reducers/ShoppingListReducer"
+import { ShoppingListIngredientHelpers, updateShoppingListIngredientDishData } from "@store/Reducers/ShoppingListReducer"
 import { RootState } from "@store/Store"
 import { range } from "lodash"
 import { useDispatch, useSelector } from "react-redux"
@@ -27,6 +27,7 @@ export const DishesEditWidget = ({ item, onDone }) => {
             }
 
             dispatch(editDishes(values.transformValues));
+            dispatch(updateShoppingListIngredientDishData(values.transformValues));
             message.success();
             onDone();
         },

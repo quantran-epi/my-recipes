@@ -1,8 +1,9 @@
 import type { PayloadAction } from '@reduxjs/toolkit';
 import { createSlice } from '@reduxjs/toolkit';
-import { Dishes } from '@store/Models/Dishes';
+import { DishIngredientAmountDishMeta, DishIngredientAmountMealMeta, Dishes } from '@store/Models/Dishes';
 import { ScheduledMeal } from '@store/Models/ScheduledMeal';
-import { ShoppingList } from '@store/Models/ShoppingList';
+import { ShoppingList, ShoppingListIngredientGroup } from '@store/Models/ShoppingList';
+import dayjs from 'dayjs';
 import { groupBy } from 'lodash';
 import { nanoid } from 'nanoid';
 
@@ -68,26 +69,58 @@ export const ShoppingListSlice = createSlice({
                     let shoppingList = state.shoppingLists.find(l => l.id === action.payload.shoppingListId);
 
                     //process meals
-                    let allMeals = action.payload.allScheduledMeals.filter(m => e.scheduledMeals.includes(m.id)).map(m1 => m1.meals);
-                    let allDishesFromMeals = Object.values(allMeals).map(meal => [...meal.breakfast, ...meal.lunch, ...meal.dinner]).flat()
-                        .map(d => action.payload.allDishes.find(d1 => d1.id === d));
+                    let allMeals = action.payload.allScheduledMeals.filter(m => e.scheduledMeals.includes(m.id));
+                    let ingredientAmountsFromMeals = [];
+                    allMeals.forEach(meal => {
+                        let dishesFromThisMeal = [...meal.meals.breakfast, ...meal.meals.lunch, ...meal.meals.dinner]
+                            .flat()
+                            .map(d => action.payload.allDishes.find(d1 => d1.id === d));
+
+                        let ingredientAmountFromThisMeal = [];
+                        dishesFromThisMeal.forEach(dish => {
+                            ingredientAmountFromThisMeal = ingredientAmountFromThisMeal.concat(...dish.ingredients.map(e => ({
+                                ...e,
+                                meal: { id: meal.id, plannedDate: dayjs(meal.plannedDate).toDate() } as DishIngredientAmountMealMeta,
+                                dish: { id: dish.id, name: dish.name } as DishIngredientAmountDishMeta
+                            })))
+                        })
+
+                        let ingredientAmountRecursiveFromThisMeal = [];
+                        dishesFromThisMeal.map(e => ShoppingListIngredientHelpers.getIncludedDishesRecursive(e, action.payload.allDishes))
+                            .flat()
+                            .map(d => action.payload.allDishes.find(d1 => d1.id === d))
+                            .forEach(dish => {
+                                ingredientAmountRecursiveFromThisMeal = ingredientAmountRecursiveFromThisMeal.concat(...dish.ingredients.map(e => ({
+                                    ...e,
+                                    meal: { id: meal.id, plannedDate: dayjs(meal.plannedDate).toDate() } as DishIngredientAmountMealMeta,
+                                    dish: { id: dish.id, name: dish.name } as DishIngredientAmountDishMeta
+                                })))
+                            })
+                        ingredientAmountsFromMeals = ingredientAmountsFromMeals.concat([...ingredientAmountFromThisMeal, ...ingredientAmountRecursiveFromThisMeal]);
+                    })
                     //end process meals
 
-                    let currentDishes = [...action.payload.allDishes
-                        .filter(e => shoppingList.dishes.includes(e.id)),
-                    ...allDishesFromMeals];
+                    let allDishesFromShoppingList = action.payload.allDishes
+                        .filter(e => shoppingList.dishes.includes(e.id));
 
-                    let ingredientAmounts = currentDishes
-                        .map(dish => dish.ingredients)
-                        .flat();
-                    let includeIngredientAmounts = currentDishes
-                        .map(e => ShoppingListIngredientHelpers.getIncludedDishesRecursive(e, action.payload.allDishes))
+                    let ingredientAmountsFromShoppingList = [];
+                    allDishesFromShoppingList.forEach(dish => {
+                        ingredientAmountsFromShoppingList.push(...dish.ingredients.map(ingre => ({
+                            ...ingre,
+                            dish: { id: dish.id, name: dish.name } as DishIngredientAmountDishMeta
+                        })))
+                    })
+                    allDishesFromShoppingList.map(e => ShoppingListIngredientHelpers.getIncludedDishesRecursive(e, action.payload.allDishes))
                         .flat()
                         .map(d => action.payload.allDishes.find(d1 => d1.id === d))
-                        .map(e => e.ingredients)
-                        .flat();
+                        .forEach(dish => {
+                            ingredientAmountsFromShoppingList.push(...dish.ingredients.map(ingre => ({
+                                ...ingre,
+                                dish: { id: dish.id, name: dish.name } as DishIngredientAmountDishMeta
+                            })))
+                        })
 
-                    let groups = groupBy([...ingredientAmounts, ...includeIngredientAmounts], "ingredientId");
+                    let groups = groupBy([...ingredientAmountsFromShoppingList, ...ingredientAmountsFromMeals], "ingredientId");
                     return {
                         ...e,
                         ingredients: Object.keys(groups).map(key => ({
@@ -131,10 +164,65 @@ export const ShoppingListSlice = createSlice({
                 return e;
             })
         },
+        updateShoppingListIngredientMealData: (state, action: PayloadAction<ScheduledMeal>) => {
+            state.shoppingLists = state.shoppingLists.map(e => {
+                let groups: ShoppingListIngredientGroup[] = e.ingredients;
+                groups = groups.map(gr => {
+                    return {
+                        ...gr,
+                        amounts: gr.amounts.map(amt => {
+                            if (amt.meal?.id === action.payload.id) {
+                                return {
+                                    ...amt,
+                                    meal: {
+                                        ...amt.meal,
+                                        plannedDate: action.payload.plannedDate
+                                    }
+                                }
+                            }
+                            return amt;
+                        })
+                    }
+                })
+                return {
+                    ...e,
+                    ingredients: groups
+                }
+            })
+        },
+        updateShoppingListIngredientDishData: (state, action: PayloadAction<Dishes>) => {
+            state.shoppingLists = state.shoppingLists.map(e => {
+                let groups: ShoppingListIngredientGroup[] = e.ingredients;
+                groups = groups.map(gr => {
+                    return {
+                        ...gr,
+                        amounts: gr.amounts.map(amt => {
+                            if (amt.dish?.id === action.payload.id) {
+                                return {
+                                    ...amt,
+                                    dish: {
+                                        ...amt.dish,
+                                        name: action.payload.name
+                                    }
+                                }
+                            }
+                            return amt;
+                        })
+                    }
+                })
+                return {
+                    ...e,
+                    ingredients: groups
+                }
+            })
+        }
     },
 })
 
 // Action creators are generated for each case reducer function
-export const { add: addShoppingList, edit: editShoppingList, remove: removeShoppingList, generateIngredient, toggleDoneIngredient, addDishesToShoppingList } = ShoppingListSlice.actions
+export const { add: addShoppingList, edit: editShoppingList,
+    remove: removeShoppingList, generateIngredient, toggleDoneIngredient, addDishesToShoppingList,
+    updateShoppingListIngredientMealData, updateShoppingListIngredientDishData
+} = ShoppingListSlice.actions
 
 export default ShoppingListSlice.reducer

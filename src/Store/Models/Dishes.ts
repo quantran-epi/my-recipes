@@ -1,11 +1,23 @@
 import { IngredientUnit } from "./Ingredient";
 
+export type DishIngredientAmountMealMeta = {
+    id: string;
+    plannedDate: Date;
+}
+
+export type DishIngredientAmountDishMeta = {
+    id: string;
+    name: string;
+}
+
 export type DishesIngredientAmount = {
     ingredientId: string;
     unit: IngredientUnit;
     amount: string;
     dishesId: string;
     required: boolean;
+    meal?: DishIngredientAmountMealMeta;
+    dish?: DishIngredientAmountDishMeta;
 }
 
 export type DishesStep = {

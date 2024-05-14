@@ -5,7 +5,7 @@ import { useTheme, useToggle } from "@hooks";
 import { Layout, Drawer, Flex } from "antd";
 import React, { useState } from "react";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
-import { MenuOutlined } from "@ant-design/icons";
+import { MenuOutlined, ImportOutlined, ExportOutlined } from "@ant-design/icons";
 import { List } from "@components/List";
 import { RootRoutes } from "./RootRoutes";
 import { Box } from "@components/Layout/Box";
@@ -205,12 +205,12 @@ export const DataBackup = () => {
 
     return <React.Fragment>
         <Space>
-            <Button onClick={() => {
+            <Button icon={<ExportOutlined />} onClick={() => {
                 setExportedData(localStorage.getItem("persist:root"));
                 toggleShowData.show();
-            }}>Export data</Button>
+            }}>Export</Button>
 
-            <Button onClick={toggleImportData.show}>Import data</Button>
+            <Button icon={<ImportOutlined />} onClick={toggleImportData.show}>Import</Button>
         </Space>
 
         <Modal title="Export Data" open={toggleShowData.value} onCancel={toggleShowData.hide} footer={null}>
