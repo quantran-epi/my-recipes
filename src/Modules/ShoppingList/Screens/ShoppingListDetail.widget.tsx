@@ -179,7 +179,7 @@ export const ShoppingListIngredientItem: React.FunctionComponent<ShoppingListIng
                                 <Space size={0}>
                                     {!item.required && <Tooltip title="Tùy chọn"><Tag color="gold" icon={<QuestionCircleOutlined />} /></Tooltip>}
                                     <Tooltip>
-                                        {item.meal && DateHelpers.calculateDaysBetween(new Date(), item.meal.plannedDate) > 1 && <Tooltip
+                                        {item.meal && DateHelpers.calculateDaysBetween(new Date(), item.meal.plannedDate) > 0 && <Tooltip
                                             title={`${DateHelpers.calculateDaysBetween(new Date(), item.meal.plannedDate)} days later`}>
                                             <Tag color="volcano">{`${DateHelpers.calculateDaysBetween(new Date(), item.meal.plannedDate)}d`}</Tag>
                                         </Tooltip>}
