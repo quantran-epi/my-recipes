@@ -1,35 +1,34 @@
-import { CheckSquareOutlined, DeleteOutlined, FormOutlined, HolderOutlined, PlusOutlined, CalendarOutlined, ReloadOutlined, OrderedListOutlined, EditOutlined, MonitorOutlined } from "@ant-design/icons";
+import { CalendarOutlined, DeleteOutlined, EditOutlined, HolderOutlined, LoadingOutlined, MonitorOutlined, OrderedListOutlined, PlusOutlined, ReloadOutlined } from "@ant-design/icons";
 import { Button } from "@components/Button";
 import { Dropdown } from "@components/Dropdown";
 import { Input } from "@components/Form/Input";
+import { Image } from "@components/Image";
 import { Box } from "@components/Layout/Box";
 import { Space } from "@components/Layout/Space";
 import { Stack } from "@components/Layout/Stack";
 import { List } from "@components/List";
 import { Modal } from "@components/Modal";
+import { useModal } from "@components/Modal/ModalProvider";
 import { Popconfirm } from "@components/Popconfirm";
 import { Tooltip } from "@components/Tootip";
 import { Typography } from "@components/Typography";
 import { useScreenTitle, useToggle } from "@hooks";
-import { nanoid } from "@reduxjs/toolkit";
 import { ShoppingList } from "@store/Models/ShoppingList";
 import { generateIngredient, removeShoppingList } from "@store/Reducers/ShoppingListReducer";
 import { RootState } from "@store/Store";
-import { debounce, groupBy, orderBy } from "lodash";
+import { debounce, orderBy } from "lodash";
 import moment from "moment";
 import React, { useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import ComposeIcon from "../../../../assets/icons/compose.png";
+import ChecklistIcon from "../../../../assets/icons/done.png";
+import CalendarIcon from "../../../../assets/icons/nineteen.png";
+import ShoppinglistIcon from "../../../../assets/icons/shoppingList.png";
 import { ShoppingListAddWidget } from "./ShoppingListAdd.widget";
 import { ShoppingListAddMoreDishesWidget } from "./ShoppingListAddMoreDishes.widget";
-import { ShoppingListDetailWidget } from "./ShoppingListDetail.widget";
-import { useModal } from "@components/Modal/ModalProvider";
 import { ShoppingListCalendarWidget } from "./ShoppingListCalendar.widget";
+import { ShoppingListDetailWidget } from "./ShoppingListDetail.widget";
 import { ShoppingListEditWidget } from "./ShoppingListEdit.widget";
-import CalendarIcon from "../../../../assets/icons/nineteen.png"
-import ComposeIcon from "../../../../assets/icons/compose.png"
-import ChecklistIcon from "../../../../assets/icons/done.png"
-import ShoppinglistIcon from "../../../../assets/icons/shoppingList.png"
-import { Image } from "@components/Image";
 
 export const ShoppingListScreen = () => {
     const shoppingLists = useSelector((state: RootState) => state.shoppingList.shoppingLists);
@@ -107,6 +106,7 @@ export const ShoppingListItem: React.FunctionComponent<ShoppingListItemProps> = 
     const dispatch = useDispatch();
     const modal = useModal();
     const toggleEditModal = useToggle({ defaultValue: false });
+    const toggleLoading = useToggle();
 
     const _onGenerate = () => {
         dispatch(generateIngredient({
@@ -118,7 +118,7 @@ export const ShoppingListItem: React.FunctionComponent<ShoppingListItemProps> = 
 
     const _onGenerateAndShow = () => {
         _onGenerate();
-        toggleIngredient.show();
+        _onShow();
     }
 
     const _isAllIngredientDone = () => {
@@ -126,6 +126,7 @@ export const ShoppingListItem: React.FunctionComponent<ShoppingListItemProps> = 
     }
 
     const _onShow = () => {
+        toggleLoading.show();
         toggleIngredient.show();
     }
 
@@ -150,8 +151,8 @@ export const ShoppingListItem: React.FunctionComponent<ShoppingListItemProps> = 
         <List.Item
             actions={
                 [
-                    props.item.ingredients.length > 0 ? <Button size="small" onClick={_onShow} icon={<MonitorOutlined />} />
-                        : <Button size="small" onClick={_onGenerateAndShow} icon={<MonitorOutlined />} />,
+                    props.item.ingredients.length > 0 ? <Button size="small" onClick={_onShow} icon={toggleLoading.value ? <LoadingOutlined /> : <MonitorOutlined />} />
+                        : <Button size="small" onClick={_onGenerateAndShow} icon={toggleLoading.value ? <LoadingOutlined /> : <MonitorOutlined />} />,
                     <Popconfirm title="Xóa?" onConfirm={() => props.onDelete(props.item)} >
                         <Button size="small" danger icon={<DeleteOutlined />} />
                     </Popconfirm>,
@@ -209,7 +210,7 @@ export const ShoppingListItem: React.FunctionComponent<ShoppingListItemProps> = 
         <Modal style={{ top: 50 }} open={toggleIngredient.value} title={<Space>
             <Image src={ShoppinglistIcon} preview={false} width={24} style={{ marginBottom: 3 }} />
             {props.item.name}
-        </Space>} destroyOnClose={true} onCancel={toggleIngredient.hide} footer={null}>
+        </Space>} destroyOnClose={true} onCancel={toggleIngredient.hide} footer={null} afterOpenChange={() => toggleLoading.hide()}>
             <ShoppingListDetailWidget shoppingList={props.item} />
         </Modal>
         <Modal style={{ top: 50 }} open={toggleAddMoreDishes.value} title={<Space>
