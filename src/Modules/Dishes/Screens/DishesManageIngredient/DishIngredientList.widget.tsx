@@ -1,4 +1,4 @@
-import { DeleteOutlined, QuestionCircleOutlined, EditOutlined } from "@ant-design/icons"
+import { DeleteOutlined, QuestionCircleOutlined, EditOutlined, ProjectOutlined } from "@ant-design/icons"
 import { ObjectPropertyHelper } from "@common/Helpers/ObjectProperty"
 import { Button } from "@components/Button"
 import { Form } from "@components/Form"
@@ -21,6 +21,9 @@ import { orderBy } from "lodash"
 import { DishesEditIngredientWidget } from "./DishesEditIngredient.widget"
 import { Image } from "@components/Image"
 import IngredientIcon from "../../../../../assets/icons/vegetable.png"
+import FoodPrepareIcon from "../../../../../assets/icons/food-preparation.png"
+import { Tag } from "@components/Tag"
+import { Popover } from "@components/Popover"
 
 type DishIngredientListWidgetProps = {
     currentDist: Dishes;
@@ -90,7 +93,7 @@ export const IngredientItem: React.FunctionComponent<IngredientItemProps> = (pro
 
     const _getIngredientName = (id) => {
         let ingre = ingredients.find(e => e.id === id);
-        return (ingre?.name.length > 15 ? ingre?.name?.substring(0, 15) + "..." : ingre.name) || "N/A";
+        return (ingre?.name.length > 10 ? ingre?.name?.substring(0, 12) + "..." : ingre.name) || "N/A";
     }
 
     const _onEdit = () => {
@@ -100,6 +103,12 @@ export const IngredientItem: React.FunctionComponent<IngredientItemProps> = (pro
     return <React.Fragment>
         <List.Item
             actions={[
+                props.ingredientAmount.prepare && <Popover title={<Space>
+                    <Image src={FoodPrepareIcon} preview={false} width={18} style={{ marginBottom: 3 }} />
+                    <Typography.Text>Sơ chế nguyên liệu</Typography.Text>
+                </Space>} content={<List dataSource={props.ingredientAmount.prepare} size="small" renderItem={(item) => <List.Item>{item}</List.Item>} />}>
+                    <Button size="small" icon={<ProjectOutlined />} />
+                </Popover>,
                 <Button size="small" icon={<EditOutlined />} onClick={_onEdit} />,
                 <Popconfirm title="Xóa?" onConfirm={() => props.onDelete(props.dish, props.ingredientAmount)}>
                     <Button size="small" danger icon={<DeleteOutlined />} />
@@ -110,7 +119,7 @@ export const IngredientItem: React.FunctionComponent<IngredientItemProps> = (pro
                     <Typography.Text>{_getIngredientName(props.ingredientAmount.ingredientId)}</Typography.Text> - {props.ingredientAmount.amount} {props.ingredientAmount.unit}
                 </Typography.Text>
                 {!props.ingredientAmount.required && <Tooltip title="Tùy chọn">
-                    <QuestionCircleOutlined style={{ color: "orange" }} />
+                    <Tag color="gold" icon={<QuestionCircleOutlined />} />
                 </Tooltip>}
             </Space>
         </List.Item>

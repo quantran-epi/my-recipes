@@ -183,7 +183,10 @@ export const ScheduledMealItem = ({ item, onDelete }: { item: ScheduledMeal, onD
         </Space>} destroyOnClose={true} onCancel={toggleEditModal.hide} footer={null}>
             <ScheduledMealEditWidget item={item} onDone={toggleEditModal.hide} />
         </Modal>
-        <Modal style={{ top: 50 }} open={toggleMealModal.value} title={"Thực đơn"} destroyOnClose={true} onCancel={toggleMealModal.hide} footer={null}>
+        <Modal style={{ top: 50 }} open={toggleMealModal.value} title={<Space>
+            <Image src={MealsIcon} preview={false} width={24} style={{ marginBottom: 3 }} />
+            Thực đơn
+        </Space>} destroyOnClose={true} onCancel={toggleMealModal.hide} footer={null}>
             <Box style={{ maxHeight: 550, overflowY: "auto" }}>
                 <ShoppingListMealDetailWidget mealId={item.id} />
             </Box>

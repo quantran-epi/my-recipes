@@ -1,15 +1,17 @@
 import { ObjectPropertyHelper } from "@common/Helpers/ObjectProperty";
 import { Button } from "@components/Button";
-import { Input } from "@components/Form/Input";
+import { Input, TextArea } from "@components/Form/Input";
 import { Option, Select } from "@components/Form/Select";
 import { Switch } from "@components/Form/Switch";
 import { Stack } from "@components/Layout/Stack";
 import { useMessage } from "@components/Message";
 import { SmartForm, useSmartForm } from "@components/SmartForm";
-import { Dishes, DishesIngredientAmount } from "@store/Models/Dishes";
+import { DISH_INGREDIENT_PREPARE_PRESETS, Dishes, DishesIngredientAmount } from "@store/Models/Dishes";
 import { INGREDIENT_UNITS } from "@store/Models/Ingredient";
-import { addIngredientsToDish } from "@store/Reducers/DishesReducer";
+import { addIngredientsToDish, test } from "@store/Reducers/DishesReducer";
 import { RootState } from "@store/Store";
+import { AutoComplete } from "antd";
+import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
 type DishesAddIngredientWidgetProps = {
@@ -26,9 +28,12 @@ export const DishesAddIngredientWidget: React.FunctionComponent<DishesAddIngredi
         defaultValues: {
             ingredientId: "",
             amount: "",
+            prepare: [],
             unit: "g",
             dishesId: props.dish.id,
-            required: true
+            required: true,
+            dish: undefined,
+            meal: undefined
         },
         onSubmit: (values) => {
             if (props.dish.ingredients.some(ingre => ingre.ingredientId === values.transformValues.ingredientId)) {
@@ -48,9 +53,10 @@ export const DishesAddIngredientWidget: React.FunctionComponent<DishesAddIngredi
             amount: { label: "Số lượng", name: ObjectPropertyHelper.nameof(defaultValues, e => e.amount) },
             unit: { label: "Đơn vị tính", name: ObjectPropertyHelper.nameof(defaultValues, e => e.unit) },
             dishesId: { name: ObjectPropertyHelper.nameof(defaultValues, e => e.dishesId), noMarkup: true },
+            prepare: { label: "Sơ chế", name: ObjectPropertyHelper.nameof(defaultValues, e => e?.prepare) },
             required: { name: ObjectPropertyHelper.nameof(defaultValues, e => e.required), valuePropName: "checked" },
-            meal: { name: ObjectPropertyHelper.nameof(defaultValues, e => e.meal), noMarkup: true },
-            dish: { name: ObjectPropertyHelper.nameof(defaultValues, e => e.dish), noMarkup: true }
+            meal: { name: ObjectPropertyHelper.nameof(defaultValues, e => e?.meal), noMarkup: true },
+            dish: { name: ObjectPropertyHelper.nameof(defaultValues, e => e?.dish), noMarkup: true }
         }),
     })
 
@@ -84,6 +90,14 @@ export const DishesAddIngredientWidget: React.FunctionComponent<DishesAddIngredi
                 style={{ width: '100%' }}>
                 {INGREDIENT_UNITS.map(unit => <Option key={unit} value={unit}>{unit}</Option>)}
             </Select>
+        </SmartForm.Item>
+        <SmartForm.Item {...addIngreToDishForm.itemDefinitions.prepare}>
+            <Select
+                mode="tags"
+                style={{ width: '100%' }}
+                placeholder="Sơ chế"
+                options={DISH_INGREDIENT_PREPARE_PRESETS.map(e => ({ value: e }))}
+            />
         </SmartForm.Item>
         <SmartForm.Item {...addIngreToDishForm.itemDefinitions.required}>
             <Switch checkedChildren="Bắt buộc" unCheckedChildren="Tùy chọn" />

@@ -5,6 +5,6 @@ interface ICheckboxProps extends AntCheckboxProps {
 
 }
 
-export const Checkbox: FunctionComponent<ICheckboxProps> = (props) => {
-    return <AntCheckbox {...props} />
-}
+export const Checkbox = React.forwardRef<typeof AntCheckbox, ICheckboxProps>((props, ref) => {
+    return <AntCheckbox ref={ref as any} {...props} />
+}) 

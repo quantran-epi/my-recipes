@@ -1,13 +1,13 @@
 import { ObjectPropertyHelper } from "@common/Helpers/ObjectProperty";
 import { Button } from "@components/Button";
 import { Form } from "@components/Form"
-import { Input } from "@components/Form/Input";
+import { Input, TextArea } from "@components/Form/Input";
 import { Option, Select } from "@components/Form/Select";
 import { Switch } from "@components/Form/Switch";
 import { Stack } from "@components/Layout/Stack";
 import { useMessage } from "@components/Message";
 import { SmartForm, useSmartForm } from "@components/SmartForm";
-import { Dishes, DishesIngredientAmount } from "@store/Models/Dishes"
+import { DISH_INGREDIENT_PREPARE_PRESETS, Dishes, DishesIngredientAmount } from "@store/Models/Dishes"
 import { INGREDIENT_UNITS, IngredientUnit } from "@store/Models/Ingredient";
 import { DishesIngredientAddParams, addIngredientsToDish, editIngredientFromDish } from "@store/Reducers/DishesReducer";
 import { RootState } from "@store/Store";
@@ -41,8 +41,9 @@ export const DishesEditIngredientWidget: React.FunctionComponent<DishesEditIngre
             unit: { label: "Đơn vị tính", name: ObjectPropertyHelper.nameof(defaultValues, e => e.unit) },
             dishesId: { name: ObjectPropertyHelper.nameof(defaultValues, e => e.dishesId), noMarkup: true },
             required: { name: ObjectPropertyHelper.nameof(defaultValues, e => e.required), valuePropName: "checked" },
-            meal: { name: ObjectPropertyHelper.nameof(defaultValues, e => e.meal), noMarkup: true },
-            dish: { name: ObjectPropertyHelper.nameof(defaultValues, e => e.dish), noMarkup: true },
+            meal: { name: ObjectPropertyHelper.nameof(defaultValues, e => e?.meal), noMarkup: true },
+            dish: { name: ObjectPropertyHelper.nameof(defaultValues, e => e?.dish), noMarkup: true },
+            prepare: { label: "Sơ chế", name: ObjectPropertyHelper.nameof(defaultValues, e => e?.prepare) },
         }),
     })
 
@@ -77,6 +78,14 @@ export const DishesEditIngredientWidget: React.FunctionComponent<DishesEditIngre
                 style={{ width: '100%' }}>
                 {INGREDIENT_UNITS.map(unit => <Option key={unit} value={unit}>{unit}</Option>)}
             </Select>
+        </SmartForm.Item>
+        <SmartForm.Item {...editIngreToDishForm.itemDefinitions.prepare}>
+            <Select
+                mode="tags"
+                style={{ width: '100%' }}
+                placeholder="Sơ chế"
+                options={DISH_INGREDIENT_PREPARE_PRESETS.map(e => ({ value: e }))}
+            />
         </SmartForm.Item>
         <SmartForm.Item {...editIngreToDishForm.itemDefinitions.required}>
             <Switch checkedChildren="Bắt buộc" unCheckedChildren="Tùy chọn" />

@@ -166,7 +166,7 @@ export const DishesItem: React.FunctionComponent<DishesItemProps> = (props) => {
                         <Space>
                             <Typography.Text>{ingredients.find(ingre => ingre.id === item.ingredientId).name} - {item.amount} {item.unit}</Typography.Text>
                             {!item.required && <Tooltip title="Tùy chọn">
-                                <QuestionCircleOutlined style={{ color: "orange" }} />
+                                <Tag color="gold" icon={<QuestionCircleOutlined />} />
                             </Tooltip>}
                         </Space>
                     </List.Item>} />
@@ -185,7 +185,7 @@ export const DishesItem: React.FunctionComponent<DishesItemProps> = (props) => {
                                 {item.content}
                             </Typography.Paragraph>
                             {!item.required && <Tooltip title="Tùy chọn">
-                                <QuestionCircleOutlined style={{ color: "orange" }} />
+                                <Tag color="gold" icon={<QuestionCircleOutlined />} />
                             </Tooltip>}
                         </Stack>
                     </List.Item>} />

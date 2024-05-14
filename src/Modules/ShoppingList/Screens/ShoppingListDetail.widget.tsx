@@ -11,12 +11,12 @@ import { Typography } from "@components/Typography";
 import { useToggle } from "@hooks";
 import { Dishes } from "@store/Models/Dishes";
 import { ShoppingList, ShoppingListIngredientGroup } from "@store/Models/ShoppingList";
-import { toggleDoneIngredient } from "@store/Reducers/ShoppingListReducer";
+import { toggleDoneIngredientAmount, toggleDoneIngredientGroup } from "@store/Reducers/ShoppingListReducer";
 import { RootState } from "@store/Store";
 import { Space, Tabs } from "antd";
 import { CheckboxChangeEvent } from "antd/es/checkbox";
 import moment from "moment";
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import ChecklistIcon from "../../../../assets/icons/done.png";
 import MealsIcon from "../../../../assets/icons/meals.png";
@@ -27,6 +27,7 @@ import { ShoppingListMealDetailWidget } from "./ShoppingListMealDetail.widget";
 import { DishesDetailWidget } from "@modules/Dishes/Screens/DishesManageIngredient/DishDetail.widget";
 import { DateHelpers } from "@common/Helpers/DateHelper";
 import { Tag } from "@components/Tag";
+import { NumberHelpers } from "@common/Helpers/NumberHelpers";
 
 type ShoppingListDetailScreenProps = {
     shoppingList: ShoppingList;
@@ -115,7 +116,10 @@ export const ShoppingListDetailWidget: React.FunctionComponent<ShoppingListDetai
                 </Box>
             }
         ]} />
-        <Modal style={{ top: 50 }} open={toggleMealModal.value} title={"Thực đơn"} destroyOnClose={true} onCancel={toggleMealModal.hide} footer={null}>
+        <Modal style={{ top: 50 }} open={toggleMealModal.value} title={<Space>
+            <Image src={MealsIcon} preview={false} width={24} style={{ marginBottom: 3 }} />
+            Thực đơn
+        </Space>} destroyOnClose={true} onCancel={toggleMealModal.hide} footer={null}>
             <Box style={{ maxHeight: 550, overflowY: "auto" }}>
                 <ShoppingListMealDetailWidget mealId={selectedMeal} />
             </Box>
@@ -132,51 +136,56 @@ type ShoppingListIngredientItemProps = {
 export const ShoppingListIngredientItem: React.FunctionComponent<ShoppingListIngredientItemProps> = (props) => {
     const dispatch = useDispatch();
     const ingredients = useSelector((state: RootState) => state.ingredient.ingredients);
-    const dishes = useSelector((state: RootState) => state.dishes.dishes);
-    const meals = useSelector((state: RootState) => state.scheduledMeal.scheduledMeals);
+    const groupCheckBoxRef = useRef(null);
 
     const _getIngredientNameById = (id: string) => {
         return ingredients.find(e => e.id === id)?.name || "";
     }
 
-    const _getDishesNameById = (id: string) => {
-        return dishes.find(e => e.id === id)?.name || "";
-    }
-
-    const _onCheckedChange = (e: CheckboxChangeEvent) => {
-        dispatch(toggleDoneIngredient({
+    const _onCheckedAllChange = (e: CheckboxChangeEvent) => {
+        dispatch(toggleDoneIngredientGroup({
             shoppingListId: props.shoppingList.id,
             ingredientGroupId: props.item.id,
             isDone: e.target.checked
         }));
     }
 
+    const _onCheckedChange = (e: CheckboxChangeEvent, id: string) => {
+        dispatch(toggleDoneIngredientAmount({
+            shoppingListId: props.shoppingList.id,
+            ingredientGroupId: props.item.id,
+            ingredientAmoutId: id,
+            isDone: e.target.checked
+        }));
+    }
+
+    const indeterminate = NumberHelpers.isBetween(props.item.amounts.filter(e => e.isDone).length, 0.1, props.item.amounts.length, false);
+
     return <React.Fragment>
         <List.Item
             style={{ backgroundColor: props.item.isDone ? "#f5f5f5" : undefined }}
-            actions={
-                [
-                ]
-            } >
+            actions={[]} >
             <List.Item.Meta
-                avatar={<Checkbox defaultChecked={props.item.isDone} onChange={_onCheckedChange} />}
+                avatar={<Checkbox indeterminate={indeterminate} checked={props.item.isDone} onChange={_onCheckedAllChange} />}
                 title={<Typography.Text type={props.item.isDone ? "secondary" : undefined} style={{ textDecorationLine: props.item.isDone ? "line-through" : "none" }}>{_getIngredientNameById(props.item.ingredientId)}</Typography.Text>}
                 description={<List
                     size="small"
                     dataSource={props.item.amounts}
                     renderItem={(item) => <List.Item style={{ padding: 0 }}>
-                        <Space>
-                            <Typography.Text>{item.amount} {item.unit} ({item?.dish.name})</Typography.Text>
-                            <Space size={0}>
-                                {!item.required && <Tooltip title="Tùy chọn"><Tag color="gold" icon={<QuestionCircleOutlined />} /></Tooltip>}
-                                <Tooltip>
-                                    {item.meal && DateHelpers.calculateDaysBetween(new Date(), item.meal.plannedDate) > 1 && <Tooltip
-                                        title={`${DateHelpers.calculateDaysBetween(new Date(), item.meal.plannedDate)} days later`}>
-                                        <Tag color="volcano">{`${DateHelpers.calculateDaysBetween(new Date(), item.meal.plannedDate)}d`}</Tag>
-                                    </Tooltip>}
-                                </Tooltip>
-                            </Space>
-                        </Space>
+                        <List.Item.Meta
+                            avatar={<Checkbox checked={item.isDone} onChange={(e) => _onCheckedChange(e, item.id)} />}
+                            description={<Space>
+                                <Typography.Text>{item.amount} {item.unit} ({item?.dish.name})</Typography.Text>
+                                <Space size={0}>
+                                    {!item.required && <Tooltip title="Tùy chọn"><Tag color="gold" icon={<QuestionCircleOutlined />} /></Tooltip>}
+                                    <Tooltip>
+                                        {item.meal && DateHelpers.calculateDaysBetween(new Date(), item.meal.plannedDate) > 1 && <Tooltip
+                                            title={`${DateHelpers.calculateDaysBetween(new Date(), item.meal.plannedDate)} days later`}>
+                                            <Tag color="volcano">{`${DateHelpers.calculateDaysBetween(new Date(), item.meal.plannedDate)}d`}</Tag>
+                                        </Tooltip>}
+                                    </Tooltip>
+                                </Space>
+                            </Space>} />
                     </List.Item>} />} />
         </List.Item >
     </React.Fragment >

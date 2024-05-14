@@ -1,9 +1,14 @@
 import { DishesIngredientAmount } from "./Dishes";
 
+export type ShoppingListIngredientAmount = DishesIngredientAmount & {
+    id: string;
+    isDone?: boolean;
+}
+
 export type ShoppingListIngredientGroup = {
     id: string;
     ingredientId: string;
-    amounts: DishesIngredientAmount[];
+    amounts: ShoppingListIngredientAmount[];
     isDone: boolean;
 }
 

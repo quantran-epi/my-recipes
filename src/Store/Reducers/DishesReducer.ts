@@ -173,7 +173,7 @@ export const DishesSlice = createSlice({
         test: (state) => {
             state.dishes = state.dishes.map(e => ({
                 ...e,
-                image: ""
+                ingredients: e.ingredients.map(e => ({ ...e, prepare: null, meal: null, dish: null }))
             }))
         }
     }

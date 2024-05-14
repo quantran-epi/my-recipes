@@ -5,13 +5,14 @@ import { useScreenTitle } from "@hooks"
 import { RootRoutes } from "@routing/RootRoutes"
 import { RootState } from "@store/Store"
 import { Typography } from "antd"
-import React, { useMemo } from "react"
-import { useSelector } from "react-redux"
+import React, { useEffect, useMemo } from "react"
+import { useDispatch, useSelector } from "react-redux"
 import { useNavigate, useSearchParams } from "react-router-dom"
 import { DishIngredientListWidget } from "./DishIngredientList.widget"
 import { DishStepListWidget } from "./DishStepList.widget"
 import { Image } from "@components/Image"
 import { Box } from "@components/Layout/Box"
+import { test } from "@store/Reducers/DishesReducer"
 
 export const DishesDetailScreen = () => {
     const [params] = useSearchParams();
@@ -20,11 +21,16 @@ export const DishesDetailScreen = () => {
         return dishes.find(e => e.id === params.get("dishes"));
     }, [params, dishes])
     const navigate = useNavigate();
+    const dispatch = useDispatch();
     const { } = useScreenTitle({ value: "Chi tiết (" + currentDist.name + ")", deps: [currentDist] },);
 
     const _getDishesByIds = (ids: string[]) => {
         return dishes.filter(e => ids.includes(e.id));
     }
+
+    useEffect(() => {
+        dispatch(test());
+    }, [])
 
     return <React.Fragment>
         {currentDist.image && <Box style={{

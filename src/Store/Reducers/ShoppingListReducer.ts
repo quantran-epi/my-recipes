@@ -2,7 +2,7 @@ import type { PayloadAction } from '@reduxjs/toolkit';
 import { createSlice } from '@reduxjs/toolkit';
 import { DishIngredientAmountDishMeta, DishIngredientAmountMealMeta, Dishes } from '@store/Models/Dishes';
 import { ScheduledMeal } from '@store/Models/ScheduledMeal';
-import { ShoppingList, ShoppingListIngredientGroup } from '@store/Models/ShoppingList';
+import { ShoppingList, ShoppingListIngredientAmount, ShoppingListIngredientGroup } from '@store/Models/ShoppingList';
 import dayjs from 'dayjs';
 import { groupBy } from 'lodash';
 import { nanoid } from 'nanoid';
@@ -13,11 +13,19 @@ export type ShoppingListGenerateIngredientParams = {
     allScheduledMeals: ScheduledMeal[];
 }
 
-export type ShoppingListToggleDoneIngredientParams = {
+export type ShoppingListToggleDoneIngredientGroupParams = {
     shoppingListId: string;
     ingredientGroupId: string;
     isDone: boolean;
 }
+
+export type ShoppingListToggleDoneIngredientAmountParams = {
+    shoppingListId: string;
+    ingredientGroupId: string;
+    ingredientAmoutId: string;
+    isDone: boolean;
+}
+
 
 export type ShoppingListAddDishesParams = {
     shoppingList: ShoppingList;
@@ -70,28 +78,30 @@ export const ShoppingListSlice = createSlice({
 
                     //process meals
                     let allMeals = action.payload.allScheduledMeals.filter(m => e.scheduledMeals.includes(m.id));
-                    let ingredientAmountsFromMeals = [];
+                    let ingredientAmountsFromMeals: ShoppingListIngredientAmount[] = [];
                     allMeals.forEach(meal => {
                         let dishesFromThisMeal = [...meal.meals.breakfast, ...meal.meals.lunch, ...meal.meals.dinner]
                             .flat()
                             .map(d => action.payload.allDishes.find(d1 => d1.id === d));
 
-                        let ingredientAmountFromThisMeal = [];
+                        let ingredientAmountFromThisMeal: ShoppingListIngredientAmount[] = [];
                         dishesFromThisMeal.forEach(dish => {
                             ingredientAmountFromThisMeal = ingredientAmountFromThisMeal.concat(...dish.ingredients.map(e => ({
                                 ...e,
+                                id: shoppingList.id.concat("-" + e.ingredientId).concat("-" + nanoid(5)),
                                 meal: { id: meal.id, plannedDate: dayjs(meal.plannedDate).toDate() } as DishIngredientAmountMealMeta,
                                 dish: { id: dish.id, name: dish.name } as DishIngredientAmountDishMeta
                             })))
                         })
 
-                        let ingredientAmountRecursiveFromThisMeal = [];
+                        let ingredientAmountRecursiveFromThisMeal: ShoppingListIngredientAmount[] = [];
                         dishesFromThisMeal.map(e => ShoppingListIngredientHelpers.getIncludedDishesRecursive(e, action.payload.allDishes))
                             .flat()
                             .map(d => action.payload.allDishes.find(d1 => d1.id === d))
                             .forEach(dish => {
                                 ingredientAmountRecursiveFromThisMeal = ingredientAmountRecursiveFromThisMeal.concat(...dish.ingredients.map(e => ({
                                     ...e,
+                                    id: shoppingList.id.concat("-" + e.ingredientId).concat("-" + nanoid(5)),
                                     meal: { id: meal.id, plannedDate: dayjs(meal.plannedDate).toDate() } as DishIngredientAmountMealMeta,
                                     dish: { id: dish.id, name: dish.name } as DishIngredientAmountDishMeta
                                 })))
@@ -103,10 +113,11 @@ export const ShoppingListSlice = createSlice({
                     let allDishesFromShoppingList = action.payload.allDishes
                         .filter(e => shoppingList.dishes.includes(e.id));
 
-                    let ingredientAmountsFromShoppingList = [];
+                    let ingredientAmountsFromShoppingList: ShoppingListIngredientAmount[] = [];
                     allDishesFromShoppingList.forEach(dish => {
                         ingredientAmountsFromShoppingList.push(...dish.ingredients.map(ingre => ({
                             ...ingre,
+                            id: shoppingList.id.concat("-" + ingre.ingredientId).concat("-" + nanoid(5)),
                             dish: { id: dish.id, name: dish.name } as DishIngredientAmountDishMeta
                         })))
                     })
@@ -116,6 +127,7 @@ export const ShoppingListSlice = createSlice({
                         .forEach(dish => {
                             ingredientAmountsFromShoppingList.push(...dish.ingredients.map(ingre => ({
                                 ...ingre,
+                                id: shoppingList.id.concat("-" + ingre.ingredientId).concat("-" + nanoid(5)),
                                 dish: { id: dish.id, name: dish.name } as DishIngredientAmountDishMeta
                             })))
                         })
@@ -134,7 +146,7 @@ export const ShoppingListSlice = createSlice({
                 return e;
             })
         },
-        toggleDoneIngredient: (state, action: PayloadAction<ShoppingListToggleDoneIngredientParams>) => {
+        toggleDoneIngredientGroup: (state, action: PayloadAction<ShoppingListToggleDoneIngredientGroupParams>) => {
             state.shoppingLists = state.shoppingLists.map(e => {
                 if (e.id === action.payload.shoppingListId) {
                     return {
@@ -143,7 +155,34 @@ export const ShoppingListSlice = createSlice({
                             if (ingre.id === action.payload.ingredientGroupId) {
                                 return {
                                     ...ingre,
+                                    amounts: ingre.amounts.map(amt => ({ ...amt, isDone: action.payload.isDone })),
                                     isDone: action.payload.isDone
+                                }
+                            }
+                            return ingre;
+                        }),
+                    }
+                }
+                return e;
+            })
+        },
+        toggleDoneIngredientAmount: (state, action: PayloadAction<ShoppingListToggleDoneIngredientAmountParams>) => {
+            state.shoppingLists = state.shoppingLists.map(e => {
+                if (e.id === action.payload.shoppingListId) {
+                    return {
+                        ...e,
+                        ingredients: e.ingredients.map(ingre => {
+                            if (ingre.id === action.payload.ingredientGroupId) {
+                                let newAmounts = ingre.amounts.map(amt => {
+                                    if (amt.id === action.payload.ingredientAmoutId) {
+                                        return { ...amt, isDone: action.payload.isDone };
+                                    }
+                                    return amt;
+                                });
+                                return {
+                                    ...ingre,
+                                    amounts: newAmounts,
+                                    isDone: newAmounts.every(e => e.isDone) ? true : false
                                 }
                             }
                             return ingre;
@@ -221,7 +260,7 @@ export const ShoppingListSlice = createSlice({
 
 // Action creators are generated for each case reducer function
 export const { add: addShoppingList, edit: editShoppingList,
-    remove: removeShoppingList, generateIngredient, toggleDoneIngredient, addDishesToShoppingList,
+    remove: removeShoppingList, generateIngredient, toggleDoneIngredientGroup, toggleDoneIngredientAmount, addDishesToShoppingList,
     updateShoppingListIngredientMealData, updateShoppingListIngredientDishData
 } = ShoppingListSlice.actions
 
