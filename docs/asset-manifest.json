@@ -1,9 +1,10 @@
 {
   "files": {
     "main.css": "/my-recipes/static/css/main.e6d404b6.css",
-    "main.js": "/my-recipes/static/js/main.e888a7cf.js",
+    "main.js": "/my-recipes/static/js/main.5fe1ffc6.js",
     "static/js/453.b5018280.chunk.js": "/my-recipes/static/js/453.b5018280.chunk.js",
     "static/media/noodles.png": "/my-recipes/static/media/noodles.db502210854831dbe3a0.png",
+    "static/media/shoppingList.png": "/my-recipes/static/media/shoppingList.8e9a35171bf2cea2583f.png",
     "static/media/diet.png": "/my-recipes/static/media/diet.bdc64f6fff2f76049182.png",
     "static/media/food-preparation.png": "/my-recipes/static/media/food-preparation.c147d132b6fa29c8cc8e.png",
     "static/media/analysis.png": "/my-recipes/static/media/analysis.46749d673be9053abbde.png",
@@ -16,18 +17,17 @@
     "static/media/time.png": "/my-recipes/static/media/time.7be30ab4672480d8c939.png",
     "static/media/nineteen.png": "/my-recipes/static/media/nineteen.8e5aac60f00e0492e358.png",
     "static/media/sunrise.png": "/my-recipes/static/media/sunrise.f250b0303eae6910c50d.png",
-    "static/media/shoppingList.png": "/my-recipes/static/media/shoppingList.e26818c0ffe739d3f9e1.png",
     "static/media/compose.png": "/my-recipes/static/media/compose.0bc3bfa11de9da064819.png",
     "static/media/eraser.png": "/my-recipes/static/media/eraser.abbb08605884bbb04e5d.png",
     "static/media/shopping-cart-add.png": "/my-recipes/static/media/shopping-cart-add.d45b8db8b3b4ff8eaf55.png",
     "static/media/list-check.png": "/my-recipes/static/media/list-check.873717da297a599a32a8.png",
     "index.html": "/my-recipes/index.html",
     "main.e6d404b6.css.map": "/my-recipes/static/css/main.e6d404b6.css.map",
-    "main.e888a7cf.js.map": "/my-recipes/static/js/main.e888a7cf.js.map",
+    "main.5fe1ffc6.js.map": "/my-recipes/static/js/main.5fe1ffc6.js.map",
     "453.b5018280.chunk.js.map": "/my-recipes/static/js/453.b5018280.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.e6d404b6.css",
-    "static/js/main.e888a7cf.js"
+    "static/js/main.5fe1ffc6.js"
   ]
 }
