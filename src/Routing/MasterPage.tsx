@@ -126,7 +126,7 @@ const SidebarDrawer = () => {
                         ]}
                     />
                     <Box style={{ overflow: "hidden" }}>
-                        <Image src={LogoIcon} width={400} preview={false} style={{ marginLeft: 90 }} />
+                        <Image src={LogoIcon} width={350} preview={false} style={{ marginLeft: 90, opacity: 0.4 }} />
                     </Box>
                     <Box style={{ padding: 15 }}><DataBackup /> </Box>
                 </Flex>
