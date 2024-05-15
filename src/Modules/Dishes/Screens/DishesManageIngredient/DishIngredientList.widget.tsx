@@ -95,7 +95,7 @@ export const IngredientItem: React.FunctionComponent<IngredientItemProps> = (pro
     }, [ingredients, props.ingredientAmount])
 
     const _getIngredientName = (id) => {
-        return (ingredientAmount?.name.length > 15 ? ingredientAmount?.name?.substring(0, 15) + "..." : ingredientAmount.name);
+        return (ingredientAmount?.name.length > 20 ? ingredientAmount?.name?.substring(0, 20) + "..." : ingredientAmount.name);
     }
 
     const _onEdit = () => {
