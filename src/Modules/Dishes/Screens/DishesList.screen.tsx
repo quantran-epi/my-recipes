@@ -1,4 +1,4 @@
-import { CheckCircleOutlined, DeleteOutlined, EditOutlined, MonitorOutlined, PlusOutlined, ProjectOutlined, QuestionCircleOutlined, TeamOutlined } from "@ant-design/icons";
+import { LoadingOutlined, DeleteOutlined, EditOutlined, MonitorOutlined, PlusOutlined, ProjectOutlined, QuestionCircleOutlined, TeamOutlined } from "@ant-design/icons";
 import { Button } from "@components/Button";
 import { Input } from "@components/Form/Input";
 import { Image } from "@components/Image";
@@ -81,16 +81,16 @@ export const DishesItem: React.FunctionComponent<DishesItemProps> = (props) => {
     const toggleIngredientsOverview = useToggle();
     const toggleStepsOverview = useToggle();
     const toggleDishesDetail = useToggle();
-    const navigate = useNavigate();
     const dishes = useSelector((state: RootState) => state.dishes.dishes);
     const ingredients = useSelector((state: RootState) => state.ingredient.ingredients);
+    const toggleLoading = useToggle();
 
     const _onEdit = () => {
         toggleEdit.show();
     }
 
     const _onManageIngredient = () => {
-        // navigate(RootRoutes.AuthorizedRoutes.DishesRoutes.ManageIngredient(props.item.id));
+        toggleLoading.show();
         toggleDishesDetail.show();
     }
 
@@ -111,7 +111,7 @@ export const DishesItem: React.FunctionComponent<DishesItemProps> = (props) => {
             actions={
                 [
                     <Button size="small" onClick={_onEdit} icon={<EditOutlined />} />,
-                    <Button size="small" onClick={_onManageIngredient} icon={<MonitorOutlined />} />,
+                    <Button size="small" onClick={_onManageIngredient} icon={toggleLoading.value ? <LoadingOutlined /> : <MonitorOutlined />} />,
                     <Popconfirm title="Xóa?" onConfirm={() => props.onDelete(props.item)}>
                         <Button size="small" danger icon={<DeleteOutlined />} />
                     </Popconfirm>
@@ -140,7 +140,7 @@ export const DishesItem: React.FunctionComponent<DishesItemProps> = (props) => {
                 <Image src={NoodlesIcon} preview={false} width={24} style={{ marginBottom: 3 }} />
                 {props.item.name}
             </Space>
-        } destroyOnClose={true} onCancel={toggleDishesDetail.hide} footer={null}>
+        } destroyOnClose={true} onCancel={toggleDishesDetail.hide} footer={null} afterOpenChange={toggleLoading.hide}>
             <Box style={{ maxHeight: 550, overflowY: "auto" }}>
                 <DishesDetailWidget dish={props.item} />
             </Box>

@@ -93,6 +93,7 @@ export const DishesAddIngredientWidget: React.FunctionComponent<DishesAddIngredi
         </SmartForm.Item>
         <SmartForm.Item {...addIngreToDishForm.itemDefinitions.prepare}>
             <Select
+                allowClear
                 mode="tags"
                 style={{ width: '100%' }}
                 placeholder="Sơ chế"

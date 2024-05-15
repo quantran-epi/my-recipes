@@ -14,7 +14,7 @@ import { Dishes, DishesIngredientAmount } from "@store/Models/Dishes"
 import { DishesIngredientAddParams, removeIngredientsFromDish } from "@store/Reducers/DishesReducer"
 import { RootState } from "@store/Store"
 import { Typography } from "antd"
-import React, { FunctionComponent, useEffect } from "react"
+import React, { FunctionComponent, useEffect, useMemo } from "react"
 import { useDispatch, useSelector } from "react-redux"
 import { DishesAddIngredientWidget } from "./DishesAddIngredient.widget"
 import { orderBy } from "lodash"
@@ -90,38 +90,52 @@ type IngredientItemProps = {
 export const IngredientItem: React.FunctionComponent<IngredientItemProps> = (props) => {
     const ingredients = useSelector((state: RootState) => state.ingredient.ingredients);
     const togglEditIngredientToDishes = useToggle();
+    const ingredientAmount = useMemo(() => {
+        return ingredients.find(e => e.id === props.ingredientAmount.ingredientId);
+    }, [ingredients, props.ingredientAmount])
 
     const _getIngredientName = (id) => {
-        let ingre = ingredients.find(e => e.id === id);
-        return (ingre?.name.length > 10 ? ingre?.name?.substring(0, 12) + "..." : ingre.name) || "N/A";
+        return (ingredientAmount?.name.length > 15 ? ingredientAmount?.name?.substring(0, 15) + "..." : ingredientAmount.name);
     }
 
     const _onEdit = () => {
         togglEditIngredientToDishes.show();
     }
 
+    const actions = [
+        <Button size="small" icon={<EditOutlined />} onClick={_onEdit} />,
+        <Popconfirm title="Xóa?" onConfirm={() => props.onDelete(props.dish, props.ingredientAmount)}>
+            <Button size="small" danger icon={<DeleteOutlined />} />
+        </Popconfirm>
+    ]
+
+    if (props.ingredientAmount.prepare?.length > 0) actions.unshift(<Popover title={<Space>
+        <Image src={FoodPrepareIcon} preview={false} width={18} style={{ marginBottom: 3 }} />
+        <Typography.Text>Sơ chế nguyên liệu</Typography.Text>
+    </Space>} content={<List dataSource={props.ingredientAmount.prepare} size="small" renderItem={(item) => <List.Item>{item}</List.Item>} />}>
+        <Button size="small" icon={<ProjectOutlined />} />
+    </Popover>);
+
     return <React.Fragment>
         <List.Item
-            actions={[
-                props.ingredientAmount.prepare && <Popover title={<Space>
-                    <Image src={FoodPrepareIcon} preview={false} width={18} style={{ marginBottom: 3 }} />
-                    <Typography.Text>Sơ chế nguyên liệu</Typography.Text>
-                </Space>} content={<List dataSource={props.ingredientAmount.prepare} size="small" renderItem={(item) => <List.Item>{item}</List.Item>} />}>
-                    <Button size="small" icon={<ProjectOutlined />} />
-                </Popover>,
-                <Button size="small" icon={<EditOutlined />} onClick={_onEdit} />,
-                <Popconfirm title="Xóa?" onConfirm={() => props.onDelete(props.dish, props.ingredientAmount)}>
-                    <Button size="small" danger icon={<DeleteOutlined />} />
-                </Popconfirm>
-            ]}>
-            <Space>
-                <Typography.Text>
-                    <Typography.Text>{_getIngredientName(props.ingredientAmount.ingredientId)}</Typography.Text> - {props.ingredientAmount.amount} {props.ingredientAmount.unit}
-                </Typography.Text>
-                {!props.ingredientAmount.required && <Tooltip title="Tùy chọn">
-                    <Tag color="gold" icon={<QuestionCircleOutlined />} />
+            actions={actions}>
+            <List.Item.Meta
+                title={<Tooltip title={ingredientAmount?.name}>
+                    <Typography.Text style={{ fontWeight: 600 }}>{_getIngredientName(props.ingredientAmount.ingredientId)}</Typography.Text>
                 </Tooltip>}
-            </Space>
+                description={<Space>
+                    <Typography.Text type="secondary">{props.ingredientAmount.amount} {props.ingredientAmount.unit}</Typography.Text>
+                    {!props.ingredientAmount.required && <Tooltip title="Tùy chọn">
+                        <Tag color="gold" icon={<QuestionCircleOutlined />} />
+                    </Tooltip>}
+                </Space>}
+            />
+            {/* <Space>
+                <Typography.Text>
+                    <Typography.Text>{_getIngredientName(props.ingredientAmount.ingredientId)}</Typography.Text> -
+                </Typography.Text>
+               
+            </Space> */}
         </List.Item>
         <Modal open={togglEditIngredientToDishes.value} title={<Stack gap={0} direction="column" align="flex-start">
             <Space>

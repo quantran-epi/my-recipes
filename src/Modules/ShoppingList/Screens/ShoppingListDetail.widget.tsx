@@ -136,7 +136,6 @@ type ShoppingListIngredientItemProps = {
 export const ShoppingListIngredientItem: React.FunctionComponent<ShoppingListIngredientItemProps> = (props) => {
     const dispatch = useDispatch();
     const ingredients = useSelector((state: RootState) => state.ingredient.ingredients);
-    const groupCheckBoxRef = useRef(null);
 
     const _getIngredientNameById = (id: string) => {
         return ingredients.find(e => e.id === id)?.name || "";
