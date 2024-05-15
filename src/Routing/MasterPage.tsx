@@ -24,6 +24,9 @@ import DishesIcon from "../../assets/icons/noodles.png";
 import IngredientIcon from "../../assets/icons/vegetable.png";
 import MealsIcon from "../../assets/icons/meals.png";
 import ShoppingListIcon from "../../assets/icons/shoppingList.png";
+import MarketIcon from "../../assets/icons/market.png";
+import LogoIcon from "../../assets/icons/logo.png";
+import ShoppingList2Icon from "../../assets/icons/shoppingList2.png";
 import { Image } from "@components/Image";
 import { Tooltip } from "@components/Tootip";
 import { CopyToClipboard } from 'react-copy-to-clipboard';
@@ -122,7 +125,9 @@ const SidebarDrawer = () => {
                             }
                         ]}
                     />
-
+                    <Box style={{ overflow: "hidden" }}>
+                        <Image src={LogoIcon} width={400} preview={false} style={{ marginLeft: 90 }} />
+                    </Box>
                     <Box style={{ padding: 15 }}><DataBackup /> </Box>
                 </Flex>
             </Drawer>
