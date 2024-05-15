@@ -6,17 +6,19 @@ import { Space } from "@components/Layout/Space"
 import { Stack } from "@components/Layout/Stack"
 import { Modal } from "@components/Modal"
 import { useToggle } from "@hooks"
-import { RootRoutes } from "@routing/RootRoutes"
 import { Dishes } from "@store/Models/Dishes"
+import { test } from "@store/Reducers/DishesReducer"
 import { RootState } from "@store/Store"
 import { Typography } from "antd"
 import React, { useEffect, useMemo, useState } from "react"
 import { useDispatch, useSelector } from "react-redux"
-import { useNavigate } from "react-router-dom"
 import NoodlesIcon from "../../../../../assets/icons/noodles.png"
+import DietIcon from "../../../../../assets/icons/diet.png"
+import VegetableIcon from "../../../../../assets/icons/vegetable.png"
+import ProcessIcon from "../../../../../assets/icons/process.png"
+import AnalysisIcon from "../../../../../assets/icons/analysis.png"
 import { DishIngredientListWidget } from "./DishIngredientList.widget"
 import { DishStepListWidget } from "./DishStepList.widget"
-import { test } from "@store/Reducers/DishesReducer"
 
 type DishDetailWidgetProps = {
     dish: Dishes;
@@ -62,12 +64,18 @@ export const DishesDetailWidget: React.FunctionComponent<DishDetailWidgetProps> 
         }}></Box>}
 
         {props.dish.note && <React.Fragment>
-            <Divider orientation="left">Thông tin chung</Divider>
+            <Divider orientation="left"><Space>
+                <Image src={AnalysisIcon} preview={false} width={24} style={{ marginBottom: 3 }} />
+                Thông tin chung
+            </Space></Divider>
             <Typography.Paragraph><Typography.Text strong>Ghi chú:</Typography.Text> {props.dish.note}</Typography.Paragraph>
         </React.Fragment>}
 
         {props.dish.includeDishes.length > 0 && <React.Fragment>
-            <Divider orientation="left">Bao gồm món</Divider>
+            <Divider orientation="left"><Space>
+                <Image src={DietIcon} preview={false} width={24} style={{ marginBottom: 3 }} />
+                Bao gồm món
+            </Space></Divider>
             <Stack wrap="wrap" gap={5}>
                 {_getDishesByIds(props.dish.includeDishes).map(e =>
                     <Button
@@ -75,10 +83,16 @@ export const DishesDetailWidget: React.FunctionComponent<DishDetailWidgetProps> 
             </Stack>
         </React.Fragment>}
 
-        <Divider orientation="left">Danh sách nguyên liệu</Divider>
+        <Divider orientation="left"><Space>
+            <Image src={VegetableIcon} preview={false} width={24} style={{ marginBottom: 3 }} />
+            Danh sách nguyên liệu
+        </Space></Divider>
         <DishIngredientListWidget currentDist={props.dish} />
 
-        <Divider orientation="left">Các bước thực hiện</Divider>
+        <Divider orientation="left"><Space>
+            <Image src={ProcessIcon} preview={false} width={24} style={{ marginBottom: 3 }} />
+            Các bước thực hiện
+        </Space></Divider>
         <DishStepListWidget currentDist={props.dish} />
 
         {currentIncludeDish && <Modal style={{ top: 50 }} open={toggleDishesDetail.value} title={

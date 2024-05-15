@@ -1,15 +1,17 @@
 {
   "files": {
     "main.css": "/my-recipes/static/css/main.e6d404b6.css",
-    "main.js": "/my-recipes/static/js/main.9e153436.js",
+    "main.js": "/my-recipes/static/js/main.e888a7cf.js",
     "static/js/453.b5018280.chunk.js": "/my-recipes/static/js/453.b5018280.chunk.js",
-    "static/media/vegetable.png": "/my-recipes/static/media/vegetable.1607f383176c56ba43e3.png",
-    "static/media/process.png": "/my-recipes/static/media/process.2d9eb2e0d6898551919e.png",
-    "static/media/noodles.png": "/my-recipes/static/media/noodles.bdc64f6fff2f76049182.png",
+    "static/media/noodles.png": "/my-recipes/static/media/noodles.db502210854831dbe3a0.png",
+    "static/media/diet.png": "/my-recipes/static/media/diet.bdc64f6fff2f76049182.png",
     "static/media/food-preparation.png": "/my-recipes/static/media/food-preparation.c147d132b6fa29c8cc8e.png",
+    "static/media/analysis.png": "/my-recipes/static/media/analysis.46749d673be9053abbde.png",
     "static/media/night.png": "/my-recipes/static/media/night.1bfbd92981bc5bc48482.png",
     "service-worker.js": "/my-recipes/service-worker.js",
     "static/media/done.png": "/my-recipes/static/media/done.815a1f74cff7ec5e25c2.png",
+    "static/media/vegetable.png": "/my-recipes/static/media/vegetable.165d06b94cb28a23e3f0.png",
+    "static/media/process.png": "/my-recipes/static/media/process.9a41cb47fced821a7c90.png",
     "static/media/meals.png": "/my-recipes/static/media/meals.27a8d17ec40b2d8c48b4.png",
     "static/media/time.png": "/my-recipes/static/media/time.7be30ab4672480d8c939.png",
     "static/media/nineteen.png": "/my-recipes/static/media/nineteen.8e5aac60f00e0492e358.png",
@@ -21,11 +23,11 @@
     "static/media/list-check.png": "/my-recipes/static/media/list-check.873717da297a599a32a8.png",
     "index.html": "/my-recipes/index.html",
     "main.e6d404b6.css.map": "/my-recipes/static/css/main.e6d404b6.css.map",
-    "main.9e153436.js.map": "/my-recipes/static/js/main.9e153436.js.map",
+    "main.e888a7cf.js.map": "/my-recipes/static/js/main.e888a7cf.js.map",
     "453.b5018280.chunk.js.map": "/my-recipes/static/js/453.b5018280.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.e6d404b6.css",
-    "static/js/main.9e153436.js"
+    "static/js/main.e888a7cf.js"
   ]
 }

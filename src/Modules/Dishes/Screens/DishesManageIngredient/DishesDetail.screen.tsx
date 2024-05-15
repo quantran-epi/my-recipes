@@ -13,6 +13,8 @@ import { DishStepListWidget } from "./DishStepList.widget"
 import { Image } from "@components/Image"
 import { Box } from "@components/Layout/Box"
 import { test } from "@store/Reducers/DishesReducer"
+import { Space } from "@components/Layout/Space"
+import DishIcon from "../../../../../assets/icons/noodles.png"
 
 export const DishesDetailScreen = () => {
     const [params] = useSearchParams();
@@ -49,7 +51,12 @@ export const DishesDetailScreen = () => {
         </React.Fragment>}
 
         {currentDist.includeDishes.length > 0 && <React.Fragment>
-            <Divider orientation="left">Bao gồm món</Divider>
+            <Divider orientation="left">
+                <Space>
+                    <Image src={DishIcon} preview={false} width={28} />
+                    Bao gồm mónada
+                </Space>
+            </Divider>
             <Stack wrap="wrap" gap={5}>
                 {_getDishesByIds(currentDist.includeDishes).map(e =>
                     <Button
@@ -57,7 +64,7 @@ export const DishesDetailScreen = () => {
             </Stack>
         </React.Fragment>}
 
-        <Divider orientation="left">Danh sách nguyên liệu</Divider>
+        <Divider orientation="left">Danh sách nguyên liệuđâ</Divider>
         <DishIngredientListWidget currentDist={currentDist} />
 
         <Divider orientation="left">Các bước thực hiện</Divider>

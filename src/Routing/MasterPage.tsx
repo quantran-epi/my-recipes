@@ -163,7 +163,8 @@ const BottomTabNavigator = () => {
     const _textStyles = (route: string): React.CSSProperties => {
         return {
             color: route === location.pathname ? theme.token.colorPrimary : undefined,
-            fontWeight: route === location.pathname ? "bold" : undefined
+            fontWeight: route === location.pathname ? "bold" : undefined,
+            fontSize: 16
         }
     }
 
