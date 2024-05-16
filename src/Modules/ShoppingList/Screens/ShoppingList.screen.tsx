@@ -18,7 +18,7 @@ import { generateIngredient, removeShoppingList } from "@store/Reducers/Shopping
 import { RootState } from "@store/Store";
 import { debounce, orderBy } from "lodash";
 import moment from "moment";
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import ComposeIcon from "../../../../assets/icons/compose.png";
 import ChecklistIcon from "../../../../assets/icons/done.png";
@@ -30,6 +30,7 @@ import { ShoppingListCalendarWidget } from "./ShoppingListCalendar.widget";
 import { ShoppingListDetailWidget } from "./ShoppingListDetail.widget";
 import { ShoppingListEditWidget } from "./ShoppingListEdit.widget";
 import { DateHelpers } from "@common/Helpers/DateHelper";
+import { test } from "@store/Reducers/DishesReducer";
 
 export const ShoppingListScreen = () => {
     const shoppingLists = useSelector((state: RootState) => state.shoppingList.shoppingLists);
@@ -149,7 +150,7 @@ export const ShoppingListItem: React.FunctionComponent<ShoppingListItemProps> = 
     }
 
     const _isOverdue = () => {
-        return DateHelpers.calculateDaysBetween(new Date(), props.item.plannedDate);
+        return DateHelpers.calculateDaysBetween(new Date(), props.item.plannedDate) < 0;
     }
 
     return <React.Fragment>
