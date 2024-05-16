@@ -33,6 +33,14 @@ export type DishesStep = {
     required: boolean;
 }
 
+export type DishDuration = {
+    unfreeze: number;
+    prepare: number;
+    cooking: number;
+    serve: number;
+    cooldown: number;
+}
+
 export type Dishes = {
     id: string;
     name: string;
@@ -41,5 +49,6 @@ export type Dishes = {
     includeDishes: string[];
     steps: DishesStep[];
     isCompleted: boolean;
+    duration: DishDuration;
     image?: string;
 }

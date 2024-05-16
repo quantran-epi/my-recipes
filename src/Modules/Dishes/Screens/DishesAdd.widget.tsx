@@ -2,7 +2,6 @@ import { ObjectPropertyHelper } from "@common/Helpers/ObjectProperty"
 import { Button } from "@components/Button"
 import { Input, TextArea } from "@components/Form/Input"
 import { Option, Select } from "@components/Form/Select"
-import { Upload } from "@components/Form/Upload"
 import { Stack } from "@components/Layout/Stack"
 import { useMessage } from "@components/Message"
 import { SmartForm, useSmartForm } from "@components/SmartForm"
@@ -10,7 +9,6 @@ import { nanoid } from "@reduxjs/toolkit"
 import { Dishes } from "@store/Models/Dishes"
 import { addDishes } from "@store/Reducers/DishesReducer"
 import { RootState } from "@store/Store"
-import { range } from "lodash"
 import { useDispatch, useSelector } from "react-redux"
 
 export const DishesAddWidget = () => {
@@ -27,7 +25,14 @@ export const DishesAddWidget = () => {
             includeDishes: [],
             steps: [],
             isCompleted: false,
-            image: ""
+            duration: {
+                unfreeze: 0,
+                prepare: 0,
+                cooking: 0,
+                serve: 0,
+                cooldown: 0
+            },
+            image: "",
         },
         onSubmit: (values) => {
             dispatch(addDishes(values.transformValues));
@@ -43,6 +48,7 @@ export const DishesAddWidget = () => {
             steps: { name: ObjectPropertyHelper.nameof(defaultValues, e => e.steps), noMarkup: true },
             isCompleted: { name: ObjectPropertyHelper.nameof(defaultValues, e => e.isCompleted), noMarkup: true },
             image: { label: "Ảnh", name: ObjectPropertyHelper.nameof(defaultValues, e => e.image) },
+            duration: { name: ObjectPropertyHelper.nameof(defaultValues, e => e.duration), noMarkup: true },
         }),
         transformFunc: (values) => ({
             ...values,

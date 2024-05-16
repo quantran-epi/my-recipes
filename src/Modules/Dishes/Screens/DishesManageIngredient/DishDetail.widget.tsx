@@ -28,12 +28,6 @@ export const DishesDetailWidget: React.FunctionComponent<DishDetailWidgetProps> 
     const dishes = useSelector((state: RootState) => state.dishes.dishes);
     const toggleDishesDetail = useToggle();
     const [currentIncludeDish, setCurrentIncludeDish] = useState<string>();
-    const dispatch = useDispatch();
-
-    useEffect(() => {
-        dispatch(test());
-    }, [])
-
 
     const _getDishesById = (id: string) => {
         return dishes.find(e => id === e.id);

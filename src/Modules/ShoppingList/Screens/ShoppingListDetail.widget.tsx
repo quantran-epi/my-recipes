@@ -10,7 +10,7 @@ import { Tooltip } from "@components/Tootip";
 import { Typography } from "@components/Typography";
 import { useToggle } from "@hooks";
 import { Dishes } from "@store/Models/Dishes";
-import { ShoppingList, ShoppingListIngredientGroup } from "@store/Models/ShoppingList";
+import { ShoppingList, ShoppingListIngredientAmount, ShoppingListIngredientGroup } from "@store/Models/ShoppingList";
 import { toggleDoneIngredientAmount, toggleDoneIngredientGroup } from "@store/Reducers/ShoppingListReducer";
 import { RootState } from "@store/Store";
 import { Space, Tabs } from "antd";
@@ -158,6 +158,14 @@ export const ShoppingListIngredientItem: React.FunctionComponent<ShoppingListIng
         }));
     }
 
+    const _getDateFromNow = (item: ShoppingListIngredientAmount) => {
+        return DateHelpers.calculateDaysBetween(new Date(), item.meal.plannedDate);
+    }
+
+    const _getDateFromNowDisplayText = (item: ShoppingListIngredientAmount) => {
+        return moment(item.meal.plannedDate).startOf("day").from(moment().startOf("day"));
+    }
+
     const indeterminate = NumberHelpers.isBetween(props.item.amounts.filter(e => e.isDone).length, 0.1, props.item.amounts.length, false);
 
     return <React.Fragment>
@@ -168,22 +176,23 @@ export const ShoppingListIngredientItem: React.FunctionComponent<ShoppingListIng
                 avatar={<Checkbox indeterminate={indeterminate} checked={props.item.isDone} onChange={_onCheckedAllChange} />}
                 title={<Typography.Text type={props.item.isDone ? "secondary" : undefined} style={{ textDecorationLine: props.item.isDone ? "line-through" : "none" }}>{_getIngredientNameById(props.item.ingredientId)}</Typography.Text>}
                 description={<List
-                    size="small"
                     dataSource={props.item.amounts}
                     renderItem={(item) => <List.Item style={{ padding: 0 }}>
                         <List.Item.Meta
                             avatar={<Checkbox checked={item.isDone} onChange={(e) => _onCheckedChange(e, item.id)} />}
                             description={<Space>
-                                <Typography.Text>{item.amount} {item.unit} ({item?.dish.name})</Typography.Text>
-                                <Space size={0}>
+                                <Typography.Text type={item.isDone ? "secondary" : undefined} style={{ textDecorationLine: item.isDone ? "line-through" : "none" }}>{item.amount} {item.unit} ({item?.dish.name})</Typography.Text>
+                                <Stack.Compact>
                                     {!item.required && <Tooltip title="Tùy chọn"><Tag color="gold" icon={<QuestionCircleOutlined />} /></Tooltip>}
-                                    <Tooltip>
-                                        {item.meal && DateHelpers.calculateDaysBetween(new Date(), item.meal.plannedDate) > 0 && <Tooltip
-                                            title={`${DateHelpers.calculateDaysBetween(new Date(), item.meal.plannedDate)} days later`}>
-                                            <Tag color="volcano">{`${DateHelpers.calculateDaysBetween(new Date(), item.meal.plannedDate)}d`}</Tag>
-                                        </Tooltip>}
-                                    </Tooltip>
-                                </Space>
+                                    {item.meal && _getDateFromNow(item) > 0 && <Tooltip
+                                        title={_getDateFromNowDisplayText(item)}>
+                                        <Tag color="blue">{`${_getDateFromNow(item)}d`}</Tag>
+                                    </Tooltip>}
+                                    {item.meal && _getDateFromNow(item) < 0 && <Tooltip
+                                        title={_getDateFromNowDisplayText(item)}>
+                                        <Tag color="volcano">{`${Math.abs(_getDateFromNow(item))}d`}</Tag>
+                                    </Tooltip>}
+                                </Stack.Compact>
                             </Space>} />
                     </List.Item>} />} />
         </List.Item >

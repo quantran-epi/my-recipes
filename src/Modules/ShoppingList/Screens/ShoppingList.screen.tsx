@@ -29,6 +29,7 @@ import { ShoppingListAddMoreDishesWidget } from "./ShoppingListAddMoreDishes.wid
 import { ShoppingListCalendarWidget } from "./ShoppingListCalendar.widget";
 import { ShoppingListDetailWidget } from "./ShoppingListDetail.widget";
 import { ShoppingListEditWidget } from "./ShoppingListEdit.widget";
+import { DateHelpers } from "@common/Helpers/DateHelper";
 
 export const ShoppingListScreen = () => {
     const shoppingLists = useSelector((state: RootState) => state.shoppingList.shoppingLists);
@@ -147,6 +148,10 @@ export const ShoppingListItem: React.FunctionComponent<ShoppingListItemProps> = 
         }
     }
 
+    const _isOverdue = () => {
+        return DateHelpers.calculateDaysBetween(new Date(), props.item.plannedDate);
+    }
+
     return <React.Fragment>
         <List.Item
             actions={
@@ -203,7 +208,11 @@ export const ShoppingListItem: React.FunctionComponent<ShoppingListItemProps> = 
                     </Space>
                     {props.item.plannedDate && <Space size={10}>
                         <Tooltip title="Ngày thực hiện"><Image src={CalendarIcon} preview={false} width={16} style={{ marginBottom: 3 }} /></Tooltip>
-                        <Typography.Text style={{ fontSize: 14 }}>{props.item.plannedDate ? moment(props.item.plannedDate).format("ddd, DD/MM/YY") : "N/A"}</Typography.Text>
+
+                        {_isOverdue() ? <Tooltip title={moment(props.item.plannedDate).startOf("day").from(moment().startOf("day"))}>
+                            <Typography.Text type={"danger"} style={{ fontSize: 14 }}>{props.item.plannedDate ? moment(props.item.plannedDate).format("ddd, DD/MM/YY") : "N/A"}</Typography.Text>
+                        </Tooltip> :
+                            <Typography.Text style={{ fontSize: 14 }}>{props.item.plannedDate ? moment(props.item.plannedDate).format("ddd, DD/MM/YY") : "N/A"}</Typography.Text>}
                     </Space>}
                 </Stack>} />
         </List.Item>
@@ -239,5 +248,5 @@ export const ShoppingListItem: React.FunctionComponent<ShoppingListItemProps> = 
         } destroyOnClose={true} onCancel={toggleEditModal.hide} footer={null}>
             <ShoppingListEditWidget item={props.item} onDone={toggleEditModal.hide} />
         </Modal>
-    </React.Fragment>
+    </React.Fragment >
 }

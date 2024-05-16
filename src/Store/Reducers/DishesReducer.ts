@@ -1,6 +1,6 @@
 import type { PayloadAction } from '@reduxjs/toolkit';
 import { createSlice } from '@reduxjs/toolkit';
-import { Dishes, DishesIngredientAmount, DishesStep } from '@store/Models/Dishes';
+import { DishDuration, Dishes, DishesIngredientAmount, DishesStep } from '@store/Models/Dishes';
 import { max } from 'lodash';
 
 export type DishesIngredientAddParams = { dishId: string, ingres: DishesIngredientAmount[] };
@@ -10,6 +10,7 @@ export type DishesStepEditParams = { dishId: string, step: DishesStep };
 export type DishesStepAddNextParams = { dishId: string, steps: Omit<DishesStep, "order">[], order: number };
 export type DishesStepAddPrevParams = { dishId: string, steps: Omit<DishesStep, "order">[], order: number };
 export type DishStepAddType = "prev" | "next" | "default";
+export type DishesDurationEditParams = { dishId: string, duration: DishDuration };
 
 export interface DishesState {
     dishes: Dishes[];
@@ -170,10 +171,27 @@ export const DishesSlice = createSlice({
                 return e;
             })
         },
+        updateDishDuration: (state, action: PayloadAction<DishesDurationEditParams>) => {
+            state.dishes = state.dishes.map(e => {
+                if (e.id === action.payload.dishId) {
+                    return {
+                        ...e,
+                        duration: action.payload.duration
+                    }
+                }
+                return e;
+            })
+        },
         test: (state) => {
             state.dishes = state.dishes.map(e => ({
                 ...e,
-                ingredients: e.ingredients.map(e => ({ ...e, prepare: null, meal: null, dish: null }))
+                duration: {
+                    unfreeze: null,
+                    prepare: null,
+                    cooking: null,
+                    serve: null,
+                    cooldown: null
+                }
             }))
         }
     }
@@ -181,7 +199,10 @@ export const DishesSlice = createSlice({
 
 // Action creators are generated for each case reducer function
 export const {
-    add: addDishes, edit: editDishes, remove: removeDishes, addIngredientsToDish, removeIngredientsFromDish, editIngredientFromDish, addStepsToDish, editStepFromDish, adStepToDishPrev, addStepToDishNext, removeStepsFromDish, search: searchDishes, changePage, test
+    add: addDishes, edit: editDishes, remove: removeDishes, addIngredientsToDish, removeIngredientsFromDish, editIngredientFromDish,
+    addStepsToDish, editStepFromDish, adStepToDishPrev, addStepToDishNext, removeStepsFromDish, search: searchDishes, changePage,
+    updateDishDuration,
+    test
 } = DishesSlice.actions
 
 export default DishesSlice.reducer
