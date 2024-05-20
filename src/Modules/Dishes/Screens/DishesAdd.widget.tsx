@@ -26,11 +26,11 @@ export const DishesAddWidget = () => {
             steps: [],
             isCompleted: false,
             duration: {
-                unfreeze: 0,
-                prepare: 0,
-                cooking: 0,
-                serve: 0,
-                cooldown: 0
+                unfreeze: null,
+                prepare: null,
+                cooking: null,
+                serve: null,
+                cooldown: null
             },
             image: "",
         },
