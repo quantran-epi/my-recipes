@@ -17,13 +17,6 @@ type DishDurationWidgetProps = {
 export const DishDurationWidget: FunctionComponent<DishDurationWidgetProps> = (props) => {
     const [disableFields, setDisabledFields] = useState<string[]>([]);
 
-    const _onToggleDisable = (value: "none" | "min", field: string) => {
-        switch (value) {
-            case "min": setDisabledFields(disableFields.filter(e => e !== field)); break;
-            case "none": setDisabledFields([...disableFields, field]); break;
-        }
-    }
-
     const _isDisable = (field: string) => {
         return disableFields.includes(field);
     }
@@ -42,6 +35,16 @@ export const DishDurationWidget: FunctionComponent<DishDurationWidgetProps> = (p
             cooldown: { label: "Để nguội", name: ObjectPropertyHelper.nameof(defaultValues, e => e.cooldown) },
         })
     });
+
+    const _onToggleDisable = (value: "none" | "min", field: string) => {
+        switch (value) {
+            case "min": setDisabledFields(disableFields.filter(e => e !== field)); break;
+            case "none":
+                setDisabledFields([...disableFields, field]);
+                durationForm.form.setFieldsValue({ [field]: null });
+                break;
+        }
+    }
 
     const _onSave = () => {
         durationForm.submit();
