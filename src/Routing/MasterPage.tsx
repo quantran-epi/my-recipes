@@ -65,7 +65,7 @@ export const MasterPage = () => {
                         <Typography.Paragraph style={{ fontFamily: "kanit", fontSize: 24, fontWeight: "500", marginBottom: 0, width: 230 }} ellipsis>{currentFeatureName}</Typography.Paragraph>
                     </Tooltip>
                 </Stack>
-                {_featureIcon() && <Image preview={false} src={_featureIcon()} height={36} style={{ marginBottom: 5 }} />}
+                {_featureIcon() && <Image preview={false} src={_featureIcon()} width={36} style={{ marginBottom: 5 }} />}
             </Stack>
         </Header>
         <Content>
