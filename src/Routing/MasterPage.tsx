@@ -1,40 +1,37 @@
+import { CloudDownloadOutlined, ExportOutlined, ImportOutlined, MenuOutlined } from "@ant-design/icons";
+import { ObjectPropertyHelper } from "@common/Helpers/ObjectProperty";
 import { Button } from "@components/Button";
+import { TextArea } from "@components/Form/Input";
+import { Image } from "@components/Image";
+import { Box } from "@components/Layout/Box";
 import { Content } from "@components/Layout/Content";
 import { Header } from "@components/Layout/Header";
-import { useTheme, useToggle } from "@hooks";
-import { Layout, Drawer, Flex } from "antd";
-import React, { useState } from "react";
-import { Outlet, useLocation, useNavigate } from "react-router-dom";
-import { MenuOutlined, ImportOutlined, ExportOutlined } from "@ant-design/icons";
-import { List } from "@components/List";
-import { RootRoutes } from "./RootRoutes";
-import { Box } from "@components/Layout/Box";
-import { Stack } from "@components/Layout/Stack";
-import { Typography } from "@components/Typography";
-import { useDispatch, useSelector } from "react-redux";
-import { RootState } from "@store/Store";
-import { Modal } from "@components/Modal";
-import { TextArea } from "@components/Form/Input";
-import { SmartForm, useSmartForm } from "@components/SmartForm";
-import { ObjectPropertyHelper } from "@common/Helpers/ObjectProperty";
 import { Space } from "@components/Layout/Space";
-import { ScheduledMealToolkitWidget } from "@modules/ScheduledMeal/Screens/ScheduledMealToolkit.widget";
+import { Stack } from "@components/Layout/Stack";
 import { Menu } from "@components/Menu";
-import DishesIcon from "../../assets/icons/noodles.png";
-import IngredientIcon from "../../assets/icons/vegetable.png";
-import MealsIcon from "../../assets/icons/meals.png";
-import ShoppingListIcon from "../../assets/icons/shoppingList.png";
-import MarketIcon from "../../assets/icons/market.png";
-import LogoIcon from "../../assets/icons/logo.png";
-import ShoppingList2Icon from "../../assets/icons/shoppingList2.png";
-import { Image } from "@components/Image";
-import { Tooltip } from "@components/Tootip";
-import { CopyToClipboard } from 'react-copy-to-clipboard';
 import { useMessage } from "@components/Message";
+import { Modal } from "@components/Modal";
+import { SmartForm, useSmartForm } from "@components/SmartForm";
+import { Tooltip } from "@components/Tootip";
+import { Typography } from "@components/Typography";
+import { useTheme, useToggle } from "@hooks";
+import { ScheduledMealToolkitWidget } from "@modules/ScheduledMeal/Screens/ScheduledMealToolkit.widget";
 import { addDishes } from "@store/Reducers/DishesReducer";
 import { addIngredient } from "@store/Reducers/IngredientReducer";
 import { addScheduledMeal } from "@store/Reducers/ScheduledMealReducer";
 import { addShoppingList } from "@store/Reducers/ShoppingListReducer";
+import { RootState } from "@store/Store";
+import { Drawer, Flex, Layout } from "antd";
+import React, { useState } from "react";
+import { CopyToClipboard } from 'react-copy-to-clipboard';
+import { useDispatch, useSelector } from "react-redux";
+import { Outlet, useLocation, useNavigate } from "react-router-dom";
+import LogoIcon from "../../assets/icons/logo.png";
+import MealsIcon from "../../assets/icons/meals.png";
+import DishesIcon from "../../assets/icons/noodles.png";
+import ShoppingListIcon from "../../assets/icons/shoppingList.png";
+import IngredientIcon from "../../assets/icons/vegetable.png";
+import { RootRoutes } from "./RootRoutes";
 
 const layoutStyles: React.CSSProperties = {
     height: "100%"
@@ -212,6 +209,7 @@ export const DataBackup = () => {
             JSON.parse(parseValues.ingredient).ingredients.map(ingre => dispatch(addIngredient(ingre)));
             JSON.parse(parseValues.scheduledMeal).scheduledMeals.map(meal => dispatch(addScheduledMeal(meal)));
             JSON.parse(parseValues.shoppingList).shoppingLists.map(shplist => dispatch(addShoppingList(shplist)));
+            message.success("Import thành công");
         }
         catch (ex) {
             alert(ex);
@@ -232,11 +230,12 @@ export const DataBackup = () => {
                 JSON.parse(parseValues.ingredient).ingredients.map(ingre => dispatch(addIngredient(ingre)));
                 JSON.parse(parseValues.scheduledMeal).scheduledMeals.map(meal => dispatch(addScheduledMeal(meal)));
                 JSON.parse(parseValues.shoppingList).shoppingLists.map(shplist => dispatch(addShoppingList(shplist)));
+                message.success("Import thành công");
             }
             catch (ex) {
                 alert(ex);
             }
-            message.success("Import thành công");
+
         },
         itemDefinitions: defaultValues => ({
             data: { name: ObjectPropertyHelper.nameof(defaultValues, e => e.data), label: "Data" }
@@ -253,7 +252,7 @@ export const DataBackup = () => {
 
             <Button icon={<ImportOutlined />} onClick={toggleImportData.show}>Import</Button>
 
-            <Button icon={<ImportOutlined />} onClick={_onImportCloud}>Import from cloud</Button>
+            <Button icon={<CloudDownloadOutlined />} onClick={_onImportCloud}>Import</Button>
         </Space>
 
         <Modal title="Export Data" open={toggleShowData.value} onCancel={toggleShowData.hide} footer={null}>
