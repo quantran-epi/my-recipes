@@ -11,7 +11,7 @@ import { RootRoutes } from "./RootRoutes";
 import { Box } from "@components/Layout/Box";
 import { Stack } from "@components/Layout/Stack";
 import { Typography } from "@components/Typography";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@store/Store";
 import { Modal } from "@components/Modal";
 import { TextArea } from "@components/Form/Input";
@@ -31,6 +31,10 @@ import { Image } from "@components/Image";
 import { Tooltip } from "@components/Tootip";
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 import { useMessage } from "@components/Message";
+import { addDishes } from "@store/Reducers/DishesReducer";
+import { addIngredient } from "@store/Reducers/IngredientReducer";
+import { addScheduledMeal } from "@store/Reducers/ScheduledMealReducer";
+import { addShoppingList } from "@store/Reducers/ShoppingListReducer";
 
 const layoutStyles: React.CSSProperties = {
     height: "100%"
@@ -195,13 +199,20 @@ export const DataBackup = () => {
     const toggleImportData = useToggle();
     const [exportedData, setExportedData] = useState<string>("");
     const message = useMessage();
+    const dispatch = useDispatch();
 
     const importDataForm = useSmartForm({
         defaultValues: {
             data: ""
         },
         onSubmit: (values) => {
-            localStorage.setItem("persist:root", values.transformValues.data);
+            debugger
+            // localStorage.setItem("persist:root", values.transformValues.data);
+            let parseValues = JSON.parse(values.transformValues.data);
+            JSON.parse(parseValues.dishes).dishes.map(dish => dispatch(addDishes(dish)));
+            JSON.parse(parseValues.ingredient).ingredients.map(ingre => dispatch(addIngredient(ingre)));
+            JSON.parse(parseValues.scheduledMeal).scheduledMeals.map(meal => dispatch(addScheduledMeal(meal)));
+            JSON.parse(parseValues.shoppingList).shoppingLists.map(shplist => dispatch(addShoppingList(shplist)));
             message.success("Import thành công");
         },
         itemDefinitions: defaultValues => ({
