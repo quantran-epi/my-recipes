@@ -201,6 +201,23 @@ export const DataBackup = () => {
     const message = useMessage();
     const dispatch = useDispatch();
 
+    const _onImportCloud = async () => {
+        let data = await fetch("https://raw.githubusercontent.com/quantran-epi/my-recipes/refs/heads/main/docs/data.txt");
+
+        let text = await data.text();
+
+        try {
+            let parseValues = JSON.parse(text);
+            JSON.parse(parseValues.dishes).dishes.map(dish => dispatch(addDishes(dish)));
+            JSON.parse(parseValues.ingredient).ingredients.map(ingre => dispatch(addIngredient(ingre)));
+            JSON.parse(parseValues.scheduledMeal).scheduledMeals.map(meal => dispatch(addScheduledMeal(meal)));
+            JSON.parse(parseValues.shoppingList).shoppingLists.map(shplist => dispatch(addShoppingList(shplist)));
+        }
+        catch (ex) {
+            alert(ex);
+        }
+    }
+
     const importDataForm = useSmartForm({
         defaultValues: {
             data: ""
@@ -208,7 +225,7 @@ export const DataBackup = () => {
         onSubmit: (values) => {
             debugger
             // localStorage.setItem("persist:root", values.transformValues.data);
-            
+
             try {
                 let parseValues = JSON.parse(values.transformValues.data);
                 JSON.parse(parseValues.dishes).dishes.map(dish => dispatch(addDishes(dish)));
@@ -235,6 +252,8 @@ export const DataBackup = () => {
             }}>Export</Button>
 
             <Button icon={<ImportOutlined />} onClick={toggleImportData.show}>Import</Button>
+
+            <Button icon={<ImportOutlined />} onClick={_onImportCloud}>Import from cloud</Button>
         </Space>
 
         <Modal title="Export Data" open={toggleShowData.value} onCancel={toggleShowData.hide} footer={null}>
