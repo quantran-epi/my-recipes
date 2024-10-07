@@ -210,6 +210,7 @@ export const DataBackup = () => {
     })
 
     return <React.Fragment>
+        {Object.keys(localStorage).map(e => e).join(";")}
         <Space>
             <Button icon={<ExportOutlined />} onClick={() => {
                 setExportedData(localStorage.getItem("persist:root"));
