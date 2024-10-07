@@ -208,11 +208,16 @@ export const DataBackup = () => {
         onSubmit: (values) => {
             debugger
             // localStorage.setItem("persist:root", values.transformValues.data);
-            let parseValues = JSON.parse(values.transformValues.data);
-            JSON.parse(parseValues.dishes).dishes.map(dish => dispatch(addDishes(dish)));
-            JSON.parse(parseValues.ingredient).ingredients.map(ingre => dispatch(addIngredient(ingre)));
-            JSON.parse(parseValues.scheduledMeal).scheduledMeals.map(meal => dispatch(addScheduledMeal(meal)));
-            JSON.parse(parseValues.shoppingList).shoppingLists.map(shplist => dispatch(addShoppingList(shplist)));
+            try {
+                let parseValues = JSON.parse(values.transformValues.data);
+                JSON.parse(parseValues.dishes).dishes.map(dish => dispatch(addDishes(dish)));
+                JSON.parse(parseValues.ingredient).ingredients.map(ingre => dispatch(addIngredient(ingre)));
+                JSON.parse(parseValues.scheduledMeal).scheduledMeals.map(meal => dispatch(addScheduledMeal(meal)));
+                JSON.parse(parseValues.shoppingList).shoppingLists.map(shplist => dispatch(addShoppingList(shplist)));
+            }
+            catch (ex) {
+                alert(ex);
+            }
             message.success("Import thành công");
         },
         itemDefinitions: defaultValues => ({
