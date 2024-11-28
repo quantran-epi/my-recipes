@@ -32,8 +32,8 @@ export const DishesAddIngredientWidget: React.FunctionComponent<DishesAddIngredi
             unit: "g",
             dishesId: props.dish.id,
             required: true,
-            dish: undefined,
-            meal: undefined
+            dish: null,
+            meal: null
         },
         onSubmit: (values) => {
             if (props.dish.ingredients.some(ingre => ingre.ingredientId === values.transformValues.ingredientId)) {
