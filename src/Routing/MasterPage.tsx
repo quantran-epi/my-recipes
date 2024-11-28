@@ -16,10 +16,10 @@ import { Tooltip } from "@components/Tootip";
 import { Typography } from "@components/Typography";
 import { useTheme, useToggle } from "@hooks";
 import { ScheduledMealToolkitWidget } from "@modules/ScheduledMeal/Screens/ScheduledMealToolkit.widget";
-import { addDishes } from "@store/Reducers/DishesReducer";
-import { addIngredient } from "@store/Reducers/IngredientReducer";
-import { addScheduledMeal } from "@store/Reducers/ScheduledMealReducer";
-import { addShoppingList } from "@store/Reducers/ShoppingListReducer";
+import { addDishes, resetDishes } from "@store/Reducers/DishesReducer";
+import { addIngredient, resetIngredient } from "@store/Reducers/IngredientReducer";
+import { addScheduledMeal, resetScheduleMeals } from "@store/Reducers/ScheduledMealReducer";
+import { addShoppingList, resetShoppingList } from "@store/Reducers/ShoppingListReducer";
 import { RootState } from "@store/Store";
 import { Drawer, Flex, Layout } from "antd";
 import React, { useState } from "react";
@@ -207,6 +207,10 @@ export const DataBackup = () => {
 
         try {
             let parseValues = JSON.parse(text);
+            dispatch(resetIngredient());
+            dispatch(resetDishes());
+            dispatch(resetScheduleMeals());
+            dispatch(resetShoppingList());
             JSON.parse(parseValues.dishes).dishes.map(dish => dispatch(addDishes(dish)));
             JSON.parse(parseValues.ingredient).ingredients.map(ingre => dispatch(addIngredient(ingre)));
             JSON.parse(parseValues.scheduledMeal).scheduledMeals.map(meal => dispatch(addScheduledMeal(meal)));

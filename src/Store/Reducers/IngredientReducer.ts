@@ -26,6 +26,9 @@ export const ingredientSlice = createSlice({
         remove: (state, action: PayloadAction<string[]>) => {
             state.ingredients = state.ingredients.filter(ingre => !action.payload.includes(ingre.id));
         },
+        reset: (state) => {
+            state.ingredients = [];
+        }
     },
     extraReducers: (builder) => {
         // builder.addCase(fetchUserById.pending, (state, action) => {
@@ -36,6 +39,6 @@ export const ingredientSlice = createSlice({
 })
 
 // Action creators are generated for each case reducer function
-export const { add: addIngredient, edit: editIngredient, remove: removeIngredient } = ingredientSlice.actions
+export const { add: addIngredient, edit: editIngredient, remove: removeIngredient, reset: resetIngredient } = ingredientSlice.actions
 
 export default ingredientSlice.reducer

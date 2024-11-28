@@ -182,6 +182,9 @@ export const DishesSlice = createSlice({
                 return e;
             })
         },
+        reset: (state) => {
+            state.dishes = [];
+        },
         test: (state) => {
             state.dishes = state.dishes.map(e => ({
                 ...e,
@@ -202,6 +205,7 @@ export const {
     add: addDishes, edit: editDishes, remove: removeDishes, addIngredientsToDish, removeIngredientsFromDish, editIngredientFromDish,
     addStepsToDish, editStepFromDish, adStepToDishPrev, addStepToDishNext, removeStepsFromDish, search: searchDishes, changePage,
     updateDishDuration,
+    reset: resetDishes,
     test
 } = DishesSlice.actions
 

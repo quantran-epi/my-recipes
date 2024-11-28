@@ -254,6 +254,9 @@ export const ShoppingListSlice = createSlice({
                     ingredients: groups
                 }
             })
+        },
+        reset: (state) => {
+            state.shoppingLists = [];
         }
     },
 })
@@ -261,7 +264,8 @@ export const ShoppingListSlice = createSlice({
 // Action creators are generated for each case reducer function
 export const { add: addShoppingList, edit: editShoppingList,
     remove: removeShoppingList, generateIngredient, toggleDoneIngredientGroup, toggleDoneIngredientAmount, addDishesToShoppingList,
-    updateShoppingListIngredientMealData, updateShoppingListIngredientDishData
+    updateShoppingListIngredientMealData, updateShoppingListIngredientDishData,
+    reset: resetShoppingList
 } = ShoppingListSlice.actions
 
 export default ShoppingListSlice.reducer

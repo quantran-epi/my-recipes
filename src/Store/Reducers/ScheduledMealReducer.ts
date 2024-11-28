@@ -41,11 +41,15 @@ export const ScheduledMealSlice = createSlice({
         },
         removeAllSelectedMeals: (state) => {
             state.selectedMeals = [];
+        },
+        reset: (state) => {
+            state.scheduledMeals = [];
+            state.selectedMeals = [];
         }
     },
 })
 
 // Action creators are generated for each case reducer function
-export const { add: addScheduledMeal, edit: editScheduledMeal, remove: removeScheduledMeal, toggleSelectedMeals, removeAllSelectedMeals } = ScheduledMealSlice.actions
+export const { add: addScheduledMeal, edit: editScheduledMeal, remove: removeScheduledMeal, toggleSelectedMeals, removeAllSelectedMeals, reset: resetScheduleMeals} = ScheduledMealSlice.actions
 
 export default ScheduledMealSlice.reducer
