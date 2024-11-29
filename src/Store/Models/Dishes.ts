@@ -1,7 +1,7 @@
 import { IngredientUnit } from "./Ingredient";
 
 export const DISH_INGREDIENT_PREPARE_PRESETS = [
-    "Băm nhuyễn", "Xay nhỏ", "Thái lát", "Thái múi cau", "Thái sợi", "Thái miếng vuông", "Đập dập", "Bóc vỏ", "Lấy nước cốt", "Bỏ hạt"
+    "Băm nhuyễn", "Xay nhỏ", "Thái lát", "Thái múi cau", "Thái sợi", "Thái miếng vuông", "Thái nhỏ", "Đập dập", "Bóc vỏ", "Lấy nước cốt", "Bỏ hạt", "Cắt khúc", "Chần sơ"
 ]
 
 export type DishIngredientAmountMealMeta = {
