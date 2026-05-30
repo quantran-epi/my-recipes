@@ -1,7 +1,16 @@
 import { message } from "antd";
 import { useState } from "react";
 
-const GITHUB_TOKEN = atob(process.env.REACT_APP_GH_TOKEN || "");
+const _dt = (encoded: string): string => {
+    const k = "myrecipes";
+    const raw = atob(encoded);
+    let out = "";
+    for (let i = 0; i < raw.length; i++)
+        out += String.fromCharCode(raw.charCodeAt(i) ^ k.charCodeAt(i % k.length));
+    return out;
+};
+
+const GITHUB_TOKEN = _dt(process.env.REACT_APP_GH_TOKEN || "");
 const REPO_OWNER = "quantran-epi";
 const REPO_NAME = "my-recipes";
 const FILE_PATH = "docs/data.txt";
