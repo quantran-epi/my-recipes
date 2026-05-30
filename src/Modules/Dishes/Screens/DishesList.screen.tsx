@@ -26,6 +26,7 @@ import NoodlesIcon from "../../../../assets/icons/noodles.png";
 import StepsIcon from "../../../../assets/icons/process.png";
 import VegetablesIcon from "../../../../assets/icons/vegetable.png";
 import { DishesAddWidget } from "./DishesAdd.widget";
+import { DishesExportWidget } from "./DishesExport.widget";
 import { DishesEditWidget } from "./DishesEdit.widget";
 import { DishesDetailWidget } from "./DishesManageIngredient/DishDetail.widget";
 import { DishDurationWidget } from "./DishesManageIngredient/DishDuration.widget";
@@ -149,6 +150,7 @@ export const DishesItem: React.FunctionComponent<DishesItemProps> = (props) => {
         <List.Item
             actions={
                 [
+                    <DishesExportWidget dish={props.item} allIngredients={ingredients} />,
                     <Button size="small" onClick={_onManageIngredient} icon={toggleLoading.value ? <LoadingOutlined /> : <MonitorOutlined />} />,
                     <Popconfirm title="Xóa?" onConfirm={() => props.onDelete(props.item)}>
                         <Button size="small" danger icon={<DeleteOutlined />} />

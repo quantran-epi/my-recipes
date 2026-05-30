@@ -25,6 +25,7 @@ import ChecklistIcon from "../../../../assets/icons/done.png";
 import CalendarIcon from "../../../../assets/icons/nineteen.png";
 import ShoppinglistIcon from "../../../../assets/icons/shoppingList.png";
 import { ShoppingListAddWidget } from "./ShoppingListAdd.widget";
+import { ShoppingListExportWidget } from "./ShoppingListExport.widget";
 import { ShoppingListAddMoreDishesWidget } from "./ShoppingListAddMoreDishes.widget";
 import { ShoppingListCalendarWidget } from "./ShoppingListCalendar.widget";
 import { ShoppingListDetailWidget } from "./ShoppingListDetail.widget";
@@ -105,6 +106,7 @@ export const ShoppingListItem: React.FunctionComponent<ShoppingListItemProps> = 
     const toggleAddMoreDishes = useToggle({ defaultValue: false });
     const dishes = useSelector((state: RootState) => state.dishes.dishes);
     const scheduledMeals = useSelector((state: RootState) => state.scheduledMeal.scheduledMeals);
+    const ingredients = useSelector((state: RootState) => state.ingredient.ingredients);
     const dispatch = useDispatch();
     const modal = useModal();
     const toggleEditModal = useToggle({ defaultValue: false });
@@ -157,6 +159,7 @@ export const ShoppingListItem: React.FunctionComponent<ShoppingListItemProps> = 
         <List.Item
             actions={
                 [
+                    <ShoppingListExportWidget shoppingList={props.item} allIngredients={ingredients} />,
                     props.item.ingredients.length > 0 ? <Button size="small" onClick={_onShow} icon={toggleLoading.value ? <LoadingOutlined /> : <MonitorOutlined />} />
                         : <Button size="small" onClick={_onGenerateAndShow} icon={toggleLoading.value ? <LoadingOutlined /> : <MonitorOutlined />} />,
                     <Popconfirm title="Xóa?" onConfirm={() => props.onDelete(props.item)} >
