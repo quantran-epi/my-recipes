@@ -1,0 +1,7 @@
+node -e "
+const token = require('child_process').execSync('echo -n \$(echo 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 | base64 -d)').toString().trim();
+const key = 'myrecipes';
+let out = '';
+for(let i = 0; i < token.length; i++) out += String.fromCharCode(token.charCodeAt(i) ^ key.charCodeAt(i % key.length));
+console.log(Buffer.from(out).toString('base64'));
+"
