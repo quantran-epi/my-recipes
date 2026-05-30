@@ -7,18 +7,46 @@ interface ImageInputProps {
     onChange?: (value: string) => void;
 }
 
+const compressImage = (dataUrl: string, maxDimension = 800, quality = 0.82): Promise<string> => {
+    return new Promise((resolve) => {
+        const img = new window.Image();
+        img.onload = () => {
+            let { width, height } = img;
+            if (width > maxDimension || height > maxDimension) {
+                if (width > height) { height = Math.round(height * maxDimension / width); width = maxDimension; }
+                else { width = Math.round(width * maxDimension / height); height = maxDimension; }
+            }
+            const canvas = document.createElement('canvas');
+            canvas.width = width;
+            canvas.height = height;
+            canvas.getContext('2d')!.drawImage(img, 0, 0, width, height);
+            resolve(canvas.toDataURL('image/jpeg', quality));
+        };
+        img.src = dataUrl;
+    });
+};
+
+const getFileSizeKB = (dataUrl: string) => {
+    const base64 = dataUrl.split(',')[1] || '';
+    return Math.round((base64.length * 3) / 4 / 1024);
+};
+
 const ImageInput: React.FC<ImageInputProps> = ({ value, onChange }) => {
     const [mode, setMode] = useState<"url" | "upload">(
         value && value.startsWith("data:") ? "upload" : "url"
     );
+    const [compressing, setCompressing] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
-    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (!file) return;
+        setCompressing(true);
         const reader = new FileReader();
-        reader.onload = () => {
-            onChange?.(reader.result as string);
+        reader.onload = async () => {
+            const compressed = await compressImage(reader.result as string);
+            onChange?.(compressed);
+            setCompressing(false);
         };
         reader.readAsDataURL(file);
     };
@@ -57,12 +85,15 @@ const ImageInput: React.FC<ImageInputProps> = ({ value, onChange }) => {
                     <Space>
                         <Button
                             icon={<UploadOutlined />}
+                            loading={compressing}
                             onClick={() => fileInputRef.current?.click()}
                         >
-                            Chọn ảnh
+                            {compressing ? "Đang nén..." : "Chọn ảnh"}
                         </Button>
-                        {value && value.startsWith("data:") && (
-                            <span style={{ fontSize: 12, color: "#52c41a" }}>✓ Đã chọn ảnh</span>
+                        {value && value.startsWith("data:") && !compressing && (
+                            <span style={{ fontSize: 12, color: "#52c41a" }}>
+                                ✓ Đã chọn ({getFileSizeKB(value)} KB)
+                            </span>
                         )}
                     </Space>
                     {value && value.startsWith("data:") && (

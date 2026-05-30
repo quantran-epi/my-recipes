@@ -1,4 +1,4 @@
-import { ClockCircleOutlined, DeleteOutlined, EditOutlined, FileTextOutlined, HolderOutlined, LoadingOutlined, MonitorOutlined, PictureOutlined, PlusOutlined, QuestionCircleOutlined } from "@ant-design/icons";
+import { ClockCircleOutlined, DeleteOutlined, EditOutlined, FileTextOutlined, HolderOutlined, PictureOutlined, PlusOutlined, QuestionCircleOutlined } from "@ant-design/icons";
 import { Button } from "@components/Button";
 import { Dropdown } from "@components/Dropdown";
 import { Input } from "@components/Form/Input";
@@ -20,7 +20,7 @@ import { DishDuration, Dishes } from "@store/Models/Dishes";
 import { DishesDurationEditParams, removeDishes, updateDishDuration } from "@store/Reducers/DishesReducer";
 import { RootState } from "@store/Store";
 import { debounce, orderBy, sortBy } from "lodash";
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import Clock2Icon from "../../../../assets/icons/clock (2).png";
 import NoodlesIcon from "../../../../assets/icons/noodles.png";
@@ -38,20 +38,30 @@ export const DishesListScreen = () => {
     const dishes = useSelector((state: RootState) => state.dishes.dishes);
     const toggleAddModal = useToggle({ defaultValue: false });
     const [searchText, setSearchText] = useState<string>("");
+    const [visibleCount, setVisibleCount] = useState<number>(10);
+    const loaderRef = useRef<HTMLDivElement>(null);
     const dispatch = useDispatch();
     const { } = useScreenTitle({ value: "Món ăn", deps: [] });
+
     const filteredDishes = useMemo<Dishes[]>(() => {
         return sortBy(dishes.filter(e => e.name.trim().toLowerCase().includes(searchText?.trim().toLowerCase())), "name")
-    }, [dishes, searchText])
+    }, [dishes, searchText]);
 
-    // useEffect(() => {
-    //     dispatch(test());
-    // }, [])
+    const visibleDishes = useMemo(() => filteredDishes.slice(0, visibleCount), [filteredDishes, visibleCount]);
 
+    useEffect(() => {
+        setVisibleCount(10);
+    }, [searchText]);
 
-    const _onAdd = () => {
-        toggleAddModal.show();
-    }
+    useEffect(() => {
+        const observer = new IntersectionObserver((entries) => {
+            if (entries[0].isIntersecting) {
+                setVisibleCount(prev => prev + 10);
+            }
+        }, { threshold: 1 });
+        if (loaderRef.current) observer.observe(loaderRef.current);
+        return () => observer.disconnect();
+    }, []);
 
     const _onDelete = (item) => {
         dispatch(removeDishes([item.id]));
@@ -60,16 +70,18 @@ export const DishesListScreen = () => {
     return <React.Fragment>
         <Stack.Compact>
             <Input allowClear placeholder="Tìm kiếm" onChange={debounce((e) => setSearchText(e.target.value), 350)} />
-            <Button onClick={_onAdd} icon={<PlusOutlined />} />
+            <Button onClick={toggleAddModal.show} icon={<PlusOutlined />} />
         </Stack.Compact>
         <List
-            pagination={{
-                position: "bottom", align: "center", pageSize: 4
-            }}
             itemLayout="horizontal"
-            dataSource={filteredDishes}
+            dataSource={visibleDishes}
             renderItem={(item) => <DishesItem item={item} onDelete={_onDelete} />}
         />
+        {visibleCount < filteredDishes.length && (
+            <div ref={loaderRef} style={{ textAlign: "center", padding: 12, color: "#aaa", fontSize: 13 }}>
+                Đang tải thêm...
+            </div>
+        )}
         <Modal open={toggleAddModal.value} title={
             <Space>
                 <Image src={NoodlesIcon} preview={false} width={24} style={{ marginBottom: 3 }} />
@@ -96,23 +108,12 @@ export const DishesItem: React.FunctionComponent<DishesItemProps> = (props) => {
     const toggleDishesDetail = useToggle();
     const dishes = useSelector((state: RootState) => state.dishes.dishes);
     const ingredients = useSelector((state: RootState) => state.ingredient.ingredients);
-    const toggleLoading = useToggle();
     const toggleEditDuration = useToggle();
     const message = useMessage();
     const dispatch = useDispatch();
 
-    const _onEdit = () => {
-        toggleEdit.show();
-    }
-
-    const _onEditDuration = () => {
-        toggleEditDuration.show();
-    }
-
-    const _onManageIngredient = () => {
-        toggleLoading.show();
-        toggleDishesDetail.show();
-    }
+    const _onEdit = () => toggleEdit.show();
+    const _onEditDuration = () => toggleEditDuration.show();
 
     const _sumDuration = () => {
         return moment.duration(Object.values(props.item.duration).reduce((prev, cur) => prev + cur || 0, 0), "minutes").locale("vi").humanize();
@@ -126,13 +127,8 @@ export const DishesItem: React.FunctionComponent<DishesItemProps> = (props) => {
         return props.item.includeDishes.filter(id => dishes.find(e => e.id === id)).length > 0;
     }
 
-    const _hasIngredients = () => {
-        return props.item.ingredients.length > 0;
-    }
-
-    const _hasSteps = () => {
-        return props.item.steps.length > 0;
-    }
+    const _hasIngredients = () => props.item.ingredients.length > 0;
+    const _hasSteps = () => props.item.steps.length > 0;
 
     const toggleExport = useToggle();
     const toggleDeleteConfirm = useToggle();
@@ -145,7 +141,6 @@ export const DishesItem: React.FunctionComponent<DishesItemProps> = (props) => {
         switch (e.key) {
             case "edit": _onEdit(); break;
             case "duration": _onEditDuration(); break;
-            case "export": toggleExport.show(); break;
             case "delete": {
                 const refs = _referencingDishes();
                 if (refs.length > 0) {
@@ -166,53 +161,38 @@ export const DishesItem: React.FunctionComponent<DishesItemProps> = (props) => {
 
     return <React.Fragment>
         <List.Item
-            actions={
-                [
-                    <Button size="small" onClick={_onManageIngredient} icon={toggleLoading.value ? <LoadingOutlined /> : <MonitorOutlined />} />,
-                    <Dropdown menu={{
-                        items: [
-                            {
-                                label: 'Sửa món ăn',
-                                key: 'edit',
-                                icon: <EditOutlined />,
-                            },
-                            {
-                                label: 'Thời lượng',
-                                key: 'duration',
-                                icon: <ClockCircleOutlined />,
-                            },
-                            {
-                                label: 'Xuất công thức',
-                                key: 'export',
-                                icon: <FileTextOutlined />,
-                            },
-                            {
-                                type: 'divider',
-                            },
-                            {
-                                label: 'Xóa',
-                                key: 'delete',
-                                icon: <DeleteOutlined />,
-                                danger: true,
-                            }
-                        ],
-                        onClick: _onMoreActionClick
-                    }} placement="bottom">
-                        <Button size="small" icon={<HolderOutlined />} />
-                    </Dropdown>
-                ]
-            }>
+            actions={[
+                <Button size="small" icon={<FileTextOutlined />} onClick={toggleExport.show} />,
+                <Dropdown menu={{
+                    items: [
+                        { label: 'Sửa món ăn', key: 'edit', icon: <EditOutlined /> },
+                        { label: 'Thời lượng', key: 'duration', icon: <ClockCircleOutlined /> },
+                        { type: 'divider' },
+                        { label: 'Xóa', key: 'delete', icon: <DeleteOutlined />, danger: true },
+                    ],
+                    onClick: _onMoreActionClick
+                }} placement="bottom">
+                    <Button size="small" icon={<HolderOutlined />} />
+                </Dropdown>
+            ]}>
             <List.Item.Meta
                 avatar={
-                    props.item.image
-                        ? <Avatar shape="square" size={48} src={props.item.image} />
-                        : <Avatar shape="square" size={48} icon={<PictureOutlined />} />
+                    <div onClick={toggleDishesDetail.show} style={{ cursor: "pointer" }}>
+                        {props.item.image
+                            ? <Avatar shape="square" size={48} src={props.item.image} />
+                            : <Avatar shape="square" size={48} icon={<PictureOutlined />} />
+                        }
+                    </div>
                 }
-                title={<Stack>
-                    <Tooltip title={props.item.name}>
-                        <Typography.Paragraph style={{ width: 220, marginBottom: 0, color: !props.item.isCompleted ? "orangered" : undefined }} ellipsis>{props.item.name}</Typography.Paragraph>
-                    </Tooltip>
-                </Stack>}
+                title={
+                    <Typography.Paragraph
+                        onClick={toggleDishesDetail.show}
+                        style={{ width: 200, marginBottom: 0, color: !props.item.isCompleted ? "orangered" : undefined, cursor: "pointer" }}
+                        ellipsis={{ tooltip: props.item.name }}
+                    >
+                        {props.item.name}
+                    </Typography.Paragraph>
+                }
                 description={<Stack direction="column" align="flex-start" gap={0}>
                     {_hasDuration() && <Space>
                         <Popover title="Thời lượng" content={<List size="small" dataSource={Object.entries(props.item.duration)} renderItem={item => {
@@ -241,10 +221,10 @@ export const DishesItem: React.FunctionComponent<DishesItemProps> = (props) => {
                     {_hasIncludeDishes() &&
                         <Space size={3}>
                             <Popover title="Bao gồm các món ăn" content={props.item.includeDishes.map(dish => {
-                                    const found = dishes.find(e => e.id === dish);
-                                    if (!found) return null;
-                                    return <Tag key={dish}>{found.name}</Tag>;
-                                })}>
+                                const found = dishes.find(e => e.id === dish);
+                                if (!found) return null;
+                                return <Tag key={dish}>{found.name}</Tag>;
+                            })}>
                                 <Button type="text" size="small" style={{ paddingInline: 0, fontSize: 14 }} icon={<Image src={NoodlesIcon} preview={false} width={18} style={{ marginBottom: 3 }} />}>{props.item.includeDishes.length} món ăn</Button>
                             </Popover>
                             {_hasIngredients() && <Button onClick={toggleIngredientsOverview.show} type="text" size="small" style={{ paddingInline: 0, fontSize: 14 }}>+ {props.item.ingredients.length} nguyên liệu</Button>}
@@ -256,7 +236,7 @@ export const DishesItem: React.FunctionComponent<DishesItemProps> = (props) => {
                 <Image src={NoodlesIcon} preview={false} width={24} style={{ marginBottom: 3 }} />
                 {props.item.name}
             </Space>
-        } destroyOnClose={true} onCancel={toggleDishesDetail.hide} footer={null} afterOpenChange={toggleLoading.hide}>
+        } destroyOnClose={true} onCancel={toggleDishesDetail.hide} footer={null}>
             <Box style={{ maxHeight: 550, overflowY: "auto" }}>
                 <DishesDetailWidget dish={props.item} />
             </Box>
