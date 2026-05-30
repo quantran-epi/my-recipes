@@ -1,4 +1,4 @@
-import { CloudDownloadOutlined, ExportOutlined, ImportOutlined, MenuOutlined } from "@ant-design/icons";
+import { CloudDownloadOutlined, CloudSyncOutlined, ExportOutlined, ImportOutlined, MenuOutlined } from "@ant-design/icons";
 import { ObjectPropertyHelper } from "@common/Helpers/ObjectProperty";
 import { Button } from "@components/Button";
 import { TextArea } from "@components/Form/Input";
@@ -38,7 +38,7 @@ const layoutStyles: React.CSSProperties = {
 }
 
 export const MasterPage = () => {
-    useAutoBackup();
+    const { triggerBackup, isBackingUp, lastBackupTime } = useAutoBackup();
     const theme = useTheme();
     const currentFeatureName = useSelector((state: RootState) => state.appContext.currentFeatureName);
 
@@ -62,7 +62,7 @@ export const MasterPage = () => {
         }}>
             <Stack justify="space-between" align="center">
                 <Stack>
-                    <SidebarDrawer />
+                    <SidebarDrawer triggerBackup={triggerBackup} isBackingUp={isBackingUp} lastBackupTime={lastBackupTime} />
                     <Tooltip title={currentFeatureName}>
                         <Typography.Paragraph style={{ fontFamily: "kanit", fontSize: 24, fontWeight: "500", marginBottom: 0, width: 230 }} ellipsis>{currentFeatureName}</Typography.Paragraph>
                     </Tooltip>
@@ -77,7 +77,11 @@ export const MasterPage = () => {
     </Layout>
 }
 
-const SidebarDrawer = () => {
+const SidebarDrawer = ({ triggerBackup, isBackingUp, lastBackupTime }: {
+    triggerBackup: () => Promise<void>;
+    isBackingUp: boolean;
+    lastBackupTime: Date | null;
+}) => {
     const [open, setOpen] = useState(false);
     const navigate = useNavigate();
 
@@ -130,7 +134,27 @@ const SidebarDrawer = () => {
                     <Box style={{ overflow: "hidden" }}>
                         <Image src={LogoIcon} width={350} preview={false} style={{ marginLeft: 90, opacity: 0.4 }} />
                     </Box>
-                    <Box style={{ padding: 15 }}><DataBackup /> </Box>
+                    <Box style={{ padding: 15 }}>
+                        <Flex vertical gap={10}>
+                            <Flex align="center" gap={8}>
+                                <Button
+                                    type="default"
+                                    icon={<CloudSyncOutlined />}
+                                    loading={isBackingUp}
+                                    onClick={triggerBackup}
+                                    block
+                                >
+                                    Sao lưu ngay
+                                </Button>
+                            </Flex>
+                            {lastBackupTime && (
+                                <Typography.Text type="secondary" style={{ fontSize: 12, textAlign: "center" }}>
+                                    Lần sao lưu cuối: {lastBackupTime.toLocaleString("vi-VN")}
+                                </Typography.Text>
+                            )}
+                            <DataBackup />
+                        </Flex>
+                    </Box>
                 </Flex>
             </Drawer>
             <ScheduledMealToolkitWidget />

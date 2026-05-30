@@ -1,4 +1,5 @@
-import { useEffect, useRef } from "react";
+import { message } from "antd";
+import { useEffect, useRef, useState } from "react";
 
 const GITHUB_TOKEN = process.env.REACT_APP_GITHUB_TOKEN;
 const REPO_OWNER = "quantran-epi";
@@ -9,14 +10,12 @@ const LAST_BACKUP_KEY = "last_auto_backup_time";
 
 const pushBackupToGithub = async (): Promise<void> => {
     if (!GITHUB_TOKEN) {
-        console.warn("Auto backup skipped: REACT_APP_GITHUB_TOKEN not set");
-        return;
+        throw new Error("REACT_APP_GITHUB_TOKEN not set");
     }
 
     const data = localStorage.getItem("persist:root");
     if (!data) {
-        console.warn("Auto backup skipped: no persist:root data found");
-        return;
+        throw new Error("No persist:root data found in localStorage");
     }
 
     // 1. Get current file SHA (required for update)
@@ -63,39 +62,63 @@ const pushBackupToGithub = async (): Promise<void> => {
     }
 
     localStorage.setItem(LAST_BACKUP_KEY, Date.now().toString());
-    console.log("[AutoBackup] Backup pushed successfully at", new Date().toLocaleString());
 };
 
-export const useAutoBackup = () => {
+export interface UseAutoBackupResult {
+    triggerBackup: () => Promise<void>;
+    isBackingUp: boolean;
+    lastBackupTime: Date | null;
+}
+
+export const useAutoBackup = (): UseAutoBackupResult => {
     const intervalRef = useRef<ReturnType<typeof setInterval>>();
+    const [isBackingUp, setIsBackingUp] = useState(false);
+    const lastBackupRaw = localStorage.getItem(LAST_BACKUP_KEY);
+    const [lastBackupTime, setLastBackupTime] = useState<Date | null>(
+        lastBackupRaw ? new Date(parseInt(lastBackupRaw)) : null
+    );
+
+    const triggerBackup = async (): Promise<void> => {
+        setIsBackingUp(true);
+        const key = "backup-message";
+        message.loading({ content: "Đang sao lưu dữ liệu...", key, duration: 0 });
+        try {
+            await pushBackupToGithub();
+            setLastBackupTime(new Date());
+            message.success({ content: "Sao lưu thành công!", key, duration: 3 });
+        } catch (err: any) {
+            console.error("[AutoBackup] Failed:", err);
+            message.error({ content: `Sao lưu thất bại: ${err?.message}`, key, duration: 4 });
+        } finally {
+            setIsBackingUp(false);
+        }
+    };
 
     useEffect(() => {
         const runBackupIfDue = () => {
             const lastBackup = localStorage.getItem(LAST_BACKUP_KEY);
             const now = Date.now();
 
-            // Skip if last backup was less than 4 hours ago
             if (lastBackup && now - parseInt(lastBackup) < INTERVAL_MS) {
                 const nextIn = Math.round((INTERVAL_MS - (now - parseInt(lastBackup))) / 60000);
                 console.log(`[AutoBackup] Skipped — next backup in ~${nextIn} min`);
                 return;
             }
 
-            pushBackupToGithub().catch(err =>
-                console.error("[AutoBackup] Failed:", err)
-            );
+            triggerBackup();
         };
 
         // Run once on app open
         runBackupIfDue();
 
-        // Schedule every 4 hours
+        // Schedule every 24 hours
         intervalRef.current = setInterval(() => {
-            pushBackupToGithub().catch(err =>
-                console.error("[AutoBackup] Failed:", err)
-            );
+            triggerBackup();
         }, INTERVAL_MS);
 
         return () => clearInterval(intervalRef.current);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
+
+    return { triggerBackup, isBackingUp, lastBackupTime };
 };
