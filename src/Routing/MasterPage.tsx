@@ -14,7 +14,7 @@ import { Modal } from "@components/Modal";
 import { SmartForm, useSmartForm } from "@components/SmartForm";
 import { Tooltip } from "@components/Tootip";
 import { Typography } from "@components/Typography";
-import { useTheme, useToggle } from "@hooks";
+import { useAutoBackup, useTheme, useToggle } from "@hooks";
 import { ScheduledMealToolkitWidget } from "@modules/ScheduledMeal/Screens/ScheduledMealToolkit.widget";
 import { addDishes, resetDishes } from "@store/Reducers/DishesReducer";
 import { addIngredient, resetIngredient } from "@store/Reducers/IngredientReducer";
@@ -38,6 +38,7 @@ const layoutStyles: React.CSSProperties = {
 }
 
 export const MasterPage = () => {
+    useAutoBackup();
     const theme = useTheme();
     const currentFeatureName = useSelector((state: RootState) => state.appContext.currentFeatureName);
 
