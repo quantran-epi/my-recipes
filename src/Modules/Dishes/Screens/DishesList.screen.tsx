@@ -1,8 +1,9 @@
-import { ClockCircleOutlined, DeleteOutlined, EditOutlined, HolderOutlined, LoadingOutlined, MonitorOutlined, PlusOutlined, QuestionCircleOutlined } from "@ant-design/icons";
+import { ClockCircleOutlined, DeleteOutlined, EditOutlined, FileTextOutlined, HolderOutlined, LoadingOutlined, MonitorOutlined, PictureOutlined, PlusOutlined, QuestionCircleOutlined } from "@ant-design/icons";
 import { Button } from "@components/Button";
 import { Dropdown } from "@components/Dropdown";
 import { Input } from "@components/Form/Input";
 import { Image } from "@components/Image";
+import { Avatar } from "@components/Avatar";
 import { Box } from "@components/Layout/Box";
 import { Space } from "@components/Layout/Space";
 import { Stack } from "@components/Layout/Stack";
@@ -122,7 +123,7 @@ export const DishesItem: React.FunctionComponent<DishesItemProps> = (props) => {
     }
 
     const _hasIncludeDishes = () => {
-        return props.item.includeDishes.length > 0;
+        return props.item.includeDishes.filter(id => dishes.find(e => e.id === id)).length > 0;
     }
 
     const _hasIngredients = () => {
@@ -133,10 +134,27 @@ export const DishesItem: React.FunctionComponent<DishesItemProps> = (props) => {
         return props.item.steps.length > 0;
     }
 
+    const toggleExport = useToggle();
+    const toggleDeleteConfirm = useToggle();
+
+    const _referencingDishes = () => {
+        return dishes.filter(d => d.id !== props.item.id && d.includeDishes?.includes(props.item.id));
+    }
+
     const _onMoreActionClick = (e) => {
         switch (e.key) {
             case "edit": _onEdit(); break;
             case "duration": _onEditDuration(); break;
+            case "export": toggleExport.show(); break;
+            case "delete": {
+                const refs = _referencingDishes();
+                if (refs.length > 0) {
+                    message.error(`Không thể xóa! Món ăn này đang được dùng trong: ${refs.map(d => d.name).join(", ")}.`);
+                } else {
+                    toggleDeleteConfirm.show();
+                }
+                break;
+            }
         }
     }
 
@@ -150,11 +168,7 @@ export const DishesItem: React.FunctionComponent<DishesItemProps> = (props) => {
         <List.Item
             actions={
                 [
-                    <DishesExportWidget dish={props.item} allIngredients={ingredients} />,
                     <Button size="small" onClick={_onManageIngredient} icon={toggleLoading.value ? <LoadingOutlined /> : <MonitorOutlined />} />,
-                    <Popconfirm title="Xóa?" onConfirm={() => props.onDelete(props.item)}>
-                        <Button size="small" danger icon={<DeleteOutlined />} />
-                    </Popconfirm>,
                     <Dropdown menu={{
                         items: [
                             {
@@ -166,6 +180,20 @@ export const DishesItem: React.FunctionComponent<DishesItemProps> = (props) => {
                                 label: 'Thời lượng',
                                 key: 'duration',
                                 icon: <ClockCircleOutlined />,
+                            },
+                            {
+                                label: 'Xuất công thức',
+                                key: 'export',
+                                icon: <FileTextOutlined />,
+                            },
+                            {
+                                type: 'divider',
+                            },
+                            {
+                                label: 'Xóa',
+                                key: 'delete',
+                                icon: <DeleteOutlined />,
+                                danger: true,
                             }
                         ],
                         onClick: _onMoreActionClick
@@ -175,6 +203,11 @@ export const DishesItem: React.FunctionComponent<DishesItemProps> = (props) => {
                 ]
             }>
             <List.Item.Meta
+                avatar={
+                    props.item.image
+                        ? <Avatar shape="square" size={48} src={props.item.image} />
+                        : <Avatar shape="square" size={48} icon={<PictureOutlined />} />
+                }
                 title={<Stack>
                     <Tooltip title={props.item.name}>
                         <Typography.Paragraph style={{ width: 220, marginBottom: 0, color: !props.item.isCompleted ? "orangered" : undefined }} ellipsis>{props.item.name}</Typography.Paragraph>
@@ -207,7 +240,11 @@ export const DishesItem: React.FunctionComponent<DishesItemProps> = (props) => {
                     {_hasIngredients() && !_hasIncludeDishes() && <Button onClick={toggleIngredientsOverview.show} type="text" size="small" style={{ paddingInline: 0, fontSize: 14 }} icon={<Image src={VegetablesIcon} preview={false} width={18} style={{ marginBottom: 3 }} />}>{props.item.ingredients.length + " nguyên liệu"}</Button>}
                     {_hasIncludeDishes() &&
                         <Space size={3}>
-                            <Popover title="Bao gồm các món ăn" content={props.item.includeDishes.map(dish => <Tag>{dishes.find(e => e.id === dish).name}</Tag>)}>
+                            <Popover title="Bao gồm các món ăn" content={props.item.includeDishes.map(dish => {
+                                    const found = dishes.find(e => e.id === dish);
+                                    if (!found) return null;
+                                    return <Tag key={dish}>{found.name}</Tag>;
+                                })}>
                                 <Button type="text" size="small" style={{ paddingInline: 0, fontSize: 14 }} icon={<Image src={NoodlesIcon} preview={false} width={18} style={{ marginBottom: 3 }} />}>{props.item.includeDishes.length} món ăn</Button>
                             </Popover>
                             {_hasIngredients() && <Button onClick={toggleIngredientsOverview.show} type="text" size="small" style={{ paddingInline: 0, fontSize: 14 }}>+ {props.item.ingredients.length} nguyên liệu</Button>}
@@ -278,6 +315,19 @@ export const DishesItem: React.FunctionComponent<DishesItemProps> = (props) => {
             <Typography.Text type="secondary">{props.item.name}</Typography.Text>
         </Stack>} destroyOnClose={true} onCancel={toggleEditDuration.hide} footer={null}>
             <DishDurationWidget dish={props.item} onSave={_onSaveDuration} />
+        </Modal>
+        <DishesExportWidget dish={props.item} allIngredients={ingredients} open={toggleExport.value} onClose={toggleExport.hide} />
+        <Modal
+            open={toggleDeleteConfirm.value}
+            title={<Space><DeleteOutlined style={{ color: "red" }} />Xác nhận xóa</Space>}
+            onCancel={toggleDeleteConfirm.hide}
+            onOk={() => { props.onDelete(props.item); toggleDeleteConfirm.hide(); }}
+            okText="Xóa"
+            cancelText="Hủy"
+            okButtonProps={{ danger: true }}
+            destroyOnClose
+        >
+            Bạn có chắc muốn xóa món <b>{props.item.name}</b> không? Hành động này không thể hoàn tác.
         </Modal>
     </React.Fragment>
 }

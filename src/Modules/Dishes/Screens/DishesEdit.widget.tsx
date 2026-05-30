@@ -1,5 +1,6 @@
 import { ObjectPropertyHelper } from "@common/Helpers/ObjectProperty"
 import { Button } from "@components/Button"
+import { ImageInput } from "@components/Form/ImageInput"
 import { Input, TextArea } from "@components/Form/Input"
 import { Option, Select } from "@components/Form/Select"
 import { Switch } from "@components/Form/Switch"
@@ -68,7 +69,7 @@ export const DishesEditWidget = ({ item, onDone }) => {
             <TextArea rows={3} placeholder="Ghi chú" autoFocus />
         </SmartForm.Item>
         <SmartForm.Item {...editDishesForm.itemDefinitions.image}>
-            <Input placeholder="Nhập đường dẫn" autoFocus />
+            <ImageInput />
         </SmartForm.Item>
         <SmartForm.Item {...editDishesForm.itemDefinitions.isCompleted}>
             <Switch checkedChildren="Hoàn thiện" unCheckedChildren="Chưa hoàn thiện" />

@@ -3,9 +3,10 @@ import { Provider } from 'react-redux';
 import { persistor, store } from '@store/Store';
 import { PersistGate } from 'redux-persist/integration/react';
 import { RootRouter } from '@routing/RootRouter';
-import { ConfigProvider, theme } from 'antd';
+import { ConfigProvider } from 'antd';
 import { MessageProvider } from '@components/Message';
 import { ModalProvider } from '@components/Modal/ModalProvider';
+import { AppInitializer } from '@components/AppInitializer/AppInitializer';
 
 function App() {
   return (
@@ -22,7 +23,9 @@ function App() {
         <ModalProvider>
           <Provider store={store}>
             <PersistGate loading={null} persistor={persistor}>
-              <RootRouter />
+              <AppInitializer>
+                <RootRouter />
+              </AppInitializer>
             </PersistGate>
           </Provider>
         </ModalProvider>

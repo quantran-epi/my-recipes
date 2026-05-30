@@ -1,5 +1,6 @@
 import { ObjectPropertyHelper } from "@common/Helpers/ObjectProperty"
 import { Button } from "@components/Button"
+import { ImageInput } from "@components/Form/ImageInput"
 import { Input, TextArea } from "@components/Form/Input"
 import { Option, Select } from "@components/Form/Select"
 import { Stack } from "@components/Layout/Stack"
@@ -80,7 +81,7 @@ export const DishesAddWidget = () => {
             <TextArea rows={3} placeholder="Ghi chú" autoFocus />
         </SmartForm.Item>
         <SmartForm.Item {...addDishesForm.itemDefinitions.image}>
-            <Input placeholder="Nhập đường dẫn" autoFocus />
+            <ImageInput />
         </SmartForm.Item>
         <Stack fullwidth justify="flex-end">
             <Button onClick={_onSave}>Lưu</Button>

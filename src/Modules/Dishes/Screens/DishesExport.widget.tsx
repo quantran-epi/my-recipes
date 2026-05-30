@@ -1,14 +1,12 @@
 import React from "react";
-import { FileTextOutlined } from "@ant-design/icons";
 import { Button } from "@components/Button";
 import { Modal } from "@components/Modal";
 import { Typography } from "@components/Typography";
-import { useToggle } from "@hooks";
+import { useMessage } from "@components/Message";
 import { Dishes } from "@store/Models/Dishes";
 import { Ingredient } from "@store/Models/Ingredient";
 import { Box } from "@components/Layout/Box";
 import { Space } from "@components/Layout/Space";
-import { useMessage } from "@components/Message";
 import { useSelector } from "react-redux";
 import { RootState } from "@store/Store";
 import NoodlesIcon from "../../../../assets/icons/noodles.png";
@@ -79,10 +77,11 @@ const formatDishToText = (dish: Dishes, allIngredients: Ingredient[], allDishes:
 type DishesExportWidgetProps = {
     dish: Dishes;
     allIngredients: Ingredient[];
+    open: boolean;
+    onClose: () => void;
 }
 
-export const DishesExportWidget: React.FC<DishesExportWidgetProps> = ({ dish, allIngredients }) => {
-    const toggle = useToggle();
+export const DishesExportWidget: React.FC<DishesExportWidgetProps> = ({ dish, allIngredients, open, onClose }) => {
     const message = useMessage();
     const allDishes = useSelector((state: RootState) => state.dishes.dishes);
     const text = formatDishToText(dish, allIngredients, allDishes);
@@ -105,10 +104,9 @@ export const DishesExportWidget: React.FC<DishesExportWidgetProps> = ({ dish, al
 
     return (
         <>
-            <Button size="small" icon={<FileTextOutlined />} onClick={toggle.show} />
             <Modal
-                open={toggle.value}
-                onCancel={toggle.hide}
+                open={open}
+                onCancel={onClose}
                 title={
                     <Space>
                         <Image src={NoodlesIcon} preview={false} width={20} style={{ marginBottom: 3 }} />

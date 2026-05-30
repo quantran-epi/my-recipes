@@ -1,7 +1,7 @@
-import { CloudDownloadOutlined, CloudSyncOutlined, ExportOutlined, ImportOutlined, MenuOutlined } from "@ant-design/icons";
+import { CloudDownloadOutlined, CloudSyncOutlined, ExportOutlined, ImportOutlined, LockOutlined, MenuOutlined, UnlockOutlined } from "@ant-design/icons";
 import { ObjectPropertyHelper } from "@common/Helpers/ObjectProperty";
 import { Button } from "@components/Button";
-import { TextArea } from "@components/Form/Input";
+import { TextArea, Input } from "@components/Form/Input";
 import { Image } from "@components/Image";
 import { Box } from "@components/Layout/Box";
 import { Content } from "@components/Layout/Content";
@@ -14,14 +14,14 @@ import { Modal } from "@components/Modal";
 import { SmartForm, useSmartForm } from "@components/SmartForm";
 import { Tooltip } from "@components/Tootip";
 import { Typography } from "@components/Typography";
-import { useAutoBackup, useTheme, useToggle } from "@hooks";
+import { useAutoBackup, useAdminMode, useTheme, useToggle } from "@hooks";
 import { ScheduledMealToolkitWidget } from "@modules/ScheduledMeal/Screens/ScheduledMealToolkit.widget";
 import { addDishes, resetDishes } from "@store/Reducers/DishesReducer";
 import { addIngredient, resetIngredient } from "@store/Reducers/IngredientReducer";
 import { addScheduledMeal, resetScheduleMeals } from "@store/Reducers/ScheduledMealReducer";
 import { addShoppingList, resetShoppingList } from "@store/Reducers/ShoppingListReducer";
 import { RootState } from "@store/Store";
-import { Drawer, Flex, Layout } from "antd";
+import { Drawer, Flex, Input as AntInput, Layout } from "antd";
 import React, { useState } from "react";
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 import { useDispatch, useSelector } from "react-redux";
@@ -83,7 +83,14 @@ const SidebarDrawer = ({ triggerBackup, isBackingUp, lastBackupTime }: {
     lastBackupTime: Date | null;
 }) => {
     const [open, setOpen] = useState(false);
+    const [pinModalOpen, setPinModalOpen] = useState(false);
+    const [pin, setPin] = useState("");
+    const [pinError, setPinError] = useState("");
+    const [isImporting, setIsImporting] = useState(false);
+    const { isAdmin, tryUnlock, lock } = useAdminMode();
     const navigate = useNavigate();
+    const dispatch = useDispatch();
+    const message = useMessage();
 
     const showDrawer = () => {
         setOpen(true);
@@ -97,6 +104,38 @@ const SidebarDrawer = ({ triggerBackup, isBackingUp, lastBackupTime }: {
         navigate(href);
         setOpen(false);
     }
+
+    const onUnlock = () => {
+        if (tryUnlock(pin)) {
+            setPinModalOpen(false);
+            setPin("");
+            setPinError("");
+        } else {
+            setPinError("Sai mã PIN");
+        }
+    };
+
+    const onImportCloud = async () => {
+        setIsImporting(true);
+        try {
+            const res = await fetch("https://raw.githubusercontent.com/quantran-epi/my-recipes/refs/heads/main/docs/data.txt?t=" + Date.now());
+            const text = await res.text();
+            const parseValues = JSON.parse(text);
+            dispatch(resetIngredient());
+            dispatch(resetDishes());
+            dispatch(resetScheduleMeals());
+            dispatch(resetShoppingList());
+            JSON.parse(parseValues.dishes).dishes.forEach(dish => dispatch(addDishes(dish)));
+            JSON.parse(parseValues.ingredient).ingredients.forEach(ingre => dispatch(addIngredient(ingre)));
+            JSON.parse(parseValues.scheduledMeal).scheduledMeals.forEach(meal => dispatch(addScheduledMeal(meal)));
+            JSON.parse(parseValues.shoppingList).shoppingLists.forEach(shplist => dispatch(addShoppingList(shplist)));
+            message.success("Import backup thành công");
+        } catch (ex: any) {
+            message.error("Import thất bại: " + ex?.message);
+        } finally {
+            setIsImporting(false);
+        }
+    };
 
     return (
         <React.Fragment>
@@ -136,27 +175,69 @@ const SidebarDrawer = ({ triggerBackup, isBackingUp, lastBackupTime }: {
                     </Box>
                     <Box style={{ padding: 15 }}>
                         <Flex vertical gap={10}>
-                            <Flex align="center" gap={8}>
-                                <Button
-                                    type="default"
-                                    icon={<CloudSyncOutlined />}
-                                    loading={isBackingUp}
-                                    onClick={triggerBackup}
-                                    block
-                                >
-                                    Sao lưu ngay
-                                </Button>
-                            </Flex>
-                            {lastBackupTime && (
-                                <Typography.Text type="secondary" style={{ fontSize: 12, textAlign: "center" }}>
-                                    Lần sao lưu cuối: {lastBackupTime.toLocaleString("vi-VN")}
-                                </Typography.Text>
+                            {/* Primary actions */}
+                            <Button
+                                type="primary"
+                                icon={<CloudDownloadOutlined />}
+                                loading={isImporting}
+                                block
+                                onClick={onImportCloud}
+                            >
+                                Đồng bộ ngay
+                            </Button>
+                            {isAdmin && (
+                                <>
+                                    <Button
+                                        type="default"
+                                        icon={<CloudSyncOutlined />}
+                                        loading={isBackingUp}
+                                        onClick={triggerBackup}
+                                        block
+                                    >
+                                        Sao lưu ngay
+                                    </Button>
+                                    {lastBackupTime && (
+                                        <Typography.Text type="secondary" style={{ fontSize: 12, textAlign: "center" }}>
+                                            Lần sao lưu cuối: {lastBackupTime.toLocaleString("vi-VN")}
+                                        </Typography.Text>
+                                    )}
+                                </>
                             )}
-                            <DataBackup />
+                            {/* Admin toggle */}
+                            {isAdmin ? (
+                                <Button size="small" type="text" icon={<LockOutlined />} danger block onClick={lock}>
+                                    Khoá quyền admin
+                                </Button>
+                            ) : (
+                                <Button size="small" type="text" icon={<UnlockOutlined />} block onClick={() => setPinModalOpen(true)}>
+                                    Mở quyền admin
+                                </Button>
+                            )}
+                            {/* Troubleshooting — manual export/import */}
+                            <DataBackup onImportCloud={onImportCloud} />
                         </Flex>
                     </Box>
                 </Flex>
             </Drawer>
+            <Modal
+                title="Nhập mã PIN"
+                open={pinModalOpen}
+                onOk={onUnlock}
+                onCancel={() => { setPinModalOpen(false); setPin(""); setPinError(""); }}
+                okText="Xác nhận"
+                cancelText="Huỷ"
+                destroyOnClose
+            >
+                <Flex vertical gap={8}>
+                    <AntInput.Password
+                        placeholder="Nhập PIN"
+                        value={pin}
+                        onChange={e => { setPin(e.target.value); setPinError(""); }}
+                        onPressEnter={onUnlock}
+                    />
+                    {pinError && <Typography.Text type="danger">{pinError}</Typography.Text>}
+                </Flex>
+            </Modal>
             <ScheduledMealToolkitWidget />
         </React.Fragment>
     );
@@ -216,7 +297,7 @@ const BottomTabNavigator = () => {
     </Stack>
 }
 
-export const DataBackup = () => {
+export const DataBackup = ({ onImportCloud }: { onImportCloud?: () => Promise<void> }) => {
     const toggleShowData = useToggle();
     const toggleImportData = useToggle();
     const [exportedData, setExportedData] = useState<string>("");
@@ -225,8 +306,9 @@ export const DataBackup = () => {
     const toggleImportingCloud = useToggle();
 
     const _onImportCloud = async () => {
+        if (onImportCloud) return onImportCloud();
         toggleImportingCloud.show();
-        let data = await fetch("https://raw.githubusercontent.com/quantran-epi/my-recipes/refs/heads/main/docs/data.txt");
+        let data = await fetch("https://raw.githubusercontent.com/quantran-epi/my-recipes/refs/heads/main/docs/data.txt" + "?t=" + Date.now());
 
         let text = await data.text();
 
@@ -275,15 +357,16 @@ export const DataBackup = () => {
     })
 
     return <React.Fragment>
+        <Typography.Text type="secondary" style={{ fontSize: 12 }}>Troubleshooting</Typography.Text>
         <Space>
-            <Button icon={<ExportOutlined />} onClick={() => {
+            <Button size="small" icon={<ExportOutlined />} onClick={() => {
                 setExportedData(localStorage.getItem("persist:root"));
                 toggleShowData.show();
             }}>Export</Button>
 
-            <Button icon={<ImportOutlined />} onClick={toggleImportData.show}>Import</Button>
+            <Button size="small" icon={<ImportOutlined />} onClick={toggleImportData.show}>Import</Button>
 
-            <Button loading={toggleImportingCloud.value} icon={<CloudDownloadOutlined />} onClick={_onImportCloud}>Import</Button>
+            <Button size="small" loading={toggleImportingCloud.value} icon={<CloudDownloadOutlined />} onClick={_onImportCloud}>Import cloud</Button>
         </Space>
 
         <Modal title="Export Data" open={toggleShowData.value} onCancel={toggleShowData.hide} footer={null}>
