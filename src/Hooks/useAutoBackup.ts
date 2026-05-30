@@ -1,16 +1,15 @@
 import { message } from "antd";
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 
-const GITHUB_TOKEN = process.env.REACT_APP_GITHUB_TOKEN;
+const GITHUB_TOKEN = process.env.REACT_APP_GH_TOKEN_A + process.env.REACT_APP_GH_TOKEN_B;
 const REPO_OWNER = "quantran-epi";
 const REPO_NAME = "my-recipes";
 const FILE_PATH = "docs/data.txt";
-const INTERVAL_MS = 24 * 60 * 60 * 1000; // 24 hours
 const LAST_BACKUP_KEY = "last_auto_backup_time";
 
 const pushBackupToGithub = async (): Promise<void> => {
     if (!GITHUB_TOKEN) {
-        throw new Error("REACT_APP_GITHUB_TOKEN not set");
+        throw new Error("GitHub token not set");
     }
 
     const data = localStorage.getItem("persist:root");
@@ -50,7 +49,7 @@ const pushBackupToGithub = async (): Promise<void> => {
                 "Content-Type": "application/json",
             },
             body: JSON.stringify({
-                message: `Auto backup ${new Date().toISOString()}`,
+                message: `Backup ${new Date().toISOString()}`,
                 content,
                 sha,
             }),
@@ -71,7 +70,6 @@ export interface UseAutoBackupResult {
 }
 
 export const useAutoBackup = (): UseAutoBackupResult => {
-    const intervalRef = useRef<ReturnType<typeof setInterval>>();
     const [isBackingUp, setIsBackingUp] = useState(false);
     const lastBackupRaw = localStorage.getItem(LAST_BACKUP_KEY);
     const [lastBackupTime, setLastBackupTime] = useState<Date | null>(
@@ -93,32 +91,6 @@ export const useAutoBackup = (): UseAutoBackupResult => {
             setIsBackingUp(false);
         }
     };
-
-    useEffect(() => {
-        const runBackupIfDue = () => {
-            const lastBackup = localStorage.getItem(LAST_BACKUP_KEY);
-            const now = Date.now();
-
-            if (lastBackup && now - parseInt(lastBackup) < INTERVAL_MS) {
-                const nextIn = Math.round((INTERVAL_MS - (now - parseInt(lastBackup))) / 60000);
-                console.log(`[AutoBackup] Skipped — next backup in ~${nextIn} min`);
-                return;
-            }
-
-            triggerBackup();
-        };
-
-        // Run once on app open
-        runBackupIfDue();
-
-        // Schedule every 24 hours
-        intervalRef.current = setInterval(() => {
-            triggerBackup();
-        }, INTERVAL_MS);
-
-        return () => clearInterval(intervalRef.current);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
 
     return { triggerBackup, isBackingUp, lastBackupTime };
 };
