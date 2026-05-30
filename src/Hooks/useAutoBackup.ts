@@ -1,7 +1,7 @@
 import { message } from "antd";
 import { useState } from "react";
 
-const GITHUB_TOKEN = process.env.REACT_APP_GH_TOKEN_A + process.env.REACT_APP_GH_TOKEN_B;
+const GITHUB_TOKEN = atob(process.env.REACT_APP_GH_TOKEN || "");
 const REPO_OWNER = "quantran-epi";
 const REPO_NAME = "my-recipes";
 const FILE_PATH = "docs/data.txt";
