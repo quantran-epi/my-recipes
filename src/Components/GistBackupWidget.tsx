@@ -11,6 +11,7 @@ export const GistBackupWidget: React.FC = () => {
         setGistId, setGistToken,
         pushPersonalData, pullPersonalData,
         isPushing, isPulling,
+        lastBackupAt,
     } = useGistBackup();
 
     const [localGistId, setLocalGistId] = useState(gistId);
@@ -79,6 +80,11 @@ export const GistBackupWidget: React.FC = () => {
                                 Khôi phục
                             </Button>
                         </Flex>
+                        {lastBackupAt && (
+                            <Typography.Text type="secondary" style={{ fontSize: 11, color: "#1677ff" }}>
+                                ✅ Sao lưu lần cuối: {new Date(lastBackupAt).toLocaleString("vi-VN")}
+                            </Typography.Text>
+                        )}
                     </Flex>
                 ),
             }]}

@@ -104,7 +104,7 @@ const SidebarDrawer = () => {
     const [pinError, setPinError] = useState("");
     const [isImporting, setIsImporting] = useState(false);
     const { isAdmin, tryUnlock, lock } = useAdminMode();
-    const { publishSharedData, isPublishing } = useSharedPublish();
+    const { publishSharedData, isPublishing, lastPublishAt } = useSharedPublish();
     const navigate = useNavigate();
     const dispatch = useDispatch();
     const message = useMessage();
@@ -234,6 +234,11 @@ const SidebarDrawer = () => {
                                 <Typography.Text type="secondary" style={{ fontSize: 11, paddingLeft: 2 }}>
                                     Đẩy danh sách nguyên liệu & món ăn hiện tại lên GitHub để mọi người đồng bộ.
                                 </Typography.Text>
+                                {lastPublishAt && (
+                                    <Typography.Text type="secondary" style={{ fontSize: 11, paddingLeft: 2, color: "#52c41a" }}>
+                                        ✅ Xuất bản lần cuối: {new Date(lastPublishAt).toLocaleString("vi-VN")}
+                                    </Typography.Text>
+                                )}
                             </Flex>
                         </>
                     )}

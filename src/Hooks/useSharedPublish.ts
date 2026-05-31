@@ -109,15 +109,21 @@ const diffItems = <T extends { id: string; name: string }>(
     return changes;
 };
 
+const LAST_PUBLISH_KEY = "shared_last_publish_at";
+
 // ── Hook ──────────────────────────────────────────────────────────────────────
 
 export interface UseSharedPublishResult {
     publishSharedData: () => Promise<void>;
     isPublishing: boolean;
+    lastPublishAt: string | null;
 }
 
 export const useSharedPublish = (): UseSharedPublishResult => {
     const [isPublishing, setIsPublishing] = useState(false);
+    const [lastPublishAt, setLastPublishAt] = useState<string | null>(
+        () => localStorage.getItem(LAST_PUBLISH_KEY)
+    );
     const ingredients = useSelector(selectIngredients);
     const dishes = useSelector(selectDishes);
 
@@ -192,6 +198,10 @@ export const useSharedPublish = (): UseSharedPublishResult => {
                 dishesVersion: newDishesVersion,
             });
 
+            const publishedAt = now;
+            localStorage.setItem(LAST_PUBLISH_KEY, publishedAt);
+            setLastPublishAt(publishedAt);
+
             message.success({
                 content: totalChanges === 0
                     ? "Xuất bản thành công (không có thay đổi mới)"
@@ -206,5 +216,5 @@ export const useSharedPublish = (): UseSharedPublishResult => {
         }
     };
 
-    return { publishSharedData, isPublishing };
+    return { publishSharedData, isPublishing, lastPublishAt };
 };

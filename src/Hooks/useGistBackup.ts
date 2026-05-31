@@ -10,6 +10,7 @@ const GIST_ID_KEY = "personal_gist_id";
 const GIST_TOKEN_KEY = "personal_gist_token";
 const GIST_FILE_NAME = "my-recipes-personal.json";
 const PERSIST_PERSONAL_KEY = "persist:personal";
+const LAST_BACKUP_KEY = "personal_last_backup_at";
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -62,6 +63,7 @@ export interface UseGistBackupResult {
     pullPersonalData: () => Promise<void>;
     isPushing: boolean;
     isPulling: boolean;
+    lastBackupAt: string | null;
 }
 
 export const useGistBackup = (): UseGistBackupResult => {
@@ -69,6 +71,9 @@ export const useGistBackup = (): UseGistBackupResult => {
     const [gistToken, setGistTokenState] = useState(() => localStorage.getItem(GIST_TOKEN_KEY) ?? "");
     const [isPushing, setIsPushing] = useState(false);
     const [isPulling, setIsPulling] = useState(false);
+    const [lastBackupAt, setLastBackupAt] = useState<string | null>(
+        () => localStorage.getItem(LAST_BACKUP_KEY)
+    );
 
     const setGistId = (id: string) => {
         localStorage.setItem(GIST_ID_KEY, id);
@@ -99,6 +104,9 @@ export const useGistBackup = (): UseGistBackupResult => {
         message.loading({ content: "Đang sao lưu dữ liệu cá nhân lên Gist...", key, duration: 0 });
         try {
             await patchGist(gistId.trim(), gistToken.trim(), data);
+            const now = new Date().toISOString();
+            localStorage.setItem(LAST_BACKUP_KEY, now);
+            setLastBackupAt(now);
             message.success({ content: "Sao lưu thành công!", key, duration: 3 });
         } catch (err: any) {
             message.error({ content: "Sao lưu thất bại: " + err?.message, key, duration: 5 });
@@ -139,5 +147,6 @@ export const useGistBackup = (): UseGistBackupResult => {
         setGistId, setGistToken,
         pushPersonalData, pullPersonalData,
         isPushing, isPulling,
+        lastBackupAt,
     };
 };
