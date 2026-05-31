@@ -478,7 +478,12 @@
     },
     {
       "id": "Bột mìpg1-aZIoDs",
-      "name": "Bột mì"
+      "name": "Bột mì",
+      "inventory": {
+        "amount": 200,
+        "unit": "g",
+        "lastUpdated": "2026-05-31T03:27:02.633Z"
+      }
     },
     {
       "id": "Bột năngho3LUqgeAO",
