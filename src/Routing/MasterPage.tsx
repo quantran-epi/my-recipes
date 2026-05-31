@@ -1,4 +1,4 @@
-import { CloudDownloadOutlined, CloudUploadOutlined, ExportOutlined, HistoryOutlined, ImportOutlined, LockOutlined, MenuOutlined, UnlockOutlined, FireOutlined, SettingOutlined } from "@ant-design/icons";
+import { CloudDownloadOutlined, CloudUploadOutlined, ExportOutlined, HistoryOutlined, ImportOutlined, LockOutlined, MenuOutlined, UnlockOutlined, FireOutlined, SettingOutlined, QuestionCircleOutlined } from "@ant-design/icons";
 import { ObjectPropertyHelper } from "@common/Helpers/ObjectProperty";
 import { Button } from "@components/Button";
 import { TextArea, Input } from "@components/Form/Input";
@@ -20,6 +20,7 @@ import { DishSuggesterScreen } from "@modules/DishSuggester/Screens/DishSuggeste
 import { CookingSessionWidget } from "@modules/Dishes/Screens/CookingSession.widget";
 import { CookingHistoryWidget } from "@modules/Dishes/Screens/CookingHistory.widget";
 import { GistBackupWidget } from "@components/GistBackupWidget";
+import { UserGuideScreen } from "@modules/Home/Screens/UserGuide.screen";
 import { addDishes, resetDishes } from "@store/Reducers/DishesReducer";
 import { addIngredient, resetIngredient } from "@store/Reducers/IngredientReducer";
 import { addScheduledMeal, resetScheduleMeals } from "@store/Reducers/ScheduledMealReducer";
@@ -109,6 +110,7 @@ const SidebarDrawer = () => {
     const dispatch = useDispatch();
     const message = useMessage();
     const toggleHistory = useToggle();
+    const toggleGuide = useToggle();
 
     const showDrawer = () => {
         setOpen(true);
@@ -259,6 +261,14 @@ const SidebarDrawer = () => {
                     >
                         Lịch sử nấu ăn
                     </Button>
+                    <Button
+                        icon={<QuestionCircleOutlined />}
+                        block
+                        style={{ marginTop: 8 }}
+                        onClick={() => { setOpen(false); toggleGuide.show(); }}
+                    >
+                        Hướng dẫn sử dụng
+                    </Button>
 
                     {/* ── Account ── */}
                     <Divider orientation="left" style={{ fontSize: 12, color: "#888", marginTop: 20, marginBottom: 12 }}>Tài khoản</Divider>
@@ -311,6 +321,7 @@ const SidebarDrawer = () => {
             </Modal>
             <ScheduledMealToolkitWidget />
             <CookingHistoryWidget open={toggleHistory.value} onClose={toggleHistory.hide} />
+            <UserGuideScreen open={toggleGuide.value} onClose={toggleGuide.hide} />
         </React.Fragment>
     );
 };
