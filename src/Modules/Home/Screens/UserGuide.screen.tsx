@@ -38,7 +38,9 @@ const GUIDE: GuideSection[] = [
         title: 'Món ăn & Nấu ăn',
         steps: [
             { title: 'Xem món ăn', desc: 'Vào mục Món ăn. Nhấn vào một món để xem chi tiết nguyên liệu, thời gian và các bước thực hiện.' },
-            { title: 'Bắt đầu nấu', desc: 'Trong trang chi tiết món, nhấn Bắt đầu nấu. Hệ thống tạo phiên nấu và hướng dẫn từng bước. Sau bước cuối nhấn Hoàn thành để ghi lại và tự động trừ tồn kho.' },
+            { title: 'Bắt đầu nấu', desc: 'Trong trang chi tiết món, nhấn nút Bắt đầu nấu (🔥) ở đầu trang. Hệ thống tạo phiên nấu và hướng dẫn từng bước. Sau bước cuối nhấn Hoàn thành để ghi lại và tự động trừ tồn kho.' },
+            { title: 'Tạo lịch mua sắm từ món', desc: 'Trong trang chi tiết món, nhấn nút Tạo lịch mua sắm (🛒) để tạo ngay một danh sách mua sắm với món này được chọn sẵn.' },
+            { title: 'Nhiều phiên nấu cùng lúc', desc: 'Bạn có thể nấu nhiều món song song. Nhấn vào viên thuốc nấu ở góc dưới màn hình — nếu đang có 2+ phiên, một bảng chọn sẽ hiện ra để chuyển giữa các phiên đang nấu.' },
             { title: 'Lịch sử nấu ăn', desc: 'Vào Menu → Lịch sử nấu ăn để xem các phiên đã nấu theo ngày, thời lượng và trạng thái hoàn thành / huỷ.' },
         ],
     },
@@ -82,6 +84,19 @@ const GUIDE: GuideSection[] = [
             { title: 'Sao lưu', desc: 'Nhấn Sao lưu để đẩy dữ liệu cá nhân (tồn kho, lịch mua sắm, thực đơn) lên Gist. Thời điểm sao lưu gần nhất hiển thị bên dưới nút.' },
             { title: 'Khôi phục', desc: 'Nhấn Khôi phục để tải dữ liệu từ Gist về. Toàn bộ dữ liệu cục bộ sẽ bị thay thế — hãy chắc chắn bạn đã sao lưu trước.' },
             { title: 'Đổi thiết bị', desc: 'Trên thiết bị mới, điền cùng Gist ID + Token rồi nhấn Khôi phục để lấy lại toàn bộ dữ liệu.' },
+        ],
+    },
+    {
+        key: 'search',
+        emoji: '🔍',
+        title: 'Tìm kiếm nhanh',
+        steps: [
+            { title: 'Mở tìm kiếm', desc: 'Nhấn icon kính lúp 🔍 ở góc trên bên phải thanh tiêu đề. Màn hình tìm kiếm toàn trang sẽ hiện ra.' },
+            { title: 'Tìm theo từ khoá', desc: 'Nhập ít nhất 2 ký tự. Kết quả tự động hiện sau 300ms, phân thành 3 nhóm: Món ăn, Nguyên liệu và Lịch mua sắm. Từ khớp được tô vàng.' },
+            { title: 'Món ăn — tìm theo nguyên liệu', desc: 'Nếu tên nguyên liệu trong món khớp với từ khoá, món đó cũng xuất hiện. Các chip màu cam phía dưới tên cho biết nguyên liệu nào khớp.' },
+            { title: 'Mở chi tiết món', desc: 'Nhấn vào một kết quả món ăn để mở trang chi tiết ngay bên trong (không rời khỏi màn hình tìm kiếm). Từ đó có thể Bắt đầu nấu hoặc Tạo lịch mua sắm trực tiếp.' },
+            { title: 'Tìm kiếm gần đây', desc: 'Ứng dụng ghi nhớ tối đa 5 từ khoá gần nhất. Nhấn vào một từ để tìm lại ngay. Nhấn Xoá để xoá toàn bộ lịch sử.' },
+            { title: 'Xem thêm kết quả', desc: 'Mỗi nhóm mặc định hiển thị 5 kết quả đầu. Nhấn Xem thêm ở cuối nhóm để mở rộng, nhấn Thu gọn để ẩn bớt.' },
         ],
     },
 ];
