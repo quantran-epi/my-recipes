@@ -180,24 +180,45 @@ export const DishSuggesterScreen: React.FC<DishSuggesterScreenProps> = ({ open, 
     );
 
     const ModeTabs = () => (
-        <Stack gap={6} style={{ marginBottom: 16 }}>
+        <div style={{
+            display: "grid",
+            gridTemplateColumns: "1fr 1fr 1fr",
+            gap: 6,
+            marginBottom: 16,
+        }}>
             {([
                 { key: "ingredients" as Mode, label: "Nguyên liệu", icon: <BulbOutlined /> },
                 { key: "inventory" as Mode, label: "Tủ lạnh", icon: <ThunderboltOutlined /> },
                 { key: "duration" as Mode, label: "Thời gian", icon: <ClockCircleOutlined /> },
             ]).map(tab => (
-                <Button
+                <button
                     key={tab.key}
-                    type={mode === tab.key ? "primary" : "default"}
-                    size="small"
-                    icon={tab.icon}
                     onClick={() => _onModeChange(tab.key)}
-                    style={{ borderRadius: 16, flex: 1 }}
+                    style={{
+                        display: "flex",
+                        flexDirection: "column",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        gap: 4,
+                        padding: "8px 4px",
+                        borderRadius: 10,
+                        border: mode === tab.key ? "2px solid #1677ff" : "1px solid #d9d9d9",
+                        background: mode === tab.key ? "#e6f4ff" : "#fff",
+                        color: mode === tab.key ? "#1677ff" : "#555",
+                        fontWeight: mode === tab.key ? 600 : 400,
+                        fontSize: 12,
+                        cursor: "pointer",
+                        minWidth: 0,
+                        width: "100%",
+                    }}
                 >
-                    {tab.label}
-                </Button>
+                    <span style={{ fontSize: 16 }}>{tab.icon}</span>
+                    <span style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", maxWidth: "100%" }}>
+                        {tab.label}
+                    </span>
+                </button>
             ))}
-        </Stack>
+        </div>
     );
 
     return <>
