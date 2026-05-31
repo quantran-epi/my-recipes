@@ -2,664 +2,823 @@
   "ingredients": [
     {
       "id": "Đậu phụQdYQjd3uDU",
-      "name": "Đậu phụ"
+      "name": "Đậu phụ",
+      "category": "Khác"
     },
     {
       "id": "Đậu nontHeqcHqWEy",
-      "name": "Đậu non"
+      "name": "Đậu non",
+      "category": "Khác"
     },
     {
       "id": "Hành láZtNmZbNswb",
-      "name": "Hành lá"
+      "name": "Hành lá",
+      "category": "Gia vị"
     },
     {
       "id": "Hành tímYvb82U-VOH",
-      "name": "Hành tím"
+      "name": "Hành tím",
+      "category": "Gia vị"
     },
     {
       "id": "Mùi tàuUQolO_X6zd",
-      "name": "Mùi tàu"
+      "name": "Mùi tàu",
+      "category": "Gia vị"
     },
     {
       "id": "Mùi tajayFO1gKOJ",
-      "name": "Mùi ta"
+      "name": "Mùi ta",
+      "category": "Gia vị"
     },
     {
       "id": "Kinh giới90WanixOVC",
-      "name": "Kinh giới"
+      "name": "Kinh giới",
+      "category": "Gia vị"
     },
     {
       "id": "Tía tôiZc3rSS3Pf",
-      "name": "Tía tô"
+      "name": "Tía tô",
+      "category": "Gia vị"
     },
     {
       "id": "Thìa là2Y2R1GD_jq",
-      "name": "Thìa là"
+      "name": "Thìa là",
+      "category": "Gia vị"
     },
     {
       "id": "Lá lốtE7OA57EkX-",
-      "name": "Lá lốt"
+      "name": "Lá lốt",
+      "category": "Rau củ"
     },
     {
       "id": "Tỏi3NILO1jEd0",
-      "name": "Tỏi"
+      "name": "Tỏi",
+      "category": "Gia vị"
     },
     {
       "id": "Hành tâyPsERexf4zd",
-      "name": "Hành tây"
+      "name": "Hành tây",
+      "category": "Rau củ"
     },
     {
       "id": "Xà láchGY5tn2xg5J",
-      "name": "Xà lách"
+      "name": "Xà lách",
+      "category": "Rau củ"
     },
     {
       "id": "Dưa chuộtiww2N4-K0c",
-      "name": "Dưa chuột"
+      "name": "Dưa chuột",
+      "category": "Rau củ"
     },
     {
       "id": "Trứng gà72vN9igVwa",
-      "name": "Trứng gà"
+      "name": "Trứng gà",
+      "category": "Sữa & trứng"
     },
     {
       "id": "Trứng vịt59-1eAcjqZ",
-      "name": "Trứng vịt"
+      "name": "Trứng vịt",
+      "category": "Sữa & trứng"
     },
     {
       "id": "Trứng cáNtiSxACUNP",
-      "name": "Trứng cá"
+      "name": "Trứng cá",
+      "category": "Sữa & trứng"
     },
     {
       "id": "Thịt heo nạc vaiVXHDweEHeG",
-      "name": "Thịt heo nạc vai"
+      "name": "Thịt heo nạc vai",
+      "category": "Thịt"
     },
     {
       "id": "Thịt heo ba chỉtn-meEAQZu",
-      "name": "Thịt heo ba chỉ"
+      "name": "Thịt heo ba chỉ",
+      "category": "Thịt"
     },
     {
       "id": "Sườn heo nonlic0JR5JmA",
-      "name": "Sườn heo non"
+      "name": "Sườn heo non",
+      "category": "Thịt"
     },
     {
       "id": "Sườn heo già2aDAA9ooHw",
-      "name": "Sườn heo già"
+      "name": "Sườn heo già",
+      "category": "Thịt"
     },
     {
       "id": "Mỡ heo tảng0WU-I2Ixi4",
-      "name": "Mỡ heo tảng"
+      "name": "Mỡ heo tảng",
+      "category": "Thịt"
     },
     {
       "id": "Mỡ heo lỏngd_H3wfitXK",
-      "name": "Mỡ heo lỏng"
+      "name": "Mỡ heo lỏng",
+      "category": "Thịt"
     },
     {
       "id": "Gan heo2X9fQYeB8e",
-      "name": "Gan heo"
+      "name": "Gan heo",
+      "category": "Thịt"
     },
     {
       "id": "Tim heoCWf5HOGp1L",
-      "name": "Tim heo"
+      "name": "Tim heo",
+      "category": "Thịt"
     },
     {
       "id": "Cật heoIFzsT44y8n",
-      "name": "Cật heo"
+      "name": "Cật heo",
+      "category": "Thịt"
     },
     {
       "id": "Thịt bò nạmJ1_LlvskPv",
-      "name": "Thịt bò nạm"
+      "name": "Thịt bò nạm",
+      "category": "Hải sản"
     },
     {
       "id": "Thịt bò gầuxg6qB7XSss",
-      "name": "Thịt bò gầu"
+      "name": "Thịt bò gầu",
+      "category": "Thịt"
     },
     {
       "id": "Sườn bòsZCwrc2GVy",
-      "name": "Sườn bò"
+      "name": "Sườn bò",
+      "category": "Thịt"
     },
     {
       "id": "Thịt bò thănDyzpaj8qvS",
-      "name": "Thịt bò thăn"
+      "name": "Thịt bò thăn",
+      "category": "Thịt"
     },
     {
       "id": "Bụng cáYEwaP8LSBh",
-      "name": "Bụng cá"
+      "name": "Bụng cá",
+      "category": "Thịt"
     },
     {
       "id": "Đuôi cáTG7XKl6Ss9",
-      "name": "Đuôi cá"
+      "name": "Đuôi cá",
+      "category": "Hải sản"
     },
     {
       "id": "Đầu cáZC-K1PBaKf",
-      "name": "Đầu cá"
+      "name": "Đầu cá",
+      "category": "Hải sản"
     },
     {
       "id": "Thịt gà đùi0vjCseh7j1",
-      "name": "Thịt gà đùi"
+      "name": "Thịt gà đùi",
+      "category": "Thịt"
     },
     {
       "id": "Thịt gà cánhugfciVhuZy",
-      "name": "Thịt gà cánh"
+      "name": "Thịt gà cánh",
+      "category": "Thịt"
     },
     {
       "id": "Xương gàRn56emeuiJ",
-      "name": "Xương gà"
+      "name": "Xương gà",
+      "category": "Thịt"
     },
     {
       "id": "Thịt gà ứcirYK34PGfJ",
-      "name": "Thịt gà ức"
+      "name": "Thịt gà ức",
+      "category": "Thịt"
     },
     {
       "id": "Thịt heo xayTtz3UMTzNU",
-      "name": "Thịt heo xay"
+      "name": "Thịt heo xay",
+      "category": "Thịt"
     },
     {
       "id": "Thịt vịtVdTLg_qlzR",
-      "name": "Thịt vịt"
+      "name": "Thịt vịt",
+      "category": "Thịt"
     },
     {
       "id": "Cà tímIfuFxVXDBv",
-      "name": "Cà tím"
+      "name": "Cà tím",
+      "category": "Rau củ"
     },
     {
       "id": "Xương ống heos9WjV1vL1p",
-      "name": "Xương ống heo"
+      "name": "Xương ống heo",
+      "category": "Thịt"
     },
     {
       "id": "Đường trắngDH_YV6vOlJ",
-      "name": "Đường trắng"
+      "name": "Đường trắng",
+      "category": "Gia vị"
     },
     {
       "id": "Đường phènCgPf36wjMX",
-      "name": "Đường phèn"
+      "name": "Đường phèn",
+      "category": "Gia vị"
     },
     {
       "id": "Muối iotmxmFIcYWUb",
-      "name": "Muối iot"
+      "name": "Muối iot",
+      "category": "Gia vị"
     },
     {
       "id": "Muối trắngrOsVaI3tKv",
-      "name": "Muối trắng"
+      "name": "Muối trắng",
+      "category": "Gia vị"
     },
     {
       "id": "Nước mắm9koIj5Fz3a",
-      "name": "Nước mắm"
+      "name": "Nước mắm",
+      "category": "Gia vị"
     },
     {
       "id": "Xì dầuJhjF6UAtE7",
-      "name": "Xì dầu"
+      "name": "Xì dầu",
+      "category": "Gia vị"
     },
     {
       "id": "Mật ongOr177EkX2-",
-      "name": "Mật ong"
+      "name": "Mật ong",
+      "category": "Gia vị"
     },
     {
       "id": "Hạt tiêu4eEOesKltQ",
-      "name": "Hạt tiêu"
+      "name": "Hạt tiêu",
+      "category": "Gia vị"
     },
     {
       "id": "Dầu ănb13XIYIrDh",
-      "name": "Dầu ăn"
+      "name": "Dầu ăn",
+      "category": "Gia vị"
     },
     {
       "id": "Bột điềuNNx_gW88pY",
-      "name": "Bột điều"
+      "name": "Bột điều",
+      "category": "Khác"
     },
     {
       "id": "Chanh2c6lpZSaM4",
-      "name": "Chanh"
+      "name": "Chanh",
+      "category": "Gia vị"
     },
     {
       "id": "Quất1tbPuuy1rb",
-      "name": "Quất"
+      "name": "Quất",
+      "category": "Gia vị"
     },
     {
       "id": "Giò lụa9aRWcTrL67",
-      "name": "Giò lụa"
+      "name": "Giò lụa",
+      "category": "Đồ hộp"
     },
     {
       "id": "Chả mỡGr-Mw11ezE",
-      "name": "Chả mỡ"
+      "name": "Chả mỡ",
+      "category": "Đồ hộp"
     },
     {
       "id": "Mọc bò0l6Y3y4t0R",
-      "name": "Mọc bò"
+      "name": "Mọc bò",
+      "category": "Đồ hộp"
     },
     {
       "id": "Cua đồng_ZT1s1jy48",
-      "name": "Cua đồng"
+      "name": "Cua đồng",
+      "category": "Hải sản"
     },
     {
       "id": "Cà chuaZP4MdEXiO_",
-      "name": "Cà chua"
+      "name": "Cà chua",
+      "category": "Rau củ"
     },
     {
       "id": "Bơ lạtbK-8VT5e-z",
-      "name": "Bơ lạt"
+      "name": "Bơ lạt",
+      "category": "Gia vị"
     },
     {
       "id": "Ớt đỏ cay4cIqrjz_8U",
-      "name": "Ớt đỏ cay"
+      "name": "Ớt đỏ cay",
+      "category": "Rau củ"
     },
     {
       "id": "Ớt chuông đỏOH3gtce7jk",
-      "name": "Ớt chuông đỏ"
+      "name": "Ớt chuông đỏ",
+      "category": "Rau củ"
     },
     {
       "id": "Ớt chuông xanh1o16kbL30u",
-      "name": "Ớt chuông xanh"
+      "name": "Ớt chuông xanh",
+      "category": "Rau củ"
     },
     {
       "id": "Ớt chuông vàngFLYc7PslEU",
-      "name": "Ớt chuông vàng"
+      "name": "Ớt chuông vàng",
+      "category": "Rau củ"
     },
     {
       "id": "Ớt xanh cayXUZVWVDT_Y",
-      "name": "Ớt xanh cay"
+      "name": "Ớt xanh cay",
+      "category": "Rau củ"
     },
     {
       "id": "Tương ớt1mzBq-weXz",
-      "name": "Tương ớt"
+      "name": "Tương ớt",
+      "category": "Gia vị"
     },
     {
       "id": "Tương càiHkFzpVbMI",
-      "name": "Tương cà"
+      "name": "Tương cà",
+      "category": "Gia vị"
     },
     {
       "id": "Ngải cứutipq4kHmOB",
-      "name": "Ngải cứu"
+      "name": "Ngải cứu",
+      "category": "Rau củ"
     },
     {
       "id": "Hạt senAdqkHmtif3",
-      "name": "Hạt sen"
+      "name": "Hạt sen",
+      "category": "Rau củ"
     },
     {
       "id": "Gừngc-VE7hkDli",
-      "name": "Gừng"
+      "name": "Gừng",
+      "category": "Gia vị"
     },
     {
       "id": "Kỷ tửE9xT5QTAhj",
-      "name": "Kỷ tử"
+      "name": "Kỷ tử",
+      "category": "Gia vị"
     },
     {
       "id": "Táo đỏqFV1jSTBGd",
-      "name": "Táo đỏ"
+      "name": "Táo đỏ",
+      "category": "Gia vị"
     },
     {
       "id": "TáođenTRNPr0KCC-",
-      "name": "Táo đen"
+      "name": "Táo đen",
+      "category": "Gia vị"
     },
     {
       "id": "DấmwpjvOTf7hW",
-      "name": "Dấm"
+      "name": "Dấm",
+      "category": "Gia vị"
     },
     {
       "id": "Phở khô2CgiH-Mb0I",
-      "name": "Phở khô"
+      "name": "Phở khô",
+      "category": "Tinh bột"
     },
     {
       "id": "Bún khôK-nYu2l5_h",
-      "name": "Bún khô"
+      "name": "Bún khô",
+      "category": "Tinh bột"
     },
     {
       "id": "SảN-nr3-BboO",
-      "name": "Sả"
+      "name": "Sả",
+      "category": "Gia vị"
     },
     {
       "id": "QuếpC5s9J3cnj",
-      "name": "Quế"
+      "name": "Quế",
+      "category": "Gia vị"
     },
     {
       "id": "Thảo quảkXyurFzxSF",
-      "name": "Thảo quả"
+      "name": "Thảo quả",
+      "category": "Gia vị"
     },
     {
       "id": "Hoa hồiFHXr32fLXp",
-      "name": "Hoa hồi"
+      "name": "Hoa hồi",
+      "category": "Gia vị"
     },
     {
       "id": "Thịt bò bắpTmUfLzE2tl",
-      "name": "Thịt bò bắp"
+      "name": "Thịt bò bắp",
+      "category": "Thịt"
     },
     {
       "id": "Giá đỗLaF0woHgwA",
-      "name": "Giá đỗ"
+      "name": "Giá đỗ",
+      "category": "Rau củ"
     },
     {
       "id": "Húng quếSnTL9FBfY0",
-      "name": "Húng quế"
+      "name": "Húng quế",
+      "category": "Gia vị"
     },
     {
       "id": "Hoa chuốiTvAka0CYhm",
-      "name": "Hoa chuối"
+      "name": "Hoa chuối",
+      "category": "Rau củ"
     },
     {
       "id": "Tiết bòfJRNveQPQa",
-      "name": "Tiết bò"
+      "name": "Tiết bò",
+      "category": "Thịt"
     },
     {
       "id": "Tiết lợn_KUqzKbZRf",
-      "name": "Tiết lợn"
+      "name": "Tiết lợn",
+      "category": "Thịt"
     },
     {
       "id": "Chả cuaZmSmfXObKL",
-      "name": "Chả cua"
+      "name": "Chả cua",
+      "category": "Đồ hộp"
     },
     {
       "id": "Mắm ruốc4d_D077Cg6",
-      "name": "Mắm ruốc"
+      "name": "Mắm ruốc",
+      "category": "Gia vị"
     },
     {
       "id": "Mắm tépFPEkwDw6dm",
-      "name": "Mắm tép"
+      "name": "Mắm tép",
+      "category": "Gia vị"
     },
     {
       "id": "DứaGu02Q4sahX",
-      "name": "Dứa"
+      "name": "Dứa",
+      "category": "Rau củ"
     },
     {
       "id": "Sữa đặckKXUK_y9VF",
-      "name": "Sữa đặc"
+      "name": "Sữa đặc",
+      "category": "Sữa & trứng"
     },
     {
       "id": "Ngũ vị hươngL2e0rt-Wrb",
-      "name": "Ngũ vị hương"
+      "name": "Ngũ vị hương",
+      "category": "Gia vị"
     },
     {
       "id": "Rau cảiiFdmSyx5A0",
-      "name": "Rau cải ngồng"
+      "name": "Rau cải ngồng",
+      "category": "Rau củ"
     },
     {
       "id": "Rau ngót5vruLe8l5U",
-      "name": "Rau ngót"
+      "name": "Rau ngót",
+      "category": "Rau củ"
     },
     {
       "id": "Cá rô đồngt2S76dzM1q",
-      "name": "Cá rô đồng"
+      "name": "Cá rô đồng",
+      "category": "Hải sản"
     },
     {
       "id": "Cá rô phisWoe0YXYMA",
-      "name": "Cá rô phi"
+      "name": "Cá rô phi",
+      "category": "Hải sản"
     },
     {
       "id": "Rượu vangGKL1_2rRy_",
-      "name": "Rượu vang"
+      "name": "Rượu vang",
+      "category": "Gia vị"
     },
     {
       "id": "XoàiZenHCISCaR",
-      "name": "Xoài"
+      "name": "Xoài",
+      "category": "Rau củ"
     },
     {
       "id": "Lá nem cuốnhi2Vczb6dt",
-      "name": "Lá nem cuốn"
+      "name": "Lá nem cuốn",
+      "category": "Khác"
     },
     {
       "id": "Lá nem ránYsP2p9gQpD",
-      "name": "Lá nem rán"
+      "name": "Lá nem rán",
+      "category": "Khác"
     },
     {
       "id": "Xúc xíchv-K-3pPXWH",
-      "name": "Xúc xích"
+      "name": "Xúc xích",
+      "category": "Đồ hộp"
     },
     {
       "id": "Rau rămUSdFLbxJzV",
-      "name": "Rau răm"
+      "name": "Rau răm",
+      "category": "Gia vị"
     },
     {
       "id": "Đậu bắpaLBLtkkAtg",
-      "name": "Đậu bắp"
+      "name": "Đậu bắp",
+      "category": "Rau củ"
     },
     {
       "id": "Nấm kim châmmlA63sS5ey",
-      "name": "Nấm kim châm"
+      "name": "Nấm kim châm",
+      "category": "Rau củ"
     },
     {
       "id": "Nấm đùi gàOxusi8DbqC",
-      "name": "Nấm đùi gà"
+      "name": "Nấm đùi gà",
+      "category": "Rau củ"
     },
     {
       "id": "Nấm hải sảnqTCA-l7FSn",
-      "name": "Nấm hải sản"
+      "name": "Nấm hải sản",
+      "category": "Rau củ"
     },
     {
       "id": "Bí đỏdfZiGA8n81",
-      "name": "Bí đỏ"
+      "name": "Bí đỏ",
+      "category": "Rau củ"
     },
     {
       "id": "Bí đaovRa5fhBI4Z",
-      "name": "Bí đao"
+      "name": "Bí đao",
+      "category": "Rau củ"
     },
     {
       "id": "Gạo nếpEjVT24T5Uq",
-      "name": "Gạo nếp"
+      "name": "Gạo nếp",
+      "category": "Tinh bột"
     },
     {
       "id": "Gạo tẻC_vFfi5R77",
-      "name": "Gạo tẻ"
+      "name": "Gạo tẻ",
+      "category": "Tinh bột"
     },
     {
       "id": "Cá chépdGCZp0Kz0l",
-      "name": "Cá chép"
+      "name": "Cá chép",
+      "category": "Hải sản"
     },
     {
       "id": "MiếnObDS-xNaoB",
-      "name": "Miến"
+      "name": "Miến",
+      "category": "Tinh bột"
     },
     {
       "id": "Mộc nhĩzQ75NeGAeu",
-      "name": "Mộc nhĩ"
+      "name": "Mộc nhĩ",
+      "category": "Rau củ"
     },
     {
       "id": "Nấm hươngF3SfMXRu9p",
-      "name": "Nấm hương"
+      "name": "Nấm hương",
+      "category": "Rau củ"
     },
     {
       "id": "Cà rốtGB2tp6fqpw",
-      "name": "Cà rốt"
+      "name": "Cà rốt",
+      "category": "Rau củ"
     },
     {
       "id": "Dọc mùng-Ykee9LwhY",
-      "name": "Dọc mùng"
+      "name": "Dọc mùng",
+      "category": "Rau củ"
     },
     {
       "id": "Lá dongmBYN9i2dtX",
-      "name": "Lá dong"
+      "name": "Lá dong",
+      "category": "Khác"
     },
     {
       "id": "Lá chuốiQ8n4MaNj6n",
-      "name": "Lá chuối"
+      "name": "Lá chuối",
+      "category": "Khác"
     },
     {
       "id": "Bột gạo tẻOiZgdglJUz",
-      "name": "Bột gạo tẻ"
+      "name": "Bột gạo tẻ",
+      "category": "Tinh bột"
     },
     {
       "id": "Bột gạo nếpJnLKNIfFnn",
-      "name": "Bột gạo nếp"
+      "name": "Bột gạo nếp",
+      "category": "Tinh bột"
     },
     {
       "id": "Bột mìpg1-aZIoDs",
       "name": "Bột mì",
-      "inventory": {
-        "amount": 200,
-        "unit": "g",
-        "lastUpdated": "2026-05-31T03:27:02.633Z"
-      }
+      "category": "Tinh bột"
     },
     {
       "id": "Bột năngho3LUqgeAO",
-      "name": "Bột năng"
+      "name": "Bột năng",
+      "category": "Tinh bột"
     },
     {
       "id": "Men nởiej8VSL_mG",
-      "name": "Men nở"
+      "name": "Men nở",
+      "category": "Khác"
     },
     {
       "id": "Nước9jnS_eO8Cv",
-      "name": "Nước"
+      "name": "Nước",
+      "category": "Khác"
     },
     {
       "id": "Tôm sú4vHhSAcJTQ",
-      "name": "Tôm sú"
+      "name": "Tôm sú",
+      "category": "Hải sản"
     },
     {
       "id": "TépQ19gfL2cl1",
-      "name": "Tép"
+      "name": "Tép",
+      "category": "Hải sản"
     },
     {
       "id": "Tôm nhỏWyLLGEkqA0",
-      "name": "Tôm nhỏ"
+      "name": "Tôm nhỏ",
+      "category": "Hải sản"
     },
     {
       "id": "Sữa tươi không đườngHqQaWllTs2",
-      "name": "Sữa tươi không đường"
+      "name": "Sữa tươi không đường",
+      "category": "Sữa & trứng"
     },
     {
       "id": "Vừng đenriz3jbwY9w",
-      "name": "Vừng đen"
+      "name": "Vừng đen",
+      "category": "Gia vị"
     },
     {
       "id": "Vừng trắng2HuELM4uwT",
-      "name": "Vừng trắng"
+      "name": "Vừng trắng",
+      "category": "Gia vị"
     },
     {
       "id": "Đậu xanhnIxKmFNrRM",
-      "name": "Đậu xanh"
+      "name": "Đậu xanh",
+      "category": "Khác"
     },
     {
       "id": "Đậu đỏ26Kvs2YJnx",
-      "name": "Đậu đỏ"
+      "name": "Đậu đỏ",
+      "category": "Khác"
     },
     {
       "id": "Đậu đenzQGtWTgGky",
-      "name": "Đậu đen"
+      "name": "Đậu đen",
+      "category": "Khác"
     },
     {
       "id": "Đậu nànhj17It1Wlhn",
-      "name": "Đậu nành"
+      "name": "Đậu nành",
+      "category": "Khác"
     },
     {
       "id": "Đậu que51Zk81TOZu",
-      "name": "Đậu que"
+      "name": "Đậu que",
+      "category": "Rau củ"
     },
     {
       "id": "Khoai tâylAyMsTv486",
-      "name": "Khoai tây"
+      "name": "Khoai tây",
+      "category": "Tinh bột"
     },
     {
       "id": "Khoai langqUx7MJBv9X",
-      "name": "Khoai lang"
+      "name": "Khoai lang",
+      "category": "Tinh bột"
     },
     {
       "id": "Nước dừaaW0TqQ5HKb",
-      "name": "Nước dừa"
+      "name": "Nước dừa",
+      "category": "Khác"
     },
     {
       "id": "Dừa nạoqQdzvpztgD",
-      "name": "Dừa nạo"
+      "name": "Dừa nạo",
+      "category": "Rau củ"
     },
     {
       "id": "Lá chanhiB3cqNxKdQ",
-      "name": "Lá chanh"
+      "name": "Lá chanh",
+      "category": "Gia vị"
     },
     {
       "id": "Trứng cútj_0gniwu4w",
-      "name": "Trứng cút"
+      "name": "Trứng cút",
+      "category": "Sữa & trứng"
     },
     {
       "id": "Mực ốngLunhJeJvsh",
-      "name": "Mực ống"
+      "name": "Mực ống",
+      "category": "Hải sản"
     },
     {
       "id": "Rau cần tây4JcCvsR3IE",
-      "name": "Rau cần tây"
+      "name": "Rau cần tây",
+      "category": "Rau củ"
     },
     {
       "id": "Rau cần talpL5fenu9D",
-      "name": "Rau cần ta"
+      "name": "Rau cần ta",
+      "category": "Rau củ"
     },
     {
       "id": "Rau bíywN7JoWrKo",
-      "name": "Rau bí"
+      "name": "Rau bí",
+      "category": "Rau củ"
     },
     {
       "id": "Rau đay-OjyFKet0H",
-      "name": "Rau đay"
+      "name": "Rau đay",
+      "category": "Rau củ"
     },
     {
       "id": "MướpUs4jbq5bn0",
-      "name": "Mướp"
+      "name": "Mướp",
+      "category": "Rau củ"
     },
     {
       "id": "Rau mồng tơiMCVFPgFWtb",
-      "name": "Rau mồng tơi"
+      "name": "Rau mồng tơi",
+      "category": "Rau củ"
     },
     {
       "id": "Cốt dừa0fULSP8Mc7",
-      "name": "Cốt dừa"
+      "name": "Cốt dừa",
+      "category": "Gia vị"
     },
     {
       "id": "Tóp mỡU2aR7-xY4p",
-      "name": "Tóp mỡ"
+      "name": "Tóp mỡ",
+      "category": "Thịt"
     },
     {
       "id": "Rễ ngòfxPj2T9HiF",
-      "name": "Rễ ngò"
+      "name": "Rễ ngò",
+      "category": "Gia vị"
     },
     {
       "id": "Củ cảikk2MGWKOnc",
-      "name": "Củ cải"
+      "name": "Củ cải",
+      "category": "Rau củ"
     },
     {
       "id": "Đậu phộnggq3Fe10jOx",
-      "name": "Đậu phộng"
+      "name": "Đậu phộng",
+      "category": "Khác"
     },
     {
       "id": "Tương đen (Tương ngọt)7RPgXnGGi2",
-      "name": "Tương đen (Tương ngọt)"
+      "name": "Tương đen (Tương ngọt)",
+      "category": "Gia vị"
     },
     {
       "id": "Tỏi tâyI-jCssQy3V",
-      "name": "Tỏi tây"
+      "name": "Tỏi tây",
+      "category": "Gia vị"
     },
     {
       "id": "Nước màumi1ObkFY7D",
-      "name": "Nước màu"
+      "name": "Nước màu",
+      "category": "Gia vị"
     },
     {
       "id": "Đường vàngNlPTxVKgvv",
-      "name": "Đường vàng"
+      "name": "Đường vàng",
+      "category": "Gia vị"
     },
     {
       "id": "NghệvGpWT6hE_4",
-      "name": "Nghệ"
+      "name": "Nghệ",
+      "category": "Gia vị"
     },
     {
       "id": "Quả sấuCYO1R7pm-6",
-      "name": "Quả sấu"
+      "name": "Quả sấu",
+      "category": "Gia vị"
     },
     {
       "id": "Mía câyHeGHZwD6T2",
-      "name": "Mía cây"
+      "name": "Mía cây",
+      "category": "Rau củ"
     },
     {
       "id": "Dưa cảiBOMOcKVr8B",
-      "name": "Dưa cải"
+      "name": "Dưa cải",
+      "category": "Rau củ"
     },
     {
       "id": "Rau cải canhE6FrtMfNND",
-      "name": "Rau cải canh"
+      "name": "Rau cải canh",
+      "category": "Rau củ"
     },
     {
       "id": "Rau cải thìaTCzhEhy6rE",
-      "name": "Rau cải thìa"
+      "name": "Rau cải thìa",
+      "category": "Rau củ"
     },
     {
       "id": "Rau cải chípDjFZcdqEQz",
-      "name": "Rau cải chíp"
+      "name": "Rau cải chíp",
+      "category": "Rau củ"
     },
     {
       "id": "Đu đủAMID8jvebp",
-      "name": "Đu đủ"
+      "name": "Đu đủ",
+      "category": "Rau củ"
     }
   ],
   "dishes": [
@@ -5270,18 +5429,22 @@
           "order": 3
         }
       ],
-      "name": "Gà chiên mắm",
-      "includeDishes": [],
-      "note": "",
-      "image": "https://cdn.eva.vn/upload/3-2023/images/2023-07-10/cach-lam-canh-ga-chien-nuoc-mam-ngon-tai-nha-don-gian-12-1688958703-582-width700height400.jpg",
-      "isCompleted": true,
       "duration": {
         "unfreeze": null,
         "prepare": null,
         "cooking": null,
         "serve": null,
         "cooldown": null
-      }
+      },
+      "name": "Gà chiên mắm",
+      "includeDishes": [],
+      "note": "",
+      "tags": [
+        "Món chính",
+        "Chiên"
+      ],
+      "image": "https://cdn.eva.vn/upload/3-2023/images/2023-07-10/cach-lam-canh-ga-chien-nuoc-mam-ngon-tai-nha-don-gian-12-1688958703-582-width700height400.jpg",
+      "isCompleted": true
     },
     {
       "id": "Gà xào nấmB1RYSsK6Oe",
