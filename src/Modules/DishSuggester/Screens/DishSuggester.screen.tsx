@@ -10,7 +10,7 @@ import { Typography } from "@components/Typography";
 import { useToggle } from "@hooks";
 import { DishScorer, ScoredDish, ScoredDishGroup } from "../Helpers/DishScorer";
 import { RootState } from "@store/Store";
-import { InputNumber } from "antd";
+import { InputNumber, Input, Select } from "antd";
 import React, { useMemo, useState } from "react";
 import { useSelector } from "react-redux";
 import { IngredientPickerWidget } from "./IngredientPicker.widget";
@@ -63,6 +63,8 @@ export const DishSuggesterScreen: React.FC<DishSuggesterScreenProps> = ({ open, 
     const toggleShoppingListAdd = useToggle();
 
     const [maxMinutes, setMaxMinutes] = useState<number>(30);
+    const [fridgeSearchIds, setFridgeSearchIds] = useState<string[]>([]);
+    const [durationSearchIds, setDurationSearchIds] = useState<string[]>([]);
 
     const inventoryIngredientIds = useMemo(() =>
         Object.entries(inventory)
@@ -83,11 +85,34 @@ export const DishSuggesterScreen: React.FC<DishSuggesterScreenProps> = ({ open, 
     );
     const inventoryGroups = useMemo(() => DishScorer.group(inventoryScored), [inventoryScored]);
 
+    const filteredInventoryGroups = useMemo(() => {
+        if (fridgeSearchIds.length === 0) return inventoryGroups;
+        return inventoryGroups
+            .map(group => ({
+                ...group,
+                dishes: group.dishes.filter(scored =>
+                    fridgeSearchIds.every(id =>
+                        scored.dish.ingredients?.some(req => req.ingredientId === id)
+                    )
+                ),
+            }))
+            .filter(group => group.dishes.length > 0);
+    }, [inventoryGroups, fridgeSearchIds]);
+
     const durationFiltered = useMemo(() => {
         return dishes
             .filter(d => { const t = totalDurationMins(d); return t > 0 && t <= maxMinutes; })
             .sort((a, b) => totalDurationMins(a) - totalDurationMins(b));
     }, [dishes, maxMinutes]);
+
+    const filteredDurationDishes = useMemo(() => {
+        if (durationSearchIds.length === 0) return durationFiltered;
+        return durationFiltered.filter(dish =>
+            durationSearchIds.every(id =>
+                dish.ingredients?.some(req => req.ingredientId === id)
+            )
+        );
+    }, [durationFiltered, durationSearchIds]);
 
     const selectedScored = useMemo(() => {
         const source = mode === "inventory" ? inventoryScored : ingredientScored;
@@ -120,6 +145,8 @@ export const DishSuggesterScreen: React.FC<DishSuggesterScreenProps> = ({ open, 
         setMode(m);
         setStep(m === "inventory" ? 1 : 0);
         setSelectedDishIds([]);
+        setFridgeSearchIds([]);
+        setDurationSearchIds([]);
     };
 
     const _missingIngredientName = (id: string) => allIngredients.find(i => i.id === id)?.name ?? id;
@@ -323,12 +350,30 @@ export const DishSuggesterScreen: React.FC<DishSuggesterScreenProps> = ({ open, 
                                     ),
                                 }]}
                             />
-                            {inventoryGroups.length === 0
+                            <Select
+                                mode="multiple"
+                                allowClear
+                                placeholder="Lọc món chứa nguyên liệu..."
+                                value={fridgeSearchIds}
+                                onChange={setFridgeSearchIds}
+                                style={{ width: "100%", marginBottom: 10 }}
+                                size="small"
+                                maxTagCount="responsive"
+                                options={allIngredients.map(i => ({
+                                    value: i.id,
+                                    label: i.name,
+                                }))}
+                            />
+                            {filteredInventoryGroups.length === 0
                                 ? <Box style={{ textAlign: "center", padding: "32px 0" }}>
-                                    <Typography.Text type="secondary">Không tìm thấy món phù hợp với nguyên liệu hiện có</Typography.Text>
+                                    <Typography.Text type="secondary">
+                                        {fridgeSearchIds.length > 0
+                                            ? `Không có món nào chứa đủ các nguyên liệu đã chọn`
+                                            : 'Không tìm thấy món phù hợp với nguyên liệu hiện có'}
+                                    </Typography.Text>
                                 </Box>
                                 : <DishSuggestionList
-                                    groups={inventoryGroups}
+                                    groups={filteredInventoryGroups}
                                     selectedDishIds={selectedDishIds}
                                     onToggle={_toggleDish}
                                 />
@@ -393,31 +438,117 @@ export const DishSuggesterScreen: React.FC<DishSuggesterScreenProps> = ({ open, 
                                 Không có món nào nấu được trong {maxMinutes} phút
                             </Typography.Text>
                         </Box>
+                    ) : filteredDurationDishes.length === 0 ? (
+                        <Box style={{ textAlign: "center", padding: "32px 0" }}>
+                            <Select
+                                mode="multiple"
+                                allowClear
+                                placeholder="Lọc món chứa nguyên liệu..."
+                                value={durationSearchIds}
+                                onChange={setDurationSearchIds}
+                                style={{ width: "100%", marginBottom: 10 }}
+                                size="small"
+                                maxTagCount="responsive"
+                                options={allIngredients.map(i => ({ value: i.id, label: i.name }))}
+                            />
+                            <Typography.Text type="secondary">
+                                Không có món nào chứa đủ các nguyên liệu đã chọn
+                            </Typography.Text>
+                        </Box>
                     ) : (
                         <>
+                            <Select
+                                mode="multiple"
+                                allowClear
+                                placeholder="Lọc món chứa nguyên liệu..."
+                                value={durationSearchIds}
+                                onChange={setDurationSearchIds}
+                                style={{ width: "100%", marginBottom: 10 }}
+                                size="small"
+                                maxTagCount="responsive"
+                                options={allIngredients.map(i => ({ value: i.id, label: i.name }))}
+                            />
                             <Typography.Text type="secondary" style={{ fontSize: 12, display: "block", marginBottom: 10 }}>
-                                {durationFiltered.length} món nấu được trong ≤ {maxMinutes} phút
+                                {filteredDurationDishes.length}{durationSearchIds.length > 0 ? ` / ${durationFiltered.length}` : ''} món nấu được trong ≤ {maxMinutes} phút
                             </Typography.Text>
                             <Box style={{ maxHeight: 380, overflowY: "auto" }}>
-                                {durationFiltered.map(dish => {
+                                {filteredDurationDishes.map(dish => {
                                     const mins = totalDurationMins(dish);
                                     const selected = selectedDishIds.includes(dish.id);
+                                    const ingredients = dish.ingredients ?? [];
+                                    const availableCount = ingredients.filter(req => {
+                                        const stockAmt = InventoryHelper.totalAmount(inventory[req.ingredientId] as any);
+                                        const needed = parseFloat(req.amount) || 0;
+                                        return needed > 0 ? stockAmt >= needed : stockAmt > 0;
+                                    }).length;
                                     return (
                                         <div
                                             key={dish.id}
                                             onClick={() => _toggleDish(dish.id)}
                                             style={{
-                                                display: "flex", alignItems: "center", justifyContent: "space-between",
                                                 padding: "10px 12px", marginBottom: 8, borderRadius: 10, cursor: "pointer",
                                                 border: `1.5px solid ${selected ? "#52c41a" : "#ebebeb"}`,
                                                 background: selected ? "#f6ffed" : "#fafafa",
                                                 transition: "all 0.15s",
                                             }}
                                         >
-                                            <Typography.Text strong style={{ fontSize: 14 }}>{dish.name}</Typography.Text>
-                                            <Tag color={mins <= 20 ? "green" : mins <= 45 ? "blue" : "orange"} style={{ marginRight: 0 }}>
-                                                🕐 {mins} phút
-                                            </Tag>
+                                            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: ingredients.length > 0 ? 8 : 0 }}>
+                                                <Typography.Text strong style={{ fontSize: 14 }}>{dish.name}</Typography.Text>
+                                                <Stack gap={6} align="center">
+                                                    {ingredients.length > 0 && (
+                                                        <span style={{ fontSize: 11, color: availableCount === ingredients.length ? "#389e0d" : "#888" }}>
+                                                            {availableCount}/{ingredients.length} có sẵn
+                                                        </span>
+                                                    )}
+                                                    <Tag color={mins <= 20 ? "green" : mins <= 45 ? "blue" : "orange"} style={{ marginRight: 0 }}>
+                                                        🕐 {mins} phút
+                                                    </Tag>
+                                                </Stack>
+                                            </div>
+                                            {ingredients.length > 0 && (
+                                                <Stack wrap="wrap" gap={4}>
+                                                    {ingredients.map(req => {
+                                                        const ingr = allIngredients.find(i => i.id === req.ingredientId);
+                                                        const inv = inventory[req.ingredientId];
+                                                        const stockAmt = InventoryHelper.totalAmount(inv as any);
+                                                        const needed = parseFloat(req.amount) || 0;
+                                                        const unit = (inv as any)?.unit ?? req.unit ?? "";
+                                                        const enough = needed > 0 ? stockAmt >= needed : stockAmt > 0;
+                                                        const lacking = stockAmt > 0 && !enough;
+                                                        const missing = stockAmt === 0;
+
+                                                        const chipStyle: React.CSSProperties = enough
+                                                            ? { background: "#f6ffed", border: "1px solid #b7eb8f", color: "#389e0d" }
+                                                            : lacking
+                                                            ? { background: "#fff7e6", border: "1px solid #ffd591", color: "#d46b08" }
+                                                            : { background: "#f5f5f5", border: "1px solid #d9d9d9", color: "#aaa" };
+
+                                                        return (
+                                                            <div key={req.ingredientId} style={{
+                                                                padding: "2px 8px", borderRadius: 10, fontSize: 11,
+                                                                whiteSpace: "nowrap", ...chipStyle,
+                                                            }}>
+                                                                {ingr?.name ?? req.ingredientId}
+                                                                {enough && stockAmt > 0 && (
+                                                                    <span style={{ marginLeft: 4, fontWeight: 600 }}>
+                                                                        {stockAmt}{unit}
+                                                                    </span>
+                                                                )}
+                                                                {lacking && (
+                                                                    <span style={{ marginLeft: 4, fontWeight: 600 }}>
+                                                                        {stockAmt}/{needed}{unit}
+                                                                    </span>
+                                                                )}
+                                                                {missing && needed > 0 && (
+                                                                    <span style={{ marginLeft: 4 }}>
+                                                                        (cần {needed}{req.unit ?? ""})
+                                                                    </span>
+                                                                )}
+                                                            </div>
+                                                        );
+                                                    })}
+                                                </Stack>
+                                            )}
                                         </div>
                                     );
                                 })}

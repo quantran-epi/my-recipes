@@ -1,4 +1,4 @@
-import { CloudDownloadOutlined, CloudUploadOutlined, ExportOutlined, HistoryOutlined, ImportOutlined, LockOutlined, MenuOutlined, UnlockOutlined, FireOutlined, SettingOutlined, QuestionCircleOutlined } from "@ant-design/icons";
+import { CloudDownloadOutlined, CloudUploadOutlined, ExportOutlined, HistoryOutlined, ImportOutlined, LockOutlined, MenuOutlined, UnlockOutlined, FireOutlined, SettingOutlined, QuestionCircleOutlined, SearchOutlined } from "@ant-design/icons";
 import { ObjectPropertyHelper } from "@common/Helpers/ObjectProperty";
 import { Button } from "@components/Button";
 import { TextArea, Input } from "@components/Form/Input";
@@ -21,6 +21,7 @@ import { CookingSessionWidget } from "@modules/Dishes/Screens/CookingSession.wid
 import { CookingHistoryWidget } from "@modules/Dishes/Screens/CookingHistory.widget";
 import { GistBackupWidget } from "@components/GistBackupWidget";
 import { UserGuideScreen } from "@modules/Home/Screens/UserGuide.screen";
+import { GlobalSearchScreen } from "@modules/Home/Screens/GlobalSearch.screen";
 import { addDishes, resetDishes } from "@store/Reducers/DishesReducer";
 import { addIngredient, resetIngredient } from "@store/Reducers/IngredientReducer";
 import { addScheduledMeal, resetScheduleMeals } from "@store/Reducers/ScheduledMealReducer";
@@ -46,6 +47,7 @@ const layoutStyles: React.CSSProperties = {
 export const MasterPage = () => {
     const theme = useTheme();
     const currentFeatureName = useSelector((state: RootState) => state.personal.appContext.currentFeatureName);    const { isOnline } = useOnlineStatus();
+    const toggleSearch = useToggle();
 
     const _featureIcon = () => {
         switch (currentFeatureName) {
@@ -72,7 +74,15 @@ export const MasterPage = () => {
                         <Typography.Paragraph style={{ fontFamily: "kanit", fontSize: 24, fontWeight: "500", marginBottom: 0, width: 230 }} ellipsis>{currentFeatureName}</Typography.Paragraph>
                     </Tooltip>
                 </Stack>
-                {_featureIcon() && <Image preview={false} src={_featureIcon()} width={36} style={{ marginBottom: 5 }} />}
+                <Stack align="center" gap={4}>
+                    <Button
+                        type="text"
+                        icon={<SearchOutlined style={{ fontSize: 20 }} />}
+                        onClick={toggleSearch.show}
+                        style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                    />
+                    {_featureIcon() && <Image preview={false} src={_featureIcon()} width={36} style={{ marginBottom: 5 }} />}
+                </Stack>
             </Stack>
         </Header>
         <Content>
@@ -95,6 +105,7 @@ export const MasterPage = () => {
         </Content>
         <BottomTabNavigator />
         <CookingPill />
+        <GlobalSearchScreen open={toggleSearch.value} onClose={toggleSearch.hide} />
     </Layout>
 }
 
@@ -330,20 +341,35 @@ const CookingPill = () => {
     const sessions = useSelector((state: RootState) => state.personal.cookingSession?.sessions ?? []);
     const allDishes = useSelector((state: RootState) => state.shared.dishes.dishes);
     const activeSessions = sessions.filter(s => s.status === "cooking");
-    const toggleModal = useToggle();
-    const [selectedSession, setSelectedSession] = React.useState<string | null>(null);
+
+    const [sessionListOpen, setSessionListOpen] = React.useState(false);
+    const [focusedSessionId, setFocusedSessionId] = React.useState<string | null>(null);
+    const [cookingModalOpen, setCookingModalOpen] = React.useState(false);
 
     if (activeSessions.length === 0) return null;
 
-    const session = activeSessions[0]; // show first active
-    const dish = allDishes.find(d => d.id === session.dishId);
+    const focusedSession = activeSessions.find(s => s.id === focusedSessionId) ?? activeSessions[0];
+    const focusedDish = allDishes.find(d => d.id === focusedSession?.dishId);
 
     const _onPillClick = () => {
-        setSelectedSession(session.id);
-        toggleModal.show();
+        if (activeSessions.length === 1) {
+            setFocusedSessionId(activeSessions[0].id);
+            setCookingModalOpen(true);
+        } else {
+            setSessionListOpen(true);
+        }
     };
 
+    const _onSelectSession = (sessionId: string) => {
+        setFocusedSessionId(sessionId);
+        setSessionListOpen(false);
+        setCookingModalOpen(true);
+    };
+
+    const displaySession = activeSessions[0];
+
     return <React.Fragment>
+        {/* ── Floating pill ── */}
         <div
             onClick={_onPillClick}
             style={{
@@ -369,36 +395,105 @@ const CookingPill = () => {
             <FireOutlined style={{ fontSize: 16, flexShrink: 0 }} />
             <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
                 <span style={{ fontSize: 13, fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                    {session.dishName}
-                    {activeSessions.length > 1 && ` (+${activeSessions.length - 1})`}
+                    {activeSessions.length > 1
+                        ? `${activeSessions.length} món đang nấu`
+                        : displaySession.dishName}
                 </span>
-                {session.steps?.length > 0 && (
+                {activeSessions.length === 1 && displaySession.steps?.length > 0 && (
                     <span style={{ fontSize: 11, opacity: 0.85 }}>
-                        Bước {(session.currentStepIndex ?? 0) + 1}/{session.steps.length}
-                        {session.steps[session.currentStepIndex ?? 0]
-                            ? ` — ${session.steps[session.currentStepIndex ?? 0].length > 30
-                                ? session.steps[session.currentStepIndex ?? 0].slice(0, 30) + "…"
-                                : session.steps[session.currentStepIndex ?? 0]}`
+                        Bước {(displaySession.currentStepIndex ?? 0) + 1}/{displaySession.steps.length}
+                        {displaySession.steps[displaySession.currentStepIndex ?? 0]
+                            ? ` — ${displaySession.steps[displaySession.currentStepIndex ?? 0].length > 30
+                                ? displaySession.steps[displaySession.currentStepIndex ?? 0].slice(0, 30) + "…"
+                                : displaySession.steps[displaySession.currentStepIndex ?? 0]}`
                             : ""}
                     </span>
                 )}
-                {(!session.steps?.length) && (
+                {activeSessions.length === 1 && !displaySession.steps?.length && (
                     <span style={{ fontSize: 11, opacity: 0.85 }}>Nhấn để hoàn thành</span>
+                )}
+                {activeSessions.length > 1 && (
+                    <span style={{ fontSize: 11, opacity: 0.85 }}>Nhấn để chuyển món</span>
                 )}
             </div>
         </div>
 
+        {/* ── Session switcher sheet (multi-session) ── */}
         <Modal
-            open={toggleModal.value}
-            title={<Space><FireOutlined style={{ color: "#fa8c16" }} />Đang nấu — {session.dishName}</Space>}
+            open={sessionListOpen}
+            onCancel={() => setSessionListOpen(false)}
+            footer={null}
+            title={<Space><FireOutlined style={{ color: "#fa8c16" }} />{activeSessions.length} món đang nấu</Space>}
+            style={{ top: 80 }}
+            destroyOnClose={false}
+        >
+            <Flex vertical gap={10}>
+                {activeSessions.map(s => {
+                    const dish = allDishes.find(d => d.id === s.dishId);
+                    const progress = s.steps?.length > 0
+                        ? Math.round(((s.currentStepIndex ?? 0) + 1) / s.steps.length * 100)
+                        : null;
+                    return (
+                        <div
+                            key={s.id}
+                            onClick={() => _onSelectSession(s.id)}
+                            style={{
+                                padding: '12px 16px',
+                                borderRadius: 12,
+                                border: '1.5px solid #ffd591',
+                                background: '#fffbe6',
+                                cursor: 'pointer',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'space-between',
+                                gap: 12,
+                            }}
+                        >
+                            <Flex vertical gap={4} style={{ minWidth: 0, flex: 1 }}>
+                                <Typography.Text strong style={{ fontSize: 14 }}>{s.dishName}</Typography.Text>
+                                {s.steps?.length > 0 ? (
+                                    <Typography.Text type="secondary" style={{ fontSize: 12 }}>
+                                        Bước {(s.currentStepIndex ?? 0) + 1} / {s.steps.length}
+                                        {s.steps[s.currentStepIndex ?? 0]
+                                            ? ` — ${s.steps[s.currentStepIndex ?? 0].slice(0, 40)}${s.steps[s.currentStepIndex ?? 0].length > 40 ? '…' : ''}`
+                                            : ''}
+                                    </Typography.Text>
+                                ) : (
+                                    <Typography.Text type="secondary" style={{ fontSize: 12 }}>Sẵn sàng hoàn thành</Typography.Text>
+                                )}
+                                {progress !== null && (
+                                    <div style={{
+                                        height: 4, borderRadius: 4, background: '#ffe7ba',
+                                        marginTop: 4, overflow: 'hidden',
+                                    }}>
+                                        <div style={{
+                                            height: '100%', borderRadius: 4,
+                                            background: progress === 100 ? '#52c41a' : '#fa8c16',
+                                            width: `${progress}%`,
+                                            transition: 'width 0.3s',
+                                        }} />
+                                    </div>
+                                )}
+                            </Flex>
+                            <FireOutlined style={{ color: '#fa8c16', fontSize: 18, flexShrink: 0 }} />
+                        </div>
+                    );
+                })}
+            </Flex>
+        </Modal>
+
+        {/* ── Single session cooking modal ── */}
+        <Modal
+            open={cookingModalOpen}
+            title={<Space><FireOutlined style={{ color: "#fa8c16" }} />Đang nấu — {focusedSession?.dishName}</Space>}
             destroyOnClose
-            onCancel={toggleModal.hide}
+            onCancel={() => setCookingModalOpen(false)}
             footer={null}
         >
-            {dish && (
+            {focusedDish && (
                 <CookingSessionWidget
-                    dish={dish}
-                    onDone={toggleModal.hide}
+                    dish={focusedDish}
+                    onDone={() => setCookingModalOpen(false)}
                 />
             )}
         </Modal>

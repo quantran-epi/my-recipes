@@ -96,7 +96,7 @@ export const CookingHistoryWidget: React.FC<CookingHistoryWidgetProps> = ({ open
                             cancelText="Huỷ"
                             onConfirm={() => dispatch(clearCookingHistory())}
                         >
-                            <Button size="small" danger icon={<DeleteOutlined />}>Xoá lịch sử</Button>
+                            <Button danger icon={<DeleteOutlined />}>Xoá lịch sử</Button>
                         </Popconfirm>
                     </Stack>
 

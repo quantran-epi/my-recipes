@@ -120,14 +120,40 @@ export const IngredientPickerWidget: React.FC<IngredientPickerWidgetProps> = ({ 
 
             {/* Selected summary strip */}
             {selectedIds.length > 0 && (
-                <Stack justify="space-between" align="center" style={{ marginBottom: 8, padding: "5px 10px", background: "#f6ffed", borderRadius: 8, border: "1px solid #b7eb8f" }}>
-                    <Typography.Text style={{ fontSize: 12, color: "#389e0d" }}>
-                        ✓ Đã chọn <strong>{selectedIds.length}</strong> nguyên liệu
-                    </Typography.Text>
-                    <Button size="small" type="link" danger style={{ padding: 0, height: "auto", fontSize: 12 }} onClick={() => onChange([])}>
-                        Bỏ hết
-                    </Button>
-                </Stack>
+                <Box style={{ marginBottom: 8, padding: "6px 10px", background: "#f6ffed", borderRadius: 8, border: "1px solid #b7eb8f" }}>
+                    <Stack justify="space-between" align="center" style={{ marginBottom: 6 }}>
+                        <Typography.Text style={{ fontSize: 12, color: "#389e0d" }}>
+                            ✓ Đã chọn <strong>{selectedIds.length}</strong> nguyên liệu
+                        </Typography.Text>
+                        <Button size="small" type="link" danger style={{ padding: 0, height: "auto", fontSize: 12 }} onClick={() => onChange([])}>
+                            Bỏ hết
+                        </Button>
+                    </Stack>
+                    <Box style={{ overflowX: "auto", paddingBottom: 2 }}>
+                        <Stack gap={5} style={{ flexWrap: "nowrap", minWidth: "max-content" }}>
+                            {selectedIds.map(id => {
+                                const name = allIngredients.find(i => i.id === id)?.name ?? id;
+                                return (
+                                    <div
+                                        key={id}
+                                        style={{
+                                            display: "inline-flex", alignItems: "center", gap: 4,
+                                            padding: "3px 8px 3px 10px", borderRadius: 14, fontSize: 12,
+                                            background: "#fff", border: "1px solid #b7eb8f", color: "#389e0d",
+                                            whiteSpace: "nowrap", userSelect: "none",
+                                        }}
+                                    >
+                                        {name}
+                                        <span
+                                            onClick={() => _toggle(id)}
+                                            style={{ cursor: "pointer", marginLeft: 2, fontSize: 11, color: "#52c41a", fontWeight: 700, lineHeight: 1 }}
+                                        >✕</span>
+                                    </div>
+                                );
+                            })}
+                        </Stack>
+                    </Box>
+                </Box>
             )}
 
             {/* Ingredient chips grid */}

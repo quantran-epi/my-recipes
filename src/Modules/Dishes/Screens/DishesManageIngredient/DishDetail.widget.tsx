@@ -19,6 +19,9 @@ import ProcessIcon from "../../../../../assets/icons/process.png"
 import AnalysisIcon from "../../../../../assets/icons/analysis.png"
 import { DishIngredientListWidget } from "./DishIngredientList.widget"
 import { DishStepListWidget } from "./DishStepList.widget"
+import { CookingSessionWidget } from "../CookingSession.widget"
+import { ShoppingListAddWidget } from "@modules/ShoppingList/Screens/ShoppingListAdd.widget"
+import { FireOutlined, ShoppingCartOutlined } from "@ant-design/icons"
 
 type DishDetailWidgetProps = {
     dish: Dishes;
@@ -27,6 +30,8 @@ type DishDetailWidgetProps = {
 export const DishesDetailWidget: React.FunctionComponent<DishDetailWidgetProps> = (props) => {
     const dishes = useSelector((state: RootState) => state.shared.dishes.dishes);
     const toggleDishesDetail = useToggle();
+    const toggleCooking = useToggle();
+    const toggleShoppingList = useToggle();
     const [currentIncludeDish, setCurrentIncludeDish] = useState<string>();
 
     const _getDishesById = (id: string) => {
@@ -47,6 +52,25 @@ export const DishesDetailWidget: React.FunctionComponent<DishDetailWidgetProps> 
     }
 
     return <React.Fragment>
+        {/* ── Shortcut actions ── */}
+        <Stack gap={8} style={{ marginBottom: 12 }}>
+            <Button
+                type="primary"
+                icon={<FireOutlined />}
+                onClick={toggleCooking.show}
+                style={{ flex: 1 }}
+            >
+                Bắt đầu nấu
+            </Button>
+            <Button
+                icon={<ShoppingCartOutlined />}
+                onClick={toggleShoppingList.show}
+                style={{ flex: 1 }}
+            >
+                Tạo lịch mua sắm
+            </Button>
+        </Stack>
+
         {props.dish.image && <Box style={{
             borderRadius: 10,
             width: "100%",
@@ -94,10 +118,36 @@ export const DishesDetailWidget: React.FunctionComponent<DishDetailWidgetProps> 
                 <Image src={NoodlesIcon} preview={false} width={24} style={{ marginBottom: 3 }} />
                 {dish.name}
             </Space>
-        } destroyOnClose={true} onCancel={toggleDishesDetail.hide} footer={null}>
+        } destroyOnClose={true} onCancel={toggleDishesDetail.hide} footer={null} zIndex={2200}>
             <Box style={{ maxHeight: 550, overflowY: "auto" }}>
                 <DishesDetailWidget dish={dish} />
             </Box>
         </Modal>}
+
+        <Modal
+            open={toggleCooking.value}
+            title={<Space><FireOutlined style={{ color: "#fa8c16" }} />{props.dish.name} — Bắt đầu nấu</Space>}
+            destroyOnClose
+            onCancel={toggleCooking.hide}
+            footer={null}
+            zIndex={2200}
+        >
+            <CookingSessionWidget dish={props.dish} onDone={toggleCooking.hide} />
+        </Modal>
+
+        <Modal
+            open={toggleShoppingList.value}
+            title={<Space><ShoppingCartOutlined />{props.dish.name} — Tạo lịch mua sắm</Space>}
+            destroyOnClose
+            onCancel={toggleShoppingList.hide}
+            footer={null}
+            zIndex={2200}
+        >
+            <ShoppingListAddWidget
+                date={null}
+                dishIds={[props.dish.id]}
+                onDone={toggleShoppingList.hide}
+            />
+        </Modal>
     </React.Fragment>
 }
