@@ -53,23 +53,23 @@ export const DishesDetailWidget: React.FunctionComponent<DishDetailWidgetProps> 
 
     return <React.Fragment>
         {/* ── Shortcut actions ── */}
-        <Stack gap={8} style={{ marginBottom: 12 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 12 }}>
             <Button
                 type="primary"
                 icon={<FireOutlined />}
                 onClick={toggleCooking.show}
-                style={{ flex: 1 }}
+                block
             >
                 Bắt đầu nấu
             </Button>
             <Button
                 icon={<ShoppingCartOutlined />}
                 onClick={toggleShoppingList.show}
-                style={{ flex: 1 }}
+                block
             >
                 Tạo lịch mua sắm
             </Button>
-        </Stack>
+        </div>
 
         {props.dish.image && <Box style={{
             borderRadius: 10,
