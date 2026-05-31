@@ -38,7 +38,7 @@ export const getSyncedVersions = (): SyncedVersions => {
     return { ingredientsVersion: "", dishesVersion: "" };
 };
 
-const saveSyncedVersions = (v: SyncedVersions) => {
+export const saveSyncedVersions = (v: SyncedVersions) => {
     localStorage.setItem(SYNCED_VERSIONS_KEY, JSON.stringify(v));
 };
 
@@ -63,7 +63,10 @@ export const useSharedDataSync = (): UseSharedDataSyncResult => {
             try {
                 const res = await fetch(MANIFEST_URL + "?t=" + Date.now());
                 if (!res.ok) return;
-                const manifest: SharedManifest = await res.json();
+                const text = await res.text();
+                if (!text || !text.trim()) return; // empty file — nothing to sync
+                const manifest: SharedManifest = JSON.parse(text);
+                if (!manifest || !manifest.ingredientsVersion) return;
                 localStorage.setItem(LAST_CHECK_KEY, Date.now().toString());
 
                 if (cancelled) return;

@@ -1,4 +1,4 @@
-import { CloudDownloadOutlined, CloudSyncOutlined, CloudUploadOutlined, ExportOutlined, ImportOutlined, LockOutlined, MenuOutlined, UnlockOutlined, FireOutlined, SettingOutlined } from "@ant-design/icons";
+import { CloudDownloadOutlined, CloudUploadOutlined, ExportOutlined, ImportOutlined, LockOutlined, MenuOutlined, UnlockOutlined, FireOutlined, SettingOutlined } from "@ant-design/icons";
 import { ObjectPropertyHelper } from "@common/Helpers/ObjectProperty";
 import { Button } from "@components/Button";
 import { TextArea, Input } from "@components/Form/Input";
@@ -14,7 +14,7 @@ import { Modal } from "@components/Modal";
 import { SmartForm, useSmartForm } from "@components/SmartForm";
 import { Tooltip } from "@components/Tootip";
 import { Typography } from "@components/Typography";
-import { useAutoBackup, useAdminMode, useTheme, useToggle, useOnlineStatus, useSharedPublish } from "@hooks";
+import { useAdminMode, useTheme, useToggle, useOnlineStatus, useSharedPublish } from "@hooks";
 import { ScheduledMealToolkitWidget } from "@modules/ScheduledMeal/Screens/ScheduledMealToolkit.widget";
 import { DishSuggesterScreen } from "@modules/DishSuggester/Screens/DishSuggester.screen";
 import { FinishCookingWidget } from "@modules/Dishes/Screens/FinishCooking.widget";
@@ -42,7 +42,6 @@ const layoutStyles: React.CSSProperties = {
 }
 
 export const MasterPage = () => {
-    const { triggerBackup, isBackingUp, lastBackupTime } = useAutoBackup();
     const theme = useTheme();
     const currentFeatureName = useSelector((state: RootState) => state.personal.appContext.currentFeatureName);    const { isOnline } = useOnlineStatus();
 
@@ -66,7 +65,7 @@ export const MasterPage = () => {
         }}>
             <Stack justify="space-between" align="center">
                 <Stack>
-                    <SidebarDrawer triggerBackup={triggerBackup} isBackingUp={isBackingUp} lastBackupTime={lastBackupTime} />
+                    <SidebarDrawer />
                     <Tooltip title={currentFeatureName}>
                         <Typography.Paragraph style={{ fontFamily: "kanit", fontSize: 24, fontWeight: "500", marginBottom: 0, width: 230 }} ellipsis>{currentFeatureName}</Typography.Paragraph>
                     </Tooltip>
@@ -97,11 +96,7 @@ export const MasterPage = () => {
     </Layout>
 }
 
-const SidebarDrawer = ({ triggerBackup, isBackingUp, lastBackupTime }: {
-    triggerBackup: () => Promise<void>;
-    isBackingUp: boolean;
-    lastBackupTime: Date | null;
-}) => {
+const SidebarDrawer = () => {
     const [open, setOpen] = useState(false);
     const [pinModalOpen, setPinModalOpen] = useState(false);
     const [pin, setPin] = useState("");
@@ -139,20 +134,18 @@ const SidebarDrawer = ({ triggerBackup, isBackingUp, lastBackupTime }: {
     const onImportCloud = async () => {
         setIsImporting(true);
         try {
-            const res = await fetch("https://raw.githubusercontent.com/quantran-epi/my-recipes/refs/heads/main/docs/data.txt?t=" + Date.now());
+            const res = await fetch("https://raw.githubusercontent.com/quantran-epi/my-recipes/refs/heads/main/docs/shared-data.json?t=" + Date.now());
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
             const text = await res.text();
-            const parseValues = JSON.parse(text);
+            if (!text || !text.trim()) throw new Error("Dữ liệu chia sẻ trống");
+            const data = JSON.parse(text);
             dispatch(resetIngredient());
             dispatch(resetDishes());
-            dispatch(resetScheduleMeals());
-            dispatch(resetShoppingList());
-            JSON.parse(parseValues.dishes).dishes.forEach(dish => dispatch(addDishes(dish)));
-            JSON.parse(parseValues.ingredient).ingredients.forEach(ingre => dispatch(addIngredient(ingre)));
-            JSON.parse(parseValues.scheduledMeal).scheduledMeals.forEach(meal => dispatch(addScheduledMeal(meal)));
-            JSON.parse(parseValues.shoppingList).shoppingLists.forEach(shplist => dispatch(addShoppingList(shplist)));
-            message.success("Import backup thành công");
+            (data.ingredients ?? []).forEach(ingre => dispatch(addIngredient(ingre)));
+            (data.dishes ?? []).forEach(dish => dispatch(addDishes(dish)));
+            message.success("Đồng bộ dữ liệu dùng chung thành công");
         } catch (ex: any) {
-            message.error("Import thất bại: " + ex?.message);
+            message.error("Đồng bộ thất bại: " + ex?.message);
         } finally {
             setIsImporting(false);
         }
@@ -208,7 +201,7 @@ const SidebarDrawer = ({ triggerBackup, isBackingUp, lastBackupTime }: {
 
                     {/* ── Sync shared data ── */}
                     <Divider orientation="left" style={{ fontSize: 12, color: "#888", marginTop: 16, marginBottom: 12 }}>Dữ liệu dùng chung</Divider>
-                    <Flex vertical gap={8}>
+                    <Flex vertical gap={4}>
                         <Button
                             icon={<CloudDownloadOutlined />}
                             loading={isImporting}
@@ -217,21 +210,16 @@ const SidebarDrawer = ({ triggerBackup, isBackingUp, lastBackupTime }: {
                         >
                             Đồng bộ dữ liệu mới
                         </Button>
+                        <Typography.Text type="secondary" style={{ fontSize: 11, paddingLeft: 2 }}>
+                            Cập nhật nguyên liệu và món ăn mới nhất được admin xuất bản.
+                        </Typography.Text>
                     </Flex>
 
-                    {/* ── Personal backup (non-admin) ── */}
-                    {!isAdmin && (
-                        <>
-                            <Divider orientation="left" style={{ fontSize: 12, color: "#888", marginTop: 16, marginBottom: 12 }}>Sao lưu cá nhân</Divider>
-                            <GistBackupWidget />
-                        </>
-                    )}
-
-                    {/* ── Admin tools ── */}
+                    {/* ── Admin publish ── */}
                     {isAdmin && (
                         <>
-                            <Divider orientation="left" style={{ fontSize: 12, color: "#888", marginTop: 16, marginBottom: 12 }}>Quản trị</Divider>
-                            <Flex vertical gap={8}>
+                            <Divider orientation="left" style={{ fontSize: 12, color: "#888", marginTop: 20, marginBottom: 12 }}>Quản trị</Divider>
+                            <Flex vertical gap={4}>
                                 <Button
                                     icon={<CloudUploadOutlined />}
                                     loading={isPublishing}
@@ -241,44 +229,47 @@ const SidebarDrawer = ({ triggerBackup, isBackingUp, lastBackupTime }: {
                                 >
                                     Xuất bản dữ liệu dùng chung
                                 </Button>
-                                <Button
-                                    icon={<CloudSyncOutlined />}
-                                    loading={isBackingUp}
-                                    onClick={triggerBackup}
-                                    block
-                                >
-                                    Sao lưu lên GitHub
-                                </Button>
-                                {lastBackupTime && (
-                                    <Typography.Text type="secondary" style={{ fontSize: 11, textAlign: "center" }}>
-                                        Sao lưu lần cuối: {lastBackupTime.toLocaleString("vi-VN")}
-                                    </Typography.Text>
-                                )}
+                                <Typography.Text type="secondary" style={{ fontSize: 11, paddingLeft: 2 }}>
+                                    Đẩy danh sách nguyên liệu & món ăn hiện tại lên GitHub để mọi người đồng bộ.
+                                </Typography.Text>
                             </Flex>
                         </>
                     )}
 
-                    {/* ── Settings / account ── */}
-                    <Divider orientation="left" style={{ fontSize: 12, color: "#888", marginTop: 16, marginBottom: 12 }}>Tài khoản</Divider>
-                    <Flex vertical gap={6}>
+                    {/* ── Personal backup — everyone including admin ── */}
+                    <Divider orientation="left" style={{ fontSize: 12, color: "#888", marginTop: 20, marginBottom: 8 }}>Sao lưu cá nhân</Divider>
+                    <Typography.Text type="secondary" style={{ fontSize: 11, paddingLeft: 2, display: "block", marginBottom: 8 }}>
+                        Sao lưu tồn kho, lịch mua sắm và thực đơn vào GitHub Gist để không mất dữ liệu khi đổi thiết bị.
+                    </Typography.Text>
+                    <GistBackupWidget />
+
+                    {/* ── Account ── */}
+                    <Divider orientation="left" style={{ fontSize: 12, color: "#888", marginTop: 20, marginBottom: 12 }}>Tài khoản</Divider>
+                    <Flex vertical gap={4}>
                         {isAdmin ? (
-                            <Flex align="center" justify="space-between" style={{ padding: "4px 0" }}>
-                                <Flex align="center" gap={6}>
-                                    <LockOutlined style={{ color: "#52c41a" }} />
-                                    <Typography.Text style={{ fontSize: 13, color: "#52c41a" }}>Đang ở chế độ Admin</Typography.Text>
+                            <>
+                                <Flex align="center" justify="space-between" style={{ padding: "4px 0" }}>
+                                    <Flex align="center" gap={6}>
+                                        <LockOutlined style={{ color: "#52c41a" }} />
+                                        <Typography.Text style={{ fontSize: 13, color: "#52c41a", fontWeight: 500 }}>Đang ở chế độ Admin</Typography.Text>
+                                    </Flex>
+                                    <Button size="small" type="text" danger onClick={lock}>Khoá</Button>
                                 </Flex>
-                                <Button size="small" type="text" danger onClick={lock}>Khoá</Button>
-                            </Flex>
+                                <Typography.Text type="secondary" style={{ fontSize: 11, paddingLeft: 2 }}>
+                                    Nhấn "Khoá" để thoát chế độ admin và ẩn các công cụ quản trị.
+                                </Typography.Text>
+                            </>
                         ) : (
-                            <Button type="text" icon={<UnlockOutlined />} block onClick={() => setPinModalOpen(true)} style={{ textAlign: "left", justifyContent: "flex-start" }}>
-                                Đăng nhập Admin
-                            </Button>
+                            <>
+                                <Button type="text" icon={<UnlockOutlined />} block onClick={() => setPinModalOpen(true)} style={{ justifyContent: "flex-start" }}>
+                                    Đăng nhập Admin
+                                </Button>
+                                <Typography.Text type="secondary" style={{ fontSize: 11, paddingLeft: 2 }}>
+                                    Nhập mã PIN để mở quyền thêm / sửa / xoá nguyên liệu và món ăn.
+                                </Typography.Text>
+                            </>
                         )}
                     </Flex>
-
-                    {/* ── Troubleshooting ── */}
-                    <Divider orientation="left" style={{ fontSize: 12, color: "#888", marginTop: 16, marginBottom: 12 }}>Khắc phục sự cố</Divider>
-                    <DataBackup onImportCloud={onImportCloud} />
 
                 </Box>
             </Drawer>
@@ -434,65 +425,50 @@ export const DataBackup = ({ onImportCloud }: { onImportCloud?: () => Promise<vo
     const toggleImportData = useToggle();
     const [exportedData, setExportedData] = useState<string>("");
     const message = useMessage();
-    const dispatch = useDispatch();
     const toggleImportingCloud = useToggle();
+
+    // Restore personal data from data.txt (base64-encoded persist:personal)
+    const _restorePersonalFromText = (text: string) => {
+        try {
+            const decoded = decodeURIComponent(escape(atob(text.trim())));
+            localStorage.setItem("persist:personal", decoded);
+            message.success("Khôi phục thành công! Đang tải lại...");
+            setTimeout(() => window.location.reload(), 1200);
+        } catch (ex) {
+            message.error("Khôi phục thất bại: dữ liệu không hợp lệ");
+        }
+    };
 
     const _onImportCloud = async () => {
         if (onImportCloud) return onImportCloud();
         toggleImportingCloud.show();
-        let data = await fetch("https://raw.githubusercontent.com/quantran-epi/my-recipes/refs/heads/main/docs/data.txt" + "?t=" + Date.now());
-
-        let text = await data.text();
-
         try {
-            let parseValues = JSON.parse(text);
-            dispatch(resetIngredient());
-            dispatch(resetDishes());
-            dispatch(resetScheduleMeals());
-            dispatch(resetShoppingList());
-            JSON.parse(parseValues.dishes).dishes.map(dish => dispatch(addDishes(dish)));
-            JSON.parse(parseValues.ingredient).ingredients.map(ingre => dispatch(addIngredient(ingre)));
-            JSON.parse(parseValues.scheduledMeal).scheduledMeals.map(meal => dispatch(addScheduledMeal(meal)));
-            JSON.parse(parseValues.shoppingList).shoppingLists.map(shplist => dispatch(addShoppingList(shplist)));
+            const res = await fetch(
+                "https://raw.githubusercontent.com/quantran-epi/my-recipes/refs/heads/main/docs/data.txt?t=" + Date.now()
+            );
+            const text = await res.text();
+            _restorePersonalFromText(text);
+        } catch (ex: any) {
+            message.error("Import thất bại: " + ex?.message);
+        } finally {
             toggleImportingCloud.hide();
-            message.success("Import thành công");
         }
-        catch (ex) {
-            alert(ex);
-        }
-    }
+    };
 
     const importDataForm = useSmartForm({
-        defaultValues: {
-            data: ""
-        },
+        defaultValues: { data: "" },
         onSubmit: (values) => {
-            debugger
-            // localStorage.setItem("persist:root", values.transformValues.data);
-
-            try {
-                let parseValues = JSON.parse(values.transformValues.data);
-                JSON.parse(parseValues.dishes).dishes.map(dish => dispatch(addDishes(dish)));
-                JSON.parse(parseValues.ingredient).ingredients.map(ingre => dispatch(addIngredient(ingre)));
-                JSON.parse(parseValues.scheduledMeal).scheduledMeals.map(meal => dispatch(addScheduledMeal(meal)));
-                JSON.parse(parseValues.shoppingList).shoppingLists.map(shplist => dispatch(addShoppingList(shplist)));
-                message.success("Import thành công");
-            }
-            catch (ex) {
-                alert(ex);
-            }
-
+            _restorePersonalFromText(values.transformValues.data);
         },
         itemDefinitions: defaultValues => ({
-            data: { name: ObjectPropertyHelper.nameof(defaultValues, e => e.data), label: "Data" }
+            data: { name: ObjectPropertyHelper.nameof(defaultValues, e => e.data), label: "Data (base64)" }
         })
-    })
+    });
 
     return <React.Fragment>
-        <Typography.Text type="secondary" style={{ fontSize: 12 }}>Troubleshooting</Typography.Text>
         <Space>
             <Button size="small" icon={<ExportOutlined />} onClick={() => {
-                setExportedData(localStorage.getItem("persist:root"));
+                setExportedData(localStorage.getItem("persist:personal") ?? "");
                 toggleShowData.show();
             }}>Export</Button>
 
@@ -501,25 +477,23 @@ export const DataBackup = ({ onImportCloud }: { onImportCloud?: () => Promise<vo
             <Button size="small" loading={toggleImportingCloud.value} icon={<CloudDownloadOutlined />} onClick={_onImportCloud}>Import cloud</Button>
         </Space>
 
-        <Modal title="Export Data" open={toggleShowData.value} onCancel={toggleShowData.hide} footer={null}>
-            <Box style={{ height: 300, overflowY: "auto" }}>
+        <Modal title="Export — persist:personal" open={toggleShowData.value} onCancel={toggleShowData.hide} footer={null}>
+            <Box style={{ height: 300, overflowY: "auto", wordBreak: "break-all", fontSize: 12 }}>
                 {exportedData}
             </Box>
             <br />
-            <CopyToClipboard text={exportedData}
-                onCopy={() => message.success("Copied")}>
+            <CopyToClipboard text={exportedData} onCopy={() => message.success("Copied")}>
                 <Stack justify="flex-end"><Button>Copy</Button></Stack>
             </CopyToClipboard>
-
         </Modal>
-        <Modal title="Import Data" open={toggleImportData.value} onCancel={toggleImportData.hide} footer={null}>
+
+        <Modal title="Import — persist:personal" open={toggleImportData.value} onCancel={toggleImportData.hide} footer={null}>
             <SmartForm {...importDataForm.defaultProps}>
                 <SmartForm.Item {...importDataForm.itemDefinitions.data}>
                     <TextArea rows={10} />
                 </SmartForm.Item>
             </SmartForm>
-
-            <Button onClick={importDataForm.submit}>Import</Button>
+            <Button onClick={importDataForm.submit}>Khôi phục</Button>
         </Modal>
     </React.Fragment>
 }

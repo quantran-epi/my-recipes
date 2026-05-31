@@ -77,7 +77,11 @@ export const SharedSyncModal: React.FC<Props> = ({
         fetch(SHARED_DATA_URL + "?t=" + Date.now())
             .then(r => {
                 if (!r.ok) throw new Error(`HTTP ${r.status}`);
-                return r.json() as Promise<SharedData>;
+                return r.text();
+            })
+            .then(text => {
+                if (!text || !text.trim()) throw new Error("Dữ liệu chia sẻ trống");
+                return JSON.parse(text) as SharedData;
             })
             .then(data => setSharedData(data))
             .catch(e => setFetchError(e?.message ?? "Lỗi không xác định"))

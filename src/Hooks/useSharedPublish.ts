@@ -10,6 +10,7 @@ import { useSelector } from "react-redux";
 import { selectDishes, selectIngredients } from "@store/Selectors";
 import { Ingredient } from "@store/Models/Ingredient";
 import { Dishes } from "@store/Models/Dishes";
+import { saveSyncedVersions } from "./useSharedDataSync";
 
 const REPO_OWNER = "quantran-epi";
 const REPO_NAME = "my-recipes";
@@ -184,6 +185,13 @@ export const useSharedPublish = (): UseSharedPublishResult => {
             );
 
             const totalChanges = ingredientChanges.length + dishChanges.length;
+
+            // Mark admin's local versions as synced so the sync modal doesn't appear on reload
+            saveSyncedVersions({
+                ingredientsVersion: newIngredientsVersion,
+                dishesVersion: newDishesVersion,
+            });
+
             message.success({
                 content: totalChanges === 0
                     ? "Xuất bản thành công (không có thay đổi mới)"
