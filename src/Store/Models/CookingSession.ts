@@ -7,4 +7,6 @@ export type CookingSession = {
     startedAt: string; // ISO string
     finishedAt?: string;
     status: CookingSessionStatus;
+    steps: string[];          // ordered step contents
+    currentStepIndex: number; // 0-based
 }

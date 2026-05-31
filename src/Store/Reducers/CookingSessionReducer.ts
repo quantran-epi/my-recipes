@@ -7,6 +7,7 @@ import { nanoid } from 'nanoid';
 export type StartCookingParams = {
     dishId: string;
     dishName: string;
+    steps: string[];
 }
 
 export type FinishCookingParams = {
@@ -35,6 +36,8 @@ export const CookingSessionSlice = createSlice({
                 dishName: action.payload.dishName,
                 startedAt: new Date().toISOString(),
                 status: "cooking",
+                steps: action.payload.steps,
+                currentStepIndex: 0,
             });
         },
         finish: (state, action: PayloadAction<string>) => {
@@ -51,8 +54,12 @@ export const CookingSessionSlice = createSlice({
                     : s
             );
         },
+        setStep: (state, action: PayloadAction<{ sessionId: string; stepIndex: number }>) => {
+            const s = state.sessions.find(s => s.id === action.payload.sessionId);
+            if (s) s.currentStepIndex = action.payload.stepIndex;
+        },
     }
 });
 
-export const { start: startCooking, finish: finishCooking, cancel: cancelCooking } = CookingSessionSlice.actions;
+export const { start: startCooking, finish: finishCooking, cancel: cancelCooking, setStep: setStepCooking } = CookingSessionSlice.actions;
 export default CookingSessionSlice.reducer;

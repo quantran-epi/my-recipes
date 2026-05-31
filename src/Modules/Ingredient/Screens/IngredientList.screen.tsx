@@ -59,7 +59,7 @@ export const IngredientListScreen = () => {
             rowCount={filteredIngredients.length}
             rowHeight={57}
             rowProps={{ items: filteredIngredients, onDelete: _onDelete, isAdmin }}
-            style={{ height: window.screen.availHeight - 210 }}
+            style={{ height: window.screen.availHeight - 210 - 80 }}
         />
         <Modal open={toggleAddModal.value} title={
             <Space>

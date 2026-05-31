@@ -17,7 +17,7 @@ import { Typography } from "@components/Typography";
 import { useAdminMode, useTheme, useToggle, useOnlineStatus, useSharedPublish } from "@hooks";
 import { ScheduledMealToolkitWidget } from "@modules/ScheduledMeal/Screens/ScheduledMealToolkit.widget";
 import { DishSuggesterScreen } from "@modules/DishSuggester/Screens/DishSuggester.screen";
-import { FinishCookingWidget } from "@modules/Dishes/Screens/FinishCooking.widget";
+import { CookingSessionWidget } from "@modules/Dishes/Screens/CookingSession.widget";
 import { GistBackupWidget } from "@components/GistBackupWidget";
 import { addDishes, resetDishes } from "@store/Reducers/DishesReducer";
 import { addIngredient, resetIngredient } from "@store/Reducers/IngredientReducer";
@@ -299,17 +299,19 @@ const SidebarDrawer = () => {
 
 const CookingPill = () => {
     const sessions = useSelector((state: RootState) => state.personal.cookingSession?.sessions ?? []);
+    const allDishes = useSelector((state: RootState) => state.shared.dishes.dishes);
     const activeSessions = sessions.filter(s => s.status === "cooking");
-    const toggleFinish = useToggle();
+    const toggleModal = useToggle();
     const [selectedSession, setSelectedSession] = React.useState<string | null>(null);
 
     if (activeSessions.length === 0) return null;
 
     const session = activeSessions[0]; // show first active
+    const dish = allDishes.find(d => d.id === session.dishId);
 
     const _onPillClick = () => {
         setSelectedSession(session.id);
-        toggleFinish.show();
+        toggleModal.show();
     };
 
     return <React.Fragment>
@@ -332,27 +334,42 @@ const CookingPill = () => {
                 zIndex: 1000,
                 userSelect: 'none',
                 whiteSpace: 'nowrap',
+                maxWidth: 'calc(100vw - 32px)',
             }}
         >
-            <FireOutlined style={{ fontSize: 16 }} />
-            <span style={{ fontSize: 14, fontWeight: 600 }}>
-                Đang nấu: {session.dishName}
-                {activeSessions.length > 1 && ` (+${activeSessions.length - 1})`}
-            </span>
-            <span style={{ fontSize: 11, opacity: 0.85 }}>Nhấn để hoàn thành</span>
+            <FireOutlined style={{ fontSize: 16, flexShrink: 0 }} />
+            <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
+                <span style={{ fontSize: 13, fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                    {session.dishName}
+                    {activeSessions.length > 1 && ` (+${activeSessions.length - 1})`}
+                </span>
+                {session.steps?.length > 0 && (
+                    <span style={{ fontSize: 11, opacity: 0.85 }}>
+                        Bước {(session.currentStepIndex ?? 0) + 1}/{session.steps.length}
+                        {session.steps[session.currentStepIndex ?? 0]
+                            ? ` — ${session.steps[session.currentStepIndex ?? 0].length > 30
+                                ? session.steps[session.currentStepIndex ?? 0].slice(0, 30) + "…"
+                                : session.steps[session.currentStepIndex ?? 0]}`
+                            : ""}
+                    </span>
+                )}
+                {(!session.steps?.length) && (
+                    <span style={{ fontSize: 11, opacity: 0.85 }}>Nhấn để hoàn thành</span>
+                )}
+            </div>
         </div>
 
         <Modal
-            open={toggleFinish.value}
-            title={<Space><FireOutlined style={{ color: "#fa8c16" }} />Hoàn thành nấu — {session.dishName}</Space>}
+            open={toggleModal.value}
+            title={<Space><FireOutlined style={{ color: "#fa8c16" }} />Đang nấu — {session.dishName}</Space>}
             destroyOnClose
-            onCancel={toggleFinish.hide}
+            onCancel={toggleModal.hide}
             footer={null}
         >
-            {selectedSession && activeSessions.find(s => s.id === selectedSession) && (
-                <FinishCookingWidget
-                    session={activeSessions.find(s => s.id === selectedSession)!}
-                    onDone={toggleFinish.hide}
+            {dish && (
+                <CookingSessionWidget
+                    dish={dish}
+                    onDone={toggleModal.hide}
                 />
             )}
         </Modal>

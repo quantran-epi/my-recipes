@@ -109,7 +109,7 @@ export const DishesListScreen = () => {
             rowCount={filteredDishes.length}
             rowHeight={rowHeight}
             rowProps={{ dishes: filteredDishes, onDelete: _onDelete, onDuplicate: _onDuplicate, isAdmin }}
-            style={{ height: window.screen.availHeight - 210 }}
+            style={{ height: window.screen.availHeight - 210 - 80 }}
         />
         <Modal open={toggleAddModal.value} title={
             <Space>
@@ -161,6 +161,33 @@ export const DishesItem: React.FunctionComponent<DishesItemProps> = (props) => {
 
     const _hasIngredients = () => props.item.ingredients.length > 0;
     const _hasSteps = () => props.item.steps.length > 0;
+
+    const _allIngredients = (): typeof props.item.ingredients => {
+        const collect = (dish: Dishes, visited = new Set<string>()): typeof props.item.ingredients => {
+            if (visited.has(dish.id)) return [];
+            visited.add(dish.id);
+            const own = dish.ingredients ?? [];
+            const fromIncluded = (dish.includeDishes ?? []).flatMap(id => {
+                const found = dishes.find(d => d.id === id);
+                return found ? collect(found, visited) : [];
+            });
+            return [...own, ...fromIncluded];
+        };
+        return collect(props.item);
+    };
+
+    const _allSteps = (): typeof props.item.steps => {
+        const collect = (dish: Dishes, visited = new Set<string>()): typeof props.item.steps => {
+            if (visited.has(dish.id)) return [];
+            visited.add(dish.id);
+            const fromIncluded = (dish.includeDishes ?? []).flatMap(id => {
+                const found = dishes.find(d => d.id === id);
+                return found ? collect(found, visited) : [];
+            });
+            return [...fromIncluded, ...(dish.steps ?? [])];
+        };
+        return collect(props.item);
+    };
 
     const toggleExport = useToggle();
     const toggleDeleteConfirm = useToggle();
@@ -217,42 +244,38 @@ export const DishesItem: React.FunctionComponent<DishesItemProps> = (props) => {
                             {props.item.tags.map(tag => <Tag key={tag} color="geekblue" style={{ fontSize: 11, padding: '0 4px' }}>{tag}</Tag>)}
                         </Space>
                     )}
-                    {_hasDuration() && <Space>
-                        <Popover title="Thời lượng" content={<List size="small" dataSource={Object.entries(props.item.duration)} renderItem={item => {
-                            let processName = "";
-                            switch (item[0] as keyof DishDuration) {
-                                case "unfreeze": processName = "Rã đông"; break;
-                                case "prepare": processName = "Sơ chế"; break;
-                                case "cooking": processName = "Nấu nướng"; break;
-                                case "serve": processName = "Trình bày"; break;
-                                case "cooldown": processName = "Để nguội"; break;
-                            }
-                            return <List.Item style={{ paddingInline: 0 }}>
-                                <Stack fullwidth justify="space-between">
-                                    <Typography.Text style={{ fontSize: 16 }}>{processName}:</Typography.Text>
-                                    {Boolean(item[1]) && <Tag>{moment.duration(item[1], "minutes").locale("vi").humanize()}</Tag>}
-                                </Stack>
-                            </List.Item>
-                        }} />}>
-                            <Button type="text" size="small" style={{ paddingInline: 0, fontSize: 14 }} icon={<Image src={Clock2Icon} preview={false} width={18} style={{ marginBottom: 3 }} />}>
-                                {_sumDuration()}
+                    <Space size={0}>
+                        {(_hasIngredients() || _hasIncludeDishes()) && (
+                            <Button onClick={toggleIngredientsOverview.show} type="text" size="small" style={{ paddingInline: 0, fontSize: 14 }} icon={<Image src={VegetablesIcon} preview={false} width={18} style={{ marginBottom: 3 }} />}>
+                                {_allIngredients().length} nguyên liệu
                             </Button>
-                        </Popover>
-                    </Space>}
-                    {_hasSteps() && <Button onClick={toggleStepsOverview.show} type="text" size="small" style={{ paddingInline: 0, fontSize: 14 }} icon={<Image src={StepsIcon} preview={false} width={18} style={{ marginBottom: 3 }} />}>{props.item.steps.length + " bước thực hiện"}</Button>}
-                    {_hasIngredients() && !_hasIncludeDishes() && <Button onClick={toggleIngredientsOverview.show} type="text" size="small" style={{ paddingInline: 0, fontSize: 14 }} icon={<Image src={VegetablesIcon} preview={false} width={18} style={{ marginBottom: 3 }} />}>{props.item.ingredients.length + " nguyên liệu"}</Button>}
-                    {_hasIncludeDishes() &&
-                        <Space size={3}>
-                            <Popover title="Bao gồm các món ăn" content={props.item.includeDishes.map(dish => {
-                                const found = dishes.find(e => e.id === dish);
-                                if (!found) return null;
-                                return <Tag key={dish}>{found.name}</Tag>;
-                            })}>
-                                <Button type="text" size="small" style={{ paddingInline: 0, fontSize: 14 }} icon={<Image src={NoodlesIcon} preview={false} width={18} style={{ marginBottom: 3 }} />}>{props.item.includeDishes.length} món ăn</Button>
+                        )}
+                        {(_hasIngredients() || _hasIncludeDishes()) && _hasDuration() && (
+                            <Typography.Text type="secondary" style={{ paddingLeft: 6, paddingRight: 2, fontSize: 14 }}>·</Typography.Text>
+                        )}
+                        {_hasDuration() && (
+                            <Popover title="Thời lượng" content={<List size="small" dataSource={Object.entries(props.item.duration)} renderItem={item => {
+                                let processName = "";
+                                switch (item[0] as keyof DishDuration) {
+                                    case "unfreeze": processName = "Rã đông"; break;
+                                    case "prepare": processName = "Sơ chế"; break;
+                                    case "cooking": processName = "Nấu nướng"; break;
+                                    case "serve": processName = "Trình bày"; break;
+                                    case "cooldown": processName = "Để nguội"; break;
+                                }
+                                return <List.Item style={{ paddingInline: 0 }}>
+                                    <Stack fullwidth justify="space-between">
+                                        <Typography.Text style={{ fontSize: 16 }}>{processName}:</Typography.Text>
+                                        {Boolean(item[1]) && <Tag>{moment.duration(item[1], "minutes").locale("vi").humanize()}</Tag>}
+                                    </Stack>
+                                </List.Item>
+                            }} />}>
+                                <Button type="text" size="small" style={{ paddingInline: 0, fontSize: 14 }} icon={<Image src={Clock2Icon} preview={false} width={18} style={{ marginBottom: 3 }} />}>
+                                    {_sumDuration()}
+                                </Button>
                             </Popover>
-                            {_hasIngredients() && <Button onClick={toggleIngredientsOverview.show} type="text" size="small" style={{ paddingInline: 0, fontSize: 14 }}>+ {props.item.ingredients.length} nguyên liệu</Button>}
-                        </Space>}
-                </Stack>
+                        )}
+                    </Space>                </Stack>
             </div>
             {/* actions */}
             <div style={{ display: 'flex', alignItems: 'center', gap: 4, flexShrink: 0 }}>
@@ -301,7 +324,7 @@ export const DishesItem: React.FunctionComponent<DishesItemProps> = (props) => {
         } destroyOnClose={true} onCancel={toggleIngredientsOverview.hide} footer={null}>
             <Box style={{ overflowY: "auto", maxHeight: 550 }}>
                 <List
-                    dataSource={orderBy(props.item.ingredients, [obj => obj.required], ['desc'])}
+                    dataSource={orderBy(_allIngredients(), [obj => obj.required], ['desc'])}
                     renderItem={(item) => <List.Item>
                         <Space>
                             <Typography.Text>{ingredients.find(ingre => ingre.id === item.ingredientId).name} - {item.amount} {item.unit}</Typography.Text>
@@ -318,7 +341,7 @@ export const DishesItem: React.FunctionComponent<DishesItemProps> = (props) => {
         </Space>} destroyOnClose={true} onCancel={toggleStepsOverview.hide} footer={null}>
             <Box style={{ overflowY: "auto", maxHeight: 550 }}>
                 <List
-                    dataSource={props.item.steps}
+                    dataSource={_allSteps()}
                     renderItem={(item) => <List.Item>
                         <Stack fullwidth justify="space-between">
                             <Typography.Paragraph style={{ maxWidth: 250 }} ellipsis={{ rows: 3, expandable: true, symbol: "Xem thêm" }}>
