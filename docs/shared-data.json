@@ -6776,18 +6776,23 @@
           "order": 5
         }
       ],
-      "name": "Bánh bao",
-      "includeDishes": [],
-      "note": "",
-      "image": "https://cdn.tgdd.vn/Files/2022/01/05/1409227/chia-se-cach-lam-banh-bao-nhan-dau-xanh-thom-ngot-vo-mem-xop-202201051416364928.jpg",
-      "isCompleted": true,
       "duration": {
         "unfreeze": null,
         "prepare": null,
         "cooking": null,
         "serve": null,
         "cooldown": null
-      }
+      },
+      "name": "Bánh bao",
+      "includeDishes": [],
+      "note": "",
+      "tags": [
+        "Ăn sáng",
+        "Ăn vặt",
+        "Hấp"
+      ],
+      "image": "https://cdn.tgdd.vn/Files/2022/01/05/1409227/chia-se-cach-lam-banh-bao-nhan-dau-xanh-thom-ngot-vo-mem-xop-202201051416364928.jpg",
+      "isCompleted": true
     },
     {
       "id": "Bánh mìwF13cjAL0k",
