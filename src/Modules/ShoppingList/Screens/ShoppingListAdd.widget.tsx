@@ -10,7 +10,7 @@ import { Typography } from "@components/Typography"
 import { nanoid } from "@reduxjs/toolkit"
 import { ShoppingList } from "@store/Models/ShoppingList"
 import { removeAllSelectedMeals } from "@store/Reducers/ScheduledMealReducer"
-import { addShoppingList } from "@store/Reducers/ShoppingListReducer"
+import { addShoppingList, generateIngredient } from "@store/Reducers/ShoppingListReducer"
 import { RootState } from "@store/Store"
 import dayjs from "dayjs"
 import moment from "moment"
@@ -20,13 +20,16 @@ import { useDispatch, useSelector } from "react-redux"
 type ShoppingListAddWidgetProps = {
     date: Date;
     scheduledMealIds?: string[];
+    dishIds?: string[];
+    alreadyHaveIngredientIds?: string[];
     onDone: () => void;
 }
 
-export const ShoppingListAddWidget: FunctionComponent<ShoppingListAddWidgetProps> = ({ date, scheduledMealIds, onDone }) => {
+export const ShoppingListAddWidget: FunctionComponent<ShoppingListAddWidgetProps> = ({ date, scheduledMealIds, dishIds, alreadyHaveIngredientIds, onDone }) => {
     const dispatch = useDispatch();
     const dishes = useSelector((state: RootState) => state.dishes.dishes);
     const scheduledMeals = useSelector((state: RootState) => state.scheduledMeal.scheduledMeals);
+    const allIngredients = useSelector((state: RootState) => state.ingredient.ingredients);
     const message = useMessage();
 
     const addShoppingListForm = useSmartForm<ShoppingList>({
@@ -40,7 +43,16 @@ export const ShoppingListAddWidget: FunctionComponent<ShoppingListAddWidgetProps
             plannedDate: null
         },
         onSubmit: (values) => {
-            dispatch(addShoppingList(values.transformValues));
+            const transformed = values.transformValues;
+            dispatch(addShoppingList(transformed));
+            // Auto-generate ingredient checklist; mark already-have items as done
+            dispatch(generateIngredient({
+                shoppingListId: transformed.id,
+                allDishes: dishes,
+                allScheduledMeals: scheduledMeals,
+                allIngredients: allIngredients,
+                alreadyHaveIngredientIds: alreadyHaveIngredientIds ?? [],
+            }));
             message.success();
             addShoppingListForm.reset();
             onDone();
@@ -68,7 +80,8 @@ export const ShoppingListAddWidget: FunctionComponent<ShoppingListAddWidgetProps
     useEffect(() => {
         if (date) addShoppingListForm.form.setFieldsValue({ plannedDate: dayjs(date) });
         if (scheduledMealIds) addShoppingListForm.form.setFieldsValue({ scheduledMeals: scheduledMealIds });
-    }, [date, scheduledMealIds, scheduledMeals])
+        if (dishIds) addShoppingListForm.form.setFieldsValue({ dishes: dishIds });
+    }, [date, scheduledMealIds, dishIds, scheduledMeals])
 
     return <React.Fragment>
         <SmartForm {...addShoppingListForm.defaultProps}>

@@ -1,4 +1,4 @@
-import { CalendarOutlined, DeleteOutlined, EditOutlined, HolderOutlined, LoadingOutlined, MonitorOutlined, OrderedListOutlined, PlusOutlined, ReloadOutlined } from "@ant-design/icons";
+import { CalendarOutlined, DeleteOutlined, EditOutlined, FileTextOutlined, HolderOutlined, LoadingOutlined, MonitorOutlined, OrderedListOutlined, PlusOutlined, ReloadOutlined } from "@ant-design/icons";
 import { Button } from "@components/Button";
 import { Dropdown } from "@components/Dropdown";
 import { Input } from "@components/Form/Input";
@@ -20,6 +20,7 @@ import { debounce, groupBy, orderBy, pickBy } from "lodash";
 import moment from "moment";
 import React, { useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { List as VirtualList, useDynamicRowHeight, type RowComponentProps } from "react-window";
 import ComposeIcon from "../../../../assets/icons/compose.png";
 import ChecklistIcon from "../../../../assets/icons/done.png";
 import CalendarIcon from "../../../../assets/icons/nineteen.png";
@@ -33,6 +34,13 @@ import { ShoppingListEditWidget } from "./ShoppingListEdit.widget";
 import { DateHelpers } from "@common/Helpers/DateHelper";
 import { test } from "@store/Reducers/DishesReducer";
 
+type ShoppingListRowProps = { items: ShoppingList[]; onDelete: (item: ShoppingList) => void; };
+
+const ShoppingListRow = ({ index, style, items, onDelete }: RowComponentProps<ShoppingListRowProps>) => {
+    if (!items[index]) return null;
+    return <div style={style}><ShoppingListItem item={items[index]} onDelete={onDelete} /></div>;
+};
+
 export const ShoppingListScreen = () => {
     const shoppingLists = useSelector((state: RootState) => state.shoppingList.shoppingLists);
     const toggleCalendarModal = useToggle({ defaultValue: false });
@@ -40,6 +48,7 @@ export const ShoppingListScreen = () => {
     const dispatch = useDispatch();
     const { } = useScreenTitle({ value: "Lịch mua sắm", deps: [] });
     const [searchText, setSearchText] = useState("");
+    const rowHeight = useDynamicRowHeight({ defaultRowHeight: 130, key: searchText });
     const filteredShoppingLists = useMemo<ShoppingList[]>(() => {
         return orderBy(shoppingLists.filter(e => e.name.trim().toLowerCase().includes(searchText.trim().toLowerCase())
             || moment(e.createdDate).format("DD/MM/YYYY hh:mm:ss A").includes(searchText.trim().toLowerCase())),
@@ -70,13 +79,12 @@ export const ShoppingListScreen = () => {
             <Button onClick={_onAdd} icon={<PlusOutlined />} />
             <Button onClick={_onShowCalendar} icon={<CalendarOutlined />} />
         </Stack.Compact>
-        <List
-            pagination={{
-                position: "bottom", align: "center", pageSize: 3
-            }}
-            itemLayout="horizontal"
-            dataSource={filteredShoppingLists}
-            renderItem={(item) => <ShoppingListItem item={item} onDelete={_onDelete} />}
+        <VirtualList
+            rowComponent={ShoppingListRow}
+            rowCount={filteredShoppingLists.length}
+            rowHeight={rowHeight}
+            rowProps={{ items: filteredShoppingLists, onDelete: _onDelete }}
+            style={{ height: window.screen.availHeight - 210 }}
         />
         <Modal open={toggleAddModal.value} title={<Space>
             <Image src={ShoppinglistIcon} preview={false} width={24} style={{ marginBottom: 3 }} />
@@ -111,6 +119,8 @@ export const ShoppingListItem: React.FunctionComponent<ShoppingListItemProps> = 
     const modal = useModal();
     const toggleEditModal = useToggle({ defaultValue: false });
     const toggleLoading = useToggle();
+    const toggleExport = useToggle();
+    const toggleDeleteConfirm = useToggle();
 
     const _onGenerate = () => {
         dispatch(generateIngredient({
@@ -148,6 +158,8 @@ export const ShoppingListItem: React.FunctionComponent<ShoppingListItemProps> = 
             }); break;
             case "add_dishes": _onAddMoreDishes(); break;
             case "edit_shopping_list": toggleEditModal.show(); break;
+            case "export": toggleExport.show(); break;
+            case "delete": toggleDeleteConfirm.show(); break;
         }
     }
 
@@ -156,45 +168,15 @@ export const ShoppingListItem: React.FunctionComponent<ShoppingListItemProps> = 
     }
 
     return <React.Fragment>
-        <List.Item
-            actions={
-                [
-                    <ShoppingListExportWidget shoppingList={props.item} allIngredients={ingredients} />,
-                    props.item.ingredients.length > 0 ? <Button size="small" onClick={_onShow} icon={toggleLoading.value ? <LoadingOutlined /> : <MonitorOutlined />} />
-                        : <Button size="small" onClick={_onGenerateAndShow} icon={toggleLoading.value ? <LoadingOutlined /> : <MonitorOutlined />} />,
-                    <Popconfirm title="Xóa?" onConfirm={() => props.onDelete(props.item)} >
-                        <Button size="small" danger icon={<DeleteOutlined />} />
-                    </Popconfirm>,
-                    <Dropdown menu={{
-                        items: [
-                            {
-                                label: 'Tải lại',
-                                key: 'reload',
-                                icon: <ReloadOutlined />,
-                            },
-                            {
-                                label: 'Sửa món ăn',
-                                key: 'add_dishes',
-                                icon: <OrderedListOutlined />,
-                            },
-                            {
-                                label: 'Sửa lịch mua sắm',
-                                key: 'edit_shopping_list',
-                                icon: <EditOutlined />,
-                            }
-                        ],
-                        onClick: _onMoreActionClick
-                    }} placement="bottom">
-                        <Button size="small" icon={<HolderOutlined />} />
-                    </Dropdown>
-                ]
-            }>
-            <List.Item.Meta title={<Tooltip title={props.item.name}>
-                <Typography.Paragraph
-                    style={{ width: 200, marginBottom: 0, textDecorationLine: _isAllIngredientDone() ? "line-through" : undefined }}
-                    type={_isAllIngredientDone() ? "secondary" : undefined} ellipsis>{props.item.name}</Typography.Paragraph>
-            </Tooltip>}
-                description={<Stack direction="column" align="flex-start" gap={2}>
+        <div style={{ display: 'flex', alignItems: 'center', padding: '8px 0', borderBottom: '1px solid rgba(5,5,5,0.06)', gap: 12 }}>
+            {/* meta content */}
+            <div style={{ flex: 1, minWidth: 0 }}>
+                <Tooltip title={props.item.name}>
+                    <Typography.Paragraph
+                        style={{ width: 200, marginBottom: 0, textDecorationLine: _isAllIngredientDone() ? "line-through" : undefined }}
+                        type={_isAllIngredientDone() ? "secondary" : undefined} ellipsis>{props.item.name}</Typography.Paragraph>
+                </Tooltip>
+                <Stack direction="column" align="flex-start" gap={2}>
                     <Space size={5}>
                         <Tooltip title="Đã hoàn thành"><Image src={ChecklistIcon} preview={false} width={18} style={{ marginBottom: 3 }} /></Tooltip>
                         <Typography.Text style={{ fontSize: 16 }}>{`${props.item.ingredients.filter(e => e.isDone).length}/${props.item.ingredients.length}`} nguyên liệu</Typography.Text>
@@ -212,14 +194,33 @@ export const ShoppingListItem: React.FunctionComponent<ShoppingListItemProps> = 
                     </Space>
                     {props.item.plannedDate && <Space size={10}>
                         <Tooltip title="Ngày thực hiện"><Image src={CalendarIcon} preview={false} width={16} style={{ marginBottom: 3 }} /></Tooltip>
-
                         {_isOverdue() ? <Tooltip title={moment(props.item.plannedDate).startOf("day").from(moment().startOf("day"))}>
                             <Typography.Text type={"danger"} style={{ fontSize: 14 }}>{props.item.plannedDate ? moment(props.item.plannedDate).format("ddd, DD/MM/YY") : "N/A"}</Typography.Text>
                         </Tooltip> :
                             <Typography.Text style={{ fontSize: 14 }}>{props.item.plannedDate ? moment(props.item.plannedDate).format("ddd, DD/MM/YY") : "N/A"}</Typography.Text>}
                     </Space>}
-                </Stack>} />
-        </List.Item>
+                </Stack>
+            </div>
+            {/* actions */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 4, flexShrink: 0 }}>
+                {props.item.ingredients.length > 0
+                    ? <Button size="small" onClick={_onShow} icon={toggleLoading.value ? <LoadingOutlined /> : <MonitorOutlined />} />
+                    : <Button size="small" onClick={_onGenerateAndShow} icon={toggleLoading.value ? <LoadingOutlined /> : <MonitorOutlined />} />}
+                <Dropdown menu={{
+                    items: [
+                        { label: 'Xuất danh sách', key: 'export', icon: <FileTextOutlined /> },
+                        { label: 'Tải lại', key: 'reload', icon: <ReloadOutlined /> },
+                        { label: 'Sửa món ăn', key: 'add_dishes', icon: <OrderedListOutlined /> },
+                        { label: 'Sửa lịch mua sắm', key: 'edit_shopping_list', icon: <EditOutlined /> },
+                        { type: 'divider' },
+                        { label: 'Xóa', key: 'delete', icon: <DeleteOutlined />, danger: true },
+                    ],
+                    onClick: _onMoreActionClick
+                }} placement="bottomRight">
+                    <Button size="small" icon={<HolderOutlined />} />
+                </Dropdown>
+            </div>
+        </div>
         <Modal style={{ top: 50 }} open={toggleIngredient.value} title={<Space>
             <Image src={ShoppinglistIcon} preview={false} width={24} style={{ marginBottom: 3 }} />
             {props.item.name}
@@ -251,6 +252,19 @@ export const ShoppingListItem: React.FunctionComponent<ShoppingListItemProps> = 
             </Space>
         } destroyOnClose={true} onCancel={toggleEditModal.hide} footer={null}>
             <ShoppingListEditWidget item={props.item} onDone={toggleEditModal.hide} />
+        </Modal>
+        <ShoppingListExportWidget shoppingList={props.item} allIngredients={ingredients} open={toggleExport.value} onClose={toggleExport.hide} />
+        <Modal
+            open={toggleDeleteConfirm.value}
+            title={<Space><DeleteOutlined style={{ color: "red" }} />Xác nhận xóa</Space>}
+            onCancel={toggleDeleteConfirm.hide}
+            onOk={() => { props.onDelete(props.item); toggleDeleteConfirm.hide(); }}
+            okText="Xóa"
+            cancelText="Hủy"
+            okButtonProps={{ danger: true }}
+            destroyOnClose
+        >
+            Bạn có chắc muốn xóa lịch <b>{props.item.name}</b> không? Hành động này không thể hoàn tác.
         </Modal>
     </React.Fragment >
 }

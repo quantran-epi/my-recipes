@@ -7,7 +7,7 @@ import { Switch } from "@components/Form/Switch"
 import { Stack } from "@components/Layout/Stack"
 import { useMessage } from "@components/Message"
 import { SmartForm, useSmartForm } from "@components/SmartForm"
-import { Dishes } from "@store/Models/Dishes"
+import { DISH_TAGS, Dishes } from "@store/Models/Dishes"
 import { editDishes } from "@store/Reducers/DishesReducer"
 import { ShoppingListIngredientHelpers, updateShoppingListIngredientDishData } from "@store/Reducers/ShoppingListReducer"
 import { RootState } from "@store/Store"
@@ -20,7 +20,7 @@ export const DishesEditWidget = ({ item, onDone }) => {
     const dishes = useSelector((state: RootState) => state.dishes.dishes);
 
     const editDishesForm = useSmartForm<Dishes>({
-        defaultValues: item,
+        defaultValues: { tags: [], ...item },
         onSubmit: (values) => {
             if (values.transformValues.includeDishes.some(e => ShoppingListIngredientHelpers.isInclude(e, dishes, values.transformValues.id))) {
                 message.error("Lỗi lặp vòng tròn");
@@ -41,7 +41,8 @@ export const DishesEditWidget = ({ item, onDone }) => {
             steps: { name: ObjectPropertyHelper.nameof(defaultValues, e => e.steps), noMarkup: true },
             isCompleted: { name: ObjectPropertyHelper.nameof(defaultValues, e => e.isCompleted) },
             duration: { name: ObjectPropertyHelper.nameof(defaultValues, e => e.duration), noMarkup: true },
-            image: { label: "Ảnh", name: ObjectPropertyHelper.nameof(defaultValues, e => e.image) }
+            image: { label: "Ảnh", name: ObjectPropertyHelper.nameof(defaultValues, e => e.image) },
+            tags: { label: "Thể loại", name: ObjectPropertyHelper.nameof(defaultValues, e => e.tags) },
         })
     })
 
@@ -67,6 +68,11 @@ export const DishesEditWidget = ({ item, onDone }) => {
         </SmartForm.Item>
         <SmartForm.Item {...editDishesForm.itemDefinitions.note}>
             <TextArea rows={3} placeholder="Ghi chú" autoFocus />
+        </SmartForm.Item>
+        <SmartForm.Item {...editDishesForm.itemDefinitions.tags}>
+            <Select mode="multiple" placeholder="Chọn thể loại" style={{ width: '100%' }}>
+                {DISH_TAGS.map(tag => <Option key={tag} value={tag}>{tag}</Option>)}
+            </Select>
         </SmartForm.Item>
         <SmartForm.Item {...editDishesForm.itemDefinitions.image}>
             <ImageInput />

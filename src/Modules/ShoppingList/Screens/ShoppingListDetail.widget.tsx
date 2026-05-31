@@ -10,13 +10,15 @@ import { Tooltip } from "@components/Tootip";
 import { Typography } from "@components/Typography";
 import { useToggle } from "@hooks";
 import { Dishes } from "@store/Models/Dishes";
+import { INGREDIENT_CATEGORIES } from "@store/Models/Ingredient";
 import { ShoppingList, ShoppingListIngredientAmount, ShoppingListIngredientGroup } from "@store/Models/ShoppingList";
 import { toggleDoneIngredientAmount, toggleDoneIngredientGroup } from "@store/Reducers/ShoppingListReducer";
 import { RootState } from "@store/Store";
-import { Space, Tabs } from "antd";
+import { Divider, Space, Tabs } from "antd";
 import { CheckboxChangeEvent } from "antd/es/checkbox";
+import { groupBy } from "lodash";
 import moment from "moment";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import ChecklistIcon from "../../../../assets/icons/done.png";
 import MealsIcon from "../../../../assets/icons/meals.png";
@@ -35,6 +37,7 @@ type ShoppingListDetailScreenProps = {
 
 export const ShoppingListDetailWidget: React.FunctionComponent<ShoppingListDetailScreenProps> = (props) => {
     const dishes = useSelector((state: RootState) => state.dishes.dishes);
+    const allIngredients = useSelector((state: RootState) => state.ingredient.ingredients);
     const scheduledMeals = useSelector((state: RootState) => state.scheduledMeal.scheduledMeals);
     const toggleMealModal = useToggle();
     const [selectedMeal, setSelectedMeal] = useState<string>();
@@ -52,6 +55,17 @@ export const ShoppingListDetailWidget: React.FunctionComponent<ShoppingListDetai
         setSelectedMeal(mealId)
     }
 
+    const groupedIngredients = useMemo(() => {
+        const grouped = groupBy(props.shoppingList.ingredients, item => {
+            return allIngredients.find(i => i.id === item.ingredientId)?.category ?? "Khác";
+        });
+        // INGREDIENT_CATEGORIES already includes "Khác"; add any unknown categories at the end
+        const baseOrder = [...INGREDIENT_CATEGORIES];
+        Object.keys(grouped).forEach(k => { if (!baseOrder.includes(k)) baseOrder.push(k); });
+        const orderedKeys = baseOrder.filter(cat => grouped[cat]?.length > 0);
+        return orderedKeys.map(cat => ({ category: cat, items: grouped[cat] }));
+    }, [props.shoppingList.ingredients, allIngredients]);
+
     return <React.Fragment>
         <Tabs defaultActiveKey="ingredients" items={[
             {
@@ -64,10 +78,21 @@ export const ShoppingListDetailWidget: React.FunctionComponent<ShoppingListDetai
                         </Space>
                     </Stack>
                     <Box style={{ maxHeight: 500, overflowY: "auto" }}>
-                        <List
-                            dataSource={props.shoppingList.ingredients}
-                            renderItem={(item) => <ShoppingListIngredientItem item={item} shoppingList={props.shoppingList} />}
-                        />
+                        {groupedIngredients.length > 1
+                            ? groupedIngredients.map(group => <React.Fragment key={group.category}>
+                                <Divider orientation="left" style={{ marginBlock: 6 }}>
+                                    <Typography.Text type="secondary" style={{ fontSize: 12 }}>{group.category}</Typography.Text>
+                                </Divider>
+                                <List
+                                    dataSource={group.items}
+                                    renderItem={(item) => <ShoppingListIngredientItem item={item} shoppingList={props.shoppingList} />}
+                                />
+                            </React.Fragment>)
+                            : <List
+                                dataSource={props.shoppingList.ingredients}
+                                renderItem={(item) => <ShoppingListIngredientItem item={item} shoppingList={props.shoppingList} />}
+                            />
+                        }
                     </Box>
                 </React.Fragment>
             },
@@ -137,6 +162,23 @@ export const ShoppingListIngredientItem: React.FunctionComponent<ShoppingListIng
     const dispatch = useDispatch();
     const ingredients = useSelector((state: RootState) => state.ingredient.ingredients);
 
+    const ingredient = ingredients.find(e => e.id === props.item.ingredientId);
+    const inventory = ingredient?.inventory;
+
+    // Sum total required (numeric prefix, e.g. "200g" → 200)
+    const totalRequired = props.item.amounts.reduce((sum, amt) => {
+        const parsed = parseFloat(amt.amount);
+        return sum + (isNaN(parsed) ? 0 : parsed);
+    }, 0);
+    const inStock = inventory?.amount ?? 0;
+    const needToBuy = Math.max(0, totalRequired - inStock);
+    const unit = inventory?.unit ?? (props.item.amounts[0]?.unit ?? "");
+
+    // Realtime: inventory fully covers the requirement → treat as done regardless of stored isDone
+    const inventoryCovered = inStock >= totalRequired && totalRequired > 0;
+    // Effective done state: either manually checked OR inventory covers it all
+    const effectiveIsDone = props.item.isDone || inventoryCovered;
+
     const _getIngredientNameById = (id: string) => {
         return ingredients.find(e => e.id === id)?.name || "";
     }
@@ -166,20 +208,41 @@ export const ShoppingListIngredientItem: React.FunctionComponent<ShoppingListIng
         return moment(item.meal.plannedDate).startOf("day").from(moment().startOf("day"));
     }
 
-    const indeterminate = NumberHelpers.isBetween(props.item.amounts.filter(e => e.isDone).length, 0.1, props.item.amounts.length, false);
+    const indeterminate = !effectiveIsDone && NumberHelpers.isBetween(props.item.amounts.filter(e => e.isDone).length, 0.1, props.item.amounts.length, false);
 
     return <React.Fragment>
         <List.Item
-            style={{ backgroundColor: props.item.isDone ? "#f5f5f5" : undefined }}
+            style={{ backgroundColor: effectiveIsDone ? "#f5f5f5" : undefined }}
             actions={[]} >
             <List.Item.Meta
-                avatar={<Checkbox indeterminate={indeterminate} checked={props.item.isDone} onChange={_onCheckedAllChange} />}
-                title={<Typography.Text type={props.item.isDone ? "secondary" : undefined} style={{ textDecorationLine: props.item.isDone ? "line-through" : "none" }}>{_getIngredientNameById(props.item.ingredientId)}</Typography.Text>}
+                avatar={<Checkbox indeterminate={indeterminate} checked={effectiveIsDone} onChange={_onCheckedAllChange} />}
+                title={<Stack justify="space-between" fullwidth>
+                    <Typography.Text type={effectiveIsDone ? "secondary" : undefined} style={{ textDecorationLine: effectiveIsDone ? "line-through" : "none" }}>
+                        {_getIngredientNameById(props.item.ingredientId)}
+                    </Typography.Text>
+                    <Space size={4}>
+                        {inStock > 0 && (
+                            <Tag color="green" style={{ fontSize: 11, marginInlineEnd: 0 }}>
+                                Còn {inStock}{unit}
+                            </Tag>
+                        )}
+                        {needToBuy > 0 && (
+                            <Tag color="orange" style={{ fontSize: 11, marginInlineEnd: 0 }}>
+                                Mua {needToBuy}{unit}
+                            </Tag>
+                        )}
+                        {inventoryCovered && !props.item.isDone && (
+                            <Tag color="green" style={{ fontSize: 11, marginInlineEnd: 0 }}>
+                                Đủ hàng
+                            </Tag>
+                        )}
+                    </Space>
+                </Stack>}
                 description={<List
                     dataSource={props.item.amounts}
                     renderItem={(item) => <List.Item style={{ padding: 0 }}>
                         <List.Item.Meta
-                            avatar={<Checkbox checked={item.isDone} onChange={(e) => _onCheckedChange(e, item.id)} />}
+                            avatar={<Checkbox checked={item.isDone || inventoryCovered} onChange={(e) => _onCheckedChange(e, item.id)} />}
                             description={<Space>
                                 <Typography.Text type={item.isDone ? "secondary" : undefined} style={{ textDecorationLine: item.isDone ? "line-through" : "none" }}>{item.amount} {item.unit} ({item?.dish.name})</Typography.Text>
                                 <Stack.Compact>

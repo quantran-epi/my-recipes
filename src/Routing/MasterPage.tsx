@@ -1,4 +1,4 @@
-import { CloudDownloadOutlined, CloudSyncOutlined, ExportOutlined, ImportOutlined, LockOutlined, MenuOutlined, UnlockOutlined } from "@ant-design/icons";
+import { CloudDownloadOutlined, CloudSyncOutlined, ExportOutlined, ImportOutlined, LockOutlined, MenuOutlined, UnlockOutlined, FireOutlined } from "@ant-design/icons";
 import { ObjectPropertyHelper } from "@common/Helpers/ObjectProperty";
 import { Button } from "@components/Button";
 import { TextArea, Input } from "@components/Form/Input";
@@ -16,6 +16,8 @@ import { Tooltip } from "@components/Tootip";
 import { Typography } from "@components/Typography";
 import { useAutoBackup, useAdminMode, useTheme, useToggle } from "@hooks";
 import { ScheduledMealToolkitWidget } from "@modules/ScheduledMeal/Screens/ScheduledMealToolkit.widget";
+import { DishSuggesterScreen } from "@modules/DishSuggester/Screens/DishSuggester.screen";
+import { FinishCookingWidget } from "@modules/Dishes/Screens/FinishCooking.widget";
 import { addDishes, resetDishes } from "@store/Reducers/DishesReducer";
 import { addIngredient, resetIngredient } from "@store/Reducers/IngredientReducer";
 import { addScheduledMeal, resetScheduleMeals } from "@store/Reducers/ScheduledMealReducer";
@@ -31,6 +33,7 @@ import MealsIcon from "../../assets/icons/meals.png";
 import DishesIcon from "../../assets/icons/noodles.png";
 import ShoppingListIcon from "../../assets/icons/shoppingList.png";
 import IngredientIcon from "../../assets/icons/vegetable.png";
+import SuggesterIcon from "../../assets/icons/cooking.png";
 import { RootRoutes } from "./RootRoutes";
 
 const layoutStyles: React.CSSProperties = {
@@ -74,6 +77,7 @@ export const MasterPage = () => {
             <Outlet />
         </Content>
         <BottomTabNavigator />
+        <CookingPill />
     </Layout>
 }
 
@@ -243,10 +247,73 @@ const SidebarDrawer = ({ triggerBackup, isBackingUp, lastBackupTime }: {
     );
 };
 
+const CookingPill = () => {
+    const sessions = useSelector((state: RootState) => state.cookingSession?.sessions ?? []);
+    const activeSessions = sessions.filter(s => s.status === "cooking");
+    const toggleFinish = useToggle();
+    const [selectedSession, setSelectedSession] = React.useState<string | null>(null);
+
+    if (activeSessions.length === 0) return null;
+
+    const session = activeSessions[0]; // show first active
+
+    const _onPillClick = () => {
+        setSelectedSession(session.id);
+        toggleFinish.show();
+    };
+
+    return <React.Fragment>
+        <div
+            onClick={_onPillClick}
+            style={{
+                position: 'fixed',
+                bottom: 70,
+                left: '50%',
+                transform: 'translateX(-50%)',
+                background: 'linear-gradient(135deg, #fa8c16, #d46b08)',
+                color: '#fff',
+                borderRadius: 24,
+                padding: '8px 20px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 8,
+                boxShadow: '0 4px 16px rgba(250,140,22,0.5)',
+                cursor: 'pointer',
+                zIndex: 1000,
+                userSelect: 'none',
+                whiteSpace: 'nowrap',
+            }}
+        >
+            <FireOutlined style={{ fontSize: 16 }} />
+            <span style={{ fontSize: 14, fontWeight: 600 }}>
+                Đang nấu: {session.dishName}
+                {activeSessions.length > 1 && ` (+${activeSessions.length - 1})`}
+            </span>
+            <span style={{ fontSize: 11, opacity: 0.85 }}>Nhấn để hoàn thành</span>
+        </div>
+
+        <Modal
+            open={toggleFinish.value}
+            title={<Space><FireOutlined style={{ color: "#fa8c16" }} />Hoàn thành nấu — {session.dishName}</Space>}
+            destroyOnClose
+            onCancel={toggleFinish.hide}
+            footer={null}
+        >
+            {selectedSession && activeSessions.find(s => s.id === selectedSession) && (
+                <FinishCookingWidget
+                    session={activeSessions.find(s => s.id === selectedSession)!}
+                    onDone={toggleFinish.hide}
+                />
+            )}
+        </Modal>
+    </React.Fragment>;
+};
+
 const BottomTabNavigator = () => {
     const navigate = useNavigate();
     const location = useLocation();
     const theme = useTheme();
+    const toggleSuggester = useToggle();
 
     const _buttonStyles = (): React.CSSProperties => {
         return {
@@ -284,17 +351,23 @@ const BottomTabNavigator = () => {
         navigate(href);
     }
 
-    return <Stack justify="space-evenly" style={_containerStyles()}>
-        <Button type="text" style={_buttonStyles()} icon={<Image src={DishesIcon} preview={false} width={28} style={{ marginLeft: 2 }} />} onClick={() => onNavigate(RootRoutes.AuthorizedRoutes.DishesRoutes.List())}>
-            <Typography.Text style={_textStyles(RootRoutes.AuthorizedRoutes.DishesRoutes.List())}>Món ăn</Typography.Text>
-        </Button>
-        <Button type="text" style={_buttonStyles()} icon={<Image src={ShoppingListIcon} preview={false} width={28} style={{ marginLeft: 3 }} />} onClick={() => onNavigate(RootRoutes.AuthorizedRoutes.ShoppingListRoutes.List())}>
-            <Typography.Text style={_textStyles(RootRoutes.AuthorizedRoutes.ShoppingListRoutes.List())}>Mua sắm</Typography.Text>
-        </Button>
-        <Button type="text" style={_buttonStyles()} icon={<Image src={MealsIcon} preview={false} width={28} style={{ marginLeft: 2 }} />} onClick={() => onNavigate(RootRoutes.AuthorizedRoutes.ScheduledMealRoutes.List())}>
-            <Typography.Text style={_textStyles(RootRoutes.AuthorizedRoutes.ScheduledMealRoutes.List())}>Thực đơn</Typography.Text>
-        </Button>
-    </Stack>
+    return <>
+        <Stack justify="space-evenly" style={_containerStyles()}>
+            <Button type="text" style={_buttonStyles()} icon={<Image src={DishesIcon} preview={false} width={28} style={{ marginLeft: 2 }} />} onClick={() => onNavigate(RootRoutes.AuthorizedRoutes.DishesRoutes.List())}>
+                <Typography.Text style={_textStyles(RootRoutes.AuthorizedRoutes.DishesRoutes.List())}>Món ăn</Typography.Text>
+            </Button>
+            <Button type="text" style={_buttonStyles()} icon={<Image src={ShoppingListIcon} preview={false} width={28} style={{ marginLeft: 3 }} />} onClick={() => onNavigate(RootRoutes.AuthorizedRoutes.ShoppingListRoutes.List())}>
+                <Typography.Text style={_textStyles(RootRoutes.AuthorizedRoutes.ShoppingListRoutes.List())}>Mua sắm</Typography.Text>
+            </Button>
+            <Button type="text" style={{ ..._buttonStyles(), color: theme.token.colorPrimary }} icon={<Image src={SuggesterIcon} preview={false} width={28} style={{ marginLeft: 2 }} />} onClick={toggleSuggester.show}>
+                <Typography.Text style={{ fontSize: 16 }}>Nấu gì?</Typography.Text>
+            </Button>
+            <Button type="text" style={_buttonStyles()} icon={<Image src={MealsIcon} preview={false} width={28} style={{ marginLeft: 2 }} />} onClick={() => onNavigate(RootRoutes.AuthorizedRoutes.ScheduledMealRoutes.List())}>
+                <Typography.Text style={_textStyles(RootRoutes.AuthorizedRoutes.ScheduledMealRoutes.List())}>Thực đơn</Typography.Text>
+            </Button>
+        </Stack>
+        <DishSuggesterScreen open={toggleSuggester.value} onClose={toggleSuggester.hide} />
+    </>
 }
 
 export const DataBackup = ({ onImportCloud }: { onImportCloud?: () => Promise<void> }) => {

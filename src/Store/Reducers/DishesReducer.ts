@@ -196,6 +196,16 @@ export const DishesSlice = createSlice({
                     cooldown: null
                 }
             }))
+        },
+        duplicate: (state, action: PayloadAction<string>) => {
+            const source = state.dishes.find(e => e.id === action.payload);
+            if (!source) return;
+            const copy: Dishes = {
+                ...source,
+                id: source.name.concat("_copy_" + Date.now()),
+                name: source.name + " (bản sao)",
+            };
+            state.dishes.push(copy);
         }
     }
 })
@@ -206,6 +216,7 @@ export const {
     addStepsToDish, editStepFromDish, adStepToDishPrev, addStepToDishNext, removeStepsFromDish, search: searchDishes, changePage,
     updateDishDuration,
     reset: resetDishes,
+    duplicate: duplicateDish,
     test
 } = DishesSlice.actions
 

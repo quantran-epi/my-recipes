@@ -1,4 +1,4 @@
-import { ClockCircleOutlined, DeleteOutlined, EditOutlined, FileTextOutlined, HolderOutlined, PictureOutlined, PlusOutlined, QuestionCircleOutlined } from "@ant-design/icons";
+import { ClockCircleOutlined, CopyOutlined, DeleteOutlined, EditOutlined, FileTextOutlined, HolderOutlined, PictureOutlined, PlusOutlined, QuestionCircleOutlined, FireOutlined } from "@ant-design/icons";
 import { Button } from "@components/Button";
 import { Dropdown } from "@components/Dropdown";
 import { Input } from "@components/Form/Input";
@@ -16,12 +16,13 @@ import { Tag } from "@components/Tag";
 import { Tooltip } from "@components/Tootip";
 import { Typography } from "@components/Typography";
 import { useScreenTitle, useToggle } from "@hooks";
-import { DishDuration, Dishes } from "@store/Models/Dishes";
-import { DishesDurationEditParams, removeDishes, updateDishDuration } from "@store/Reducers/DishesReducer";
+import { DISH_TAGS, DishDuration, Dishes } from "@store/Models/Dishes";
+import { DishesDurationEditParams, duplicateDish, removeDishes, updateDishDuration } from "@store/Reducers/DishesReducer";
 import { RootState } from "@store/Store";
 import { debounce, orderBy, sortBy } from "lodash";
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { List as VirtualList, useDynamicRowHeight, type RowComponentProps } from "react-window";
 import Clock2Icon from "../../../../assets/icons/clock (2).png";
 import NoodlesIcon from "../../../../assets/icons/noodles.png";
 import StepsIcon from "../../../../assets/icons/process.png";
@@ -31,40 +32,48 @@ import { DishesExportWidget } from "./DishesExport.widget";
 import { DishesEditWidget } from "./DishesEdit.widget";
 import { DishesDetailWidget } from "./DishesManageIngredient/DishDetail.widget";
 import { DishDurationWidget } from "./DishesManageIngredient/DishDuration.widget";
+import { CookingSessionWidget } from "./CookingSession.widget";
 import moment from "moment";
 import 'moment/locale/vi';
+
+type DishRowProps = { dishes: Dishes[]; onDelete: (item: Dishes) => void; onDuplicate: (item: Dishes) => void; };
+
+const DishRow = ({ index, style, dishes, onDelete, onDuplicate }: RowComponentProps<DishRowProps>) => {
+    if (!dishes[index]) return null;
+    return <div style={style}><DishesItem item={dishes[index]} onDelete={onDelete} onDuplicate={onDuplicate} /></div>;
+};
 
 export const DishesListScreen = () => {
     const dishes = useSelector((state: RootState) => state.dishes.dishes);
     const toggleAddModal = useToggle({ defaultValue: false });
     const [searchText, setSearchText] = useState<string>("");
-    const [visibleCount, setVisibleCount] = useState<number>(10);
-    const loaderRef = useRef<HTMLDivElement>(null);
+    const [activeTag, setActiveTag] = useState<string | null>(null);
     const dispatch = useDispatch();
     const { } = useScreenTitle({ value: "Món ăn", deps: [] });
+    const rowHeight = useDynamicRowHeight({ defaultRowHeight: 110, key: searchText + (activeTag ?? "") });
+
+    const allTags = useMemo<string[]>(() => {
+        const tagSet = new Set<string>();
+        dishes.forEach(d => d.tags?.forEach(t => tagSet.add(t)));
+        return DISH_TAGS.filter(t => tagSet.has(t));
+    }, [dishes]);
 
     const filteredDishes = useMemo<Dishes[]>(() => {
-        return sortBy(dishes.filter(e => e.name.trim().toLowerCase().includes(searchText?.trim().toLowerCase())), "name")
-    }, [dishes, searchText]);
+        return sortBy(
+            dishes.filter(e =>
+                e.name.trim().toLowerCase().includes(searchText?.trim().toLowerCase()) &&
+                (activeTag === null || e.tags?.includes(activeTag))
+            ),
+            "name"
+        );
+    }, [dishes, searchText, activeTag]);
 
-    const visibleDishes = useMemo(() => filteredDishes.slice(0, visibleCount), [filteredDishes, visibleCount]);
-
-    useEffect(() => {
-        setVisibleCount(10);
-    }, [searchText]);
-
-    useEffect(() => {
-        const observer = new IntersectionObserver((entries) => {
-            if (entries[0].isIntersecting) {
-                setVisibleCount(prev => prev + 10);
-            }
-        }, { threshold: 1 });
-        if (loaderRef.current) observer.observe(loaderRef.current);
-        return () => observer.disconnect();
-    }, []);
-
-    const _onDelete = (item) => {
+    const _onDelete = (item: Dishes) => {
         dispatch(removeDishes([item.id]));
+    }
+
+    const _onDuplicate = (item: Dishes) => {
+        dispatch(duplicateDish(item.id));
     }
 
     return <React.Fragment>
@@ -72,16 +81,35 @@ export const DishesListScreen = () => {
             <Input allowClear placeholder="Tìm kiếm" onChange={debounce((e) => setSearchText(e.target.value), 350)} />
             <Button onClick={toggleAddModal.show} icon={<PlusOutlined />} />
         </Stack.Compact>
-        <List
-            itemLayout="horizontal"
-            dataSource={visibleDishes}
-            renderItem={(item) => <DishesItem item={item} onDelete={_onDelete} />}
-        />
-        {visibleCount < filteredDishes.length && (
-            <div ref={loaderRef} style={{ textAlign: "center", padding: 12, color: "#aaa", fontSize: 13 }}>
-                Đang tải thêm...
+        {allTags.length > 0 && (
+            <div style={{ display: 'flex', gap: 0, flexWrap: 'wrap', padding: '6px 0' }}>
+                <Tag
+                    onClick={() => setActiveTag(null)}
+                    color={activeTag === null ? "blue" : undefined}
+                    style={{ cursor: 'pointer', userSelect: 'none' }}
+                    
+                >
+                    Tất cả
+                </Tag>
+                {allTags.map(tag => (
+                    <Tag
+                        key={tag}
+                        onClick={() => setActiveTag(activeTag === tag ? null : tag)}
+                        color={activeTag === tag ? "blue" : undefined}
+                        style={{ cursor: 'pointer', userSelect: 'none' }}
+                    >
+                        {tag}
+                    </Tag>
+                ))}
             </div>
         )}
+        <VirtualList
+            rowComponent={DishRow}
+            rowCount={filteredDishes.length}
+            rowHeight={rowHeight}
+            rowProps={{ dishes: filteredDishes, onDelete: _onDelete, onDuplicate: _onDuplicate }}
+            style={{ height: window.screen.availHeight - 210 }}
+        />
         <Modal open={toggleAddModal.value} title={
             <Space>
                 <Image src={NoodlesIcon} preview={false} width={24} style={{ marginBottom: 3 }} />
@@ -96,6 +124,7 @@ export const DishesListScreen = () => {
 type DishesItemProps = {
     item: Dishes;
     onDelete: (item: Dishes) => void;
+    onDuplicate: (item: Dishes) => void;
 }
 
 moment.relativeTimeRounding((v) => parseFloat(v.toFixed(1)));
@@ -106,6 +135,7 @@ export const DishesItem: React.FunctionComponent<DishesItemProps> = (props) => {
     const toggleIngredientsOverview = useToggle();
     const toggleStepsOverview = useToggle();
     const toggleDishesDetail = useToggle();
+    const toggleCooking = useToggle();
     const dishes = useSelector((state: RootState) => state.dishes.dishes);
     const ingredients = useSelector((state: RootState) => state.ingredient.ingredients);
     const toggleEditDuration = useToggle();
@@ -141,6 +171,8 @@ export const DishesItem: React.FunctionComponent<DishesItemProps> = (props) => {
         switch (e.key) {
             case "edit": _onEdit(); break;
             case "duration": _onEditDuration(); break;
+            case "duplicate": props.onDuplicate(props.item); break;
+            case "cook": toggleCooking.show(); break;
             case "delete": {
                 const refs = _referencingDishes();
                 if (refs.length > 0) {
@@ -160,40 +192,29 @@ export const DishesItem: React.FunctionComponent<DishesItemProps> = (props) => {
     }
 
     return <React.Fragment>
-        <List.Item
-            actions={[
-                <Button size="small" icon={<FileTextOutlined />} onClick={toggleExport.show} />,
-                <Dropdown menu={{
-                    items: [
-                        { label: 'Sửa món ăn', key: 'edit', icon: <EditOutlined /> },
-                        { label: 'Thời lượng', key: 'duration', icon: <ClockCircleOutlined /> },
-                        { type: 'divider' },
-                        { label: 'Xóa', key: 'delete', icon: <DeleteOutlined />, danger: true },
-                    ],
-                    onClick: _onMoreActionClick
-                }} placement="bottom">
-                    <Button size="small" icon={<HolderOutlined />} />
-                </Dropdown>
-            ]}>
-            <List.Item.Meta
-                avatar={
-                    <div onClick={toggleDishesDetail.show} style={{ cursor: "pointer" }}>
-                        {props.item.image
-                            ? <Avatar shape="square" size={48} src={props.item.image} />
-                            : <Avatar shape="square" size={48} icon={<PictureOutlined />} />
-                        }
-                    </div>
+        <div style={{ display: 'flex', alignItems: 'center', padding: '8px 0', borderBottom: '1px solid rgba(5,5,5,0.06)', gap: 12 }}>
+            {/* avatar */}
+            <div onClick={toggleDishesDetail.show} style={{ cursor: "pointer", flexShrink: 0 }}>
+                {props.item.image
+                    ? <Avatar shape="square" size={48} src={props.item.image} />
+                    : <Avatar shape="square" size={48} icon={<PictureOutlined />} />
                 }
-                title={
-                    <Typography.Paragraph
-                        onClick={toggleDishesDetail.show}
-                        style={{ width: 200, marginBottom: 0, color: !props.item.isCompleted ? "orangered" : undefined, cursor: "pointer" }}
-                        ellipsis={{ tooltip: props.item.name }}
-                    >
-                        {props.item.name}
-                    </Typography.Paragraph>
-                }
-                description={<Stack direction="column" align="flex-start" gap={0}>
+            </div>
+            {/* meta content */}
+            <div style={{ flex: 1, minWidth: 0 }}>
+                <Typography.Paragraph
+                    onClick={toggleDishesDetail.show}
+                    style={{ width: 200, marginBottom: 0, color: !props.item.isCompleted ? "orangered" : undefined, cursor: "pointer" }}
+                    ellipsis={{ tooltip: props.item.name }}
+                >
+                    {props.item.name}
+                </Typography.Paragraph>
+                <Stack direction="column" align="flex-start" gap={0}>
+                    {props.item.tags?.length > 0 && (
+                        <Space size={0} wrap style={{ marginBottom: 2 }}>
+                            {props.item.tags.map(tag => <Tag key={tag} color="geekblue" style={{ fontSize: 11, padding: '0 4px' }}>{tag}</Tag>)}
+                        </Space>
+                    )}
                     {_hasDuration() && <Space>
                         <Popover title="Thời lượng" content={<List size="small" dataSource={Object.entries(props.item.duration)} renderItem={item => {
                             let processName = "";
@@ -229,8 +250,27 @@ export const DishesItem: React.FunctionComponent<DishesItemProps> = (props) => {
                             </Popover>
                             {_hasIngredients() && <Button onClick={toggleIngredientsOverview.show} type="text" size="small" style={{ paddingInline: 0, fontSize: 14 }}>+ {props.item.ingredients.length} nguyên liệu</Button>}
                         </Space>}
-                </Stack>} />
-        </List.Item>
+                </Stack>
+            </div>
+            {/* actions */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 4, flexShrink: 0 }}>
+                <Button size="small" icon={<FileTextOutlined />} onClick={toggleExport.show} />
+                <Dropdown menu={{
+                    items: [
+                        { label: 'Bắt đầu nấu', key: 'cook', icon: <FireOutlined />, },
+                        { type: 'divider' },
+                        { label: 'Sửa món ăn', key: 'edit', icon: <EditOutlined /> },
+                        { label: 'Thời lượng', key: 'duration', icon: <ClockCircleOutlined /> },
+                        { label: 'Nhân bản', key: 'duplicate', icon: <CopyOutlined /> },
+                        { type: 'divider' },
+                        { label: 'Xóa', key: 'delete', icon: <DeleteOutlined />, danger: true },
+                    ],
+                    onClick: _onMoreActionClick
+                }} placement="bottom">
+                    <Button size="small" icon={<HolderOutlined />} />
+                </Dropdown>
+            </div>
+        </div>
         <Modal style={{ top: 50 }} open={toggleDishesDetail.value} title={
             <Space>
                 <Image src={NoodlesIcon} preview={false} width={24} style={{ marginBottom: 3 }} />
@@ -308,6 +348,15 @@ export const DishesItem: React.FunctionComponent<DishesItemProps> = (props) => {
             destroyOnClose
         >
             Bạn có chắc muốn xóa món <b>{props.item.name}</b> không? Hành động này không thể hoàn tác.
+        </Modal>
+        <Modal
+            open={toggleCooking.value}
+            title={<Space><FireOutlined style={{ color: "#fa8c16" }} />{props.item.name} — Bắt đầu nấu</Space>}
+            destroyOnClose
+            onCancel={toggleCooking.hide}
+            footer={null}
+        >
+            <CookingSessionWidget dish={props.item} onDone={toggleCooking.hide} />
         </Modal>
     </React.Fragment>
 }

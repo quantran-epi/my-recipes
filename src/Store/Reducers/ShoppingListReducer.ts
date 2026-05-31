@@ -1,6 +1,7 @@
 import type { PayloadAction } from '@reduxjs/toolkit';
 import { createSlice } from '@reduxjs/toolkit';
 import { DishIngredientAmountDishMeta, DishIngredientAmountMealMeta, Dishes } from '@store/Models/Dishes';
+import { Ingredient } from '@store/Models/Ingredient';
 import { ScheduledMeal } from '@store/Models/ScheduledMeal';
 import { ShoppingList, ShoppingListIngredientAmount, ShoppingListIngredientGroup } from '@store/Models/ShoppingList';
 import dayjs from 'dayjs';
@@ -11,6 +12,8 @@ export type ShoppingListGenerateIngredientParams = {
     shoppingListId: string;
     allDishes: Dishes[];
     allScheduledMeals: ScheduledMeal[];
+    allIngredients?: Ingredient[];
+    alreadyHaveIngredientIds?: string[];
 }
 
 export type ShoppingListToggleDoneIngredientGroupParams = {
@@ -135,12 +138,14 @@ export const ShoppingListSlice = createSlice({
                     let groups = groupBy([...ingredientAmountsFromShoppingList, ...ingredientAmountsFromMeals], "ingredientId");
                     return {
                         ...e,
-                        ingredients: Object.keys(groups).map(key => ({
-                            id: key.concat('-gr-').concat(nanoid(10)),
-                            ingredientId: key,
-                            amounts: groups[key],
-                            isDone: false
-                        })),
+                        ingredients: Object.keys(groups).map(key => {
+                            return {
+                                id: key.concat('-gr-').concat(nanoid(10)),
+                                ingredientId: key,
+                                amounts: groups[key].map(amt => ({ ...amt, isDone: false })),
+                                isDone: false,
+                            };
+                        }),
                     }
                 }
                 return e;

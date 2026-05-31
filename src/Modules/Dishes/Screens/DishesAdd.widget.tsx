@@ -7,7 +7,7 @@ import { Stack } from "@components/Layout/Stack"
 import { useMessage } from "@components/Message"
 import { SmartForm, useSmartForm } from "@components/SmartForm"
 import { nanoid } from "@reduxjs/toolkit"
-import { Dishes } from "@store/Models/Dishes"
+import { DISH_TAGS, Dishes } from "@store/Models/Dishes"
 import { addDishes } from "@store/Reducers/DishesReducer"
 import { RootState } from "@store/Store"
 import { useDispatch, useSelector } from "react-redux"
@@ -34,6 +34,7 @@ export const DishesAddWidget = () => {
                 cooldown: null
             },
             image: "",
+            tags: [],
         },
         onSubmit: (values) => {
             dispatch(addDishes(values.transformValues));
@@ -50,6 +51,7 @@ export const DishesAddWidget = () => {
             isCompleted: { name: ObjectPropertyHelper.nameof(defaultValues, e => e.isCompleted), noMarkup: true },
             image: { label: "Ảnh", name: ObjectPropertyHelper.nameof(defaultValues, e => e.image) },
             duration: { name: ObjectPropertyHelper.nameof(defaultValues, e => e.duration), noMarkup: true },
+            tags: { label: "Thể loại", name: ObjectPropertyHelper.nameof(defaultValues, e => e.tags) },
         }),
         transformFunc: (values) => ({
             ...values,
@@ -79,6 +81,11 @@ export const DishesAddWidget = () => {
         </SmartForm.Item>
         <SmartForm.Item {...addDishesForm.itemDefinitions.note}>
             <TextArea rows={3} placeholder="Ghi chú" autoFocus />
+        </SmartForm.Item>
+        <SmartForm.Item {...addDishesForm.itemDefinitions.tags}>
+            <Select mode="multiple" placeholder="Chọn thể loại" style={{ width: '100%' }}>
+                {DISH_TAGS.map(tag => <Option key={tag} value={tag}>{tag}</Option>)}
+            </Select>
         </SmartForm.Item>
         <SmartForm.Item {...addDishesForm.itemDefinitions.image}>
             <ImageInput />

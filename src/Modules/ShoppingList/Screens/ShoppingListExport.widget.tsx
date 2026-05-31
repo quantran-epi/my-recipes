@@ -50,10 +50,11 @@ const formatShoppingListToText = (shoppingList: ShoppingList, allIngredients: In
 type ShoppingListExportWidgetProps = {
     shoppingList: ShoppingList;
     allIngredients: Ingredient[];
+    open?: boolean;
+    onClose?: () => void;
 }
 
-export const ShoppingListExportWidget: React.FC<ShoppingListExportWidgetProps> = ({ shoppingList, allIngredients }) => {
-    const toggle = useToggle();
+export const ShoppingListExportWidget: React.FC<ShoppingListExportWidgetProps> = ({ shoppingList, allIngredients, open, onClose }) => {
     const message = useMessage();
     const text = formatShoppingListToText(shoppingList, allIngredients);
 
@@ -75,10 +76,9 @@ export const ShoppingListExportWidget: React.FC<ShoppingListExportWidgetProps> =
 
     return (
         <>
-            <Button size="small" icon={<FileTextOutlined />} onClick={toggle.show} />
             <Modal
-                open={toggle.value}
-                onCancel={toggle.hide}
+                open={open}
+                onCancel={onClose}
                 title={
                     <Space>
                         <Image src={ShoppingListIcon} preview={false} width={20} style={{ marginBottom: 3 }} />

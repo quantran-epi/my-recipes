@@ -4,6 +4,10 @@ export const DISH_INGREDIENT_PREPARE_PRESETS = [
     "Băm nhuyễn", "Xay nhỏ", "Thái lát", "Thái múi cau", "Thái sợi", "Thái miếng vuông", "Thái nhỏ", "Đập dập", "Bóc vỏ", "Lấy nước cốt", "Bỏ hạt", "Cắt khúc", "Chần sơ"
 ]
 
+export const DISH_TAGS = [
+    "Canh", "Món chính", "Món phụ", "Tráng miệng", "Khai vị", "Đồ uống", "Ăn sáng", "Ăn vặt", "Nướng", "Chiên", "Hấp", "Luộc", "Xào", "Salad"
+]
+
 export type DishIngredientAmountMealMeta = {
     id: string;
     plannedDate: Date;
@@ -51,4 +55,5 @@ export type Dishes = {
     isCompleted: boolean;
     duration: DishDuration;
     image?: string;
+    tags?: string[];
 }
