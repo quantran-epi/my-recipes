@@ -64,7 +64,7 @@ const ImageInput: React.FC<ImageInputProps> = ({ value, onChange }) => {
                 size="small"
             >
                 <Radio.Button value="url"><LinkOutlined /> Đường dẫn URL</Radio.Button>
-                <Radio.Button value="upload"><UploadOutlined /> Tải lên từ thiết bị</Radio.Button>
+                <Radio.Button value="upload"><UploadOutlined /> Tải lên</Radio.Button>
             </Radio.Group>
 
             {mode === "url" ? (

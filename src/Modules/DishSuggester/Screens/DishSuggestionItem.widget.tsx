@@ -19,7 +19,7 @@ type DishSuggestionItemProps = {
 }
 
 export const DishSuggestionItem: React.FC<DishSuggestionItemProps> = ({ scored, selected, onToggle }) => {
-    const allIngredients = useSelector((state: RootState) => state.ingredient.ingredients);
+    const allIngredients = useSelector((state: RootState) => state.shared.ingredient.ingredients);
     const [expanded, setExpanded] = useState(false);
 
     const _name = (id: string) => allIngredients.find(i => i.id === id)?.name ?? id;

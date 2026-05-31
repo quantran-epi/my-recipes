@@ -88,7 +88,7 @@ type IngredientItemProps = {
 }
 
 export const IngredientItem: React.FunctionComponent<IngredientItemProps> = (props) => {
-    const ingredients = useSelector((state: RootState) => state.ingredient.ingredients);
+    const ingredients = useSelector((state: RootState) => state.shared.ingredient.ingredients);
     const togglEditIngredientToDishes = useToggle();
     const ingredientAmount = useMemo(() => {
         return ingredients.find(e => e.id === props.ingredientAmount.ingredientId);

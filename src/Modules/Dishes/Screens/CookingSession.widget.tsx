@@ -7,6 +7,7 @@ import { useToggle } from "@hooks";
 import { Dishes, DishesIngredientAmount } from "@store/Models/Dishes";
 import { Ingredient } from "@store/Models/Ingredient";
 import { startCooking } from "@store/Reducers/CookingSessionReducer";
+import { selectDishes, selectIngredients, selectInventory } from "@store/Selectors";
 import { RootState } from "@store/Store";
 import { Divider, Space } from "antd";
 import React, { useMemo } from "react";
@@ -48,13 +49,13 @@ type CookingSessionWidgetProps = {
 
 export const CookingSessionWidget: React.FunctionComponent<CookingSessionWidgetProps> = ({ dish, onDone }) => {
     const dispatch = useDispatch();
-    const allDishes = useSelector((state: RootState) => state.dishes.dishes);
-    const allIngredients = useSelector((state: RootState) => state.ingredient.ingredients);
+    const allDishes = useSelector(selectDishes);
+    const allIngredients = useSelector(selectIngredients);
+    const inventoryItems = useSelector(selectInventory);
     const toggleShoppingList = useToggle();
 
     const rows = useMemo<CookingIngredientRow[]>(() => {
         const amounts = collectIngredientAmounts(dish, allDishes);
-        // Group by ingredientId, sum amounts
         const grouped: Record<string, { total: number; unit: string }> = {};
         amounts.forEach(amt => {
             const parsed = parseFloat(amt.amount);
@@ -68,18 +69,19 @@ export const CookingSessionWidget: React.FunctionComponent<CookingSessionWidgetP
         return Object.entries(grouped).map(([ingredientId, { total, unit }]) => {
             const ingredient = allIngredients.find(i => i.id === ingredientId);
             if (!ingredient) return null;
-            const inStock = ingredient.inventory?.amount ?? 0;
+            const inv = inventoryItems[ingredientId];
+            const inStock = inv?.amount ?? 0;
             const lacking = Math.max(0, total - inStock);
             return {
                 ingredient,
                 required: total,
-                unit: ingredient.inventory?.unit ?? unit,
+                unit: inv?.unit ?? unit,
                 inStock,
                 lacking,
                 sufficient: inStock >= total,
             } as CookingIngredientRow;
         }).filter(Boolean) as CookingIngredientRow[];
-    }, [dish, allDishes, allIngredients]);
+    }, [dish, allDishes, allIngredients, inventoryItems]);
 
     const lackingDishIds = [dish.id];
     const lackingIngredientIds = rows.filter(r => !r.sufficient).map(r => r.ingredient.id);

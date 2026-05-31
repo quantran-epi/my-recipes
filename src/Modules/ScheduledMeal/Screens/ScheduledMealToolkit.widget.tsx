@@ -18,7 +18,7 @@ import { useModal } from "@components/Modal/ModalProvider";
 import { Popconfirm } from "@components/Popconfirm";
 
 export const ScheduledMealToolkitWidget = () => {
-    const selectedMeals = useSelector((state: RootState) => state.scheduledMeal.selectedMeals);
+    const selectedMeals = useSelector((state: RootState) => state.personal.scheduledMeal.selectedMeals);
     const toggle = useToggle();
     const toggleAddModal = useToggle();
     const dispatch = useDispatch();

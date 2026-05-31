@@ -83,7 +83,7 @@ type DishesExportWidgetProps = {
 
 export const DishesExportWidget: React.FC<DishesExportWidgetProps> = ({ dish, allIngredients, open, onClose }) => {
     const message = useMessage();
-    const allDishes = useSelector((state: RootState) => state.dishes.dishes);
+    const allDishes = useSelector((state: RootState) => state.shared.dishes.dishes);
     const text = formatDishToText(dish, allIngredients, allDishes);
 
     const _onCopy = () => {

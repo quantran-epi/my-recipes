@@ -25,8 +25,8 @@ type ShoppingListMealDetailWidgetProps = {
 }
 
 export const ShoppingListMealDetailWidget: FunctionComponent<ShoppingListMealDetailWidgetProps> = ({ mealId }) => {
-    const dishes = useSelector((state: RootState) => state.dishes.dishes);
-    const scheduledMeals = useSelector((state: RootState) => state.scheduledMeal.scheduledMeals);
+    const dishes = useSelector((state: RootState) => state.shared.dishes.dishes);
+    const scheduledMeals = useSelector((state: RootState) => state.personal.scheduledMeal.scheduledMeals);
 
     const meal = useMemo(() => {
         return scheduledMeals.find(e => e.id === mealId);

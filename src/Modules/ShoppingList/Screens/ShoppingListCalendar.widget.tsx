@@ -14,7 +14,7 @@ import { PlusOutlined } from "@ant-design/icons";
 
 export const ShoppingListCalendarWidget = ({ onAdd }) => {
     const [selectedDate, setSelectedDate] = useState<Date>(new Date());
-    const shoppingLists = useSelector((state: RootState) => state.shoppingList.shoppingLists);
+    const shoppingLists = useSelector((state: RootState) => state.personal.shoppingList.shoppingLists);
     const dispatch = useDispatch();
 
     const _onSelect = (d, selectInfo: SelectInfo) => {

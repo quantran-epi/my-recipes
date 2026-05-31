@@ -1,6 +1,7 @@
 import React from "react";
 import { Flex, Spin, Typography } from "antd";
-import { useAutoImport } from "@hooks";
+import { useAutoImport, useSharedDataSync } from "@hooks";
+import { SharedSyncModal } from "./SharedSyncModal";
 import LogoIcon from "../../../assets/icons/logo.png";
 
 type AppInitializerProps = {
@@ -9,6 +10,7 @@ type AppInitializerProps = {
 
 export const AppInitializer: React.FC<AppInitializerProps> = ({ children }) => {
     const { status, error } = useAutoImport();
+    const { pendingSync, dismissSync, markSynced } = useSharedDataSync();
 
     if (status === "loading") {
         return (
@@ -58,5 +60,20 @@ export const AppInitializer: React.FC<AppInitializerProps> = ({ children }) => {
         );
     }
 
-    return <>{children}</>;
+    return (
+        <>
+            {children}
+            {pendingSync && (
+                <SharedSyncModal
+                    open={true}
+                    manifest={pendingSync.manifest}
+                    hasIngredientChanges={pendingSync.hasIngredientChanges}
+                    hasDishChanges={pendingSync.hasDishChanges}
+                    onDone={markSynced}
+                    onCancel={dismissSync}
+                />
+            )}
+        </>
+    );
 };
+

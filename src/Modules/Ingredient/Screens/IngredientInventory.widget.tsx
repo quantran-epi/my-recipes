@@ -4,10 +4,11 @@ import { Option, Select } from "@components/Form/Select";
 import { Stack } from "@components/Layout/Stack";
 import { Typography } from "@components/Typography";
 import { Ingredient, IngredientUnit, INGREDIENT_UNITS } from "@store/Models/Ingredient";
-import { updateInventory } from "@store/Reducers/IngredientReducer";
+import { setInventory } from "@store/Reducers/InventoryReducer";
+import { selectInventoryById } from "@store/Selectors";
 import { InputNumber } from "antd";
 import React, { useState } from "react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 
 type IngredientInventoryWidgetProps = {
     item: Ingredient;
@@ -16,12 +17,13 @@ type IngredientInventoryWidgetProps = {
 
 export const IngredientInventoryWidget: React.FC<IngredientInventoryWidgetProps> = ({ item, onDone }) => {
     const dispatch = useDispatch();
-    const [amount, setAmount] = useState<number>(item.inventory?.amount ?? 0);
-    const [unit, setUnit] = useState<IngredientUnit>(item.inventory?.unit ?? "g");
+    const inventory = useSelector(selectInventoryById(item.id));
+    const [amount, setAmount] = useState<number>(inventory?.amount ?? 0);
+    const [unit, setUnit] = useState<IngredientUnit>(inventory?.unit ?? "g");
 
     const _onSave = () => {
-        dispatch(updateInventory({
-            id: item.id,
+        dispatch(setInventory({
+            ingredientId: item.id,
             inventory: { amount, unit, lastUpdated: new Date() }
         }));
         onDone?.();
@@ -51,12 +53,7 @@ export const IngredientInventoryWidget: React.FC<IngredientInventoryWidgetProps>
                     {INGREDIENT_UNITS.map(u => <Option key={u} value={u}>{u}</Option>)}
                 </Select>
             </Stack>
-
-            <Stack justify="flex-end">
-                <Button type="primary" onClick={_onSave} style={{ borderRadius: 20, paddingInline: 20 }}>
-                    Lưu
-                </Button>
-            </Stack>
+            <Button type="primary" fullwidth onClick={_onSave}>Lưu</Button>
         </div>
     );
 };

@@ -20,7 +20,7 @@ type DishesAddIngredientWidgetProps = {
 }
 
 export const DishesAddIngredientWidget: React.FunctionComponent<DishesAddIngredientWidgetProps> = (props) => {
-    const ingredients = useSelector((state: RootState) => state.ingredient.ingredients);
+    const ingredients = useSelector((state: RootState) => state.shared.ingredient.ingredients);
     const dispatch = useDispatch();
     const message = useMessage();
 

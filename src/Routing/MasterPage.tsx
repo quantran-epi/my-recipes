@@ -1,4 +1,4 @@
-import { CloudDownloadOutlined, CloudSyncOutlined, ExportOutlined, ImportOutlined, LockOutlined, MenuOutlined, UnlockOutlined, FireOutlined } from "@ant-design/icons";
+import { CloudDownloadOutlined, CloudSyncOutlined, CloudUploadOutlined, ExportOutlined, ImportOutlined, LockOutlined, MenuOutlined, UnlockOutlined, FireOutlined, SettingOutlined } from "@ant-design/icons";
 import { ObjectPropertyHelper } from "@common/Helpers/ObjectProperty";
 import { Button } from "@components/Button";
 import { TextArea, Input } from "@components/Form/Input";
@@ -14,16 +14,17 @@ import { Modal } from "@components/Modal";
 import { SmartForm, useSmartForm } from "@components/SmartForm";
 import { Tooltip } from "@components/Tootip";
 import { Typography } from "@components/Typography";
-import { useAutoBackup, useAdminMode, useTheme, useToggle } from "@hooks";
+import { useAutoBackup, useAdminMode, useTheme, useToggle, useOnlineStatus, useSharedPublish } from "@hooks";
 import { ScheduledMealToolkitWidget } from "@modules/ScheduledMeal/Screens/ScheduledMealToolkit.widget";
 import { DishSuggesterScreen } from "@modules/DishSuggester/Screens/DishSuggester.screen";
 import { FinishCookingWidget } from "@modules/Dishes/Screens/FinishCooking.widget";
+import { GistBackupWidget } from "@components/GistBackupWidget";
 import { addDishes, resetDishes } from "@store/Reducers/DishesReducer";
 import { addIngredient, resetIngredient } from "@store/Reducers/IngredientReducer";
 import { addScheduledMeal, resetScheduleMeals } from "@store/Reducers/ScheduledMealReducer";
 import { addShoppingList, resetShoppingList } from "@store/Reducers/ShoppingListReducer";
 import { RootState } from "@store/Store";
-import { Drawer, Flex, Input as AntInput, Layout } from "antd";
+import { Drawer, Flex, Input as AntInput, Layout, Divider } from "antd";
 import React, { useState } from "react";
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 import { useDispatch, useSelector } from "react-redux";
@@ -43,7 +44,7 @@ const layoutStyles: React.CSSProperties = {
 export const MasterPage = () => {
     const { triggerBackup, isBackingUp, lastBackupTime } = useAutoBackup();
     const theme = useTheme();
-    const currentFeatureName = useSelector((state: RootState) => state.appContext.currentFeatureName);
+    const currentFeatureName = useSelector((state: RootState) => state.personal.appContext.currentFeatureName);    const { isOnline } = useOnlineStatus();
 
     const _featureIcon = () => {
         switch (currentFeatureName) {
@@ -74,6 +75,21 @@ export const MasterPage = () => {
             </Stack>
         </Header>
         <Content>
+            {!isOnline && (
+                <div style={{
+                    background: '#fffbe6',
+                    borderBottom: '1px solid #ffe58f',
+                    padding: '6px 16px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 8,
+                    fontSize: 13,
+                    color: '#7c6000',
+                }}>
+                    <span>📴</span>
+                    <span>Không có mạng — Dữ liệu vẫn được lưu cục bộ</span>
+                </div>
+            )}
             <Outlet />
         </Content>
         <BottomTabNavigator />
@@ -92,6 +108,7 @@ const SidebarDrawer = ({ triggerBackup, isBackingUp, lastBackupTime }: {
     const [pinError, setPinError] = useState("");
     const [isImporting, setIsImporting] = useState(false);
     const { isAdmin, tryUnlock, lock } = useAdminMode();
+    const { publishSharedData, isPublishing } = useSharedPublish();
     const navigate = useNavigate();
     const dispatch = useDispatch();
     const message = useMessage();
@@ -144,84 +161,126 @@ const SidebarDrawer = ({ triggerBackup, isBackingUp, lastBackupTime }: {
     return (
         <React.Fragment>
             <Button type="primary" onClick={showDrawer} icon={<MenuOutlined />} />
-            <Drawer placement="left" title={<Typography.Text style={{ fontFamily: "kanit", fontSize: 24 }}>My Recipes</Typography.Text>} onClose={onClose} open={open} styles={{ body: { padding: 0 } }}>
-                <Flex vertical justify="space-between" style={{ height: "100%" }}>
-                    <Menu
-                        items={[
-                            {
-                                key: "ingredients", label: <Flex align="center">
-                                    <img src={IngredientIcon} width={32} style={{ marginRight: 10 }} />
-                                    {"Nguyên liệu"}
-                                </Flex>, onClick: () => onNavigate(RootRoutes.AuthorizedRoutes.IngredientRoutes.List())
-                            },
-                            {
-                                key: "dishes", label: <Flex align="center">
-                                    <img src={DishesIcon} width={32} style={{ marginRight: 10 }} />
-                                    {"Món ăn"}
-                                </Flex>, onClick: () => onNavigate(RootRoutes.AuthorizedRoutes.DishesRoutes.List())
-                            },
-                            {
-                                key: "shoppingList", label: <Flex align="center">
-                                    <img src={ShoppingListIcon} width={32} style={{ marginRight: 10 }} />
-                                    {"Lịch mua sắm"}
-                                </Flex>, onClick: () => onNavigate(RootRoutes.AuthorizedRoutes.ShoppingListRoutes.List())
-                            },
-                            {
-                                key: "meals", label: <Flex align="center">
-                                    <img src={MealsIcon} width={32} style={{ marginRight: 10 }} />
-                                    {"Thực đơn"}
-                                </Flex>, onClick: () => onNavigate(RootRoutes.AuthorizedRoutes.ScheduledMealRoutes.List())
-                            }
-                        ]}
-                    />
-                    <Box style={{ overflow: "hidden" }}>
-                        <Image src={LogoIcon} width={350} preview={false} style={{ marginLeft: 90, opacity: 0.4 }} />
-                    </Box>
-                    <Box style={{ padding: 15 }}>
-                        <Flex vertical gap={10}>
-                            {/* Primary actions */}
-                            <Button
-                                type="primary"
-                                icon={<CloudDownloadOutlined />}
-                                loading={isImporting}
-                                block
-                                onClick={onImportCloud}
-                            >
-                                Đồng bộ ngay
+            <Drawer
+                placement="left"
+                title={
+                    <Flex align="center" gap={10}>
+                        <Image src={LogoIcon} preview={false} width={32} />
+                        <Typography.Text style={{ fontFamily: "kanit", fontSize: 22, fontWeight: 600 }}>My Recipes</Typography.Text>
+                    </Flex>
+                }
+                onClose={onClose}
+                open={open}
+                styles={{ body: { padding: 0, display: "flex", flexDirection: "column", height: "100%", overflowY: "auto" } }}
+            >
+                {/* ── Navigation ── */}
+                <Menu
+                    style={{ borderInlineEnd: "none" }}
+                    items={[
+                        {
+                            key: "ingredients", label: <Flex align="center" gap={10}>
+                                <img src={IngredientIcon} width={24} />
+                                <span>Nguyên liệu</span>
+                            </Flex>, onClick: () => onNavigate(RootRoutes.AuthorizedRoutes.IngredientRoutes.List())
+                        },
+                        {
+                            key: "dishes", label: <Flex align="center" gap={10}>
+                                <img src={DishesIcon} width={24} />
+                                <span>Món ăn</span>
+                            </Flex>, onClick: () => onNavigate(RootRoutes.AuthorizedRoutes.DishesRoutes.List())
+                        },
+                        {
+                            key: "shoppingList", label: <Flex align="center" gap={10}>
+                                <img src={ShoppingListIcon} width={24} />
+                                <span>Lịch mua sắm</span>
+                            </Flex>, onClick: () => onNavigate(RootRoutes.AuthorizedRoutes.ShoppingListRoutes.List())
+                        },
+                        {
+                            key: "meals", label: <Flex align="center" gap={10}>
+                                <img src={MealsIcon} width={24} />
+                                <span>Thực đơn</span>
+                            </Flex>, onClick: () => onNavigate(RootRoutes.AuthorizedRoutes.ScheduledMealRoutes.List())
+                        }
+                    ]}
+                />
+
+                <Box style={{ padding: "0 16px 24px" }}>
+
+                    {/* ── Sync shared data ── */}
+                    <Divider orientation="left" style={{ fontSize: 12, color: "#888", marginTop: 16, marginBottom: 12 }}>Dữ liệu dùng chung</Divider>
+                    <Flex vertical gap={8}>
+                        <Button
+                            icon={<CloudDownloadOutlined />}
+                            loading={isImporting}
+                            block
+                            onClick={onImportCloud}
+                        >
+                            Đồng bộ dữ liệu mới
+                        </Button>
+                    </Flex>
+
+                    {/* ── Personal backup (non-admin) ── */}
+                    {!isAdmin && (
+                        <>
+                            <Divider orientation="left" style={{ fontSize: 12, color: "#888", marginTop: 16, marginBottom: 12 }}>Sao lưu cá nhân</Divider>
+                            <GistBackupWidget />
+                        </>
+                    )}
+
+                    {/* ── Admin tools ── */}
+                    {isAdmin && (
+                        <>
+                            <Divider orientation="left" style={{ fontSize: 12, color: "#888", marginTop: 16, marginBottom: 12 }}>Quản trị</Divider>
+                            <Flex vertical gap={8}>
+                                <Button
+                                    icon={<CloudUploadOutlined />}
+                                    loading={isPublishing}
+                                    onClick={publishSharedData}
+                                    block
+                                    style={{ color: "#52c41a", borderColor: "#52c41a" }}
+                                >
+                                    Xuất bản dữ liệu dùng chung
+                                </Button>
+                                <Button
+                                    icon={<CloudSyncOutlined />}
+                                    loading={isBackingUp}
+                                    onClick={triggerBackup}
+                                    block
+                                >
+                                    Sao lưu lên GitHub
+                                </Button>
+                                {lastBackupTime && (
+                                    <Typography.Text type="secondary" style={{ fontSize: 11, textAlign: "center" }}>
+                                        Sao lưu lần cuối: {lastBackupTime.toLocaleString("vi-VN")}
+                                    </Typography.Text>
+                                )}
+                            </Flex>
+                        </>
+                    )}
+
+                    {/* ── Settings / account ── */}
+                    <Divider orientation="left" style={{ fontSize: 12, color: "#888", marginTop: 16, marginBottom: 12 }}>Tài khoản</Divider>
+                    <Flex vertical gap={6}>
+                        {isAdmin ? (
+                            <Flex align="center" justify="space-between" style={{ padding: "4px 0" }}>
+                                <Flex align="center" gap={6}>
+                                    <LockOutlined style={{ color: "#52c41a" }} />
+                                    <Typography.Text style={{ fontSize: 13, color: "#52c41a" }}>Đang ở chế độ Admin</Typography.Text>
+                                </Flex>
+                                <Button size="small" type="text" danger onClick={lock}>Khoá</Button>
+                            </Flex>
+                        ) : (
+                            <Button type="text" icon={<UnlockOutlined />} block onClick={() => setPinModalOpen(true)} style={{ textAlign: "left", justifyContent: "flex-start" }}>
+                                Đăng nhập Admin
                             </Button>
-                            {isAdmin && (
-                                <>
-                                    <Button
-                                        type="default"
-                                        icon={<CloudSyncOutlined />}
-                                        loading={isBackingUp}
-                                        onClick={triggerBackup}
-                                        block
-                                    >
-                                        Sao lưu ngay
-                                    </Button>
-                                    {lastBackupTime && (
-                                        <Typography.Text type="secondary" style={{ fontSize: 12, textAlign: "center" }}>
-                                            Lần sao lưu cuối: {lastBackupTime.toLocaleString("vi-VN")}
-                                        </Typography.Text>
-                                    )}
-                                </>
-                            )}
-                            {/* Admin toggle */}
-                            {isAdmin ? (
-                                <Button size="small" type="text" icon={<LockOutlined />} danger block onClick={lock}>
-                                    Khoá quyền admin
-                                </Button>
-                            ) : (
-                                <Button size="small" type="text" icon={<UnlockOutlined />} block onClick={() => setPinModalOpen(true)}>
-                                    Mở quyền admin
-                                </Button>
-                            )}
-                            {/* Troubleshooting — manual export/import */}
-                            <DataBackup onImportCloud={onImportCloud} />
-                        </Flex>
-                    </Box>
-                </Flex>
+                        )}
+                    </Flex>
+
+                    {/* ── Troubleshooting ── */}
+                    <Divider orientation="left" style={{ fontSize: 12, color: "#888", marginTop: 16, marginBottom: 12 }}>Khắc phục sự cố</Divider>
+                    <DataBackup onImportCloud={onImportCloud} />
+
+                </Box>
             </Drawer>
             <Modal
                 title="Nhập mã PIN"
@@ -248,7 +307,7 @@ const SidebarDrawer = ({ triggerBackup, isBackingUp, lastBackupTime }: {
 };
 
 const CookingPill = () => {
-    const sessions = useSelector((state: RootState) => state.cookingSession?.sessions ?? []);
+    const sessions = useSelector((state: RootState) => state.personal.cookingSession?.sessions ?? []);
     const activeSessions = sessions.filter(s => s.status === "cooking");
     const toggleFinish = useToggle();
     const [selectedSession, setSelectedSession] = React.useState<string | null>(null);

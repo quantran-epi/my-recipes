@@ -42,7 +42,7 @@ const ShoppingListRow = ({ index, style, items, onDelete }: RowComponentProps<Sh
 };
 
 export const ShoppingListScreen = () => {
-    const shoppingLists = useSelector((state: RootState) => state.shoppingList.shoppingLists);
+    const shoppingLists = useSelector((state: RootState) => state.personal.shoppingList.shoppingLists);
     const toggleCalendarModal = useToggle({ defaultValue: false });
     const toggleAddModal = useToggle({ defaultValue: false });
     const dispatch = useDispatch();
@@ -112,9 +112,9 @@ type ShoppingListItemProps = {
 export const ShoppingListItem: React.FunctionComponent<ShoppingListItemProps> = (props) => {
     const toggleIngredient = useToggle({ defaultValue: false });
     const toggleAddMoreDishes = useToggle({ defaultValue: false });
-    const dishes = useSelector((state: RootState) => state.dishes.dishes);
-    const scheduledMeals = useSelector((state: RootState) => state.scheduledMeal.scheduledMeals);
-    const ingredients = useSelector((state: RootState) => state.ingredient.ingredients);
+    const dishes = useSelector((state: RootState) => state.shared.dishes.dishes);
+    const scheduledMeals = useSelector((state: RootState) => state.personal.scheduledMeal.scheduledMeals);
+    const ingredients = useSelector((state: RootState) => state.shared.ingredient.ingredients);
     const dispatch = useDispatch();
     const modal = useModal();
     const toggleEditModal = useToggle({ defaultValue: false });

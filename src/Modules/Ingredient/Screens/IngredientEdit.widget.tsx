@@ -15,7 +15,7 @@ export const IngredientEditWidget = ({ item, onDone }) => {
     const message = useMessage();
 
     const editIngredientForm = useSmartForm<Ingredient>({
-        defaultValues: { category: "", inventory: undefined, ...item },
+        defaultValues: { category: "", ...item },
         onSubmit: (values) => {
             dispatch(editIngredient(values.transformValues));
             message.success();
@@ -25,7 +25,6 @@ export const IngredientEditWidget = ({ item, onDone }) => {
             id: { name: ObjectPropertyHelper.nameof(defaultValues, e => e.id), noMarkup: true },
             name: { label: "Tên nguyên liệu", name: ObjectPropertyHelper.nameof(defaultValues, e => e.name) },
             category: { label: "Nhóm", name: ObjectPropertyHelper.nameof(defaultValues, e => e.category) },
-            inventory: { name: ObjectPropertyHelper.nameof(defaultValues, e => e.inventory), noMarkup: true },
         })
     })
 

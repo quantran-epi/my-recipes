@@ -13,6 +13,7 @@ import { Dishes } from "@store/Models/Dishes";
 import { INGREDIENT_CATEGORIES } from "@store/Models/Ingredient";
 import { ShoppingList, ShoppingListIngredientAmount, ShoppingListIngredientGroup } from "@store/Models/ShoppingList";
 import { toggleDoneIngredientAmount, toggleDoneIngredientGroup } from "@store/Reducers/ShoppingListReducer";
+import { selectDishes, selectIngredients, selectInventory } from "@store/Selectors";
 import { RootState } from "@store/Store";
 import { Divider, Space, Tabs } from "antd";
 import { CheckboxChangeEvent } from "antd/es/checkbox";
@@ -36,9 +37,9 @@ type ShoppingListDetailScreenProps = {
 }
 
 export const ShoppingListDetailWidget: React.FunctionComponent<ShoppingListDetailScreenProps> = (props) => {
-    const dishes = useSelector((state: RootState) => state.dishes.dishes);
-    const allIngredients = useSelector((state: RootState) => state.ingredient.ingredients);
-    const scheduledMeals = useSelector((state: RootState) => state.scheduledMeal.scheduledMeals);
+    const dishes = useSelector(selectDishes);
+    const allIngredients = useSelector(selectIngredients);
+    const scheduledMeals = useSelector((state: RootState) => state.personal.scheduledMeal.scheduledMeals);
     const toggleMealModal = useToggle();
     const [selectedMeal, setSelectedMeal] = useState<string>();
 
@@ -160,10 +161,11 @@ type ShoppingListIngredientItemProps = {
 
 export const ShoppingListIngredientItem: React.FunctionComponent<ShoppingListIngredientItemProps> = (props) => {
     const dispatch = useDispatch();
-    const ingredients = useSelector((state: RootState) => state.ingredient.ingredients);
+    const ingredients = useSelector(selectIngredients);
+    const inventoryItems = useSelector(selectInventory);
 
     const ingredient = ingredients.find(e => e.id === props.item.ingredientId);
-    const inventory = ingredient?.inventory;
+    const inventory = inventoryItems[props.item.ingredientId];
 
     // Sum total required (numeric prefix, e.g. "200g" → 200)
     const totalRequired = props.item.amounts.reduce((sum, amt) => {

@@ -16,7 +16,7 @@ type ShoppingListAddMoreDishesWidgetProps = {
 
 export const ShoppingListAddMoreDishesWidget: React.FunctionComponent<ShoppingListAddMoreDishesWidgetProps> = (props) => {
     const dispatch = useDispatch();
-    const dishes = useSelector((state: RootState) => state.dishes.dishes);
+    const dishes = useSelector((state: RootState) => state.shared.dishes.dishes);
 
     const addDishesToShoppingListForm = useSmartForm<ShoppingListAddDishesParams>({
         defaultValues: {

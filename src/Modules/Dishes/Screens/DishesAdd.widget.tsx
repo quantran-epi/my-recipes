@@ -15,7 +15,7 @@ import { useDispatch, useSelector } from "react-redux"
 export const DishesAddWidget = () => {
     const dispatch = useDispatch();
     const message = useMessage();
-    const dishes = useSelector((state: RootState) => state.dishes.dishes);
+    const dishes = useSelector((state: RootState) => state.shared.dishes.dishes);
 
     const addDishesForm = useSmartForm<Dishes>({
         defaultValues: {

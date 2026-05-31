@@ -24,8 +24,8 @@ type ShoppingListEditWidgetProps = {
 
 export const ShoppingListEditWidget: FunctionComponent<ShoppingListEditWidgetProps> = ({ item, onDone }) => {
     const dispatch = useDispatch();
-    const dishes = useSelector((state: RootState) => state.dishes.dishes);
-    const scheduledMeals = useSelector((state: RootState) => state.scheduledMeal.scheduledMeals);
+    const dishes = useSelector((state: RootState) => state.shared.dishes.dishes);
+    const scheduledMeals = useSelector((state: RootState) => state.personal.scheduledMeal.scheduledMeals);
     const message = useMessage();
 
     const editShoppingListForm = useSmartForm<ShoppingList>({

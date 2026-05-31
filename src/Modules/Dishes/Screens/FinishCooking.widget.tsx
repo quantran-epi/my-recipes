@@ -6,7 +6,8 @@ import { Typography } from "@components/Typography";
 import { CookingSession } from "@store/Models/CookingSession";
 import { Dishes } from "@store/Models/Dishes";
 import { cancelCooking, finishCooking } from "@store/Reducers/CookingSessionReducer";
-import { deductInventory } from "@store/Reducers/IngredientReducer";
+import { deductInventory } from "@store/Reducers/InventoryReducer";
+import { selectDishes, selectIngredients, selectInventory } from "@store/Selectors";
 import { RootState } from "@store/Store";
 import { Space } from "antd";
 import moment from "moment";
@@ -33,8 +34,9 @@ const collectIngredientAmounts = (dish: Dishes, allDishes: Dishes[], visited = n
 
 export const FinishCookingWidget: React.FunctionComponent<FinishCookingWidgetProps> = ({ session, onDone }) => {
     const dispatch = useDispatch();
-    const allDishes = useSelector((state: RootState) => state.dishes.dishes);
-    const allIngredients = useSelector((state: RootState) => state.ingredient.ingredients);
+    const allDishes = useSelector(selectDishes);
+    const allIngredients = useSelector(selectIngredients);
+    const inventoryItems = useSelector(selectInventory);
 
     const dish = allDishes.find(d => d.id === session.dishId);
 
@@ -52,12 +54,12 @@ export const FinishCookingWidget: React.FunctionComponent<FinishCookingWidgetPro
             grouped[amt.ingredientId].total += val;
         });
         return Object.entries(grouped)
-            .filter(([id]) => allIngredients.find(i => i.id === id)?.inventory != null)
+            .filter(([id]) => inventoryItems[id] != null)
             .map(([id, { total, unit, name }]) => ({ id, total, unit, name }));
-    }, [dish, allDishes, allIngredients]);
+    }, [dish, allDishes, allIngredients, inventoryItems]);
 
     const _onFinish = () => {
-        deductions.forEach(d => dispatch(deductInventory({ id: d.id, amount: d.total })));
+        deductions.forEach(d => dispatch(deductInventory({ ingredientId: d.id, amount: d.total })));
         dispatch(finishCooking(session.id));
         onDone();
     };

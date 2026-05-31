@@ -26,8 +26,8 @@ type DishSuggesterScreenProps = {
 }
 
 export const DishSuggesterScreen: React.FC<DishSuggesterScreenProps> = ({ open, onClose }) => {
-    const dishes = useSelector((state: RootState) => state.dishes.dishes);
-    const allIngredients = useSelector((state: RootState) => state.ingredient.ingredients);
+    const dishes = useSelector((state: RootState) => state.shared.dishes.dishes);
+    const allIngredients = useSelector((state: RootState) => state.shared.ingredient.ingredients);
 
     const [step, setStep] = useState(0);
     const [selectedIngredientIds, setSelectedIngredientIds] = useState<string[]>([]);

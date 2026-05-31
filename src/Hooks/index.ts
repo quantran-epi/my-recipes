@@ -4,3 +4,7 @@ export * from './useScreenTitle';
 export * from './useAutoBackup';
 export * from './useAutoImport';
 export * from './useAdminMode';
+export * from './useOnlineStatus';
+export * from './useSharedPublish';
+export * from './useSharedDataSync';
+export * from './useGistBackup';

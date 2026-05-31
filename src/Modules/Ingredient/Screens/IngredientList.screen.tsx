@@ -9,9 +9,10 @@ import { Modal } from "@components/Modal";
 import { Popconfirm } from "@components/Popconfirm";
 import { Tooltip } from "@components/Tootip";
 import { Typography } from "@components/Typography";
-import { useScreenTitle, useToggle } from "@hooks";
+import { useScreenTitle, useToggle, useAdminMode } from "@hooks";
 import { Ingredient } from "@store/Models/Ingredient";
 import { removeIngredient } from "@store/Reducers/IngredientReducer";
+import { selectIngredients, selectInventoryById } from "@store/Selectors";
 import { RootState } from "@store/Store";
 import { debounce, sortBy } from "lodash";
 import React, { useMemo, useState } from "react";
@@ -22,19 +23,19 @@ import { IngredientAddWidget } from "./IngredientAdd.widget";
 import { IngredientEditWidget } from "./IngredientEdit.widget";
 import { IngredientInventoryWidget } from "./IngredientInventory.widget";
 
-type IngredientRowProps = { items: Ingredient[]; onDelete: (item: Ingredient) => void; };
+type IngredientRowProps = { items: Ingredient[]; onDelete: (item: Ingredient) => void; isAdmin: boolean; };
 
-const IngredientRow = ({ index, style, items, onDelete }: RowComponentProps<IngredientRowProps>) => {
+const IngredientRow = ({ index, style, items, onDelete, isAdmin }: RowComponentProps<IngredientRowProps>) => {
     if (!items[index]) return null;
-    return <div style={style}><IngredientItem item={items[index]} onDelete={onDelete} /></div>;
+    return <div style={style}><IngredientItem item={items[index]} onDelete={onDelete} isAdmin={isAdmin} /></div>;
 };
 
 export const IngredientListScreen = () => {
-    const ingredients = useSelector((state: RootState) => state.ingredient.ingredients);
-    const toggleAddModal = useToggle({ defaultValue: false });
+    const ingredients = useSelector((state: RootState) => state.shared.ingredient.ingredients);    const toggleAddModal = useToggle({ defaultValue: false });
     const dispatch = useDispatch();
     const { } = useScreenTitle({ value: "Nguyên liệu", deps: [] });
     const [searchText, setSearchText] = useState("");
+    const { isAdmin } = useAdminMode();
 
     const filteredIngredients = useMemo(() => {
         return sortBy(ingredients.filter(e => e.name.trim().toLowerCase().includes(searchText.trim().toLowerCase())), "name");
@@ -51,13 +52,13 @@ export const IngredientListScreen = () => {
     return <React.Fragment>
         <Stack.Compact>
             <Input allowClear placeholder="Tìm kiếm" onChange={debounce((e) => setSearchText(e.target.value), 350)} />
-            <Button onClick={_onAdd} icon={<PlusOutlined />} />
+            {isAdmin && <Button onClick={_onAdd} icon={<PlusOutlined />} />}
         </Stack.Compact>
         <VirtualList
             rowComponent={IngredientRow}
             rowCount={filteredIngredients.length}
             rowHeight={57}
-            rowProps={{ items: filteredIngredients, onDelete: _onDelete }}
+            rowProps={{ items: filteredIngredients, onDelete: _onDelete, isAdmin }}
             style={{ height: window.screen.availHeight - 210 }}
         />
         <Modal open={toggleAddModal.value} title={
@@ -74,13 +75,14 @@ export const IngredientListScreen = () => {
 type IngredientItemProps = {
     item: Ingredient;
     onDelete: (item: Ingredient) => void;
+    isAdmin: boolean;
 }
 
 export const IngredientItem: React.FunctionComponent<IngredientItemProps> = (props) => {
     const toggleEdit = useToggle({ defaultValue: false });
     const toggleInventory = useToggle({ defaultValue: false });
 
-    const inv = props.item.inventory;
+    const inv = useSelector(selectInventoryById(props.item.id));
     const invLabel = inv ? `${inv.amount} ${inv.unit}` : null;
     const invColor = !inv ? "#aaa" : inv.amount <= 0 ? "#ff4d4f" : inv.amount <= 2 ? "#faad14" : "#52c41a";
 
@@ -112,10 +114,12 @@ export const IngredientItem: React.FunctionComponent<IngredientItemProps> = (pro
 
             {/* Action buttons */}
             <div style={{ display: 'flex', alignItems: 'center', gap: 4, flexShrink: 0 }}>
-                <Button size="small" onClick={toggleEdit.show} icon={<EditOutlined />} />
-                <Popconfirm title="Xóa?" onConfirm={() => props.onDelete(props.item)}>
-                    <Button size="small" danger icon={<DeleteOutlined />} />
-                </Popconfirm>
+                {props.isAdmin && <Button size="small" onClick={toggleEdit.show} icon={<EditOutlined />} />}
+                {props.isAdmin && (
+                    <Popconfirm title="Xóa?" onConfirm={() => props.onDelete(props.item)}>
+                        <Button size="small" danger icon={<DeleteOutlined />} />
+                    </Popconfirm>
+                )}
             </div>
         </div>
 

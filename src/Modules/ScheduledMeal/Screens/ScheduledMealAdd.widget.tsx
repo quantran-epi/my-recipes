@@ -19,7 +19,7 @@ import { useDispatch, useSelector } from "react-redux"
 
 export const ScheduledMealAddWidget = ({ date, onDone }) => {
     const dispatch = useDispatch();
-    const dishes = useSelector((state: RootState) => state.dishes.dishes);
+    const dishes = useSelector((state: RootState) => state.shared.dishes.dishes);
     const message = useMessage();
 
     const addScheduledMealForm = useSmartForm<ScheduledMeal>({

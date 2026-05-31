@@ -86,6 +86,10 @@ export const useAutoBackup = (): UseAutoBackupResult => {
     );
 
     const triggerBackup = async (): Promise<void> => {
+        if (!navigator.onLine) {
+            message.warning({ content: "Không có mạng — Sao lưu sẽ tiếp tục khi có kết nối", duration: 3 });
+            return;
+        }
         setIsBackingUp(true);
         const key = "backup-message";
         message.loading({ content: "Đang sao lưu dữ liệu...", key, duration: 0 });

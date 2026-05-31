@@ -33,7 +33,7 @@ import { CheckboxChangeEvent } from "antd/es/checkbox";
 
 export const ScheduledMealListScreen = () => {
     const [selectedDate, setSelectedDate] = useState<Date>(new Date());
-    const scheduledMeals = useSelector((state: RootState) => state.scheduledMeal.scheduledMeals);
+    const scheduledMeals = useSelector((state: RootState) => state.personal.scheduledMeal.scheduledMeals);
     const dispatch = useDispatch();
     const { } = useScreenTitle({ value: "Thực đơn", deps: [] });
     const toggleAddModal = useToggle({ defaultValue: false });
@@ -93,7 +93,7 @@ export const ScheduledMealListScreen = () => {
 export const ScheduledMealItem = ({ item, onDelete }: { item: ScheduledMeal, onDelete }) => {
     const toggleEditModal = useToggle({ defaultValue: false });
     const toggleMealModal = useToggle({ defaultValue: false });
-    const selectedMeals = useSelector((state: RootState) => state.scheduledMeal.selectedMeals);
+    const selectedMeals = useSelector((state: RootState) => state.personal.scheduledMeal.selectedMeals);
     const dispatch = useDispatch();
     const theme = useTheme();
 

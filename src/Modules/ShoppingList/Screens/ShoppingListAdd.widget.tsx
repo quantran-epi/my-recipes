@@ -27,9 +27,9 @@ type ShoppingListAddWidgetProps = {
 
 export const ShoppingListAddWidget: FunctionComponent<ShoppingListAddWidgetProps> = ({ date, scheduledMealIds, dishIds, alreadyHaveIngredientIds, onDone }) => {
     const dispatch = useDispatch();
-    const dishes = useSelector((state: RootState) => state.dishes.dishes);
-    const scheduledMeals = useSelector((state: RootState) => state.scheduledMeal.scheduledMeals);
-    const allIngredients = useSelector((state: RootState) => state.ingredient.ingredients);
+    const dishes = useSelector((state: RootState) => state.shared.dishes.dishes);
+    const scheduledMeals = useSelector((state: RootState) => state.personal.scheduledMeal.scheduledMeals);
+    const allIngredients = useSelector((state: RootState) => state.shared.ingredient.ingredients);
     const message = useMessage();
 
     const addShoppingListForm = useSmartForm<ShoppingList>({

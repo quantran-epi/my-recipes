@@ -18,7 +18,7 @@ import DishIcon from "../../../../../assets/icons/noodles.png"
 
 export const DishesDetailScreen = () => {
     const [params] = useSearchParams();
-    const dishes = useSelector((state: RootState) => state.dishes.dishes);
+    const dishes = useSelector((state: RootState) => state.shared.dishes.dishes);
     const currentDist = useMemo(() => {
         return dishes.find(e => e.id === params.get("dishes"));
     }, [params, dishes])

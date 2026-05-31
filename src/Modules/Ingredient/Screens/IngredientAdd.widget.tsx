@@ -19,7 +19,6 @@ export const IngredientAddWidget = () => {
             id: "",
             name: "",
             category: "",
-            inventory: undefined,
         },
         onSubmit: (values) => {
             dispatch(addIngredient(values.transformValues));
@@ -30,7 +29,6 @@ export const IngredientAddWidget = () => {
             id: { name: ObjectPropertyHelper.nameof(defaultValues, e => e.id), noMarkup: true },
             name: { label: "Tên nguyên liệu", name: ObjectPropertyHelper.nameof(defaultValues, e => e.name) },
             category: { label: "Nhóm", name: ObjectPropertyHelper.nameof(defaultValues, e => e.category) },
-            inventory: { name: ObjectPropertyHelper.nameof(defaultValues, e => e.inventory), noMarkup: true },
         }),
         transformFunc: (values) => ({
             ...values,

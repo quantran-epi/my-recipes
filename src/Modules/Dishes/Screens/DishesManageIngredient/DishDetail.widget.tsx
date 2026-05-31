@@ -25,7 +25,7 @@ type DishDetailWidgetProps = {
 }
 
 export const DishesDetailWidget: React.FunctionComponent<DishDetailWidgetProps> = (props) => {
-    const dishes = useSelector((state: RootState) => state.dishes.dishes);
+    const dishes = useSelector((state: RootState) => state.shared.dishes.dishes);
     const toggleDishesDetail = useToggle();
     const [currentIncludeDish, setCurrentIncludeDish] = useState<string>();
 

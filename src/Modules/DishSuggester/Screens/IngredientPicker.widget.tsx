@@ -20,7 +20,7 @@ type IngredientPickerWidgetProps = {
 }
 
 export const IngredientPickerWidget: React.FC<IngredientPickerWidgetProps> = ({ selectedIds, onChange }) => {
-    const allIngredients = useSelector((state: RootState) => state.ingredient.ingredients);
+    const allIngredients = useSelector((state: RootState) => state.shared.ingredient.ingredients);
     const [activeCategory, setActiveCategory] = useState<string | null>(null);
     const [search, setSearch] = useState("");
 

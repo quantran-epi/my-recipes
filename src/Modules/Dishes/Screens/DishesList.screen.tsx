@@ -15,7 +15,7 @@ import { Popover } from "@components/Popover";
 import { Tag } from "@components/Tag";
 import { Tooltip } from "@components/Tootip";
 import { Typography } from "@components/Typography";
-import { useScreenTitle, useToggle } from "@hooks";
+import { useScreenTitle, useToggle, useAdminMode } from "@hooks";
 import { DISH_TAGS, DishDuration, Dishes } from "@store/Models/Dishes";
 import { DishesDurationEditParams, duplicateDish, removeDishes, updateDishDuration } from "@store/Reducers/DishesReducer";
 import { RootState } from "@store/Store";
@@ -36,21 +36,22 @@ import { CookingSessionWidget } from "./CookingSession.widget";
 import moment from "moment";
 import 'moment/locale/vi';
 
-type DishRowProps = { dishes: Dishes[]; onDelete: (item: Dishes) => void; onDuplicate: (item: Dishes) => void; };
+type DishRowProps = { dishes: Dishes[]; onDelete: (item: Dishes) => void; onDuplicate: (item: Dishes) => void; isAdmin: boolean; };
 
-const DishRow = ({ index, style, dishes, onDelete, onDuplicate }: RowComponentProps<DishRowProps>) => {
+const DishRow = ({ index, style, dishes, onDelete, onDuplicate, isAdmin }: RowComponentProps<DishRowProps>) => {
     if (!dishes[index]) return null;
-    return <div style={style}><DishesItem item={dishes[index]} onDelete={onDelete} onDuplicate={onDuplicate} /></div>;
+    return <div style={style}><DishesItem item={dishes[index]} onDelete={onDelete} onDuplicate={onDuplicate} isAdmin={isAdmin} /></div>;
 };
 
 export const DishesListScreen = () => {
-    const dishes = useSelector((state: RootState) => state.dishes.dishes);
+    const dishes = useSelector((state: RootState) => state.shared.dishes.dishes);
     const toggleAddModal = useToggle({ defaultValue: false });
     const [searchText, setSearchText] = useState<string>("");
     const [activeTag, setActiveTag] = useState<string | null>(null);
     const dispatch = useDispatch();
     const { } = useScreenTitle({ value: "Món ăn", deps: [] });
     const rowHeight = useDynamicRowHeight({ defaultRowHeight: 110, key: searchText + (activeTag ?? "") });
+    const { isAdmin } = useAdminMode();
 
     const allTags = useMemo<string[]>(() => {
         const tagSet = new Set<string>();
@@ -79,7 +80,7 @@ export const DishesListScreen = () => {
     return <React.Fragment>
         <Stack.Compact>
             <Input allowClear placeholder="Tìm kiếm" onChange={debounce((e) => setSearchText(e.target.value), 350)} />
-            <Button onClick={toggleAddModal.show} icon={<PlusOutlined />} />
+            {isAdmin && <Button onClick={toggleAddModal.show} icon={<PlusOutlined />} />}
         </Stack.Compact>
         {allTags.length > 0 && (
             <div style={{ display: 'flex', gap: 0, flexWrap: 'wrap', padding: '6px 0' }}>
@@ -107,7 +108,7 @@ export const DishesListScreen = () => {
             rowComponent={DishRow}
             rowCount={filteredDishes.length}
             rowHeight={rowHeight}
-            rowProps={{ dishes: filteredDishes, onDelete: _onDelete, onDuplicate: _onDuplicate }}
+            rowProps={{ dishes: filteredDishes, onDelete: _onDelete, onDuplicate: _onDuplicate, isAdmin }}
             style={{ height: window.screen.availHeight - 210 }}
         />
         <Modal open={toggleAddModal.value} title={
@@ -125,6 +126,7 @@ type DishesItemProps = {
     item: Dishes;
     onDelete: (item: Dishes) => void;
     onDuplicate: (item: Dishes) => void;
+    isAdmin: boolean;
 }
 
 moment.relativeTimeRounding((v) => parseFloat(v.toFixed(1)));
@@ -136,8 +138,8 @@ export const DishesItem: React.FunctionComponent<DishesItemProps> = (props) => {
     const toggleStepsOverview = useToggle();
     const toggleDishesDetail = useToggle();
     const toggleCooking = useToggle();
-    const dishes = useSelector((state: RootState) => state.dishes.dishes);
-    const ingredients = useSelector((state: RootState) => state.ingredient.ingredients);
+    const dishes = useSelector((state: RootState) => state.shared.dishes.dishes);
+    const ingredients = useSelector((state: RootState) => state.shared.ingredient.ingredients);
     const toggleEditDuration = useToggle();
     const message = useMessage();
     const dispatch = useDispatch();
@@ -258,12 +260,14 @@ export const DishesItem: React.FunctionComponent<DishesItemProps> = (props) => {
                 <Dropdown menu={{
                     items: [
                         { label: 'Bắt đầu nấu', key: 'cook', icon: <FireOutlined />, },
-                        { type: 'divider' },
-                        { label: 'Sửa món ăn', key: 'edit', icon: <EditOutlined /> },
-                        { label: 'Thời lượng', key: 'duration', icon: <ClockCircleOutlined /> },
-                        { label: 'Nhân bản', key: 'duplicate', icon: <CopyOutlined /> },
-                        { type: 'divider' },
-                        { label: 'Xóa', key: 'delete', icon: <DeleteOutlined />, danger: true },
+                        ...(props.isAdmin ? [
+                            { type: 'divider' as const },
+                            { label: 'Sửa món ăn', key: 'edit', icon: <EditOutlined /> },
+                            { label: 'Thời lượng', key: 'duration', icon: <ClockCircleOutlined /> },
+                            { label: 'Nhân bản', key: 'duplicate', icon: <CopyOutlined /> },
+                            { type: 'divider' as const },
+                            { label: 'Xóa', key: 'delete', icon: <DeleteOutlined />, danger: true },
+                        ] : []),
                     ],
                     onClick: _onMoreActionClick
                 }} placement="bottom">
