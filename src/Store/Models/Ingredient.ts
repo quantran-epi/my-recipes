@@ -3,14 +3,31 @@ export const INGREDIENT_UNITS: Array<IngredientUnit> = ["g", "kg", "lít", "ml",
 
 export const INGREDIENT_CATEGORIES = ["Thịt", "Hải sản", "Rau củ", "Gia vị", "Nước chấm", "Tinh bột", "Đồ hộp", "Sữa & trứng", "Khác"];
 
+export type IngredientShelfLife = "very_short" | "short" | "medium" | "long" | "very_long";
+
+export const INGREDIENT_SHELF_LIFE_OPTIONS: { value: IngredientShelfLife; label: string; description: string; color: string; emoji: string }[] = [
+    { value: "very_short", label: "Rất ngắn",  description: "1–3 ngày (rau thơm, hải sản tươi)",        color: "#ff4d4f", emoji: "🔴" },
+    { value: "short",      label: "Ngắn",       description: "3–7 ngày (thịt tươi, rau củ lá)",          color: "#fa8c16", emoji: "🟠" },
+    { value: "medium",     label: "Trung bình", description: "1–2 tuần (trứng, rau củ quả)",             color: "#faad14", emoji: "🟡" },
+    { value: "long",       label: "Dài",        description: "2–4 tuần (củ quả khô, bơ, phô mai)",      color: "#52c41a", emoji: "🟢" },
+    { value: "very_long",  label: "Rất dài",    description: "Vài tháng trở lên (đồ hộp, gia vị khô)", color: "#1677ff", emoji: "🔵" },
+];
+
 export type IngredientInventory = {
-    amount: number;
     unit: IngredientUnit;
     lastUpdated: Date;
+    batches: InventoryBatch[];
+}
+
+export type InventoryBatch = {
+    id: string;         // uuid for keying / removal
+    amount: number;
+    purchasedAt?: string; // ISO date string
 }
 
 export type Ingredient = {
     id: string;
     name: string;
     category?: string;
+    shelfLife?: IngredientShelfLife;
 }

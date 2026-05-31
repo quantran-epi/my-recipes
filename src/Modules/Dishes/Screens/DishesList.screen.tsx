@@ -83,7 +83,7 @@ export const DishesListScreen = () => {
             {isAdmin && <Button onClick={toggleAddModal.show} icon={<PlusOutlined />} />}
         </Stack.Compact>
         {allTags.length > 0 && (
-            <div style={{ display: 'flex', gap: 0, flexWrap: 'wrap', padding: '6px 0' }}>
+            <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap', padding: '6px 0' }}>
                 <Tag
                     onClick={() => setActiveTag(null)}
                     color={activeTag === null ? "blue" : undefined}

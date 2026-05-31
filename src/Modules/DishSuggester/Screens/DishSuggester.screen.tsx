@@ -1,4 +1,4 @@
-import { BulbOutlined, LeftOutlined, ShoppingCartOutlined } from "@ant-design/icons";
+import { BulbOutlined, ClockCircleOutlined, LeftOutlined, ShoppingCartOutlined, ThunderboltOutlined } from "@ant-design/icons";
 import { Button } from "@components/Button";
 import { Image } from "@components/Image";
 import { Box } from "@components/Layout/Box";
@@ -10,7 +10,7 @@ import { Typography } from "@components/Typography";
 import { useToggle } from "@hooks";
 import { DishScorer, ScoredDish, ScoredDishGroup } from "../Helpers/DishScorer";
 import { RootState } from "@store/Store";
-import { Divider } from "antd";
+import { InputNumber } from "antd";
 import React, { useMemo, useState } from "react";
 import { useSelector } from "react-redux";
 import { IngredientPickerWidget } from "./IngredientPicker.widget";
@@ -18,29 +18,81 @@ import { DishSuggestionList } from "./DishSuggestionList.widget";
 import { ShoppingListAddWidget } from "@modules/ShoppingList/Screens/ShoppingListAdd.widget";
 import ShoppingListIcon from "../../../../assets/icons/shoppingList.png";
 import NoodlesIcon from "../../../../assets/icons/noodles.png";
-import IngredientIcon from "../../../../assets/icons/vegetable.png";
+import { Dishes } from "@store/Models/Dishes";
+import { InventoryHelper } from "@common/Helpers/InventoryHelper";
+import { Collapse } from "antd";
+
+type Mode = "ingredients" | "inventory" | "duration";
 
 type DishSuggesterScreenProps = {
     open: boolean;
     onClose: () => void;
+    initialMode?: Mode;
+    initialIngredientIds?: string[];
 }
 
-export const DishSuggesterScreen: React.FC<DishSuggesterScreenProps> = ({ open, onClose }) => {
+const totalDurationMins = (dish: Dishes) => {
+    const d = dish.duration;
+    if (!d) return 0;
+    return (d.unfreeze ?? 0) + (d.prepare ?? 0) + (d.cooking ?? 0) + (d.serve ?? 0) + (d.cooldown ?? 0);
+};
+
+export const DishSuggesterScreen: React.FC<DishSuggesterScreenProps> = ({ open, onClose, initialMode, initialIngredientIds }) => {
     const dishes = useSelector((state: RootState) => state.shared.dishes.dishes);
     const allIngredients = useSelector((state: RootState) => state.shared.ingredient.ingredients);
+    const inventory = useSelector((state: RootState) => state.personal.inventory?.items ?? {});
 
+    const [mode, setMode] = useState<Mode>(initialMode ?? "ingredients");
     const [step, setStep] = useState(0);
-    const [selectedIngredientIds, setSelectedIngredientIds] = useState<string[]>([]);
+
+    // When opened with pre-filled IDs (e.g. from UseFirstWidget), jump to results step
+    React.useEffect(() => {
+        if (open && initialIngredientIds && initialIngredientIds.length > 0) {
+            setMode("ingredients");
+            setSelectedIngredientIds(initialIngredientIds);
+            setStep(1);
+        } else if (open && initialMode) {
+            setMode(initialMode);
+            setStep(0);
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [open]);
+
+    const [selectedIngredientIds, setSelectedIngredientIds] = useState<string[]>(initialIngredientIds ?? []);
     const [selectedDishIds, setSelectedDishIds] = useState<string[]>([]);
     const toggleShoppingListAdd = useToggle();
 
-    const scored = useMemo(() => DishScorer.score(dishes, selectedIngredientIds, dishes), [dishes, selectedIngredientIds]);
-    const groups = useMemo(() => DishScorer.group(scored), [scored]);
+    const [maxMinutes, setMaxMinutes] = useState<number>(30);
 
-    const selectedScored = useMemo(() =>
-        scored.filter(s => selectedDishIds.includes(s.dish.id)),
-        [scored, selectedDishIds]
+    const inventoryIngredientIds = useMemo(() =>
+        Object.entries(inventory)
+            .filter(([, inv]) => InventoryHelper.totalAmount(inv as any) > 0)
+            .map(([id]) => id),
+        [inventory]
     );
+
+    const ingredientScored = useMemo(() =>
+        DishScorer.score(dishes, selectedIngredientIds, dishes),
+        [dishes, selectedIngredientIds]
+    );
+    const ingredientGroups = useMemo(() => DishScorer.group(ingredientScored), [ingredientScored]);
+
+    const inventoryScored = useMemo(() =>
+        DishScorer.score(dishes, inventoryIngredientIds, dishes),
+        [dishes, inventoryIngredientIds]
+    );
+    const inventoryGroups = useMemo(() => DishScorer.group(inventoryScored), [inventoryScored]);
+
+    const durationFiltered = useMemo(() => {
+        return dishes
+            .filter(d => { const t = totalDurationMins(d); return t > 0 && t <= maxMinutes; })
+            .sort((a, b) => totalDurationMins(a) - totalDurationMins(b));
+    }, [dishes, maxMinutes]);
+
+    const selectedScored = useMemo(() => {
+        const source = mode === "inventory" ? inventoryScored : ingredientScored;
+        return source.filter(s => selectedDishIds.includes(s.dish.id));
+    }, [mode, inventoryScored, ingredientScored, selectedDishIds]);
 
     const missingIngredientIds = useMemo(() => {
         const ids = new Set<string>();
@@ -64,43 +116,87 @@ export const DishSuggesterScreen: React.FC<DishSuggesterScreenProps> = ({ open, 
         onClose();
     };
 
+    const _onModeChange = (m: Mode) => {
+        setMode(m);
+        setStep(m === "inventory" ? 1 : 0);
+        setSelectedDishIds([]);
+    };
+
     const _missingIngredientName = (id: string) => allIngredients.find(i => i.id === id)?.name ?? id;
 
-    // Step indicator
-    const StepBar = () => (
-        <Stack gap={10} style={{ marginBottom: 16 }}>
-            {/* Step 1 */}
-            <div style={{
-                flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 3,
-            }}>
-                <div style={{
-                    width: 28, height: 28, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center",
-                    background: step === 0 ? "#1677ff" : "#52c41a",
-                    color: "#fff", fontSize: 13, fontWeight: 700,
+    const ResultsFooter = ({ dishIds }: { dishIds: string[] }) => (
+        <>
+            {dishIds.length > 0 && (
+                <Box style={{
+                    marginTop: 10, padding: "8px 12px", borderRadius: 8,
+                    background: missingIngredientIds.length === 0 ? "#f6ffed" : "#fff7e6",
+                    border: `1px solid ${missingIngredientIds.length === 0 ? "#b7eb8f" : "#ffe7ba"}`,
                 }}>
-                    {step > 0 ? "✓" : "1"}
-                </div>
-                <Typography.Text style={{ fontSize: 11, color: step === 0 ? "#1677ff" : "#52c41a", fontWeight: step === 0 ? 600 : 400 }}>
-                    Nguyên liệu {step === 0 && selectedIngredientIds.length > 0 ? `(${selectedIngredientIds.length})` : ""}
-                </Typography.Text>
-            </div>
-            {/* connector */}
-            <div style={{ flex: 2, height: 2, background: step > 0 ? "#52c41a" : "#e0e0e0", marginTop: 13, transition: "background 0.3s" }} />
-            {/* Step 2 */}
-            <div style={{
-                flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 3,
-            }}>
-                <div style={{
-                    width: 28, height: 28, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center",
-                    background: step === 1 ? "#1677ff" : "#e0e0e0",
-                    color: step === 1 ? "#fff" : "#aaa", fontSize: 13, fontWeight: 700,
-                }}>
-                    2
-                </div>
-                <Typography.Text style={{ fontSize: 11, color: step === 1 ? "#1677ff" : "#aaa", fontWeight: step === 1 ? 600 : 400 }}>
-                    Chọn món {step === 1 && selectedDishIds.length > 0 ? `(${selectedDishIds.length})` : ""}
-                </Typography.Text>
-            </div>
+                    {missingIngredientIds.length === 0 ? (
+                        <Typography.Text style={{ fontSize: 12, color: "#389e0d" }}>
+                            🎉 Đủ nguyên liệu cho tất cả món đã chọn!
+                        </Typography.Text>
+                    ) : (
+                        <>
+                            <Typography.Text style={{ fontSize: 12, color: "#d46b08", display: "block", marginBottom: 6 }}>
+                                Cần mua thêm <strong>{missingIngredientIds.length}</strong> nguyên liệu:
+                            </Typography.Text>
+                            <Stack wrap="wrap" gap={5}>
+                                {missingIngredientIds.slice(0, 8).map(id => (
+                                    <div key={id} style={{
+                                        padding: "2px 10px", borderRadius: 12, fontSize: 12,
+                                        background: "#fff2f0", border: "1px solid #ffccc7", color: "#cf1322",
+                                    }}>
+                                        {_missingIngredientName(id)}
+                                    </div>
+                                ))}
+                                {missingIngredientIds.length > 8 && (
+                                    <Typography.Text type="secondary" style={{ fontSize: 12 }}>
+                                        +{missingIngredientIds.length - 8} khác
+                                    </Typography.Text>
+                                )}
+                            </Stack>
+                        </>
+                    )}
+                </Box>
+            )}
+            <Stack justify="space-between" style={{ marginTop: 12 }}>
+                {mode !== "inventory" && (
+                    <Button onClick={_onBack} icon={<LeftOutlined />} style={{ borderRadius: 20 }}>
+                        Quay lại
+                    </Button>
+                )}
+                <Button
+                    type="primary"
+                    disabled={dishIds.length === 0}
+                    icon={<ShoppingCartOutlined />}
+                    onClick={toggleShoppingListAdd.show}
+                    style={{ borderRadius: 20, paddingInline: 20, marginLeft: "auto" }}
+                >
+                    Tạo giỏ hàng ({dishIds.length})
+                </Button>
+            </Stack>
+        </>
+    );
+
+    const ModeTabs = () => (
+        <Stack gap={6} style={{ marginBottom: 16 }}>
+            {([
+                { key: "ingredients" as Mode, label: "Nguyên liệu", icon: <BulbOutlined /> },
+                { key: "inventory" as Mode, label: "Tủ lạnh", icon: <ThunderboltOutlined /> },
+                { key: "duration" as Mode, label: "Thời gian", icon: <ClockCircleOutlined /> },
+            ]).map(tab => (
+                <Button
+                    key={tab.key}
+                    type={mode === tab.key ? "primary" : "default"}
+                    size="small"
+                    icon={tab.icon}
+                    onClick={() => _onModeChange(tab.key)}
+                    style={{ borderRadius: 16, flex: 1 }}
+                >
+                    {tab.label}
+                </Button>
+            ))}
         </Stack>
     );
 
@@ -118,93 +214,213 @@ export const DishSuggesterScreen: React.FC<DishSuggesterScreenProps> = ({ open, 
             }
             style={{ top: 24 }}
         >
-            <StepBar />
+            <ModeTabs />
 
-            {step === 0 && <>
-                <IngredientPickerWidget
-                    selectedIds={selectedIngredientIds}
-                    onChange={setSelectedIngredientIds}
-                />
-                <Stack justify="flex-end" style={{ marginTop: 14 }}>
-                    <Button
-                        type="primary"
-                        size="middle"
-                        disabled={selectedIngredientIds.length === 0}
-                        onClick={_onNext}
-                        icon={<BulbOutlined />}
-                        style={{ borderRadius: 20, paddingInline: 20 }}
-                    >
-                        Gợi ý món ({selectedIngredientIds.length})
-                    </Button>
-                </Stack>
-            </>}
-
-            {step === 1 && <>
-                {groups.length === 0
-                    ? <Box style={{ textAlign: "center", padding: "32px 0" }}>
-                        <Typography.Text type="secondary">Không tìm thấy món phù hợp</Typography.Text>
-                    </Box>
-                    : <DishSuggestionList
-                        groups={groups}
-                        selectedDishIds={selectedDishIds}
-                        onToggle={_toggleDish}
+            {/* ── Mode: ingredients ── */}
+            {mode === "ingredients" && step === 0 && (
+                <>
+                    <IngredientPickerWidget
+                        selectedIds={selectedIngredientIds}
+                        onChange={setSelectedIngredientIds}
                     />
-                }
+                    <Stack justify="flex-end" style={{ marginTop: 14 }}>
+                        <Button
+                            type="primary"
+                            size="middle"
+                            disabled={selectedIngredientIds.length === 0}
+                            onClick={_onNext}
+                            icon={<BulbOutlined />}
+                            style={{ borderRadius: 20, paddingInline: 20 }}
+                        >
+                            Gợi ý món ({selectedIngredientIds.length})
+                        </Button>
+                    </Stack>
+                </>
+            )}
 
-                {/* Missing ingredients summary */}
-                {selectedDishIds.length > 0 && (
-                    <Box style={{
-                        marginTop: 10, padding: "8px 12px", borderRadius: 8,
-                        background: missingIngredientIds.length === 0 ? "#f6ffed" : "#fff7e6",
-                        border: `1px solid ${missingIngredientIds.length === 0 ? "#b7eb8f" : "#ffe7ba"}`,
-                    }}>
-                        {missingIngredientIds.length === 0 ? (
-                            <Typography.Text style={{ fontSize: 12, color: "#389e0d" }}>
-                                🎉 Đủ nguyên liệu cho tất cả món đã chọn!
+            {mode === "ingredients" && step === 1 && (
+                <>
+                    {ingredientGroups.length === 0
+                        ? <Box style={{ textAlign: "center", padding: "32px 0" }}>
+                            <Typography.Text type="secondary">Không tìm thấy món phù hợp</Typography.Text>
+                        </Box>
+                        : <DishSuggestionList
+                            groups={ingredientGroups}
+                            selectedDishIds={selectedDishIds}
+                            onToggle={_toggleDish}
+                        />
+                    }
+                    <ResultsFooter dishIds={selectedDishIds} />
+                </>
+            )}
+
+            {/* ── Mode: inventory ── */}
+            {mode === "inventory" && (
+                <>
+                    {inventoryIngredientIds.length === 0 ? (
+                        <Box style={{ textAlign: "center", padding: "32px 0" }}>
+                            <Typography.Text type="secondary">
+                                Tủ lạnh trống — hãy cập nhật tồn kho trước
                             </Typography.Text>
-                        ) : (
-                            <>
-                                <Typography.Text style={{ fontSize: 12, color: "#d46b08", display: "block", marginBottom: 6 }}>
-                                    Cần mua thêm <strong>{missingIngredientIds.length}</strong> nguyên liệu:
-                                </Typography.Text>
-                                <Stack wrap="wrap" gap={5}>
-                                    {missingIngredientIds.slice(0, 8).map(id => (
-                                        <div key={id} style={{
-                                            padding: "2px 10px", borderRadius: 12, fontSize: 12,
-                                            background: "#fff2f0", border: "1px solid #ffccc7", color: "#cf1322",
-                                        }}>
-                                            {_missingIngredientName(id)}
-                                        </div>
-                                    ))}
-                                    {missingIngredientIds.length > 8 && (
-                                        <Typography.Text type="secondary" style={{ fontSize: 12 }}>
-                                            +{missingIngredientIds.length - 8} khác
+                        </Box>
+                    ) : (
+                        <>
+                            <Collapse
+                                size="small"
+                                ghost
+                                style={{ marginBottom: 12, background: "#e6f4ff", borderRadius: 8, border: "1px solid #91caff" }}
+                                items={[{
+                                    key: "inv",
+                                    label: (
+                                        <Typography.Text style={{ fontSize: 12, color: "#0958d9" }}>
+                                            🧊 <strong>{inventoryIngredientIds.length}</strong> nguyên liệu trong tủ lạnh — bấm để xem
                                         </Typography.Text>
-                                    )}
-                                </Stack>
-                            </>
-                        )}
-                    </Box>
-                )}
+                                    ),
+                                    children: (
+                                        <Box style={{ maxHeight: 180, overflowY: "auto" }}>
+                                            <Stack wrap="wrap" gap={6}>
+                                                {inventoryIngredientIds.map(id => {
+                                                    const ingr = allIngredients.find(i => i.id === id);
+                                                    const inv = inventory[id];
+                                                    const amt = InventoryHelper.totalAmount(inv as any);
+                                                    const unit = (inv as any)?.unit ?? "";
+                                                    return (
+                                                        <div key={id} style={{
+                                                            padding: "3px 10px", borderRadius: 12, fontSize: 12,
+                                                            background: "#fff", border: "1px solid #91caff",
+                                                            color: "#0958d9", whiteSpace: "nowrap",
+                                                        }}>
+                                                            {ingr?.name ?? id}
+                                                            <span style={{ color: "#52c41a", marginLeft: 5, fontWeight: 600 }}>
+                                                                {amt} {unit}
+                                                            </span>
+                                                        </div>
+                                                    );
+                                                })}
+                                            </Stack>
+                                        </Box>
+                                    ),
+                                }]}
+                            />
+                            {inventoryGroups.length === 0
+                                ? <Box style={{ textAlign: "center", padding: "32px 0" }}>
+                                    <Typography.Text type="secondary">Không tìm thấy món phù hợp với nguyên liệu hiện có</Typography.Text>
+                                </Box>
+                                : <DishSuggestionList
+                                    groups={inventoryGroups}
+                                    selectedDishIds={selectedDishIds}
+                                    onToggle={_toggleDish}
+                                />
+                            }
+                            <ResultsFooter dishIds={selectedDishIds} />
+                        </>
+                    )}
+                </>
+            )}
 
-                <Stack justify="space-between" style={{ marginTop: 12 }}>
-                    <Button onClick={_onBack} icon={<LeftOutlined />} style={{ borderRadius: 20 }}>
-                        Quay lại
-                    </Button>
-                    <Button
-                        type="primary"
-                        disabled={selectedDishIds.length === 0}
-                        icon={<ShoppingCartOutlined />}
-                        onClick={toggleShoppingListAdd.show}
-                        style={{ borderRadius: 20, paddingInline: 20 }}
-                    >
-                        Tạo giỏ hàng ({selectedDishIds.length})
-                    </Button>
-                </Stack>
-            </>}
+            {/* ── Mode: duration ── */}
+            {mode === "duration" && step === 0 && (
+                <>
+                    <Box style={{
+                        padding: "16px", borderRadius: 10, background: "#f8f8f8",
+                        border: "1px solid #e8e8e8", marginBottom: 16,
+                    }}>
+                        <Typography.Text style={{ display: "block", marginBottom: 10, fontWeight: 500 }}>
+                            ⏱ Bạn có bao nhiêu thời gian để nấu?
+                        </Typography.Text>
+                        <Stack gap={10} align="center" wrap="wrap">
+                            <InputNumber
+                                min={5} max={480} step={5}
+                                value={maxMinutes}
+                                onChange={v => setMaxMinutes(v ?? 30)}
+                                addonAfter="phút"
+                                style={{ width: 140 }}
+                            />
+                            <Stack wrap="wrap" gap={6}>
+                                {[15, 30, 45, 60, 90].map(m => (
+                                    <Button
+                                        key={m}
+                                        size="small"
+                                        type={maxMinutes === m ? "primary" : "default"}
+                                        onClick={() => setMaxMinutes(m)}
+                                        style={{ borderRadius: 14 }}
+                                    >
+                                        {m} phút
+                                    </Button>
+                                ))}
+                            </Stack>
+                        </Stack>
+                    </Box>
+                    <Stack justify="flex-end">
+                        <Button
+                            type="primary"
+                            icon={<BulbOutlined />}
+                            onClick={_onNext}
+                            style={{ borderRadius: 20, paddingInline: 20 }}
+                        >
+                            Tìm món ≤ {maxMinutes} phút
+                        </Button>
+                    </Stack>
+                </>
+            )}
+
+            {mode === "duration" && step === 1 && (
+                <>
+                    {durationFiltered.length === 0 ? (
+                        <Box style={{ textAlign: "center", padding: "32px 0" }}>
+                            <Typography.Text type="secondary">
+                                Không có món nào nấu được trong {maxMinutes} phút
+                            </Typography.Text>
+                        </Box>
+                    ) : (
+                        <>
+                            <Typography.Text type="secondary" style={{ fontSize: 12, display: "block", marginBottom: 10 }}>
+                                {durationFiltered.length} món nấu được trong ≤ {maxMinutes} phút
+                            </Typography.Text>
+                            <Box style={{ maxHeight: 380, overflowY: "auto" }}>
+                                {durationFiltered.map(dish => {
+                                    const mins = totalDurationMins(dish);
+                                    const selected = selectedDishIds.includes(dish.id);
+                                    return (
+                                        <div
+                                            key={dish.id}
+                                            onClick={() => _toggleDish(dish.id)}
+                                            style={{
+                                                display: "flex", alignItems: "center", justifyContent: "space-between",
+                                                padding: "10px 12px", marginBottom: 8, borderRadius: 10, cursor: "pointer",
+                                                border: `1.5px solid ${selected ? "#52c41a" : "#ebebeb"}`,
+                                                background: selected ? "#f6ffed" : "#fafafa",
+                                                transition: "all 0.15s",
+                                            }}
+                                        >
+                                            <Typography.Text strong style={{ fontSize: 14 }}>{dish.name}</Typography.Text>
+                                            <Tag color={mins <= 20 ? "green" : mins <= 45 ? "blue" : "orange"} style={{ marginRight: 0 }}>
+                                                🕐 {mins} phút
+                                            </Tag>
+                                        </div>
+                                    );
+                                })}
+                            </Box>
+                        </>
+                    )}
+                    <Stack justify="space-between" style={{ marginTop: 12 }}>
+                        <Button onClick={_onBack} icon={<LeftOutlined />} style={{ borderRadius: 20 }}>
+                            Quay lại
+                        </Button>
+                        <Button
+                            type="primary"
+                            disabled={selectedDishIds.length === 0}
+                            icon={<ShoppingCartOutlined />}
+                            onClick={toggleShoppingListAdd.show}
+                            style={{ borderRadius: 20, paddingInline: 20 }}
+                        >
+                            Tạo giỏ hàng ({selectedDishIds.length})
+                        </Button>
+                    </Stack>
+                </>
+            )}
         </Modal>
 
-        {/* ShoppingList add pre-filled with selected dishes */}
         <Modal
             open={toggleShoppingListAdd.value}
             onCancel={toggleShoppingListAdd.hide}
@@ -221,7 +437,10 @@ export const DishSuggesterScreen: React.FC<DishSuggesterScreenProps> = ({ open, 
             <ShoppingListAddWidget
                 date={new Date()}
                 dishIds={selectedDishIds}
-                alreadyHaveIngredientIds={selectedIngredientIds}
+                alreadyHaveIngredientIds={
+                    mode === "ingredients" ? selectedIngredientIds :
+                    mode === "inventory" ? inventoryIngredientIds : []
+                }
                 onDone={() => {
                     toggleShoppingListAdd.hide();
                     _onClose();

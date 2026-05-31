@@ -1,58 +1,231 @@
-import { MinusOutlined, PlusOutlined } from "@ant-design/icons";
+import { BulbOutlined, DeleteOutlined, PlusOutlined, WarningOutlined } from "@ant-design/icons";
 import { Button } from "@components/Button";
+import { Box } from "@components/Layout/Box";
 import { Option, Select } from "@components/Form/Select";
 import { Stack } from "@components/Layout/Stack";
 import { Typography } from "@components/Typography";
-import { Ingredient, IngredientUnit, INGREDIENT_UNITS } from "@store/Models/Ingredient";
+import { InventoryHelper } from "@common/Helpers/InventoryHelper";
+import { Ingredient, IngredientUnit, INGREDIENT_UNITS, InventoryBatch } from "@store/Models/Ingredient";
 import { setInventory } from "@store/Reducers/InventoryReducer";
 import { selectInventoryById } from "@store/Selectors";
-import { InputNumber } from "antd";
+import { Alert, DatePicker, Divider, InputNumber } from "antd";
+import dayjs, { Dayjs } from "dayjs";
 import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { v4 as uuidv4 } from "uuid";
 
 type IngredientInventoryWidgetProps = {
     item: Ingredient;
     onDone?: () => void;
+    onSuggest?: (ingredientIds: string[]) => void;
 }
 
-export const IngredientInventoryWidget: React.FC<IngredientInventoryWidgetProps> = ({ item, onDone }) => {
+type BatchRow = {
+    id: string;
+    amount: number;
+    purchasedAt: Dayjs | null;
+}
+
+const emptyBatch = (): BatchRow => ({ id: uuidv4(), amount: 0, purchasedAt: null });
+
+export const IngredientInventoryWidget: React.FC<IngredientInventoryWidgetProps> = ({ item, onDone, onSuggest }) => {
     const dispatch = useDispatch();
     const inventory = useSelector(selectInventoryById(item.id));
-    const [amount, setAmount] = useState<number>(inventory?.amount ?? 0);
+
     const [unit, setUnit] = useState<IngredientUnit>(inventory?.unit ?? "g");
+    const [batches, setBatches] = useState<BatchRow[]>(() => {
+        if (!inventory || !inventory.batches || inventory.batches.length === 0) {
+            // Migrate old flat data: { amount, unit } → single batch
+            const legacyAmount = (inventory as any)?.amount;
+            return [{ ...emptyBatch(), amount: legacyAmount ?? 0 }];
+        }
+        return inventory.batches.map(b => ({
+            id: b.id,
+            amount: b.amount,
+            purchasedAt: b.purchasedAt ? dayjs(b.purchasedAt) : null,
+        }));
+    });
+
+    const _updateBatch = (id: string, patch: Partial<BatchRow>) => {
+        setBatches(prev => prev.map(b => b.id === id ? { ...b, ...patch } : b));
+    };
+
+    const _addBatch = () => setBatches(prev => [...prev, emptyBatch()]);
+
+    const _removeBatch = (id: string) => {
+        setBatches(prev => prev.length > 1 ? prev.filter(b => b.id !== id) : prev);
+    };
 
     const _onSave = () => {
         dispatch(setInventory({
             ingredientId: item.id,
-            inventory: { amount, unit, lastUpdated: new Date() }
+            inventory: {
+                unit,
+                lastUpdated: new Date(),
+                batches: batches
+                    .filter(b => b.amount > 0)
+                    .map(b => ({
+                        id: b.id,
+                        amount: b.amount,
+                        purchasedAt: b.purchasedAt ? b.purchasedAt.toISOString() : undefined,
+                    })),
+            }
         }));
         onDone?.();
     };
 
-    const _nudge = (delta: number) => {
-        setAmount(prev => Math.max(0, prev + delta));
-    };
+    const totalAmount = batches.reduce((s, b) => s + b.amount, 0);
+
+    // Find the most urgent batch for the warning banner
+    const nearestBatch = item.shelfLife ? (() => {
+        let best: { row: BatchRow; daysLeft: number } | null = null;
+        batches.forEach(row => {
+            if (row.amount <= 0 || !row.purchasedAt) return;
+            const days = InventoryHelper.daysUntilExpiry(row.purchasedAt.toISOString(), item.shelfLife);
+            if (days === null) return;
+            if (best === null || days < best.daysLeft) best = { row, daysLeft: days };
+        });
+        return best;
+    })() : null;
+
+    const nearestBadge = nearestBatch ? InventoryHelper.expiryBadge(nearestBatch.daysLeft) : null;
+    const isExpiringSoon = nearestBatch !== null && nearestBatch.daysLeft <= 1;
 
     return (
         <div>
-            <Typography.Text type="secondary" style={{ fontSize: 12, display: "block", marginBottom: 10 }}>
-                Cập nhật lượng tồn kho cho <Typography.Text strong>{item.name}</Typography.Text>
-            </Typography.Text>
-
-            <Stack gap={8} align="center" style={{ marginBottom: 16 }}>
-                <Button icon={<MinusOutlined />} onClick={() => _nudge(-1)} size="small" />
-                <InputNumber
-                    min={0}
-                    value={amount}
-                    onChange={v => setAmount(v ?? 0)}
-                    style={{ width: 90 }}
-                    size="middle"
-                />
-                <Button icon={<PlusOutlined />} onClick={() => _nudge(1)} size="small" />
-                <Select value={unit} onChange={v => setUnit(v)} style={{ width: 80 }} size="middle">
-                    {INGREDIENT_UNITS.map(u => <Option key={u} value={u}>{u}</Option>)}
-                </Select>
+            <Stack justify="space-between" align="center" style={{ marginBottom: 10 }}>
+                <Typography.Text type="secondary" style={{ fontSize: 12 }}>
+                    Tồn kho: <Typography.Text strong>{item.name}</Typography.Text>
+                </Typography.Text>
+                <Stack gap={6} align="center">
+                    <Typography.Text style={{ fontSize: 12, color: "#666" }}>Đơn vị:</Typography.Text>
+                    <Select value={unit} onChange={v => setUnit(v)} style={{ width: 80 }} size="small">
+                        {INGREDIENT_UNITS.map(u => <Option key={u} value={u}>{u}</Option>)}
+                    </Select>
+                </Stack>
             </Stack>
+
+            {/* Batch rows */}
+            {batches.map((batch, idx) => (
+                <Box
+                    key={batch.id}
+                    style={{
+                        padding: "10px 12px",
+                        marginBottom: 8,
+                        borderRadius: 8,
+                        background: "#fafafa",
+                        border: "1px solid #f0f0f0",
+                    }}
+                >
+                    <Stack justify="space-between" align="center" style={{ marginBottom: 8 }}>
+                        <Typography.Text style={{ fontSize: 12, color: "#888" }}>
+                            Lô #{idx + 1}
+                        </Typography.Text>
+                        {batches.length > 1 && (
+                            <Button
+                                size="small"
+                                danger
+                                type="text"
+                                icon={<DeleteOutlined />}
+                                onClick={() => _removeBatch(batch.id)}
+                            />
+                        )}
+                    </Stack>
+
+                    <Stack gap={8} align="center">
+                        <InputNumber
+                            min={0}
+                            value={batch.amount}
+                            onChange={v => _updateBatch(batch.id, { amount: v ?? 0 })}
+                            style={{ flex: 1 }}
+                            size="middle"
+                            addonAfter={unit}
+                        />
+                        {item.shelfLife && (
+                            <DatePicker
+                                value={batch.purchasedAt}
+                                onChange={v => _updateBatch(batch.id, { purchasedAt: v })}
+                                format="DD/MM/YYYY"
+                                placeholder="Ngày mua"
+                                style={{ flex: 1 }}
+                                allowClear
+                                disabledDate={d => d.isAfter(dayjs())}
+                            />
+                        )}
+                    </Stack>
+
+                    {/* Per-batch expiry hint */}
+                    {item.shelfLife && batch.purchasedAt && (() => {
+                        const days = InventoryHelper.daysUntilExpiry(batch.purchasedAt!.toISOString(), item.shelfLife);
+                        const bdg = InventoryHelper.expiryBadge(days);
+                        if (!bdg) return null;
+                        return (
+                            <Typography.Text style={{ fontSize: 11, color: bdg.color, marginTop: 4, display: "block" }}>
+                                ⏰ {bdg.label}
+                                {days !== null && days >= 0 && (
+                                    <span style={{ color: "#aaa", marginLeft: 6 }}>
+                                        (hết {InventoryHelper.estimatedExpiry(batch.purchasedAt!.toISOString(), item.shelfLife)?.format("DD/MM/YYYY")})
+                                    </span>
+                                )}
+                            </Typography.Text>
+                        );
+                    })()}
+                </Box>
+            ))}
+
+            <Button
+                type="dashed"
+                block
+                icon={<PlusOutlined />}
+                onClick={_addBatch}
+                style={{ marginBottom: 12 }}
+            >
+                Thêm lô hàng
+            </Button>
+
+            {/* Nearest-expiry warning banner */}
+            {nearestBadge && item.shelfLife && (
+                <Box style={{ marginBottom: 12 }}>
+                    <Alert
+                        type={isExpiringSoon ? "error" : nearestBatch!.daysLeft <= 3 ? "warning" : "success"}
+                        showIcon
+                        icon={isExpiringSoon ? <WarningOutlined /> : undefined}
+                        message={
+                            <Stack justify="space-between" align="center">
+                                <Typography.Text style={{ fontSize: 13 }}>
+                                    Lô gần hết hạn nhất:{" "}
+                                    <strong style={{ color: nearestBadge.color }}>{nearestBadge.label}</strong>
+                                </Typography.Text>
+                                {isExpiringSoon && onSuggest && totalAmount > 0 && (
+                                    <Button
+                                        size="small"
+                                        type="primary"
+                                        danger
+                                        icon={<BulbOutlined />}
+                                        onClick={() => onSuggest([item.id])}
+                                        style={{ flexShrink: 0 }}
+                                    >
+                                        Gợi ý món
+                                    </Button>
+                                )}
+                            </Stack>
+                        }
+                    />
+                </Box>
+            )}
+
+            <Divider style={{ margin: "8px 0" }} />
+            <Stack justify="space-between" align="center" style={{ marginBottom: 10 }}>
+                <Typography.Text type="secondary" style={{ fontSize: 12 }}>
+                    Tổng: <Typography.Text strong>{totalAmount} {unit}</Typography.Text>
+                    {batches.filter(b => b.amount > 0).length > 1 && (
+                        <Typography.Text type="secondary" style={{ fontSize: 11, marginLeft: 6 }}>
+                            ({batches.filter(b => b.amount > 0).length} lô)
+                        </Typography.Text>
+                    )}
+                </Typography.Text>
+            </Stack>
+
             <Button type="primary" fullwidth onClick={_onSave}>Lưu</Button>
         </div>
     );

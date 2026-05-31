@@ -11,6 +11,7 @@ import { Typography } from "@components/Typography";
 import { useToggle } from "@hooks";
 import { Dishes } from "@store/Models/Dishes";
 import { INGREDIENT_CATEGORIES } from "@store/Models/Ingredient";
+import { InventoryHelper } from "@common/Helpers/InventoryHelper";
 import { ShoppingList, ShoppingListIngredientAmount, ShoppingListIngredientGroup } from "@store/Models/ShoppingList";
 import { toggleDoneIngredientAmount, toggleDoneIngredientGroup } from "@store/Reducers/ShoppingListReducer";
 import { selectDishes, selectIngredients, selectInventory } from "@store/Selectors";
@@ -172,7 +173,7 @@ export const ShoppingListIngredientItem: React.FunctionComponent<ShoppingListIng
         const parsed = parseFloat(amt.amount);
         return sum + (isNaN(parsed) ? 0 : parsed);
     }, 0);
-    const inStock = inventory?.amount ?? 0;
+    const inStock = InventoryHelper.totalAmount(inventory);
     const needToBuy = Math.max(0, totalRequired - inStock);
     const unit = inventory?.unit ?? (props.item.amounts[0]?.unit ?? "");
 

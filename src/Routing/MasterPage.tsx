@@ -1,4 +1,4 @@
-import { CloudDownloadOutlined, CloudUploadOutlined, ExportOutlined, ImportOutlined, LockOutlined, MenuOutlined, UnlockOutlined, FireOutlined, SettingOutlined } from "@ant-design/icons";
+import { CloudDownloadOutlined, CloudUploadOutlined, ExportOutlined, HistoryOutlined, ImportOutlined, LockOutlined, MenuOutlined, UnlockOutlined, FireOutlined, SettingOutlined } from "@ant-design/icons";
 import { ObjectPropertyHelper } from "@common/Helpers/ObjectProperty";
 import { Button } from "@components/Button";
 import { TextArea, Input } from "@components/Form/Input";
@@ -18,6 +18,7 @@ import { useAdminMode, useTheme, useToggle, useOnlineStatus, useSharedPublish } 
 import { ScheduledMealToolkitWidget } from "@modules/ScheduledMeal/Screens/ScheduledMealToolkit.widget";
 import { DishSuggesterScreen } from "@modules/DishSuggester/Screens/DishSuggester.screen";
 import { CookingSessionWidget } from "@modules/Dishes/Screens/CookingSession.widget";
+import { CookingHistoryWidget } from "@modules/Dishes/Screens/CookingHistory.widget";
 import { GistBackupWidget } from "@components/GistBackupWidget";
 import { addDishes, resetDishes } from "@store/Reducers/DishesReducer";
 import { addIngredient, resetIngredient } from "@store/Reducers/IngredientReducer";
@@ -107,6 +108,7 @@ const SidebarDrawer = () => {
     const navigate = useNavigate();
     const dispatch = useDispatch();
     const message = useMessage();
+    const toggleHistory = useToggle();
 
     const showDrawer = () => {
         setOpen(true);
@@ -243,6 +245,16 @@ const SidebarDrawer = () => {
                     </Typography.Text>
                     <GistBackupWidget />
 
+                    {/* ── Cooking history ── */}
+                    <Divider orientation="left" style={{ fontSize: 12, color: "#888", marginTop: 20, marginBottom: 12 }}>Nấu ăn</Divider>
+                    <Button
+                        icon={<HistoryOutlined />}
+                        block
+                        onClick={() => { setOpen(false); toggleHistory.show(); }}
+                    >
+                        Lịch sử nấu ăn
+                    </Button>
+
                     {/* ── Account ── */}
                     <Divider orientation="left" style={{ fontSize: 12, color: "#888", marginTop: 20, marginBottom: 12 }}>Tài khoản</Divider>
                     <Flex vertical gap={4}>
@@ -293,6 +305,7 @@ const SidebarDrawer = () => {
                 </Flex>
             </Modal>
             <ScheduledMealToolkitWidget />
+            <CookingHistoryWidget open={toggleHistory.value} onClose={toggleHistory.hide} />
         </React.Fragment>
     );
 };
@@ -428,9 +441,6 @@ const BottomTabNavigator = () => {
             </Button>
             <Button type="text" style={{ ..._buttonStyles(), color: theme.token.colorPrimary }} icon={<Image src={SuggesterIcon} preview={false} width={28} style={{ marginLeft: 2 }} />} onClick={toggleSuggester.show}>
                 <Typography.Text style={{ fontSize: 16 }}>Nấu gì?</Typography.Text>
-            </Button>
-            <Button type="text" style={_buttonStyles()} icon={<Image src={MealsIcon} preview={false} width={28} style={{ marginLeft: 2 }} />} onClick={() => onNavigate(RootRoutes.AuthorizedRoutes.ScheduledMealRoutes.List())}>
-                <Typography.Text style={_textStyles(RootRoutes.AuthorizedRoutes.ScheduledMealRoutes.List())}>Thực đơn</Typography.Text>
             </Button>
         </Stack>
         <DishSuggesterScreen open={toggleSuggester.value} onClose={toggleSuggester.hide} />

@@ -58,8 +58,11 @@ export const CookingSessionSlice = createSlice({
             const s = state.sessions.find(s => s.id === action.payload.sessionId);
             if (s) s.currentStepIndex = action.payload.stepIndex;
         },
+        clearFinished: (state) => {
+            state.sessions = state.sessions.filter(s => s.status === "cooking");
+        },
     }
 });
 
-export const { start: startCooking, finish: finishCooking, cancel: cancelCooking, setStep: setStepCooking } = CookingSessionSlice.actions;
+export const { start: startCooking, finish: finishCooking, cancel: cancelCooking, setStep: setStepCooking, clearFinished: clearCookingHistory } = CookingSessionSlice.actions;
 export default CookingSessionSlice.reducer;

@@ -6,6 +6,7 @@ import { Typography } from "@components/Typography";
 import { useToggle } from "@hooks";
 import { Dishes, DishesIngredientAmount } from "@store/Models/Dishes";
 import { Ingredient } from "@store/Models/Ingredient";
+import { InventoryHelper } from "@common/Helpers/InventoryHelper";
 import { startCooking, setStepCooking } from "@store/Reducers/CookingSessionReducer";
 import { selectDishes, selectIngredients, selectInventory, selectCookingSessions } from "@store/Selectors";
 import { Progress, Space } from "antd";
@@ -87,7 +88,7 @@ export const CookingSessionWidget: React.FunctionComponent<CookingSessionWidgetP
             const ingredient = allIngredients.find(i => i.id === ingredientId);
             if (!ingredient) return null;
             const inv = inventoryItems[ingredientId];
-            const inStock = inv?.amount ?? 0;
+            const inStock = InventoryHelper.totalAmount(inv);
             const lacking = Math.max(0, total - inStock);
             return { ingredient, required: total, unit: inv?.unit ?? unit, inStock, lacking, sufficient: inStock >= total } as CookingIngredientRow;
         }).filter(Boolean) as CookingIngredientRow[];
