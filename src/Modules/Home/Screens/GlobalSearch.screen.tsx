@@ -291,7 +291,7 @@ export const GlobalSearchScreen: React.FC<GlobalSearchScreenProps> = ({ open, on
                             return (
                                 <div
                                     key={ing.id}
-                                    onClick={() => _navigate(RootRoutes.AuthorizedRoutes.IngredientRoutes.List())}
+                                    onClick={() => _navigate(RootRoutes.AuthorizedRoutes.IngredientRoutes.Detail(ing.id))}
                                     style={{
                                         padding: '10px 16px',
                                         borderBottom: i < list.length - 1 ? '1px solid #f5f5f5' : 'none',
@@ -335,7 +335,7 @@ export const GlobalSearchScreen: React.FC<GlobalSearchScreenProps> = ({ open, on
                             return (
                                 <div
                                     key={r.list.id}
-                                    onClick={() => _navigate(RootRoutes.AuthorizedRoutes.ShoppingListRoutes.List())}
+                                    onClick={() => _navigate(RootRoutes.AuthorizedRoutes.ShoppingListRoutes.Detail(r.list.id))}
                                     style={{
                                         padding: '10px 16px',
                                         borderBottom: i < list.length - 1 ? '1px solid #f5f5f5' : 'none',

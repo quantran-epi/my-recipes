@@ -21,6 +21,7 @@ import { orderBy } from "lodash";
 import moment from "moment";
 import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
 import { ScheduledMealAddWidget } from "./ScheduledMealAdd.widget";
 import { ScheduledMealEditWidget } from "./ScheduledMealEdit.widget";
 import MorningIcon from "../../../../assets/icons/sunrise.png";
@@ -33,6 +34,7 @@ import { ShoppingListMealDetailWidget } from "@modules/ShoppingList/Screens/Shop
 import { ShoppingListAddWidget } from "@modules/ShoppingList/Screens/ShoppingListAdd.widget";
 import { Checkbox } from "@components/Form/Checkbox";
 import { CheckboxChangeEvent } from "antd/es/checkbox";
+import { RootRoutes } from "@routing/RootRoutes";
 
 // ─── Main screen ─────────────────────────────────────────────────────────────
 export const ScheduledMealListScreen = () => {
@@ -44,6 +46,7 @@ export const ScheduledMealListScreen = () => {
 
     const scheduledMeals = useSelector((state: RootState) => state.personal.scheduledMeal.scheduledMeals);
     const dispatch = useDispatch();
+    const navigate = useNavigate();
     const { } = useScreenTitle({ value: "Thực đơn", deps: [] });
     const toggleAddModal = useToggle({ defaultValue: false });
 
@@ -196,6 +199,7 @@ export const ScheduledMealListScreen = () => {
                         date={selectedRange ? selectedRange[0].toDate() : new Date()}
                         scheduledMealIds={shoppingRangeMealIds}
                         onDone={() => setShoppingRangeOpen(false)}
+                        onCreated={(shoppingList) => navigate(RootRoutes.AuthorizedRoutes.ShoppingListRoutes.Detail(shoppingList.id))}
                     />
                 )}
             </Modal>

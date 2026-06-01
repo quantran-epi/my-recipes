@@ -12,9 +12,24 @@ const SHELF_LIFE_DAYS: Record<IngredientShelfLife, number> = {
 };
 
 export const InventoryHelper = {
+    isAlwaysAvailable(ingredient?: Ingredient): boolean {
+        return ingredient?.alwaysAvailable === true;
+    },
+
     /** Total amount across all batches */
     totalAmount(inv: IngredientInventory | undefined, ingredient?: Ingredient): number {
         return IngredientUnitHelper.totalInventoryAmount(inv, ingredient);
+    },
+
+    /** Amount available for coverage checks. Always-available ingredients satisfy their required amount. */
+    availableAmount(inv: IngredientInventory | undefined, ingredient: Ingredient | undefined, requiredAmount: number): number {
+        if (InventoryHelper.isAlwaysAvailable(ingredient)) return requiredAmount;
+        return InventoryHelper.totalAmount(inv, ingredient);
+    },
+
+    isCovered(inv: IngredientInventory | undefined, ingredient: Ingredient | undefined, requiredAmount: number): boolean {
+        if (InventoryHelper.isAlwaysAvailable(ingredient)) return true;
+        return InventoryHelper.totalAmount(inv, ingredient) >= requiredAmount;
     },
 
     /** Returns estimated expiry as a dayjs for a single batch, or null if missing data */

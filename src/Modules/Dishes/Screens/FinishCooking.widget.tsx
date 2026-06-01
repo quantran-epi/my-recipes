@@ -5,6 +5,7 @@ import { Tag } from "@components/Tag";
 import { Typography } from "@components/Typography";
 import { CookingSession } from "@store/Models/CookingSession";
 import { Dishes } from "@store/Models/Dishes";
+import { InventoryHelper } from "@common/Helpers/InventoryHelper";
 import { IngredientUnitHelper } from "@common/Helpers/IngredientUnitHelper";
 import { cancelCooking, finishCooking } from "@store/Reducers/CookingSessionReducer";
 import { deductInventory } from "@store/Reducers/InventoryReducer";
@@ -55,7 +56,7 @@ export const FinishCookingWidget: React.FunctionComponent<FinishCookingWidgetPro
             grouped[amt.ingredientId].total += val;
         });
         return Object.entries(grouped)
-            .filter(([id]) => inventoryItems[id] != null)
+            .filter(([id]) => inventoryItems[id] != null && !InventoryHelper.isAlwaysAvailable(allIngredients.find(i => i.id === id)))
             .map(([id, { total, unit, name }]) => ({ id, total, unit, name }));
     }, [dish, allDishes, allIngredients, inventoryItems]);
 

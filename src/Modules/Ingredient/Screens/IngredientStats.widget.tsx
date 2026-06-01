@@ -53,9 +53,10 @@ export const IngredientStatsWidget: React.FC<IngredientStatsWidgetProps> = ({ op
             .forEach(sl => {
                 sl.ingredients.forEach(group => {
                     if (!group.isDone) return; // only count checked-off groups
+                    const ingredient = ingredients.find(i => i.id === group.ingredientId);
+                    if (ingredient?.alwaysAvailable) return;
                     const existing = boughtMap[group.ingredientId];
                     const amounts = group.amounts;
-                    const ingredient = ingredients.find(i => i.id === group.ingredientId);
                     const unit = IngredientUnitHelper.getBaseUnit(ingredient, amounts.map(a => a.unit));
                     const totalAmt = amounts.reduce((sum, a) => {
                         const converted = IngredientUnitHelper.toBaseAmount(ingredient, a.amount, a.unit, unit);

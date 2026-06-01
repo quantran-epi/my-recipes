@@ -151,7 +151,7 @@ export const ShoppingListSlice = createSlice({
                             }, 0);
                             const inStockBaseAmount = action.payload.alreadyHaveIngredientIds?.includes(key)
                                 ? requiredBaseAmount
-                                : InventoryHelper.totalAmount(action.payload.inventory?.[key], ingredient);
+                                : InventoryHelper.availableAmount(action.payload.inventory?.[key], ingredient, requiredBaseAmount);
                             const isCovered = action.payload.autoMarkCoveredByInventory === true && inStockBaseAmount >= requiredBaseAmount;
 
                             return {

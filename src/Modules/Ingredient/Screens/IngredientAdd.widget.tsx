@@ -1,12 +1,13 @@
 import { ObjectPropertyHelper } from "@common/Helpers/ObjectProperty"
 import { Button } from "@components/Button"
+import { Checkbox } from "@components/Form/Checkbox"
 import { Input } from "@components/Form/Input"
 import { Option, Select } from "@components/Form/Select"
 import { Stack } from "@components/Layout/Stack"
 import { useMessage } from "@components/Message"
 import { SmartForm, useSmartForm } from "@components/SmartForm"
 import { nanoid } from "@reduxjs/toolkit"
-import { INGREDIENT_CATEGORIES, INGREDIENT_SHELF_LIFE_OPTIONS, Ingredient, IngredientUnit } from "@store/Models/Ingredient"
+import { INGREDIENT_CATEGORIES, INGREDIENT_PRESERVATION_OPTIONS, INGREDIENT_SHELF_LIFE_OPTIONS, Ingredient, IngredientUnit } from "@store/Models/Ingredient"
 import { addIngredient } from "@store/Reducers/IngredientReducer"
 import { IngredientUnitHelper } from "@common/Helpers/IngredientUnitHelper"
 import { IngredientUnitRulesEditor } from "./IngredientUnitRulesEditor"
@@ -31,6 +32,8 @@ export const IngredientAddWidget = () => {
             name: "",
             category: "",
             shelfLife: undefined,
+            preservationCondition: undefined,
+            alwaysAvailable: false,
             baseUnit,
             inventoryUnits,
             recipeUnitConversions: conversionValues,
@@ -50,6 +53,8 @@ export const IngredientAddWidget = () => {
             name: { label: "Tên nguyên liệu", name: ObjectPropertyHelper.nameof(defaultValues, e => e.name) },
             category: { label: "Nhóm", name: ObjectPropertyHelper.nameof(defaultValues, e => e.category) },
             shelfLife: { label: "Thời hạn bảo quản", name: ObjectPropertyHelper.nameof(defaultValues, e => e.shelfLife) },
+            preservationCondition: { label: "Điều kiện bảo quản", name: ObjectPropertyHelper.nameof(defaultValues, e => e.preservationCondition) },
+            alwaysAvailable: { name: ObjectPropertyHelper.nameof(defaultValues, e => e.alwaysAvailable), valuePropName: "checked" },
             baseUnit: { name: ObjectPropertyHelper.nameof(defaultValues, e => e.baseUnit), noMarkup: true },
             inventoryUnits: { name: ObjectPropertyHelper.nameof(defaultValues, e => e.inventoryUnits), noMarkup: true },
             recipeUnitConversions: { name: ObjectPropertyHelper.nameof(defaultValues, e => e.recipeUnitConversions), noMarkup: true },
@@ -105,6 +110,16 @@ export const IngredientAddWidget = () => {
                     </Option>
                 ))}
             </Select>
+        </SmartForm.Item>
+        <SmartForm.Item {...addIngredientForm.itemDefinitions.preservationCondition}>
+            <Select allowClear placeholder="Chọn điều kiện bảo quản" style={{ width: '100%' }}>
+                {INGREDIENT_PRESERVATION_OPTIONS.map(opt => (
+                    <Option key={opt.value} value={opt.value}>{opt.label} — {opt.description}</Option>
+                ))}
+            </Select>
+        </SmartForm.Item>
+        <SmartForm.Item {...addIngredientForm.itemDefinitions.alwaysAvailable}>
+            <Checkbox>Luôn có sẵn, không cần quản lý tồn kho</Checkbox>
         </SmartForm.Item>
         <IngredientUnitRulesEditor
             baseUnit={baseUnit}

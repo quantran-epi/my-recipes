@@ -13,12 +13,14 @@ import { selectDishes, selectIngredients, selectInventory, selectCookingSessions
 import { Progress, Space } from "antd";
 import React, { useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
 import { ShoppingListAddWidget } from "@modules/ShoppingList/Screens/ShoppingListAdd.widget";
 import { Modal } from "@components/Modal";
 import ShoppingListIcon from "../../../../assets/icons/shoppingList.png";
 import StepsIcon from "../../../../assets/icons/process.png";
 import { Image } from "@components/Image";
 import { FinishCookingWidget } from "./FinishCooking.widget";
+import { RootRoutes } from "@routing/RootRoutes";
 
 type CookingIngredientRow = {
     ingredient: Ingredient;
@@ -65,6 +67,7 @@ type CookingSessionWidgetProps = {
 
 export const CookingSessionWidget: React.FunctionComponent<CookingSessionWidgetProps> = ({ dish, onDone }) => {
     const dispatch = useDispatch();
+    const navigate = useNavigate();
     const allDishes = useSelector(selectDishes);
     const allIngredients = useSelector(selectIngredients);
     const inventoryItems = useSelector(selectInventory);
@@ -90,7 +93,7 @@ export const CookingSessionWidget: React.FunctionComponent<CookingSessionWidgetP
             const ingredient = allIngredients.find(i => i.id === ingredientId);
             if (!ingredient) return null;
             const inv = inventoryItems[ingredientId];
-            const inStock = InventoryHelper.totalAmount(inv, ingredient);
+            const inStock = InventoryHelper.availableAmount(inv, ingredient, total);
             const lacking = Math.max(0, total - inStock);
             return { ingredient, required: total, unit, inStock, lacking, sufficient: inStock >= total } as CookingIngredientRow;
         }).filter(Boolean) as CookingIngredientRow[];
@@ -218,7 +221,9 @@ export const CookingSessionWidget: React.FunctionComponent<CookingSessionWidgetP
                         <Typography.Text type="secondary" style={{ fontSize: 12 }}>
                             Cần {row.required}{row.unit}
                         </Typography.Text>
-                        {row.sufficient ? (
+                        {row.ingredient.alwaysAvailable ? (
+                            <Tag color="green" style={{ marginInlineEnd: 0 }}>Luôn có</Tag>
+                        ) : row.sufficient ? (
                             <Tag color="green" style={{ marginInlineEnd: 0 }}>Đủ ({row.inStock}{row.unit})</Tag>
                         ) : (
                             <Tag color="red" style={{ marginInlineEnd: 0 }}>Thiếu {row.lacking}{row.unit}</Tag>
@@ -281,6 +286,7 @@ export const CookingSessionWidget: React.FunctionComponent<CookingSessionWidgetP
                 date={new Date()}
                 dishIds={[dish.id]}
                 onDone={() => { toggleShoppingList.hide(); onDone(); }}
+                onCreated={(shoppingList) => navigate(RootRoutes.AuthorizedRoutes.ShoppingListRoutes.Detail(shoppingList.id))}
             />
         </Modal>
     </React.Fragment>;

@@ -175,7 +175,8 @@ export const ShoppingListIngredientItem: React.FunctionComponent<ShoppingListIng
         const converted = IngredientUnitHelper.toBaseAmount(ingredient, amt.amount, amt.unit, unit);
         return sum + (converted ?? IngredientUnitHelper.parseAmount(amt.amount));
     }, 0);
-    const inStock = InventoryHelper.totalAmount(inventory, ingredient);
+    const isAlwaysAvailable = InventoryHelper.isAlwaysAvailable(ingredient);
+    const inStock = InventoryHelper.availableAmount(inventory, ingredient, totalRequired);
 
     // Realtime inventory only affects status badges. Done state stays persisted/manual.
     const inventoryCovered = inStock >= totalRequired && totalRequired > 0;
@@ -224,7 +225,11 @@ export const ShoppingListIngredientItem: React.FunctionComponent<ShoppingListIng
                         {_getIngredientNameById(props.item.ingredientId)}
                     </Typography.Text>
                     <Space size={4}>
-                        {inStock > 0 && (
+                        {isAlwaysAvailable ? (
+                            <Tag color="green" style={{ fontSize: 11, marginInlineEnd: 0 }}>
+                                Luôn có
+                            </Tag>
+                        ) : inStock > 0 && (
                             <Tag color="green" style={{ fontSize: 11, marginInlineEnd: 0 }}>
                                 Còn {inStock}{unit}
                             </Tag>
@@ -234,7 +239,7 @@ export const ShoppingListIngredientItem: React.FunctionComponent<ShoppingListIng
                                 Mua {needToBuy}{unit}
                             </Tag>
                         )}
-                        {inventoryCovered && !props.item.isDone && (
+                        {inventoryCovered && !props.item.isDone && !isAlwaysAvailable && (
                             <Tag color="green" style={{ fontSize: 11, marginInlineEnd: 0 }}>
                                 Đủ hàng
                             </Tag>

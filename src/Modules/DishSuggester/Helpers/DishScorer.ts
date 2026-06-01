@@ -8,6 +8,14 @@ export type ScoredDish = {
     score: number; // 0..1
     matchedIngredientIds: string[];
     missingIngredientIds: string[];
+    stockedIngredientIds?: string[];
+    partialIngredientIds?: string[];
+    urgentIngredients?: ScoredDishUrgentIngredient[];
+}
+
+export type ScoredDishUrgentIngredient = {
+    ingredientId: string;
+    daysLeft: number;
 }
 
 export type ScoredDishGroup = {
@@ -39,6 +47,29 @@ const collectAllIngredientAmounts = (dish: Dishes, allDishes: Dishes[], visited 
         return d ? collectAllIngredientAmounts(d, allDishes, visited) : [];
     });
     return [...own, ...fromIncluded];
+};
+
+const URGENT_DAYS_THRESHOLD = 3;
+
+const getNearestUrgentDays = (scored: ScoredDish): number => {
+    const days = scored.urgentIngredients?.map(item => item.daysLeft) ?? [];
+    return days.length > 0 ? Math.min(...days) : Number.POSITIVE_INFINITY;
+};
+
+const compareInventoryPriority = (a: ScoredDish, b: ScoredDish): number => {
+    const aUrgentCount = a.urgentIngredients?.length ?? 0;
+    const bUrgentCount = b.urgentIngredients?.length ?? 0;
+    const aHasUrgent = aUrgentCount > 0;
+    const bHasUrgent = bUrgentCount > 0;
+
+    if (aHasUrgent !== bHasUrgent) return aHasUrgent ? -1 : 1;
+    if (aHasUrgent && bHasUrgent) {
+        const daysDiff = getNearestUrgentDays(a) - getNearestUrgentDays(b);
+        if (daysDiff !== 0) return daysDiff;
+        if (aUrgentCount !== bUrgentCount) return bUrgentCount - aUrgentCount;
+    }
+    if (b.score !== a.score) return b.score - a.score;
+    return a.missingIngredientIds.length - b.missingIngredientIds.length;
 };
 
 export const DishScorer = {
@@ -87,22 +118,32 @@ export const DishScorer = {
                 const requiredIds = Object.keys(grouped);
                 if (requiredIds.length === 0) return null;
 
-                const matched = requiredIds.filter(id => InventoryHelper.totalAmount(inventory[id], grouped[id].ingredient) >= grouped[id].required);
+                const stocked = requiredIds.filter(id => InventoryHelper.totalAmount(inventory[id], grouped[id].ingredient) > 0);
+                const matched = requiredIds.filter(id => InventoryHelper.isCovered(inventory[id], grouped[id].ingredient, grouped[id].required));
                 const missing = requiredIds.filter(id => !matched.includes(id));
+                const partial = stocked.filter(id => !matched.includes(id));
                 const score = matched.length / requiredIds.length;
+                const urgentIngredients = requiredIds
+                    .map(id => {
+                        const urgent = InventoryHelper.nearestExpiryBatch(inventory[id], grouped[id].ingredient?.shelfLife);
+                        return urgent && urgent.daysLeft <= URGENT_DAYS_THRESHOLD
+                            ? { ingredientId: id, daysLeft: urgent.daysLeft }
+                            : null;
+                    })
+                    .filter((item): item is ScoredDishUrgentIngredient => item !== null);
 
                 return {
                     dish,
                     score,
                     matchedIngredientIds: matched,
                     missingIngredientIds: missing,
+                    stockedIngredientIds: stocked,
+                    partialIngredientIds: partial,
+                    urgentIngredients,
                 } as ScoredDish;
             })
-            .filter((s): s is ScoredDish => s !== null && s.score > 0)
-            .sort((a, b) => {
-                if (b.score !== a.score) return b.score - a.score;
-                return a.missingIngredientIds.length - b.missingIngredientIds.length;
-            });
+            .filter((s): s is ScoredDish => s !== null && (s.stockedIngredientIds?.length ?? 0) > 0)
+            .sort(compareInventoryPriority);
     },
 
     group(scored: ScoredDish[]): ScoredDishGroup[] {

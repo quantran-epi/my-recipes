@@ -12,7 +12,7 @@ import { Typography } from "@components/Typography";
 import { useScreenTitle, useToggle, useAdminMode } from "@hooks";
 import { InventoryHelper } from "@common/Helpers/InventoryHelper";
 import { IngredientUnitHelper } from "@common/Helpers/IngredientUnitHelper";
-import { Ingredient, INGREDIENT_SHELF_LIFE_OPTIONS } from "@store/Models/Ingredient";
+import { Ingredient, INGREDIENT_PRESERVATION_OPTIONS, INGREDIENT_SHELF_LIFE_OPTIONS } from "@store/Models/Ingredient";
 import { removeIngredient } from "@store/Reducers/IngredientReducer";
 import { selectIngredients, selectInventoryById } from "@store/Selectors";
 import { RootState } from "@store/Store";
@@ -121,8 +121,9 @@ export const IngredientItem: React.FunctionComponent<IngredientItemProps> = (pro
     const inv = useSelector(selectInventoryById(props.item.id));
     const totalAmt = InventoryHelper.totalAmount(inv, props.item);
     const inventoryUnit = IngredientUnitHelper.getBaseUnit(props.item);
-    const invLabel = inv ? `${IngredientUnitHelper.formatAmount(totalAmt)} ${inventoryUnit}` : null;
-    const invColor = !inv ? "#aaa" : totalAmt <= 0 ? "#ff4d4f" : totalAmt <= 2 ? "#faad14" : "#52c41a";
+    const preservation = INGREDIENT_PRESERVATION_OPTIONS.find(o => o.value === props.item.preservationCondition);
+    const invLabel = props.item.alwaysAvailable ? "Luôn có" : inv ? `${IngredientUnitHelper.formatAmount(totalAmt)} ${inventoryUnit}` : null;
+    const invColor = props.item.alwaysAvailable ? "#52c41a" : !inv ? "#aaa" : totalAmt <= 0 ? "#ff4d4f" : totalAmt <= 2 ? "#faad14" : "#52c41a";
 
     return <React.Fragment>
         <div style={{ display: 'flex', alignItems: 'center', padding: '8px 0', borderBottom: '1px solid rgba(5,5,5,0.06)', gap: 10 }}>
@@ -145,11 +146,14 @@ export const IngredientItem: React.FunctionComponent<IngredientItemProps> = (pro
                             </Tooltip>
                         ) : null;
                     })()}
+                    {preservation && (
+                        <Typography.Text type="secondary" style={{ fontSize: 11 }}>{preservation.label}</Typography.Text>
+                    )}
                 </Stack>
             </div>
 
             {/* Inventory badge */}
-            <Tooltip title={inv ? `Tồn kho: ${totalAmt} ${inv.unit}` : "Chưa cập nhật tồn kho"}>
+            <Tooltip title={props.item.alwaysAvailable ? "Luôn có sẵn, không cần quản lý tồn kho" : inv ? `Tồn kho: ${totalAmt} ${inv.unit}` : "Chưa cập nhật tồn kho"}>
                 <div
                     onClick={toggleInventory.show}
                     style={{

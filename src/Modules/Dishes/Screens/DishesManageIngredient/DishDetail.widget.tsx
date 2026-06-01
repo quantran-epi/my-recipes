@@ -12,6 +12,7 @@ import { RootState } from "@store/Store"
 import { Typography } from "antd"
 import React, { useEffect, useMemo, useState } from "react"
 import { useDispatch, useSelector } from "react-redux"
+import { useNavigate } from "react-router-dom"
 import NoodlesIcon from "../../../../../assets/icons/noodles.png"
 import DietIcon from "../../../../../assets/icons/diet.png"
 import VegetableIcon from "../../../../../assets/icons/vegetable.png"
@@ -22,6 +23,7 @@ import { DishStepListWidget } from "./DishStepList.widget"
 import { CookingSessionWidget } from "../CookingSession.widget"
 import { ShoppingListAddWidget } from "@modules/ShoppingList/Screens/ShoppingListAdd.widget"
 import { FireOutlined, ShoppingCartOutlined } from "@ant-design/icons"
+import { RootRoutes } from "@routing/RootRoutes"
 
 type DishDetailWidgetProps = {
     dish: Dishes;
@@ -29,6 +31,7 @@ type DishDetailWidgetProps = {
 
 export const DishesDetailWidget: React.FunctionComponent<DishDetailWidgetProps> = (props) => {
     const dishes = useSelector((state: RootState) => state.shared.dishes.dishes);
+    const navigate = useNavigate();
     const toggleDishesDetail = useToggle();
     const toggleCooking = useToggle();
     const toggleShoppingList = useToggle();
@@ -147,6 +150,7 @@ export const DishesDetailWidget: React.FunctionComponent<DishDetailWidgetProps> 
                 date={null}
                 dishIds={[props.dish.id]}
                 onDone={toggleShoppingList.hide}
+                onCreated={(shoppingList) => navigate(RootRoutes.AuthorizedRoutes.ShoppingListRoutes.Detail(shoppingList.id))}
             />
         </Modal>
     </React.Fragment>

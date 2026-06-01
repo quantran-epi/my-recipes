@@ -4,6 +4,7 @@ export const INGREDIENT_UNITS: Array<IngredientUnit> = ["g", "kg", "lít", "ml",
 export const INGREDIENT_CATEGORIES = ["Thịt", "Hải sản", "Rau củ", "Gia vị", "Nước chấm", "Tinh bột", "Đồ hộp", "Sữa & trứng", "Khác"];
 
 export type IngredientShelfLife = "very_short" | "short" | "medium" | "long" | "very_long";
+export type IngredientPreservationCondition = "room_temperature" | "cool_dry" | "fridge" | "freezer";
 
 export const INGREDIENT_SHELF_LIFE_OPTIONS: { value: IngredientShelfLife; label: string; description: string; color: string; emoji: string }[] = [
     { value: "very_short", label: "Rất ngắn",  description: "1–3 ngày (rau thơm, hải sản tươi)",        color: "#ff4d4f", emoji: "🔴" },
@@ -11,6 +12,13 @@ export const INGREDIENT_SHELF_LIFE_OPTIONS: { value: IngredientShelfLife; label:
     { value: "medium",     label: "Trung bình", description: "1–2 tuần (trứng, rau củ quả)",             color: "#faad14", emoji: "🟡" },
     { value: "long",       label: "Dài",        description: "2–4 tuần (củ quả khô, bơ, phô mai)",      color: "#52c41a", emoji: "🟢" },
     { value: "very_long",  label: "Rất dài",    description: "Vài tháng trở lên (đồ hộp, gia vị khô)", color: "#1677ff", emoji: "🔵" },
+];
+
+export const INGREDIENT_PRESERVATION_OPTIONS: { value: IngredientPreservationCondition; label: string; description: string }[] = [
+    { value: "room_temperature", label: "Nhiệt độ phòng", description: "Có thể để ngoài ở nhiệt độ phòng" },
+    { value: "cool_dry", label: "Khô mát", description: "Bảo quản nơi khô, mát, tránh nắng" },
+    { value: "fridge", label: "Tủ lạnh", description: "Bảo quản ngăn mát tủ lạnh" },
+    { value: "freezer", label: "Tủ đông", description: "Bảo quản đông lạnh" },
 ];
 
 export type IngredientInventory = {
@@ -32,6 +40,8 @@ export type Ingredient = {
     name: string;
     category?: string;
     shelfLife?: IngredientShelfLife;
+    preservationCondition?: IngredientPreservationCondition;
+    alwaysAvailable?: boolean;
     baseUnit?: IngredientUnit;
     inventoryUnits?: IngredientUnit[];
     recipeUnitConversions?: Partial<Record<IngredientUnit, number>>;

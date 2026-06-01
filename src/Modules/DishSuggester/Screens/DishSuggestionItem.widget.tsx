@@ -1,7 +1,6 @@
-import { CheckOutlined, MinusOutlined, PlusOutlined } from "@ant-design/icons";
+import { CheckOutlined, FireOutlined, MinusOutlined, PlusOutlined } from "@ant-design/icons";
 import { Avatar } from "@components/Avatar";
 import { Box } from "@components/Layout/Box";
-import { Space } from "@components/Layout/Space";
 import { Stack } from "@components/Layout/Stack";
 import { Tag } from "@components/Tag";
 import { Typography } from "@components/Typography";
@@ -26,6 +25,20 @@ export const DishSuggestionItem: React.FC<DishSuggestionItemProps> = ({ scored, 
 
     const pct = Math.round(scored.score * 100);
     const scoreColor = pct >= 100 ? "#52c41a" : pct >= 50 ? "#faad14" : "#fa8c16";
+    const partialIngredients = scored.partialIngredientIds ?? [];
+    const urgentIngredients = scored.urgentIngredients ?? [];
+    const nearestUrgentDays = urgentIngredients.length > 0
+        ? Math.min(...urgentIngredients.map(item => item.daysLeft))
+        : null;
+    const urgentColor = nearestUrgentDays !== null && nearestUrgentDays <= 1 ? "volcano" : "orange";
+
+    const _urgentFor = (ingredientId: string) => urgentIngredients.find(item => item.ingredientId === ingredientId);
+    const _urgentDaysLabel = (daysLeft: number) => {
+        if (daysLeft < 0) return "quá hạn";
+        if (daysLeft === 0) return "hôm nay";
+        return `${daysLeft} ngày`;
+    };
+    const _isPartial = (ingredientId: string) => partialIngredients.includes(ingredientId);
 
     return (
         <div
@@ -41,7 +54,7 @@ export const DishSuggestionItem: React.FC<DishSuggestionItemProps> = ({ scored, 
             {/* Main row — tap to select */}
             <div
                 onClick={() => onToggle(scored.dish.id)}
-                style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 12px", cursor: "pointer" }}
+                style={{ display: "flex", alignItems: "flex-start", gap: 10, padding: "12px", cursor: "pointer" }}
             >
                 {/* Select indicator */}
                 <div style={{
@@ -50,6 +63,7 @@ export const DishSuggestionItem: React.FC<DishSuggestionItemProps> = ({ scored, 
                     background: selected ? "#52c41a" : "transparent",
                     display: "flex", alignItems: "center", justifyContent: "center",
                     transition: "all 0.15s",
+                    marginTop: 10,
                 }}>
                     {selected && <CheckOutlined style={{ color: "#fff", fontSize: 11 }} />}
                 </div>
@@ -60,13 +74,13 @@ export const DishSuggestionItem: React.FC<DishSuggestionItemProps> = ({ scored, 
                     icon={!scored.dish.image ? <Image src={NoodlesIcon} preview={false} width={26} /> : undefined}
                     size={42}
                     shape="square"
-                    style={{ borderRadius: 6, flexShrink: 0 }}
+                    style={{ borderRadius: 6, flexShrink: 0, marginTop: 1 }}
                 />
 
                 {/* Info */}
-                <Box style={{ flex: 1, minWidth: 0, overflow: "hidden" }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 2, minWidth: 0 }}>
-                        <Typography.Text strong style={{ fontSize: 14, flex: 1, minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", display: "block" }}>
+                <Box style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column", gap: 4 }}>
+                    <div style={{ display: "grid", gridTemplateColumns: "minmax(0, 1fr) auto", alignItems: "start", gap: 8, minWidth: 0 }}>
+                        <Typography.Text strong style={{ fontSize: 14, lineHeight: "18px", minWidth: 0, overflowWrap: "anywhere" }}>
                             {scored.dish.name}
                         </Typography.Text>
                         {/* Score pill */}
@@ -78,6 +92,20 @@ export const DishSuggestionItem: React.FC<DishSuggestionItemProps> = ({ scored, 
                         </div>
                     </div>
 
+                    {urgentIngredients.length > 0 && (
+                        <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
+                            <Tag
+                                color={urgentColor}
+                                icon={<FireOutlined />}
+                                style={{ fontSize: 10, lineHeight: "18px", marginRight: 0, maxWidth: "100%", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}
+                            >
+                                {urgentIngredients.length === 1
+                                    ? `Dùng sớm: ${_name(urgentIngredients[0].ingredientId)}`
+                                    : `Dùng sớm ${urgentIngredients.length} nguyên liệu`}
+                            </Tag>
+                        </div>
+                    )}
+
                     {/* Tags row */}
                     {scored.dish.tags?.length > 0 && (
                         <Stack wrap="wrap" gap={3}>
@@ -88,22 +116,32 @@ export const DishSuggestionItem: React.FC<DishSuggestionItemProps> = ({ scored, 
                     )}
 
                     {/* Ingredient mini summary */}
-                    <Stack gap={6} style={{ marginTop: 4 }}>
-                        <Typography.Text style={{ fontSize: 11, color: "#52c41a" }}>
+                    <div style={{ display: "flex", flexWrap: "wrap", gap: "4px 8px", marginTop: 1 }}>
+                        <Typography.Text style={{ fontSize: 11, color: "#52c41a", whiteSpace: "nowrap" }}>
                             ✓ {scored.matchedIngredientIds.length} có sẵn
                         </Typography.Text>
                         {scored.missingIngredientIds.length > 0 && (
-                            <Typography.Text style={{ fontSize: 11, color: "#ff4d4f" }}>
+                            <Typography.Text style={{ fontSize: 11, color: "#ff4d4f", whiteSpace: "nowrap" }}>
                                 ✗ {scored.missingIngredientIds.length} còn thiếu
                             </Typography.Text>
                         )}
-                    </Stack>
+                        {partialIngredients.length > 0 && (
+                            <Typography.Text style={{ fontSize: 11, color: "#d46b08", whiteSpace: "nowrap" }}>
+                                ◐ {partialIngredients.length} còn một phần
+                            </Typography.Text>
+                        )}
+                        {urgentIngredients.length > 0 && (
+                            <Typography.Text style={{ fontSize: 11, color: "#d46b08", whiteSpace: "nowrap" }}>
+                                <FireOutlined style={{ fontSize: 10 }} /> {urgentIngredients.length} cần dùng sớm
+                            </Typography.Text>
+                        )}
+                    </div>
                 </Box>
 
                 {/* Expand toggle */}
                 <div
                     onClick={e => { e.stopPropagation(); setExpanded(v => !v); }}
-                    style={{ padding: "4px 6px", cursor: "pointer", color: "#aaa", flexShrink: 0 }}
+                    style={{ padding: "4px 6px", cursor: "pointer", color: "#aaa", flexShrink: 0, marginTop: 8 }}
                 >
                     {expanded ? <MinusOutlined /> : <PlusOutlined />}
                 </div>
@@ -118,15 +156,19 @@ export const DishSuggestionItem: React.FC<DishSuggestionItemProps> = ({ scored, 
                                 Có sẵn
                             </Typography.Text>
                             <Stack wrap="wrap" gap={5} style={{ marginTop: 5 }}>
-                                {scored.matchedIngredientIds.map(id => (
-                                    <div key={id} style={{
+                                {scored.matchedIngredientIds.map(id => {
+                                    const urgent = _urgentFor(id);
+                                    return <div key={id} style={{
                                         display: "inline-flex", alignItems: "center", gap: 3,
                                         padding: "3px 10px", borderRadius: 16, fontSize: 12,
-                                        background: "#f6ffed", border: "1px solid #b7eb8f", color: "#389e0d",
+                                        background: urgent ? "#fff7e6" : "#f6ffed",
+                                        border: urgent ? "1px solid #ffd591" : "1px solid #b7eb8f",
+                                        color: urgent ? "#d46b08" : "#389e0d",
                                     }}>
-                                        <CheckOutlined style={{ fontSize: 10 }} /> {_name(id)}
+                                        {urgent ? <FireOutlined style={{ fontSize: 10 }} /> : <CheckOutlined style={{ fontSize: 10 }} />} {_name(id)}
+                                        {urgent && <span style={{ fontWeight: 600 }}>({_urgentDaysLabel(urgent.daysLeft)})</span>}
                                     </div>
-                                ))}
+                                })}
                             </Stack>
                         </Box>
                     )}
@@ -136,15 +178,21 @@ export const DishSuggestionItem: React.FC<DishSuggestionItemProps> = ({ scored, 
                                 Cần mua thêm
                             </Typography.Text>
                             <Stack wrap="wrap" gap={5} style={{ marginTop: 5 }}>
-                                {scored.missingIngredientIds.map(id => (
-                                    <div key={id} style={{
+                                {scored.missingIngredientIds.map(id => {
+                                    const urgent = _urgentFor(id);
+                                    const partial = _isPartial(id);
+                                    return <div key={id} style={{
                                         display: "inline-flex", alignItems: "center", gap: 3,
                                         padding: "3px 10px", borderRadius: 16, fontSize: 12,
-                                        background: "#fff2f0", border: "1px solid #ffccc7", color: "#cf1322",
+                                        background: urgent || partial ? "#fff7e6" : "#fff2f0",
+                                        border: urgent || partial ? "1px solid #ffd591" : "1px solid #ffccc7",
+                                        color: urgent || partial ? "#d46b08" : "#cf1322",
                                     }}>
-                                        ✗ {_name(id)}
+                                        {urgent ? <FireOutlined style={{ fontSize: 10 }} /> : partial ? "◐" : "✗"} {_name(id)}
+                                        {partial && !urgent && <span style={{ fontWeight: 600 }}>(còn một phần)</span>}
+                                        {urgent && <span style={{ fontWeight: 600 }}>({_urgentDaysLabel(urgent.daysLeft)})</span>}
                                     </div>
-                                ))}
+                                })}
                             </Stack>
                         </Box>
                     )}

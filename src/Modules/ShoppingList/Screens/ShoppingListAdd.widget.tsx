@@ -18,14 +18,15 @@ import React, { FunctionComponent, useEffect } from "react"
 import { useDispatch, useSelector } from "react-redux"
 
 type ShoppingListAddWidgetProps = {
-    date: Date;
+    date: Date | null;
     scheduledMealIds?: string[];
     dishIds?: string[];
     alreadyHaveIngredientIds?: string[];
     onDone: () => void;
+    onCreated?: (shoppingList: ShoppingList) => void;
 }
 
-export const ShoppingListAddWidget: FunctionComponent<ShoppingListAddWidgetProps> = ({ date, scheduledMealIds, dishIds, alreadyHaveIngredientIds, onDone }) => {
+export const ShoppingListAddWidget: FunctionComponent<ShoppingListAddWidgetProps> = ({ date, scheduledMealIds, dishIds, alreadyHaveIngredientIds, onDone, onCreated }) => {
     const dispatch = useDispatch();
     const dishes = useSelector((state: RootState) => state.shared.dishes.dishes);
     const scheduledMeals = useSelector((state: RootState) => state.personal.scheduledMeal.scheduledMeals);
@@ -59,6 +60,7 @@ export const ShoppingListAddWidget: FunctionComponent<ShoppingListAddWidgetProps
             message.success();
             addShoppingListForm.reset();
             onDone();
+            onCreated?.(transformed);
         },
         itemDefinitions: defaultValues => ({
             id: { name: ObjectPropertyHelper.nameof(defaultValues, e => e.id), noMarkup: true },

@@ -20,6 +20,7 @@ import { debounce, groupBy, orderBy, pickBy } from "lodash";
 import moment from "moment";
 import React, { useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
 import { List as VirtualList, useDynamicRowHeight, type RowComponentProps } from "react-window";
 import ComposeIcon from "../../../../assets/icons/compose.png";
 import ChecklistIcon from "../../../../assets/icons/done.png";
@@ -33,6 +34,7 @@ import { ShoppingListDetailWidget } from "./ShoppingListDetail.widget";
 import { ShoppingListEditWidget } from "./ShoppingListEdit.widget";
 import { DateHelpers } from "@common/Helpers/DateHelper";
 import { test } from "@store/Reducers/DishesReducer";
+import { RootRoutes } from "@routing/RootRoutes";
 
 type ShoppingListRowProps = { items: ShoppingList[]; onDelete: (item: ShoppingList) => void; };
 
@@ -46,6 +48,7 @@ export const ShoppingListScreen = () => {
     const toggleCalendarModal = useToggle({ defaultValue: false });
     const toggleAddModal = useToggle({ defaultValue: false });
     const dispatch = useDispatch();
+    const navigate = useNavigate();
     const { } = useScreenTitle({ value: "Lịch mua sắm", deps: [] });
     const [searchText, setSearchText] = useState("");
     const rowHeight = useDynamicRowHeight({ defaultRowHeight: 130, key: searchText });
@@ -90,7 +93,11 @@ export const ShoppingListScreen = () => {
             <Image src={ShoppinglistIcon} preview={false} width={24} style={{ marginBottom: 3 }} />
             Thêm lịch mua sắm
         </Space>} destroyOnClose={true} onCancel={toggleAddModal.hide} footer={null}>
-            <ShoppingListAddWidget date={selectedDate} onDone={toggleAddModal.hide} />
+            <ShoppingListAddWidget
+                date={selectedDate}
+                onDone={toggleAddModal.hide}
+                onCreated={(shoppingList) => navigate(RootRoutes.AuthorizedRoutes.ShoppingListRoutes.Detail(shoppingList.id))}
+            />
         </Modal>
 
         <Modal style={{ top: 50 }} open={toggleCalendarModal.value} title={<Space>

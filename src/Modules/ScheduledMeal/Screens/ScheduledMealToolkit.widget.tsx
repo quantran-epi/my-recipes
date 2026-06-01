@@ -8,6 +8,7 @@ import { RootState } from "@store/Store"
 import { FloatButton } from "antd"
 import React from "react"
 import { useDispatch, useSelector } from "react-redux"
+import { useNavigate } from "react-router-dom"
 import ShoppinglistIcon from "../../../../assets/icons/shoppingList.png"
 import ListCheckIcon from "../../../../assets/icons/list-check.png"
 import EraseIcon from "../../../../assets/icons/eraser.png"
@@ -16,12 +17,14 @@ import { Space } from "@components/Layout/Space";
 import { Image } from "@components/Image";
 import { useModal } from "@components/Modal/ModalProvider";
 import { Popconfirm } from "@components/Popconfirm";
+import { RootRoutes } from "@routing/RootRoutes";
 
 export const ScheduledMealToolkitWidget = () => {
     const selectedMeals = useSelector((state: RootState) => state.personal.scheduledMeal.selectedMeals);
     const toggle = useToggle();
     const toggleAddModal = useToggle();
     const dispatch = useDispatch();
+    const navigate = useNavigate();
 
     const _onEraseSelected = () => {
         toggle.hide();
@@ -54,7 +57,12 @@ export const ScheduledMealToolkitWidget = () => {
                 Thêm lịch mua sắm
             </Space>
         } destroyOnClose={true} onCancel={toggleAddModal.hide} footer={null}>
-            <ShoppingListAddWidget date={null} scheduledMealIds={selectedMeals} onDone={_onAddShoppingListDone} />
+            <ShoppingListAddWidget
+                date={null}
+                scheduledMealIds={selectedMeals}
+                onDone={_onAddShoppingListDone}
+                onCreated={(shoppingList) => navigate(RootRoutes.AuthorizedRoutes.ShoppingListRoutes.Detail(shoppingList.id))}
+            />
         </Modal>
     </React.Fragment>
 }

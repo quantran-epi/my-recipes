@@ -13,6 +13,7 @@ import { RootState } from "@store/Store";
 import { InputNumber, Input, Select } from "antd";
 import React, { useMemo, useState } from "react";
 import { useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
 import { IngredientPickerWidget } from "./IngredientPicker.widget";
 import { DishSuggestionList } from "./DishSuggestionList.widget";
 import { ShoppingListAddWidget } from "@modules/ShoppingList/Screens/ShoppingListAdd.widget";
@@ -22,6 +23,7 @@ import { Dishes } from "@store/Models/Dishes";
 import { InventoryHelper } from "@common/Helpers/InventoryHelper";
 import { IngredientUnitHelper } from "@common/Helpers/IngredientUnitHelper";
 import { Collapse } from "antd";
+import { RootRoutes } from "@routing/RootRoutes";
 
 type Mode = "ingredients" | "inventory" | "duration";
 
@@ -39,6 +41,7 @@ const totalDurationMins = (dish: Dishes) => {
 };
 
 export const DishSuggesterScreen: React.FC<DishSuggesterScreenProps> = ({ open, onClose, initialMode, initialIngredientIds }) => {
+    const navigate = useNavigate();
     const dishes = useSelector((state: RootState) => state.shared.dishes.dishes);
     const allIngredients = useSelector((state: RootState) => state.shared.ingredient.ingredients);
     const inventory = useSelector((state: RootState) => state.personal.inventory?.items ?? {});
@@ -91,11 +94,10 @@ export const DishSuggesterScreen: React.FC<DishSuggesterScreenProps> = ({ open, 
         return inventoryGroups
             .map(group => ({
                 ...group,
-                dishes: group.dishes.filter(scored =>
-                    fridgeSearchIds.every(id =>
-                        scored.dish.ingredients?.some(req => req.ingredientId === id)
-                    )
-                ),
+                dishes: group.dishes.filter(scored => {
+                    const requiredIds = new Set([...scored.matchedIngredientIds, ...scored.missingIngredientIds]);
+                    return fridgeSearchIds.every(id => requiredIds.has(id));
+                }),
             }))
             .filter(group => group.dishes.length > 0);
     }, [inventoryGroups, fridgeSearchIds]);
@@ -606,6 +608,7 @@ export const DishSuggesterScreen: React.FC<DishSuggesterScreenProps> = ({ open, 
                     toggleShoppingListAdd.hide();
                     _onClose();
                 }}
+                onCreated={(shoppingList) => navigate(RootRoutes.AuthorizedRoutes.ShoppingListRoutes.Detail(shoppingList.id))}
             />
         </Modal>
     </>;

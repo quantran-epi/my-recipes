@@ -52,6 +52,15 @@ export const IngredientInventoryWidget: React.FC<IngredientInventoryWidgetProps>
         }));
     });
 
+    if (item.alwaysAvailable) {
+        return <Alert
+            type="success"
+            showIcon
+            message="Luôn có sẵn"
+            description="Nguyên liệu này được tính là đủ trong gợi ý món, phiên nấu và lịch mua sắm mà không cần nhập tồn kho."
+        />;
+    }
+
     const _updateBatch = (id: string, patch: Partial<BatchRow>) => {
         setBatches(prev => prev.map(b => b.id === id ? { ...b, ...patch } : b));
     };

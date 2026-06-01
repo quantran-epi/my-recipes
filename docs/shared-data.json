@@ -4,6 +4,8 @@
       "id": "Đậu phụQdYQjd3uDU",
       "name": "Đậu phụ",
       "category": "Khác",
+      "shelfLife": "short",
+      "preservationCondition": "fridge",
       "baseUnit": "g",
       "inventoryUnits": [
         "g",
@@ -18,6 +20,8 @@
       "id": "Đậu nontHeqcHqWEy",
       "name": "Đậu non",
       "category": "Khác",
+      "shelfLife": "short",
+      "preservationCondition": "fridge",
       "baseUnit": "g",
       "inventoryUnits": [
         "g",
@@ -32,6 +36,8 @@
       "id": "Hành láZtNmZbNswb",
       "name": "Hành lá",
       "category": "Gia vị",
+      "shelfLife": "very_short",
+      "preservationCondition": "fridge",
       "baseUnit": "g",
       "inventoryUnits": [
         "g",
@@ -46,6 +52,8 @@
       "id": "Hành tímYvb82U-VOH",
       "name": "Hành tím",
       "category": "Gia vị",
+      "shelfLife": "long",
+      "preservationCondition": "cool_dry",
       "baseUnit": "g",
       "inventoryUnits": [
         "g",
@@ -62,6 +70,8 @@
       "id": "Mùi tàuUQolO_X6zd",
       "name": "Mùi tàu",
       "category": "Gia vị",
+      "shelfLife": "very_short",
+      "preservationCondition": "fridge",
       "baseUnit": "g",
       "inventoryUnits": [
         "g",
@@ -76,6 +86,8 @@
       "id": "Mùi tajayFO1gKOJ",
       "name": "Mùi ta",
       "category": "Gia vị",
+      "shelfLife": "very_short",
+      "preservationCondition": "fridge",
       "baseUnit": "g",
       "inventoryUnits": [
         "g",
@@ -90,6 +102,8 @@
       "id": "Kinh giới90WanixOVC",
       "name": "Kinh giới",
       "category": "Gia vị",
+      "shelfLife": "very_short",
+      "preservationCondition": "fridge",
       "baseUnit": "g",
       "inventoryUnits": [
         "g",
@@ -104,6 +118,8 @@
       "id": "Tía tôiZc3rSS3Pf",
       "name": "Tía tô",
       "category": "Gia vị",
+      "shelfLife": "very_short",
+      "preservationCondition": "fridge",
       "baseUnit": "g",
       "inventoryUnits": [
         "g",
@@ -118,6 +134,8 @@
       "id": "Thìa là2Y2R1GD_jq",
       "name": "Thìa là",
       "category": "Gia vị",
+      "shelfLife": "very_short",
+      "preservationCondition": "fridge",
       "baseUnit": "g",
       "inventoryUnits": [
         "g",
@@ -132,6 +150,8 @@
       "id": "Lá lốtE7OA57EkX-",
       "name": "Lá lốt",
       "category": "Rau củ",
+      "shelfLife": "very_short",
+      "preservationCondition": "fridge",
       "baseUnit": "lá",
       "inventoryUnits": [
         "lá"
@@ -144,6 +164,8 @@
       "id": "Tỏi3NILO1jEd0",
       "name": "Tỏi",
       "category": "Gia vị",
+      "shelfLife": "long",
+      "preservationCondition": "cool_dry",
       "baseUnit": "g",
       "inventoryUnits": [
         "g",
@@ -162,6 +184,8 @@
       "id": "Hành tâyPsERexf4zd",
       "name": "Hành tây",
       "category": "Rau củ",
+      "shelfLife": "long",
+      "preservationCondition": "cool_dry",
       "baseUnit": "g",
       "inventoryUnits": [
         "g",
@@ -178,6 +202,8 @@
       "id": "Xà láchGY5tn2xg5J",
       "name": "Xà lách",
       "category": "Rau củ",
+      "shelfLife": "very_short",
+      "preservationCondition": "fridge",
       "baseUnit": "g",
       "inventoryUnits": [
         "g",
@@ -194,6 +220,8 @@
       "id": "Dưa chuộtiww2N4-K0c",
       "name": "Dưa chuột",
       "category": "Rau củ",
+      "shelfLife": "short",
+      "preservationCondition": "fridge",
       "baseUnit": "g",
       "inventoryUnits": [
         "g",
@@ -210,6 +238,8 @@
       "id": "Trứng gà72vN9igVwa",
       "name": "Trứng gà",
       "category": "Sữa & trứng",
+      "shelfLife": "medium",
+      "preservationCondition": "fridge",
       "baseUnit": "quả",
       "inventoryUnits": [
         "quả"
@@ -222,6 +252,8 @@
       "id": "Trứng vịt59-1eAcjqZ",
       "name": "Trứng vịt",
       "category": "Sữa & trứng",
+      "shelfLife": "medium",
+      "preservationCondition": "fridge",
       "baseUnit": "quả",
       "inventoryUnits": [
         "quả"
@@ -234,6 +266,8 @@
       "id": "Trứng cáNtiSxACUNP",
       "name": "Trứng cá",
       "category": "Sữa & trứng",
+      "shelfLife": "very_short",
+      "preservationCondition": "freezer",
       "baseUnit": "g",
       "inventoryUnits": [
         "g",
@@ -248,6 +282,8 @@
       "id": "Thịt heo nạc vaiVXHDweEHeG",
       "name": "Thịt heo nạc vai",
       "category": "Thịt",
+      "shelfLife": "short",
+      "preservationCondition": "freezer",
       "baseUnit": "g",
       "inventoryUnits": [
         "g",
@@ -262,6 +298,8 @@
       "id": "Thịt heo ba chỉtn-meEAQZu",
       "name": "Thịt heo ba chỉ",
       "category": "Thịt",
+      "shelfLife": "short",
+      "preservationCondition": "freezer",
       "baseUnit": "g",
       "inventoryUnits": [
         "g",
@@ -276,6 +314,8 @@
       "id": "Sườn heo nonlic0JR5JmA",
       "name": "Sườn heo non",
       "category": "Thịt",
+      "shelfLife": "short",
+      "preservationCondition": "freezer",
       "baseUnit": "g",
       "inventoryUnits": [
         "g",
@@ -290,6 +330,8 @@
       "id": "Sườn heo già2aDAA9ooHw",
       "name": "Sườn heo già",
       "category": "Thịt",
+      "shelfLife": "short",
+      "preservationCondition": "freezer",
       "baseUnit": "g",
       "inventoryUnits": [
         "g",
@@ -304,6 +346,8 @@
       "id": "Mỡ heo tảng0WU-I2Ixi4",
       "name": "Mỡ heo tảng",
       "category": "Thịt",
+      "shelfLife": "long",
+      "preservationCondition": "fridge",
       "baseUnit": "g",
       "inventoryUnits": [
         "g",
@@ -318,6 +362,8 @@
       "id": "Mỡ heo lỏngd_H3wfitXK",
       "name": "Mỡ heo lỏng",
       "category": "Thịt",
+      "shelfLife": "long",
+      "preservationCondition": "fridge",
       "baseUnit": "ml",
       "inventoryUnits": [
         "ml",
@@ -332,6 +378,8 @@
       "id": "Gan heo2X9fQYeB8e",
       "name": "Gan heo",
       "category": "Thịt",
+      "shelfLife": "very_short",
+      "preservationCondition": "freezer",
       "baseUnit": "g",
       "inventoryUnits": [
         "g",
@@ -346,6 +394,8 @@
       "id": "Tim heoCWf5HOGp1L",
       "name": "Tim heo",
       "category": "Thịt",
+      "shelfLife": "very_short",
+      "preservationCondition": "freezer",
       "baseUnit": "g",
       "inventoryUnits": [
         "g",
@@ -360,6 +410,8 @@
       "id": "Cật heoIFzsT44y8n",
       "name": "Cật heo",
       "category": "Thịt",
+      "shelfLife": "very_short",
+      "preservationCondition": "freezer",
       "baseUnit": "g",
       "inventoryUnits": [
         "g",
@@ -374,6 +426,8 @@
       "id": "Thịt bò nạmJ1_LlvskPv",
       "name": "Thịt bò nạm",
       "category": "Hải sản",
+      "shelfLife": "short",
+      "preservationCondition": "freezer",
       "baseUnit": "g",
       "inventoryUnits": [
         "g",
@@ -388,6 +442,8 @@
       "id": "Thịt bò gầuxg6qB7XSss",
       "name": "Thịt bò gầu",
       "category": "Thịt",
+      "shelfLife": "short",
+      "preservationCondition": "freezer",
       "baseUnit": "g",
       "inventoryUnits": [
         "g",
@@ -402,6 +458,8 @@
       "id": "Sườn bòsZCwrc2GVy",
       "name": "Sườn bò",
       "category": "Thịt",
+      "shelfLife": "short",
+      "preservationCondition": "freezer",
       "baseUnit": "g",
       "inventoryUnits": [
         "g",
@@ -416,6 +474,8 @@
       "id": "Thịt bò thănDyzpaj8qvS",
       "name": "Thịt bò thăn",
       "category": "Thịt",
+      "shelfLife": "short",
+      "preservationCondition": "freezer",
       "baseUnit": "g",
       "inventoryUnits": [
         "g",
@@ -430,6 +490,8 @@
       "id": "Bụng cáYEwaP8LSBh",
       "name": "Bụng cá",
       "category": "Thịt",
+      "shelfLife": "very_short",
+      "preservationCondition": "freezer",
       "baseUnit": "g",
       "inventoryUnits": [
         "g",
@@ -444,6 +506,8 @@
       "id": "Đuôi cáTG7XKl6Ss9",
       "name": "Đuôi cá",
       "category": "Hải sản",
+      "shelfLife": "very_short",
+      "preservationCondition": "freezer",
       "baseUnit": "g",
       "inventoryUnits": [
         "g",
@@ -458,6 +522,8 @@
       "id": "Đầu cáZC-K1PBaKf",
       "name": "Đầu cá",
       "category": "Hải sản",
+      "shelfLife": "very_short",
+      "preservationCondition": "freezer",
       "baseUnit": "g",
       "inventoryUnits": [
         "g",
@@ -472,6 +538,8 @@
       "id": "Thịt gà đùi0vjCseh7j1",
       "name": "Thịt gà đùi",
       "category": "Thịt",
+      "shelfLife": "short",
+      "preservationCondition": "freezer",
       "baseUnit": "g",
       "inventoryUnits": [
         "g",
@@ -486,6 +554,8 @@
       "id": "Thịt gà cánhugfciVhuZy",
       "name": "Thịt gà cánh",
       "category": "Thịt",
+      "shelfLife": "short",
+      "preservationCondition": "freezer",
       "baseUnit": "g",
       "inventoryUnits": [
         "g",
@@ -500,6 +570,8 @@
       "id": "Xương gàRn56emeuiJ",
       "name": "Xương gà",
       "category": "Thịt",
+      "shelfLife": "short",
+      "preservationCondition": "freezer",
       "baseUnit": "g",
       "inventoryUnits": [
         "g",
@@ -514,6 +586,8 @@
       "id": "Thịt gà ứcirYK34PGfJ",
       "name": "Thịt gà ức",
       "category": "Thịt",
+      "shelfLife": "short",
+      "preservationCondition": "freezer",
       "baseUnit": "g",
       "inventoryUnits": [
         "g",
@@ -528,6 +602,8 @@
       "id": "Thịt heo xayTtz3UMTzNU",
       "name": "Thịt heo xay",
       "category": "Thịt",
+      "shelfLife": "short",
+      "preservationCondition": "freezer",
       "baseUnit": "g",
       "inventoryUnits": [
         "g",
@@ -542,6 +618,8 @@
       "id": "Thịt vịtVdTLg_qlzR",
       "name": "Thịt vịt",
       "category": "Thịt",
+      "shelfLife": "short",
+      "preservationCondition": "freezer",
       "baseUnit": "g",
       "inventoryUnits": [
         "g",
@@ -556,6 +634,8 @@
       "id": "Cà tímIfuFxVXDBv",
       "name": "Cà tím",
       "category": "Rau củ",
+      "shelfLife": "medium",
+      "preservationCondition": "fridge",
       "baseUnit": "g",
       "inventoryUnits": [
         "g",
@@ -572,6 +652,8 @@
       "id": "Xương ống heos9WjV1vL1p",
       "name": "Xương ống heo",
       "category": "Thịt",
+      "shelfLife": "short",
+      "preservationCondition": "freezer",
       "baseUnit": "g",
       "inventoryUnits": [
         "g",
@@ -586,6 +668,8 @@
       "id": "Đường trắngDH_YV6vOlJ",
       "name": "Đường trắng",
       "category": "Gia vị",
+      "shelfLife": "very_long",
+      "preservationCondition": "cool_dry",
       "baseUnit": "g",
       "inventoryUnits": [
         "g",
@@ -601,6 +685,8 @@
       "id": "Đường phènCgPf36wjMX",
       "name": "Đường phèn",
       "category": "Gia vị",
+      "shelfLife": "very_long",
+      "preservationCondition": "cool_dry",
       "baseUnit": "g",
       "inventoryUnits": [
         "g",
@@ -616,6 +702,8 @@
       "id": "Muối iotmxmFIcYWUb",
       "name": "Muối iot",
       "category": "Gia vị",
+      "shelfLife": "very_long",
+      "preservationCondition": "cool_dry",
       "baseUnit": "g",
       "inventoryUnits": [
         "g",
@@ -631,6 +719,8 @@
       "id": "Muối trắngrOsVaI3tKv",
       "name": "Muối trắng",
       "category": "Gia vị",
+      "shelfLife": "very_long",
+      "preservationCondition": "cool_dry",
       "baseUnit": "g",
       "inventoryUnits": [
         "g",
@@ -645,6 +735,8 @@
       "id": "Nước mắm9koIj5Fz3a",
       "name": "Nước mắm",
       "category": "Gia vị",
+      "shelfLife": "very_long",
+      "preservationCondition": "cool_dry",
       "baseUnit": "ml",
       "inventoryUnits": [
         "ml",
@@ -660,6 +752,8 @@
       "id": "Xì dầuJhjF6UAtE7",
       "name": "Xì dầu",
       "category": "Gia vị",
+      "shelfLife": "very_long",
+      "preservationCondition": "cool_dry",
       "baseUnit": "ml",
       "inventoryUnits": [
         "ml",
@@ -675,6 +769,8 @@
       "id": "Mật ongOr177EkX2-",
       "name": "Mật ong",
       "category": "Gia vị",
+      "shelfLife": "very_long",
+      "preservationCondition": "cool_dry",
       "baseUnit": "ml",
       "inventoryUnits": [
         "ml",
@@ -690,6 +786,8 @@
       "id": "Hạt tiêu4eEOesKltQ",
       "name": "Hạt tiêu",
       "category": "Gia vị",
+      "shelfLife": "very_long",
+      "preservationCondition": "cool_dry",
       "baseUnit": "g",
       "inventoryUnits": [
         "g",
@@ -705,6 +803,8 @@
       "id": "Dầu ănb13XIYIrDh",
       "name": "Dầu ăn",
       "category": "Gia vị",
+      "shelfLife": "very_long",
+      "preservationCondition": "cool_dry",
       "baseUnit": "ml",
       "inventoryUnits": [
         "ml",
@@ -720,6 +820,8 @@
       "id": "Bột điềuNNx_gW88pY",
       "name": "Bột điều",
       "category": "Khác",
+      "shelfLife": "very_long",
+      "preservationCondition": "cool_dry",
       "baseUnit": "g",
       "inventoryUnits": [
         "g",
@@ -735,6 +837,8 @@
       "id": "Chanh2c6lpZSaM4",
       "name": "Chanh",
       "category": "Gia vị",
+      "shelfLife": "medium",
+      "preservationCondition": "fridge",
       "baseUnit": "ml",
       "inventoryUnits": [
         "ml",
@@ -751,6 +855,8 @@
       "id": "Quất1tbPuuy1rb",
       "name": "Quất",
       "category": "Gia vị",
+      "shelfLife": "medium",
+      "preservationCondition": "fridge",
       "baseUnit": "quả",
       "inventoryUnits": [
         "quả"
@@ -763,6 +869,8 @@
       "id": "Giò lụa9aRWcTrL67",
       "name": "Giò lụa",
       "category": "Đồ hộp",
+      "shelfLife": "short",
+      "preservationCondition": "fridge",
       "baseUnit": "g",
       "inventoryUnits": [
         "g",
@@ -777,6 +885,8 @@
       "id": "Chả mỡGr-Mw11ezE",
       "name": "Chả mỡ",
       "category": "Đồ hộp",
+      "shelfLife": "short",
+      "preservationCondition": "fridge",
       "baseUnit": "g",
       "inventoryUnits": [
         "g",
@@ -791,6 +901,8 @@
       "id": "Mọc bò0l6Y3y4t0R",
       "name": "Mọc bò",
       "category": "Đồ hộp",
+      "shelfLife": "short",
+      "preservationCondition": "fridge",
       "baseUnit": "g",
       "inventoryUnits": [
         "g",
@@ -805,6 +917,8 @@
       "id": "Cua đồng_ZT1s1jy48",
       "name": "Cua đồng",
       "category": "Hải sản",
+      "shelfLife": "very_short",
+      "preservationCondition": "freezer",
       "baseUnit": "g",
       "inventoryUnits": [
         "g",
@@ -819,6 +933,8 @@
       "id": "Cà chuaZP4MdEXiO_",
       "name": "Cà chua",
       "category": "Rau củ",
+      "shelfLife": "medium",
+      "preservationCondition": "fridge",
       "baseUnit": "g",
       "inventoryUnits": [
         "g",
@@ -835,6 +951,8 @@
       "id": "Bơ lạtbK-8VT5e-z",
       "name": "Bơ lạt",
       "category": "Gia vị",
+      "shelfLife": "medium",
+      "preservationCondition": "fridge",
       "baseUnit": "g",
       "inventoryUnits": [
         "g",
@@ -849,6 +967,8 @@
       "id": "Ớt đỏ cay4cIqrjz_8U",
       "name": "Ớt đỏ cay",
       "category": "Rau củ",
+      "shelfLife": "medium",
+      "preservationCondition": "fridge",
       "baseUnit": "g",
       "inventoryUnits": [
         "g",
@@ -865,6 +985,8 @@
       "id": "Ớt chuông đỏOH3gtce7jk",
       "name": "Ớt chuông đỏ",
       "category": "Rau củ",
+      "shelfLife": "short",
+      "preservationCondition": "fridge",
       "baseUnit": "g",
       "inventoryUnits": [
         "g",
@@ -881,6 +1003,8 @@
       "id": "Ớt chuông xanh1o16kbL30u",
       "name": "Ớt chuông xanh",
       "category": "Rau củ",
+      "shelfLife": "short",
+      "preservationCondition": "fridge",
       "baseUnit": "g",
       "inventoryUnits": [
         "g",
@@ -895,6 +1019,8 @@
       "id": "Ớt chuông vàngFLYc7PslEU",
       "name": "Ớt chuông vàng",
       "category": "Rau củ",
+      "shelfLife": "short",
+      "preservationCondition": "fridge",
       "baseUnit": "g",
       "inventoryUnits": [
         "g",
@@ -909,6 +1035,8 @@
       "id": "Ớt xanh cayXUZVWVDT_Y",
       "name": "Ớt xanh cay",
       "category": "Rau củ",
+      "shelfLife": "medium",
+      "preservationCondition": "fridge",
       "baseUnit": "g",
       "inventoryUnits": [
         "g",
@@ -923,6 +1051,8 @@
       "id": "Tương ớt1mzBq-weXz",
       "name": "Tương ớt",
       "category": "Gia vị",
+      "shelfLife": "very_long",
+      "preservationCondition": "cool_dry",
       "baseUnit": "ml",
       "inventoryUnits": [
         "ml",
@@ -938,6 +1068,8 @@
       "id": "Tương càiHkFzpVbMI",
       "name": "Tương cà",
       "category": "Gia vị",
+      "shelfLife": "very_long",
+      "preservationCondition": "cool_dry",
       "baseUnit": "ml",
       "inventoryUnits": [
         "ml",
@@ -953,6 +1085,8 @@
       "id": "Ngải cứutipq4kHmOB",
       "name": "Ngải cứu",
       "category": "Rau củ",
+      "shelfLife": "very_short",
+      "preservationCondition": "fridge",
       "baseUnit": "g",
       "inventoryUnits": [
         "g",
@@ -967,6 +1101,8 @@
       "id": "Hạt senAdqkHmtif3",
       "name": "Hạt sen",
       "category": "Rau củ",
+      "shelfLife": "short",
+      "preservationCondition": "fridge",
       "baseUnit": "g",
       "inventoryUnits": [
         "g",
@@ -981,6 +1117,8 @@
       "id": "Gừngc-VE7hkDli",
       "name": "Gừng",
       "category": "Gia vị",
+      "shelfLife": "long",
+      "preservationCondition": "cool_dry",
       "baseUnit": "g",
       "inventoryUnits": [
         "g",
@@ -999,6 +1137,8 @@
       "id": "Kỷ tửE9xT5QTAhj",
       "name": "Kỷ tử",
       "category": "Gia vị",
+      "shelfLife": "very_long",
+      "preservationCondition": "cool_dry",
       "baseUnit": "g",
       "inventoryUnits": [
         "g",
@@ -1013,6 +1153,8 @@
       "id": "Táo đỏqFV1jSTBGd",
       "name": "Táo đỏ",
       "category": "Gia vị",
+      "shelfLife": "very_long",
+      "preservationCondition": "cool_dry",
       "baseUnit": "quả",
       "inventoryUnits": [
         "quả"
@@ -1025,6 +1167,8 @@
       "id": "TáođenTRNPr0KCC-",
       "name": "Táo đen",
       "category": "Gia vị",
+      "shelfLife": "very_long",
+      "preservationCondition": "cool_dry",
       "baseUnit": "quả",
       "inventoryUnits": [
         "quả"
@@ -1037,6 +1181,8 @@
       "id": "DấmwpjvOTf7hW",
       "name": "Dấm",
       "category": "Gia vị",
+      "shelfLife": "very_long",
+      "preservationCondition": "cool_dry",
       "baseUnit": "ml",
       "inventoryUnits": [
         "ml",
@@ -1052,6 +1198,8 @@
       "id": "Phở khô2CgiH-Mb0I",
       "name": "Phở khô",
       "category": "Tinh bột",
+      "shelfLife": "very_long",
+      "preservationCondition": "cool_dry",
       "baseUnit": "g",
       "inventoryUnits": [
         "g",
@@ -1066,6 +1214,8 @@
       "id": "Bún khôK-nYu2l5_h",
       "name": "Bún khô",
       "category": "Tinh bột",
+      "shelfLife": "very_long",
+      "preservationCondition": "cool_dry",
       "baseUnit": "g",
       "inventoryUnits": [
         "g",
@@ -1080,6 +1230,8 @@
       "id": "SảN-nr3-BboO",
       "name": "Sả",
       "category": "Gia vị",
+      "shelfLife": "medium",
+      "preservationCondition": "fridge",
       "baseUnit": "g",
       "inventoryUnits": [
         "g",
@@ -1096,6 +1248,8 @@
       "id": "QuếpC5s9J3cnj",
       "name": "Quế",
       "category": "Gia vị",
+      "shelfLife": "very_long",
+      "preservationCondition": "cool_dry",
       "baseUnit": "thanh",
       "inventoryUnits": [
         "thanh"
@@ -1108,6 +1262,8 @@
       "id": "Thảo quảkXyurFzxSF",
       "name": "Thảo quả",
       "category": "Gia vị",
+      "shelfLife": "very_long",
+      "preservationCondition": "cool_dry",
       "baseUnit": "quả",
       "inventoryUnits": [
         "quả"
@@ -1120,6 +1276,8 @@
       "id": "Hoa hồiFHXr32fLXp",
       "name": "Hoa hồi",
       "category": "Gia vị",
+      "shelfLife": "very_long",
+      "preservationCondition": "cool_dry",
       "baseUnit": "chiếc",
       "inventoryUnits": [
         "chiếc"
@@ -1132,6 +1290,8 @@
       "id": "Thịt bò bắpTmUfLzE2tl",
       "name": "Thịt bò bắp",
       "category": "Thịt",
+      "shelfLife": "short",
+      "preservationCondition": "freezer",
       "baseUnit": "g",
       "inventoryUnits": [
         "g",
@@ -1146,6 +1306,8 @@
       "id": "Giá đỗLaF0woHgwA",
       "name": "Giá đỗ",
       "category": "Rau củ",
+      "shelfLife": "very_short",
+      "preservationCondition": "fridge",
       "baseUnit": "g",
       "inventoryUnits": [
         "g",
@@ -1160,6 +1322,8 @@
       "id": "Húng quếSnTL9FBfY0",
       "name": "Húng quế",
       "category": "Gia vị",
+      "shelfLife": "very_short",
+      "preservationCondition": "fridge",
       "baseUnit": "g",
       "inventoryUnits": [
         "g",
@@ -1174,6 +1338,8 @@
       "id": "Hoa chuốiTvAka0CYhm",
       "name": "Hoa chuối",
       "category": "Rau củ",
+      "shelfLife": "very_short",
+      "preservationCondition": "fridge",
       "baseUnit": "g",
       "inventoryUnits": [
         "g",
@@ -1188,6 +1354,8 @@
       "id": "Tiết bòfJRNveQPQa",
       "name": "Tiết bò",
       "category": "Thịt",
+      "shelfLife": "very_short",
+      "preservationCondition": "fridge",
       "baseUnit": "g",
       "inventoryUnits": [
         "g",
@@ -1202,6 +1370,8 @@
       "id": "Tiết lợn_KUqzKbZRf",
       "name": "Tiết lợn",
       "category": "Thịt",
+      "shelfLife": "very_short",
+      "preservationCondition": "fridge",
       "baseUnit": "g",
       "inventoryUnits": [
         "g",
@@ -1216,6 +1386,8 @@
       "id": "Chả cuaZmSmfXObKL",
       "name": "Chả cua",
       "category": "Đồ hộp",
+      "shelfLife": "short",
+      "preservationCondition": "fridge",
       "baseUnit": "g",
       "inventoryUnits": [
         "g",
@@ -1230,6 +1402,8 @@
       "id": "Mắm ruốc4d_D077Cg6",
       "name": "Mắm ruốc",
       "category": "Gia vị",
+      "shelfLife": "very_long",
+      "preservationCondition": "cool_dry",
       "baseUnit": "g",
       "inventoryUnits": [
         "g",
@@ -1245,6 +1419,8 @@
       "id": "Mắm tépFPEkwDw6dm",
       "name": "Mắm tép",
       "category": "Gia vị",
+      "shelfLife": "very_long",
+      "preservationCondition": "cool_dry",
       "baseUnit": "g",
       "inventoryUnits": [
         "g",
@@ -1259,6 +1435,8 @@
       "id": "DứaGu02Q4sahX",
       "name": "Dứa",
       "category": "Rau củ",
+      "shelfLife": "medium",
+      "preservationCondition": "fridge",
       "baseUnit": "g",
       "inventoryUnits": [
         "g",
@@ -1275,6 +1453,8 @@
       "id": "Sữa đặckKXUK_y9VF",
       "name": "Sữa đặc",
       "category": "Sữa & trứng",
+      "shelfLife": "very_long",
+      "preservationCondition": "cool_dry",
       "baseUnit": "ml",
       "inventoryUnits": [
         "ml",
@@ -1290,6 +1470,8 @@
       "id": "Ngũ vị hươngL2e0rt-Wrb",
       "name": "Ngũ vị hương",
       "category": "Gia vị",
+      "shelfLife": "very_long",
+      "preservationCondition": "cool_dry",
       "baseUnit": "g",
       "inventoryUnits": [
         "g",
@@ -1305,6 +1487,8 @@
       "id": "Rau cảiiFdmSyx5A0",
       "name": "Rau cải ngồng",
       "category": "Rau củ",
+      "shelfLife": "very_short",
+      "preservationCondition": "fridge",
       "baseUnit": "g",
       "inventoryUnits": [
         "g",
@@ -1319,6 +1503,8 @@
       "id": "Rau ngót5vruLe8l5U",
       "name": "Rau ngót",
       "category": "Rau củ",
+      "shelfLife": "very_short",
+      "preservationCondition": "fridge",
       "baseUnit": "g",
       "inventoryUnits": [
         "g",
@@ -1333,6 +1519,8 @@
       "id": "Cá rô đồngt2S76dzM1q",
       "name": "Cá rô đồng",
       "category": "Hải sản",
+      "shelfLife": "very_short",
+      "preservationCondition": "freezer",
       "baseUnit": "g",
       "inventoryUnits": [
         "g",
@@ -1347,6 +1535,8 @@
       "id": "Cá rô phisWoe0YXYMA",
       "name": "Cá rô phi",
       "category": "Hải sản",
+      "shelfLife": "very_short",
+      "preservationCondition": "freezer",
       "baseUnit": "g",
       "inventoryUnits": [
         "g",
@@ -1361,6 +1551,8 @@
       "id": "Rượu vangGKL1_2rRy_",
       "name": "Rượu vang",
       "category": "Gia vị",
+      "shelfLife": "very_long",
+      "preservationCondition": "cool_dry",
       "baseUnit": "ml",
       "inventoryUnits": [
         "ml",
@@ -1375,6 +1567,8 @@
       "id": "XoàiZenHCISCaR",
       "name": "Xoài",
       "category": "Rau củ",
+      "shelfLife": "medium",
+      "preservationCondition": "fridge",
       "baseUnit": "g",
       "inventoryUnits": [
         "g",
@@ -1391,6 +1585,8 @@
       "id": "Lá nem cuốnhi2Vczb6dt",
       "name": "Lá nem cuốn",
       "category": "Khác",
+      "shelfLife": "long",
+      "preservationCondition": "cool_dry",
       "baseUnit": "lá",
       "inventoryUnits": [
         "lá"
@@ -1403,6 +1599,8 @@
       "id": "Lá nem ránYsP2p9gQpD",
       "name": "Lá nem rán",
       "category": "Khác",
+      "shelfLife": "long",
+      "preservationCondition": "cool_dry",
       "baseUnit": "lá",
       "inventoryUnits": [
         "lá"
@@ -1415,6 +1613,8 @@
       "id": "Xúc xíchv-K-3pPXWH",
       "name": "Xúc xích",
       "category": "Đồ hộp",
+      "shelfLife": "long",
+      "preservationCondition": "fridge",
       "baseUnit": "chiếc",
       "inventoryUnits": [
         "chiếc"
@@ -1427,6 +1627,8 @@
       "id": "Rau rămUSdFLbxJzV",
       "name": "Rau răm",
       "category": "Gia vị",
+      "shelfLife": "very_short",
+      "preservationCondition": "fridge",
       "baseUnit": "g",
       "inventoryUnits": [
         "g",
@@ -1441,6 +1643,8 @@
       "id": "Đậu bắpaLBLtkkAtg",
       "name": "Đậu bắp",
       "category": "Rau củ",
+      "shelfLife": "short",
+      "preservationCondition": "fridge",
       "baseUnit": "g",
       "inventoryUnits": [
         "g",
@@ -1455,6 +1659,8 @@
       "id": "Nấm kim châmmlA63sS5ey",
       "name": "Nấm kim châm",
       "category": "Rau củ",
+      "shelfLife": "short",
+      "preservationCondition": "fridge",
       "baseUnit": "g",
       "inventoryUnits": [
         "g",
@@ -1469,6 +1675,8 @@
       "id": "Nấm đùi gàOxusi8DbqC",
       "name": "Nấm đùi gà",
       "category": "Rau củ",
+      "shelfLife": "short",
+      "preservationCondition": "fridge",
       "baseUnit": "g",
       "inventoryUnits": [
         "g",
@@ -1483,6 +1691,8 @@
       "id": "Nấm hải sảnqTCA-l7FSn",
       "name": "Nấm hải sản",
       "category": "Rau củ",
+      "shelfLife": "short",
+      "preservationCondition": "fridge",
       "baseUnit": "g",
       "inventoryUnits": [
         "g",
@@ -1497,6 +1707,8 @@
       "id": "Bí đỏdfZiGA8n81",
       "name": "Bí đỏ",
       "category": "Rau củ",
+      "shelfLife": "long",
+      "preservationCondition": "cool_dry",
       "baseUnit": "g",
       "inventoryUnits": [
         "g",
@@ -1511,6 +1723,8 @@
       "id": "Bí đaovRa5fhBI4Z",
       "name": "Bí đao",
       "category": "Rau củ",
+      "shelfLife": "medium",
+      "preservationCondition": "cool_dry",
       "baseUnit": "g",
       "inventoryUnits": [
         "g",
@@ -1525,6 +1739,8 @@
       "id": "Gạo nếpEjVT24T5Uq",
       "name": "Gạo nếp",
       "category": "Tinh bột",
+      "shelfLife": "very_long",
+      "preservationCondition": "cool_dry",
       "baseUnit": "g",
       "inventoryUnits": [
         "g",
@@ -1539,6 +1755,8 @@
       "id": "Gạo tẻC_vFfi5R77",
       "name": "Gạo tẻ",
       "category": "Tinh bột",
+      "shelfLife": "very_long",
+      "preservationCondition": "cool_dry",
       "baseUnit": "g",
       "inventoryUnits": [
         "g",
@@ -1553,6 +1771,8 @@
       "id": "Cá chépdGCZp0Kz0l",
       "name": "Cá chép",
       "category": "Hải sản",
+      "shelfLife": "very_short",
+      "preservationCondition": "freezer",
       "baseUnit": "g",
       "inventoryUnits": [
         "g",
@@ -1567,6 +1787,8 @@
       "id": "MiếnObDS-xNaoB",
       "name": "Miến",
       "category": "Tinh bột",
+      "shelfLife": "very_long",
+      "preservationCondition": "cool_dry",
       "baseUnit": "g",
       "inventoryUnits": [
         "g",
@@ -1581,6 +1803,8 @@
       "id": "Mộc nhĩzQ75NeGAeu",
       "name": "Mộc nhĩ",
       "category": "Rau củ",
+      "shelfLife": "very_long",
+      "preservationCondition": "cool_dry",
       "baseUnit": "g",
       "inventoryUnits": [
         "g",
@@ -1595,6 +1819,8 @@
       "id": "Nấm hươngF3SfMXRu9p",
       "name": "Nấm hương",
       "category": "Rau củ",
+      "shelfLife": "very_long",
+      "preservationCondition": "cool_dry",
       "baseUnit": "g",
       "inventoryUnits": [
         "g",
@@ -1609,6 +1835,8 @@
       "id": "Cà rốtGB2tp6fqpw",
       "name": "Cà rốt",
       "category": "Rau củ",
+      "shelfLife": "long",
+      "preservationCondition": "fridge",
       "baseUnit": "g",
       "inventoryUnits": [
         "g",
@@ -1623,6 +1851,8 @@
       "id": "Dọc mùng-Ykee9LwhY",
       "name": "Dọc mùng",
       "category": "Rau củ",
+      "shelfLife": "very_short",
+      "preservationCondition": "fridge",
       "baseUnit": "g",
       "inventoryUnits": [
         "g",
@@ -1637,6 +1867,8 @@
       "id": "Lá dongmBYN9i2dtX",
       "name": "Lá dong",
       "category": "Khác",
+      "shelfLife": "short",
+      "preservationCondition": "fridge",
       "baseUnit": "lá",
       "inventoryUnits": [
         "lá"
@@ -1649,6 +1881,8 @@
       "id": "Lá chuốiQ8n4MaNj6n",
       "name": "Lá chuối",
       "category": "Khác",
+      "shelfLife": "short",
+      "preservationCondition": "fridge",
       "baseUnit": "lá",
       "inventoryUnits": [
         "lá"
@@ -1661,6 +1895,8 @@
       "id": "Bột gạo tẻOiZgdglJUz",
       "name": "Bột gạo tẻ",
       "category": "Tinh bột",
+      "shelfLife": "very_long",
+      "preservationCondition": "cool_dry",
       "baseUnit": "g",
       "inventoryUnits": [
         "g",
@@ -1675,6 +1911,8 @@
       "id": "Bột gạo nếpJnLKNIfFnn",
       "name": "Bột gạo nếp",
       "category": "Tinh bột",
+      "shelfLife": "very_long",
+      "preservationCondition": "cool_dry",
       "baseUnit": "g",
       "inventoryUnits": [
         "g",
@@ -1689,6 +1927,8 @@
       "id": "Bột mìpg1-aZIoDs",
       "name": "Bột mì",
       "category": "Tinh bột",
+      "shelfLife": "very_long",
+      "preservationCondition": "cool_dry",
       "baseUnit": "g",
       "inventoryUnits": [
         "g",
@@ -1703,6 +1943,8 @@
       "id": "Bột năngho3LUqgeAO",
       "name": "Bột năng",
       "category": "Tinh bột",
+      "shelfLife": "very_long",
+      "preservationCondition": "cool_dry",
       "baseUnit": "g",
       "inventoryUnits": [
         "g",
@@ -1717,6 +1959,8 @@
       "id": "Men nởiej8VSL_mG",
       "name": "Men nở",
       "category": "Khác",
+      "shelfLife": "very_long",
+      "preservationCondition": "cool_dry",
       "baseUnit": "g",
       "inventoryUnits": [
         "g",
@@ -1731,6 +1975,9 @@
       "id": "Nước9jnS_eO8Cv",
       "name": "Nước",
       "category": "Khác",
+      "shelfLife": "very_long",
+      "preservationCondition": "room_temperature",
+      "alwaysAvailable": true,
       "baseUnit": "ml",
       "inventoryUnits": [
         "ml",
@@ -1746,6 +1993,8 @@
       "id": "Tôm sú4vHhSAcJTQ",
       "name": "Tôm sú",
       "category": "Hải sản",
+      "shelfLife": "very_short",
+      "preservationCondition": "freezer",
       "baseUnit": "g",
       "inventoryUnits": [
         "g",
@@ -1760,6 +2009,8 @@
       "id": "TépQ19gfL2cl1",
       "name": "Tép",
       "category": "Hải sản",
+      "shelfLife": "very_short",
+      "preservationCondition": "freezer",
       "baseUnit": "g",
       "inventoryUnits": [
         "g",
@@ -1774,6 +2025,8 @@
       "id": "Tôm nhỏWyLLGEkqA0",
       "name": "Tôm nhỏ",
       "category": "Hải sản",
+      "shelfLife": "very_short",
+      "preservationCondition": "freezer",
       "baseUnit": "g",
       "inventoryUnits": [
         "g",
@@ -1788,6 +2041,8 @@
       "id": "Sữa tươi không đườngHqQaWllTs2",
       "name": "Sữa tươi không đường",
       "category": "Sữa & trứng",
+      "shelfLife": "short",
+      "preservationCondition": "fridge",
       "baseUnit": "ml",
       "inventoryUnits": [
         "ml",
@@ -1802,6 +2057,8 @@
       "id": "Vừng đenriz3jbwY9w",
       "name": "Vừng đen",
       "category": "Gia vị",
+      "shelfLife": "very_long",
+      "preservationCondition": "cool_dry",
       "baseUnit": "g",
       "inventoryUnits": [
         "g",
@@ -1816,6 +2073,8 @@
       "id": "Vừng trắng2HuELM4uwT",
       "name": "Vừng trắng",
       "category": "Gia vị",
+      "shelfLife": "very_long",
+      "preservationCondition": "cool_dry",
       "baseUnit": "g",
       "inventoryUnits": [
         "g",
@@ -1830,6 +2089,8 @@
       "id": "Đậu xanhnIxKmFNrRM",
       "name": "Đậu xanh",
       "category": "Khác",
+      "shelfLife": "very_long",
+      "preservationCondition": "cool_dry",
       "baseUnit": "g",
       "inventoryUnits": [
         "g",
@@ -1844,6 +2105,8 @@
       "id": "Đậu đỏ26Kvs2YJnx",
       "name": "Đậu đỏ",
       "category": "Khác",
+      "shelfLife": "very_long",
+      "preservationCondition": "cool_dry",
       "baseUnit": "g",
       "inventoryUnits": [
         "g",
@@ -1858,6 +2121,8 @@
       "id": "Đậu đenzQGtWTgGky",
       "name": "Đậu đen",
       "category": "Khác",
+      "shelfLife": "very_long",
+      "preservationCondition": "cool_dry",
       "baseUnit": "g",
       "inventoryUnits": [
         "g",
@@ -1872,6 +2137,8 @@
       "id": "Đậu nànhj17It1Wlhn",
       "name": "Đậu nành",
       "category": "Khác",
+      "shelfLife": "very_long",
+      "preservationCondition": "cool_dry",
       "baseUnit": "g",
       "inventoryUnits": [
         "g",
@@ -1886,6 +2153,8 @@
       "id": "Đậu que51Zk81TOZu",
       "name": "Đậu que",
       "category": "Rau củ",
+      "shelfLife": "short",
+      "preservationCondition": "fridge",
       "baseUnit": "g",
       "inventoryUnits": [
         "g",
@@ -1900,6 +2169,8 @@
       "id": "Khoai tâylAyMsTv486",
       "name": "Khoai tây",
       "category": "Tinh bột",
+      "shelfLife": "long",
+      "preservationCondition": "cool_dry",
       "baseUnit": "g",
       "inventoryUnits": [
         "g",
@@ -1914,6 +2185,8 @@
       "id": "Khoai langqUx7MJBv9X",
       "name": "Khoai lang",
       "category": "Tinh bột",
+      "shelfLife": "long",
+      "preservationCondition": "cool_dry",
       "baseUnit": "g",
       "inventoryUnits": [
         "g",
@@ -1930,6 +2203,8 @@
       "id": "Nước dừaaW0TqQ5HKb",
       "name": "Nước dừa",
       "category": "Khác",
+      "shelfLife": "short",
+      "preservationCondition": "fridge",
       "baseUnit": "ml",
       "inventoryUnits": [
         "ml",
@@ -1944,6 +2219,8 @@
       "id": "Dừa nạoqQdzvpztgD",
       "name": "Dừa nạo",
       "category": "Rau củ",
+      "shelfLife": "short",
+      "preservationCondition": "fridge",
       "baseUnit": "g",
       "inventoryUnits": [
         "g",
@@ -1958,6 +2235,8 @@
       "id": "Lá chanhiB3cqNxKdQ",
       "name": "Lá chanh",
       "category": "Gia vị",
+      "shelfLife": "very_short",
+      "preservationCondition": "fridge",
       "baseUnit": "lá",
       "inventoryUnits": [
         "lá"
@@ -1970,6 +2249,8 @@
       "id": "Trứng cútj_0gniwu4w",
       "name": "Trứng cút",
       "category": "Sữa & trứng",
+      "shelfLife": "medium",
+      "preservationCondition": "fridge",
       "baseUnit": "quả",
       "inventoryUnits": [
         "quả"
@@ -1982,6 +2263,8 @@
       "id": "Mực ốngLunhJeJvsh",
       "name": "Mực ống",
       "category": "Hải sản",
+      "shelfLife": "very_short",
+      "preservationCondition": "freezer",
       "baseUnit": "g",
       "inventoryUnits": [
         "g",
@@ -1996,6 +2279,8 @@
       "id": "Rau cần tây4JcCvsR3IE",
       "name": "Rau cần tây",
       "category": "Rau củ",
+      "shelfLife": "very_short",
+      "preservationCondition": "fridge",
       "baseUnit": "g",
       "inventoryUnits": [
         "g",
@@ -2010,6 +2295,8 @@
       "id": "Rau cần talpL5fenu9D",
       "name": "Rau cần ta",
       "category": "Rau củ",
+      "shelfLife": "very_short",
+      "preservationCondition": "fridge",
       "baseUnit": "g",
       "inventoryUnits": [
         "g",
@@ -2024,6 +2311,8 @@
       "id": "Rau bíywN7JoWrKo",
       "name": "Rau bí",
       "category": "Rau củ",
+      "shelfLife": "very_short",
+      "preservationCondition": "fridge",
       "baseUnit": "g",
       "inventoryUnits": [
         "g",
@@ -2038,6 +2327,8 @@
       "id": "Rau đay-OjyFKet0H",
       "name": "Rau đay",
       "category": "Rau củ",
+      "shelfLife": "very_short",
+      "preservationCondition": "fridge",
       "baseUnit": "g",
       "inventoryUnits": [
         "g",
@@ -2052,6 +2343,8 @@
       "id": "MướpUs4jbq5bn0",
       "name": "Mướp",
       "category": "Rau củ",
+      "shelfLife": "short",
+      "preservationCondition": "fridge",
       "baseUnit": "g",
       "inventoryUnits": [
         "g",
@@ -2066,6 +2359,8 @@
       "id": "Rau mồng tơiMCVFPgFWtb",
       "name": "Rau mồng tơi",
       "category": "Rau củ",
+      "shelfLife": "very_short",
+      "preservationCondition": "fridge",
       "baseUnit": "g",
       "inventoryUnits": [
         "g",
@@ -2080,6 +2375,8 @@
       "id": "Cốt dừa0fULSP8Mc7",
       "name": "Cốt dừa",
       "category": "Gia vị",
+      "shelfLife": "short",
+      "preservationCondition": "fridge",
       "baseUnit": "ml",
       "inventoryUnits": [
         "ml",
@@ -2095,6 +2392,8 @@
       "id": "Tóp mỡU2aR7-xY4p",
       "name": "Tóp mỡ",
       "category": "Thịt",
+      "shelfLife": "long",
+      "preservationCondition": "cool_dry",
       "baseUnit": "g",
       "inventoryUnits": [
         "g",
@@ -2109,6 +2408,8 @@
       "id": "Rễ ngòfxPj2T9HiF",
       "name": "Rễ ngò",
       "category": "Gia vị",
+      "shelfLife": "short",
+      "preservationCondition": "fridge",
       "baseUnit": "chiếc",
       "inventoryUnits": [
         "chiếc"
@@ -2121,6 +2422,8 @@
       "id": "Củ cảikk2MGWKOnc",
       "name": "Củ cải",
       "category": "Rau củ",
+      "shelfLife": "long",
+      "preservationCondition": "fridge",
       "baseUnit": "g",
       "inventoryUnits": [
         "g",
@@ -2137,6 +2440,8 @@
       "id": "Đậu phộnggq3Fe10jOx",
       "name": "Đậu phộng",
       "category": "Khác",
+      "shelfLife": "very_long",
+      "preservationCondition": "cool_dry",
       "baseUnit": "g",
       "inventoryUnits": [
         "g",
@@ -2151,6 +2456,8 @@
       "id": "Tương đen (Tương ngọt)7RPgXnGGi2",
       "name": "Tương đen (Tương ngọt)",
       "category": "Gia vị",
+      "shelfLife": "very_long",
+      "preservationCondition": "cool_dry",
       "baseUnit": "ml",
       "inventoryUnits": [
         "ml",
@@ -2166,6 +2473,8 @@
       "id": "Tỏi tâyI-jCssQy3V",
       "name": "Tỏi tây",
       "category": "Gia vị",
+      "shelfLife": "medium",
+      "preservationCondition": "fridge",
       "baseUnit": "g",
       "inventoryUnits": [
         "g",
@@ -2182,6 +2491,8 @@
       "id": "Nước màumi1ObkFY7D",
       "name": "Nước màu",
       "category": "Gia vị",
+      "shelfLife": "very_long",
+      "preservationCondition": "cool_dry",
       "baseUnit": "ml",
       "inventoryUnits": [
         "ml",
@@ -2196,6 +2507,8 @@
       "id": "Đường vàngNlPTxVKgvv",
       "name": "Đường vàng",
       "category": "Gia vị",
+      "shelfLife": "very_long",
+      "preservationCondition": "cool_dry",
       "baseUnit": "g",
       "inventoryUnits": [
         "g",
@@ -2210,6 +2523,8 @@
       "id": "NghệvGpWT6hE_4",
       "name": "Nghệ",
       "category": "Gia vị",
+      "shelfLife": "long",
+      "preservationCondition": "cool_dry",
       "baseUnit": "g",
       "inventoryUnits": [
         "g",
@@ -2226,6 +2541,8 @@
       "id": "Quả sấuCYO1R7pm-6",
       "name": "Quả sấu",
       "category": "Gia vị",
+      "shelfLife": "medium",
+      "preservationCondition": "fridge",
       "baseUnit": "g",
       "inventoryUnits": [
         "g",
@@ -2242,6 +2559,8 @@
       "id": "Mía câyHeGHZwD6T2",
       "name": "Mía cây",
       "category": "Rau củ",
+      "shelfLife": "medium",
+      "preservationCondition": "cool_dry",
       "baseUnit": "g",
       "inventoryUnits": [
         "g",
@@ -2256,6 +2575,8 @@
       "id": "Dưa cảiBOMOcKVr8B",
       "name": "Dưa cải",
       "category": "Rau củ",
+      "shelfLife": "short",
+      "preservationCondition": "fridge",
       "baseUnit": "g",
       "inventoryUnits": [
         "g",
@@ -2270,6 +2591,8 @@
       "id": "Rau cải canhE6FrtMfNND",
       "name": "Rau cải canh",
       "category": "Rau củ",
+      "shelfLife": "very_short",
+      "preservationCondition": "fridge",
       "baseUnit": "g",
       "inventoryUnits": [
         "g",
@@ -2284,6 +2607,8 @@
       "id": "Rau cải thìaTCzhEhy6rE",
       "name": "Rau cải thìa",
       "category": "Rau củ",
+      "shelfLife": "very_short",
+      "preservationCondition": "fridge",
       "baseUnit": "g",
       "inventoryUnits": [
         "g",
@@ -2298,6 +2623,8 @@
       "id": "Rau cải chípDjFZcdqEQz",
       "name": "Rau cải chíp",
       "category": "Rau củ",
+      "shelfLife": "very_short",
+      "preservationCondition": "fridge",
       "baseUnit": "g",
       "inventoryUnits": [
         "g",
@@ -2312,6 +2639,8 @@
       "id": "Đu đủAMID8jvebp",
       "name": "Đu đủ",
       "category": "Rau củ",
+      "shelfLife": "medium",
+      "preservationCondition": "fridge",
       "baseUnit": "g",
       "inventoryUnits": [
         "g",
