@@ -3,822 +3,2324 @@
     {
       "id": "Đậu phụQdYQjd3uDU",
       "name": "Đậu phụ",
-      "category": "Khác"
+      "category": "Khác",
+      "baseUnit": "g",
+      "inventoryUnits": [
+        "g",
+        "kg"
+      ],
+      "recipeUnitConversions": {
+        "g": 1,
+        "kg": 1000
+      }
     },
     {
       "id": "Đậu nontHeqcHqWEy",
       "name": "Đậu non",
-      "category": "Khác"
+      "category": "Khác",
+      "baseUnit": "g",
+      "inventoryUnits": [
+        "g",
+        "kg"
+      ],
+      "recipeUnitConversions": {
+        "g": 1,
+        "kg": 1000
+      }
     },
     {
       "id": "Hành láZtNmZbNswb",
       "name": "Hành lá",
-      "category": "Gia vị"
+      "category": "Gia vị",
+      "baseUnit": "g",
+      "inventoryUnits": [
+        "g",
+        "kg"
+      ],
+      "recipeUnitConversions": {
+        "g": 1,
+        "kg": 1000
+      }
     },
     {
       "id": "Hành tímYvb82U-VOH",
       "name": "Hành tím",
-      "category": "Gia vị"
+      "category": "Gia vị",
+      "baseUnit": "g",
+      "inventoryUnits": [
+        "g",
+        "kg",
+        "nhánh"
+      ],
+      "recipeUnitConversions": {
+        "g": 1,
+        "kg": 1000,
+        "nhánh": 10
+      }
     },
     {
       "id": "Mùi tàuUQolO_X6zd",
       "name": "Mùi tàu",
-      "category": "Gia vị"
+      "category": "Gia vị",
+      "baseUnit": "g",
+      "inventoryUnits": [
+        "g",
+        "kg"
+      ],
+      "recipeUnitConversions": {
+        "g": 1,
+        "kg": 1000
+      }
     },
     {
       "id": "Mùi tajayFO1gKOJ",
       "name": "Mùi ta",
-      "category": "Gia vị"
+      "category": "Gia vị",
+      "baseUnit": "g",
+      "inventoryUnits": [
+        "g",
+        "kg"
+      ],
+      "recipeUnitConversions": {
+        "g": 1,
+        "kg": 1000
+      }
     },
     {
       "id": "Kinh giới90WanixOVC",
       "name": "Kinh giới",
-      "category": "Gia vị"
+      "category": "Gia vị",
+      "baseUnit": "g",
+      "inventoryUnits": [
+        "g",
+        "kg"
+      ],
+      "recipeUnitConversions": {
+        "g": 1,
+        "kg": 1000
+      }
     },
     {
       "id": "Tía tôiZc3rSS3Pf",
       "name": "Tía tô",
-      "category": "Gia vị"
+      "category": "Gia vị",
+      "baseUnit": "g",
+      "inventoryUnits": [
+        "g",
+        "kg"
+      ],
+      "recipeUnitConversions": {
+        "g": 1,
+        "kg": 1000
+      }
     },
     {
       "id": "Thìa là2Y2R1GD_jq",
       "name": "Thìa là",
-      "category": "Gia vị"
+      "category": "Gia vị",
+      "baseUnit": "g",
+      "inventoryUnits": [
+        "g",
+        "kg"
+      ],
+      "recipeUnitConversions": {
+        "g": 1,
+        "kg": 1000
+      }
     },
     {
       "id": "Lá lốtE7OA57EkX-",
       "name": "Lá lốt",
-      "category": "Rau củ"
+      "category": "Rau củ",
+      "baseUnit": "lá",
+      "inventoryUnits": [
+        "lá"
+      ],
+      "recipeUnitConversions": {
+        "lá": 1
+      }
     },
     {
       "id": "Tỏi3NILO1jEd0",
       "name": "Tỏi",
-      "category": "Gia vị"
+      "category": "Gia vị",
+      "baseUnit": "g",
+      "inventoryUnits": [
+        "g",
+        "kg",
+        "nhánh",
+        "củ"
+      ],
+      "recipeUnitConversions": {
+        "g": 1,
+        "kg": 1000,
+        "nhánh": 5,
+        "củ": 40
+      }
     },
     {
       "id": "Hành tâyPsERexf4zd",
       "name": "Hành tây",
-      "category": "Rau củ"
+      "category": "Rau củ",
+      "baseUnit": "g",
+      "inventoryUnits": [
+        "g",
+        "kg",
+        "củ"
+      ],
+      "recipeUnitConversions": {
+        "g": 1,
+        "kg": 1000,
+        "củ": 150
+      }
     },
     {
       "id": "Xà láchGY5tn2xg5J",
       "name": "Xà lách",
-      "category": "Rau củ"
+      "category": "Rau củ",
+      "baseUnit": "g",
+      "inventoryUnits": [
+        "g",
+        "kg",
+        "lá"
+      ],
+      "recipeUnitConversions": {
+        "g": 1,
+        "kg": 1000,
+        "lá": 10
+      }
     },
     {
       "id": "Dưa chuộtiww2N4-K0c",
       "name": "Dưa chuột",
-      "category": "Rau củ"
+      "category": "Rau củ",
+      "baseUnit": "g",
+      "inventoryUnits": [
+        "g",
+        "kg",
+        "quả"
+      ],
+      "recipeUnitConversions": {
+        "g": 1,
+        "kg": 1000,
+        "quả": 150
+      }
     },
     {
       "id": "Trứng gà72vN9igVwa",
       "name": "Trứng gà",
-      "category": "Sữa & trứng"
+      "category": "Sữa & trứng",
+      "baseUnit": "quả",
+      "inventoryUnits": [
+        "quả"
+      ],
+      "recipeUnitConversions": {
+        "quả": 1
+      }
     },
     {
       "id": "Trứng vịt59-1eAcjqZ",
       "name": "Trứng vịt",
-      "category": "Sữa & trứng"
+      "category": "Sữa & trứng",
+      "baseUnit": "quả",
+      "inventoryUnits": [
+        "quả"
+      ],
+      "recipeUnitConversions": {
+        "quả": 1
+      }
     },
     {
       "id": "Trứng cáNtiSxACUNP",
       "name": "Trứng cá",
-      "category": "Sữa & trứng"
+      "category": "Sữa & trứng",
+      "baseUnit": "g",
+      "inventoryUnits": [
+        "g",
+        "kg"
+      ],
+      "recipeUnitConversions": {
+        "g": 1,
+        "kg": 1000
+      }
     },
     {
       "id": "Thịt heo nạc vaiVXHDweEHeG",
       "name": "Thịt heo nạc vai",
-      "category": "Thịt"
+      "category": "Thịt",
+      "baseUnit": "g",
+      "inventoryUnits": [
+        "g",
+        "kg"
+      ],
+      "recipeUnitConversions": {
+        "g": 1,
+        "kg": 1000
+      }
     },
     {
       "id": "Thịt heo ba chỉtn-meEAQZu",
       "name": "Thịt heo ba chỉ",
-      "category": "Thịt"
+      "category": "Thịt",
+      "baseUnit": "g",
+      "inventoryUnits": [
+        "g",
+        "kg"
+      ],
+      "recipeUnitConversions": {
+        "g": 1,
+        "kg": 1000
+      }
     },
     {
       "id": "Sườn heo nonlic0JR5JmA",
       "name": "Sườn heo non",
-      "category": "Thịt"
+      "category": "Thịt",
+      "baseUnit": "g",
+      "inventoryUnits": [
+        "g",
+        "kg"
+      ],
+      "recipeUnitConversions": {
+        "g": 1,
+        "kg": 1000
+      }
     },
     {
       "id": "Sườn heo già2aDAA9ooHw",
       "name": "Sườn heo già",
-      "category": "Thịt"
+      "category": "Thịt",
+      "baseUnit": "g",
+      "inventoryUnits": [
+        "g",
+        "kg"
+      ],
+      "recipeUnitConversions": {
+        "g": 1,
+        "kg": 1000
+      }
     },
     {
       "id": "Mỡ heo tảng0WU-I2Ixi4",
       "name": "Mỡ heo tảng",
-      "category": "Thịt"
+      "category": "Thịt",
+      "baseUnit": "g",
+      "inventoryUnits": [
+        "g",
+        "kg"
+      ],
+      "recipeUnitConversions": {
+        "g": 1,
+        "kg": 1000
+      }
     },
     {
       "id": "Mỡ heo lỏngd_H3wfitXK",
       "name": "Mỡ heo lỏng",
-      "category": "Thịt"
+      "category": "Thịt",
+      "baseUnit": "ml",
+      "inventoryUnits": [
+        "ml",
+        "lít"
+      ],
+      "recipeUnitConversions": {
+        "ml": 1,
+        "lít": 1000
+      }
     },
     {
       "id": "Gan heo2X9fQYeB8e",
       "name": "Gan heo",
-      "category": "Thịt"
+      "category": "Thịt",
+      "baseUnit": "g",
+      "inventoryUnits": [
+        "g",
+        "kg"
+      ],
+      "recipeUnitConversions": {
+        "g": 1,
+        "kg": 1000
+      }
     },
     {
       "id": "Tim heoCWf5HOGp1L",
       "name": "Tim heo",
-      "category": "Thịt"
+      "category": "Thịt",
+      "baseUnit": "g",
+      "inventoryUnits": [
+        "g",
+        "kg"
+      ],
+      "recipeUnitConversions": {
+        "g": 1,
+        "kg": 1000
+      }
     },
     {
       "id": "Cật heoIFzsT44y8n",
       "name": "Cật heo",
-      "category": "Thịt"
+      "category": "Thịt",
+      "baseUnit": "g",
+      "inventoryUnits": [
+        "g",
+        "kg"
+      ],
+      "recipeUnitConversions": {
+        "g": 1,
+        "kg": 1000
+      }
     },
     {
       "id": "Thịt bò nạmJ1_LlvskPv",
       "name": "Thịt bò nạm",
-      "category": "Hải sản"
+      "category": "Hải sản",
+      "baseUnit": "g",
+      "inventoryUnits": [
+        "g",
+        "kg"
+      ],
+      "recipeUnitConversions": {
+        "g": 1,
+        "kg": 1000
+      }
     },
     {
       "id": "Thịt bò gầuxg6qB7XSss",
       "name": "Thịt bò gầu",
-      "category": "Thịt"
+      "category": "Thịt",
+      "baseUnit": "g",
+      "inventoryUnits": [
+        "g",
+        "kg"
+      ],
+      "recipeUnitConversions": {
+        "g": 1,
+        "kg": 1000
+      }
     },
     {
       "id": "Sườn bòsZCwrc2GVy",
       "name": "Sườn bò",
-      "category": "Thịt"
+      "category": "Thịt",
+      "baseUnit": "g",
+      "inventoryUnits": [
+        "g",
+        "kg"
+      ],
+      "recipeUnitConversions": {
+        "g": 1,
+        "kg": 1000
+      }
     },
     {
       "id": "Thịt bò thănDyzpaj8qvS",
       "name": "Thịt bò thăn",
-      "category": "Thịt"
+      "category": "Thịt",
+      "baseUnit": "g",
+      "inventoryUnits": [
+        "g",
+        "kg"
+      ],
+      "recipeUnitConversions": {
+        "g": 1,
+        "kg": 1000
+      }
     },
     {
       "id": "Bụng cáYEwaP8LSBh",
       "name": "Bụng cá",
-      "category": "Thịt"
+      "category": "Thịt",
+      "baseUnit": "g",
+      "inventoryUnits": [
+        "g",
+        "kg"
+      ],
+      "recipeUnitConversions": {
+        "g": 1,
+        "kg": 1000
+      }
     },
     {
       "id": "Đuôi cáTG7XKl6Ss9",
       "name": "Đuôi cá",
-      "category": "Hải sản"
+      "category": "Hải sản",
+      "baseUnit": "g",
+      "inventoryUnits": [
+        "g",
+        "kg"
+      ],
+      "recipeUnitConversions": {
+        "g": 1,
+        "kg": 1000
+      }
     },
     {
       "id": "Đầu cáZC-K1PBaKf",
       "name": "Đầu cá",
-      "category": "Hải sản"
+      "category": "Hải sản",
+      "baseUnit": "g",
+      "inventoryUnits": [
+        "g",
+        "kg"
+      ],
+      "recipeUnitConversions": {
+        "g": 1,
+        "kg": 1000
+      }
     },
     {
       "id": "Thịt gà đùi0vjCseh7j1",
       "name": "Thịt gà đùi",
-      "category": "Thịt"
+      "category": "Thịt",
+      "baseUnit": "g",
+      "inventoryUnits": [
+        "g",
+        "kg"
+      ],
+      "recipeUnitConversions": {
+        "g": 1,
+        "kg": 1000
+      }
     },
     {
       "id": "Thịt gà cánhugfciVhuZy",
       "name": "Thịt gà cánh",
-      "category": "Thịt"
+      "category": "Thịt",
+      "baseUnit": "g",
+      "inventoryUnits": [
+        "g",
+        "kg"
+      ],
+      "recipeUnitConversions": {
+        "g": 1,
+        "kg": 1000
+      }
     },
     {
       "id": "Xương gàRn56emeuiJ",
       "name": "Xương gà",
-      "category": "Thịt"
+      "category": "Thịt",
+      "baseUnit": "g",
+      "inventoryUnits": [
+        "g",
+        "kg"
+      ],
+      "recipeUnitConversions": {
+        "g": 1,
+        "kg": 1000
+      }
     },
     {
       "id": "Thịt gà ứcirYK34PGfJ",
       "name": "Thịt gà ức",
-      "category": "Thịt"
+      "category": "Thịt",
+      "baseUnit": "g",
+      "inventoryUnits": [
+        "g",
+        "kg"
+      ],
+      "recipeUnitConversions": {
+        "g": 1,
+        "kg": 1000
+      }
     },
     {
       "id": "Thịt heo xayTtz3UMTzNU",
       "name": "Thịt heo xay",
-      "category": "Thịt"
+      "category": "Thịt",
+      "baseUnit": "g",
+      "inventoryUnits": [
+        "g",
+        "kg"
+      ],
+      "recipeUnitConversions": {
+        "g": 1,
+        "kg": 1000
+      }
     },
     {
       "id": "Thịt vịtVdTLg_qlzR",
       "name": "Thịt vịt",
-      "category": "Thịt"
+      "category": "Thịt",
+      "baseUnit": "g",
+      "inventoryUnits": [
+        "g",
+        "kg"
+      ],
+      "recipeUnitConversions": {
+        "g": 1,
+        "kg": 1000
+      }
     },
     {
       "id": "Cà tímIfuFxVXDBv",
       "name": "Cà tím",
-      "category": "Rau củ"
+      "category": "Rau củ",
+      "baseUnit": "g",
+      "inventoryUnits": [
+        "g",
+        "kg",
+        "quả"
+      ],
+      "recipeUnitConversions": {
+        "g": 1,
+        "kg": 1000,
+        "quả": 250
+      }
     },
     {
       "id": "Xương ống heos9WjV1vL1p",
       "name": "Xương ống heo",
-      "category": "Thịt"
+      "category": "Thịt",
+      "baseUnit": "g",
+      "inventoryUnits": [
+        "g",
+        "kg"
+      ],
+      "recipeUnitConversions": {
+        "g": 1,
+        "kg": 1000
+      }
     },
     {
       "id": "Đường trắngDH_YV6vOlJ",
       "name": "Đường trắng",
-      "category": "Gia vị"
+      "category": "Gia vị",
+      "baseUnit": "g",
+      "inventoryUnits": [
+        "g",
+        "kg"
+      ],
+      "recipeUnitConversions": {
+        "g": 1,
+        "kg": 1000,
+        "thìa": 12.5
+      }
     },
     {
       "id": "Đường phènCgPf36wjMX",
       "name": "Đường phèn",
-      "category": "Gia vị"
+      "category": "Gia vị",
+      "baseUnit": "g",
+      "inventoryUnits": [
+        "g",
+        "kg"
+      ],
+      "recipeUnitConversions": {
+        "g": 1,
+        "kg": 1000,
+        "thìa": 12
+      }
     },
     {
       "id": "Muối iotmxmFIcYWUb",
       "name": "Muối iot",
-      "category": "Gia vị"
+      "category": "Gia vị",
+      "baseUnit": "g",
+      "inventoryUnits": [
+        "g",
+        "kg"
+      ],
+      "recipeUnitConversions": {
+        "g": 1,
+        "kg": 1000,
+        "thìa": 5
+      }
     },
     {
       "id": "Muối trắngrOsVaI3tKv",
       "name": "Muối trắng",
-      "category": "Gia vị"
+      "category": "Gia vị",
+      "baseUnit": "g",
+      "inventoryUnits": [
+        "g",
+        "kg"
+      ],
+      "recipeUnitConversions": {
+        "g": 1,
+        "kg": 1000
+      }
     },
     {
       "id": "Nước mắm9koIj5Fz3a",
       "name": "Nước mắm",
-      "category": "Gia vị"
+      "category": "Gia vị",
+      "baseUnit": "ml",
+      "inventoryUnits": [
+        "ml",
+        "lít"
+      ],
+      "recipeUnitConversions": {
+        "ml": 1,
+        "lít": 1000,
+        "thìa": 15
+      }
     },
     {
       "id": "Xì dầuJhjF6UAtE7",
       "name": "Xì dầu",
-      "category": "Gia vị"
+      "category": "Gia vị",
+      "baseUnit": "ml",
+      "inventoryUnits": [
+        "ml",
+        "lít"
+      ],
+      "recipeUnitConversions": {
+        "ml": 1,
+        "lít": 1000,
+        "thìa": 15
+      }
     },
     {
       "id": "Mật ongOr177EkX2-",
       "name": "Mật ong",
-      "category": "Gia vị"
+      "category": "Gia vị",
+      "baseUnit": "ml",
+      "inventoryUnits": [
+        "ml",
+        "lít"
+      ],
+      "recipeUnitConversions": {
+        "ml": 1,
+        "lít": 1000,
+        "thìa": 15
+      }
     },
     {
       "id": "Hạt tiêu4eEOesKltQ",
       "name": "Hạt tiêu",
-      "category": "Gia vị"
+      "category": "Gia vị",
+      "baseUnit": "g",
+      "inventoryUnits": [
+        "g",
+        "kg"
+      ],
+      "recipeUnitConversions": {
+        "g": 1,
+        "kg": 1000,
+        "thìa": 2.5
+      }
     },
     {
       "id": "Dầu ănb13XIYIrDh",
       "name": "Dầu ăn",
-      "category": "Gia vị"
+      "category": "Gia vị",
+      "baseUnit": "ml",
+      "inventoryUnits": [
+        "ml",
+        "lít"
+      ],
+      "recipeUnitConversions": {
+        "ml": 1,
+        "lít": 1000,
+        "thìa": 15
+      }
     },
     {
       "id": "Bột điềuNNx_gW88pY",
       "name": "Bột điều",
-      "category": "Khác"
+      "category": "Khác",
+      "baseUnit": "g",
+      "inventoryUnits": [
+        "g",
+        "kg"
+      ],
+      "recipeUnitConversions": {
+        "g": 1,
+        "kg": 1000,
+        "thìa": 5
+      }
     },
     {
       "id": "Chanh2c6lpZSaM4",
       "name": "Chanh",
-      "category": "Gia vị"
+      "category": "Gia vị",
+      "baseUnit": "ml",
+      "inventoryUnits": [
+        "ml",
+        "lít",
+        "quả"
+      ],
+      "recipeUnitConversions": {
+        "ml": 1,
+        "lít": 1000,
+        "quả": 30
+      }
     },
     {
       "id": "Quất1tbPuuy1rb",
       "name": "Quất",
-      "category": "Gia vị"
+      "category": "Gia vị",
+      "baseUnit": "quả",
+      "inventoryUnits": [
+        "quả"
+      ],
+      "recipeUnitConversions": {
+        "quả": 1
+      }
     },
     {
       "id": "Giò lụa9aRWcTrL67",
       "name": "Giò lụa",
-      "category": "Đồ hộp"
+      "category": "Đồ hộp",
+      "baseUnit": "g",
+      "inventoryUnits": [
+        "g",
+        "kg"
+      ],
+      "recipeUnitConversions": {
+        "g": 1,
+        "kg": 1000
+      }
     },
     {
       "id": "Chả mỡGr-Mw11ezE",
       "name": "Chả mỡ",
-      "category": "Đồ hộp"
+      "category": "Đồ hộp",
+      "baseUnit": "g",
+      "inventoryUnits": [
+        "g",
+        "kg"
+      ],
+      "recipeUnitConversions": {
+        "g": 1,
+        "kg": 1000
+      }
     },
     {
       "id": "Mọc bò0l6Y3y4t0R",
       "name": "Mọc bò",
-      "category": "Đồ hộp"
+      "category": "Đồ hộp",
+      "baseUnit": "g",
+      "inventoryUnits": [
+        "g",
+        "kg"
+      ],
+      "recipeUnitConversions": {
+        "g": 1,
+        "kg": 1000
+      }
     },
     {
       "id": "Cua đồng_ZT1s1jy48",
       "name": "Cua đồng",
-      "category": "Hải sản"
+      "category": "Hải sản",
+      "baseUnit": "g",
+      "inventoryUnits": [
+        "g",
+        "kg"
+      ],
+      "recipeUnitConversions": {
+        "g": 1,
+        "kg": 1000
+      }
     },
     {
       "id": "Cà chuaZP4MdEXiO_",
       "name": "Cà chua",
-      "category": "Rau củ"
+      "category": "Rau củ",
+      "baseUnit": "g",
+      "inventoryUnits": [
+        "g",
+        "kg",
+        "quả"
+      ],
+      "recipeUnitConversions": {
+        "g": 1,
+        "kg": 1000,
+        "quả": 100
+      }
     },
     {
       "id": "Bơ lạtbK-8VT5e-z",
       "name": "Bơ lạt",
-      "category": "Gia vị"
+      "category": "Gia vị",
+      "baseUnit": "g",
+      "inventoryUnits": [
+        "g",
+        "kg"
+      ],
+      "recipeUnitConversions": {
+        "g": 1,
+        "kg": 1000
+      }
     },
     {
       "id": "Ớt đỏ cay4cIqrjz_8U",
       "name": "Ớt đỏ cay",
-      "category": "Rau củ"
+      "category": "Rau củ",
+      "baseUnit": "g",
+      "inventoryUnits": [
+        "g",
+        "kg",
+        "quả"
+      ],
+      "recipeUnitConversions": {
+        "g": 1,
+        "kg": 1000,
+        "quả": 10
+      }
     },
     {
       "id": "Ớt chuông đỏOH3gtce7jk",
       "name": "Ớt chuông đỏ",
-      "category": "Rau củ"
+      "category": "Rau củ",
+      "baseUnit": "g",
+      "inventoryUnits": [
+        "g",
+        "kg",
+        "quả"
+      ],
+      "recipeUnitConversions": {
+        "g": 1,
+        "kg": 1000,
+        "quả": 150
+      }
     },
     {
       "id": "Ớt chuông xanh1o16kbL30u",
       "name": "Ớt chuông xanh",
-      "category": "Rau củ"
+      "category": "Rau củ",
+      "baseUnit": "g",
+      "inventoryUnits": [
+        "g",
+        "kg"
+      ],
+      "recipeUnitConversions": {
+        "g": 1,
+        "kg": 1000
+      }
     },
     {
       "id": "Ớt chuông vàngFLYc7PslEU",
       "name": "Ớt chuông vàng",
-      "category": "Rau củ"
+      "category": "Rau củ",
+      "baseUnit": "g",
+      "inventoryUnits": [
+        "g",
+        "kg"
+      ],
+      "recipeUnitConversions": {
+        "g": 1,
+        "kg": 1000
+      }
     },
     {
       "id": "Ớt xanh cayXUZVWVDT_Y",
       "name": "Ớt xanh cay",
-      "category": "Rau củ"
+      "category": "Rau củ",
+      "baseUnit": "g",
+      "inventoryUnits": [
+        "g",
+        "kg"
+      ],
+      "recipeUnitConversions": {
+        "g": 1,
+        "kg": 1000
+      }
     },
     {
       "id": "Tương ớt1mzBq-weXz",
       "name": "Tương ớt",
-      "category": "Gia vị"
+      "category": "Gia vị",
+      "baseUnit": "ml",
+      "inventoryUnits": [
+        "ml",
+        "lít"
+      ],
+      "recipeUnitConversions": {
+        "ml": 1,
+        "lít": 1000,
+        "thìa": 15
+      }
     },
     {
       "id": "Tương càiHkFzpVbMI",
       "name": "Tương cà",
-      "category": "Gia vị"
+      "category": "Gia vị",
+      "baseUnit": "ml",
+      "inventoryUnits": [
+        "ml",
+        "lít"
+      ],
+      "recipeUnitConversions": {
+        "ml": 1,
+        "lít": 1000,
+        "thìa": 15
+      }
     },
     {
       "id": "Ngải cứutipq4kHmOB",
       "name": "Ngải cứu",
-      "category": "Rau củ"
+      "category": "Rau củ",
+      "baseUnit": "g",
+      "inventoryUnits": [
+        "g",
+        "kg"
+      ],
+      "recipeUnitConversions": {
+        "g": 1,
+        "kg": 1000
+      }
     },
     {
       "id": "Hạt senAdqkHmtif3",
       "name": "Hạt sen",
-      "category": "Rau củ"
+      "category": "Rau củ",
+      "baseUnit": "g",
+      "inventoryUnits": [
+        "g",
+        "kg"
+      ],
+      "recipeUnitConversions": {
+        "g": 1,
+        "kg": 1000
+      }
     },
     {
       "id": "Gừngc-VE7hkDli",
       "name": "Gừng",
-      "category": "Gia vị"
+      "category": "Gia vị",
+      "baseUnit": "g",
+      "inventoryUnits": [
+        "g",
+        "kg",
+        "củ",
+        "nhánh"
+      ],
+      "recipeUnitConversions": {
+        "g": 1,
+        "kg": 1000,
+        "củ": 50,
+        "nhánh": 10
+      }
     },
     {
       "id": "Kỷ tửE9xT5QTAhj",
       "name": "Kỷ tử",
-      "category": "Gia vị"
+      "category": "Gia vị",
+      "baseUnit": "g",
+      "inventoryUnits": [
+        "g",
+        "kg"
+      ],
+      "recipeUnitConversions": {
+        "g": 1,
+        "kg": 1000
+      }
     },
     {
       "id": "Táo đỏqFV1jSTBGd",
       "name": "Táo đỏ",
-      "category": "Gia vị"
+      "category": "Gia vị",
+      "baseUnit": "quả",
+      "inventoryUnits": [
+        "quả"
+      ],
+      "recipeUnitConversions": {
+        "quả": 1
+      }
     },
     {
       "id": "TáođenTRNPr0KCC-",
       "name": "Táo đen",
-      "category": "Gia vị"
+      "category": "Gia vị",
+      "baseUnit": "quả",
+      "inventoryUnits": [
+        "quả"
+      ],
+      "recipeUnitConversions": {
+        "quả": 1
+      }
     },
     {
       "id": "DấmwpjvOTf7hW",
       "name": "Dấm",
-      "category": "Gia vị"
+      "category": "Gia vị",
+      "baseUnit": "ml",
+      "inventoryUnits": [
+        "ml",
+        "lít"
+      ],
+      "recipeUnitConversions": {
+        "ml": 1,
+        "lít": 1000,
+        "thìa": 15
+      }
     },
     {
       "id": "Phở khô2CgiH-Mb0I",
       "name": "Phở khô",
-      "category": "Tinh bột"
+      "category": "Tinh bột",
+      "baseUnit": "g",
+      "inventoryUnits": [
+        "g",
+        "kg"
+      ],
+      "recipeUnitConversions": {
+        "g": 1,
+        "kg": 1000
+      }
     },
     {
       "id": "Bún khôK-nYu2l5_h",
       "name": "Bún khô",
-      "category": "Tinh bột"
+      "category": "Tinh bột",
+      "baseUnit": "g",
+      "inventoryUnits": [
+        "g",
+        "kg"
+      ],
+      "recipeUnitConversions": {
+        "g": 1,
+        "kg": 1000
+      }
     },
     {
       "id": "SảN-nr3-BboO",
       "name": "Sả",
-      "category": "Gia vị"
+      "category": "Gia vị",
+      "baseUnit": "g",
+      "inventoryUnits": [
+        "g",
+        "kg",
+        "củ"
+      ],
+      "recipeUnitConversions": {
+        "g": 1,
+        "kg": 1000,
+        "củ": 20
+      }
     },
     {
       "id": "QuếpC5s9J3cnj",
       "name": "Quế",
-      "category": "Gia vị"
+      "category": "Gia vị",
+      "baseUnit": "thanh",
+      "inventoryUnits": [
+        "thanh"
+      ],
+      "recipeUnitConversions": {
+        "thanh": 1
+      }
     },
     {
       "id": "Thảo quảkXyurFzxSF",
       "name": "Thảo quả",
-      "category": "Gia vị"
+      "category": "Gia vị",
+      "baseUnit": "quả",
+      "inventoryUnits": [
+        "quả"
+      ],
+      "recipeUnitConversions": {
+        "quả": 1
+      }
     },
     {
       "id": "Hoa hồiFHXr32fLXp",
       "name": "Hoa hồi",
-      "category": "Gia vị"
+      "category": "Gia vị",
+      "baseUnit": "chiếc",
+      "inventoryUnits": [
+        "chiếc"
+      ],
+      "recipeUnitConversions": {
+        "chiếc": 1
+      }
     },
     {
       "id": "Thịt bò bắpTmUfLzE2tl",
       "name": "Thịt bò bắp",
-      "category": "Thịt"
+      "category": "Thịt",
+      "baseUnit": "g",
+      "inventoryUnits": [
+        "g",
+        "kg"
+      ],
+      "recipeUnitConversions": {
+        "g": 1,
+        "kg": 1000
+      }
     },
     {
       "id": "Giá đỗLaF0woHgwA",
       "name": "Giá đỗ",
-      "category": "Rau củ"
+      "category": "Rau củ",
+      "baseUnit": "g",
+      "inventoryUnits": [
+        "g",
+        "kg"
+      ],
+      "recipeUnitConversions": {
+        "g": 1,
+        "kg": 1000
+      }
     },
     {
       "id": "Húng quếSnTL9FBfY0",
       "name": "Húng quế",
-      "category": "Gia vị"
+      "category": "Gia vị",
+      "baseUnit": "g",
+      "inventoryUnits": [
+        "g",
+        "kg"
+      ],
+      "recipeUnitConversions": {
+        "g": 1,
+        "kg": 1000
+      }
     },
     {
       "id": "Hoa chuốiTvAka0CYhm",
       "name": "Hoa chuối",
-      "category": "Rau củ"
+      "category": "Rau củ",
+      "baseUnit": "g",
+      "inventoryUnits": [
+        "g",
+        "kg"
+      ],
+      "recipeUnitConversions": {
+        "g": 1,
+        "kg": 1000
+      }
     },
     {
       "id": "Tiết bòfJRNveQPQa",
       "name": "Tiết bò",
-      "category": "Thịt"
+      "category": "Thịt",
+      "baseUnit": "g",
+      "inventoryUnits": [
+        "g",
+        "kg"
+      ],
+      "recipeUnitConversions": {
+        "g": 1,
+        "kg": 1000
+      }
     },
     {
       "id": "Tiết lợn_KUqzKbZRf",
       "name": "Tiết lợn",
-      "category": "Thịt"
+      "category": "Thịt",
+      "baseUnit": "g",
+      "inventoryUnits": [
+        "g",
+        "kg"
+      ],
+      "recipeUnitConversions": {
+        "g": 1,
+        "kg": 1000
+      }
     },
     {
       "id": "Chả cuaZmSmfXObKL",
       "name": "Chả cua",
-      "category": "Đồ hộp"
+      "category": "Đồ hộp",
+      "baseUnit": "g",
+      "inventoryUnits": [
+        "g",
+        "kg"
+      ],
+      "recipeUnitConversions": {
+        "g": 1,
+        "kg": 1000
+      }
     },
     {
       "id": "Mắm ruốc4d_D077Cg6",
       "name": "Mắm ruốc",
-      "category": "Gia vị"
+      "category": "Gia vị",
+      "baseUnit": "g",
+      "inventoryUnits": [
+        "g",
+        "kg"
+      ],
+      "recipeUnitConversions": {
+        "g": 1,
+        "kg": 1000,
+        "thìa": 15
+      }
     },
     {
       "id": "Mắm tépFPEkwDw6dm",
       "name": "Mắm tép",
-      "category": "Gia vị"
+      "category": "Gia vị",
+      "baseUnit": "g",
+      "inventoryUnits": [
+        "g",
+        "kg"
+      ],
+      "recipeUnitConversions": {
+        "g": 1,
+        "kg": 1000
+      }
     },
     {
       "id": "DứaGu02Q4sahX",
       "name": "Dứa",
-      "category": "Rau củ"
+      "category": "Rau củ",
+      "baseUnit": "g",
+      "inventoryUnits": [
+        "g",
+        "kg",
+        "quả"
+      ],
+      "recipeUnitConversions": {
+        "g": 1,
+        "kg": 1000,
+        "quả": 800
+      }
     },
     {
       "id": "Sữa đặckKXUK_y9VF",
       "name": "Sữa đặc",
-      "category": "Sữa & trứng"
+      "category": "Sữa & trứng",
+      "baseUnit": "ml",
+      "inventoryUnits": [
+        "ml",
+        "lít"
+      ],
+      "recipeUnitConversions": {
+        "ml": 1,
+        "lít": 1000,
+        "thìa": 15
+      }
     },
     {
       "id": "Ngũ vị hươngL2e0rt-Wrb",
       "name": "Ngũ vị hương",
-      "category": "Gia vị"
+      "category": "Gia vị",
+      "baseUnit": "g",
+      "inventoryUnits": [
+        "g",
+        "kg"
+      ],
+      "recipeUnitConversions": {
+        "g": 1,
+        "kg": 1000,
+        "thìa": 5
+      }
     },
     {
       "id": "Rau cảiiFdmSyx5A0",
       "name": "Rau cải ngồng",
-      "category": "Rau củ"
+      "category": "Rau củ",
+      "baseUnit": "g",
+      "inventoryUnits": [
+        "g",
+        "kg"
+      ],
+      "recipeUnitConversions": {
+        "g": 1,
+        "kg": 1000
+      }
     },
     {
       "id": "Rau ngót5vruLe8l5U",
       "name": "Rau ngót",
-      "category": "Rau củ"
+      "category": "Rau củ",
+      "baseUnit": "g",
+      "inventoryUnits": [
+        "g",
+        "kg"
+      ],
+      "recipeUnitConversions": {
+        "g": 1,
+        "kg": 1000
+      }
     },
     {
       "id": "Cá rô đồngt2S76dzM1q",
       "name": "Cá rô đồng",
-      "category": "Hải sản"
+      "category": "Hải sản",
+      "baseUnit": "g",
+      "inventoryUnits": [
+        "g",
+        "kg"
+      ],
+      "recipeUnitConversions": {
+        "g": 1,
+        "kg": 1000
+      }
     },
     {
       "id": "Cá rô phisWoe0YXYMA",
       "name": "Cá rô phi",
-      "category": "Hải sản"
+      "category": "Hải sản",
+      "baseUnit": "g",
+      "inventoryUnits": [
+        "g",
+        "kg"
+      ],
+      "recipeUnitConversions": {
+        "g": 1,
+        "kg": 1000
+      }
     },
     {
       "id": "Rượu vangGKL1_2rRy_",
       "name": "Rượu vang",
-      "category": "Gia vị"
+      "category": "Gia vị",
+      "baseUnit": "ml",
+      "inventoryUnits": [
+        "ml",
+        "lít"
+      ],
+      "recipeUnitConversions": {
+        "ml": 1,
+        "lít": 1000
+      }
     },
     {
       "id": "XoàiZenHCISCaR",
       "name": "Xoài",
-      "category": "Rau củ"
+      "category": "Rau củ",
+      "baseUnit": "g",
+      "inventoryUnits": [
+        "g",
+        "kg",
+        "quả"
+      ],
+      "recipeUnitConversions": {
+        "g": 1,
+        "kg": 1000,
+        "quả": 300
+      }
     },
     {
       "id": "Lá nem cuốnhi2Vczb6dt",
       "name": "Lá nem cuốn",
-      "category": "Khác"
+      "category": "Khác",
+      "baseUnit": "lá",
+      "inventoryUnits": [
+        "lá"
+      ],
+      "recipeUnitConversions": {
+        "lá": 1
+      }
     },
     {
       "id": "Lá nem ránYsP2p9gQpD",
       "name": "Lá nem rán",
-      "category": "Khác"
+      "category": "Khác",
+      "baseUnit": "lá",
+      "inventoryUnits": [
+        "lá"
+      ],
+      "recipeUnitConversions": {
+        "lá": 1
+      }
     },
     {
       "id": "Xúc xíchv-K-3pPXWH",
       "name": "Xúc xích",
-      "category": "Đồ hộp"
+      "category": "Đồ hộp",
+      "baseUnit": "chiếc",
+      "inventoryUnits": [
+        "chiếc"
+      ],
+      "recipeUnitConversions": {
+        "chiếc": 1
+      }
     },
     {
       "id": "Rau rămUSdFLbxJzV",
       "name": "Rau răm",
-      "category": "Gia vị"
+      "category": "Gia vị",
+      "baseUnit": "g",
+      "inventoryUnits": [
+        "g",
+        "kg"
+      ],
+      "recipeUnitConversions": {
+        "g": 1,
+        "kg": 1000
+      }
     },
     {
       "id": "Đậu bắpaLBLtkkAtg",
       "name": "Đậu bắp",
-      "category": "Rau củ"
+      "category": "Rau củ",
+      "baseUnit": "g",
+      "inventoryUnits": [
+        "g",
+        "kg"
+      ],
+      "recipeUnitConversions": {
+        "g": 1,
+        "kg": 1000
+      }
     },
     {
       "id": "Nấm kim châmmlA63sS5ey",
       "name": "Nấm kim châm",
-      "category": "Rau củ"
+      "category": "Rau củ",
+      "baseUnit": "g",
+      "inventoryUnits": [
+        "g",
+        "kg"
+      ],
+      "recipeUnitConversions": {
+        "g": 1,
+        "kg": 1000
+      }
     },
     {
       "id": "Nấm đùi gàOxusi8DbqC",
       "name": "Nấm đùi gà",
-      "category": "Rau củ"
+      "category": "Rau củ",
+      "baseUnit": "g",
+      "inventoryUnits": [
+        "g",
+        "kg"
+      ],
+      "recipeUnitConversions": {
+        "g": 1,
+        "kg": 1000
+      }
     },
     {
       "id": "Nấm hải sảnqTCA-l7FSn",
       "name": "Nấm hải sản",
-      "category": "Rau củ"
+      "category": "Rau củ",
+      "baseUnit": "g",
+      "inventoryUnits": [
+        "g",
+        "kg"
+      ],
+      "recipeUnitConversions": {
+        "g": 1,
+        "kg": 1000
+      }
     },
     {
       "id": "Bí đỏdfZiGA8n81",
       "name": "Bí đỏ",
-      "category": "Rau củ"
+      "category": "Rau củ",
+      "baseUnit": "g",
+      "inventoryUnits": [
+        "g",
+        "kg"
+      ],
+      "recipeUnitConversions": {
+        "g": 1,
+        "kg": 1000
+      }
     },
     {
       "id": "Bí đaovRa5fhBI4Z",
       "name": "Bí đao",
-      "category": "Rau củ"
+      "category": "Rau củ",
+      "baseUnit": "g",
+      "inventoryUnits": [
+        "g",
+        "kg"
+      ],
+      "recipeUnitConversions": {
+        "g": 1,
+        "kg": 1000
+      }
     },
     {
       "id": "Gạo nếpEjVT24T5Uq",
       "name": "Gạo nếp",
-      "category": "Tinh bột"
+      "category": "Tinh bột",
+      "baseUnit": "g",
+      "inventoryUnits": [
+        "g",
+        "kg"
+      ],
+      "recipeUnitConversions": {
+        "g": 1,
+        "kg": 1000
+      }
     },
     {
       "id": "Gạo tẻC_vFfi5R77",
       "name": "Gạo tẻ",
-      "category": "Tinh bột"
+      "category": "Tinh bột",
+      "baseUnit": "g",
+      "inventoryUnits": [
+        "g",
+        "kg"
+      ],
+      "recipeUnitConversions": {
+        "g": 1,
+        "kg": 1000
+      }
     },
     {
       "id": "Cá chépdGCZp0Kz0l",
       "name": "Cá chép",
-      "category": "Hải sản"
+      "category": "Hải sản",
+      "baseUnit": "g",
+      "inventoryUnits": [
+        "g",
+        "kg"
+      ],
+      "recipeUnitConversions": {
+        "g": 1,
+        "kg": 1000
+      }
     },
     {
       "id": "MiếnObDS-xNaoB",
       "name": "Miến",
-      "category": "Tinh bột"
+      "category": "Tinh bột",
+      "baseUnit": "g",
+      "inventoryUnits": [
+        "g",
+        "kg"
+      ],
+      "recipeUnitConversions": {
+        "g": 1,
+        "kg": 1000
+      }
     },
     {
       "id": "Mộc nhĩzQ75NeGAeu",
       "name": "Mộc nhĩ",
-      "category": "Rau củ"
+      "category": "Rau củ",
+      "baseUnit": "g",
+      "inventoryUnits": [
+        "g",
+        "kg"
+      ],
+      "recipeUnitConversions": {
+        "g": 1,
+        "kg": 1000
+      }
     },
     {
       "id": "Nấm hươngF3SfMXRu9p",
       "name": "Nấm hương",
-      "category": "Rau củ"
+      "category": "Rau củ",
+      "baseUnit": "g",
+      "inventoryUnits": [
+        "g",
+        "kg"
+      ],
+      "recipeUnitConversions": {
+        "g": 1,
+        "kg": 1000
+      }
     },
     {
       "id": "Cà rốtGB2tp6fqpw",
       "name": "Cà rốt",
-      "category": "Rau củ"
+      "category": "Rau củ",
+      "baseUnit": "g",
+      "inventoryUnits": [
+        "g",
+        "kg"
+      ],
+      "recipeUnitConversions": {
+        "g": 1,
+        "kg": 1000
+      }
     },
     {
       "id": "Dọc mùng-Ykee9LwhY",
       "name": "Dọc mùng",
-      "category": "Rau củ"
+      "category": "Rau củ",
+      "baseUnit": "g",
+      "inventoryUnits": [
+        "g",
+        "kg"
+      ],
+      "recipeUnitConversions": {
+        "g": 1,
+        "kg": 1000
+      }
     },
     {
       "id": "Lá dongmBYN9i2dtX",
       "name": "Lá dong",
-      "category": "Khác"
+      "category": "Khác",
+      "baseUnit": "lá",
+      "inventoryUnits": [
+        "lá"
+      ],
+      "recipeUnitConversions": {
+        "lá": 1
+      }
     },
     {
       "id": "Lá chuốiQ8n4MaNj6n",
       "name": "Lá chuối",
-      "category": "Khác"
+      "category": "Khác",
+      "baseUnit": "lá",
+      "inventoryUnits": [
+        "lá"
+      ],
+      "recipeUnitConversions": {
+        "lá": 1
+      }
     },
     {
       "id": "Bột gạo tẻOiZgdglJUz",
       "name": "Bột gạo tẻ",
-      "category": "Tinh bột"
+      "category": "Tinh bột",
+      "baseUnit": "g",
+      "inventoryUnits": [
+        "g",
+        "kg"
+      ],
+      "recipeUnitConversions": {
+        "g": 1,
+        "kg": 1000
+      }
     },
     {
       "id": "Bột gạo nếpJnLKNIfFnn",
       "name": "Bột gạo nếp",
-      "category": "Tinh bột"
+      "category": "Tinh bột",
+      "baseUnit": "g",
+      "inventoryUnits": [
+        "g",
+        "kg"
+      ],
+      "recipeUnitConversions": {
+        "g": 1,
+        "kg": 1000
+      }
     },
     {
       "id": "Bột mìpg1-aZIoDs",
       "name": "Bột mì",
-      "category": "Tinh bột"
+      "category": "Tinh bột",
+      "baseUnit": "g",
+      "inventoryUnits": [
+        "g",
+        "kg"
+      ],
+      "recipeUnitConversions": {
+        "g": 1,
+        "kg": 1000
+      }
     },
     {
       "id": "Bột năngho3LUqgeAO",
       "name": "Bột năng",
-      "category": "Tinh bột"
+      "category": "Tinh bột",
+      "baseUnit": "g",
+      "inventoryUnits": [
+        "g",
+        "kg"
+      ],
+      "recipeUnitConversions": {
+        "g": 1,
+        "kg": 1000
+      }
     },
     {
       "id": "Men nởiej8VSL_mG",
       "name": "Men nở",
-      "category": "Khác"
+      "category": "Khác",
+      "baseUnit": "g",
+      "inventoryUnits": [
+        "g",
+        "kg"
+      ],
+      "recipeUnitConversions": {
+        "g": 1,
+        "kg": 1000
+      }
     },
     {
       "id": "Nước9jnS_eO8Cv",
       "name": "Nước",
-      "category": "Khác"
+      "category": "Khác",
+      "baseUnit": "ml",
+      "inventoryUnits": [
+        "ml",
+        "lít"
+      ],
+      "recipeUnitConversions": {
+        "ml": 1,
+        "lít": 1000,
+        "g": 1
+      }
     },
     {
       "id": "Tôm sú4vHhSAcJTQ",
       "name": "Tôm sú",
-      "category": "Hải sản"
+      "category": "Hải sản",
+      "baseUnit": "g",
+      "inventoryUnits": [
+        "g",
+        "kg"
+      ],
+      "recipeUnitConversions": {
+        "g": 1,
+        "kg": 1000
+      }
     },
     {
       "id": "TépQ19gfL2cl1",
       "name": "Tép",
-      "category": "Hải sản"
+      "category": "Hải sản",
+      "baseUnit": "g",
+      "inventoryUnits": [
+        "g",
+        "kg"
+      ],
+      "recipeUnitConversions": {
+        "g": 1,
+        "kg": 1000
+      }
     },
     {
       "id": "Tôm nhỏWyLLGEkqA0",
       "name": "Tôm nhỏ",
-      "category": "Hải sản"
+      "category": "Hải sản",
+      "baseUnit": "g",
+      "inventoryUnits": [
+        "g",
+        "kg"
+      ],
+      "recipeUnitConversions": {
+        "g": 1,
+        "kg": 1000
+      }
     },
     {
       "id": "Sữa tươi không đườngHqQaWllTs2",
       "name": "Sữa tươi không đường",
-      "category": "Sữa & trứng"
+      "category": "Sữa & trứng",
+      "baseUnit": "ml",
+      "inventoryUnits": [
+        "ml",
+        "lít"
+      ],
+      "recipeUnitConversions": {
+        "ml": 1,
+        "lít": 1000
+      }
     },
     {
       "id": "Vừng đenriz3jbwY9w",
       "name": "Vừng đen",
-      "category": "Gia vị"
+      "category": "Gia vị",
+      "baseUnit": "g",
+      "inventoryUnits": [
+        "g",
+        "kg"
+      ],
+      "recipeUnitConversions": {
+        "g": 1,
+        "kg": 1000
+      }
     },
     {
       "id": "Vừng trắng2HuELM4uwT",
       "name": "Vừng trắng",
-      "category": "Gia vị"
+      "category": "Gia vị",
+      "baseUnit": "g",
+      "inventoryUnits": [
+        "g",
+        "kg"
+      ],
+      "recipeUnitConversions": {
+        "g": 1,
+        "kg": 1000
+      }
     },
     {
       "id": "Đậu xanhnIxKmFNrRM",
       "name": "Đậu xanh",
-      "category": "Khác"
+      "category": "Khác",
+      "baseUnit": "g",
+      "inventoryUnits": [
+        "g",
+        "kg"
+      ],
+      "recipeUnitConversions": {
+        "g": 1,
+        "kg": 1000
+      }
     },
     {
       "id": "Đậu đỏ26Kvs2YJnx",
       "name": "Đậu đỏ",
-      "category": "Khác"
+      "category": "Khác",
+      "baseUnit": "g",
+      "inventoryUnits": [
+        "g",
+        "kg"
+      ],
+      "recipeUnitConversions": {
+        "g": 1,
+        "kg": 1000
+      }
     },
     {
       "id": "Đậu đenzQGtWTgGky",
       "name": "Đậu đen",
-      "category": "Khác"
+      "category": "Khác",
+      "baseUnit": "g",
+      "inventoryUnits": [
+        "g",
+        "kg"
+      ],
+      "recipeUnitConversions": {
+        "g": 1,
+        "kg": 1000
+      }
     },
     {
       "id": "Đậu nànhj17It1Wlhn",
       "name": "Đậu nành",
-      "category": "Khác"
+      "category": "Khác",
+      "baseUnit": "g",
+      "inventoryUnits": [
+        "g",
+        "kg"
+      ],
+      "recipeUnitConversions": {
+        "g": 1,
+        "kg": 1000
+      }
     },
     {
       "id": "Đậu que51Zk81TOZu",
       "name": "Đậu que",
-      "category": "Rau củ"
+      "category": "Rau củ",
+      "baseUnit": "g",
+      "inventoryUnits": [
+        "g",
+        "kg"
+      ],
+      "recipeUnitConversions": {
+        "g": 1,
+        "kg": 1000
+      }
     },
     {
       "id": "Khoai tâylAyMsTv486",
       "name": "Khoai tây",
-      "category": "Tinh bột"
+      "category": "Tinh bột",
+      "baseUnit": "g",
+      "inventoryUnits": [
+        "g",
+        "kg"
+      ],
+      "recipeUnitConversions": {
+        "g": 1,
+        "kg": 1000
+      }
     },
     {
       "id": "Khoai langqUx7MJBv9X",
       "name": "Khoai lang",
-      "category": "Tinh bột"
+      "category": "Tinh bột",
+      "baseUnit": "g",
+      "inventoryUnits": [
+        "g",
+        "kg",
+        "củ"
+      ],
+      "recipeUnitConversions": {
+        "g": 1,
+        "kg": 1000,
+        "củ": 200
+      }
     },
     {
       "id": "Nước dừaaW0TqQ5HKb",
       "name": "Nước dừa",
-      "category": "Khác"
+      "category": "Khác",
+      "baseUnit": "ml",
+      "inventoryUnits": [
+        "ml",
+        "lít"
+      ],
+      "recipeUnitConversions": {
+        "ml": 1,
+        "lít": 1000
+      }
     },
     {
       "id": "Dừa nạoqQdzvpztgD",
       "name": "Dừa nạo",
-      "category": "Rau củ"
+      "category": "Rau củ",
+      "baseUnit": "g",
+      "inventoryUnits": [
+        "g",
+        "kg"
+      ],
+      "recipeUnitConversions": {
+        "g": 1,
+        "kg": 1000
+      }
     },
     {
       "id": "Lá chanhiB3cqNxKdQ",
       "name": "Lá chanh",
-      "category": "Gia vị"
+      "category": "Gia vị",
+      "baseUnit": "lá",
+      "inventoryUnits": [
+        "lá"
+      ],
+      "recipeUnitConversions": {
+        "lá": 1
+      }
     },
     {
       "id": "Trứng cútj_0gniwu4w",
       "name": "Trứng cút",
-      "category": "Sữa & trứng"
+      "category": "Sữa & trứng",
+      "baseUnit": "quả",
+      "inventoryUnits": [
+        "quả"
+      ],
+      "recipeUnitConversions": {
+        "quả": 1
+      }
     },
     {
       "id": "Mực ốngLunhJeJvsh",
       "name": "Mực ống",
-      "category": "Hải sản"
+      "category": "Hải sản",
+      "baseUnit": "g",
+      "inventoryUnits": [
+        "g",
+        "kg"
+      ],
+      "recipeUnitConversions": {
+        "g": 1,
+        "kg": 1000
+      }
     },
     {
       "id": "Rau cần tây4JcCvsR3IE",
       "name": "Rau cần tây",
-      "category": "Rau củ"
+      "category": "Rau củ",
+      "baseUnit": "g",
+      "inventoryUnits": [
+        "g",
+        "kg"
+      ],
+      "recipeUnitConversions": {
+        "g": 1,
+        "kg": 1000
+      }
     },
     {
       "id": "Rau cần talpL5fenu9D",
       "name": "Rau cần ta",
-      "category": "Rau củ"
+      "category": "Rau củ",
+      "baseUnit": "g",
+      "inventoryUnits": [
+        "g",
+        "kg"
+      ],
+      "recipeUnitConversions": {
+        "g": 1,
+        "kg": 1000
+      }
     },
     {
       "id": "Rau bíywN7JoWrKo",
       "name": "Rau bí",
-      "category": "Rau củ"
+      "category": "Rau củ",
+      "baseUnit": "g",
+      "inventoryUnits": [
+        "g",
+        "kg"
+      ],
+      "recipeUnitConversions": {
+        "g": 1,
+        "kg": 1000
+      }
     },
     {
       "id": "Rau đay-OjyFKet0H",
       "name": "Rau đay",
-      "category": "Rau củ"
+      "category": "Rau củ",
+      "baseUnit": "g",
+      "inventoryUnits": [
+        "g",
+        "kg"
+      ],
+      "recipeUnitConversions": {
+        "g": 1,
+        "kg": 1000
+      }
     },
     {
       "id": "MướpUs4jbq5bn0",
       "name": "Mướp",
-      "category": "Rau củ"
+      "category": "Rau củ",
+      "baseUnit": "g",
+      "inventoryUnits": [
+        "g",
+        "kg"
+      ],
+      "recipeUnitConversions": {
+        "g": 1,
+        "kg": 1000
+      }
     },
     {
       "id": "Rau mồng tơiMCVFPgFWtb",
       "name": "Rau mồng tơi",
-      "category": "Rau củ"
+      "category": "Rau củ",
+      "baseUnit": "g",
+      "inventoryUnits": [
+        "g",
+        "kg"
+      ],
+      "recipeUnitConversions": {
+        "g": 1,
+        "kg": 1000
+      }
     },
     {
       "id": "Cốt dừa0fULSP8Mc7",
       "name": "Cốt dừa",
-      "category": "Gia vị"
+      "category": "Gia vị",
+      "baseUnit": "ml",
+      "inventoryUnits": [
+        "ml",
+        "lít"
+      ],
+      "recipeUnitConversions": {
+        "ml": 1,
+        "lít": 1000,
+        "thìa": 15
+      }
     },
     {
       "id": "Tóp mỡU2aR7-xY4p",
       "name": "Tóp mỡ",
-      "category": "Thịt"
+      "category": "Thịt",
+      "baseUnit": "g",
+      "inventoryUnits": [
+        "g",
+        "kg"
+      ],
+      "recipeUnitConversions": {
+        "g": 1,
+        "kg": 1000
+      }
     },
     {
       "id": "Rễ ngòfxPj2T9HiF",
       "name": "Rễ ngò",
-      "category": "Gia vị"
+      "category": "Gia vị",
+      "baseUnit": "chiếc",
+      "inventoryUnits": [
+        "chiếc"
+      ],
+      "recipeUnitConversions": {
+        "chiếc": 1
+      }
     },
     {
       "id": "Củ cảikk2MGWKOnc",
       "name": "Củ cải",
-      "category": "Rau củ"
+      "category": "Rau củ",
+      "baseUnit": "g",
+      "inventoryUnits": [
+        "g",
+        "kg",
+        "củ"
+      ],
+      "recipeUnitConversions": {
+        "g": 1,
+        "kg": 1000,
+        "củ": 300
+      }
     },
     {
       "id": "Đậu phộnggq3Fe10jOx",
       "name": "Đậu phộng",
-      "category": "Khác"
+      "category": "Khác",
+      "baseUnit": "g",
+      "inventoryUnits": [
+        "g",
+        "kg"
+      ],
+      "recipeUnitConversions": {
+        "g": 1,
+        "kg": 1000
+      }
     },
     {
       "id": "Tương đen (Tương ngọt)7RPgXnGGi2",
       "name": "Tương đen (Tương ngọt)",
-      "category": "Gia vị"
+      "category": "Gia vị",
+      "baseUnit": "ml",
+      "inventoryUnits": [
+        "ml",
+        "lít"
+      ],
+      "recipeUnitConversions": {
+        "ml": 1,
+        "lít": 1000,
+        "thìa": 15
+      }
     },
     {
       "id": "Tỏi tâyI-jCssQy3V",
       "name": "Tỏi tây",
-      "category": "Gia vị"
+      "category": "Gia vị",
+      "baseUnit": "g",
+      "inventoryUnits": [
+        "g",
+        "kg",
+        "củ"
+      ],
+      "recipeUnitConversions": {
+        "g": 1,
+        "kg": 1000,
+        "củ": 150
+      }
     },
     {
       "id": "Nước màumi1ObkFY7D",
       "name": "Nước màu",
-      "category": "Gia vị"
+      "category": "Gia vị",
+      "baseUnit": "ml",
+      "inventoryUnits": [
+        "ml",
+        "lít"
+      ],
+      "recipeUnitConversions": {
+        "ml": 1,
+        "lít": 1000
+      }
     },
     {
       "id": "Đường vàngNlPTxVKgvv",
       "name": "Đường vàng",
-      "category": "Gia vị"
+      "category": "Gia vị",
+      "baseUnit": "g",
+      "inventoryUnits": [
+        "g",
+        "kg"
+      ],
+      "recipeUnitConversions": {
+        "g": 1,
+        "kg": 1000
+      }
     },
     {
       "id": "NghệvGpWT6hE_4",
       "name": "Nghệ",
-      "category": "Gia vị"
+      "category": "Gia vị",
+      "baseUnit": "g",
+      "inventoryUnits": [
+        "g",
+        "kg",
+        "củ"
+      ],
+      "recipeUnitConversions": {
+        "g": 1,
+        "kg": 1000,
+        "củ": 20
+      }
     },
     {
       "id": "Quả sấuCYO1R7pm-6",
       "name": "Quả sấu",
-      "category": "Gia vị"
+      "category": "Gia vị",
+      "baseUnit": "g",
+      "inventoryUnits": [
+        "g",
+        "kg",
+        "quả"
+      ],
+      "recipeUnitConversions": {
+        "g": 1,
+        "kg": 1000,
+        "quả": 10
+      }
     },
     {
       "id": "Mía câyHeGHZwD6T2",
       "name": "Mía cây",
-      "category": "Rau củ"
+      "category": "Rau củ",
+      "baseUnit": "g",
+      "inventoryUnits": [
+        "g",
+        "kg"
+      ],
+      "recipeUnitConversions": {
+        "g": 1,
+        "kg": 1000
+      }
     },
     {
       "id": "Dưa cảiBOMOcKVr8B",
       "name": "Dưa cải",
-      "category": "Rau củ"
+      "category": "Rau củ",
+      "baseUnit": "g",
+      "inventoryUnits": [
+        "g",
+        "kg"
+      ],
+      "recipeUnitConversions": {
+        "g": 1,
+        "kg": 1000
+      }
     },
     {
       "id": "Rau cải canhE6FrtMfNND",
       "name": "Rau cải canh",
-      "category": "Rau củ"
+      "category": "Rau củ",
+      "baseUnit": "g",
+      "inventoryUnits": [
+        "g",
+        "kg"
+      ],
+      "recipeUnitConversions": {
+        "g": 1,
+        "kg": 1000
+      }
     },
     {
       "id": "Rau cải thìaTCzhEhy6rE",
       "name": "Rau cải thìa",
-      "category": "Rau củ"
+      "category": "Rau củ",
+      "baseUnit": "g",
+      "inventoryUnits": [
+        "g",
+        "kg"
+      ],
+      "recipeUnitConversions": {
+        "g": 1,
+        "kg": 1000
+      }
     },
     {
       "id": "Rau cải chípDjFZcdqEQz",
       "name": "Rau cải chíp",
-      "category": "Rau củ"
+      "category": "Rau củ",
+      "baseUnit": "g",
+      "inventoryUnits": [
+        "g",
+        "kg"
+      ],
+      "recipeUnitConversions": {
+        "g": 1,
+        "kg": 1000
+      }
     },
     {
       "id": "Đu đủAMID8jvebp",
       "name": "Đu đủ",
-      "category": "Rau củ"
+      "category": "Rau củ",
+      "baseUnit": "g",
+      "inventoryUnits": [
+        "g",
+        "kg"
+      ],
+      "recipeUnitConversions": {
+        "g": 1,
+        "kg": 1000
+      }
     }
   ],
   "dishes": [

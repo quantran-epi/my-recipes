@@ -1,5 +1,5 @@
-export type IngredientUnit = "g" | "ml" | "lít" | "kg"  | "lá" | "chiếc" | "thìa" | "củ" | "quả" | "thanh" | "nhánh";
-export const INGREDIENT_UNITS: Array<IngredientUnit> = ["g", "kg", "lít", "ml", "lá", "chiếc", "củ", "nhánh", "quả", "thanh", "thìa"];
+export type IngredientUnit = "g" | "ml" | "lít" | "kg" | "lá" | "chiếc" | "thìa" | "củ" | "quả" | "thanh" | "nhánh" | "bó";
+export const INGREDIENT_UNITS: Array<IngredientUnit> = ["g", "kg", "lít", "ml", "lá", "chiếc", "củ", "nhánh", "quả", "thanh", "thìa", "bó"];
 
 export const INGREDIENT_CATEGORIES = ["Thịt", "Hải sản", "Rau củ", "Gia vị", "Nước chấm", "Tinh bột", "Đồ hộp", "Sữa & trứng", "Khác"];
 
