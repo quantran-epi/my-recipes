@@ -12,6 +12,7 @@ import { useToggle } from "@hooks";
 import { Dishes } from "@store/Models/Dishes";
 import { INGREDIENT_CATEGORIES } from "@store/Models/Ingredient";
 import { InventoryHelper } from "@common/Helpers/InventoryHelper";
+import { IngredientUnitHelper } from "@common/Helpers/IngredientUnitHelper";
 import { ShoppingList, ShoppingListIngredientAmount, ShoppingListIngredientGroup } from "@store/Models/ShoppingList";
 import { toggleDoneIngredientAmount, toggleDoneIngredientGroup } from "@store/Reducers/ShoppingListReducer";
 import { selectDishes, selectIngredients, selectInventory } from "@store/Selectors";
@@ -169,18 +170,17 @@ export const ShoppingListIngredientItem: React.FunctionComponent<ShoppingListIng
     const inventory = inventoryItems[props.item.ingredientId];
 
     // Sum total required (numeric prefix, e.g. "200g" → 200)
+    const unit = IngredientUnitHelper.getBaseUnit(ingredient, props.item.amounts.map(amt => amt.unit));
     const totalRequired = props.item.amounts.reduce((sum, amt) => {
-        const parsed = parseFloat(amt.amount);
-        return sum + (isNaN(parsed) ? 0 : parsed);
+        const converted = IngredientUnitHelper.toBaseAmount(ingredient, amt.amount, amt.unit, unit);
+        return sum + (converted ?? IngredientUnitHelper.parseAmount(amt.amount));
     }, 0);
-    const inStock = InventoryHelper.totalAmount(inventory);
-    const needToBuy = Math.max(0, totalRequired - inStock);
-    const unit = inventory?.unit ?? (props.item.amounts[0]?.unit ?? "");
+    const inStock = InventoryHelper.totalAmount(inventory, ingredient);
 
-    // Realtime: inventory fully covers the requirement → treat as done regardless of stored isDone
+    // Realtime inventory only affects status badges. Done state stays persisted/manual.
     const inventoryCovered = inStock >= totalRequired && totalRequired > 0;
-    // Effective done state: either manually checked OR inventory covers it all
-    const effectiveIsDone = props.item.isDone || inventoryCovered;
+    const effectiveIsDone = props.item.isDone;
+    const needToBuy = Math.max(0, totalRequired - inStock);
 
     const _getIngredientNameById = (id: string) => {
         return ingredients.find(e => e.id === id)?.name || "";
@@ -211,7 +211,7 @@ export const ShoppingListIngredientItem: React.FunctionComponent<ShoppingListIng
         return moment(item.meal.plannedDate).startOf("day").from(moment().startOf("day"));
     }
 
-    const indeterminate = !effectiveIsDone && NumberHelpers.isBetween(props.item.amounts.filter(e => e.isDone).length, 0.1, props.item.amounts.length, false);
+    const indeterminate = !props.item.isDone && NumberHelpers.isBetween(props.item.amounts.filter(e => e.isDone).length, 0.1, props.item.amounts.length, false);
 
     return <React.Fragment>
         <List.Item
@@ -245,7 +245,7 @@ export const ShoppingListIngredientItem: React.FunctionComponent<ShoppingListIng
                     dataSource={props.item.amounts}
                     renderItem={(item) => <List.Item style={{ padding: 0 }}>
                         <List.Item.Meta
-                            avatar={<Checkbox checked={item.isDone || inventoryCovered} onChange={(e) => _onCheckedChange(e, item.id)} />}
+                            avatar={<Checkbox checked={item.isDone} onChange={(e) => _onCheckedChange(e, item.id)} />}
                             description={<Space>
                                 <Typography.Text type={item.isDone ? "secondary" : undefined} style={{ textDecorationLine: item.isDone ? "line-through" : "none" }}>{item.amount} {item.unit} ({item?.dish.name})</Typography.Text>
                                 <Stack.Compact>

@@ -11,6 +11,7 @@ import { Tooltip } from "@components/Tootip";
 import { Typography } from "@components/Typography";
 import { useScreenTitle, useToggle, useAdminMode } from "@hooks";
 import { InventoryHelper } from "@common/Helpers/InventoryHelper";
+import { IngredientUnitHelper } from "@common/Helpers/IngredientUnitHelper";
 import { Ingredient, INGREDIENT_SHELF_LIFE_OPTIONS } from "@store/Models/Ingredient";
 import { removeIngredient } from "@store/Reducers/IngredientReducer";
 import { selectIngredients, selectInventoryById } from "@store/Selectors";
@@ -81,7 +82,7 @@ export const IngredientListScreen = () => {
             rowProps={{ items: filteredIngredients, onDelete: _onDelete, isAdmin, onSuggest: _onSuggest }}
             style={{ height: window.screen.availHeight - 210 - 80 }}
         />
-        <Modal open={toggleAddModal.value} title={
+        <Modal width={640} open={toggleAddModal.value} title={
             <Space>
                 <Image src={VegetablesIcon} preview={false} width={24} style={{ marginBottom: 3 }} />
                 Thêm nguyên liệu
@@ -118,8 +119,9 @@ export const IngredientItem: React.FunctionComponent<IngredientItemProps> = (pro
     const toggleInventory = useToggle({ defaultValue: false });
 
     const inv = useSelector(selectInventoryById(props.item.id));
-    const totalAmt = InventoryHelper.totalAmount(inv);
-    const invLabel = inv ? `${totalAmt} ${inv.unit}` : null;
+    const totalAmt = InventoryHelper.totalAmount(inv, props.item);
+    const inventoryUnit = IngredientUnitHelper.getBaseUnit(props.item);
+    const invLabel = inv ? `${IngredientUnitHelper.formatAmount(totalAmt)} ${inventoryUnit}` : null;
     const invColor = !inv ? "#aaa" : totalAmt <= 0 ? "#ff4d4f" : totalAmt <= 2 ? "#faad14" : "#52c41a";
 
     return <React.Fragment>
@@ -172,7 +174,7 @@ export const IngredientItem: React.FunctionComponent<IngredientItemProps> = (pro
         </div>
 
         {/* Edit modal */}
-        <Modal open={toggleEdit.value} title={
+        <Modal width={640} open={toggleEdit.value} title={
             <Space>
                 <Image src={VegetablesIcon} preview={false} width={24} style={{ marginBottom: 3 }} />
                 Chỉnh sửa nguyên liệu

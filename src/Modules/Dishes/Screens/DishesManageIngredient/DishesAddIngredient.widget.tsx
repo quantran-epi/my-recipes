@@ -1,17 +1,17 @@
 import { ObjectPropertyHelper } from "@common/Helpers/ObjectProperty";
 import { Button } from "@components/Button";
-import { Input, TextArea } from "@components/Form/Input";
+import { Input } from "@components/Form/Input";
 import { Option, Select } from "@components/Form/Select";
 import { Switch } from "@components/Form/Switch";
 import { Stack } from "@components/Layout/Stack";
 import { useMessage } from "@components/Message";
 import { SmartForm, useSmartForm } from "@components/SmartForm";
 import { DISH_INGREDIENT_PREPARE_PRESETS, Dishes, DishesIngredientAmount } from "@store/Models/Dishes";
-import { INGREDIENT_UNITS } from "@store/Models/Ingredient";
-import { addIngredientsToDish, test } from "@store/Reducers/DishesReducer";
+import { IngredientUnit } from "@store/Models/Ingredient";
+import { IngredientUnitHelper } from "@common/Helpers/IngredientUnitHelper";
+import { addIngredientsToDish } from "@store/Reducers/DishesReducer";
 import { RootState } from "@store/Store";
-import { AutoComplete } from "antd";
-import { useEffect } from "react";
+import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
 type DishesAddIngredientWidgetProps = {
@@ -23,6 +23,9 @@ export const DishesAddIngredientWidget: React.FunctionComponent<DishesAddIngredi
     const ingredients = useSelector((state: RootState) => state.shared.ingredient.ingredients);
     const dispatch = useDispatch();
     const message = useMessage();
+    const [selectedIngredientId, setSelectedIngredientId] = useState<string>("");
+    const selectedIngredient = ingredients.find(ingre => ingre.id === selectedIngredientId);
+    const recipeUnits = IngredientUnitHelper.getRecipeUnits(selectedIngredient);
 
     const addIngreToDishForm = useSmartForm<DishesIngredientAmount>({
         defaultValues: {
@@ -36,6 +39,15 @@ export const DishesAddIngredientWidget: React.FunctionComponent<DishesAddIngredi
             meal: null
         },
         onSubmit: (values) => {
+            const ingredient = ingredients.find(ingre => ingre.id === values.transformValues.ingredientId);
+            if (!ingredient) {
+                message.error("Choose an ingredient first.");
+                return;
+            }
+            if (!IngredientUnitHelper.canConvert(ingredient, values.transformValues.unit)) {
+                message.error("This unit is not configured for the selected ingredient.");
+                return;
+            }
             if (props.dish.ingredients.some(ingre => ingre.ingredientId === values.transformValues.ingredientId)) {
                 message.error("Đã tồn tại nguyên liệu trong món ăn");
                 return;
@@ -46,7 +58,8 @@ export const DishesAddIngredientWidget: React.FunctionComponent<DishesAddIngredi
             }));
             message.success();
             addIngreToDishForm.reset();
-            props.onDone();
+            setSelectedIngredientId("");
+            props.onDone?.();
         },
         itemDefinitions: defaultValues => ({
             ingredientId: { label: "Nguyên liệu", name: ObjectPropertyHelper.nameof(defaultValues, e => e.ingredientId) },
@@ -64,6 +77,16 @@ export const DishesAddIngredientWidget: React.FunctionComponent<DishesAddIngredi
         addIngreToDishForm.submit();
     }
 
+    const _onIngredientChange = (ingredientId: string) => {
+        const ingredient = ingredients.find(ingre => ingre.id === ingredientId);
+        const units = IngredientUnitHelper.getRecipeUnits(ingredient);
+        setSelectedIngredientId(ingredientId);
+        addIngreToDishForm.form.setFieldsValue({
+            ingredientId,
+            unit: (units[0] ?? "g") as IngredientUnit,
+        });
+    }
+
     return <SmartForm {...addIngreToDishForm.defaultProps}>
         <SmartForm.Item {...addIngreToDishForm.itemDefinitions.ingredientId}>
             <Select
@@ -73,6 +96,7 @@ export const DishesAddIngredientWidget: React.FunctionComponent<DishesAddIngredi
                     if (!option?.children) return false;
                     return option?.children?.toString().toLowerCase().includes(inputValue.toLowerCase());
                 }}
+                onChange={_onIngredientChange}
                 style={{ width: '100%' }}>
                 {ingredients.map(ingre => <Option key={ingre.id} value={ingre.id}>{ingre.name}</Option>)}
             </Select>
@@ -88,7 +112,7 @@ export const DishesAddIngredientWidget: React.FunctionComponent<DishesAddIngredi
                     return option?.children?.toString().toLowerCase().includes(inputValue.toLowerCase());
                 }}
                 style={{ width: '100%' }}>
-                {INGREDIENT_UNITS.map(unit => <Option key={unit} value={unit}>{unit}</Option>)}
+                {recipeUnits.map(unit => <Option key={unit} value={unit}>{unit}</Option>)}
             </Select>
         </SmartForm.Item>
         <SmartForm.Item {...addIngreToDishForm.itemDefinitions.prepare}>

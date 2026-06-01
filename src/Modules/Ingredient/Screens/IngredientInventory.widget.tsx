@@ -5,7 +5,8 @@ import { Option, Select } from "@components/Form/Select";
 import { Stack } from "@components/Layout/Stack";
 import { Typography } from "@components/Typography";
 import { InventoryHelper } from "@common/Helpers/InventoryHelper";
-import { Ingredient, IngredientUnit, INGREDIENT_UNITS, InventoryBatch } from "@store/Models/Ingredient";
+import { Ingredient, IngredientUnit } from "@store/Models/Ingredient";
+import { IngredientUnitHelper } from "@common/Helpers/IngredientUnitHelper";
 import { setInventory } from "@store/Reducers/InventoryReducer";
 import { selectInventoryById } from "@store/Selectors";
 import { Alert, DatePicker, Divider, InputNumber } from "antd";
@@ -23,25 +24,30 @@ type IngredientInventoryWidgetProps = {
 type BatchRow = {
     id: string;
     amount: number;
+    unit: IngredientUnit;
     purchasedAt: Dayjs | null;
 }
 
-const emptyBatch = (): BatchRow => ({ id: uuidv4(), amount: 0, purchasedAt: null });
+const emptyBatch = (unit: IngredientUnit): BatchRow => ({ id: uuidv4(), amount: 0, unit, purchasedAt: null });
 
 export const IngredientInventoryWidget: React.FC<IngredientInventoryWidgetProps> = ({ item, onDone, onSuggest }) => {
     const dispatch = useDispatch();
     const inventory = useSelector(selectInventoryById(item.id));
+    const inventoryUnits = IngredientUnitHelper.getInventoryUnits(item);
+    const baseUnit = IngredientUnitHelper.getBaseUnit(item, inventoryUnits);
+    const defaultUnit = inventory?.unit ?? baseUnit;
+    const unit = baseUnit;
 
-    const [unit, setUnit] = useState<IngredientUnit>(inventory?.unit ?? "g");
     const [batches, setBatches] = useState<BatchRow[]>(() => {
         if (!inventory || !inventory.batches || inventory.batches.length === 0) {
             // Migrate old flat data: { amount, unit } → single batch
             const legacyAmount = (inventory as any)?.amount;
-            return [{ ...emptyBatch(), amount: legacyAmount ?? 0 }];
+            return [{ ...emptyBatch(defaultUnit), amount: legacyAmount ?? 0 }];
         }
         return inventory.batches.map(b => ({
             id: b.id,
             amount: b.amount,
+            unit: b.unit ?? inventory.unit ?? defaultUnit,
             purchasedAt: b.purchasedAt ? dayjs(b.purchasedAt) : null,
         }));
     });
@@ -50,7 +56,7 @@ export const IngredientInventoryWidget: React.FC<IngredientInventoryWidgetProps>
         setBatches(prev => prev.map(b => b.id === id ? { ...b, ...patch } : b));
     };
 
-    const _addBatch = () => setBatches(prev => [...prev, emptyBatch()]);
+    const _addBatch = () => setBatches(prev => [...prev, emptyBatch(defaultUnit)]);
 
     const _removeBatch = (id: string) => {
         setBatches(prev => prev.length > 1 ? prev.filter(b => b.id !== id) : prev);
@@ -60,13 +66,14 @@ export const IngredientInventoryWidget: React.FC<IngredientInventoryWidgetProps>
         dispatch(setInventory({
             ingredientId: item.id,
             inventory: {
-                unit,
+                unit: baseUnit,
                 lastUpdated: new Date(),
                 batches: batches
                     .filter(b => b.amount > 0)
                     .map(b => ({
                         id: b.id,
                         amount: b.amount,
+                        unit: b.unit,
                         purchasedAt: b.purchasedAt ? b.purchasedAt.toISOString() : undefined,
                     })),
             }
@@ -74,7 +81,11 @@ export const IngredientInventoryWidget: React.FC<IngredientInventoryWidgetProps>
         onDone?.();
     };
 
-    const totalAmount = batches.reduce((s, b) => s + b.amount, 0);
+    const totalAmount = IngredientUnitHelper.totalInventoryAmount({
+        unit: baseUnit,
+        lastUpdated: new Date(),
+        batches: batches.map(b => ({ id: b.id, amount: b.amount, unit: b.unit, purchasedAt: b.purchasedAt?.toISOString() })),
+    }, item);
 
     // Find the most urgent batch for the warning banner
     const nearestBatch = item.shelfLife ? (() => {
@@ -99,9 +110,7 @@ export const IngredientInventoryWidget: React.FC<IngredientInventoryWidgetProps>
                 </Typography.Text>
                 <Stack gap={6} align="center">
                     <Typography.Text style={{ fontSize: 12, color: "#666" }}>Đơn vị:</Typography.Text>
-                    <Select value={unit} onChange={v => setUnit(v)} style={{ width: 80 }} size="small">
-                        {INGREDIENT_UNITS.map(u => <Option key={u} value={u}>{u}</Option>)}
-                    </Select>
+                    <Typography.Text style={{ fontSize: 12, color: "#666" }}>Base: {baseUnit}</Typography.Text>
                 </Stack>
             </Stack>
 
@@ -139,8 +148,10 @@ export const IngredientInventoryWidget: React.FC<IngredientInventoryWidgetProps>
                             onChange={v => _updateBatch(batch.id, { amount: v ?? 0 })}
                             style={{ flex: 1 }}
                             size="middle"
-                            addonAfter={unit}
                         />
+                        <Select value={batch.unit} onChange={v => _updateBatch(batch.id, { unit: v })} style={{ width: 90 }}>
+                            {inventoryUnits.map(u => <Option key={u} value={u}>{u}</Option>)}
+                        </Select>
                         {item.shelfLife && (
                             <DatePicker
                                 value={batch.purchasedAt}

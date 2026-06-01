@@ -1,5 +1,6 @@
-import { IngredientInventory, IngredientShelfLife, InventoryBatch } from "@store/Models/Ingredient";
+import { Ingredient, IngredientInventory, IngredientShelfLife, InventoryBatch } from "@store/Models/Ingredient";
 import dayjs from "dayjs";
+import { IngredientUnitHelper } from "./IngredientUnitHelper";
 
 // How many days each shelf-life tier lasts
 const SHELF_LIFE_DAYS: Record<IngredientShelfLife, number> = {
@@ -12,11 +13,8 @@ const SHELF_LIFE_DAYS: Record<IngredientShelfLife, number> = {
 
 export const InventoryHelper = {
     /** Total amount across all batches */
-    totalAmount(inv: IngredientInventory | undefined): number {
-        if (!inv) return 0;
-        // Guard against old persisted data that still has flat `amount` field
-        if (!inv.batches) return (inv as any).amount ?? 0;
-        return inv.batches.reduce((sum, b) => sum + b.amount, 0);
+    totalAmount(inv: IngredientInventory | undefined, ingredient?: Ingredient): number {
+        return IngredientUnitHelper.totalInventoryAmount(inv, ingredient);
     },
 
     /** Returns estimated expiry as a dayjs for a single batch, or null if missing data */

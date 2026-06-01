@@ -5,6 +5,7 @@ import { Stack } from "@components/Layout/Stack";
 import { Modal } from "@components/Modal";
 import { Typography } from "@components/Typography";
 import { InventoryHelper } from "@common/Helpers/InventoryHelper";
+import { IngredientUnitHelper } from "@common/Helpers/IngredientUnitHelper";
 import { INGREDIENT_SHELF_LIFE_OPTIONS } from "@store/Models/Ingredient";
 import { RootState } from "@store/Store";
 import { Checkbox, Empty } from "antd";
@@ -26,9 +27,9 @@ export const UseFirstWidget: React.FC<UseFirstWidgetProps> = ({ open, onClose, o
     // Items that are perishable (very_short or short) with amount > 0
     const urgentItems = Object.entries(inventory)
         .filter(([id, inv]) => {
-            const totalAmt = InventoryHelper.totalAmount(inv as any);
-            if (totalAmt <= 0) return false;
             const ingr = ingredients.find(i => i.id === id);
+            const totalAmt = InventoryHelper.totalAmount(inv as any, ingr);
+            if (totalAmt <= 0) return false;
             if (!ingr?.shelfLife) return false;
             return ingr.shelfLife === "very_short" || ingr.shelfLife === "short";
         })
@@ -38,10 +39,13 @@ export const UseFirstWidget: React.FC<UseFirstWidgetProps> = ({ open, onClose, o
             const daysLeft = nearest?.daysLeft ?? null;
             const badge = InventoryHelper.expiryBadge(daysLeft);
             const opt = INGREDIENT_SHELF_LIFE_OPTIONS.find(o => o.value === ingr.shelfLife);
-            const totalAmt = InventoryHelper.totalAmount(inv as any);
+            const totalAmt = InventoryHelper.totalAmount(inv as any, ingr);
             const urgentAmt = nearest?.batch.amount ?? totalAmt; // amount of the near-expiry batch
-            const unit = (inv as any).unit ?? "";
-            const hasOtherBatches = totalAmt > urgentAmt; // extra stock beyond the urgent batch
+            const unit = IngredientUnitHelper.getBatchUnit(inv as any, nearest?.batch, ingr);
+            const urgentBaseAmt = nearest?.batch
+                ? IngredientUnitHelper.toBaseAmount(ingr, nearest.batch.amount, unit) ?? nearest.batch.amount
+                : totalAmt;
+            const hasOtherBatches = totalAmt > urgentBaseAmt; // extra stock beyond the urgent batch
             return { id, ingr, totalAmt, urgentAmt, hasOtherBatches, unit, daysLeft, badge, opt };
         })
         .sort((a, b) => {

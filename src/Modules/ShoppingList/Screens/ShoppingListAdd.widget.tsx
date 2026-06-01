@@ -30,6 +30,7 @@ export const ShoppingListAddWidget: FunctionComponent<ShoppingListAddWidgetProps
     const dishes = useSelector((state: RootState) => state.shared.dishes.dishes);
     const scheduledMeals = useSelector((state: RootState) => state.personal.scheduledMeal.scheduledMeals);
     const allIngredients = useSelector((state: RootState) => state.shared.ingredient.ingredients);
+    const inventory = useSelector((state: RootState) => state.personal.inventory.items);
     const message = useMessage();
 
     const addShoppingListForm = useSmartForm<ShoppingList>({
@@ -51,7 +52,9 @@ export const ShoppingListAddWidget: FunctionComponent<ShoppingListAddWidgetProps
                 allDishes: dishes,
                 allScheduledMeals: scheduledMeals,
                 allIngredients: allIngredients,
+                inventory,
                 alreadyHaveIngredientIds: alreadyHaveIngredientIds ?? [],
+                autoMarkCoveredByInventory: true,
             }));
             message.success();
             addShoppingListForm.reset();

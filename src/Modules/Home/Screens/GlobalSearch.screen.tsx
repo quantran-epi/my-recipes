@@ -6,9 +6,8 @@ import { Ingredient } from '@store/Models/Ingredient';
 import { Dishes } from '@store/Models/Dishes';
 import { ShoppingList } from '@store/Models/ShoppingList';
 import { RootState } from '@store/Store';
-import { Input, Modal } from 'antd';
+import { Input } from 'antd';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { DishesDetailWidget } from '@modules/Dishes/Screens/DishesManageIngredient/DishDetail.widget';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { RootRoutes } from '@routing/RootRoutes';
@@ -68,7 +67,6 @@ export const GlobalSearchScreen: React.FC<GlobalSearchScreenProps> = ({ open, on
     const [showAllDishes, setShowAllDishes] = useState(false);
     const [showAllIngredients, setShowAllIngredients] = useState(false);
     const [showAllLists, setShowAllLists] = useState(false);
-    const [selectedDish, setSelectedDish] = useState<Dishes | null>(null);
     const inputRef = useRef<any>(null);
 
     const dishes = useSelector((state: RootState) => state.shared.dishes.dishes);
@@ -83,7 +81,6 @@ export const GlobalSearchScreen: React.FC<GlobalSearchScreenProps> = ({ open, on
             setShowAllDishes(false);
             setShowAllIngredients(false);
             setShowAllLists(false);
-            setSelectedDish(null);
             setTimeout(() => inputRef.current?.focus(), 80);
         }
     }, [open]);
@@ -246,7 +243,7 @@ export const GlobalSearchScreen: React.FC<GlobalSearchScreenProps> = ({ open, on
                             return (
                                 <div
                                     key={r.dish.id}
-                                    onClick={() => { _commit(); setSelectedDish(r.dish); }}
+                                    onClick={() => _navigate(RootRoutes.AuthorizedRoutes.DishesRoutes.ManageIngredient(r.dish.id))}
                                     style={{
                                         padding: '10px 16px',
                                         borderBottom: i < list.length - 1 ? '1px solid #f5f5f5' : 'none',
@@ -374,22 +371,6 @@ export const GlobalSearchScreen: React.FC<GlobalSearchScreenProps> = ({ open, on
                 )}
             </div>
         </div>
-        <Modal
-            open={selectedDish !== null}
-            onCancel={() => setSelectedDish(null)}
-            footer={null}
-            destroyOnClose
-            title={selectedDish?.name}
-            style={{ top: '5vh' }}
-            zIndex={2100}
-            styles={{
-                content: { padding: 0, display: 'flex', flexDirection: 'column', height: '88vh', maxHeight: '88vh' },
-                header: { padding: '16px 24px', marginBottom: 0, borderBottom: '1px solid #f0f0f0', flexShrink: 0 },
-                body: { flex: 1, overflowY: 'auto', padding: '16px 24px' },
-            }}
-        >
-            {selectedDish && <DishesDetailWidget dish={selectedDish} />}
-        </Modal>
         </>
     );
 };

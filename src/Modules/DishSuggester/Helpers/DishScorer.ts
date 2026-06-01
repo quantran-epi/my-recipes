@@ -1,4 +1,7 @@
-import { Dishes } from "@store/Models/Dishes";
+import { Dishes, DishesIngredientAmount } from "@store/Models/Dishes";
+import { Ingredient, IngredientInventory } from "@store/Models/Ingredient";
+import { IngredientUnitHelper } from "@common/Helpers/IngredientUnitHelper";
+import { InventoryHelper } from "@common/Helpers/InventoryHelper";
 
 export type ScoredDish = {
     dish: Dishes;
@@ -27,6 +30,17 @@ const collectAllIngredientIds = (dish: Dishes, allDishes: Dishes[], visited = ne
     return Array.from(new Set([...own, ...fromIncluded]));
 };
 
+const collectAllIngredientAmounts = (dish: Dishes, allDishes: Dishes[], visited = new Set<string>()): DishesIngredientAmount[] => {
+    if (visited.has(dish.id)) return [];
+    visited.add(dish.id);
+    const own = dish.ingredients.filter(i => i.required !== false);
+    const fromIncluded = dish.includeDishes.flatMap(id => {
+        const d = allDishes.find(d => d.id === id);
+        return d ? collectAllIngredientAmounts(d, allDishes, visited) : [];
+    });
+    return [...own, ...fromIncluded];
+};
+
 export const DishScorer = {
     score(dishes: Dishes[], selectedIngredientIds: string[], allDishes: Dishes[]): ScoredDish[] {
         if (selectedIngredientIds.length === 0) return [];
@@ -39,6 +53,43 @@ export const DishScorer = {
                 const matched = allRequired.filter(id => selectedIngredientIds.includes(id));
                 const missing = allRequired.filter(id => !selectedIngredientIds.includes(id));
                 const score = matched.length / allRequired.length;
+
+                return {
+                    dish,
+                    score,
+                    matchedIngredientIds: matched,
+                    missingIngredientIds: missing,
+                } as ScoredDish;
+            })
+            .filter((s): s is ScoredDish => s !== null && s.score > 0)
+            .sort((a, b) => {
+                if (b.score !== a.score) return b.score - a.score;
+                return a.missingIngredientIds.length - b.missingIngredientIds.length;
+            });
+    },
+
+    scoreWithInventory(dishes: Dishes[], inventory: Record<string, IngredientInventory>, allDishes: Dishes[], allIngredients: Ingredient[]): ScoredDish[] {
+        if (Object.keys(inventory).length === 0) return [];
+
+        return dishes
+            .map(dish => {
+                const amounts = collectAllIngredientAmounts(dish, allDishes);
+                const grouped: Record<string, { required: number; ingredient?: Ingredient }> = {};
+                amounts.forEach(amount => {
+                    const ingredient = allIngredients.find(i => i.id === amount.ingredientId);
+                    const baseUnit = IngredientUnitHelper.getBaseUnit(ingredient, [amount.unit]);
+                    const required = IngredientUnitHelper.toBaseAmount(ingredient, amount.amount, amount.unit, baseUnit)
+                        ?? IngredientUnitHelper.parseAmount(amount.amount);
+                    if (!grouped[amount.ingredientId]) grouped[amount.ingredientId] = { required: 0, ingredient };
+                    grouped[amount.ingredientId].required += required;
+                });
+
+                const requiredIds = Object.keys(grouped);
+                if (requiredIds.length === 0) return null;
+
+                const matched = requiredIds.filter(id => InventoryHelper.totalAmount(inventory[id], grouped[id].ingredient) >= grouped[id].required);
+                const missing = requiredIds.filter(id => !matched.includes(id));
+                const score = matched.length / requiredIds.length;
 
                 return {
                     dish,

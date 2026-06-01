@@ -8,8 +8,8 @@ import { Stack } from "@components/Layout/Stack";
 import { useMessage } from "@components/Message";
 import { SmartForm, useSmartForm } from "@components/SmartForm";
 import { DISH_INGREDIENT_PREPARE_PRESETS, Dishes, DishesIngredientAmount } from "@store/Models/Dishes"
-import { INGREDIENT_UNITS, IngredientUnit } from "@store/Models/Ingredient";
-import { DishesIngredientAddParams, addIngredientsToDish, editIngredientFromDish } from "@store/Reducers/DishesReducer";
+import { IngredientUnitHelper } from "@common/Helpers/IngredientUnitHelper";
+import { editIngredientFromDish } from "@store/Reducers/DishesReducer";
 import { RootState } from "@store/Store";
 import { useDispatch, useSelector } from "react-redux";
 
@@ -23,17 +23,24 @@ export const DishesEditIngredientWidget: React.FunctionComponent<DishesEditIngre
     const ingredients = useSelector((state: RootState) => state.shared.ingredient.ingredients);
     const dispatch = useDispatch();
     const message = useMessage();
+    const selectedIngredient = ingredients.find(ingre => ingre.id === props.item.ingredientId);
+    const recipeUnits = Array.from(new Set([props.item.unit, ...IngredientUnitHelper.getRecipeUnits(selectedIngredient)]));
 
     const editIngreToDishForm = useSmartForm<DishesIngredientAmount>({
         defaultValues: props.item,
         onSubmit: (values) => {
+            const ingredient = ingredients.find(ingre => ingre.id === values.transformValues.ingredientId);
+            if (!IngredientUnitHelper.canConvert(ingredient, values.transformValues.unit)) {
+                message.error("This unit is not configured for the selected ingredient.");
+                return;
+            }
             dispatch(editIngredientFromDish({
                 dishId: props.dish.id,
                 ingres: values.transformValues
             }));
             message.success();
             editIngreToDishForm.reset();
-            props.onDone();
+            props.onDone?.();
         },
         itemDefinitions: defaultValues => ({
             ingredientId: { label: "Nguyên liệu", name: ObjectPropertyHelper.nameof(defaultValues, e => e.ingredientId) },
@@ -76,7 +83,7 @@ export const DishesEditIngredientWidget: React.FunctionComponent<DishesEditIngre
                     return option?.children?.toString().toLowerCase().includes(inputValue.toLowerCase());
                 }}
                 style={{ width: '100%' }}>
-                {INGREDIENT_UNITS.map(unit => <Option key={unit} value={unit}>{unit}</Option>)}
+                {recipeUnits.map(unit => <Option key={unit} value={unit}>{unit}</Option>)}
             </Select>
         </SmartForm.Item>
         <SmartForm.Item {...editIngreToDishForm.itemDefinitions.prepare}>

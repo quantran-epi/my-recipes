@@ -3,6 +3,7 @@ import { Box } from "@components/Layout/Box";
 import { Stack } from "@components/Layout/Stack";
 import { Modal } from "@components/Modal";
 import { Typography } from "@components/Typography";
+import { IngredientUnitHelper } from "@common/Helpers/IngredientUnitHelper";
 import { RootState } from "@store/Store";
 import { DatePicker, Divider, Empty, Progress, Table } from "antd";
 import dayjs, { Dayjs } from "dayjs";
@@ -54,8 +55,12 @@ export const IngredientStatsWidget: React.FC<IngredientStatsWidgetProps> = ({ op
                     if (!group.isDone) return; // only count checked-off groups
                     const existing = boughtMap[group.ingredientId];
                     const amounts = group.amounts;
-                    const totalAmt = amounts.reduce((sum, a) => sum + (parseFloat(a.amount) || 0), 0);
-                    const unit = amounts[0]?.unit ?? "";
+                    const ingredient = ingredients.find(i => i.id === group.ingredientId);
+                    const unit = IngredientUnitHelper.getBaseUnit(ingredient, amounts.map(a => a.unit));
+                    const totalAmt = amounts.reduce((sum, a) => {
+                        const converted = IngredientUnitHelper.toBaseAmount(ingredient, a.amount, a.unit, unit);
+                        return sum + (converted ?? IngredientUnitHelper.parseAmount(a.amount));
+                    }, 0);
                     if (existing) {
                         boughtMap[group.ingredientId] = {
                             amount: existing.amount + totalAmt,
@@ -80,15 +85,17 @@ export const IngredientStatsWidget: React.FC<IngredientStatsWidgetProps> = ({ op
                 const dish = dishes.find(d => d.id === session.dishId);
                 if (!dish) return;
                 dish.ingredients.forEach(ingr => {
-                    const amt = parseFloat(ingr.amount) || 0;
+                    const ingredient = ingredients.find(i => i.id === ingr.ingredientId);
+                    const unit = IngredientUnitHelper.getBaseUnit(ingredient, [ingr.unit]);
+                    const amt = IngredientUnitHelper.toBaseAmount(ingredient, ingr.amount, ingr.unit, unit) ?? IngredientUnitHelper.parseAmount(ingr.amount);
                     const existing = cookedMap[ingr.ingredientId];
                     if (existing) {
                         cookedMap[ingr.ingredientId] = {
                             amount: existing.amount + amt,
-                            unit: existing.unit || ingr.unit,
+                            unit: existing.unit || unit,
                         };
                     } else {
-                        cookedMap[ingr.ingredientId] = { amount: amt, unit: ingr.unit };
+                        cookedMap[ingr.ingredientId] = { amount: amt, unit };
                     }
                 });
             });

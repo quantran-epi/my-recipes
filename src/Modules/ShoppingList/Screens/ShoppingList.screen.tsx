@@ -126,7 +126,8 @@ export const ShoppingListItem: React.FunctionComponent<ShoppingListItemProps> = 
         dispatch(generateIngredient({
             shoppingListId: props.item.id,
             allDishes: dishes,
-            allScheduledMeals: scheduledMeals
+            allScheduledMeals: scheduledMeals,
+            allIngredients: ingredients,
         }));
     }
 

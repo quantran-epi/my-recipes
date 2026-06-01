@@ -14,7 +14,8 @@ export const INGREDIENT_SHELF_LIFE_OPTIONS: { value: IngredientShelfLife; label:
 ];
 
 export type IngredientInventory = {
-    unit: IngredientUnit;
+    /** Legacy/default unit. New inventory batches store their own unit. */
+    unit?: IngredientUnit;
     lastUpdated: Date;
     batches: InventoryBatch[];
 }
@@ -22,6 +23,7 @@ export type IngredientInventory = {
 export type InventoryBatch = {
     id: string;         // uuid for keying / removal
     amount: number;
+    unit?: IngredientUnit;
     purchasedAt?: string; // ISO date string
 }
 
@@ -30,4 +32,7 @@ export type Ingredient = {
     name: string;
     category?: string;
     shelfLife?: IngredientShelfLife;
+    baseUnit?: IngredientUnit;
+    inventoryUnits?: IngredientUnit[];
+    recipeUnitConversions?: Partial<Record<IngredientUnit, number>>;
 }

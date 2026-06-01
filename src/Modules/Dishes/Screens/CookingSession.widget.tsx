@@ -7,6 +7,7 @@ import { useToggle } from "@hooks";
 import { Dishes, DishesIngredientAmount } from "@store/Models/Dishes";
 import { Ingredient } from "@store/Models/Ingredient";
 import { InventoryHelper } from "@common/Helpers/InventoryHelper";
+import { IngredientUnitHelper } from "@common/Helpers/IngredientUnitHelper";
 import { startCooking, setStepCooking } from "@store/Reducers/CookingSessionReducer";
 import { selectDishes, selectIngredients, selectInventory, selectCookingSessions } from "@store/Selectors";
 import { Progress, Space } from "antd";
@@ -79,18 +80,19 @@ export const CookingSessionWidget: React.FunctionComponent<CookingSessionWidgetP
         const amounts = collectIngredientAmounts(dish, allDishes);
         const grouped: Record<string, { total: number; unit: string }> = {};
         amounts.forEach(amt => {
-            const parsed = parseFloat(amt.amount);
-            const val = isNaN(parsed) ? 0 : parsed;
-            if (!grouped[amt.ingredientId]) grouped[amt.ingredientId] = { total: 0, unit: amt.unit };
+            const ingredient = allIngredients.find(i => i.id === amt.ingredientId);
+            const baseUnit = IngredientUnitHelper.getBaseUnit(ingredient, [amt.unit]);
+            const val = IngredientUnitHelper.toBaseAmount(ingredient, amt.amount, amt.unit, baseUnit) ?? IngredientUnitHelper.parseAmount(amt.amount);
+            if (!grouped[amt.ingredientId]) grouped[amt.ingredientId] = { total: 0, unit: baseUnit };
             grouped[amt.ingredientId].total += val;
         });
         return Object.entries(grouped).map(([ingredientId, { total, unit }]) => {
             const ingredient = allIngredients.find(i => i.id === ingredientId);
             if (!ingredient) return null;
             const inv = inventoryItems[ingredientId];
-            const inStock = InventoryHelper.totalAmount(inv);
+            const inStock = InventoryHelper.totalAmount(inv, ingredient);
             const lacking = Math.max(0, total - inStock);
-            return { ingredient, required: total, unit: inv?.unit ?? unit, inStock, lacking, sufficient: inStock >= total } as CookingIngredientRow;
+            return { ingredient, required: total, unit, inStock, lacking, sufficient: inStock >= total } as CookingIngredientRow;
         }).filter(Boolean) as CookingIngredientRow[];
     }, [dish, allDishes, allIngredients, inventoryItems]);
 

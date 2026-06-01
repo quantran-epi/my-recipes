@@ -5,6 +5,7 @@ import { Tag } from "@components/Tag";
 import { Typography } from "@components/Typography";
 import { CookingSession } from "@store/Models/CookingSession";
 import { Dishes } from "@store/Models/Dishes";
+import { IngredientUnitHelper } from "@common/Helpers/IngredientUnitHelper";
 import { cancelCooking, finishCooking } from "@store/Reducers/CookingSessionReducer";
 import { deductInventory } from "@store/Reducers/InventoryReducer";
 import { selectDishes, selectIngredients, selectInventory } from "@store/Selectors";
@@ -45,11 +46,11 @@ export const FinishCookingWidget: React.FunctionComponent<FinishCookingWidgetPro
         const amounts = collectIngredientAmounts(dish, allDishes);
         const grouped: Record<string, { total: number; unit: string; name: string }> = {};
         amounts.forEach(amt => {
-            const parsed = parseFloat(amt.amount);
-            const val = isNaN(parsed) ? 0 : parsed;
+            const ingre = allIngredients.find(i => i.id === amt.ingredientId);
+            const baseUnit = IngredientUnitHelper.getBaseUnit(ingre, [amt.unit]);
+            const val = IngredientUnitHelper.toBaseAmount(ingre, amt.amount, amt.unit, baseUnit) ?? IngredientUnitHelper.parseAmount(amt.amount);
             if (!grouped[amt.ingredientId]) {
-                const ingre = allIngredients.find(i => i.id === amt.ingredientId);
-                grouped[amt.ingredientId] = { total: 0, unit: amt.unit, name: ingre?.name ?? amt.ingredientId };
+                grouped[amt.ingredientId] = { total: 0, unit: baseUnit, name: ingre?.name ?? amt.ingredientId };
             }
             grouped[amt.ingredientId].total += val;
         });
@@ -59,7 +60,12 @@ export const FinishCookingWidget: React.FunctionComponent<FinishCookingWidgetPro
     }, [dish, allDishes, allIngredients, inventoryItems]);
 
     const _onFinish = () => {
-        deductions.forEach(d => dispatch(deductInventory({ ingredientId: d.id, amount: d.total })));
+        deductions.forEach(d => dispatch(deductInventory({
+            ingredientId: d.id,
+            amount: d.total,
+            unit: d.unit as any,
+            ingredient: allIngredients.find(i => i.id === d.id),
+        })));
         dispatch(finishCooking(session.id));
         onDone();
     };

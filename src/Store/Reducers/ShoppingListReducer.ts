@@ -1,9 +1,11 @@
 import type { PayloadAction } from '@reduxjs/toolkit';
 import { createSlice } from '@reduxjs/toolkit';
 import { DishIngredientAmountDishMeta, DishIngredientAmountMealMeta, Dishes } from '@store/Models/Dishes';
-import { Ingredient } from '@store/Models/Ingredient';
+import { Ingredient, IngredientInventory } from '@store/Models/Ingredient';
 import { ScheduledMeal } from '@store/Models/ScheduledMeal';
 import { ShoppingList, ShoppingListIngredientAmount, ShoppingListIngredientGroup } from '@store/Models/ShoppingList';
+import { IngredientUnitHelper } from '@common/Helpers/IngredientUnitHelper';
+import { InventoryHelper } from '@common/Helpers/InventoryHelper';
 import dayjs from 'dayjs';
 import { groupBy } from 'lodash';
 import { nanoid } from 'nanoid';
@@ -13,7 +15,9 @@ export type ShoppingListGenerateIngredientParams = {
     allDishes: Dishes[];
     allScheduledMeals: ScheduledMeal[];
     allIngredients?: Ingredient[];
+    inventory?: Record<string, IngredientInventory>;
     alreadyHaveIngredientIds?: string[];
+    autoMarkCoveredByInventory?: boolean;
 }
 
 export type ShoppingListToggleDoneIngredientGroupParams = {
@@ -139,13 +143,24 @@ export const ShoppingListSlice = createSlice({
                     return {
                         ...e,
                         ingredients: Object.keys(groups).map(key => {
+                            const ingredient = action.payload.allIngredients?.find(i => i.id === key);
+                            const baseUnit = IngredientUnitHelper.getBaseUnit(ingredient, groups[key].map(amt => amt.unit));
+                            const requiredBaseAmount = groups[key].reduce((sum, amt) => {
+                                const converted = IngredientUnitHelper.toBaseAmount(ingredient, amt.amount, amt.unit, baseUnit);
+                                return sum + (converted ?? IngredientUnitHelper.parseAmount(amt.amount));
+                            }, 0);
+                            const inStockBaseAmount = action.payload.alreadyHaveIngredientIds?.includes(key)
+                                ? requiredBaseAmount
+                                : InventoryHelper.totalAmount(action.payload.inventory?.[key], ingredient);
+                            const isCovered = action.payload.autoMarkCoveredByInventory === true && inStockBaseAmount >= requiredBaseAmount;
+
                             return {
                                 id: key.concat('-gr-').concat(nanoid(10)),
                                 ingredientId: key,
-                                amounts: groups[key].map(amt => ({ ...amt, isDone: false })),
-                                isDone: false,
+                                amounts: groups[key].map(amt => ({ ...amt, isDone: isCovered })),
+                                isDone: isCovered,
                             };
-                        }),
+                        }) as ShoppingListIngredientGroup[],
                     }
                 }
                 return e;

@@ -67,7 +67,7 @@ export const DishesDetailWidget: React.FunctionComponent<DishDetailWidgetProps> 
                 onClick={toggleShoppingList.show}
                 block
             >
-                Tạo lịch mua sắm
+                Tạo giỏ hàng
             </Button>
         </div>
 
