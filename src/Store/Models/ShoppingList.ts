@@ -1,4 +1,5 @@
 import { DishesIngredientAmount } from "./Dishes";
+import { IngredientUnit } from "./Ingredient";
 
 export type ShoppingListIngredientAmount = DishesIngredientAmount & {
     id: string;
@@ -10,6 +11,8 @@ export type ShoppingListIngredientGroup = {
     ingredientId: string;
     amounts: ShoppingListIngredientAmount[];
     isDone: boolean;
+    boughtAmount?: number;
+    boughtUnit?: IngredientUnit;
 }
 
 export type ShoppingList = {
@@ -20,4 +23,5 @@ export type ShoppingList = {
     scheduledMeals: string[];
     createdDate: Date;
     plannedDate: Date;
+    completedAt?: Date;
 }

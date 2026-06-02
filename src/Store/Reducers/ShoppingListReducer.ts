@@ -1,7 +1,7 @@
 import type { PayloadAction } from '@reduxjs/toolkit';
 import { createSlice } from '@reduxjs/toolkit';
 import { DishIngredientAmountDishMeta, DishIngredientAmountMealMeta, Dishes } from '@store/Models/Dishes';
-import { Ingredient, IngredientInventory } from '@store/Models/Ingredient';
+import { Ingredient, IngredientInventory, IngredientUnit } from '@store/Models/Ingredient';
 import { ScheduledMeal } from '@store/Models/ScheduledMeal';
 import { ShoppingList, ShoppingListIngredientAmount, ShoppingListIngredientGroup } from '@store/Models/ShoppingList';
 import { IngredientUnitHelper } from '@common/Helpers/IngredientUnitHelper';
@@ -31,6 +31,13 @@ export type ShoppingListToggleDoneIngredientAmountParams = {
     ingredientGroupId: string;
     ingredientAmoutId: string;
     isDone: boolean;
+}
+
+export type ShoppingListSetIngredientBoughtAmountParams = {
+    shoppingListId: string;
+    ingredientGroupId: string;
+    boughtAmount?: number;
+    boughtUnit?: IngredientUnit;
 }
 
 
@@ -71,6 +78,7 @@ export const ShoppingListSlice = createSlice({
         },
         edit: (state, action: PayloadAction<ShoppingList>) => {
             state.shoppingLists = state.shoppingLists.map(e => {
+                if (e.id === action.payload.id && e.completedAt) return e;
                 if (e.id === action.payload.id) return action.payload;
                 return e;
             })
@@ -81,6 +89,7 @@ export const ShoppingListSlice = createSlice({
         generateIngredient: (state, action: PayloadAction<ShoppingListGenerateIngredientParams>) => {
             state.shoppingLists = state.shoppingLists.map(e => {
                 if (e.id === action.payload.shoppingListId) {
+                    if (e.completedAt) return e;
                     let shoppingList = state.shoppingLists.find(l => l.id === action.payload.shoppingListId);
 
                     //process meals
@@ -145,14 +154,20 @@ export const ShoppingListSlice = createSlice({
                         ingredients: Object.keys(groups).map(key => {
                             const ingredient = action.payload.allIngredients?.find(i => i.id === key);
                             const baseUnit = IngredientUnitHelper.getBaseUnit(ingredient, groups[key].map(amt => amt.unit));
+                            const shouldAutoMark = action.payload.autoMarkCoveredByInventory === true;
+                            const forceCoveredByManualSelection = action.payload.inventory === undefined && action.payload.alreadyHaveIngredientIds?.includes(key);
                             const requiredBaseAmount = groups[key].reduce((sum, amt) => {
                                 const converted = IngredientUnitHelper.toBaseAmount(ingredient, amt.amount, amt.unit, baseUnit);
                                 return sum + (converted ?? IngredientUnitHelper.parseAmount(amt.amount));
                             }, 0);
-                            const inStockBaseAmount = action.payload.alreadyHaveIngredientIds?.includes(key)
+                            const inStockBaseAmount = forceCoveredByManualSelection
                                 ? requiredBaseAmount
                                 : InventoryHelper.availableAmount(action.payload.inventory?.[key], ingredient, requiredBaseAmount);
-                            const isCovered = action.payload.autoMarkCoveredByInventory === true && inStockBaseAmount >= requiredBaseAmount;
+                            const isCovered = shouldAutoMark && (
+                                InventoryHelper.isAlwaysAvailable(ingredient)
+                                || forceCoveredByManualSelection
+                                || (requiredBaseAmount > 0 && inStockBaseAmount >= requiredBaseAmount)
+                            );
 
                             return {
                                 id: key.concat('-gr-').concat(nanoid(10)),
@@ -169,6 +184,7 @@ export const ShoppingListSlice = createSlice({
         toggleDoneIngredientGroup: (state, action: PayloadAction<ShoppingListToggleDoneIngredientGroupParams>) => {
             state.shoppingLists = state.shoppingLists.map(e => {
                 if (e.id === action.payload.shoppingListId) {
+                    if (e.completedAt) return e;
                     return {
                         ...e,
                         ingredients: e.ingredients.map(ingre => {
@@ -189,6 +205,7 @@ export const ShoppingListSlice = createSlice({
         toggleDoneIngredientAmount: (state, action: PayloadAction<ShoppingListToggleDoneIngredientAmountParams>) => {
             state.shoppingLists = state.shoppingLists.map(e => {
                 if (e.id === action.payload.shoppingListId) {
+                    if (e.completedAt) return e;
                     return {
                         ...e,
                         ingredients: e.ingredients.map(ingre => {
@@ -212,9 +229,42 @@ export const ShoppingListSlice = createSlice({
                 return e;
             })
         },
+        setIngredientBoughtAmount: (state, action: PayloadAction<ShoppingListSetIngredientBoughtAmountParams>) => {
+            state.shoppingLists = state.shoppingLists.map(e => {
+                if (e.id === action.payload.shoppingListId) {
+                    if (e.completedAt) return e;
+                    return {
+                        ...e,
+                        ingredients: e.ingredients.map(ingre => {
+                            if (ingre.id === action.payload.ingredientGroupId) {
+                                return {
+                                    ...ingre,
+                                    boughtAmount: action.payload.boughtAmount,
+                                    boughtUnit: action.payload.boughtUnit,
+                                };
+                            }
+                            return ingre;
+                        }),
+                    };
+                }
+                return e;
+            });
+        },
+        completeShoppingList: (state, action: PayloadAction<string>) => {
+            state.shoppingLists = state.shoppingLists.map(e => {
+                if (e.id === action.payload && !e.completedAt) {
+                    return {
+                        ...e,
+                        completedAt: new Date(),
+                    };
+                }
+                return e;
+            });
+        },
         addDishesToShoppingList: (state, action: PayloadAction<ShoppingListAddDishesParams>) => {
             state.shoppingLists = state.shoppingLists.map(e => {
                 if (e.id === action.payload.shoppingList.id) {
+                    if (e.completedAt) return e;
                     return {
                         ...e,
                         dishes: action.payload.dishesIds
@@ -225,6 +275,7 @@ export const ShoppingListSlice = createSlice({
         },
         updateShoppingListIngredientMealData: (state, action: PayloadAction<ScheduledMeal>) => {
             state.shoppingLists = state.shoppingLists.map(e => {
+                if (e.completedAt) return e;
                 let groups: ShoppingListIngredientGroup[] = e.ingredients;
                 groups = groups.map(gr => {
                     return {
@@ -251,6 +302,7 @@ export const ShoppingListSlice = createSlice({
         },
         updateShoppingListIngredientDishData: (state, action: PayloadAction<Dishes>) => {
             state.shoppingLists = state.shoppingLists.map(e => {
+                if (e.completedAt) return e;
                 let groups: ShoppingListIngredientGroup[] = e.ingredients;
                 groups = groups.map(gr => {
                     return {
@@ -283,7 +335,7 @@ export const ShoppingListSlice = createSlice({
 
 // Action creators are generated for each case reducer function
 export const { add: addShoppingList, edit: editShoppingList,
-    remove: removeShoppingList, generateIngredient, toggleDoneIngredientGroup, toggleDoneIngredientAmount, addDishesToShoppingList,
+    remove: removeShoppingList, generateIngredient, toggleDoneIngredientGroup, toggleDoneIngredientAmount, setIngredientBoughtAmount, completeShoppingList, addDishesToShoppingList,
     updateShoppingListIngredientMealData, updateShoppingListIngredientDishData,
     reset: resetShoppingList
 } = ShoppingListSlice.actions

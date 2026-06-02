@@ -281,6 +281,7 @@ export const CookingSessionWidget: React.FunctionComponent<CookingSessionWidgetP
             destroyOnClose
             onCancel={toggleShoppingList.hide}
             footer={null}
+            zIndex={2500}
         >
             <ShoppingListAddWidget
                 date={new Date()}

@@ -47,6 +47,7 @@ export const ShoppingListEditWidget: FunctionComponent<ShoppingListEditWidgetPro
             ingredients: { name: ObjectPropertyHelper.nameof(defaultValues, e => e.ingredients), noMarkup: true },
             createdDate: { name: ObjectPropertyHelper.nameof(defaultValues, e => e.createdDate), noMarkup: true },
             plannedDate: { label: "Ngày kế hoạch", name: ObjectPropertyHelper.nameof(defaultValues, e => e.plannedDate) },
+            completedAt: { name: ObjectPropertyHelper.nameof(defaultValues, e => e.completedAt), noMarkup: true },
         }),
         transformFunc: (values) => ({
             ...values,

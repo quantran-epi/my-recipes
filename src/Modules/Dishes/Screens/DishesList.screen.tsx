@@ -106,7 +106,7 @@ export const DishesListScreen = () => {
         )}
         <VirtualList
             rowComponent={DishRow}
-            rowCount={filteredDishes.length}
+            rowCount={filteredDishes.length + (filteredDishes.length > 0 ? 2 : 0)}
             rowHeight={rowHeight}
             rowProps={{ dishes: filteredDishes, onDelete: _onDelete, onDuplicate: _onDuplicate, isAdmin }}
             style={{ height: window.screen.availHeight - 210 - 80 }}

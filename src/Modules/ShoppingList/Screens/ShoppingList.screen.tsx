@@ -84,7 +84,7 @@ export const ShoppingListScreen = () => {
         </Stack.Compact>
         <VirtualList
             rowComponent={ShoppingListRow}
-            rowCount={filteredShoppingLists.length}
+            rowCount={filteredShoppingLists.length + (filteredShoppingLists.length > 0 ? 2 : 0)}
             rowHeight={rowHeight}
             rowProps={{ items: filteredShoppingLists, onDelete: _onDelete }}
             style={{ height: window.screen.availHeight - 210 }}
@@ -128,8 +128,10 @@ export const ShoppingListItem: React.FunctionComponent<ShoppingListItemProps> = 
     const toggleLoading = useToggle();
     const toggleExport = useToggle();
     const toggleDeleteConfirm = useToggle();
+    const isReadonly = Boolean(props.item.completedAt);
 
     const _onGenerate = () => {
+        if (isReadonly) return;
         dispatch(generateIngredient({
             shoppingListId: props.item.id,
             allDishes: dishes,
@@ -139,6 +141,10 @@ export const ShoppingListItem: React.FunctionComponent<ShoppingListItemProps> = 
     }
 
     const _onGenerateAndShow = () => {
+        if (isReadonly) {
+            _onShow();
+            return;
+        }
         _onGenerate();
         _onShow();
     }
@@ -153,10 +159,12 @@ export const ShoppingListItem: React.FunctionComponent<ShoppingListItemProps> = 
     }
 
     const _onAddMoreDishes = () => {
+        if (isReadonly) return;
         toggleAddMoreDishes.show();
     }
 
     const _onMoreActionClick = (e) => {
+        if (isReadonly && ["reload", "add_dishes", "edit_shopping_list"].includes(e.key)) return;
         switch (e.key) {
             case "reload": modal.confirm({
                 content: "Tải lại danh sách nguyên liệu?",
@@ -189,6 +197,11 @@ export const ShoppingListItem: React.FunctionComponent<ShoppingListItemProps> = 
                         <Tooltip title="Đã hoàn thành"><Image src={ChecklistIcon} preview={false} width={18} style={{ marginBottom: 3 }} /></Tooltip>
                         <Typography.Text style={{ fontSize: 16 }}>{`${props.item.ingredients.filter(e => e.isDone).length}/${props.item.ingredients.length}`} nguyên liệu</Typography.Text>
                     </Space>
+                    {isReadonly && <Space size={5}>
+                        <Typography.Text type="secondary" style={{ fontSize: 13 }}>
+                            Đã hoàn tất {moment(props.item.completedAt).format("DD/MM/YY")}
+                        </Typography.Text>
+                    </Space>}
                     <Space size={5}>
                         <Typography.Text style={{ fontSize: 14 }}>Gồm</Typography.Text>
                         <Typography.Text style={{ fontSize: 14 }} strong>{props.item.dishes.length}</Typography.Text>
@@ -217,9 +230,9 @@ export const ShoppingListItem: React.FunctionComponent<ShoppingListItemProps> = 
                 <Dropdown menu={{
                     items: [
                         { label: 'Xuất danh sách', key: 'export', icon: <FileTextOutlined /> },
-                        { label: 'Tải lại', key: 'reload', icon: <ReloadOutlined /> },
-                        { label: 'Sửa món ăn', key: 'add_dishes', icon: <OrderedListOutlined /> },
-                        { label: 'Sửa lịch mua sắm', key: 'edit_shopping_list', icon: <EditOutlined /> },
+                        { label: 'Tải lại', key: 'reload', icon: <ReloadOutlined />, disabled: isReadonly },
+                        { label: 'Sửa món ăn', key: 'add_dishes', icon: <OrderedListOutlined />, disabled: isReadonly },
+                        { label: 'Sửa lịch mua sắm', key: 'edit_shopping_list', icon: <EditOutlined />, disabled: isReadonly },
                         { type: 'divider' },
                         { label: 'Xóa', key: 'delete', icon: <DeleteOutlined />, danger: true },
                     ],

@@ -77,7 +77,7 @@ export const IngredientListScreen = () => {
         </Stack.Compact>
         <VirtualList
             rowComponent={IngredientRow}
-            rowCount={filteredIngredients.length}
+            rowCount={filteredIngredients.length + (filteredIngredients.length > 0 ? 2 : 0)}
             rowHeight={57}
             rowProps={{ items: filteredIngredients, onDelete: _onDelete, isAdmin, onSuggest: _onSuggest }}
             style={{ height: window.screen.availHeight - 210 - 80 }}

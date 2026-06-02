@@ -42,7 +42,8 @@ export const ShoppingListAddWidget: FunctionComponent<ShoppingListAddWidgetProps
             ingredients: [],
             scheduledMeals: [],
             createdDate: new Date(),
-            plannedDate: null
+            plannedDate: null,
+            completedAt: undefined,
         },
         onSubmit: (values) => {
             const transformed = values.transformValues;
@@ -70,6 +71,7 @@ export const ShoppingListAddWidget: FunctionComponent<ShoppingListAddWidgetProps
             ingredients: { name: ObjectPropertyHelper.nameof(defaultValues, e => e.ingredients), noMarkup: true },
             createdDate: { name: ObjectPropertyHelper.nameof(defaultValues, e => e.createdDate), noMarkup: true },
             plannedDate: { label: "Ngày kế hoạch", name: ObjectPropertyHelper.nameof(defaultValues, e => e.plannedDate) },
+            completedAt: { name: ObjectPropertyHelper.nameof(defaultValues, e => e.completedAt), noMarkup: true },
         }),
         transformFunc: (values) => ({
             ...values,

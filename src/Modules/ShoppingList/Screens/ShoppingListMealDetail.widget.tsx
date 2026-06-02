@@ -1,24 +1,16 @@
 import { Button } from "@components/Button";
 import { Image } from "@components/Image";
-import { Box } from "@components/Layout/Box";
 import { Divider } from "@components/Layout/Divider";
-import { Space } from "@components/Layout/Space";
 import { Stack } from "@components/Layout/Stack";
 import { List } from "@components/List";
-import { Modal } from "@components/Modal";
 import { Typography } from "@components/Typography";
 import { useToggle } from "@hooks";
-import { DishesDetailWidget } from "@modules/Dishes/Screens/DishesManageIngredient/DishDetail.widget";
-import { RootRoutes } from "@routing/RootRoutes";
+import { DishesReadonlyDetailModal } from "@modules/Dishes/Screens/DishesManageIngredient/DishReadonlyDetail.widget";
 import { Dishes } from "@store/Models/Dishes";
-import { ScheduledMeal } from "@store/Models/ScheduledMeal";
-import { ShoppingList } from "@store/Models/ShoppingList"
 import { RootState } from "@store/Store";
 import moment from "moment";
 import React, { FunctionComponent, useMemo } from "react";
 import { useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
-import DishesIcon from "../../../../assets/icons/noodles.png";
 
 type ShoppingListMealDetailWidgetProps = {
     mealId: string;
@@ -70,16 +62,11 @@ export const ShoppingListMealDishesItem: React.FunctionComponent<ShoppingListMea
 
     return <List.Item>
         <Button onClick={toggleDishesDetail.show} type="link" style={{ color: "blue" }}>{props.dish.name}</Button>
-        <Modal style={{ top: 50 }} open={toggleDishesDetail.value} title={
-            <Space>
-                <Image src={DishesIcon} preview={false} width={24} style={{ marginBottom: 3 }} />
-                {props.dish.name}
-            </Space>
-        } destroyOnClose={true} onCancel={toggleDishesDetail.hide} footer={null}>
-            <Box style={{ maxHeight: 550, overflowY: "auto" }}>
-                <DishesDetailWidget dish={props.dish} />
-            </Box>
-        </Modal>
+        <DishesReadonlyDetailModal
+            dish={props.dish}
+            open={toggleDishesDetail.value}
+            onClose={toggleDishesDetail.hide}
+        />
     </List.Item>
 
 }

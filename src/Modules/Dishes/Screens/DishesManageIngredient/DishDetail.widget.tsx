@@ -133,7 +133,7 @@ export const DishesDetailWidget: React.FunctionComponent<DishDetailWidgetProps> 
             destroyOnClose
             onCancel={toggleCooking.hide}
             footer={null}
-            zIndex={2200}
+            zIndex={2300}
         >
             <CookingSessionWidget dish={props.dish} onDone={toggleCooking.hide} />
         </Modal>
@@ -144,7 +144,7 @@ export const DishesDetailWidget: React.FunctionComponent<DishDetailWidgetProps> 
             destroyOnClose
             onCancel={toggleShoppingList.hide}
             footer={null}
-            zIndex={2200}
+            zIndex={2300}
         >
             <ShoppingListAddWidget
                 date={null}
