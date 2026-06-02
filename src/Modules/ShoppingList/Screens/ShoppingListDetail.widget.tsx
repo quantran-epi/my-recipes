@@ -1,4 +1,4 @@
-import { CheckCircleOutlined, DollarCircleOutlined, MinusOutlined, PlusOutlined, QuestionCircleOutlined, ShoppingCartOutlined, WarningOutlined } from "@ant-design/icons";
+import { CheckCircleOutlined, MinusOutlined, PlusOutlined, QuestionCircleOutlined, ShoppingCartOutlined, WalletOutlined, WarningOutlined } from "@ant-design/icons";
 import { Button } from "@components/Button";
 import { Checkbox } from "@components/Form/Checkbox";
 import { DatePicker } from "@components/Form/DatePicker";
@@ -376,7 +376,7 @@ export const ShoppingListDetailWidget: React.FunctionComponent<ShoppingListDetai
                 </React.Fragment>
             },
             {
-                key: "cost", icon: <DollarCircleOutlined />, label: "Chi phí",
+                key: "cost", icon: <WalletOutlined />, label: "Chi phí",
                 children: <Box>
                     <div style={{ display: "flex", flexDirection: "column", gap: 10, width: "100%", boxSizing: "border-box" }}>
                         <ShoppingListCostSummaryWidget summary={costSummary} />
@@ -635,7 +635,7 @@ const formatCostSummary = (summary: CostEstimateSummary, emptyText = "0đ"): str
 const ShoppingListCostMetric: React.FunctionComponent<ShoppingListCostMetricProps> = ({ label, description, summary, primary, emptyText }) => {
     return <div style={{
         minWidth: 0,
-        minHeight: 92,
+        minHeight: 62,
         padding: "12px",
         borderRadius: 8,
         border: primary ? "1px solid #91caff" : "1px solid #eeeeee",

@@ -237,11 +237,6 @@ export const DashboardScreen = () => {
     const stockedBatchCount = Object.values(inventoryItems).reduce((sum, inventory) => sum + (inventory.batches ?? []).filter(batch => batch.amount > 0).length, 0);
 
     return <Box style={{ display: 'flex', flexDirection: 'column', gap: 12, paddingBottom: 12 }}>
-        <Box>
-            <Typography.Title level={3} style={{ marginTop: 0, marginBottom: 4 }}>Tổng quan hôm nay</Typography.Title>
-            <Typography.Text type='secondary'>Việc cần nấu, cần mua và nguyên liệu nên xử lý trước.</Typography.Text>
-        </Box>
-
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(170px, 1fr))', gap: 10 }}>
             <Metric icon={<CalendarOutlined />} label='Món trong thực đơn' value={todayDishCount} detail={`${todayMeals.length} lịch ăn trong hôm nay`} tone='#1677ff' />
             <Metric icon={<ShoppingCartOutlined />} label='Lịch mua hôm nay' value={todayShoppingLists.length} detail='Danh sách có ngày mua là hôm nay' tone='#0958d9' />
