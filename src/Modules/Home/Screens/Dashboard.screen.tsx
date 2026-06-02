@@ -41,6 +41,17 @@ const formatCostSummary = (summary: CostEstimateSummary): string => {
     return IngredientPriceHelper.formatRange(summary);
 }
 
+const truncateName = (value: string, maxLength = 28): string => {
+    return value.length > maxLength ? `${value.slice(0, maxLength - 3)}...` : value;
+}
+
+const formatNamePreview = (names: string[], emptyText: string, hiddenLabel = 'mục khác'): string => {
+    if (names.length === 0) return emptyText;
+    const shown = names.slice(0, 3).map(item => truncateName(item));
+    const hiddenCount = names.length - shown.length;
+    return hiddenCount > 0 ? `${shown.join(', ')} và ${hiddenCount} ${hiddenLabel}` : shown.join(', ');
+}
+
 const getIngredientById = (ingredients: Ingredient[], id: string): Ingredient | undefined => {
     return ingredients.find(item => item.id === id);
 }
@@ -116,13 +127,14 @@ const Section: React.FunctionComponent<{ title: string; action?: React.ReactNode
     </Box>;
 }
 
-const Metric: React.FunctionComponent<{ icon: React.ReactNode; label: string; value: string | number; tone?: string }> = ({ icon, label, value, tone }) => {
+const Metric: React.FunctionComponent<{ icon: React.ReactNode; label: string; value: string | number; detail?: React.ReactNode; tone?: string }> = ({ icon, label, value, detail, tone }) => {
     return <Box style={{ padding: '10px 12px', border: '1px solid #f0f0f0', borderRadius: 8, background: '#fafafa', minWidth: 0 }}>
-        <Stack align='center' gap={8}>
+        <Stack align='flex-start' gap={8}>
             <span style={{ color: tone ?? '#1677ff', flexShrink: 0 }}>{icon}</span>
             <div style={{ minWidth: 0 }}>
                 <Typography.Text strong style={{ display: 'block', lineHeight: '18px' }}>{value}</Typography.Text>
                 <Typography.Text type='secondary' style={{ display: 'block', fontSize: 12, lineHeight: '16px' }}>{label}</Typography.Text>
+                {detail && <Typography.Text type='secondary' style={{ display: 'block', fontSize: 11, lineHeight: '15px', marginTop: 4, overflowWrap: 'anywhere' }}>{detail}</Typography.Text>}
             </div>
         </Stack>
     </Box>;
@@ -219,6 +231,10 @@ export const DashboardScreen = () => {
 
     const expiredCount = urgentInventory.filter(item => item.daysLeft < 0).length;
     const todayDishCount = todayMeals.reduce((sum, meal) => sum + Object.values(meal.meals).flat().length, 0);
+    const completedDishes = dishes.filter(item => item.isCompleted);
+    const incompleteDishes = dishes.filter(item => !item.isCompleted);
+    const stockedIngredientCount = Object.entries(inventoryItems).filter(([, inventory]) => (inventory.batches ?? []).some(batch => batch.amount > 0)).length;
+    const stockedBatchCount = Object.values(inventoryItems).reduce((sum, inventory) => sum + (inventory.batches ?? []).filter(batch => batch.amount > 0).length, 0);
 
     return <Box style={{ display: 'flex', flexDirection: 'column', gap: 12, paddingBottom: 12 }}>
         <Box>
@@ -226,11 +242,11 @@ export const DashboardScreen = () => {
             <Typography.Text type='secondary'>Việc cần nấu, cần mua và nguyên liệu nên xử lý trước.</Typography.Text>
         </Box>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: 10 }}>
-            <Metric icon={<CalendarOutlined />} label='Món trong thực đơn' value={todayDishCount} tone='#1677ff' />
-            <Metric icon={<ShoppingCartOutlined />} label='Lịch mua hôm nay' value={todayShoppingLists.length} tone='#0958d9' />
-            <Metric icon={<WarningOutlined />} label='Lô hết hạn' value={expiredCount} tone='#cf1322' />
-            <Metric icon={<FireOutlined />} label='Đang nấu' value={activeSessions.length} tone='#fa8c16' />
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(170px, 1fr))', gap: 10 }}>
+            <Metric icon={<CalendarOutlined />} label='Món trong thực đơn' value={todayDishCount} detail={`${todayMeals.length} lịch ăn trong hôm nay`} tone='#1677ff' />
+            <Metric icon={<ShoppingCartOutlined />} label='Lịch mua hôm nay' value={todayShoppingLists.length} detail='Danh sách có ngày mua là hôm nay' tone='#0958d9' />
+            <Metric icon={<WarningOutlined />} label='Lô hết hạn' value={expiredCount} detail='Lô tồn kho đã quá hạn sử dụng' tone='#cf1322' />
+            <Metric icon={<FireOutlined />} label='Đang nấu' value={activeSessions.length} detail='Phiên nấu chưa kết thúc' tone='#fa8c16' />
         </div>
 
         <Section
@@ -281,11 +297,11 @@ export const DashboardScreen = () => {
                 : openShoppingLists.slice(0, 5).map(item => <ShoppingListRow key={item.id} item={item} cost={shoppingListCosts[item.id] ?? '0đ'} onOpen={() => navigate(RootRoutes.AuthorizedRoutes.ShoppingListRoutes.Detail(item.id))} />)}
         </Section>
 
-        <Box style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: 10 }}>
-            <Metric icon={<CheckCircleOutlined />} label='Món đã hoàn thiện' value={dishes.filter(item => item.isCompleted).length} tone='#389e0d' />
-            <Metric icon={<ClockCircleOutlined />} label='Món cần cập nhật' value={dishes.filter(item => !item.isCompleted).length} tone='#d46b08' />
-            <Metric icon={<DollarCircleOutlined />} label='Danh sách đang mở' value={openShoppingLists.length} tone='#0958d9' />
-            <Metric icon={<RightOutlined />} label='Nguyên liệu trong kho' value={Object.keys(inventoryItems).length} tone='#722ed1' />
+        <Box style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(190px, 1fr))', gap: 10 }}>
+            <Metric icon={<CheckCircleOutlined />} label='Món đã hoàn thiện' value={completedDishes.length} detail='Đã bật trạng thái hoàn thiện' tone='#389e0d' />
+            <Metric icon={<ClockCircleOutlined />} label='Món chưa hoàn thiện' value={incompleteDishes.length} detail={incompleteDishes.length > 0 ? `Chưa bật hoàn thiện: ${formatNamePreview(incompleteDishes.map(item => item.name), 'Không có món nào', 'món khác')}` : 'Không có món cần cập nhật'} tone='#d46b08' />
+            <Metric icon={<DollarCircleOutlined />} label='Danh sách đang mở' value={openShoppingLists.length} detail={openShoppingLists.length > 0 ? `Chưa bấm hoàn tất: ${formatNamePreview(openShoppingLists.map(item => item.name), 'Không có danh sách nào', 'danh sách khác')}` : 'Không có danh sách đang mở'} tone='#0958d9' />
+            <Metric icon={<RightOutlined />} label='Nguyên liệu có tồn kho' value={stockedIngredientCount} detail={`${stockedBatchCount} lô còn số lượng trong kho`} tone='#722ed1' />
         </Box>
     </Box>;
 }

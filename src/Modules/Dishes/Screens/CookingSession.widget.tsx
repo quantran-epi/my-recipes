@@ -11,7 +11,7 @@ import { IngredientUnitHelper } from "@common/Helpers/IngredientUnitHelper";
 import { startCooking, setStepCooking } from "@store/Reducers/CookingSessionReducer";
 import { selectDishes, selectIngredients, selectInventory, selectCookingSessions } from "@store/Selectors";
 import { Progress, Space } from "antd";
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { ShoppingListAddWidget } from "@modules/ShoppingList/Screens/ShoppingListAdd.widget";
@@ -65,6 +65,10 @@ export const CookingSessionWidget: React.FunctionComponent<CookingSessionWidgetP
     const [showFinish, setShowFinish] = useState(false);
     const baseServings = DishServingHelper.getBaseServings(dish);
     const [targetServings, setTargetServings] = useState<number>(() => baseServings);
+
+    useEffect(() => {
+        setTargetServings(baseServings);
+    }, [dish.id, baseServings]);
 
     const activeSession = sessions.find(s => s.dishId === dish.id && s.status === "cooking");
     const steps = useMemo(() => collectAllSteps(dish, allDishes), [dish, allDishes]);

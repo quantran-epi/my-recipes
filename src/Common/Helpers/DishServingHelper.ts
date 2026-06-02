@@ -5,7 +5,7 @@ export type DishServingCollectOptions = {
     targetServings?: number;
 }
 
-const DEFAULT_BASE_SERVINGS = 1;
+const DEFAULT_BASE_SERVINGS = 2;
 
 const normalizeServings = (value: unknown, fallback: number): number => {
     const parsed = typeof value === 'number' ? value : parseFloat(String(value ?? ''));

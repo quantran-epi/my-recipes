@@ -17,7 +17,7 @@ import { RootRoutes } from "@routing/RootRoutes";
 import { Dishes, DishesIngredientAmount, DishesStep } from "@store/Models/Dishes";
 import { selectDishes, selectIngredients, selectInventory } from "@store/Selectors";
 import { orderBy } from "lodash";
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import AnalysisIcon from "../../../../../assets/icons/analysis.png";
@@ -81,6 +81,10 @@ export const DishesReadonlyDetailWidget: React.FunctionComponent<DishesReadonlyD
     const baseServings = DishServingHelper.getBaseServings(dish);
     const [targetServings, setTargetServings] = useState<number>(() => DishServingHelper.getTargetServings(dish, initialTargetServings));
     const scaledIngredients = useMemo(() => DishServingHelper.scaleIngredientAmounts(dish, targetServings), [dish, targetServings]);
+
+    useEffect(() => {
+        setTargetServings(DishServingHelper.getTargetServings(dish, initialTargetServings));
+    }, [dish.id, baseServings, initialTargetServings]);
 
     const includedDishes = useMemo(() => {
         return dish.includeDishes
