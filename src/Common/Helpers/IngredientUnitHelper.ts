@@ -45,7 +45,24 @@ const hasSameFallbackFamily = (unit: IngredientUnit, baseUnit: IngredientUnit): 
 export const IngredientUnitHelper = {
     parseAmount(value: string | number | null | undefined): number {
         if (typeof value === "number") return isFinite(value) ? value : 0;
-        const parsed = parseFloat(value ?? "");
+        const raw = String(value ?? "").trim();
+        const normalized = raw.replace(",", ".");
+        const fractionMatch = normalized.match(/^(\d+(?:\.\d+)?)\s*\/\s*(\d+(?:\.\d+)?)/);
+        if (fractionMatch) {
+            const numerator = parseFloat(fractionMatch[1]);
+            const denominator = parseFloat(fractionMatch[2]);
+            return denominator > 0 ? numerator / denominator : 0;
+        }
+
+        const mixedFractionMatch = normalized.match(/^(\d+(?:\.\d+)?)\s+(\d+(?:\.\d+)?)\s*\/\s*(\d+(?:\.\d+)?)/);
+        if (mixedFractionMatch) {
+            const whole = parseFloat(mixedFractionMatch[1]);
+            const numerator = parseFloat(mixedFractionMatch[2]);
+            const denominator = parseFloat(mixedFractionMatch[3]);
+            return denominator > 0 ? whole + numerator / denominator : whole;
+        }
+
+        const parsed = parseFloat(normalized);
         return isNaN(parsed) ? 0 : parsed;
     },
 

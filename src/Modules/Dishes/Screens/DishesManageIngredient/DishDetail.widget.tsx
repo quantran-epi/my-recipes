@@ -24,6 +24,8 @@ import { CookingSessionWidget } from "../CookingSession.widget"
 import { ShoppingListAddWidget } from "@modules/ShoppingList/Screens/ShoppingListAdd.widget"
 import { FireOutlined, ShoppingCartOutlined } from "@ant-design/icons"
 import { RootRoutes } from "@routing/RootRoutes"
+import { DishCostEstimateWidget } from "./DishCostEstimate.widget"
+import { DishImageWidget } from "./DishImage.widget"
 
 type DishDetailWidgetProps = {
     dish: Dishes;
@@ -74,15 +76,9 @@ export const DishesDetailWidget: React.FunctionComponent<DishDetailWidgetProps> 
             </Button>
         </div>
 
-        {props.dish.image && <Box style={{
-            borderRadius: 10,
-            width: "100%",
-            height: 150,
-            backgroundImage: `url(${props.dish.image})`,
-            backgroundSize: "cover",
-            backgroundRepeat: "no-repeat",
-            backgroundPosition: "center"
-        }}></Box>}
+        <DishImageWidget src={props.dish.image} height={150} borderRadius={10} />
+
+        <DishCostEstimateWidget dish={props.dish} />
 
         {props.dish.note && <React.Fragment>
             <Divider orientation="left"><Space>

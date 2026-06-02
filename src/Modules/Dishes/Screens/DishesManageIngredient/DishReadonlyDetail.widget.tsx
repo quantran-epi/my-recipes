@@ -26,6 +26,8 @@ import DietIcon from "../../../../../assets/icons/diet.png";
 import NoodlesIcon from "../../../../../assets/icons/noodles.png";
 import ProcessIcon from "../../../../../assets/icons/process.png";
 import VegetableIcon from "../../../../../assets/icons/vegetable.png";
+import { DishCostEstimateWidget } from "./DishCostEstimate.widget";
+import { DishImageWidget } from "./DishImage.widget";
 
 type DishesReadonlyDetailModalProps = {
     dish: Dishes;
@@ -93,16 +95,9 @@ export const DishesReadonlyDetailWidget: React.FunctionComponent<DishesReadonlyD
     }, [dish.duration]);
 
     return <React.Fragment>
-        {dish.image && <Box style={{
-            borderRadius: 8,
-            width: "100%",
-            height: 180,
-            backgroundImage: `url(${dish.image})`,
-            backgroundSize: "cover",
-            backgroundRepeat: "no-repeat",
-            backgroundPosition: "center",
-            marginBottom: 12,
-        }} />}
+        <DishImageWidget src={dish.image} height={180} borderRadius={8} style={{ marginBottom: 12 }} />
+
+        <DishCostEstimateWidget dish={dish} />
 
         {(dish.note || durationItems.length > 0) && <React.Fragment>
             <Divider orientation="left"><Space>

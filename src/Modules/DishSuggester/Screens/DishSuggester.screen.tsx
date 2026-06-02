@@ -72,7 +72,11 @@ export const DishSuggesterScreen: React.FC<DishSuggesterScreenProps> = ({ open, 
 
     const inventoryIngredientIds = useMemo(() =>
         Object.entries(inventory)
-            .filter(([id, inv]) => InventoryHelper.totalAmount(inv as any, allIngredients.find(i => i.id === id)) > 0)
+            .filter(([id, inv]) => {
+                const ingredient = allIngredients.find(i => i.id === id);
+                return !InventoryHelper.isAlwaysAvailable(ingredient)
+                    && InventoryHelper.totalUsableAmount(inv as any, ingredient) > 0;
+            })
             .map(([id]) => id),
         [inventory, allIngredients]
     );

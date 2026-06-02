@@ -1,9 +1,8 @@
-import { ClockCircleOutlined, CopyOutlined, DeleteOutlined, EditOutlined, FileTextOutlined, HolderOutlined, PictureOutlined, PlusOutlined, QuestionCircleOutlined, FireOutlined } from "@ant-design/icons";
+import { ClockCircleOutlined, CopyOutlined, DeleteOutlined, EditOutlined, FileTextOutlined, HolderOutlined, PlusOutlined, QuestionCircleOutlined, FireOutlined } from "@ant-design/icons";
 import { Button } from "@components/Button";
 import { Dropdown } from "@components/Dropdown";
 import { Input } from "@components/Form/Input";
 import { Image } from "@components/Image";
-import { Avatar } from "@components/Avatar";
 import { Box } from "@components/Layout/Box";
 import { Space } from "@components/Layout/Space";
 import { Stack } from "@components/Layout/Stack";
@@ -33,6 +32,7 @@ import { DishesAddWidget } from "./DishesAdd.widget";
 import { DishesExportWidget } from "./DishesExport.widget";
 import { DishesEditWidget } from "./DishesEdit.widget";
 import { DishesDetailWidget } from "./DishesManageIngredient/DishDetail.widget";
+import { DishImageWidget } from "./DishesManageIngredient/DishImage.widget";
 import { DishDurationWidget } from "./DishesManageIngredient/DishDuration.widget";
 import { CookingSessionWidget } from "./CookingSession.widget";
 import moment from "moment";
@@ -231,10 +231,7 @@ export const DishesItem: React.FunctionComponent<DishesItemProps> = (props) => {
         <div style={{ display: 'flex', alignItems: 'center', padding: '8px 0', borderBottom: '1px solid rgba(5,5,5,0.06)', gap: 12 }}>
             {/* avatar */}
             <div onClick={toggleDishesDetail.show} style={{ cursor: "pointer", flexShrink: 0 }}>
-                {props.item.image
-                    ? <Avatar shape="square" size={48} src={props.item.image} />
-                    : <Avatar shape="square" size={48} icon={<PictureOutlined />} />
-                }
+                <DishImageWidget src={props.item.image} width={48} height={48} borderRadius={6} fallbackIconSize={24} showBrokenLabel={false} />
             </div>
             {/* meta content */}
             <div style={{ flex: 1, minWidth: 0 }}>

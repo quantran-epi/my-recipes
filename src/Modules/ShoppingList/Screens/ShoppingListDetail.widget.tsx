@@ -1,23 +1,24 @@
-import { CheckCircleOutlined, MinusOutlined, PlusOutlined, QuestionCircleOutlined, ShoppingCartOutlined } from "@ant-design/icons";
+import { CheckCircleOutlined, DollarCircleOutlined, MinusOutlined, PlusOutlined, QuestionCircleOutlined, ShoppingCartOutlined } from "@ant-design/icons";
 import { Button } from "@components/Button";
 import { Checkbox } from "@components/Form/Checkbox";
+import { DatePicker } from "@components/Form/DatePicker";
 import { Option, Select } from "@components/Form/Select";
 import { Image } from "@components/Image";
 import { Box } from "@components/Layout/Box";
 import { Stack } from "@components/Layout/Stack";
 import { List } from "@components/List";
 import { Modal } from "@components/Modal";
-import { useModal } from "@components/Modal/ModalProvider";
 import { useMessage } from "@components/Message";
 import { Tooltip } from "@components/Tootip";
 import { Typography } from "@components/Typography";
 import { useToggle } from "@hooks";
 import { Dishes } from "@store/Models/Dishes";
-import { INGREDIENT_CATEGORIES, Ingredient, IngredientInventory, IngredientUnit, InventoryBatch } from "@store/Models/Ingredient";
+import { INGREDIENT_CATEGORIES, INGREDIENT_PRESERVATION_OPTIONS, Ingredient, IngredientInventory, IngredientPreservationCondition, IngredientUnit, InventoryBatch } from "@store/Models/Ingredient";
 import { InventoryHelper } from "@common/Helpers/InventoryHelper";
 import { IngredientUnitHelper } from "@common/Helpers/IngredientUnitHelper";
 import { IngredientPriceHelper, IngredientPriceRange } from "@common/Helpers/IngredientPriceHelper";
-import { ShoppingList, ShoppingListIngredientAmount, ShoppingListIngredientGroup } from "@store/Models/ShoppingList";
+import { CostEstimateHelper, CostEstimateSummary } from "@common/Helpers/CostEstimateHelper";
+import { ShoppingList, ShoppingListCompletionImport, ShoppingListIngredientAmount, ShoppingListIngredientGroup } from "@store/Models/ShoppingList";
 import { completeShoppingList, setIngredientBoughtAmount, toggleDoneIngredientAmount, toggleDoneIngredientGroup } from "@store/Reducers/ShoppingListReducer";
 import { setInventory } from "@store/Reducers/InventoryReducer";
 import { selectDishes, selectIngredients, selectInventory } from "@store/Selectors";
@@ -66,6 +67,27 @@ type ShoppingListIngredientPriceEstimate = {
     unit: IngredientUnit;
     range: IngredientPriceRange | null;
 }
+
+type ShoppingListCostSummary = {
+    recipe: CostEstimateSummary;
+    cart: CostEstimateSummary;
+    bought: CostEstimateSummary;
+}
+
+type ShoppingListCostMetricProps = {
+    label: string;
+    description: string;
+    summary: CostEstimateSummary;
+    primary?: boolean;
+    emptyText?: string;
+}
+
+type CompletionReviewValue = {
+    expiresAt?: string;
+    preservationCondition?: IngredientPreservationCondition;
+}
+
+type CompletionReviewValues = Record<string, CompletionReviewValue>;
 
 const getIngredientGroupStatus = (
     group: ShoppingListIngredientGroup,
@@ -173,15 +195,20 @@ const getShoppingListIngredientPriceEstimate = (
 
 export const ShoppingListDetailWidget: React.FunctionComponent<ShoppingListDetailScreenProps> = (props) => {
     const dispatch = useDispatch();
-    const modal = useModal();
     const message = useMessage();
     const dishes = useSelector(selectDishes);
     const allIngredients = useSelector(selectIngredients);
     const inventoryItems = useSelector(selectInventory);
     const scheduledMeals = useSelector((state: RootState) => state.personal.scheduledMeal.scheduledMeals);
     const toggleMealModal = useToggle();
+    const toggleCompletionReview = useToggle();
     const [selectedMeal, setSelectedMeal] = useState<string>();
+    const [completionReviewValues, setCompletionReviewValues] = useState<CompletionReviewValues>({});
     const isReadonly = Boolean(props.shoppingList.completedAt);
+
+    const boughtImportPlans = useMemo(() => {
+        return getBoughtImportPlans(props.shoppingList, allIngredients, inventoryItems);
+    }, [props.shoppingList, allIngredients, inventoryItems]);
 
     const _getDishesByIds = (ids: string[]) => {
         return dishes.filter(e => ids.includes(e.id));
@@ -207,64 +234,100 @@ export const ShoppingListDetailWidget: React.FunctionComponent<ShoppingListDetai
         return orderedKeys.map(cat => ({ category: cat, items: grouped[cat] }));
     }, [props.shoppingList.ingredients, allIngredients]);
 
-    const priceSummary = useMemo(() => {
+    const costSummary = useMemo(() => {
         return props.shoppingList.ingredients.reduce((summary, group) => {
             const ingredient = allIngredients.find(item => item.id === group.ingredientId);
-            const estimate = getShoppingListIngredientPriceEstimate(group, ingredient, inventoryItems[group.ingredientId]);
-            if (!estimate) return summary;
-            if (!estimate.range) return { ...summary, missingPriceCount: summary.missingPriceCount + 1 };
-            return {
-                min: summary.min + estimate.range.min,
-                max: summary.max + estimate.range.max,
-                missingPriceCount: summary.missingPriceCount,
-                pricedCount: summary.pricedCount + 1,
-            };
-        }, { min: 0, max: 0, missingPriceCount: 0, pricedCount: 0 });
+            const inventory = inventoryItems[group.ingredientId];
+            const status = getIngredientGroupStatus(group, ingredient, inventory);
+            CostEstimateHelper.addAmount(summary.recipe, ingredient, status.totalRequired, status.unit);
+
+            const cartEstimate = getShoppingListIngredientPriceEstimate(group, ingredient, inventory);
+            if (cartEstimate) CostEstimateHelper.addAmount(summary.cart, ingredient, cartEstimate.amount, cartEstimate.unit);
+
+            if (!status.isAlwaysAvailable) {
+                const explicitBoughtAmount = group.boughtAmount ?? 0;
+                if (explicitBoughtAmount > 0) {
+                    CostEstimateHelper.addAmount(summary.bought, ingredient, explicitBoughtAmount, group.boughtUnit ?? status.unit);
+                } else if (group.isDone && status.needToBuy > 0) {
+                    CostEstimateHelper.addAmount(summary.bought, ingredient, status.needToBuy, status.unit);
+                }
+            }
+
+            return summary;
+        }, {
+            recipe: CostEstimateHelper.emptySummary(),
+            cart: CostEstimateHelper.emptySummary(),
+            bought: CostEstimateHelper.emptySummary(),
+        } as ShoppingListCostSummary);
     }, [props.shoppingList.ingredients, allIngredients, inventoryItems]);
 
     const _completeShoppingList = () => {
         if (props.shoppingList.completedAt) return;
 
-        const importPlans = getBoughtImportPlans(props.shoppingList, allIngredients, inventoryItems);
-        const purchasedAt = new Date().toISOString();
+        const importedAt = new Date().toISOString();
+        const completionImports: ShoppingListCompletionImport[] = [];
 
-        importPlans.forEach(plan => {
+        boughtImportPlans.forEach(plan => {
             const inventory = inventoryItems[plan.ingredientId];
             const baseUnit = IngredientUnitHelper.getBaseUnit(plan.ingredient, [inventory?.unit, plan.unit].filter(Boolean) as IngredientUnit[]);
+            const batchId = nanoid(10);
+            const review = completionReviewValues[plan.ingredientId] ?? {};
+            const hasReviewStorage = Object.prototype.hasOwnProperty.call(review, "preservationCondition");
+            const preservationCondition = hasReviewStorage ? review.preservationCondition : plan.ingredient?.preservationCondition;
+            const estimatedCost = IngredientPriceHelper.estimateForAmount(plan.ingredient, plan.amount, plan.unit);
             dispatch(setInventory({
                 ingredientId: plan.ingredientId,
                 inventory: {
                     unit: baseUnit,
                     lastUpdated: new Date(),
+                    discardedBatches: inventory?.discardedBatches,
                     batches: [
                         ...getExistingBatches(inventory, baseUnit),
                         {
-                            id: nanoid(10),
+                            id: batchId,
                             amount: plan.amount,
                             unit: plan.unit,
-                            purchasedAt,
+                            purchasedAt: importedAt,
+                            expiresAt: review.expiresAt,
+                            preservationCondition,
                         },
                     ],
                 },
             }));
+            completionImports.push({
+                id: nanoid(10),
+                batchId,
+                ingredientId: plan.ingredientId,
+                ingredientName: plan.ingredient?.name ?? plan.ingredientId,
+                amount: plan.amount,
+                unit: plan.unit,
+                importedAt,
+                expiresAt: review.expiresAt,
+                preservationCondition,
+                estimatedCost: estimatedCost
+                    ? { min: estimatedCost.min, max: estimatedCost.max, currency: estimatedCost.currency }
+                    : undefined,
+            });
         });
 
-        dispatch(completeShoppingList(props.shoppingList.id));
+        dispatch(completeShoppingList({ shoppingListId: props.shoppingList.id, imports: completionImports }));
+        toggleCompletionReview.hide();
         message.success("Đã hoàn tất lịch mua sắm");
     }
 
     const _onCompleteShoppingList = () => {
         if (props.shoppingList.completedAt) return;
+        toggleCompletionReview.show();
+    }
 
-        const importPlans = getBoughtImportPlans(props.shoppingList, allIngredients, inventoryItems);
-        modal.confirm({
-            title: "Hoàn tất lịch mua sắm?",
-            content: `Hệ thống sẽ thêm ${importPlans.length} lô nguyên liệu đã mua vào kho. Hành động này không thể hoàn tác, và lịch mua sắm này sẽ chỉ còn xem được.`,
-            okText: "Hoàn tất",
-            cancelText: "Hủy",
-            okButtonProps: { danger: true },
-            onOk: _completeShoppingList,
-        });
+    const _patchCompletionReviewValue = (ingredientId: string, patch: CompletionReviewValue) => {
+        setCompletionReviewValues(prev => ({
+            ...prev,
+            [ingredientId]: {
+                ...prev[ingredientId],
+                ...patch,
+            },
+        }));
     }
 
     return <React.Fragment>
@@ -293,22 +356,6 @@ export const ShoppingListDetailWidget: React.FunctionComponent<ShoppingListDetai
                                 Hoàn tất mua sắm
                             </Button>}
                     </Stack>
-                    {(priceSummary.pricedCount > 0 || priceSummary.missingPriceCount > 0) && (
-                        <Box style={{ marginBottom: 10, padding: "8px 10px", borderRadius: 8, background: "#fafafa", border: "1px solid #f0f0f0" }}>
-                            <Stack justify="space-between" align="center" gap={8} wrap="wrap" fullwidth>
-                                <Typography.Text strong>
-                                    Ước tính: {priceSummary.pricedCount > 0
-                                        ? IngredientPriceHelper.formatRange({ min: priceSummary.min, max: priceSummary.max, currency: "VND" })
-                                        : "Chưa có giá"}
-                                </Typography.Text>
-                                {priceSummary.missingPriceCount > 0 && (
-                                    <Typography.Text type="secondary" style={{ fontSize: 12 }}>
-                                        {priceSummary.missingPriceCount} nguyên liệu chưa có giá
-                                    </Typography.Text>
-                                )}
-                            </Stack>
-                        </Box>
-                    )}
                     <Box style={{ maxHeight: 500, overflowY: "auto" }}>
                         {groupedIngredients.length > 1
                             ? groupedIngredients.map(group => <React.Fragment key={group.category}>
@@ -327,6 +374,13 @@ export const ShoppingListDetailWidget: React.FunctionComponent<ShoppingListDetai
                         }
                     </Box>
                 </React.Fragment>
+            },
+            {
+                key: "cost", icon: <DollarCircleOutlined />, label: "Chi phí",
+                children: <Box style={{ maxHeight: 500, overflowY: "auto" }}>
+                    <ShoppingListCostSummaryWidget summary={costSummary} />
+                    <ShoppingListCompletionAuditWidget shoppingList={props.shoppingList} />
+                </Box>
             },
             {
                 key: "dishes", icon: <Image src={DishesIcon} preview={false} width={22} style={{ marginBottom: 3 }} />, label: "Món ăn " + `(${props.shoppingList.dishes.length})`,
@@ -381,8 +435,226 @@ export const ShoppingListDetailWidget: React.FunctionComponent<ShoppingListDetai
                 <ShoppingListMealDetailWidget mealId={selectedMeal} />
             </Box>
         </Modal>
+        <Modal
+            style={{ top: 40 }}
+            width={720}
+            open={toggleCompletionReview.value}
+            title="Xác nhận hoàn tất mua sắm"
+            destroyOnClose
+            onCancel={toggleCompletionReview.hide}
+            footer={<Space>
+                <Button onClick={toggleCompletionReview.hide}>Hủy</Button>
+                <Button type="primary" danger onClick={_completeShoppingList}>Hoàn tất và nhập kho</Button>
+            </Space>}
+        >
+            <PurchaseCompletionReviewWidget
+                plans={boughtImportPlans}
+                values={completionReviewValues}
+                onPatch={_patchCompletionReviewValue}
+            />
+        </Modal>
     </React.Fragment >
 
+}
+
+const PurchaseCompletionReviewWidget: React.FunctionComponent<{
+    plans: BoughtImportPlan[];
+    values: CompletionReviewValues;
+    onPatch: (ingredientId: string, patch: CompletionReviewValue) => void;
+}> = ({ plans, values, onPatch }) => {
+    const total = plans.reduce((summary, plan) => {
+        CostEstimateHelper.addAmount(summary, plan.ingredient, plan.amount, plan.unit);
+        return summary;
+    }, CostEstimateHelper.emptySummary());
+
+    return <Stack direction="column" align="flex-start" gap={10} fullwidth>
+        <Box style={{ width: "100%", padding: "8px 10px", border: "1px solid #ffd591", borderRadius: 8, background: "#fff7e6" }}>
+            <Typography.Text style={{ color: "#ad4e00", fontSize: 12 }}>
+                Hành động này không thể hoàn tác. Sau khi hoàn tất, danh sách mua sắm sẽ chuyển sang chỉ xem và các lô bên dưới sẽ được thêm vào kho.
+            </Typography.Text>
+        </Box>
+
+        <Stack justify="space-between" align="center" wrap="wrap" gap={8} fullwidth>
+            <Typography.Text strong>{plans.length} lô sẽ được nhập kho</Typography.Text>
+            <Typography.Text type="secondary" style={{ fontSize: 12 }}>
+                Ước tính: {CostEstimateHelper.hasPrice(total) ? IngredientPriceHelper.formatRange(total) : "0đ"}
+            </Typography.Text>
+        </Stack>
+
+        {plans.length === 0 && <Typography.Text type="secondary">
+            Không có nguyên liệu nào cần thêm vào kho. Danh sách vẫn sẽ được đánh dấu hoàn tất.
+        </Typography.Text>}
+
+        <List
+            style={{ width: "100%" }}
+            dataSource={plans}
+            renderItem={(plan) => {
+                const value = values[plan.ingredientId] ?? {};
+                const hasReviewStorage = Object.prototype.hasOwnProperty.call(value, "preservationCondition");
+                const preservationValue = hasReviewStorage ? value.preservationCondition : plan.ingredient?.preservationCondition;
+                const cost = IngredientPriceHelper.estimateForAmount(plan.ingredient, plan.amount, plan.unit);
+
+                return <List.Item style={{ padding: "8px 0", display: "block" }}>
+                    <div style={{
+                        width: "100%",
+                        minWidth: 0,
+                        padding: "10px 12px",
+                        border: "1px solid #f0f0f0",
+                        borderRadius: 8,
+                        background: "#fff",
+                    }}>
+                        <div style={{ minWidth: 0, marginBottom: 8 }}>
+                            <Typography.Text strong style={{ display: "block", overflowWrap: "break-word", lineHeight: "20px" }}>
+                                {plan.ingredient?.name ?? plan.ingredientId}
+                            </Typography.Text>
+                            <Typography.Text type="secondary" style={{ display: "block", fontSize: 12, lineHeight: "18px" }}>
+                                {IngredientUnitHelper.formatAmount(plan.amount)} {plan.unit}
+                                {cost ? ` · ${IngredientPriceHelper.formatRange(cost)}` : ""}
+                            </Typography.Text>
+                        </div>
+                        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", gap: 8, width: "100%" }}>
+                            <DatePicker
+                                size="small"
+                                allowClear
+                                placeholder="Hạn dùng"
+                                value={value.expiresAt ? moment(value.expiresAt) : undefined}
+                                onChange={(date) => onPatch(plan.ingredientId, { expiresAt: date ? date.endOf("day").toISOString() : undefined })}
+                                style={{ width: "100%" }}
+                            />
+                            <Select
+                                size="small"
+                                allowClear
+                                placeholder="Bảo quản"
+                                value={preservationValue}
+                                onChange={(next: IngredientPreservationCondition) => onPatch(plan.ingredientId, { preservationCondition: next })}
+                                style={{ width: "100%" }}
+                            >
+                                {INGREDIENT_PRESERVATION_OPTIONS.map(opt => <Option key={opt.value} value={opt.value}>{opt.label}</Option>)}
+                            </Select>
+                        </div>
+                    </div>
+                </List.Item>
+            }}
+        />
+    </Stack>
+}
+
+const ShoppingListCompletionAuditWidget: React.FunctionComponent<{ shoppingList: ShoppingList }> = ({ shoppingList }) => {
+    if (!shoppingList.completedAt) return null;
+    const imports = shoppingList.completionImports ?? [];
+    const storageLabel = (value?: IngredientPreservationCondition) => INGREDIENT_PRESERVATION_OPTIONS.find(opt => opt.value === value)?.label;
+
+    return <Box style={{ marginTop: 10, padding: "10px", borderRadius: 8, background: "#fff", border: "1px solid #f0f0f0" }}>
+        <Stack direction="column" align="flex-start" gap={8} fullwidth>
+            <Stack justify="space-between" align="center" wrap="wrap" gap={8} fullwidth>
+                <Typography.Text strong>Lịch sử nhập kho</Typography.Text>
+                <Typography.Text type="secondary" style={{ fontSize: 12 }}>
+                    Hoàn tất {moment(shoppingList.completedAt).format("DD/MM/YYYY HH:mm")}
+                </Typography.Text>
+            </Stack>
+
+            {imports.length === 0
+                ? <Typography.Text type="secondary" style={{ fontSize: 12 }}>Không có lô nguyên liệu nào được nhập khi hoàn tất.</Typography.Text>
+                : <List
+                    size="small"
+                    style={{ width: "100%" }}
+                    dataSource={imports}
+                    renderItem={(item) => <List.Item style={{ padding: "7px 0", display: "block" }}>
+                        <div style={{
+                            width: "100%",
+                            minWidth: 0,
+                            padding: "10px 12px",
+                            border: "1px solid #f0f0f0",
+                            borderRadius: 8,
+                            background: "#fff",
+                        }}>
+                            <Typography.Text strong style={{ display: "block", overflowWrap: "break-word", lineHeight: "20px" }}>
+                                {item.ingredientName}
+                            </Typography.Text>
+                            <Typography.Text type="secondary" style={{ display: "block", fontSize: 12, lineHeight: "18px" }}>
+                                {IngredientUnitHelper.formatAmount(item.amount)} {item.unit}
+                                {item.estimatedCost ? ` · ${IngredientPriceHelper.formatRange(item.estimatedCost)}` : ""}
+                            </Typography.Text>
+                            <Typography.Text type="secondary" style={{ display: "block", fontSize: 12, lineHeight: "18px", marginTop: 2 }}>
+                                Lô {item.batchId}
+                            </Typography.Text>
+                            {(item.expiresAt || item.preservationCondition) && <Typography.Text type="secondary" style={{ display: "block", fontSize: 12, lineHeight: "18px", marginTop: 2 }}>
+                                {item.expiresAt ? `Hạn dùng ${moment(item.expiresAt).format("DD/MM/YYYY")}` : ""}
+                                {item.expiresAt && item.preservationCondition ? " · " : ""}
+                                {storageLabel(item.preservationCondition) ?? ""}
+                            </Typography.Text>}
+                        </div>
+                    </List.Item>}
+                />}
+        </Stack>
+    </Box>
+}
+
+const formatCostSummary = (summary: CostEstimateSummary, emptyText = "0đ"): string => {
+    if (!CostEstimateHelper.hasAny(summary)) return emptyText;
+    if (!CostEstimateHelper.hasPrice(summary)) return "Chưa có giá";
+    return IngredientPriceHelper.formatRange(summary);
+}
+
+const ShoppingListCostMetric: React.FunctionComponent<ShoppingListCostMetricProps> = ({ label, description, summary, primary, emptyText }) => {
+    return <div style={{
+        minWidth: 0,
+        padding: "8px 10px",
+        borderRadius: 8,
+        border: primary ? "1px solid #91caff" : "1px solid #f0f0f0",
+        background: primary ? "#f0f7ff" : "#fff",
+    }}>
+        <Typography.Text type="secondary" style={{ display: "block", fontSize: 12, marginBottom: 2 }}>
+            {label}
+        </Typography.Text>
+        <Typography.Text strong={primary} style={{ display: "block", color: primary ? "#0958d9" : undefined }}>
+            {formatCostSummary(summary, emptyText)}
+        </Typography.Text>
+        <Typography.Text type="secondary" style={{ display: "block", fontSize: 11, marginTop: 2 }}>
+            {description}
+        </Typography.Text>
+        {summary.missingPriceCount > 0 && <Typography.Text type="secondary" style={{ display: "block", fontSize: 11, marginTop: 2 }}>
+            {summary.missingPriceCount} mục chưa có giá
+        </Typography.Text>}
+    </div>
+}
+
+const ShoppingListCostSummaryWidget: React.FunctionComponent<{ summary: ShoppingListCostSummary }> = ({ summary }) => {
+    const hasSummary = CostEstimateHelper.hasAny(summary.recipe)
+        || CostEstimateHelper.hasAny(summary.cart)
+        || CostEstimateHelper.hasAny(summary.bought);
+
+    if (!hasSummary) return null;
+
+    return <Box style={{ marginBottom: 10, padding: "10px", borderRadius: 8, background: "#fafafa", border: "1px solid #f0f0f0" }}>
+        <Stack direction="column" align="flex-start" gap={8} fullwidth>
+            <Stack justify="space-between" align="center" wrap="wrap" gap={8} fullwidth>
+                <Typography.Text strong>Ước tính mua sắm</Typography.Text>
+                <Typography.Text type="secondary" style={{ fontSize: 12 }}>Giá tham khảo</Typography.Text>
+            </Stack>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(135px, 1fr))", gap: 8, width: "100%" }}>
+                <ShoppingListCostMetric
+                    label="Giỏ mua"
+                    description="Theo lượng còn thiếu"
+                    summary={summary.cart}
+                    primary
+                    emptyText="0đ"
+                />
+                <ShoppingListCostMetric
+                    label="Theo công thức"
+                    description="Tổng lượng món cần"
+                    summary={summary.recipe}
+                    emptyText="Chưa có giá"
+                />
+                {CostEstimateHelper.hasAny(summary.bought) && <ShoppingListCostMetric
+                    label="Đã mua"
+                    description="Theo lượng đã đánh dấu"
+                    summary={summary.bought}
+                    emptyText="0đ"
+                />}
+            </div>
+        </Stack>
+    </Box>
 }
 
 type ShoppingListIngredientPanelItemProps = {
@@ -742,12 +1014,35 @@ type ShoppingListDishesItemProps = {
 
 export const ShoppingListDishesItem: React.FunctionComponent<ShoppingListDishesItemProps> = (props) => {
     const toggleDishesDetail = useToggle();
+    const ingredients = useSelector(selectIngredients);
+    const dishes = useSelector(selectDishes);
+    const costEstimate = useMemo(() => CostEstimateHelper.estimateDish(props.dish, ingredients, dishes), [props.dish, ingredients, dishes]);
+    const costLabel = CostEstimateHelper.hasPrice(costEstimate.required)
+        ? IngredientPriceHelper.formatRange(costEstimate.required)
+        : null;
 
-    return <List.Item style={{ padding: 0 }}>
-        <Button fullwidth style={{ paddingInline: 0, textAlign: "left" }} type="link" onClick={toggleDishesDetail.show}>
-            <Stack gap={3} justify="space-between" fullwidth>
-                <Typography.Paragraph style={{ width: 150, marginBottom: 0, color: "blue" }} ellipsis> {props.dish.name}</Typography.Paragraph>
-                <Box>
+    return <List.Item style={{ padding: "6px 0" }}>
+        <Button
+            fullwidth
+            style={{
+                height: "auto",
+                minHeight: 48,
+                padding: "8px 0",
+                textAlign: "left",
+                whiteSpace: "normal",
+                lineHeight: 1.3,
+            }}
+            type="link"
+            onClick={toggleDishesDetail.show}
+        >
+            <Stack gap={8} justify="space-between" align="flex-start" fullwidth>
+                <div style={{ minWidth: 0, flex: 1 }}>
+                    <Typography.Paragraph style={{ width: "100%", marginBottom: 2, color: "blue" }} ellipsis={{ rows: 2 }}> {props.dish.name}</Typography.Paragraph>
+                    {costLabel && <Typography.Text type="secondary" style={{ display: "block", fontSize: 12, lineHeight: "16px" }}>
+                        {costLabel}
+                    </Typography.Text>}
+                </div>
+                <Box style={{ flexShrink: 0, paddingTop: 1 }}>
                     (<Space size={2}>
                         <Space size={3}>
                             <Typography.Text>{props.dish.ingredients.length}</Typography.Text>

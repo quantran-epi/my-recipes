@@ -2,6 +2,7 @@ import { createSlice } from '@reduxjs/toolkit';
 import type { PayloadAction } from '@reduxjs/toolkit';
 import { Ingredient, IngredientInventory, IngredientUnit } from '@store/Models/Ingredient';
 import { IngredientUnitHelper } from '@common/Helpers/IngredientUnitHelper';
+import { InventoryHelper } from '@common/Helpers/InventoryHelper';
 
 export interface InventoryState {
     items: Record<string, IngredientInventory>; // keyed by ingredientId
@@ -30,7 +31,7 @@ export const inventorySlice = createSlice({
         setInventory: (state, action: PayloadAction<SetInventoryParams>) => {
             state.items[action.payload.ingredientId] = action.payload.inventory;
         },
-        /** FIFO deduction — removes from oldest batch (by purchasedAt) first */
+        /** FEFO deduction: removes from the earliest-expiring usable batch first. */
         deductInventory: (state, action: PayloadAction<DeductInventoryParams>) => {
             const inv = state.items[action.payload.ingredientId];
             if (!inv) return;
@@ -42,14 +43,8 @@ export const inventorySlice = createSlice({
                 inv.batches = legacyAmount > 0 ? [{ id: "legacy", amount: legacyAmount, unit: inv.unit ?? baseUnit }] : [];
             }
             let remaining = IngredientUnitHelper.toBaseAmount(ingredient, action.payload.amount, action.payload.unit ?? baseUnit, baseUnit) ?? action.payload.amount;
-            // Sort batches oldest first (no purchasedAt treated as oldest)
-            const sorted = [...inv.batches].sort((a, b) => {
-                if (!a.purchasedAt && !b.purchasedAt) return 0;
-                if (!a.purchasedAt) return -1;
-                if (!b.purchasedAt) return 1;
-                return a.purchasedAt < b.purchasedAt ? -1 : 1;
-            });
-            const updated = sorted.map(batch => {
+            const nextAmounts = new Map<string, { amount: number; unit: IngredientUnit }>();
+            InventoryHelper.sortBatchesForConsumption(inv, ingredient).forEach(batch => {
                 if (remaining <= 0) return batch;
                 const batchUnit = IngredientUnitHelper.getBatchUnit(inv, batch, ingredient);
                 const batchBaseAmount = IngredientUnitHelper.toBaseAmount(ingredient, batch.amount, batchUnit, baseUnit) ?? batch.amount;
@@ -57,7 +52,12 @@ export const inventorySlice = createSlice({
                 remaining -= deductBaseAmount;
                 const nextBaseAmount = Math.max(0, batchBaseAmount - deductBaseAmount);
                 const nextAmount = IngredientUnitHelper.fromBaseAmount(ingredient, nextBaseAmount, batchUnit, baseUnit) ?? nextBaseAmount;
-                return { ...batch, unit: batchUnit, amount: nextAmount };
+                nextAmounts.set(batch.id, { unit: batchUnit, amount: nextAmount });
+                return batch;
+            });
+            const updated = inv.batches.map(batch => {
+                const next = nextAmounts.get(batch.id);
+                return next ? { ...batch, unit: next.unit, amount: next.amount } : batch;
             });
             state.items[action.payload.ingredientId] = {
                 ...inv,

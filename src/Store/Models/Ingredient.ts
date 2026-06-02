@@ -35,6 +35,7 @@ export type IngredientInventory = {
     unit?: IngredientUnit;
     lastUpdated: Date;
     batches: InventoryBatch[];
+    discardedBatches?: InventoryBatchDiscard[];
 }
 
 export type InventoryBatch = {
@@ -42,6 +43,14 @@ export type InventoryBatch = {
     amount: number;
     unit?: IngredientUnit;
     purchasedAt?: string; // ISO date string
+    expiresAt?: string; // ISO date string, overrides estimated shelf-life expiry
+    preservationCondition?: IngredientPreservationCondition;
+}
+
+export type InventoryBatchDiscard = InventoryBatch & {
+    batchId: string;
+    discardedAt: string;
+    reason: "expired";
 }
 
 export type Ingredient = {

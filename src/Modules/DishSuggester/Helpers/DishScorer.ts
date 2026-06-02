@@ -1,7 +1,9 @@
 import { Dishes, DishesIngredientAmount } from "@store/Models/Dishes";
-import { Ingredient, IngredientInventory } from "@store/Models/Ingredient";
+import { Ingredient, IngredientInventory, IngredientUnit } from "@store/Models/Ingredient";
 import { IngredientUnitHelper } from "@common/Helpers/IngredientUnitHelper";
 import { InventoryHelper } from "@common/Helpers/InventoryHelper";
+import { CostEstimateHelper } from "@common/Helpers/CostEstimateHelper";
+import { IngredientPriceRange } from "@common/Helpers/IngredientPriceHelper";
 
 export type ScoredDish = {
     dish: Dishes;
@@ -11,11 +13,25 @@ export type ScoredDish = {
     stockedIngredientIds?: string[];
     partialIngredientIds?: string[];
     urgentIngredients?: ScoredDishUrgentIngredient[];
+    ingredientDetails?: ScoredDishIngredientDetail[];
+    extraShoppingCost?: IngredientPriceRange | null;
+    missingPriceCount?: number;
 }
 
 export type ScoredDishUrgentIngredient = {
     ingredientId: string;
     daysLeft: number;
+}
+
+export type ScoredDishIngredientDetail = {
+    ingredientId: string;
+    requiredAmount: number;
+    inStockAmount: number;
+    needToBuyAmount: number;
+    unit: IngredientUnit;
+    matched: boolean;
+    partial: boolean;
+    alwaysAvailable: boolean;
 }
 
 export type ScoredDishGroup = {
@@ -105,24 +121,47 @@ export const DishScorer = {
         return dishes
             .map(dish => {
                 const amounts = collectAllIngredientAmounts(dish, allDishes);
-                const grouped: Record<string, { required: number; ingredient?: Ingredient }> = {};
+                const grouped: Record<string, { required: number; unit: IngredientUnit; ingredient?: Ingredient }> = {};
                 amounts.forEach(amount => {
                     const ingredient = allIngredients.find(i => i.id === amount.ingredientId);
+                    if (InventoryHelper.isAlwaysAvailable(ingredient)) return;
                     const baseUnit = IngredientUnitHelper.getBaseUnit(ingredient, [amount.unit]);
                     const required = IngredientUnitHelper.toBaseAmount(ingredient, amount.amount, amount.unit, baseUnit)
                         ?? IngredientUnitHelper.parseAmount(amount.amount);
-                    if (!grouped[amount.ingredientId]) grouped[amount.ingredientId] = { required: 0, ingredient };
+                    if (!grouped[amount.ingredientId]) grouped[amount.ingredientId] = { required: 0, unit: baseUnit, ingredient };
                     grouped[amount.ingredientId].required += required;
                 });
 
                 const requiredIds = Object.keys(grouped);
                 if (requiredIds.length === 0) return null;
 
-                const stocked = requiredIds.filter(id => InventoryHelper.totalAmount(inventory[id], grouped[id].ingredient) > 0);
-                const matched = requiredIds.filter(id => InventoryHelper.isCovered(inventory[id], grouped[id].ingredient, grouped[id].required));
+                const ingredientDetails = requiredIds.map(id => {
+                    const item = grouped[id];
+                    const inStock = InventoryHelper.availableAmount(inventory[id], item.ingredient, item.required);
+                    const matched = item.required > 0 && inStock >= item.required;
+                    const needToBuy = Math.max(0, item.required - inStock);
+                    return {
+                        ingredientId: id,
+                        requiredAmount: item.required,
+                        inStockAmount: inStock,
+                        needToBuyAmount: needToBuy,
+                        unit: item.unit,
+                        matched,
+                        partial: !matched && inStock > 0,
+                        alwaysAvailable: false,
+                    } as ScoredDishIngredientDetail;
+                });
+                const stocked = ingredientDetails.filter(item => item.inStockAmount > 0).map(item => item.ingredientId);
+                const matched = ingredientDetails.filter(item => item.matched).map(item => item.ingredientId);
                 const missing = requiredIds.filter(id => !matched.includes(id));
-                const partial = stocked.filter(id => !matched.includes(id));
+                const partial = ingredientDetails.filter(item => item.partial).map(item => item.ingredientId);
                 const score = matched.length / requiredIds.length;
+                const extraShoppingSummary = ingredientDetails.reduce((summary, detail) => {
+                    if (detail.needToBuyAmount > 0) {
+                        CostEstimateHelper.addAmount(summary, grouped[detail.ingredientId].ingredient, detail.needToBuyAmount, detail.unit);
+                    }
+                    return summary;
+                }, CostEstimateHelper.emptySummary());
                 const urgentIngredients = requiredIds
                     .map(id => {
                         const urgent = InventoryHelper.nearestExpiryBatch(inventory[id], grouped[id].ingredient?.shelfLife);
@@ -140,6 +179,11 @@ export const DishScorer = {
                     stockedIngredientIds: stocked,
                     partialIngredientIds: partial,
                     urgentIngredients,
+                    ingredientDetails,
+                    extraShoppingCost: CostEstimateHelper.hasPrice(extraShoppingSummary)
+                        ? { min: extraShoppingSummary.min, max: extraShoppingSummary.max, currency: extraShoppingSummary.currency }
+                        : null,
+                    missingPriceCount: extraShoppingSummary.missingPriceCount,
                 } as ScoredDish;
             })
             .filter((s): s is ScoredDish => s !== null && (s.stockedIngredientIds?.length ?? 0) > 0)

@@ -1,5 +1,5 @@
 import { DishesIngredientAmount } from "./Dishes";
-import { IngredientUnit } from "./Ingredient";
+import { IngredientPreservationCondition, IngredientPriceCurrency, IngredientUnit } from "./Ingredient";
 
 export type ShoppingListIngredientAmount = DishesIngredientAmount & {
     id: string;
@@ -15,6 +15,23 @@ export type ShoppingListIngredientGroup = {
     boughtUnit?: IngredientUnit;
 }
 
+export type ShoppingListCompletionImport = {
+    id: string;
+    batchId: string;
+    ingredientId: string;
+    ingredientName: string;
+    amount: number;
+    unit: IngredientUnit;
+    importedAt: string;
+    expiresAt?: string;
+    preservationCondition?: IngredientPreservationCondition;
+    estimatedCost?: {
+        min: number;
+        max: number;
+        currency: IngredientPriceCurrency;
+    };
+}
+
 export type ShoppingList = {
     id: string;
     name: string;
@@ -24,4 +41,5 @@ export type ShoppingList = {
     createdDate: Date;
     plannedDate: Date;
     completedAt?: Date;
+    completionImports?: ShoppingListCompletionImport[];
 }

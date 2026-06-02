@@ -3,7 +3,7 @@ import { createSlice } from '@reduxjs/toolkit';
 import { DishIngredientAmountDishMeta, DishIngredientAmountMealMeta, Dishes } from '@store/Models/Dishes';
 import { Ingredient, IngredientInventory, IngredientUnit } from '@store/Models/Ingredient';
 import { ScheduledMeal } from '@store/Models/ScheduledMeal';
-import { ShoppingList, ShoppingListIngredientAmount, ShoppingListIngredientGroup } from '@store/Models/ShoppingList';
+import { ShoppingList, ShoppingListCompletionImport, ShoppingListIngredientAmount, ShoppingListIngredientGroup } from '@store/Models/ShoppingList';
 import { IngredientUnitHelper } from '@common/Helpers/IngredientUnitHelper';
 import { InventoryHelper } from '@common/Helpers/InventoryHelper';
 import dayjs from 'dayjs';
@@ -38,6 +38,11 @@ export type ShoppingListSetIngredientBoughtAmountParams = {
     ingredientGroupId: string;
     boughtAmount?: number;
     boughtUnit?: IngredientUnit;
+}
+
+export type ShoppingListCompleteParams = {
+    shoppingListId: string;
+    imports?: ShoppingListCompletionImport[];
 }
 
 
@@ -250,12 +255,15 @@ export const ShoppingListSlice = createSlice({
                 return e;
             });
         },
-        completeShoppingList: (state, action: PayloadAction<string>) => {
+        completeShoppingList: (state, action: PayloadAction<string | ShoppingListCompleteParams>) => {
+            const shoppingListId = typeof action.payload === "string" ? action.payload : action.payload.shoppingListId;
+            const completionImports = typeof action.payload === "string" ? undefined : action.payload.imports;
             state.shoppingLists = state.shoppingLists.map(e => {
-                if (e.id === action.payload && !e.completedAt) {
+                if (e.id === shoppingListId && !e.completedAt) {
                     return {
                         ...e,
                         completedAt: new Date(),
+                        completionImports,
                     };
                 }
                 return e;
