@@ -1,4 +1,4 @@
-import { Ingredient, IngredientInventory, IngredientShelfLife, InventoryBatch } from "@store/Models/Ingredient";
+import { Ingredient, IngredientInventory, IngredientPreservationCondition, IngredientShelfLife, InventoryBatch } from "@store/Models/Ingredient";
 import dayjs from "dayjs";
 import { IngredientUnitHelper } from "./IngredientUnitHelper";
 
@@ -9,6 +9,36 @@ const SHELF_LIFE_DAYS: Record<IngredientShelfLife, number> = {
     medium: 10,
     long: 21,
     very_long: 90,
+};
+
+const PRESERVATION_SHELF_LIFE_DAYS: Record<IngredientShelfLife, Record<IngredientPreservationCondition, number>> = {
+    very_short: { room_temperature: 1, cool_dry: 1, fridge: 2, freezer: 14 },
+    short: { room_temperature: 2, cool_dry: 3, fridge: 5, freezer: 30 },
+    medium: { room_temperature: 5, cool_dry: 7, fridge: 10, freezer: 60 },
+    long: { room_temperature: 14, cool_dry: 21, fridge: 21, freezer: 90 },
+    very_long: { room_temperature: 60, cool_dry: 90, fridge: 90, freezer: 180 },
+};
+
+type ExpiryContext = Ingredient | IngredientShelfLife | undefined;
+
+const getShelfLife = (context: ExpiryContext): IngredientShelfLife | undefined => {
+    return typeof context === "string" ? context : context?.shelfLife;
+};
+
+const getPreservationCondition = (
+    batch: InventoryBatch,
+    context: ExpiryContext,
+): IngredientPreservationCondition | undefined => {
+    if (batch.preservationCondition) return batch.preservationCondition;
+    return typeof context === "string" ? undefined : context?.preservationCondition;
+};
+
+const getShelfLifeDays = (
+    shelfLife: IngredientShelfLife,
+    preservationCondition?: IngredientPreservationCondition,
+): number => {
+    if (!preservationCondition) return SHELF_LIFE_DAYS[shelfLife];
+    return PRESERVATION_SHELF_LIFE_DAYS[shelfLife]?.[preservationCondition] ?? SHELF_LIFE_DAYS[shelfLife];
 };
 
 export const InventoryHelper = {
@@ -32,7 +62,7 @@ export const InventoryHelper = {
 
         const baseUnit = IngredientUnitHelper.getBaseUnit(ingredient, [inv.unit].filter(Boolean) as any);
         return inv.batches.reduce((sum, batch) => {
-            if (InventoryHelper.isBatchExpired(batch, ingredient?.shelfLife)) return sum;
+            if (InventoryHelper.isBatchExpired(batch, ingredient)) return sum;
             const unit = IngredientUnitHelper.getBatchUnit(inv, batch, ingredient);
             const converted = IngredientUnitHelper.toBaseAmount(ingredient, batch.amount, unit, baseUnit);
             return sum + (converted ?? batch.amount);
@@ -51,14 +81,24 @@ export const InventoryHelper = {
     },
 
     /** Returns estimated expiry as a dayjs for a single batch, or null if missing data */
-    estimatedExpiry(purchasedAt: string | undefined, shelfLife: IngredientShelfLife | undefined): dayjs.Dayjs | null {
+    estimatedExpiry(
+        purchasedAt: string | undefined,
+        shelfLife: IngredientShelfLife | undefined,
+        preservationCondition?: IngredientPreservationCondition,
+    ): dayjs.Dayjs | null {
         if (!purchasedAt || !shelfLife) return null;
-        return dayjs(purchasedAt).add(SHELF_LIFE_DAYS[shelfLife], "day");
+        return dayjs(purchasedAt).add(getShelfLifeDays(shelfLife, preservationCondition), "day");
     },
 
-    batchExpiry(batch: InventoryBatch, shelfLife: IngredientShelfLife | undefined): dayjs.Dayjs | null {
+    estimatedExpiryForBatch(batch: InventoryBatch, context: ExpiryContext): dayjs.Dayjs | null {
+        const shelfLife = getShelfLife(context);
+        const preservationCondition = getPreservationCondition(batch, context);
+        return InventoryHelper.estimatedExpiry(batch.purchasedAt, shelfLife, preservationCondition);
+    },
+
+    batchExpiry(batch: InventoryBatch, context: ExpiryContext): dayjs.Dayjs | null {
         if (batch.expiresAt) return dayjs(batch.expiresAt);
-        return InventoryHelper.estimatedExpiry(batch.purchasedAt, shelfLife);
+        return InventoryHelper.estimatedExpiryForBatch(batch, context);
     },
 
     /** Days remaining until expiry for a single batch. Negative = already expired. */
@@ -68,24 +108,24 @@ export const InventoryHelper = {
         return exp.startOf("day").diff(dayjs().startOf("day"), "day");
     },
 
-    daysUntilBatchExpiry(batch: InventoryBatch, shelfLife: IngredientShelfLife | undefined): number | null {
-        const exp = InventoryHelper.batchExpiry(batch, shelfLife);
+    daysUntilBatchExpiry(batch: InventoryBatch, context: ExpiryContext): number | null {
+        const exp = InventoryHelper.batchExpiry(batch, context);
         if (!exp) return null;
         return exp.startOf("day").diff(dayjs().startOf("day"), "day");
     },
 
-    isBatchExpired(batch: InventoryBatch, shelfLife: IngredientShelfLife | undefined): boolean {
-        const days = InventoryHelper.daysUntilBatchExpiry(batch, shelfLife);
+    isBatchExpired(batch: InventoryBatch, context: ExpiryContext): boolean {
+        const days = InventoryHelper.daysUntilBatchExpiry(batch, context);
         return days !== null && days < 0;
     },
 
     sortBatchesForConsumption(inv: IngredientInventory | undefined, ingredient?: Ingredient): InventoryBatch[] {
         if (!inv?.batches) return [];
         return [...inv.batches]
-            .filter(batch => batch.amount > 0 && !InventoryHelper.isBatchExpired(batch, ingredient?.shelfLife))
+            .filter(batch => batch.amount > 0 && !InventoryHelper.isBatchExpired(batch, ingredient))
             .sort((a, b) => {
-                const aExpiry = InventoryHelper.batchExpiry(a, ingredient?.shelfLife);
-                const bExpiry = InventoryHelper.batchExpiry(b, ingredient?.shelfLife);
+                const aExpiry = InventoryHelper.batchExpiry(a, ingredient);
+                const bExpiry = InventoryHelper.batchExpiry(b, ingredient);
                 if (aExpiry && bExpiry && !aExpiry.isSame(bExpiry)) return aExpiry.valueOf() - bExpiry.valueOf();
                 if (aExpiry && !bExpiry) return -1;
                 if (!aExpiry && bExpiry) return 1;
@@ -97,7 +137,7 @@ export const InventoryHelper = {
     },
 
     /** Returns the batch with the fewest days left (most urgent), or null */
-    nearestExpiryBatch(inv: IngredientInventory | undefined, shelfLife: IngredientShelfLife | undefined): {
+    nearestExpiryBatch(inv: IngredientInventory | undefined, context: ExpiryContext): {
         batch: InventoryBatch; daysLeft: number
     } | null {
         if (!inv) return null;
@@ -105,8 +145,8 @@ export const InventoryHelper = {
         let best: { batch: InventoryBatch; daysLeft: number } | null = null;
         for (const batch of inv.batches) {
             if (batch.amount <= 0) continue;
-            const days = InventoryHelper.daysUntilBatchExpiry(batch, shelfLife);
-            if (days === null) continue;
+            const days = InventoryHelper.daysUntilBatchExpiry(batch, context);
+            if (days === null || days < 0) continue;
             if (best === null || days < best.daysLeft) {
                 best = { batch, daysLeft: days };
             }

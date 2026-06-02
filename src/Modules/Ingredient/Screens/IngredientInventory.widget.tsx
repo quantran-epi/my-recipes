@@ -6,7 +6,7 @@ import { Stack } from "@components/Layout/Stack";
 import { Popconfirm } from "@components/Popconfirm";
 import { Typography } from "@components/Typography";
 import { InventoryHelper } from "@common/Helpers/InventoryHelper";
-import { Ingredient, IngredientPreservationCondition, IngredientUnit, InventoryBatch, InventoryBatchDiscard } from "@store/Models/Ingredient";
+import { INGREDIENT_PRESERVATION_OPTIONS, Ingredient, IngredientPreservationCondition, IngredientUnit, InventoryBatch, InventoryBatchDiscard } from "@store/Models/Ingredient";
 import { IngredientUnitHelper } from "@common/Helpers/IngredientUnitHelper";
 import { setInventory } from "@store/Reducers/InventoryReducer";
 import { selectInventoryById } from "@store/Selectors";
@@ -86,13 +86,24 @@ export const IngredientInventoryWidget: React.FC<IngredientInventoryWidgetProps>
         preservationCondition: row.preservationCondition,
     });
 
+    const _getPreservationLabel = (value?: IngredientPreservationCondition) => {
+        return INGREDIENT_PRESERVATION_OPTIONS.find(option => option.value === value)?.label;
+    };
+
+    const _getExpirySourceLabel = (row: BatchRow) => {
+        const batch = _toInventoryBatch(row);
+        if (batch.expiresAt) return "Hạn nhập tay";
+        const preservationCondition = batch.preservationCondition ?? item.preservationCondition;
+        return _getPreservationLabel(preservationCondition) ?? "Hạn mặc định";
+    };
+
     const _isExpiredBatch = (row: BatchRow) => {
-        return InventoryHelper.isBatchExpired(_toInventoryBatch(row), item.shelfLife);
+        return InventoryHelper.isBatchExpired(_toInventoryBatch(row), item);
     };
 
     const _discardExpiredBatch = (row: BatchRow) => {
         const batch = _toInventoryBatch(row);
-        const effectiveExpiry = InventoryHelper.batchExpiry(batch, item.shelfLife)?.toISOString();
+        const effectiveExpiry = InventoryHelper.batchExpiry(batch, item)?.toISOString();
 
         setBatches(prev => prev.filter(b => b.id !== row.id));
         setDiscardHistory(prev => [{
@@ -138,7 +149,7 @@ export const IngredientInventoryWidget: React.FC<IngredientInventoryWidgetProps>
         let best: { row: BatchRow; daysLeft: number } | null = null;
         batches.forEach(row => {
             if (row.amount <= 0) return;
-            const days = InventoryHelper.daysUntilBatchExpiry(_toInventoryBatch(row), item.shelfLife);
+            const days = InventoryHelper.daysUntilBatchExpiry(_toInventoryBatch(row), item);
             if (days === null || days < 0) return;
             if (best === null || days < best.daysLeft) best = { row, daysLeft: days };
         });
@@ -237,13 +248,25 @@ export const IngredientInventoryWidget: React.FC<IngredientInventoryWidgetProps>
                             style={{ width: "100%" }}
                             allowClear
                         />
+                        <Select
+                            allowClear
+                            value={batch.preservationCondition}
+                            onChange={v => _updateBatch(batch.id, { preservationCondition: v })}
+                            placeholder={item.preservationCondition ? `Mặc định: ${_getPreservationLabel(item.preservationCondition)}` : "Bảo quản"}
+                            style={{ width: "100%" }}
+                        >
+                            {INGREDIENT_PRESERVATION_OPTIONS.map(option => (
+                                <Option key={option.value} value={option.value}>{option.label}</Option>
+                            ))}
+                        </Select>
                     </div>
 
                     {/* Per-batch expiry hint */}
                     {(batch.expiresAt || (item.shelfLife && batch.purchasedAt)) && (() => {
                         const inventoryBatch = _toInventoryBatch(batch);
-                        const days = InventoryHelper.daysUntilBatchExpiry(inventoryBatch, item.shelfLife);
-                        const expiry = InventoryHelper.batchExpiry(inventoryBatch, item.shelfLife);
+                        const days = InventoryHelper.daysUntilBatchExpiry(inventoryBatch, item);
+                        const expiry = InventoryHelper.batchExpiry(inventoryBatch, item);
+                        const sourceLabel = _getExpirySourceLabel(batch);
                         const bdg = InventoryHelper.expiryBadge(days);
                         if (!bdg) return null;
                         return (
@@ -251,7 +274,7 @@ export const IngredientInventoryWidget: React.FC<IngredientInventoryWidgetProps>
                                 ⏰ {bdg.label}
                                 {expiry && (
                                     <span style={{ color: "#aaa", marginLeft: 6 }}>
-                                        (hết {expiry.format("DD/MM/YYYY")})
+                                        (hết {expiry.format("DD/MM/YYYY")} · {sourceLabel})
                                     </span>
                                 )}
                             </Typography.Text>

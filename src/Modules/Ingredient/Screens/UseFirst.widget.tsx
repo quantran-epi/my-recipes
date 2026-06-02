@@ -35,7 +35,7 @@ export const UseFirstWidget: React.FC<UseFirstWidgetProps> = ({ open, onClose, o
         })
         .map(([id, inv]) => {
             const ingr = ingredients.find(i => i.id === id)!;
-            const nearest = InventoryHelper.nearestExpiryBatch(inv as any, ingr.shelfLife);
+            const nearest = InventoryHelper.nearestExpiryBatch(inv as any, ingr);
             const daysLeft = nearest?.daysLeft ?? null;
             const badge = InventoryHelper.expiryBadge(daysLeft);
             const opt = INGREDIENT_SHELF_LIFE_OPTIONS.find(o => o.value === ingr.shelfLife);

@@ -104,7 +104,7 @@ export const IngredientItem: React.FunctionComponent<IngredientItemProps> = (pro
     const stockAmount = InventoryHelper.availableAmount(inventory, ingredientAmount, requiredAmount);
     const hasStock = isAlwaysAvailable || stockAmount > 0;
     const enoughStock = isAlwaysAvailable || (requiredAmount > 0 ? stockAmount >= requiredAmount : hasStock);
-    const nearestExpiry = InventoryHelper.nearestExpiryBatch(inventory, ingredientAmount?.shelfLife);
+    const nearestExpiry = InventoryHelper.nearestExpiryBatch(inventory, ingredientAmount);
     const expiryBadge = nearestExpiry && nearestExpiry.daysLeft <= 3 ? InventoryHelper.expiryBadge(nearestExpiry.daysLeft) : null;
     const inventoryStatus = isAlwaysAvailable
         ? { color: "#52c41a", label: "✓ Luôn có" }

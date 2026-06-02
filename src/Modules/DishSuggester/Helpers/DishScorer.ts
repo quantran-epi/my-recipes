@@ -164,7 +164,7 @@ export const DishScorer = {
                 }, CostEstimateHelper.emptySummary());
                 const urgentIngredients = requiredIds
                     .map(id => {
-                        const urgent = InventoryHelper.nearestExpiryBatch(inventory[id], grouped[id].ingredient?.shelfLife);
+                        const urgent = InventoryHelper.nearestExpiryBatch(inventory[id], grouped[id].ingredient);
                         return urgent && urgent.daysLeft <= URGENT_DAYS_THRESHOLD
                             ? { ingredientId: id, daysLeft: urgent.daysLeft }
                             : null;
