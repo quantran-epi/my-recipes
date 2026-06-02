@@ -18,20 +18,23 @@ type UseFirstWidgetProps = {
     onSuggest: (ingredientIds: string[]) => void;
 }
 
+const URGENT_DAYS_THRESHOLD = 3;
+
 export const UseFirstWidget: React.FC<UseFirstWidgetProps> = ({ open, onClose, onSuggest }) => {
     const inventory = useSelector((state: RootState) => state.personal.inventory?.items ?? {});
     const ingredients = useSelector((state: RootState) => state.shared.ingredient.ingredients);
 
     const [selectedIds, setSelectedIds] = useState<string[]>([]);
 
-    // Items that are perishable (very_short or short) with amount > 0
+    // Items with a usable batch that is actually close to expiring after preservation rules.
     const urgentItems = Object.entries(inventory)
         .filter(([id, inv]) => {
             const ingr = ingredients.find(i => i.id === id);
-            const totalAmt = InventoryHelper.totalAmount(inv as any, ingr);
+            const totalAmt = InventoryHelper.totalUsableAmount(inv as any, ingr);
             if (totalAmt <= 0) return false;
             if (!ingr?.shelfLife) return false;
-            return ingr.shelfLife === "very_short" || ingr.shelfLife === "short";
+            const nearest = InventoryHelper.nearestExpiryBatch(inv as any, ingr);
+            return nearest !== null && nearest.daysLeft <= URGENT_DAYS_THRESHOLD;
         })
         .map(([id, inv]) => {
             const ingr = ingredients.find(i => i.id === id)!;
@@ -39,7 +42,7 @@ export const UseFirstWidget: React.FC<UseFirstWidgetProps> = ({ open, onClose, o
             const daysLeft = nearest?.daysLeft ?? null;
             const badge = InventoryHelper.expiryBadge(daysLeft);
             const opt = INGREDIENT_SHELF_LIFE_OPTIONS.find(o => o.value === ingr.shelfLife);
-            const totalAmt = InventoryHelper.totalAmount(inv as any, ingr);
+            const totalAmt = InventoryHelper.totalUsableAmount(inv as any, ingr);
             const urgentAmt = nearest?.batch.amount ?? totalAmt; // amount of the near-expiry batch
             const unit = IngredientUnitHelper.getBatchUnit(inv as any, nearest?.batch, ingr);
             const urgentBaseAmt = nearest?.batch

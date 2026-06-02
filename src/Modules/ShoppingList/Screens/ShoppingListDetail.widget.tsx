@@ -1,4 +1,4 @@
-import { CheckCircleOutlined, DollarCircleOutlined, MinusOutlined, PlusOutlined, QuestionCircleOutlined, ShoppingCartOutlined } from "@ant-design/icons";
+import { CheckCircleOutlined, DollarCircleOutlined, MinusOutlined, PlusOutlined, QuestionCircleOutlined, ShoppingCartOutlined, WarningOutlined } from "@ant-design/icons";
 import { Button } from "@components/Button";
 import { Checkbox } from "@components/Form/Checkbox";
 import { DatePicker } from "@components/Form/DatePicker";
@@ -377,9 +377,11 @@ export const ShoppingListDetailWidget: React.FunctionComponent<ShoppingListDetai
             },
             {
                 key: "cost", icon: <DollarCircleOutlined />, label: "Chi phí",
-                children: <Box style={{ maxHeight: 500, overflowY: "auto" }}>
-                    <ShoppingListCostSummaryWidget summary={costSummary} />
-                    <ShoppingListCompletionAuditWidget shoppingList={props.shoppingList} />
+                children: <Box>
+                    <div style={{ display: "flex", flexDirection: "column", gap: 10, width: "100%", boxSizing: "border-box" }}>
+                        <ShoppingListCostSummaryWidget summary={costSummary} />
+                        <ShoppingListCompletionAuditWidget shoppingList={props.shoppingList} />
+                    </div>
                 </Box>
             },
             {
@@ -437,15 +439,23 @@ export const ShoppingListDetailWidget: React.FunctionComponent<ShoppingListDetai
         </Modal>
         <Modal
             style={{ top: 40 }}
-            width={720}
+            width={760}
             open={toggleCompletionReview.value}
-            title="Xác nhận hoàn tất mua sắm"
+            title={<Space size={8}>
+                <ShoppingCartOutlined />
+                <span>Xác nhận hoàn tất mua sắm</span>
+            </Space>}
             destroyOnClose
             onCancel={toggleCompletionReview.hide}
-            footer={<Space>
-                <Button onClick={toggleCompletionReview.hide}>Hủy</Button>
-                <Button type="primary" danger onClick={_completeShoppingList}>Hoàn tất và nhập kho</Button>
-            </Space>}
+            footer={<div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8, flexWrap: "wrap", width: "100%", boxSizing: "border-box" }}>
+                <Typography.Text type="secondary" style={{ fontSize: 12, lineHeight: "18px" }}>
+                    Kiểm tra hạn dùng và nơi bảo quản trước khi nhập kho.
+                </Typography.Text>
+                <Space>
+                    <Button onClick={toggleCompletionReview.hide}>Hủy</Button>
+                    <Button type="primary" danger onClick={_completeShoppingList}>Hoàn tất và nhập kho</Button>
+                </Space>
+            </div>}
         >
             <PurchaseCompletionReviewWidget
                 plans={boughtImportPlans}
@@ -467,23 +477,40 @@ const PurchaseCompletionReviewWidget: React.FunctionComponent<{
         return summary;
     }, CostEstimateHelper.emptySummary());
 
-    return <Stack direction="column" align="flex-start" gap={10} fullwidth>
-        <Box style={{ width: "100%", padding: "8px 10px", border: "1px solid #ffd591", borderRadius: 8, background: "#fff7e6" }}>
-            <Typography.Text style={{ color: "#ad4e00", fontSize: 12 }}>
-                Hành động này không thể hoàn tác. Sau khi hoàn tất, danh sách mua sắm sẽ chuyển sang chỉ xem và các lô bên dưới sẽ được thêm vào kho.
-            </Typography.Text>
+    return <div style={{ display: "flex", flexDirection: "column", gap: 12, width: "100%", boxSizing: "border-box" }}>
+        <Box style={{ width: "100%", boxSizing: "border-box", padding: "10px 12px", border: "1px solid #ffd591", borderRadius: 8, background: "#fff7e6" }}>
+            <div style={{ display: "grid", gridTemplateColumns: "18px minmax(0, 1fr)", gap: 8, alignItems: "start" }}>
+                <WarningOutlined style={{ color: "#d46b08", marginTop: 2 }} />
+                <div style={{ minWidth: 0 }}>
+                    <Typography.Text strong style={{ display: "block", color: "#ad4e00", fontSize: 13, lineHeight: "18px" }}>
+                        Hành động này không thể hoàn tác
+                    </Typography.Text>
+                    <Typography.Text style={{ display: "block", color: "#ad4e00", fontSize: 12, lineHeight: "18px" }}>
+                        Sau khi hoàn tất, danh sách mua sắm sẽ chuyển sang chỉ xem và các lô bên dưới sẽ được thêm vào kho.
+                    </Typography.Text>
+                </div>
+            </div>
         </Box>
 
-        <Stack justify="space-between" align="center" wrap="wrap" gap={8} fullwidth>
-            <Typography.Text strong>{plans.length} lô sẽ được nhập kho</Typography.Text>
-            <Typography.Text type="secondary" style={{ fontSize: 12 }}>
-                Ước tính: {CostEstimateHelper.hasPrice(total) ? IngredientPriceHelper.formatRange(total) : "0đ"}
-            </Typography.Text>
-        </Stack>
+        <Box style={{ width: "100%", boxSizing: "border-box", padding: "10px 12px", borderRadius: 8, background: "#fafafa", border: "1px solid #f0f0f0" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8, flexWrap: "wrap", width: "100%", boxSizing: "border-box" }}>
+                <Box>
+                    <Typography.Text strong style={{ display: "block", lineHeight: "20px" }}>{plans.length} lô sẽ được nhập kho</Typography.Text>
+                    <Typography.Text type="secondary" style={{ display: "block", fontSize: 12, lineHeight: "18px" }}>
+                        Hạn dùng để trống sẽ dùng quy tắc bảo quản của nguyên liệu.
+                    </Typography.Text>
+                </Box>
+                <Typography.Text strong style={{ color: "#0958d9" }}>
+                    {CostEstimateHelper.hasPrice(total) ? IngredientPriceHelper.formatRange(total) : "0đ"}
+                </Typography.Text>
+            </div>
+        </Box>
 
-        {plans.length === 0 && <Typography.Text type="secondary">
-            Không có nguyên liệu nào cần thêm vào kho. Danh sách vẫn sẽ được đánh dấu hoàn tất.
-        </Typography.Text>}
+        {plans.length === 0 && <Box style={{ width: "100%", boxSizing: "border-box", padding: "12px", borderRadius: 8, background: "#fafafa", border: "1px dashed #d9d9d9" }}>
+            <Typography.Text type="secondary">
+                Không có nguyên liệu nào cần thêm vào kho. Danh sách vẫn sẽ được đánh dấu hoàn tất.
+            </Typography.Text>
+        </Box>}
 
         <List
             style={{ width: "100%" }}
@@ -494,22 +521,27 @@ const PurchaseCompletionReviewWidget: React.FunctionComponent<{
                 const preservationValue = hasReviewStorage ? value.preservationCondition : plan.ingredient?.preservationCondition;
                 const cost = IngredientPriceHelper.estimateForAmount(plan.ingredient, plan.amount, plan.unit);
 
-                return <List.Item style={{ padding: "8px 0", display: "block" }}>
+                return <List.Item style={{ padding: "6px 0", display: "block", borderBottom: "none" }}>
                     <div style={{
                         width: "100%",
+                        boxSizing: "border-box",
                         minWidth: 0,
-                        padding: "10px 12px",
+                        padding: "12px",
                         border: "1px solid #f0f0f0",
                         borderRadius: 8,
                         background: "#fff",
                     }}>
-                        <div style={{ minWidth: 0, marginBottom: 8 }}>
-                            <Typography.Text strong style={{ display: "block", overflowWrap: "break-word", lineHeight: "20px" }}>
-                                {plan.ingredient?.name ?? plan.ingredientId}
-                            </Typography.Text>
-                            <Typography.Text type="secondary" style={{ display: "block", fontSize: 12, lineHeight: "18px" }}>
-                                {IngredientUnitHelper.formatAmount(plan.amount)} {plan.unit}
-                                {cost ? ` · ${IngredientPriceHelper.formatRange(cost)}` : ""}
+                        <div style={{ display: "grid", gridTemplateColumns: "minmax(0, 1fr) auto", gap: 10, alignItems: "start", marginBottom: 10 }}>
+                            <div style={{ minWidth: 0 }}>
+                                <Typography.Text strong style={{ display: "block", overflowWrap: "break-word", lineHeight: "20px" }}>
+                                    {plan.ingredient?.name ?? plan.ingredientId}
+                                </Typography.Text>
+                                <Typography.Text type="secondary" style={{ display: "block", fontSize: 12, lineHeight: "18px" }}>
+                                    {IngredientUnitHelper.formatAmount(plan.amount)} {plan.unit}
+                                </Typography.Text>
+                            </div>
+                            <Typography.Text type="secondary" style={{ fontSize: 12, lineHeight: "18px", whiteSpace: "nowrap" }}>
+                                {cost ? IngredientPriceHelper.formatRange(cost) : "Chưa có giá"}
                             </Typography.Text>
                         </div>
                         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", gap: 8, width: "100%" }}>
@@ -536,7 +568,7 @@ const PurchaseCompletionReviewWidget: React.FunctionComponent<{
                 </List.Item>
             }}
         />
-    </Stack>
+    </div>
 }
 
 const ShoppingListCompletionAuditWidget: React.FunctionComponent<{ shoppingList: ShoppingList }> = ({ shoppingList }) => {
@@ -544,14 +576,17 @@ const ShoppingListCompletionAuditWidget: React.FunctionComponent<{ shoppingList:
     const imports = shoppingList.completionImports ?? [];
     const storageLabel = (value?: IngredientPreservationCondition) => INGREDIENT_PRESERVATION_OPTIONS.find(opt => opt.value === value)?.label;
 
-    return <Box style={{ marginTop: 10, padding: "10px", borderRadius: 8, background: "#fff", border: "1px solid #f0f0f0" }}>
-        <Stack direction="column" align="flex-start" gap={8} fullwidth>
-            <Stack justify="space-between" align="center" wrap="wrap" gap={8} fullwidth>
-                <Typography.Text strong>Lịch sử nhập kho</Typography.Text>
-                <Typography.Text type="secondary" style={{ fontSize: 12 }}>
-                    Hoàn tất {moment(shoppingList.completedAt).format("DD/MM/YYYY HH:mm")}
-                </Typography.Text>
-            </Stack>
+    return <Box style={{ width: "100%", boxSizing: "border-box", padding: "12px", borderRadius: 8, background: "#fff", border: "1px solid #f0f0f0" }}>
+        <div style={{ display: "flex", flexDirection: "column", gap: 10, width: "100%", boxSizing: "border-box" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8, flexWrap: "wrap", width: "100%", boxSizing: "border-box" }}>
+                <Box>
+                    <Typography.Text strong style={{ display: "block", lineHeight: "20px" }}>Lịch sử nhập kho</Typography.Text>
+                    <Typography.Text type="secondary" style={{ display: "block", fontSize: 12, lineHeight: "18px" }}>
+                        Hoàn tất {moment(shoppingList.completedAt).format("DD/MM/YYYY HH:mm")}
+                    </Typography.Text>
+                </Box>
+                <Typography.Text type="secondary" style={{ fontSize: 12 }}>{imports.length} lô</Typography.Text>
+            </div>
 
             {imports.length === 0
                 ? <Typography.Text type="secondary" style={{ fontSize: 12 }}>Không có lô nguyên liệu nào được nhập khi hoàn tất.</Typography.Text>
@@ -559,9 +594,10 @@ const ShoppingListCompletionAuditWidget: React.FunctionComponent<{ shoppingList:
                     size="small"
                     style={{ width: "100%" }}
                     dataSource={imports}
-                    renderItem={(item) => <List.Item style={{ padding: "7px 0", display: "block" }}>
+                    renderItem={(item) => <List.Item style={{ padding: "6px 0", display: "block", borderBottom: "none" }}>
                         <div style={{
                             width: "100%",
+                            boxSizing: "border-box",
                             minWidth: 0,
                             padding: "10px 12px",
                             border: "1px solid #f0f0f0",
@@ -586,7 +622,7 @@ const ShoppingListCompletionAuditWidget: React.FunctionComponent<{ shoppingList:
                         </div>
                     </List.Item>}
                 />}
-        </Stack>
+        </div>
     </Box>
 }
 
@@ -599,23 +635,31 @@ const formatCostSummary = (summary: CostEstimateSummary, emptyText = "0đ"): str
 const ShoppingListCostMetric: React.FunctionComponent<ShoppingListCostMetricProps> = ({ label, description, summary, primary, emptyText }) => {
     return <div style={{
         minWidth: 0,
-        padding: "8px 10px",
+        minHeight: 92,
+        padding: "12px",
         borderRadius: 8,
-        border: primary ? "1px solid #91caff" : "1px solid #f0f0f0",
+        border: primary ? "1px solid #91caff" : "1px solid #eeeeee",
         background: primary ? "#f0f7ff" : "#fff",
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "space-between",
     }}>
-        <Typography.Text type="secondary" style={{ display: "block", fontSize: 12, marginBottom: 2 }}>
-            {label}
-        </Typography.Text>
-        <Typography.Text strong={primary} style={{ display: "block", color: primary ? "#0958d9" : undefined }}>
-            {formatCostSummary(summary, emptyText)}
-        </Typography.Text>
-        <Typography.Text type="secondary" style={{ display: "block", fontSize: 11, marginTop: 2 }}>
-            {description}
-        </Typography.Text>
-        {summary.missingPriceCount > 0 && <Typography.Text type="secondary" style={{ display: "block", fontSize: 11, marginTop: 2 }}>
-            {summary.missingPriceCount} mục chưa có giá
-        </Typography.Text>}
+        <div>
+            <Typography.Text type="secondary" style={{ display: "block", fontSize: 12, lineHeight: "18px" }}>
+                {label}
+            </Typography.Text>
+            <Typography.Text strong style={{ display: "block", color: primary ? "#0958d9" : undefined, fontSize: primary ? 18 : 15, lineHeight: primary ? "24px" : "22px" }}>
+                {formatCostSummary(summary, emptyText)}
+            </Typography.Text>
+        </div>
+        <div>
+            <Typography.Text type="secondary" style={{ display: "block", fontSize: 11, lineHeight: "16px" }}>
+                {description}
+            </Typography.Text>
+            {summary.missingPriceCount > 0 && <Typography.Text type="secondary" style={{ display: "block", fontSize: 11, lineHeight: "16px" }}>
+                {summary.missingPriceCount} mục chưa có giá
+            </Typography.Text>}
+        </div>
     </div>
 }
 
@@ -626,13 +670,16 @@ const ShoppingListCostSummaryWidget: React.FunctionComponent<{ summary: Shopping
 
     if (!hasSummary) return null;
 
-    return <Box style={{ marginBottom: 10, padding: "10px", borderRadius: 8, background: "#fafafa", border: "1px solid #f0f0f0" }}>
-        <Stack direction="column" align="flex-start" gap={8} fullwidth>
-            <Stack justify="space-between" align="center" wrap="wrap" gap={8} fullwidth>
-                <Typography.Text strong>Ước tính mua sắm</Typography.Text>
-                <Typography.Text type="secondary" style={{ fontSize: 12 }}>Giá tham khảo</Typography.Text>
-            </Stack>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(135px, 1fr))", gap: 8, width: "100%" }}>
+    return <Box style={{ width: "100%", boxSizing: "border-box", padding: "12px", borderRadius: 8, background: "#fafafa", border: "1px solid #f0f0f0" }}>
+        <div style={{ display: "flex", flexDirection: "column", gap: 10, width: "100%", boxSizing: "border-box" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8, flexWrap: "wrap", width: "100%", boxSizing: "border-box" }}>
+                <Box>
+                    <Typography.Text strong style={{ display: "block", lineHeight: "20px" }}>Ước tính mua sắm</Typography.Text>
+                    <Typography.Text type="secondary" style={{ display: "block", fontSize: 12, lineHeight: "18px" }}>Giá tham khảo theo khoảng giá nguyên liệu</Typography.Text>
+                </Box>
+                <Typography.Text type="secondary" style={{ fontSize: 12 }}>Tổng quan chi phí</Typography.Text>
+            </div>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", gap: 10, width: "100%" }}>
                 <ShoppingListCostMetric
                     label="Giỏ mua"
                     description="Theo lượng còn thiếu"
@@ -653,7 +700,7 @@ const ShoppingListCostSummaryWidget: React.FunctionComponent<{ summary: Shopping
                     emptyText="0đ"
                 />}
             </div>
-        </Stack>
+        </div>
     </Box>
 }
 
