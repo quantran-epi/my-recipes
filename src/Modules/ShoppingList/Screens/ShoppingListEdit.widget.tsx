@@ -45,6 +45,7 @@ export const ShoppingListEditWidget: FunctionComponent<ShoppingListEditWidgetPro
             dishes: { label: "Chọn món ăn", name: ObjectPropertyHelper.nameof(defaultValues, e => e.dishes) },
             scheduledMeals: { label: "Chọn thực đơn", name: ObjectPropertyHelper.nameof(defaultValues, e => e.scheduledMeals) },
             ingredients: { name: ObjectPropertyHelper.nameof(defaultValues, e => e.ingredients), noMarkup: true },
+            dishServings: { name: ObjectPropertyHelper.nameof(defaultValues, e => e.dishServings), noMarkup: true },
             createdDate: { name: ObjectPropertyHelper.nameof(defaultValues, e => e.createdDate), noMarkup: true },
             plannedDate: { label: "Ngày kế hoạch", name: ObjectPropertyHelper.nameof(defaultValues, e => e.plannedDate) },
             completedAt: { name: ObjectPropertyHelper.nameof(defaultValues, e => e.completedAt), noMarkup: true },

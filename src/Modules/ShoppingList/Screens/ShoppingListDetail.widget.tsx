@@ -356,7 +356,7 @@ export const ShoppingListDetailWidget: React.FunctionComponent<ShoppingListDetai
                                 Hoàn tất mua sắm
                             </Button>}
                     </Stack>
-                    <Box style={{ maxHeight: 500, overflowY: "auto" }}>
+                    <Box>
                         {groupedIngredients.length > 1
                             ? groupedIngredients.map(group => <React.Fragment key={group.category}>
                                 <Divider orientation="left" style={{ marginBlock: 6 }}>
@@ -386,18 +386,18 @@ export const ShoppingListDetailWidget: React.FunctionComponent<ShoppingListDetai
             },
             {
                 key: "dishes", icon: <Image src={DishesIcon} preview={false} width={22} style={{ marginBottom: 3 }} />, label: "Món ăn " + `(${props.shoppingList.dishes.length})`,
-                children: <Box style={{ maxHeight: 500, overflowY: "auto" }}>
+                children: <Box>
                     <List
                         size="small"
                         style={{ overflowX: "auto" }}
                         dataSource={_getDishesByIds(props.shoppingList.dishes)}
-                        renderItem={(item) => <ShoppingListDishesItem dish={item} />}
+                        renderItem={(item) => <ShoppingListDishesItem dish={item} targetServings={props.shoppingList.dishServings?.[item.id]} />}
                     />
                 </Box>
             },
             {
                 key: "meals", icon: <Image src={MealsIcon} preview={false} width={22} style={{ marginBottom: 3 }} />, label: "Thực đơn " + `(${props.shoppingList.scheduledMeals.length})`,
-                children: <Box style={{ maxHeight: 500, overflowY: "auto" }}>
+                children: <Box>
                     <List
                         size="small"
                         style={{ overflowX: "auto" }}
@@ -1057,13 +1057,14 @@ export const ShoppingListIngredientItem: React.FunctionComponent<ShoppingListIng
 
 type ShoppingListDishesItemProps = {
     dish: Dishes;
+    targetServings?: number;
 }
 
 export const ShoppingListDishesItem: React.FunctionComponent<ShoppingListDishesItemProps> = (props) => {
     const toggleDishesDetail = useToggle();
     const ingredients = useSelector(selectIngredients);
     const dishes = useSelector(selectDishes);
-    const costEstimate = useMemo(() => CostEstimateHelper.estimateDish(props.dish, ingredients, dishes), [props.dish, ingredients, dishes]);
+    const costEstimate = useMemo(() => CostEstimateHelper.estimateDish(props.dish, ingredients, dishes, props.targetServings), [props.dish, ingredients, dishes, props.targetServings]);
     const costLabel = CostEstimateHelper.hasPrice(costEstimate.required)
         ? IngredientPriceHelper.formatRange(costEstimate.required)
         : null;
@@ -1106,6 +1107,7 @@ export const ShoppingListDishesItem: React.FunctionComponent<ShoppingListDishesI
         </Button>
         <DishesReadonlyDetailModal
             dish={props.dish}
+            targetServings={props.targetServings}
             open={toggleDishesDetail.value}
             onClose={toggleDishesDetail.hide}
         />

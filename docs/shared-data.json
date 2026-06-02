@@ -4088,7 +4088,8 @@
         "cooking": null,
         "serve": null,
         "cooldown": null
-      }
+      },
+      "baseServings": 2
     },
     {
       "id": "Bún cá chan1Ew2KgsgmT",
@@ -4174,7 +4175,8 @@
         "cooking": null,
         "serve": null,
         "cooldown": null
-      }
+      },
+      "baseServings": 2
     },
     {
       "id": "Bún cá chấmU4hU2b399-",
@@ -4295,7 +4297,8 @@
         "cooking": null,
         "serve": null,
         "cooldown": null
-      }
+      },
+      "baseServings": 2
     },
     {
       "id": "Bún thịtnướngUqWqmbOE7I",
@@ -4382,7 +4385,8 @@
         "cooking": null,
         "serve": null,
         "cooldown": null
-      }
+      },
+      "baseServings": 2
     },
     {
       "id": "Bún sườn thịtaCscwGORwq",
@@ -4513,7 +4517,8 @@
         "cooking": null,
         "serve": null,
         "cooldown": null
-      }
+      },
+      "baseServings": 2
     },
     {
       "id": "Bún riêu cua7DaVnQCpYq",
@@ -4689,7 +4694,8 @@
         "cooking": null,
         "serve": null,
         "cooldown": null
-      }
+      },
+      "baseServings": 2
     },
     {
       "id": "Bún chả-wKNw4Uzrc",
@@ -4769,7 +4775,8 @@
         "cooking": null,
         "serve": null,
         "cooldown": null
-      }
+      },
+      "baseServings": 2
     },
     {
       "id": "Phở bòWaCgW7nbpG",
@@ -4935,7 +4942,8 @@
         "cooking": null,
         "serve": null,
         "cooldown": null
-      }
+      },
+      "baseServings": 2
     },
     {
       "id": "Phở gàhgVbN9BnEZ",
@@ -5119,7 +5127,8 @@
         "cooking": null,
         "serve": null,
         "cooldown": null
-      }
+      },
+      "baseServings": 2
     },
     {
       "id": "Phở sườn thịto25085Lqjt",
@@ -5269,7 +5278,8 @@
         "cooking": null,
         "serve": null,
         "cooldown": null
-      }
+      },
+      "baseServings": 2
     },
     {
       "id": "Bánh mì chảKzqj_9cvC0",
@@ -5358,7 +5368,8 @@
         "cooking": null,
         "serve": null,
         "cooldown": null
-      }
+      },
+      "baseServings": 2
     },
     {
       "id": "Bánh mì trứngYXTAjmVDVy",
@@ -5447,7 +5458,8 @@
         "cooking": null,
         "serve": null,
         "cooldown": null
-      }
+      },
+      "baseServings": 2
     },
     {
       "id": "Bánh mì chả trứng4L3M-9r9SW",
@@ -5536,7 +5548,8 @@
         "cooking": null,
         "serve": null,
         "cooldown": null
-      }
+      },
+      "baseServings": 2
     },
     {
       "id": "Bánh mì thịt nướngjHjYfxtOCf",
@@ -5616,7 +5629,8 @@
         "cooking": null,
         "serve": null,
         "cooldown": null
-      }
+      },
+      "baseServings": 2
     },
     {
       "id": "Bánh mì sốt vangU5O-BSsuoj",
@@ -5698,7 +5712,8 @@
         "cooking": null,
         "serve": null,
         "cooldown": null
-      }
+      },
+      "baseServings": 2
     },
     {
       "id": "Bánh mì bò bít tếtETcY3mgKom",
@@ -5776,7 +5791,8 @@
         "cooking": null,
         "serve": null,
         "cooldown": null
-      }
+      },
+      "baseServings": 2
     },
     {
       "id": "Bánh bao thịtw6NDAJV_R9",
@@ -5895,7 +5911,8 @@
         "cooking": null,
         "serve": null,
         "cooldown": null
-      }
+      },
+      "baseServings": 2
     },
     {
       "id": "Bánh bao thịt trứngFidOo_-fXE",
@@ -5954,7 +5971,8 @@
         "cooking": null,
         "serve": null,
         "cooldown": null
-      }
+      },
+      "baseServings": 2
     },
     {
       "id": "Bánh bao đậu xanh14gE89JJzD",
@@ -6043,7 +6061,8 @@
         "cooking": null,
         "serve": null,
         "cooldown": null
-      }
+      },
+      "baseServings": 2
     },
     {
       "id": "Bánh bao khoai mônLqCoXzgEwy",
@@ -6120,7 +6139,8 @@
         "cooking": null,
         "serve": null,
         "cooldown": null
-      }
+      },
+      "baseServings": 2
     },
     {
       "id": "Bánh tẻUsui_Ug4Ow",
@@ -6297,7 +6317,8 @@
         "cooking": null,
         "serve": null,
         "cooldown": null
-      }
+      },
+      "baseServings": 2
     },
     {
       "id": "Bánh rán đườngJq4BlL8hzr",
@@ -6356,7 +6377,8 @@
         "cooking": null,
         "serve": null,
         "cooldown": null
-      }
+      },
+      "baseServings": 2
     },
     {
       "id": "Bánh rán mèYlhY6pSPNS",
@@ -6483,7 +6505,8 @@
         "cooking": null,
         "serve": null,
         "cooldown": null
-      }
+      },
+      "baseServings": 2
     },
     {
       "id": "Bánh mochi Hàn Quốc8sMDMtqZLp",
@@ -6600,7 +6623,8 @@
         "cooking": null,
         "serve": null,
         "cooldown": null
-      }
+      },
+      "baseServings": 2
     },
     {
       "id": "Há cảo thịtANEgIKhgjL",
@@ -6767,7 +6791,8 @@
         "cooking": null,
         "serve": null,
         "cooldown": null
-      }
+      },
+      "baseServings": 2
     },
     {
       "id": "Há cảo tôm thịtl3oOSN5oVE",
@@ -6826,7 +6851,8 @@
         "cooking": null,
         "serve": null,
         "cooldown": null
-      }
+      },
+      "baseServings": 2
     },
     {
       "id": "Bánh cuốn chảCZ_BcZ5FYH",
@@ -6895,7 +6921,8 @@
         "cooking": null,
         "serve": null,
         "cooldown": null
-      }
+      },
+      "baseServings": 2
     },
     {
       "id": "Bánh cuốn chả nướngE15dUu79KH",
@@ -6955,7 +6982,8 @@
         "cooking": null,
         "serve": null,
         "cooldown": null
-      }
+      },
+      "baseServings": 2
     },
     {
       "id": "Thịt heo kho tộmXl-EQhHzc",
@@ -7083,7 +7111,8 @@
         "cooking": null,
         "serve": null,
         "cooldown": null
-      }
+      },
+      "baseServings": 2
     },
     {
       "id": "Thịt heo kho tàuaCPPJEzn2u",
@@ -7210,7 +7239,8 @@
         "cooking": null,
         "serve": null,
         "cooldown": null
-      }
+      },
+      "baseServings": 2
     },
     {
       "id": "Thịt rang cháy cạnhjR-i4HmL-R",
@@ -7318,7 +7348,8 @@
         "cooking": null,
         "serve": null,
         "cooldown": null
-      }
+      },
+      "baseServings": 2
     },
     {
       "id": "Thịt rang sả ớt1VlNr-YF_L",
@@ -7430,7 +7461,8 @@
         "cooking": null,
         "serve": null,
         "cooldown": null
-      }
+      },
+      "baseServings": 2
     },
     {
       "id": "Thịt nướng mậtongrSMGs780fv",
@@ -7598,7 +7630,8 @@
         "cooking": null,
         "serve": null,
         "cooldown": null
-      }
+      },
+      "baseServings": 2
     },
     {
       "id": "Nem ránWHi3tylvI1",
@@ -7775,7 +7808,8 @@
         "cooking": null,
         "serve": null,
         "cooldown": null
-      }
+      },
+      "baseServings": 2
     },
     {
       "id": "Nem cuốnoaV_NZCmq5",
@@ -7944,7 +7978,8 @@
         "cooking": null,
         "serve": null,
         "cooldown": null
-      }
+      },
+      "baseServings": 2
     },
     {
       "id": "Nem nướng Nha TrangTKi1hePlxN",
@@ -8083,7 +8118,8 @@
         "cooking": null,
         "serve": null,
         "cooldown": null
-      }
+      },
+      "baseServings": 2
     },
     {
       "id": "Trứng chiên thịt2lYnyNmIAN",
@@ -8181,7 +8217,8 @@
         "cooking": null,
         "serve": null,
         "cooldown": null
-      }
+      },
+      "baseServings": 2
     },
     {
       "id": "Đậu que xào thịtB6q9Ab7M0p",
@@ -8309,7 +8346,8 @@
         "cooking": null,
         "serve": null,
         "cooldown": null
-      }
+      },
+      "baseServings": 2
     },
     {
       "id": "Sườn xàochua ngọteFYLzGgWNB",
@@ -8476,7 +8514,8 @@
         "cooking": null,
         "serve": null,
         "cooldown": null
-      }
+      },
+      "baseServings": 2
     },
     {
       "id": "Bí đao nấu sườnT5E11NwG9V",
@@ -8623,7 +8662,8 @@
         "cooking": null,
         "serve": null,
         "cooldown": null
-      }
+      },
+      "baseServings": 2
     },
     {
       "id": "Bí đỏ nấu sườnOK2EPMR8-_",
@@ -8760,7 +8800,8 @@
         "cooking": null,
         "serve": null,
         "cooldown": null
-      }
+      },
+      "baseServings": 2
     },
     {
       "id": "Đu đủ nấu sườnOaBBVKILRI",
@@ -8887,7 +8928,8 @@
         "cooking": null,
         "serve": null,
         "cooldown": null
-      }
+      },
+      "baseServings": 2
     },
     {
       "id": "Sườn hầm ngũ quảnb0L2xGBZl",
@@ -9007,7 +9049,8 @@
         "cooking": null,
         "serve": null,
         "cooldown": null
-      }
+      },
+      "baseServings": 2
     },
     {
       "id": "Chả lá lốtyiP92XK_Jc",
@@ -9124,7 +9167,8 @@
         "cooking": null,
         "serve": null,
         "cooldown": null
-      }
+      },
+      "baseServings": 2
     },
     {
       "id": "Gà rang lá chanhcnUYkqoDq3",
@@ -9241,7 +9285,8 @@
         "cooking": null,
         "serve": null,
         "cooldown": null
-      }
+      },
+      "baseServings": 2
     },
     {
       "id": "Gà xào sả ớtVfovGNIUhC",
@@ -9388,7 +9433,8 @@
         "cooking": null,
         "serve": null,
         "cooldown": null
-      }
+      },
+      "baseServings": 2
     },
     {
       "id": "Gà chiên mắmqZNDqYlsWY",
@@ -9519,7 +9565,8 @@
         "Chiên"
       ],
       "image": "https://cdn.eva.vn/upload/3-2023/images/2023-07-10/cach-lam-canh-ga-chien-nuoc-mam-ngon-tai-nha-don-gian-12-1688958703-582-width700height400.jpg",
-      "isCompleted": true
+      "isCompleted": true,
+      "baseServings": 2
     },
     {
       "id": "Gà xào nấmB1RYSsK6Oe",
@@ -9666,7 +9713,8 @@
         "cooking": null,
         "serve": null,
         "cooldown": null
-      }
+      },
+      "baseServings": 2
     },
     {
       "id": "Gà tầnbG8OqbqMTK",
@@ -9813,7 +9861,8 @@
         "cooking": null,
         "serve": null,
         "cooldown": null
-      }
+      },
+      "baseServings": 2
     },
     {
       "id": "Tôm rang hànhF8W8plnKT7",
@@ -9910,7 +9959,8 @@
         "cooking": null,
         "serve": null,
         "cooldown": null
-      }
+      },
+      "baseServings": 2
     },
     {
       "id": "Tôm rim bơ tỏich4Dm7CDlW",
@@ -10014,7 +10064,8 @@
         "cooking": null,
         "serve": null,
         "cooldown": null
-      }
+      },
+      "baseServings": 2
     },
     {
       "id": "Tôm hấp sảI0_8nFFpz4",
@@ -10104,7 +10155,8 @@
         "cooking": null,
         "serve": null,
         "cooldown": null
-      }
+      },
+      "baseServings": 2
     },
     {
       "id": "Đậu tẩm hànhFjUFTPHaUH",
@@ -10202,7 +10254,8 @@
         "cooking": null,
         "serve": null,
         "cooldown": null
-      }
+      },
+      "baseServings": 2
     },
     {
       "id": "Đậu sốt cà chuaTq8NcZ6Qlr",
@@ -10339,7 +10392,8 @@
         "cooking": null,
         "serve": null,
         "cooldown": null
-      }
+      },
+      "baseServings": 2
     },
     {
       "id": "Cà tím nấu đậuFwdnaf-a_w",
@@ -10496,7 +10550,8 @@
         "cooking": null,
         "serve": null,
         "cooldown": null
-      }
+      },
+      "baseServings": 2
     },
     {
       "id": "Cải xào bòNqFLICg3fs",
@@ -10593,7 +10648,8 @@
         "cooking": null,
         "serve": null,
         "cooldown": null
-      }
+      },
+      "baseServings": 2
     },
     {
       "id": "Cần tây xào bòkluzOX2jap",
@@ -10750,7 +10806,8 @@
         "cooking": null,
         "serve": null,
         "cooldown": null
-      }
+      },
+      "baseServings": 2
     },
     {
       "id": "Bò lúc lắcdhQP6vbomX",
@@ -10947,7 +11004,8 @@
         "cooking": null,
         "serve": null,
         "cooldown": null
-      }
+      },
+      "baseServings": 2
     },
     {
       "id": "Bò sốt vangdF28akq1Mp",
@@ -11144,7 +11202,8 @@
         "cooking": null,
         "serve": null,
         "cooldown": null
-      }
+      },
+      "baseServings": 2
     },
     {
       "id": "Bánh baoLKwsrX4wPV",
@@ -11246,7 +11305,8 @@
         "Hấp"
       ],
       "image": "https://cdn.tgdd.vn/Files/2022/01/05/1409227/chia-se-cach-lam-banh-bao-nhan-dau-xanh-thom-ngot-vo-mem-xop-202201051416364928.jpg",
-      "isCompleted": true
+      "isCompleted": true,
+      "baseServings": 2
     },
     {
       "id": "Bánh mìwF13cjAL0k",
@@ -11342,7 +11402,8 @@
         "cooking": null,
         "serve": null,
         "cooldown": null
-      }
+      },
+      "baseServings": 2
     },
     {
       "id": "Cá khoK1SnToMpDi",
@@ -11519,7 +11580,8 @@
         "cooking": null,
         "serve": null,
         "cooldown": null
-      }
+      },
+      "baseServings": 2
     },
     {
       "id": "Cá nấu chua6cAGOrVK_E",
@@ -11726,7 +11788,8 @@
         "cooking": null,
         "serve": null,
         "cooldown": null
-      }
+      },
+      "baseServings": 2
     },
     {
       "id": "Cá rim cà chuawUgDfH6RNq",
@@ -11893,7 +11956,8 @@
         "cooking": null,
         "serve": null,
         "cooldown": null
-      }
+      },
+      "baseServings": 2
     },
     {
       "id": "Đậu non nấu cà chuaTTfZ5gtok9",
@@ -12021,7 +12085,8 @@
         "cooking": null,
         "serve": null,
         "cooldown": null
-      }
+      },
+      "baseServings": 2
     },
     {
       "id": "Trứng chiên hành2TlY54LLcQ",
@@ -12101,7 +12166,8 @@
         "cooking": null,
         "serve": null,
         "cooldown": null
-      }
+      },
+      "baseServings": 2
     },
     {
       "id": "Canh cua nấu mồng tơiTQ-BZFGHQC",
@@ -12180,7 +12246,8 @@
         "cooking": null,
         "serve": null,
         "cooldown": null
-      }
+      },
+      "baseServings": 2
     },
     {
       "id": "Mực xào cần tâycYKhDiwKv9",
@@ -12327,7 +12394,8 @@
         "cooking": null,
         "serve": null,
         "cooldown": null
-      }
+      },
+      "baseServings": 2
     },
     {
       "id": "Khoai lang luộc-XvNSV54c7",
@@ -12395,7 +12463,8 @@
         "cooking": null,
         "serve": null,
         "cooldown": null
-      }
+      },
+      "baseServings": 2
     },
     {
       "id": "Trứng luộcTPJEiuAgr5",
@@ -12464,7 +12533,8 @@
         "cooking": null,
         "serve": null,
         "cooldown": null
-      }
+      },
+      "baseServings": 2
     },
     {
       "id": "Thịt nướng sảwdM8vUkIif",
@@ -12575,7 +12645,8 @@
         "cooking": null,
         "serve": null,
         "cooldown": null
-      }
+      },
+      "baseServings": 2
     },
     {
       "id": "Nước sốt bún trộnHQE5qZrQpv",
@@ -12673,7 +12744,8 @@
         "cooking": null,
         "serve": null,
         "cooldown": null
-      }
+      },
+      "baseServings": 2
     },
     {
       "id": "Cà rốt và củ cải ngâm chua ngọtEwWkyZx38p",
@@ -12780,7 +12852,8 @@
         "cooking": null,
         "serve": null,
         "cooldown": null
-      }
+      },
+      "baseServings": 2
     },
     {
       "id": "Nước chấm nem nướngTae9hkbHGW",
@@ -12948,7 +13021,8 @@
         "cooking": null,
         "serve": null,
         "cooldown": null
-      }
+      },
+      "baseServings": 2
     },
     {
       "id": "Bánh cuốn8njAOXZMLa",
@@ -13067,7 +13141,8 @@
         "cooking": null,
         "serve": null,
         "cooldown": null
-      }
+      },
+      "baseServings": 2
     },
     {
       "id": "Chả nướng bămseNLEMMZFp",
@@ -13136,7 +13211,8 @@
         "cooking": null,
         "serve": null,
         "cooldown": null
-      }
+      },
+      "baseServings": 2
     },
     {
       "id": "Chả nướng miếngAqMSAIpst1",
@@ -13195,7 +13271,8 @@
         "cooking": null,
         "serve": null,
         "cooldown": null
-      }
+      },
+      "baseServings": 2
     },
     {
       "id": "Chả nướng lẫn78Xm_wfZ7d",
@@ -13301,7 +13378,8 @@
         "cooking": null,
         "serve": null,
         "cooldown": null
-      }
+      },
+      "baseServings": 2
     },
     {
       "id": "Bánh cuốn chả nướng miếngfSgiyqTVGg",
@@ -13361,7 +13439,8 @@
         "cooking": null,
         "serve": null,
         "cooldown": null
-      }
+      },
+      "baseServings": 2
     },
     {
       "id": "Bánh cuốn chả nướng lẫn0RpjzyE-2Z",
@@ -13421,7 +13500,8 @@
         "cooking": null,
         "serve": null,
         "cooldown": null
-      }
+      },
+      "baseServings": 2
     },
     {
       "id": "Nước chấm bánh cuốnECD_ldv04_",
@@ -13549,7 +13629,8 @@
         "cooking": null,
         "serve": null,
         "cooldown": null
-      }
+      },
+      "baseServings": 2
     },
     {
       "id": "Bò bít tếtaOXbsKyhgB",
@@ -13666,7 +13747,8 @@
         "cooking": null,
         "serve": null,
         "cooldown": null
-      }
+      },
+      "baseServings": 2
     },
     {
       "id": "Bánh mì thịt nướng mật ongegAwiclMzM",
@@ -13746,7 +13828,8 @@
         "cooking": null,
         "serve": null,
         "cooldown": null
-      }
+      },
+      "baseServings": 2
     },
     {
       "id": "Nước chấm hải sảnabDnXSNf-y",
@@ -13841,7 +13924,8 @@
         "cooking": null,
         "serve": null,
         "cooldown": null
-      }
+      },
+      "baseServings": 2
     },
     {
       "id": "Bún chả miếngfKGq1GQZND",
@@ -13921,7 +14005,8 @@
         "cooking": null,
         "serve": null,
         "cooldown": null
-      }
+      },
+      "baseServings": 2
     },
     {
       "id": "Bún chả lẫnU69ZgQadyy",
@@ -14001,7 +14086,8 @@
         "cooking": null,
         "serve": null,
         "cooldown": null
-      }
+      },
+      "baseServings": 2
     },
     {
       "id": "Nước chấm bún chả9XYmqW0KpO",
@@ -14119,7 +14205,8 @@
         "cooking": null,
         "serve": null,
         "cooldown": null
-      }
+      },
+      "baseServings": 2
     },
     {
       "id": "Sốt ướp chả nướng (bún chả)bgtSIsRYZV",
@@ -14247,7 +14334,8 @@
         "cooking": null,
         "serve": null,
         "cooldown": null
-      }
+      },
+      "baseServings": 2
     },
     {
       "id": "Sốt ướp thịt nướng sảViIOYxgxhe",
@@ -14351,7 +14439,8 @@
         "cooking": null,
         "serve": null,
         "cooldown": null
-      }
+      },
+      "baseServings": 2
     },
     {
       "id": "Sốt ướp thịt nướng mật ongqZhf-2mjJm",
@@ -14455,7 +14544,8 @@
         "cooking": null,
         "serve": null,
         "cooldown": null
-      }
+      },
+      "baseServings": 2
     },
     {
       "id": "Riêu cuaBBGR0lt-N3",
@@ -14562,7 +14652,8 @@
         "cooking": null,
         "serve": null,
         "cooldown": null
-      }
+      },
+      "baseServings": 2
     },
     {
       "id": "Bánh rán mèmHwyy7hdxN",
@@ -14621,7 +14712,8 @@
         "cooking": null,
         "serve": null,
         "cooldown": null
-      }
+      },
+      "baseServings": 2
     },
     {
       "id": "Nước chấm cá rán0UK9PsMOJv",
@@ -14728,7 +14820,8 @@
         "cooking": null,
         "serve": null,
         "cooldown": null
-      }
+      },
+      "baseServings": 2
     },
     {
       "id": "Gà kho sả ớt2NJpSsMRKr",
@@ -14895,7 +14988,8 @@
         "cooking": null,
         "serve": null,
         "cooldown": null
-      }
+      },
+      "baseServings": 2
     },
     {
       "id": "Cá om dưaAAAq2tCTdc",
@@ -15054,7 +15148,8 @@
         "cooking": null,
         "serve": null,
         "cooldown": null
-      }
+      },
+      "baseServings": 2
     },
     {
       "id": "Dưa muối_3Gl1lv4L_",
@@ -15133,7 +15228,8 @@
         "cooking": null,
         "serve": null,
         "cooldown": null
-      }
+      },
+      "baseServings": 2
     },
     {
       "id": "Nước chấm chua ngọtG7qG4YmA5R",
@@ -15240,7 +15336,8 @@
         "cooking": null,
         "serve": null,
         "cooldown": null
-      }
+      },
+      "baseServings": 2
     },
     {
       "id": "Sườn chua cay TháiQZm3j8N_jt",
@@ -15357,7 +15454,8 @@
       "name": "Sườn chua cay Thái",
       "includeDishes": [],
       "note": "",
-      "image": "https://cdn.tgdd.vn/Files/2017/03/24/964475/cach-lam-suon-xao-chua-ngot-ngon-bat-bai-vo-cung-don-gian-202212051056278431.jpg"
+      "image": "https://cdn.tgdd.vn/Files/2017/03/24/964475/cach-lam-suon-xao-chua-ngot-ngon-bat-bai-vo-cung-don-gian-202212051056278431.jpg",
+      "baseServings": 2
     }
   ]
 }

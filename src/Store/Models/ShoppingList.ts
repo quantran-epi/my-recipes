@@ -36,6 +36,7 @@ export type ShoppingList = {
     id: string;
     name: string;
     dishes: string[];
+    dishServings?: Record<string, number>;
     ingredients: ShoppingListIngredientGroup[];
     scheduledMeals: string[];
     createdDate: Date;

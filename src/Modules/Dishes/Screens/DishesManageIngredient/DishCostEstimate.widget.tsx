@@ -9,8 +9,11 @@ import { selectDishes, selectIngredients } from "@store/Selectors";
 import React, { useMemo } from "react";
 import { useSelector } from "react-redux";
 
+import { DishServingHelper } from '@common/Helpers/DishServingHelper';
+
 type DishCostEstimateWidgetProps = {
     dish: Dishes;
+    targetServings?: number;
 }
 
 const formatSummary = (summary: CostEstimateSummary): string => {
@@ -31,15 +34,15 @@ const Metric: React.FunctionComponent<{ label: string; summary: CostEstimateSumm
     </div>
 }
 
-export const DishCostEstimateWidget: React.FunctionComponent<DishCostEstimateWidgetProps> = ({ dish }) => {
+export const DishCostEstimateWidget: React.FunctionComponent<DishCostEstimateWidgetProps> = ({ dish, targetServings }) => {
     const ingredients = useSelector(selectIngredients);
     const dishes = useSelector(selectDishes);
-    const estimate = useMemo(() => CostEstimateHelper.estimateDish(dish, ingredients, dishes), [dish, ingredients, dishes]);
-    const servingSize = Number((dish as any).servingSize ?? 0);
-    const requiredPerServing = servingSize > 0 && CostEstimateHelper.hasPrice(estimate.required)
+    const normalizedTargetServings = DishServingHelper.getTargetServings(dish, targetServings);
+    const estimate = useMemo(() => CostEstimateHelper.estimateDish(dish, ingredients, dishes, normalizedTargetServings), [dish, ingredients, dishes, normalizedTargetServings]);
+    const requiredPerServing = normalizedTargetServings > 0 && CostEstimateHelper.hasPrice(estimate.required)
         ? {
-            min: estimate.required.min / servingSize,
-            max: estimate.required.max / servingSize,
+            min: estimate.required.min / normalizedTargetServings,
+            max: estimate.required.max / normalizedTargetServings,
             currency: estimate.required.currency,
             itemCount: estimate.required.itemCount,
             pricedCount: estimate.required.pricedCount,

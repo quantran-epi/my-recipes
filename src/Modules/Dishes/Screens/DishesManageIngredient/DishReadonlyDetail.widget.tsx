@@ -29,14 +29,18 @@ import VegetableIcon from "../../../../../assets/icons/vegetable.png";
 import { DishCostEstimateWidget } from "./DishCostEstimate.widget";
 import { DishImageWidget } from "./DishImage.widget";
 
+import { DishServingHelper } from '@common/Helpers/DishServingHelper';
+import { InputNumber } from 'antd';
+
 type DishesReadonlyDetailModalProps = {
     dish: Dishes;
     open: boolean;
     onClose: () => void;
     zIndex?: number;
+    targetServings?: number;
 }
 
-export const DishesReadonlyDetailModal: React.FunctionComponent<DishesReadonlyDetailModalProps> = ({ dish, open, onClose, zIndex }) => {
+export const DishesReadonlyDetailModal: React.FunctionComponent<DishesReadonlyDetailModalProps> = ({ dish, open, onClose, zIndex, targetServings }) => {
     const navigate = useNavigate();
 
     const _onOpenDetail = () => {
@@ -61,18 +65,22 @@ export const DishesReadonlyDetailModal: React.FunctionComponent<DishesReadonlyDe
         </Space>}
     >
         <Box style={{ maxHeight: "70vh", overflowY: "auto", paddingRight: 4 }}>
-            <DishesReadonlyDetailWidget dish={dish} />
+            <DishesReadonlyDetailWidget dish={dish} targetServings={targetServings} />
         </Box>
     </Modal>
 }
 
 type DishesReadonlyDetailWidgetProps = {
     dish: Dishes;
+    targetServings?: number;
 }
 
-export const DishesReadonlyDetailWidget: React.FunctionComponent<DishesReadonlyDetailWidgetProps> = ({ dish }) => {
+export const DishesReadonlyDetailWidget: React.FunctionComponent<DishesReadonlyDetailWidgetProps> = ({ dish, targetServings: initialTargetServings }) => {
     const dishes = useSelector(selectDishes);
     const [selectedIncludedDish, setSelectedIncludedDish] = useState<Dishes>();
+    const baseServings = DishServingHelper.getBaseServings(dish);
+    const [targetServings, setTargetServings] = useState<number>(() => DishServingHelper.getTargetServings(dish, initialTargetServings));
+    const scaledIngredients = useMemo(() => DishServingHelper.scaleIngredientAmounts(dish, targetServings), [dish, targetServings]);
 
     const includedDishes = useMemo(() => {
         return dish.includeDishes
@@ -97,7 +105,32 @@ export const DishesReadonlyDetailWidget: React.FunctionComponent<DishesReadonlyD
     return <React.Fragment>
         <DishImageWidget src={dish.image} height={180} borderRadius={8} style={{ marginBottom: 12 }} />
 
-        <DishCostEstimateWidget dish={dish} />
+        <Box style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            gap: 8,
+            padding: '8px 10px',
+            border: '1px solid #f0f0f0',
+            borderRadius: 8,
+            background: '#fafafa',
+            marginBottom: 12,
+        }}>
+            <div>
+                <Typography.Text strong style={{ display: 'block' }}>Khẩu phần</Typography.Text>
+                <Typography.Text type='secondary' style={{ fontSize: 12 }}>Gốc {baseServings} phần</Typography.Text>
+            </div>
+            <InputNumber
+                min={1}
+                precision={0}
+                value={targetServings}
+                onChange={(value) => setTargetServings(DishServingHelper.normalizeTargetServings(value, baseServings))}
+                addonAfter='phần'
+                style={{ width: 118 }}
+            />
+        </Box>
+
+        <DishCostEstimateWidget dish={dish} targetServings={targetServings} />
 
         {(dish.note || durationItems.length > 0) && <React.Fragment>
             <Divider orientation="left"><Space>
@@ -130,9 +163,9 @@ export const DishesReadonlyDetailWidget: React.FunctionComponent<DishesReadonlyD
             <Image src={VegetableIcon} preview={false} width={22} style={{ marginBottom: 3 }} />
             Danh sách nguyên liệu
         </Space></Divider>
-        {dish.ingredients.length > 0
+        {scaledIngredients.length > 0
             ? <List
-                dataSource={orderBy(dish.ingredients, [item => item.required], ["desc"])}
+                dataSource={orderBy(scaledIngredients, [item => item.required], ["desc"])}
                 renderItem={(item) => <ReadonlyIngredientItem item={item} />}
             />
             : <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} />}

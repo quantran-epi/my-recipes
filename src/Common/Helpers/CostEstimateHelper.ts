@@ -3,6 +3,8 @@ import { Ingredient, IngredientUnit } from "@store/Models/Ingredient";
 import { IngredientPriceHelper, IngredientPriceRange } from "./IngredientPriceHelper";
 import { IngredientUnitHelper } from "./IngredientUnitHelper";
 
+import { DishServingHelper } from './DishServingHelper';
+
 export type CostEstimateSummary = IngredientPriceRange & {
     itemCount: number;
     pricedCount: number;
@@ -83,26 +85,15 @@ export const CostEstimateHelper = {
         return target;
     },
 
-    estimateDish(dish: Dishes, ingredients: Ingredient[], dishes: Dishes[] = [], visitedDishIds = new Set<string>()): DishCostEstimate {
+    estimateDish(dish: Dishes, ingredients: Ingredient[], dishes: Dishes[] = [], targetServings?: number): DishCostEstimate {
         const estimate = CostEstimateHelper.emptyDishEstimate();
-        if (!dish || visitedDishIds.has(dish.id)) return estimate;
-        visitedDishIds.add(dish.id);
+        if (!dish) return estimate;
 
-        dish.ingredients.forEach(item => {
+        DishServingHelper.collectIngredientAmounts(dish, dishes, { targetServings }).forEach(item => {
             const ingredient = findIngredient(ingredients, item.ingredientId);
             const target = item.required ? estimate.required : estimate.optional;
             CostEstimateHelper.addIngredientAmount(target, item, ingredient);
             CostEstimateHelper.addIngredientAmount(estimate.total, item, ingredient);
-        });
-
-        dish.includeDishes.forEach(id => {
-            const includedDish = dishes.find(item => item.id === id);
-            if (!includedDish) return;
-
-            const includedEstimate = CostEstimateHelper.estimateDish(includedDish, ingredients, dishes, visitedDishIds);
-            CostEstimateHelper.mergeSummary(estimate.total, includedEstimate.total);
-            CostEstimateHelper.mergeSummary(estimate.required, includedEstimate.required);
-            CostEstimateHelper.mergeSummary(estimate.optional, includedEstimate.optional);
         });
 
         return estimate;

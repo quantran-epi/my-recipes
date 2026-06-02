@@ -7,6 +7,8 @@ import { nanoid } from 'nanoid';
 export type StartCookingParams = {
     dishId: string;
     dishName: string;
+    baseServings?: number;
+    targetServings?: number;
     steps: string[];
 }
 
@@ -34,6 +36,8 @@ export const CookingSessionSlice = createSlice({
                 id: nanoid(),
                 dishId: action.payload.dishId,
                 dishName: action.payload.dishName,
+                baseServings: action.payload.baseServings,
+                targetServings: action.payload.targetServings,
                 startedAt: new Date().toISOString(),
                 status: "cooking",
                 steps: action.payload.steps,

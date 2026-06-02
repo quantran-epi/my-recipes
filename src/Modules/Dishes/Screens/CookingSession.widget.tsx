@@ -22,6 +22,9 @@ import { Image } from "@components/Image";
 import { FinishCookingWidget } from "./FinishCooking.widget";
 import { RootRoutes } from "@routing/RootRoutes";
 
+import { DishServingHelper } from '@common/Helpers/DishServingHelper';
+import { InputNumber } from 'antd';
+
 type CookingIngredientRow = {
     ingredient: Ingredient;
     required: number;
@@ -30,21 +33,6 @@ type CookingIngredientRow = {
     lacking: number;
     sufficient: boolean;
 }
-
-const collectIngredientAmounts = (
-    dish: Dishes,
-    allDishes: Dishes[],
-    visited = new Set<string>()
-): DishesIngredientAmount[] => {
-    if (visited.has(dish.id)) return [];
-    visited.add(dish.id);
-    const own = dish.ingredients;
-    const fromIncluded = dish.includeDishes.flatMap(id => {
-        const d = allDishes.find(d => d.id === id);
-        return d ? collectIngredientAmounts(d, allDishes, visited) : [];
-    });
-    return [...own, ...fromIncluded];
-};
 
 const collectAllSteps = (
     dish: Dishes,
@@ -75,12 +63,14 @@ export const CookingSessionWidget: React.FunctionComponent<CookingSessionWidgetP
     const toggleShoppingList = useToggle();
     const [phase, setPhase] = useState<"prep" | "cooking">("prep");
     const [showFinish, setShowFinish] = useState(false);
+    const baseServings = DishServingHelper.getBaseServings(dish);
+    const [targetServings, setTargetServings] = useState<number>(() => baseServings);
 
     const activeSession = sessions.find(s => s.dishId === dish.id && s.status === "cooking");
     const steps = useMemo(() => collectAllSteps(dish, allDishes), [dish, allDishes]);
 
     const rows = useMemo<CookingIngredientRow[]>(() => {
-        const amounts = collectIngredientAmounts(dish, allDishes);
+        const amounts = DishServingHelper.collectIngredientAmounts(dish, allDishes, { targetServings });
         const grouped: Record<string, { total: number; unit: string }> = {};
         amounts.forEach(amt => {
             const ingredient = allIngredients.find(i => i.id === amt.ingredientId);
@@ -97,13 +87,13 @@ export const CookingSessionWidget: React.FunctionComponent<CookingSessionWidgetP
             const lacking = Math.max(0, total - inStock);
             return { ingredient, required: total, unit, inStock, lacking, sufficient: inStock >= total } as CookingIngredientRow;
         }).filter(Boolean) as CookingIngredientRow[];
-    }, [dish, allDishes, allIngredients, inventoryItems]);
+    }, [dish, allDishes, allIngredients, inventoryItems, targetServings]);
 
     const lackingIngredientIds = rows.filter(r => !r.sufficient).map(r => r.ingredient.id);
     const allSufficient = rows.every(r => r.sufficient);
 
     const _onStartCooking = () => {
-        dispatch(startCooking({ dishId: dish.id, dishName: dish.name, steps }));
+        dispatch(startCooking({ dishId: dish.id, dishName: dish.name, baseServings, targetServings, steps }));
         if (steps.length > 0) setPhase("cooking");
         else onDone();
     };
@@ -207,6 +197,31 @@ export const CookingSessionWidget: React.FunctionComponent<CookingSessionWidgetP
             Kiểm tra nguyên liệu cần thiết để nấu món này
         </Typography.Text>
 
+        <div style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            gap: 8,
+            marginTop: 12,
+            padding: '8px 10px',
+            border: '1px solid #f0f0f0',
+            borderRadius: 8,
+            background: '#fafafa',
+        }}>
+            <div>
+                <Typography.Text strong style={{ display: 'block' }}>Khẩu phần</Typography.Text>
+                <Typography.Text type='secondary' style={{ fontSize: 12 }}>Gốc {baseServings} phần</Typography.Text>
+            </div>
+            <InputNumber
+                min={1}
+                precision={0}
+                value={targetServings}
+                onChange={(value) => setTargetServings(DishServingHelper.normalizeTargetServings(value, baseServings))}
+                addonAfter='phần'
+                style={{ width: 118 }}
+            />
+        </div>
+
         <div style={{ marginTop: 12, marginBottom: 8 }}>
             {rows.length === 0 && (
                 <Typography.Text type="secondary">Món này chưa có nguyên liệu.</Typography.Text>
@@ -286,6 +301,7 @@ export const CookingSessionWidget: React.FunctionComponent<CookingSessionWidgetP
             <ShoppingListAddWidget
                 date={new Date()}
                 dishIds={[dish.id]}
+                initialDishServings={{ [dish.id]: targetServings }}
                 onDone={() => { toggleShoppingList.hide(); onDone(); }}
                 onCreated={(shoppingList) => navigate(RootRoutes.AuthorizedRoutes.ShoppingListRoutes.Detail(shoppingList.id))}
             />

@@ -4,6 +4,8 @@ export type CookingSession = {
     id: string;
     dishId: string;
     dishName: string;
+    baseServings?: number;
+    targetServings?: number;
     startedAt: string; // ISO string
     finishedAt?: string;
     status: CookingSessionStatus;

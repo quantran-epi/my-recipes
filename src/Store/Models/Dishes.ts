@@ -16,6 +16,8 @@ export type DishIngredientAmountMealMeta = {
 export type DishIngredientAmountDishMeta = {
     id: string;
     name: string;
+    baseServings?: number;
+    targetServings?: number;
 }
 
 export type DishesIngredientAmount = {
@@ -48,6 +50,7 @@ export type DishDuration = {
 export type Dishes = {
     id: string;
     name: string;
+    baseServings?: number;
     ingredients: DishesIngredientAmount[];
     note: string;
     includeDishes: string[];

@@ -14,13 +14,15 @@ import { RootState } from "@store/Store"
 import { range } from "lodash"
 import { useDispatch, useSelector } from "react-redux"
 
+import { InputNumber } from '@components/Form/InputNumber'
+
 export const DishesEditWidget = ({ item, onDone }) => {
     const dispatch = useDispatch();
     const message = useMessage();
     const dishes = useSelector((state: RootState) => state.shared.dishes.dishes);
 
     const editDishesForm = useSmartForm<Dishes>({
-        defaultValues: { tags: [], ...item },
+        defaultValues: { tags: [], ...item, baseServings: item.baseServings ?? 2 },
         onSubmit: (values) => {
             if (values.transformValues.includeDishes.some(e => ShoppingListIngredientHelpers.isInclude(e, dishes, values.transformValues.id))) {
                 message.error("Lỗi lặp vòng tròn");
@@ -34,6 +36,7 @@ export const DishesEditWidget = ({ item, onDone }) => {
         },
         itemDefinitions: defaultValues => ({
             id: { name: ObjectPropertyHelper.nameof(defaultValues, e => e.id), noMarkup: true },
+            baseServings: { label: 'Khẩu phần gốc', name: ObjectPropertyHelper.nameof(defaultValues, e => e.baseServings) },
             name: { label: "Tên món ăn", name: ObjectPropertyHelper.nameof(defaultValues, e => e.name) },
             note: { label: "Ghi chú", name: ObjectPropertyHelper.nameof(defaultValues, e => e.note) },
             includeDishes: { label: "Bao gồm món", name: ObjectPropertyHelper.nameof(defaultValues, e => e.includeDishes) },
@@ -53,6 +56,9 @@ export const DishesEditWidget = ({ item, onDone }) => {
     return <SmartForm {...editDishesForm.defaultProps}>
         <SmartForm.Item {...editDishesForm.itemDefinitions.name}>
             <Input placeholder="Nhập tên" autoFocus />
+        </SmartForm.Item>
+        <SmartForm.Item {...editDishesForm.itemDefinitions.baseServings}>
+            <InputNumber min={1} precision={0} style={{ width: '100%' }} />
         </SmartForm.Item>
         <SmartForm.Item {...editDishesForm.itemDefinitions.includeDishes}>
             <Select

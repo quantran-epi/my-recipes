@@ -17,22 +17,12 @@ import 'moment/locale/vi';
 import React, { useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
+import { DishServingHelper } from '@common/Helpers/DishServingHelper';
+
 type FinishCookingWidgetProps = {
     session: CookingSession;
     onDone: () => void;
 }
-
-// Reuse the same recursive collector
-const collectIngredientAmounts = (dish: Dishes, allDishes: Dishes[], visited = new Set<string>()) => {
-    if (visited.has(dish.id)) return [];
-    visited.add(dish.id);
-    const own = dish.ingredients;
-    const fromIncluded = dish.includeDishes.flatMap(id => {
-        const d = allDishes.find(d => d.id === id);
-        return d ? collectIngredientAmounts(d, allDishes, visited) : [];
-    });
-    return [...own, ...fromIncluded];
-};
 
 export const FinishCookingWidget: React.FunctionComponent<FinishCookingWidgetProps> = ({ session, onDone }) => {
     const dispatch = useDispatch();
@@ -44,7 +34,7 @@ export const FinishCookingWidget: React.FunctionComponent<FinishCookingWidgetPro
 
     const deductions = useMemo(() => {
         if (!dish) return [];
-        const amounts = collectIngredientAmounts(dish, allDishes);
+        const amounts = DishServingHelper.collectIngredientAmounts(dish, allDishes, { targetServings: session.targetServings });
         const grouped: Record<string, { total: number; unit: string; name: string }> = {};
         amounts.forEach(amt => {
             const ingre = allIngredients.find(i => i.id === amt.ingredientId);
@@ -58,7 +48,7 @@ export const FinishCookingWidget: React.FunctionComponent<FinishCookingWidgetPro
         return Object.entries(grouped)
             .filter(([id]) => inventoryItems[id] != null && !InventoryHelper.isAlwaysAvailable(allIngredients.find(i => i.id === id)))
             .map(([id, { total, unit, name }]) => ({ id, total, unit, name }));
-    }, [dish, allDishes, allIngredients, inventoryItems]);
+    }, [dish, allDishes, allIngredients, inventoryItems, session.targetServings]);
 
     const _onFinish = () => {
         deductions.forEach(d => dispatch(deductInventory({

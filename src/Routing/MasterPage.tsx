@@ -55,6 +55,7 @@ export const MasterPage = () => {
             case "Thực đơn": return MealsIcon;
             case "Lịch mua sắm": return ShoppingListIcon;
             case "Nguyên liệu": return IngredientIcon;
+            case 'Tổng quan': return LogoIcon;
             default: return null;
         }
     }
@@ -185,6 +186,12 @@ const SidebarDrawer = () => {
                 <Menu
                     style={{ borderInlineEnd: "none" }}
                     items={[
+                        {
+                            key: 'dashboard', label: <Flex align="center" gap={10}>
+                                <img src={LogoIcon} width={24} />
+                                <span>Tổng quan</span>
+                            </Flex>, onClick: () => onNavigate(RootRoutes.AuthorizedRoutes.Root())
+                        },
                         {
                             key: "ingredients", label: <Flex align="center" gap={10}>
                                 <img src={IngredientIcon} width={24} />

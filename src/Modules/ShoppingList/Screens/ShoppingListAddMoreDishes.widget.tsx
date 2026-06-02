@@ -9,6 +9,9 @@ import { RootState } from "@store/Store";
 import { Input } from "antd";
 import { useDispatch, useSelector } from "react-redux";
 
+import React, { useState } from 'react';
+import { DishServingSelector, normalizeDishServings } from './DishServingSelector.widget';
+
 type ShoppingListAddMoreDishesWidgetProps = {
     shoppingList: ShoppingList;
     onDone: () => void;
@@ -17,25 +20,39 @@ type ShoppingListAddMoreDishesWidgetProps = {
 export const ShoppingListAddMoreDishesWidget: React.FunctionComponent<ShoppingListAddMoreDishesWidgetProps> = (props) => {
     const dispatch = useDispatch();
     const dishes = useSelector((state: RootState) => state.shared.dishes.dishes);
+    const [selectedDishIds, setSelectedDishIds] = useState<string[]>(props.shoppingList.dishes ?? []);
+    const [dishServings, setDishServings] = useState<Record<string, number>>(() => normalizeDishServings(props.shoppingList.dishes ?? [], dishes, props.shoppingList.dishServings ?? {}));
 
     const addDishesToShoppingListForm = useSmartForm<ShoppingListAddDishesParams>({
         defaultValues: {
             dishesIds: props.shoppingList.dishes,
+            dishServings: props.shoppingList.dishServings ?? {},
             shoppingList: props.shoppingList
         },
         onSubmit: (values) => {
-            dispatch(addDishesToShoppingList(values.transformValues));
+            const normalizedDishServings = normalizeDishServings(values.transformValues.dishesIds ?? [], dishes, dishServings);
+            dispatch(addDishesToShoppingList({
+                ...values.transformValues,
+                dishServings: normalizedDishServings,
+            }));
             addDishesToShoppingListForm.reset();
             props.onDone();
         },
         itemDefinitions: defaultValues => ({
             dishesIds: { label: "Chọn món ăn", name: ObjectPropertyHelper.nameof(defaultValues, e => e.dishesIds) },
+            dishServings: { name: ObjectPropertyHelper.nameof(defaultValues, e => e.dishServings), noMarkup: true },
             shoppingList: { name: ObjectPropertyHelper.nameof(defaultValues, e => e.shoppingList), noMarkup: true },
         }),
     })
 
     const _onSave = () => {
         addDishesToShoppingListForm.submit();
+    }
+
+    const _onDishesChange = (ids: string[]) => {
+        const nextIds = ids ?? [];
+        setSelectedDishIds(nextIds);
+        setDishServings(prev => normalizeDishServings(nextIds, dishes, prev));
     }
 
     return <SmartForm {...addDishesToShoppingListForm.defaultProps}>
@@ -50,10 +67,17 @@ export const ShoppingListAddMoreDishesWidget: React.FunctionComponent<ShoppingLi
                     if (!option?.children) return false;
                     return option?.children?.toString().toLowerCase().includes(inputValue.toLowerCase());
                 }}
+                onChange={_onDishesChange}
                 style={{ width: '100%' }}>
                 {dishes.map(dish => <Option key={dish.id} value={dish.id}>{dish.name}</Option>)}
             </Select>
         </SmartForm.Item>
+        <DishServingSelector
+            selectedDishIds={selectedDishIds}
+            dishes={dishes}
+            value={dishServings}
+            onChange={setDishServings}
+        />
         <Stack fullwidth justify="flex-end">
             <Button onClick={_onSave}>Lưu</Button>
         </Stack>

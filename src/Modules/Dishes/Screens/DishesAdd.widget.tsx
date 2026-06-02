@@ -12,6 +12,8 @@ import { addDishes } from "@store/Reducers/DishesReducer"
 import { RootState } from "@store/Store"
 import { useDispatch, useSelector } from "react-redux"
 
+import { InputNumber } from '@components/Form/InputNumber'
+
 export const DishesAddWidget = () => {
     const dispatch = useDispatch();
     const message = useMessage();
@@ -21,6 +23,7 @@ export const DishesAddWidget = () => {
         defaultValues: {
             id: "",
             name: "",
+            baseServings: 2,
             ingredients: [],
             note: "",
             includeDishes: [],
@@ -43,6 +46,7 @@ export const DishesAddWidget = () => {
         },
         itemDefinitions: defaultValues => ({
             id: { name: ObjectPropertyHelper.nameof(defaultValues, e => e.id), noMarkup: true },
+            baseServings: { label: 'Khẩu phần gốc', name: ObjectPropertyHelper.nameof(defaultValues, e => e.baseServings) },
             name: { label: "Tên món ăn", name: ObjectPropertyHelper.nameof(defaultValues, e => e.name) },
             note: { label: "Ghi chú", name: ObjectPropertyHelper.nameof(defaultValues, e => e.note) },
             includeDishes: { label: "Bao gồm món", name: ObjectPropertyHelper.nameof(defaultValues, e => e.includeDishes) },
@@ -66,6 +70,9 @@ export const DishesAddWidget = () => {
     return <SmartForm {...addDishesForm.defaultProps}>
         <SmartForm.Item {...addDishesForm.itemDefinitions.name}>
             <Input placeholder="Nhập tên" autoFocus />
+        </SmartForm.Item>
+        <SmartForm.Item {...addDishesForm.itemDefinitions.baseServings}>
+            <InputNumber min={1} precision={0} style={{ width: '100%' }} />
         </SmartForm.Item>
         <SmartForm.Item {...addDishesForm.itemDefinitions.includeDishes}>
             <Select
