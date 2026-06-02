@@ -6,10 +6,12 @@ import { Option, Select } from "@components/Form/Select"
 import { Stack } from "@components/Layout/Stack"
 import { useMessage } from "@components/Message"
 import { SmartForm, useSmartForm } from "@components/SmartForm"
-import { INGREDIENT_CATEGORIES, INGREDIENT_PRESERVATION_OPTIONS, INGREDIENT_SHELF_LIFE_OPTIONS, Ingredient, IngredientUnit } from "@store/Models/Ingredient"
+import { INGREDIENT_CATEGORIES, INGREDIENT_PRESERVATION_OPTIONS, INGREDIENT_SHELF_LIFE_OPTIONS, Ingredient, IngredientPriceEstimate, IngredientUnit } from "@store/Models/Ingredient"
 import { editIngredient } from "@store/Reducers/IngredientReducer"
 import { IngredientUnitHelper } from "@common/Helpers/IngredientUnitHelper"
+import { IngredientPriceHelper } from "@common/Helpers/IngredientPriceHelper"
 import { IngredientUnitRulesEditor } from "./IngredientUnitRulesEditor"
+import { IngredientPriceEstimateEditor } from "./IngredientPriceEstimateEditor"
 import { RootState } from "@store/Store"
 import { useState } from "react"
 import { useDispatch, useSelector } from "react-redux"
@@ -27,6 +29,11 @@ export const IngredientEditWidget = ({ item, onDone }) => {
     const [conversionValues, setConversionValues] = useState<Partial<Record<IngredientUnit, number>>>(() =>
         IngredientUnitHelper.getRecipeUnitConversions(item)
     );
+    const [priceEstimate, setPriceEstimate] = useState<Partial<IngredientPriceEstimate>>(() => item.priceEstimate ?? {
+        amount: 1,
+        unit: IngredientUnitHelper.getBaseUnit(item),
+        currency: "VND",
+    });
 
     const editIngredientForm = useSmartForm<Ingredient>({
         defaultValues: {
@@ -38,11 +45,17 @@ export const IngredientEditWidget = ({ item, onDone }) => {
             baseUnit,
             inventoryUnits,
             recipeUnitConversions: conversionValues,
+            priceEstimate: item.priceEstimate,
         },
         onSubmit: (values) => {
             const error = IngredientUnitHelper.validateRules(values.transformValues);
             if (error) {
                 message.error(error);
+                return;
+            }
+            const priceError = IngredientPriceHelper.validatePriceEstimate(priceEstimate);
+            if (priceError) {
+                message.error(priceError);
                 return;
             }
 
@@ -59,7 +72,7 @@ export const IngredientEditWidget = ({ item, onDone }) => {
 
             const invalidUnits = uniqueUnits([...removedRecipeUnits, ...removedInventoryUnits]);
             if (invalidUnits.length > 0) {
-                message.error(`Cannot remove units currently in use: ${invalidUnits.join(", ")}`);
+                message.error(`Không thể xóa đơn vị đang được sử dụng: ${invalidUnits.join(", ")}`);
                 return;
             }
 
@@ -77,12 +90,14 @@ export const IngredientEditWidget = ({ item, onDone }) => {
             baseUnit: { name: ObjectPropertyHelper.nameof(defaultValues, e => e.baseUnit), noMarkup: true },
             inventoryUnits: { name: ObjectPropertyHelper.nameof(defaultValues, e => e.inventoryUnits), noMarkup: true },
             recipeUnitConversions: { name: ObjectPropertyHelper.nameof(defaultValues, e => e.recipeUnitConversions), noMarkup: true },
+            priceEstimate: { name: ObjectPropertyHelper.nameof(defaultValues, e => e.priceEstimate), noMarkup: true },
         }),
         transformFunc: (values) => ({
             ...values,
             baseUnit,
             inventoryUnits: uniqueUnits([...inventoryUnits, baseUnit]),
             recipeUnitConversions: IngredientUnitHelper.normalizeRecipeConversions(baseUnit, recipeUnits, conversionValues),
+            priceEstimate: IngredientPriceHelper.normalizePriceEstimate(priceEstimate),
         })
     })
 
@@ -148,6 +163,11 @@ export const IngredientEditWidget = ({ item, onDone }) => {
             onInventoryUnitsChange={_onInventoryUnitsChange}
             onRecipeUnitsChange={_onRecipeUnitsChange}
             onConversionChange={_onConversionChange}
+        />
+        <IngredientPriceEstimateEditor
+            value={priceEstimate}
+            unitOptions={uniqueUnits([...inventoryUnits, baseUnit])}
+            onChange={setPriceEstimate}
         />
         <Stack fullwidth justify="flex-end">
             <Button onClick={_onSave}>Lưu</Button>

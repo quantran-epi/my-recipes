@@ -19,9 +19,11 @@ import { useScreenTitle, useToggle, useAdminMode } from "@hooks";
 import { DISH_TAGS, DishDuration, Dishes } from "@store/Models/Dishes";
 import { DishesDurationEditParams, duplicateDish, removeDishes, updateDishDuration } from "@store/Reducers/DishesReducer";
 import { RootState } from "@store/Store";
+import { RootRoutes } from "@routing/RootRoutes";
 import { debounce, orderBy, sortBy } from "lodash";
 import React, { useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
 import { List as VirtualList, useDynamicRowHeight, type RowComponentProps } from "react-window";
 import Clock2Icon from "../../../../assets/icons/clock (2).png";
 import NoodlesIcon from "../../../../assets/icons/noodles.png";
@@ -143,9 +145,14 @@ export const DishesItem: React.FunctionComponent<DishesItemProps> = (props) => {
     const toggleEditDuration = useToggle();
     const message = useMessage();
     const dispatch = useDispatch();
+    const navigate = useNavigate();
 
     const _onEdit = () => toggleEdit.show();
     const _onEditDuration = () => toggleEditDuration.show();
+    const _onOpenDetailPage = () => {
+        toggleDishesDetail.hide();
+        navigate(RootRoutes.AuthorizedRoutes.DishesRoutes.ManageIngredient(props.item.id));
+    }
 
     const _sumDuration = () => {
         return moment.duration(Object.values(props.item.duration).reduce((prev, cur) => prev + cur || 0, 0), "minutes").locale("vi").humanize();
@@ -303,7 +310,10 @@ export const DishesItem: React.FunctionComponent<DishesItemProps> = (props) => {
                 <Image src={NoodlesIcon} preview={false} width={24} style={{ marginBottom: 3 }} />
                 {props.item.name}
             </Space>
-        } destroyOnClose={true} onCancel={toggleDishesDetail.hide} footer={null}>
+        } destroyOnClose={true} onCancel={toggleDishesDetail.hide} footer={<Space>
+            <Button onClick={toggleDishesDetail.hide}>Đóng</Button>
+            <Button type="primary" icon={<EditOutlined />} onClick={_onOpenDetailPage}>Mở trang chi tiết</Button>
+        </Space>}>
             <Box style={{ maxHeight: 550, overflowY: "auto" }}>
                 <DishesDetailWidget dish={props.item} />
             </Box>

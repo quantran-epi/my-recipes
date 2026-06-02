@@ -119,6 +119,7 @@ type ShoppingListItemProps = {
 export const ShoppingListItem: React.FunctionComponent<ShoppingListItemProps> = (props) => {
     const toggleIngredient = useToggle({ defaultValue: false });
     const toggleAddMoreDishes = useToggle({ defaultValue: false });
+    const navigate = useNavigate();
     const dishes = useSelector((state: RootState) => state.shared.dishes.dishes);
     const scheduledMeals = useSelector((state: RootState) => state.personal.scheduledMeal.scheduledMeals);
     const ingredients = useSelector((state: RootState) => state.shared.ingredient.ingredients);
@@ -156,6 +157,11 @@ export const ShoppingListItem: React.FunctionComponent<ShoppingListItemProps> = 
     const _onShow = () => {
         toggleLoading.show();
         toggleIngredient.show();
+    }
+
+    const _onOpenDetailPage = () => {
+        toggleIngredient.hide();
+        navigate(RootRoutes.AuthorizedRoutes.ShoppingListRoutes.Detail(props.item.id));
     }
 
     const _onAddMoreDishes = () => {
@@ -245,7 +251,10 @@ export const ShoppingListItem: React.FunctionComponent<ShoppingListItemProps> = 
         <Modal style={{ top: 50 }} open={toggleIngredient.value} title={<Space>
             <Image src={ShoppinglistIcon} preview={false} width={24} style={{ marginBottom: 3 }} />
             {props.item.name}
-        </Space>} destroyOnClose={true} onCancel={toggleIngredient.hide} footer={null} afterOpenChange={() => toggleLoading.hide()}>
+        </Space>} destroyOnClose={true} onCancel={toggleIngredient.hide} footer={<Space>
+            <Button onClick={toggleIngredient.hide}>Đóng</Button>
+            <Button type="primary" icon={<EditOutlined />} onClick={_onOpenDetailPage}>Mở trang chi tiết</Button>
+        </Space>} afterOpenChange={() => toggleLoading.hide()}>
             <ShoppingListDetailWidget shoppingList={props.item} />
         </Modal>
         <Modal style={{ top: 50 }} open={toggleAddMoreDishes.value} title={<Space>

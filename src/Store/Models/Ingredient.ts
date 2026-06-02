@@ -5,6 +5,15 @@ export const INGREDIENT_CATEGORIES = ["Thịt", "Hải sản", "Rau củ", "Gia 
 
 export type IngredientShelfLife = "very_short" | "short" | "medium" | "long" | "very_long";
 export type IngredientPreservationCondition = "room_temperature" | "cool_dry" | "fridge" | "freezer";
+export type IngredientPriceCurrency = "VND";
+
+export type IngredientPriceEstimate = {
+    min: number;
+    max: number;
+    amount: number;
+    unit: IngredientUnit;
+    currency: IngredientPriceCurrency;
+}
 
 export const INGREDIENT_SHELF_LIFE_OPTIONS: { value: IngredientShelfLife; label: string; description: string; color: string; emoji: string }[] = [
     { value: "very_short", label: "Rất ngắn",  description: "1–3 ngày (rau thơm, hải sản tươi)",        color: "#ff4d4f", emoji: "🔴" },
@@ -45,4 +54,5 @@ export type Ingredient = {
     baseUnit?: IngredientUnit;
     inventoryUnits?: IngredientUnit[];
     recipeUnitConversions?: Partial<Record<IngredientUnit, number>>;
+    priceEstimate?: IngredientPriceEstimate;
 }

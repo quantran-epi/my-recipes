@@ -16,6 +16,7 @@ import { Dishes } from "@store/Models/Dishes";
 import { INGREDIENT_CATEGORIES, Ingredient, IngredientInventory, IngredientUnit, InventoryBatch } from "@store/Models/Ingredient";
 import { InventoryHelper } from "@common/Helpers/InventoryHelper";
 import { IngredientUnitHelper } from "@common/Helpers/IngredientUnitHelper";
+import { IngredientPriceHelper, IngredientPriceRange } from "@common/Helpers/IngredientPriceHelper";
 import { ShoppingList, ShoppingListIngredientAmount, ShoppingListIngredientGroup } from "@store/Models/ShoppingList";
 import { completeShoppingList, setIngredientBoughtAmount, toggleDoneIngredientAmount, toggleDoneIngredientGroup } from "@store/Reducers/ShoppingListReducer";
 import { setInventory } from "@store/Reducers/InventoryReducer";
@@ -58,6 +59,12 @@ type BoughtImportPlan = {
     ingredient?: Ingredient;
     amount: number;
     unit: IngredientUnit;
+}
+
+type ShoppingListIngredientPriceEstimate = {
+    amount: number;
+    unit: IngredientUnit;
+    range: IngredientPriceRange | null;
 }
 
 const getIngredientGroupStatus = (
@@ -144,6 +151,26 @@ const getBoughtImportPlans = (
     }, [] as BoughtImportPlan[]);
 }
 
+const getShoppingListIngredientPriceEstimate = (
+    group: ShoppingListIngredientGroup,
+    ingredient: Ingredient | undefined,
+    inventory: IngredientInventory | undefined,
+): ShoppingListIngredientPriceEstimate | null => {
+    if (InventoryHelper.isAlwaysAvailable(ingredient)) return null;
+
+    const status = getIngredientGroupStatus(group, ingredient, inventory);
+    const explicitBoughtAmount = group.boughtAmount ?? 0;
+    const amount = explicitBoughtAmount > 0 ? explicitBoughtAmount : status.needToBuy;
+    const unit = explicitBoughtAmount > 0 ? (group.boughtUnit ?? status.unit) : status.unit;
+    if (amount <= 0) return null;
+
+    return {
+        amount,
+        unit,
+        range: IngredientPriceHelper.estimateForAmount(ingredient, amount, unit),
+    };
+}
+
 export const ShoppingListDetailWidget: React.FunctionComponent<ShoppingListDetailScreenProps> = (props) => {
     const dispatch = useDispatch();
     const modal = useModal();
@@ -179,6 +206,21 @@ export const ShoppingListDetailWidget: React.FunctionComponent<ShoppingListDetai
         const orderedKeys = baseOrder.filter(cat => grouped[cat]?.length > 0);
         return orderedKeys.map(cat => ({ category: cat, items: grouped[cat] }));
     }, [props.shoppingList.ingredients, allIngredients]);
+
+    const priceSummary = useMemo(() => {
+        return props.shoppingList.ingredients.reduce((summary, group) => {
+            const ingredient = allIngredients.find(item => item.id === group.ingredientId);
+            const estimate = getShoppingListIngredientPriceEstimate(group, ingredient, inventoryItems[group.ingredientId]);
+            if (!estimate) return summary;
+            if (!estimate.range) return { ...summary, missingPriceCount: summary.missingPriceCount + 1 };
+            return {
+                min: summary.min + estimate.range.min,
+                max: summary.max + estimate.range.max,
+                missingPriceCount: summary.missingPriceCount,
+                pricedCount: summary.pricedCount + 1,
+            };
+        }, { min: 0, max: 0, missingPriceCount: 0, pricedCount: 0 });
+    }, [props.shoppingList.ingredients, allIngredients, inventoryItems]);
 
     const _completeShoppingList = () => {
         if (props.shoppingList.completedAt) return;
@@ -251,6 +293,22 @@ export const ShoppingListDetailWidget: React.FunctionComponent<ShoppingListDetai
                                 Hoàn tất mua sắm
                             </Button>}
                     </Stack>
+                    {(priceSummary.pricedCount > 0 || priceSummary.missingPriceCount > 0) && (
+                        <Box style={{ marginBottom: 10, padding: "8px 10px", borderRadius: 8, background: "#fafafa", border: "1px solid #f0f0f0" }}>
+                            <Stack justify="space-between" align="center" gap={8} wrap="wrap" fullwidth>
+                                <Typography.Text strong>
+                                    Ước tính: {priceSummary.pricedCount > 0
+                                        ? IngredientPriceHelper.formatRange({ min: priceSummary.min, max: priceSummary.max, currency: "VND" })
+                                        : "Chưa có giá"}
+                                </Typography.Text>
+                                {priceSummary.missingPriceCount > 0 && (
+                                    <Typography.Text type="secondary" style={{ fontSize: 12 }}>
+                                        {priceSummary.missingPriceCount} nguyên liệu chưa có giá
+                                    </Typography.Text>
+                                )}
+                            </Stack>
+                        </Box>
+                    )}
                     <Box style={{ maxHeight: 500, overflowY: "auto" }}>
                         {groupedIngredients.length > 1
                             ? groupedIngredients.map(group => <React.Fragment key={group.category}>
@@ -342,6 +400,7 @@ const ShoppingListIngredientPanelItem: React.FunctionComponent<ShoppingListIngre
     const ingredient = ingredients.find(e => e.id === props.item.ingredientId);
     const inventory = inventoryItems[props.item.ingredientId];
     const status = getIngredientGroupStatus(props.item, ingredient, inventory);
+    const priceEstimate = getShoppingListIngredientPriceEstimate(props.item, ingredient, inventory);
     const effectiveIsDone = props.item.isDone;
     const inventoryUnits = IngredientUnitHelper.getInventoryUnits(ingredient);
     const boughtUnit = props.item.boughtUnit ?? status.unit;
@@ -368,6 +427,35 @@ const ShoppingListIngredientPanelItem: React.FunctionComponent<ShoppingListIngre
         }
     }
 
+    const _isBoughtAmountEnough = (amount: number | undefined, unit: IngredientUnit) => {
+        if (!amount || amount <= 0) return false;
+        const boughtBaseAmount = IngredientUnitHelper.toBaseAmount(ingredient, amount, unit, status.unit) ?? amount;
+        return status.needToBuy > 0
+            ? boughtBaseAmount >= status.needToBuy
+            : boughtBaseAmount > 0;
+    }
+
+    const _syncDoneWithBoughtAmount = (amount: number | undefined, unit: IngredientUnit) => {
+        const isEnough = _isBoughtAmountEnough(amount, unit);
+        const hadBoughtAmount = (props.item.boughtAmount ?? 0) > 0;
+
+        if (isEnough && !props.item.isDone) {
+            dispatch(toggleDoneIngredientGroup({
+                shoppingListId: props.shoppingList.id,
+                ingredientGroupId: props.item.id,
+                isDone: true,
+            }));
+        }
+
+        if (!isEnough && hadBoughtAmount && props.item.isDone && status.needToBuy > 0) {
+            dispatch(toggleDoneIngredientGroup({
+                shoppingListId: props.shoppingList.id,
+                ingredientGroupId: props.item.id,
+                isDone: false,
+            }));
+        }
+    }
+
     const _onBoughtAmountChange = (value: number | string | null) => {
         if (props.readonly) return;
         const parsed = typeof value === "number" ? value : parseFloat(value ?? "");
@@ -378,6 +466,7 @@ const ShoppingListIngredientPanelItem: React.FunctionComponent<ShoppingListIngre
             boughtAmount,
             boughtUnit,
         }));
+        _syncDoneWithBoughtAmount(boughtAmount, boughtUnit);
     }
 
     const _onBoughtUnitChange = (unit: IngredientUnit) => {
@@ -388,6 +477,7 @@ const ShoppingListIngredientPanelItem: React.FunctionComponent<ShoppingListIngre
             boughtAmount: props.item.boughtAmount,
             boughtUnit: unit,
         }));
+        _syncDoneWithBoughtAmount(props.item.boughtAmount, unit);
     }
 
     const _getDateFromNow = (item: ShoppingListIngredientAmount) => {
@@ -399,12 +489,13 @@ const ShoppingListIngredientPanelItem: React.FunctionComponent<ShoppingListIngre
     }
 
     const indeterminate = !effectiveIsDone && status.boughtBaseAmount > 0;
-    const _statusPill = (label: string, tone: "blue" | "green" | "orange" | "purple") => {
+    const _statusPill = (label: string, tone: "blue" | "green" | "orange" | "purple" | "gray") => {
         const colors = {
             blue: { background: "#e6f4ff", border: "#91caff", color: "#0958d9" },
             green: { background: "#f6ffed", border: "#b7eb8f", color: "#389e0d" },
             orange: { background: "#fff7e6", border: "#ffd591", color: "#d46b08" },
             purple: { background: "#f9f0ff", border: "#d3adf7", color: "#722ed1" },
+            gray: { background: "#fafafa", border: "#d9d9d9", color: "#595959" },
         }[tone];
 
         return <div
@@ -476,6 +567,8 @@ const ShoppingListIngredientPanelItem: React.FunctionComponent<ShoppingListIngre
                             {status.needToBuy > 0 && _statusPill(`Mua ${IngredientUnitHelper.formatAmount(status.needToBuy)}${status.unit}`, "orange")}
                             {props.item.boughtAmount > 0 && _statusPill(`Đã mua ${props.item.boughtAmount}${boughtUnit}`, "purple")}
                             {status.inventoryCovered && !props.item.isDone && !status.isAlwaysAvailable && _statusPill("Đủ hàng", "green")}
+                            {priceEstimate?.range && _statusPill(`~ ${IngredientPriceHelper.formatRange(priceEstimate.range)}`, "gray")}
+                            {priceEstimate && !priceEstimate.range && _statusPill("Chưa có giá", "gray")}
                         </div>
                     </div>
                 </div>

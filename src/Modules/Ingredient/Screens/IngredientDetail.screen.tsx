@@ -1,6 +1,7 @@
 import { ArrowLeftOutlined, EditOutlined } from "@ant-design/icons";
 import { InventoryHelper } from "@common/Helpers/InventoryHelper";
 import { IngredientUnitHelper } from "@common/Helpers/IngredientUnitHelper";
+import { IngredientPriceHelper } from "@common/Helpers/IngredientPriceHelper";
 import { Button } from "@components/Button";
 import { Image } from "@components/Image";
 import { Box } from "@components/Layout/Box";
@@ -54,6 +55,7 @@ export const IngredientDetailScreen = () => {
     const totalAmount = InventoryHelper.totalAmount(inventory, ingredient);
     const shelfLife = INGREDIENT_SHELF_LIFE_OPTIONS.find(option => option.value === ingredient.shelfLife);
     const preservation = INGREDIENT_PRESERVATION_OPTIONS.find(option => option.value === ingredient.preservationCondition);
+    const priceEstimate = ingredient.priceEstimate;
 
     const _onSuggest = (ingredientIds: string[]) => {
         setSuggestIds(ingredientIds);
@@ -78,6 +80,9 @@ export const IngredientDetailScreen = () => {
                         {shelfLife && <Typography.Text style={{ color: shelfLife.color }}>{shelfLife.emoji} {shelfLife.label}</Typography.Text>}
                         {preservation && <Typography.Text type="secondary">Bảo quản: {preservation.label}</Typography.Text>}
                         {ingredient.alwaysAvailable && <Typography.Text style={{ color: "#52c41a", fontWeight: 600 }}>Luôn có sẵn</Typography.Text>}
+                        {priceEstimate && <Typography.Text type="secondary">
+                            Giá: {IngredientPriceHelper.formatRange(priceEstimate)} / {IngredientUnitHelper.formatAmount(priceEstimate.amount)} {priceEstimate.unit}
+                        </Typography.Text>}
                     </Stack>
                 </Box>
                 <Typography.Text strong style={{ color: ingredient.alwaysAvailable || totalAmount > 0 ? "#52c41a" : "#8c8c8c", whiteSpace: "nowrap" }}>

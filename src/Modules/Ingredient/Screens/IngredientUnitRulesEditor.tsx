@@ -34,14 +34,14 @@ export const IngredientUnitRulesEditor: React.FC<IngredientUnitRulesEditorProps>
         <Divider style={{ margin: "8px 0 12px" }} />
 
         <div style={fieldStyle}>
-            <Typography.Text style={labelStyle}>Base unit</Typography.Text>
+            <Typography.Text style={labelStyle}>Đơn vị gốc</Typography.Text>
             <Select value={baseUnit} onChange={onBaseUnitChange} style={{ width: "100%" }}>
                 {INGREDIENT_UNITS.map(unit => <Option key={unit} value={unit}>{unit}</Option>)}
             </Select>
         </div>
 
         <div style={fieldStyle}>
-            <Typography.Text style={labelStyle}>Inventory units</Typography.Text>
+            <Typography.Text style={labelStyle}>Đơn vị nhập kho</Typography.Text>
             <Select
                 mode="multiple"
                 maxTagCount="responsive"
@@ -54,7 +54,7 @@ export const IngredientUnitRulesEditor: React.FC<IngredientUnitRulesEditorProps>
         </div>
 
         <div style={fieldStyle}>
-            <Typography.Text style={labelStyle}>Recipe units</Typography.Text>
+            <Typography.Text style={labelStyle}>Đơn vị trong công thức</Typography.Text>
             <Select
                 mode="multiple"
                 maxTagCount="responsive"
@@ -67,7 +67,7 @@ export const IngredientUnitRulesEditor: React.FC<IngredientUnitRulesEditorProps>
         </div>
 
         <div style={{ ...fieldStyle, marginBottom: 4 }}>
-            <Typography.Text style={labelStyle}>Conversions to base unit</Typography.Text>
+            <Typography.Text style={labelStyle}>Quy đổi về đơn vị gốc</Typography.Text>
             <div style={{ maxHeight: 190, overflowY: "auto", paddingRight: 4 }}>
                 {recipeUnitsWithBase.map(unit => (
                     <div

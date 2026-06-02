@@ -142,14 +142,14 @@ export const IngredientUnitHelper = {
 
     validateRules(ingredient: Ingredient): string | null {
         const baseUnit = ingredient.baseUnit;
-        if (!baseUnit) return "Choose a base unit.";
-        if (!ingredient.inventoryUnits?.length) return "Choose at least one inventory unit.";
-        if (!ingredient.inventoryUnits.includes(baseUnit)) return "Inventory units must include the base unit.";
+        if (!baseUnit) return "Chọn đơn vị gốc.";
+        if (!ingredient.inventoryUnits?.length) return "Chọn ít nhất một đơn vị nhập kho.";
+        if (!ingredient.inventoryUnits.includes(baseUnit)) return "Đơn vị nhập kho phải bao gồm đơn vị gốc.";
         const conversions = ingredient.recipeUnitConversions ?? {};
         const recipeUnits = Object.keys(conversions) as IngredientUnit[];
-        if (recipeUnits.length === 0) return "Choose at least one recipe unit.";
+        if (recipeUnits.length === 0) return "Chọn ít nhất một đơn vị trong công thức.";
         for (const unit of recipeUnits) {
-            if (!isPositiveNumber(conversions[unit])) return `Conversion for ${unit} must be greater than 0.`;
+            if (!isPositiveNumber(conversions[unit])) return `Quy đổi cho ${unit} phải lớn hơn 0.`;
         }
         return null;
     },

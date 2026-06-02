@@ -14,6 +14,13 @@
       "recipeUnitConversions": {
         "g": 1,
         "kg": 1000
+      },
+      "priceEstimate": {
+        "min": 15000,
+        "max": 30000,
+        "amount": 1,
+        "unit": "kg",
+        "currency": "VND"
       }
     },
     {
@@ -30,6 +37,13 @@
       "recipeUnitConversions": {
         "g": 1,
         "kg": 1000
+      },
+      "priceEstimate": {
+        "min": 18000,
+        "max": 35000,
+        "amount": 1,
+        "unit": "kg",
+        "currency": "VND"
       }
     },
     {
@@ -46,6 +60,13 @@
       "recipeUnitConversions": {
         "g": 1,
         "kg": 1000
+      },
+      "priceEstimate": {
+        "min": 50000,
+        "max": 100000,
+        "amount": 1,
+        "unit": "kg",
+        "currency": "VND"
       }
     },
     {
@@ -64,6 +85,13 @@
         "g": 1,
         "kg": 1000,
         "nhánh": 10
+      },
+      "priceEstimate": {
+        "min": 40000,
+        "max": 80000,
+        "amount": 1,
+        "unit": "kg",
+        "currency": "VND"
       }
     },
     {
@@ -80,6 +108,13 @@
       "recipeUnitConversions": {
         "g": 1,
         "kg": 1000
+      },
+      "priceEstimate": {
+        "min": 60000,
+        "max": 120000,
+        "amount": 1,
+        "unit": "kg",
+        "currency": "VND"
       }
     },
     {
@@ -96,6 +131,13 @@
       "recipeUnitConversions": {
         "g": 1,
         "kg": 1000
+      },
+      "priceEstimate": {
+        "min": 60000,
+        "max": 120000,
+        "amount": 1,
+        "unit": "kg",
+        "currency": "VND"
       }
     },
     {
@@ -112,6 +154,13 @@
       "recipeUnitConversions": {
         "g": 1,
         "kg": 1000
+      },
+      "priceEstimate": {
+        "min": 60000,
+        "max": 120000,
+        "amount": 1,
+        "unit": "kg",
+        "currency": "VND"
       }
     },
     {
@@ -128,6 +177,13 @@
       "recipeUnitConversions": {
         "g": 1,
         "kg": 1000
+      },
+      "priceEstimate": {
+        "min": 60000,
+        "max": 120000,
+        "amount": 1,
+        "unit": "kg",
+        "currency": "VND"
       }
     },
     {
@@ -144,6 +200,13 @@
       "recipeUnitConversions": {
         "g": 1,
         "kg": 1000
+      },
+      "priceEstimate": {
+        "min": 60000,
+        "max": 120000,
+        "amount": 1,
+        "unit": "kg",
+        "currency": "VND"
       }
     },
     {
@@ -158,6 +221,13 @@
       ],
       "recipeUnitConversions": {
         "lá": 1
+      },
+      "priceEstimate": {
+        "min": 300,
+        "max": 1000,
+        "amount": 1,
+        "unit": "lá",
+        "currency": "VND"
       }
     },
     {
@@ -178,6 +248,13 @@
         "kg": 1000,
         "nhánh": 5,
         "củ": 40
+      },
+      "priceEstimate": {
+        "min": 50000,
+        "max": 120000,
+        "amount": 1,
+        "unit": "kg",
+        "currency": "VND"
       }
     },
     {
@@ -196,6 +273,13 @@
         "g": 1,
         "kg": 1000,
         "củ": 150
+      },
+      "priceEstimate": {
+        "min": 20000,
+        "max": 40000,
+        "amount": 1,
+        "unit": "kg",
+        "currency": "VND"
       }
     },
     {
@@ -214,6 +298,13 @@
         "g": 1,
         "kg": 1000,
         "lá": 10
+      },
+      "priceEstimate": {
+        "min": 40000,
+        "max": 80000,
+        "amount": 1,
+        "unit": "kg",
+        "currency": "VND"
       }
     },
     {
@@ -232,6 +323,13 @@
         "g": 1,
         "kg": 1000,
         "quả": 150
+      },
+      "priceEstimate": {
+        "min": 20000,
+        "max": 40000,
+        "amount": 1,
+        "unit": "kg",
+        "currency": "VND"
       }
     },
     {
@@ -246,6 +344,13 @@
       ],
       "recipeUnitConversions": {
         "quả": 1
+      },
+      "priceEstimate": {
+        "min": 2500,
+        "max": 4500,
+        "amount": 1,
+        "unit": "quả",
+        "currency": "VND"
       }
     },
     {
@@ -260,6 +365,13 @@
       ],
       "recipeUnitConversions": {
         "quả": 1
+      },
+      "priceEstimate": {
+        "min": 4000,
+        "max": 6500,
+        "amount": 1,
+        "unit": "quả",
+        "currency": "VND"
       }
     },
     {
@@ -276,6 +388,13 @@
       "recipeUnitConversions": {
         "g": 1,
         "kg": 1000
+      },
+      "priceEstimate": {
+        "min": 250000,
+        "max": 450000,
+        "amount": 1,
+        "unit": "kg",
+        "currency": "VND"
       }
     },
     {
@@ -292,6 +411,13 @@
       "recipeUnitConversions": {
         "g": 1,
         "kg": 1000
+      },
+      "priceEstimate": {
+        "min": 120000,
+        "max": 180000,
+        "amount": 1,
+        "unit": "kg",
+        "currency": "VND"
       }
     },
     {
@@ -308,6 +434,13 @@
       "recipeUnitConversions": {
         "g": 1,
         "kg": 1000
+      },
+      "priceEstimate": {
+        "min": 130000,
+        "max": 200000,
+        "amount": 1,
+        "unit": "kg",
+        "currency": "VND"
       }
     },
     {
@@ -324,6 +457,13 @@
       "recipeUnitConversions": {
         "g": 1,
         "kg": 1000
+      },
+      "priceEstimate": {
+        "min": 150000,
+        "max": 230000,
+        "amount": 1,
+        "unit": "kg",
+        "currency": "VND"
       }
     },
     {
@@ -340,6 +480,13 @@
       "recipeUnitConversions": {
         "g": 1,
         "kg": 1000
+      },
+      "priceEstimate": {
+        "min": 90000,
+        "max": 150000,
+        "amount": 1,
+        "unit": "kg",
+        "currency": "VND"
       }
     },
     {
@@ -356,6 +503,13 @@
       "recipeUnitConversions": {
         "g": 1,
         "kg": 1000
+      },
+      "priceEstimate": {
+        "min": 35000,
+        "max": 70000,
+        "amount": 1,
+        "unit": "kg",
+        "currency": "VND"
       }
     },
     {
@@ -372,6 +526,13 @@
       "recipeUnitConversions": {
         "ml": 1,
         "lít": 1000
+      },
+      "priceEstimate": {
+        "min": 40000,
+        "max": 80000,
+        "amount": 1,
+        "unit": "lít",
+        "currency": "VND"
       }
     },
     {
@@ -388,6 +549,13 @@
       "recipeUnitConversions": {
         "g": 1,
         "kg": 1000
+      },
+      "priceEstimate": {
+        "min": 70000,
+        "max": 120000,
+        "amount": 1,
+        "unit": "kg",
+        "currency": "VND"
       }
     },
     {
@@ -404,6 +572,13 @@
       "recipeUnitConversions": {
         "g": 1,
         "kg": 1000
+      },
+      "priceEstimate": {
+        "min": 90000,
+        "max": 160000,
+        "amount": 1,
+        "unit": "kg",
+        "currency": "VND"
       }
     },
     {
@@ -420,6 +595,13 @@
       "recipeUnitConversions": {
         "g": 1,
         "kg": 1000
+      },
+      "priceEstimate": {
+        "min": 90000,
+        "max": 160000,
+        "amount": 1,
+        "unit": "kg",
+        "currency": "VND"
       }
     },
     {
@@ -436,6 +618,13 @@
       "recipeUnitConversions": {
         "g": 1,
         "kg": 1000
+      },
+      "priceEstimate": {
+        "min": 180000,
+        "max": 300000,
+        "amount": 1,
+        "unit": "kg",
+        "currency": "VND"
       }
     },
     {
@@ -452,6 +641,13 @@
       "recipeUnitConversions": {
         "g": 1,
         "kg": 1000
+      },
+      "priceEstimate": {
+        "min": 180000,
+        "max": 300000,
+        "amount": 1,
+        "unit": "kg",
+        "currency": "VND"
       }
     },
     {
@@ -468,6 +664,13 @@
       "recipeUnitConversions": {
         "g": 1,
         "kg": 1000
+      },
+      "priceEstimate": {
+        "min": 180000,
+        "max": 320000,
+        "amount": 1,
+        "unit": "kg",
+        "currency": "VND"
       }
     },
     {
@@ -484,6 +687,13 @@
       "recipeUnitConversions": {
         "g": 1,
         "kg": 1000
+      },
+      "priceEstimate": {
+        "min": 250000,
+        "max": 450000,
+        "amount": 1,
+        "unit": "kg",
+        "currency": "VND"
       }
     },
     {
@@ -500,6 +710,13 @@
       "recipeUnitConversions": {
         "g": 1,
         "kg": 1000
+      },
+      "priceEstimate": {
+        "min": 100000,
+        "max": 180000,
+        "amount": 1,
+        "unit": "kg",
+        "currency": "VND"
       }
     },
     {
@@ -516,6 +733,13 @@
       "recipeUnitConversions": {
         "g": 1,
         "kg": 1000
+      },
+      "priceEstimate": {
+        "min": 50000,
+        "max": 120000,
+        "amount": 1,
+        "unit": "kg",
+        "currency": "VND"
       }
     },
     {
@@ -532,6 +756,13 @@
       "recipeUnitConversions": {
         "g": 1,
         "kg": 1000
+      },
+      "priceEstimate": {
+        "min": 50000,
+        "max": 120000,
+        "amount": 1,
+        "unit": "kg",
+        "currency": "VND"
       }
     },
     {
@@ -548,6 +779,13 @@
       "recipeUnitConversions": {
         "g": 1,
         "kg": 1000
+      },
+      "priceEstimate": {
+        "min": 80000,
+        "max": 140000,
+        "amount": 1,
+        "unit": "kg",
+        "currency": "VND"
       }
     },
     {
@@ -564,6 +802,13 @@
       "recipeUnitConversions": {
         "g": 1,
         "kg": 1000
+      },
+      "priceEstimate": {
+        "min": 80000,
+        "max": 140000,
+        "amount": 1,
+        "unit": "kg",
+        "currency": "VND"
       }
     },
     {
@@ -580,6 +825,13 @@
       "recipeUnitConversions": {
         "g": 1,
         "kg": 1000
+      },
+      "priceEstimate": {
+        "min": 30000,
+        "max": 60000,
+        "amount": 1,
+        "unit": "kg",
+        "currency": "VND"
       }
     },
     {
@@ -596,6 +848,13 @@
       "recipeUnitConversions": {
         "g": 1,
         "kg": 1000
+      },
+      "priceEstimate": {
+        "min": 80000,
+        "max": 140000,
+        "amount": 1,
+        "unit": "kg",
+        "currency": "VND"
       }
     },
     {
@@ -612,6 +871,13 @@
       "recipeUnitConversions": {
         "g": 1,
         "kg": 1000
+      },
+      "priceEstimate": {
+        "min": 100000,
+        "max": 160000,
+        "amount": 1,
+        "unit": "kg",
+        "currency": "VND"
       }
     },
     {
@@ -628,6 +894,13 @@
       "recipeUnitConversions": {
         "g": 1,
         "kg": 1000
+      },
+      "priceEstimate": {
+        "min": 100000,
+        "max": 170000,
+        "amount": 1,
+        "unit": "kg",
+        "currency": "VND"
       }
     },
     {
@@ -646,6 +919,13 @@
         "g": 1,
         "kg": 1000,
         "quả": 250
+      },
+      "priceEstimate": {
+        "min": 20000,
+        "max": 40000,
+        "amount": 1,
+        "unit": "kg",
+        "currency": "VND"
       }
     },
     {
@@ -662,6 +942,13 @@
       "recipeUnitConversions": {
         "g": 1,
         "kg": 1000
+      },
+      "priceEstimate": {
+        "min": 60000,
+        "max": 110000,
+        "amount": 1,
+        "unit": "kg",
+        "currency": "VND"
       }
     },
     {
@@ -679,6 +966,13 @@
         "g": 1,
         "kg": 1000,
         "thìa": 12.5
+      },
+      "priceEstimate": {
+        "min": 20000,
+        "max": 45000,
+        "amount": 1,
+        "unit": "kg",
+        "currency": "VND"
       }
     },
     {
@@ -696,6 +990,13 @@
         "g": 1,
         "kg": 1000,
         "thìa": 12
+      },
+      "priceEstimate": {
+        "min": 25000,
+        "max": 60000,
+        "amount": 1,
+        "unit": "kg",
+        "currency": "VND"
       }
     },
     {
@@ -713,6 +1014,13 @@
         "g": 1,
         "kg": 1000,
         "thìa": 5
+      },
+      "priceEstimate": {
+        "min": 5000,
+        "max": 15000,
+        "amount": 1,
+        "unit": "kg",
+        "currency": "VND"
       }
     },
     {
@@ -729,6 +1037,13 @@
       "recipeUnitConversions": {
         "g": 1,
         "kg": 1000
+      },
+      "priceEstimate": {
+        "min": 5000,
+        "max": 15000,
+        "amount": 1,
+        "unit": "kg",
+        "currency": "VND"
       }
     },
     {
@@ -746,6 +1061,13 @@
         "ml": 1,
         "lít": 1000,
         "thìa": 15
+      },
+      "priceEstimate": {
+        "min": 40000,
+        "max": 90000,
+        "amount": 1,
+        "unit": "lít",
+        "currency": "VND"
       }
     },
     {
@@ -763,6 +1085,13 @@
         "ml": 1,
         "lít": 1000,
         "thìa": 15
+      },
+      "priceEstimate": {
+        "min": 30000,
+        "max": 70000,
+        "amount": 1,
+        "unit": "lít",
+        "currency": "VND"
       }
     },
     {
@@ -780,6 +1109,13 @@
         "ml": 1,
         "lít": 1000,
         "thìa": 15
+      },
+      "priceEstimate": {
+        "min": 120000,
+        "max": 250000,
+        "amount": 1,
+        "unit": "lít",
+        "currency": "VND"
       }
     },
     {
@@ -797,6 +1133,13 @@
         "g": 1,
         "kg": 1000,
         "thìa": 2.5
+      },
+      "priceEstimate": {
+        "min": 180000,
+        "max": 350000,
+        "amount": 1,
+        "unit": "kg",
+        "currency": "VND"
       }
     },
     {
@@ -814,6 +1157,13 @@
         "ml": 1,
         "lít": 1000,
         "thìa": 15
+      },
+      "priceEstimate": {
+        "min": 35000,
+        "max": 70000,
+        "amount": 1,
+        "unit": "lít",
+        "currency": "VND"
       }
     },
     {
@@ -831,6 +1181,13 @@
         "g": 1,
         "kg": 1000,
         "thìa": 5
+      },
+      "priceEstimate": {
+        "min": 120000,
+        "max": 250000,
+        "amount": 1,
+        "unit": "kg",
+        "currency": "VND"
       }
     },
     {
@@ -849,6 +1206,13 @@
         "ml": 1,
         "lít": 1000,
         "quả": 30
+      },
+      "priceEstimate": {
+        "min": 2000,
+        "max": 5000,
+        "amount": 1,
+        "unit": "quả",
+        "currency": "VND"
       }
     },
     {
@@ -863,6 +1227,13 @@
       ],
       "recipeUnitConversions": {
         "quả": 1
+      },
+      "priceEstimate": {
+        "min": 500,
+        "max": 1500,
+        "amount": 1,
+        "unit": "quả",
+        "currency": "VND"
       }
     },
     {
@@ -879,6 +1250,13 @@
       "recipeUnitConversions": {
         "g": 1,
         "kg": 1000
+      },
+      "priceEstimate": {
+        "min": 160000,
+        "max": 250000,
+        "amount": 1,
+        "unit": "kg",
+        "currency": "VND"
       }
     },
     {
@@ -895,6 +1273,13 @@
       "recipeUnitConversions": {
         "g": 1,
         "kg": 1000
+      },
+      "priceEstimate": {
+        "min": 160000,
+        "max": 260000,
+        "amount": 1,
+        "unit": "kg",
+        "currency": "VND"
       }
     },
     {
@@ -911,6 +1296,13 @@
       "recipeUnitConversions": {
         "g": 1,
         "kg": 1000
+      },
+      "priceEstimate": {
+        "min": 180000,
+        "max": 280000,
+        "amount": 1,
+        "unit": "kg",
+        "currency": "VND"
       }
     },
     {
@@ -927,6 +1319,13 @@
       "recipeUnitConversions": {
         "g": 1,
         "kg": 1000
+      },
+      "priceEstimate": {
+        "min": 80000,
+        "max": 140000,
+        "amount": 1,
+        "unit": "kg",
+        "currency": "VND"
       }
     },
     {
@@ -945,6 +1344,13 @@
         "g": 1,
         "kg": 1000,
         "quả": 100
+      },
+      "priceEstimate": {
+        "min": 25000,
+        "max": 50000,
+        "amount": 1,
+        "unit": "kg",
+        "currency": "VND"
       }
     },
     {
@@ -961,6 +1367,13 @@
       "recipeUnitConversions": {
         "g": 1,
         "kg": 1000
+      },
+      "priceEstimate": {
+        "min": 180000,
+        "max": 320000,
+        "amount": 1,
+        "unit": "kg",
+        "currency": "VND"
       }
     },
     {
@@ -979,6 +1392,13 @@
         "g": 1,
         "kg": 1000,
         "quả": 10
+      },
+      "priceEstimate": {
+        "min": 40000,
+        "max": 90000,
+        "amount": 1,
+        "unit": "kg",
+        "currency": "VND"
       }
     },
     {
@@ -997,6 +1417,13 @@
         "g": 1,
         "kg": 1000,
         "quả": 150
+      },
+      "priceEstimate": {
+        "min": 60000,
+        "max": 100000,
+        "amount": 1,
+        "unit": "kg",
+        "currency": "VND"
       }
     },
     {
@@ -1013,6 +1440,13 @@
       "recipeUnitConversions": {
         "g": 1,
         "kg": 1000
+      },
+      "priceEstimate": {
+        "min": 60000,
+        "max": 100000,
+        "amount": 1,
+        "unit": "kg",
+        "currency": "VND"
       }
     },
     {
@@ -1029,6 +1463,13 @@
       "recipeUnitConversions": {
         "g": 1,
         "kg": 1000
+      },
+      "priceEstimate": {
+        "min": 60000,
+        "max": 100000,
+        "amount": 1,
+        "unit": "kg",
+        "currency": "VND"
       }
     },
     {
@@ -1045,6 +1486,13 @@
       "recipeUnitConversions": {
         "g": 1,
         "kg": 1000
+      },
+      "priceEstimate": {
+        "min": 40000,
+        "max": 90000,
+        "amount": 1,
+        "unit": "kg",
+        "currency": "VND"
       }
     },
     {
@@ -1062,6 +1510,13 @@
         "ml": 1,
         "lít": 1000,
         "thìa": 15
+      },
+      "priceEstimate": {
+        "min": 30000,
+        "max": 70000,
+        "amount": 1,
+        "unit": "lít",
+        "currency": "VND"
       }
     },
     {
@@ -1079,6 +1534,13 @@
         "ml": 1,
         "lít": 1000,
         "thìa": 15
+      },
+      "priceEstimate": {
+        "min": 30000,
+        "max": 70000,
+        "amount": 1,
+        "unit": "lít",
+        "currency": "VND"
       }
     },
     {
@@ -1095,6 +1557,13 @@
       "recipeUnitConversions": {
         "g": 1,
         "kg": 1000
+      },
+      "priceEstimate": {
+        "min": 30000,
+        "max": 60000,
+        "amount": 1,
+        "unit": "kg",
+        "currency": "VND"
       }
     },
     {
@@ -1111,6 +1580,13 @@
       "recipeUnitConversions": {
         "g": 1,
         "kg": 1000
+      },
+      "priceEstimate": {
+        "min": 100000,
+        "max": 180000,
+        "amount": 1,
+        "unit": "kg",
+        "currency": "VND"
       }
     },
     {
@@ -1131,6 +1607,13 @@
         "kg": 1000,
         "củ": 50,
         "nhánh": 10
+      },
+      "priceEstimate": {
+        "min": 40000,
+        "max": 90000,
+        "amount": 1,
+        "unit": "kg",
+        "currency": "VND"
       }
     },
     {
@@ -1147,6 +1630,13 @@
       "recipeUnitConversions": {
         "g": 1,
         "kg": 1000
+      },
+      "priceEstimate": {
+        "min": 250000,
+        "max": 500000,
+        "amount": 1,
+        "unit": "kg",
+        "currency": "VND"
       }
     },
     {
@@ -1161,6 +1651,13 @@
       ],
       "recipeUnitConversions": {
         "quả": 1
+      },
+      "priceEstimate": {
+        "min": 1000,
+        "max": 3000,
+        "amount": 1,
+        "unit": "quả",
+        "currency": "VND"
       }
     },
     {
@@ -1175,6 +1672,13 @@
       ],
       "recipeUnitConversions": {
         "quả": 1
+      },
+      "priceEstimate": {
+        "min": 1000,
+        "max": 3000,
+        "amount": 1,
+        "unit": "quả",
+        "currency": "VND"
       }
     },
     {
@@ -1192,6 +1696,13 @@
         "ml": 1,
         "lít": 1000,
         "thìa": 15
+      },
+      "priceEstimate": {
+        "min": 15000,
+        "max": 40000,
+        "amount": 1,
+        "unit": "lít",
+        "currency": "VND"
       }
     },
     {
@@ -1208,6 +1719,13 @@
       "recipeUnitConversions": {
         "g": 1,
         "kg": 1000
+      },
+      "priceEstimate": {
+        "min": 30000,
+        "max": 70000,
+        "amount": 1,
+        "unit": "kg",
+        "currency": "VND"
       }
     },
     {
@@ -1224,6 +1742,13 @@
       "recipeUnitConversions": {
         "g": 1,
         "kg": 1000
+      },
+      "priceEstimate": {
+        "min": 30000,
+        "max": 70000,
+        "amount": 1,
+        "unit": "kg",
+        "currency": "VND"
       }
     },
     {
@@ -1242,6 +1767,13 @@
         "g": 1,
         "kg": 1000,
         "củ": 20
+      },
+      "priceEstimate": {
+        "min": 30000,
+        "max": 60000,
+        "amount": 1,
+        "unit": "kg",
+        "currency": "VND"
       }
     },
     {
@@ -1256,6 +1788,13 @@
       ],
       "recipeUnitConversions": {
         "thanh": 1
+      },
+      "priceEstimate": {
+        "min": 2000,
+        "max": 6000,
+        "amount": 1,
+        "unit": "thanh",
+        "currency": "VND"
       }
     },
     {
@@ -1270,6 +1809,13 @@
       ],
       "recipeUnitConversions": {
         "quả": 1
+      },
+      "priceEstimate": {
+        "min": 3000,
+        "max": 8000,
+        "amount": 1,
+        "unit": "quả",
+        "currency": "VND"
       }
     },
     {
@@ -1284,6 +1830,13 @@
       ],
       "recipeUnitConversions": {
         "chiếc": 1
+      },
+      "priceEstimate": {
+        "min": 1000,
+        "max": 3000,
+        "amount": 1,
+        "unit": "chiếc",
+        "currency": "VND"
       }
     },
     {
@@ -1300,6 +1853,13 @@
       "recipeUnitConversions": {
         "g": 1,
         "kg": 1000
+      },
+      "priceEstimate": {
+        "min": 180000,
+        "max": 300000,
+        "amount": 1,
+        "unit": "kg",
+        "currency": "VND"
       }
     },
     {
@@ -1316,6 +1876,13 @@
       "recipeUnitConversions": {
         "g": 1,
         "kg": 1000
+      },
+      "priceEstimate": {
+        "min": 20000,
+        "max": 50000,
+        "amount": 1,
+        "unit": "kg",
+        "currency": "VND"
       }
     },
     {
@@ -1332,6 +1899,13 @@
       "recipeUnitConversions": {
         "g": 1,
         "kg": 1000
+      },
+      "priceEstimate": {
+        "min": 60000,
+        "max": 120000,
+        "amount": 1,
+        "unit": "kg",
+        "currency": "VND"
       }
     },
     {
@@ -1348,6 +1922,13 @@
       "recipeUnitConversions": {
         "g": 1,
         "kg": 1000
+      },
+      "priceEstimate": {
+        "min": 25000,
+        "max": 50000,
+        "amount": 1,
+        "unit": "kg",
+        "currency": "VND"
       }
     },
     {
@@ -1364,6 +1945,13 @@
       "recipeUnitConversions": {
         "g": 1,
         "kg": 1000
+      },
+      "priceEstimate": {
+        "min": 20000,
+        "max": 50000,
+        "amount": 1,
+        "unit": "kg",
+        "currency": "VND"
       }
     },
     {
@@ -1380,6 +1968,13 @@
       "recipeUnitConversions": {
         "g": 1,
         "kg": 1000
+      },
+      "priceEstimate": {
+        "min": 20000,
+        "max": 50000,
+        "amount": 1,
+        "unit": "kg",
+        "currency": "VND"
       }
     },
     {
@@ -1396,6 +1991,13 @@
       "recipeUnitConversions": {
         "g": 1,
         "kg": 1000
+      },
+      "priceEstimate": {
+        "min": 180000,
+        "max": 300000,
+        "amount": 1,
+        "unit": "kg",
+        "currency": "VND"
       }
     },
     {
@@ -1413,6 +2015,13 @@
         "g": 1,
         "kg": 1000,
         "thìa": 15
+      },
+      "priceEstimate": {
+        "min": 60000,
+        "max": 140000,
+        "amount": 1,
+        "unit": "kg",
+        "currency": "VND"
       }
     },
     {
@@ -1429,6 +2038,13 @@
       "recipeUnitConversions": {
         "g": 1,
         "kg": 1000
+      },
+      "priceEstimate": {
+        "min": 60000,
+        "max": 140000,
+        "amount": 1,
+        "unit": "kg",
+        "currency": "VND"
       }
     },
     {
@@ -1447,6 +2063,13 @@
         "g": 1,
         "kg": 1000,
         "quả": 800
+      },
+      "priceEstimate": {
+        "min": 20000,
+        "max": 35000,
+        "amount": 1,
+        "unit": "kg",
+        "currency": "VND"
       }
     },
     {
@@ -1464,6 +2087,13 @@
         "ml": 1,
         "lít": 1000,
         "thìa": 15
+      },
+      "priceEstimate": {
+        "min": 60000,
+        "max": 90000,
+        "amount": 1,
+        "unit": "lít",
+        "currency": "VND"
       }
     },
     {
@@ -1481,6 +2111,13 @@
         "g": 1,
         "kg": 1000,
         "thìa": 5
+      },
+      "priceEstimate": {
+        "min": 250000,
+        "max": 500000,
+        "amount": 1,
+        "unit": "kg",
+        "currency": "VND"
       }
     },
     {
@@ -1497,6 +2134,13 @@
       "recipeUnitConversions": {
         "g": 1,
         "kg": 1000
+      },
+      "priceEstimate": {
+        "min": 25000,
+        "max": 60000,
+        "amount": 1,
+        "unit": "kg",
+        "currency": "VND"
       }
     },
     {
@@ -1513,6 +2157,13 @@
       "recipeUnitConversions": {
         "g": 1,
         "kg": 1000
+      },
+      "priceEstimate": {
+        "min": 25000,
+        "max": 60000,
+        "amount": 1,
+        "unit": "kg",
+        "currency": "VND"
       }
     },
     {
@@ -1529,6 +2180,13 @@
       "recipeUnitConversions": {
         "g": 1,
         "kg": 1000
+      },
+      "priceEstimate": {
+        "min": 100000,
+        "max": 180000,
+        "amount": 1,
+        "unit": "kg",
+        "currency": "VND"
       }
     },
     {
@@ -1545,6 +2203,13 @@
       "recipeUnitConversions": {
         "g": 1,
         "kg": 1000
+      },
+      "priceEstimate": {
+        "min": 50000,
+        "max": 90000,
+        "amount": 1,
+        "unit": "kg",
+        "currency": "VND"
       }
     },
     {
@@ -1561,6 +2226,13 @@
       "recipeUnitConversions": {
         "ml": 1,
         "lít": 1000
+      },
+      "priceEstimate": {
+        "min": 180000,
+        "max": 400000,
+        "amount": 1,
+        "unit": "lít",
+        "currency": "VND"
       }
     },
     {
@@ -1579,6 +2251,13 @@
         "g": 1,
         "kg": 1000,
         "quả": 300
+      },
+      "priceEstimate": {
+        "min": 30000,
+        "max": 60000,
+        "amount": 1,
+        "unit": "kg",
+        "currency": "VND"
       }
     },
     {
@@ -1593,6 +2272,13 @@
       ],
       "recipeUnitConversions": {
         "lá": 1
+      },
+      "priceEstimate": {
+        "min": 500,
+        "max": 1500,
+        "amount": 1,
+        "unit": "lá",
+        "currency": "VND"
       }
     },
     {
@@ -1607,6 +2293,13 @@
       ],
       "recipeUnitConversions": {
         "lá": 1
+      },
+      "priceEstimate": {
+        "min": 500,
+        "max": 1500,
+        "amount": 1,
+        "unit": "lá",
+        "currency": "VND"
       }
     },
     {
@@ -1621,6 +2314,13 @@
       ],
       "recipeUnitConversions": {
         "chiếc": 1
+      },
+      "priceEstimate": {
+        "min": 5000,
+        "max": 15000,
+        "amount": 1,
+        "unit": "chiếc",
+        "currency": "VND"
       }
     },
     {
@@ -1637,6 +2337,13 @@
       "recipeUnitConversions": {
         "g": 1,
         "kg": 1000
+      },
+      "priceEstimate": {
+        "min": 60000,
+        "max": 120000,
+        "amount": 1,
+        "unit": "kg",
+        "currency": "VND"
       }
     },
     {
@@ -1653,6 +2360,13 @@
       "recipeUnitConversions": {
         "g": 1,
         "kg": 1000
+      },
+      "priceEstimate": {
+        "min": 25000,
+        "max": 50000,
+        "amount": 1,
+        "unit": "kg",
+        "currency": "VND"
       }
     },
     {
@@ -1669,6 +2383,13 @@
       "recipeUnitConversions": {
         "g": 1,
         "kg": 1000
+      },
+      "priceEstimate": {
+        "min": 40000,
+        "max": 80000,
+        "amount": 1,
+        "unit": "kg",
+        "currency": "VND"
       }
     },
     {
@@ -1685,6 +2406,13 @@
       "recipeUnitConversions": {
         "g": 1,
         "kg": 1000
+      },
+      "priceEstimate": {
+        "min": 70000,
+        "max": 120000,
+        "amount": 1,
+        "unit": "kg",
+        "currency": "VND"
       }
     },
     {
@@ -1701,6 +2429,13 @@
       "recipeUnitConversions": {
         "g": 1,
         "kg": 1000
+      },
+      "priceEstimate": {
+        "min": 80000,
+        "max": 150000,
+        "amount": 1,
+        "unit": "kg",
+        "currency": "VND"
       }
     },
     {
@@ -1717,6 +2452,13 @@
       "recipeUnitConversions": {
         "g": 1,
         "kg": 1000
+      },
+      "priceEstimate": {
+        "min": 15000,
+        "max": 35000,
+        "amount": 1,
+        "unit": "kg",
+        "currency": "VND"
       }
     },
     {
@@ -1733,6 +2475,13 @@
       "recipeUnitConversions": {
         "g": 1,
         "kg": 1000
+      },
+      "priceEstimate": {
+        "min": 15000,
+        "max": 35000,
+        "amount": 1,
+        "unit": "kg",
+        "currency": "VND"
       }
     },
     {
@@ -1749,6 +2498,13 @@
       "recipeUnitConversions": {
         "g": 1,
         "kg": 1000
+      },
+      "priceEstimate": {
+        "min": 25000,
+        "max": 50000,
+        "amount": 1,
+        "unit": "kg",
+        "currency": "VND"
       }
     },
     {
@@ -1765,6 +2521,13 @@
       "recipeUnitConversions": {
         "g": 1,
         "kg": 1000
+      },
+      "priceEstimate": {
+        "min": 18000,
+        "max": 35000,
+        "amount": 1,
+        "unit": "kg",
+        "currency": "VND"
       }
     },
     {
@@ -1781,6 +2544,13 @@
       "recipeUnitConversions": {
         "g": 1,
         "kg": 1000
+      },
+      "priceEstimate": {
+        "min": 70000,
+        "max": 130000,
+        "amount": 1,
+        "unit": "kg",
+        "currency": "VND"
       }
     },
     {
@@ -1797,6 +2567,13 @@
       "recipeUnitConversions": {
         "g": 1,
         "kg": 1000
+      },
+      "priceEstimate": {
+        "min": 30000,
+        "max": 70000,
+        "amount": 1,
+        "unit": "kg",
+        "currency": "VND"
       }
     },
     {
@@ -1813,6 +2590,13 @@
       "recipeUnitConversions": {
         "g": 1,
         "kg": 1000
+      },
+      "priceEstimate": {
+        "min": 180000,
+        "max": 350000,
+        "amount": 1,
+        "unit": "kg",
+        "currency": "VND"
       }
     },
     {
@@ -1829,6 +2613,13 @@
       "recipeUnitConversions": {
         "g": 1,
         "kg": 1000
+      },
+      "priceEstimate": {
+        "min": 250000,
+        "max": 500000,
+        "amount": 1,
+        "unit": "kg",
+        "currency": "VND"
       }
     },
     {
@@ -1845,6 +2636,13 @@
       "recipeUnitConversions": {
         "g": 1,
         "kg": 1000
+      },
+      "priceEstimate": {
+        "min": 15000,
+        "max": 30000,
+        "amount": 1,
+        "unit": "kg",
+        "currency": "VND"
       }
     },
     {
@@ -1861,6 +2659,13 @@
       "recipeUnitConversions": {
         "g": 1,
         "kg": 1000
+      },
+      "priceEstimate": {
+        "min": 20000,
+        "max": 40000,
+        "amount": 1,
+        "unit": "kg",
+        "currency": "VND"
       }
     },
     {
@@ -1875,6 +2680,13 @@
       ],
       "recipeUnitConversions": {
         "lá": 1
+      },
+      "priceEstimate": {
+        "min": 5000,
+        "max": 15000,
+        "amount": 1,
+        "unit": "lá",
+        "currency": "VND"
       }
     },
     {
@@ -1889,6 +2701,13 @@
       ],
       "recipeUnitConversions": {
         "lá": 1
+      },
+      "priceEstimate": {
+        "min": 3000,
+        "max": 8000,
+        "amount": 1,
+        "unit": "lá",
+        "currency": "VND"
       }
     },
     {
@@ -1905,6 +2724,13 @@
       "recipeUnitConversions": {
         "g": 1,
         "kg": 1000
+      },
+      "priceEstimate": {
+        "min": 20000,
+        "max": 50000,
+        "amount": 1,
+        "unit": "kg",
+        "currency": "VND"
       }
     },
     {
@@ -1921,6 +2747,13 @@
       "recipeUnitConversions": {
         "g": 1,
         "kg": 1000
+      },
+      "priceEstimate": {
+        "min": 20000,
+        "max": 50000,
+        "amount": 1,
+        "unit": "kg",
+        "currency": "VND"
       }
     },
     {
@@ -1937,6 +2770,13 @@
       "recipeUnitConversions": {
         "g": 1,
         "kg": 1000
+      },
+      "priceEstimate": {
+        "min": 20000,
+        "max": 50000,
+        "amount": 1,
+        "unit": "kg",
+        "currency": "VND"
       }
     },
     {
@@ -1953,6 +2793,13 @@
       "recipeUnitConversions": {
         "g": 1,
         "kg": 1000
+      },
+      "priceEstimate": {
+        "min": 25000,
+        "max": 60000,
+        "amount": 1,
+        "unit": "kg",
+        "currency": "VND"
       }
     },
     {
@@ -1969,6 +2816,13 @@
       "recipeUnitConversions": {
         "g": 1,
         "kg": 1000
+      },
+      "priceEstimate": {
+        "min": 100000,
+        "max": 220000,
+        "amount": 1,
+        "unit": "kg",
+        "currency": "VND"
       }
     },
     {
@@ -1987,6 +2841,13 @@
         "ml": 1,
         "lít": 1000,
         "g": 1
+      },
+      "priceEstimate": {
+        "min": 1000,
+        "max": 3000,
+        "amount": 1,
+        "unit": "lít",
+        "currency": "VND"
       }
     },
     {
@@ -2003,6 +2864,13 @@
       "recipeUnitConversions": {
         "g": 1,
         "kg": 1000
+      },
+      "priceEstimate": {
+        "min": 220000,
+        "max": 350000,
+        "amount": 1,
+        "unit": "kg",
+        "currency": "VND"
       }
     },
     {
@@ -2019,6 +2887,13 @@
       "recipeUnitConversions": {
         "g": 1,
         "kg": 1000
+      },
+      "priceEstimate": {
+        "min": 80000,
+        "max": 150000,
+        "amount": 1,
+        "unit": "kg",
+        "currency": "VND"
       }
     },
     {
@@ -2035,6 +2910,13 @@
       "recipeUnitConversions": {
         "g": 1,
         "kg": 1000
+      },
+      "priceEstimate": {
+        "min": 120000,
+        "max": 220000,
+        "amount": 1,
+        "unit": "kg",
+        "currency": "VND"
       }
     },
     {
@@ -2051,6 +2933,13 @@
       "recipeUnitConversions": {
         "ml": 1,
         "lít": 1000
+      },
+      "priceEstimate": {
+        "min": 30000,
+        "max": 50000,
+        "amount": 1,
+        "unit": "lít",
+        "currency": "VND"
       }
     },
     {
@@ -2067,6 +2956,13 @@
       "recipeUnitConversions": {
         "g": 1,
         "kg": 1000
+      },
+      "priceEstimate": {
+        "min": 80000,
+        "max": 160000,
+        "amount": 1,
+        "unit": "kg",
+        "currency": "VND"
       }
     },
     {
@@ -2083,6 +2979,13 @@
       "recipeUnitConversions": {
         "g": 1,
         "kg": 1000
+      },
+      "priceEstimate": {
+        "min": 80000,
+        "max": 160000,
+        "amount": 1,
+        "unit": "kg",
+        "currency": "VND"
       }
     },
     {
@@ -2099,6 +3002,13 @@
       "recipeUnitConversions": {
         "g": 1,
         "kg": 1000
+      },
+      "priceEstimate": {
+        "min": 40000,
+        "max": 80000,
+        "amount": 1,
+        "unit": "kg",
+        "currency": "VND"
       }
     },
     {
@@ -2115,6 +3025,13 @@
       "recipeUnitConversions": {
         "g": 1,
         "kg": 1000
+      },
+      "priceEstimate": {
+        "min": 40000,
+        "max": 80000,
+        "amount": 1,
+        "unit": "kg",
+        "currency": "VND"
       }
     },
     {
@@ -2131,6 +3048,13 @@
       "recipeUnitConversions": {
         "g": 1,
         "kg": 1000
+      },
+      "priceEstimate": {
+        "min": 40000,
+        "max": 80000,
+        "amount": 1,
+        "unit": "kg",
+        "currency": "VND"
       }
     },
     {
@@ -2147,6 +3071,13 @@
       "recipeUnitConversions": {
         "g": 1,
         "kg": 1000
+      },
+      "priceEstimate": {
+        "min": 30000,
+        "max": 70000,
+        "amount": 1,
+        "unit": "kg",
+        "currency": "VND"
       }
     },
     {
@@ -2163,6 +3094,13 @@
       "recipeUnitConversions": {
         "g": 1,
         "kg": 1000
+      },
+      "priceEstimate": {
+        "min": 30000,
+        "max": 60000,
+        "amount": 1,
+        "unit": "kg",
+        "currency": "VND"
       }
     },
     {
@@ -2179,6 +3117,13 @@
       "recipeUnitConversions": {
         "g": 1,
         "kg": 1000
+      },
+      "priceEstimate": {
+        "min": 15000,
+        "max": 30000,
+        "amount": 1,
+        "unit": "kg",
+        "currency": "VND"
       }
     },
     {
@@ -2197,6 +3142,13 @@
         "g": 1,
         "kg": 1000,
         "củ": 200
+      },
+      "priceEstimate": {
+        "min": 20000,
+        "max": 40000,
+        "amount": 1,
+        "unit": "kg",
+        "currency": "VND"
       }
     },
     {
@@ -2213,6 +3165,13 @@
       "recipeUnitConversions": {
         "ml": 1,
         "lít": 1000
+      },
+      "priceEstimate": {
+        "min": 10000,
+        "max": 25000,
+        "amount": 1,
+        "unit": "lít",
+        "currency": "VND"
       }
     },
     {
@@ -2229,6 +3188,13 @@
       "recipeUnitConversions": {
         "g": 1,
         "kg": 1000
+      },
+      "priceEstimate": {
+        "min": 40000,
+        "max": 80000,
+        "amount": 1,
+        "unit": "kg",
+        "currency": "VND"
       }
     },
     {
@@ -2243,6 +3209,13 @@
       ],
       "recipeUnitConversions": {
         "lá": 1
+      },
+      "priceEstimate": {
+        "min": 200,
+        "max": 700,
+        "amount": 1,
+        "unit": "lá",
+        "currency": "VND"
       }
     },
     {
@@ -2257,6 +3230,13 @@
       ],
       "recipeUnitConversions": {
         "quả": 1
+      },
+      "priceEstimate": {
+        "min": 800,
+        "max": 1500,
+        "amount": 1,
+        "unit": "quả",
+        "currency": "VND"
       }
     },
     {
@@ -2273,6 +3253,13 @@
       "recipeUnitConversions": {
         "g": 1,
         "kg": 1000
+      },
+      "priceEstimate": {
+        "min": 160000,
+        "max": 260000,
+        "amount": 1,
+        "unit": "kg",
+        "currency": "VND"
       }
     },
     {
@@ -2289,6 +3276,13 @@
       "recipeUnitConversions": {
         "g": 1,
         "kg": 1000
+      },
+      "priceEstimate": {
+        "min": 30000,
+        "max": 70000,
+        "amount": 1,
+        "unit": "kg",
+        "currency": "VND"
       }
     },
     {
@@ -2305,6 +3299,13 @@
       "recipeUnitConversions": {
         "g": 1,
         "kg": 1000
+      },
+      "priceEstimate": {
+        "min": 30000,
+        "max": 70000,
+        "amount": 1,
+        "unit": "kg",
+        "currency": "VND"
       }
     },
     {
@@ -2321,6 +3322,13 @@
       "recipeUnitConversions": {
         "g": 1,
         "kg": 1000
+      },
+      "priceEstimate": {
+        "min": 25000,
+        "max": 60000,
+        "amount": 1,
+        "unit": "kg",
+        "currency": "VND"
       }
     },
     {
@@ -2337,6 +3345,13 @@
       "recipeUnitConversions": {
         "g": 1,
         "kg": 1000
+      },
+      "priceEstimate": {
+        "min": 25000,
+        "max": 60000,
+        "amount": 1,
+        "unit": "kg",
+        "currency": "VND"
       }
     },
     {
@@ -2353,6 +3368,13 @@
       "recipeUnitConversions": {
         "g": 1,
         "kg": 1000
+      },
+      "priceEstimate": {
+        "min": 20000,
+        "max": 40000,
+        "amount": 1,
+        "unit": "kg",
+        "currency": "VND"
       }
     },
     {
@@ -2369,6 +3391,13 @@
       "recipeUnitConversions": {
         "g": 1,
         "kg": 1000
+      },
+      "priceEstimate": {
+        "min": 25000,
+        "max": 60000,
+        "amount": 1,
+        "unit": "kg",
+        "currency": "VND"
       }
     },
     {
@@ -2386,6 +3415,13 @@
         "ml": 1,
         "lít": 1000,
         "thìa": 15
+      },
+      "priceEstimate": {
+        "min": 50000,
+        "max": 100000,
+        "amount": 1,
+        "unit": "lít",
+        "currency": "VND"
       }
     },
     {
@@ -2402,6 +3438,13 @@
       "recipeUnitConversions": {
         "g": 1,
         "kg": 1000
+      },
+      "priceEstimate": {
+        "min": 150000,
+        "max": 250000,
+        "amount": 1,
+        "unit": "kg",
+        "currency": "VND"
       }
     },
     {
@@ -2416,6 +3459,13 @@
       ],
       "recipeUnitConversions": {
         "chiếc": 1
+      },
+      "priceEstimate": {
+        "min": 1000,
+        "max": 3000,
+        "amount": 1,
+        "unit": "chiếc",
+        "currency": "VND"
       }
     },
     {
@@ -2434,6 +3484,13 @@
         "g": 1,
         "kg": 1000,
         "củ": 300
+      },
+      "priceEstimate": {
+        "min": 15000,
+        "max": 30000,
+        "amount": 1,
+        "unit": "kg",
+        "currency": "VND"
       }
     },
     {
@@ -2450,6 +3507,13 @@
       "recipeUnitConversions": {
         "g": 1,
         "kg": 1000
+      },
+      "priceEstimate": {
+        "min": 50000,
+        "max": 90000,
+        "amount": 1,
+        "unit": "kg",
+        "currency": "VND"
       }
     },
     {
@@ -2467,6 +3531,13 @@
         "ml": 1,
         "lít": 1000,
         "thìa": 15
+      },
+      "priceEstimate": {
+        "min": 40000,
+        "max": 80000,
+        "amount": 1,
+        "unit": "lít",
+        "currency": "VND"
       }
     },
     {
@@ -2485,6 +3556,13 @@
         "g": 1,
         "kg": 1000,
         "củ": 150
+      },
+      "priceEstimate": {
+        "min": 50000,
+        "max": 100000,
+        "amount": 1,
+        "unit": "kg",
+        "currency": "VND"
       }
     },
     {
@@ -2501,6 +3579,13 @@
       "recipeUnitConversions": {
         "ml": 1,
         "lít": 1000
+      },
+      "priceEstimate": {
+        "min": 50000,
+        "max": 100000,
+        "amount": 1,
+        "unit": "lít",
+        "currency": "VND"
       }
     },
     {
@@ -2517,6 +3602,13 @@
       "recipeUnitConversions": {
         "g": 1,
         "kg": 1000
+      },
+      "priceEstimate": {
+        "min": 25000,
+        "max": 60000,
+        "amount": 1,
+        "unit": "kg",
+        "currency": "VND"
       }
     },
     {
@@ -2535,6 +3627,13 @@
         "g": 1,
         "kg": 1000,
         "củ": 20
+      },
+      "priceEstimate": {
+        "min": 40000,
+        "max": 90000,
+        "amount": 1,
+        "unit": "kg",
+        "currency": "VND"
       }
     },
     {
@@ -2553,6 +3652,13 @@
         "g": 1,
         "kg": 1000,
         "quả": 10
+      },
+      "priceEstimate": {
+        "min": 60000,
+        "max": 120000,
+        "amount": 1,
+        "unit": "kg",
+        "currency": "VND"
       }
     },
     {
@@ -2569,6 +3675,13 @@
       "recipeUnitConversions": {
         "g": 1,
         "kg": 1000
+      },
+      "priceEstimate": {
+        "min": 15000,
+        "max": 30000,
+        "amount": 1,
+        "unit": "kg",
+        "currency": "VND"
       }
     },
     {
@@ -2585,6 +3698,13 @@
       "recipeUnitConversions": {
         "g": 1,
         "kg": 1000
+      },
+      "priceEstimate": {
+        "min": 25000,
+        "max": 50000,
+        "amount": 1,
+        "unit": "kg",
+        "currency": "VND"
       }
     },
     {
@@ -2601,6 +3721,13 @@
       "recipeUnitConversions": {
         "g": 1,
         "kg": 1000
+      },
+      "priceEstimate": {
+        "min": 25000,
+        "max": 60000,
+        "amount": 1,
+        "unit": "kg",
+        "currency": "VND"
       }
     },
     {
@@ -2617,6 +3744,13 @@
       "recipeUnitConversions": {
         "g": 1,
         "kg": 1000
+      },
+      "priceEstimate": {
+        "min": 25000,
+        "max": 60000,
+        "amount": 1,
+        "unit": "kg",
+        "currency": "VND"
       }
     },
     {
@@ -2633,6 +3767,13 @@
       "recipeUnitConversions": {
         "g": 1,
         "kg": 1000
+      },
+      "priceEstimate": {
+        "min": 25000,
+        "max": 60000,
+        "amount": 1,
+        "unit": "kg",
+        "currency": "VND"
       }
     },
     {
@@ -2649,6 +3790,13 @@
       "recipeUnitConversions": {
         "g": 1,
         "kg": 1000
+      },
+      "priceEstimate": {
+        "min": 15000,
+        "max": 30000,
+        "amount": 1,
+        "unit": "kg",
+        "currency": "VND"
       }
     },
     {
@@ -2667,6 +3815,13 @@
         "g": 1,
         "kg": 1000,
         "củ": 350
+      },
+      "priceEstimate": {
+        "min": 25000,
+        "max": 45000,
+        "amount": 1,
+        "unit": "kg",
+        "currency": "VND"
       }
     }
   ],
@@ -4106,7 +5261,7 @@
       "name": "Phở sườn",
       "includeDishes": [],
       "note": "",
-      "image": "",
+      "image": "https://cdn.tgdd.vn/Files/2022/01/25/1412805/cach-nau-pho-bo-nam-dinh-chuan-vi-thom-ngon-nhu-hang-quan-202201250230038502.jpg",
       "isCompleted": false,
       "duration": {
         "unfreeze": null,
@@ -5921,7 +7076,7 @@
         }
       ],
       "isCompleted": false,
-      "image": "",
+      "image": "https://eurocook.com.vn/Data/upload/images/tintuc/mon-ngon-moi-ngay-thit-kho-nuoc-dua-02.jpg",
       "duration": {
         "unfreeze": null,
         "prepare": null,
@@ -6156,7 +7311,7 @@
         }
       ],
       "isCompleted": false,
-      "image": "",
+      "image": "https://i1-giadinh.vnecdn.net/2022/10/08/Thanh-pham-4-4-1443-1665204099.jpg?w=0&h=0&q=100&dpr=2&fit=crop&s=oBIihXQC5MPakCfn52CWqQ",
       "duration": {
         "unfreeze": null,
         "prepare": null,
@@ -6268,7 +7423,7 @@
         }
       ],
       "isCompleted": false,
-      "image": "",
+      "image": "https://cookbeo.com/media/2024/04/thit-lon-rang-sa-ot/thit-lon-rang-sa-ot.jpg",
       "duration": {
         "unfreeze": null,
         "prepare": null,
@@ -6436,7 +7591,7 @@
         }
       ],
       "isCompleted": false,
-      "image": "",
+      "image": "https://www.bigc.vn/files/cam-nang-mua-sam-27-11-2023-14-35-21/vao-bep-cung-go-27-11-2023-14-39-10/cach-lam-banh-mi-thit-nuong.jpg",
       "duration": {
         "unfreeze": null,
         "prepare": null,
@@ -7019,7 +8174,7 @@
       "includeDishes": [],
       "note": "",
       "isCompleted": true,
-      "image": "",
+      "image": "https://cookbeo.com/media/2024/04/trung-chien-thit-bam/thanh-pham-trung-chien-thit-bam.jpg",
       "duration": {
         "unfreeze": null,
         "prepare": null,
@@ -7147,7 +8302,7 @@
         }
       ],
       "isCompleted": false,
-      "image": "",
+      "image": "https://cdn.tgdd.vn/Files/2021/04/06/1341261/cach-lam-dau-que-xao-thit-bo-thom-ngon-hap-dan-cho-ca-nha-202104061451403048.jpg",
       "duration": {
         "unfreeze": null,
         "prepare": null,
@@ -7845,7 +9000,7 @@
         }
       ],
       "isCompleted": false,
-      "image": "",
+      "image": "https://cookbeo.com/media/2023/09/cu-sen-ham-xuong/bat-cu-sen-ham-xuong.jpg",
       "duration": {
         "unfreeze": null,
         "prepare": null,
@@ -8748,7 +9903,7 @@
         }
       ],
       "isCompleted": false,
-      "image": "",
+      "image": "https://cookbeo.com/media/2024/03/tom-dong-rang/thanh-pham-tom-dong-rang.jpg",
       "duration": {
         "unfreeze": null,
         "prepare": null,
@@ -8852,7 +10007,7 @@
         }
       ],
       "isCompleted": false,
-      "image": "",
+      "image": "https://cdn.tgdd.vn/Files/2019/05/15/1167198/cach-lam-tom-chien-bo-toi-thom-ngon-cang-an-cang-ghien-202201101623307077.jpg",
       "duration": {
         "unfreeze": null,
         "prepare": null,
@@ -8942,7 +10097,7 @@
         }
       ],
       "isCompleted": false,
-      "image": "",
+      "image": "https://cookbeo.com/media/2021/05/tom-hap-bia/tom-hap-bia.jpg",
       "duration": {
         "unfreeze": null,
         "prepare": null,
@@ -9040,7 +10195,7 @@
         }
       ],
       "isCompleted": false,
-      "image": "",
+      "image": "https://cdn.tgdd.vn/Files/2019/03/20/1155562/cach-lam-dau-phu-tam-hanh-dan-da-ma-ngon-com-202202151620266794.jpg",
       "duration": {
         "unfreeze": null,
         "prepare": null,
@@ -10859,7 +12014,7 @@
         }
       ],
       "isCompleted": false,
-      "image": "",
+      "image": "https://cookbeo.com/media/2023/08/canh-dau-phu-ca-chua/canh-dau-phu-ca-chua.jpg",
       "duration": {
         "unfreeze": null,
         "prepare": null,
@@ -10939,7 +12094,7 @@
       "includeDishes": [],
       "note": "",
       "isCompleted": true,
-      "image": "",
+      "image": "https://cookbeo.com/media/2024/04/trung-chien-thit-bam/thanh-pham-trung-chien-thit-bam.jpg",
       "duration": {
         "unfreeze": null,
         "prepare": null,
@@ -11302,7 +12457,7 @@
       "includeDishes": [],
       "note": "",
       "isCompleted": true,
-      "image": "",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/5/5d/Hard-boiled_egg.jpg",
       "duration": {
         "unfreeze": null,
         "prepare": null,
@@ -11413,7 +12568,7 @@
       "includeDishes": [],
       "note": "",
       "isCompleted": false,
-      "image": "",
+      "image": "https://www.bigc.vn/files/cam-nang-mua-sam-27-11-2023-14-35-21/vao-bep-cung-go-27-11-2023-14-39-10/cach-lam-banh-mi-thit-nuong.jpg",
       "duration": {
         "unfreeze": null,
         "prepare": null,
@@ -11511,7 +12666,7 @@
       "includeDishes": [],
       "note": "",
       "isCompleted": true,
-      "image": "",
+      "image": "https://vcdn1-giadinh.vnecdn.net/2020/11/15/daidien-1605417540-6495-1605417726.jpg?w=1200&h=0&q=100&dpr=1&fit=crop&s=78XZiYnQDEf8Ghj-I_SVGg",
       "duration": {
         "unfreeze": null,
         "prepare": null,
@@ -11786,7 +12941,7 @@
       "includeDishes": [],
       "note": "",
       "isCompleted": true,
-      "image": "",
+      "image": "https://www.huongnghiepaau.com/wp-content/uploads/2019/01/nem-nuong-mien-tay620x400.jpg",
       "duration": {
         "unfreeze": null,
         "prepare": null,
@@ -12387,7 +13542,7 @@
       "includeDishes": [],
       "note": "",
       "isCompleted": true,
-      "image": "",
+      "image": "https://img-global.cpcdn.com/recipes/3c872698969f85ec/1360x964cq70/banh-cu%E1%BB%91n-homemade-recipe-main-photo.webp",
       "duration": {
         "unfreeze": null,
         "prepare": null,
@@ -12678,7 +13833,7 @@
       "name": "Sốt chấm hải sản",
       "includeDishes": [],
       "note": "",
-      "image": "",
+      "image": "https://cdn.tgdd.vn/Files/2021/05/05/1349943/cach-lam-muoi-ot-xanh-cham-hai-san-ngon-dung-dieu-202105051459349345.jpg",
       "isCompleted": false,
       "duration": {
         "unfreeze": null,
@@ -12957,7 +14112,7 @@
       "includeDishes": [],
       "note": "",
       "isCompleted": true,
-      "image": "",
+      "image": "https://i1-giadinh.vnecdn.net/2023/04/16/Bc11Thnhphm11-1681636259-6445-1681636728.jpg?w=0&h=0&q=100&dpr=2&fit=crop&s=2zyjryzCAWgbIFdeBFwyow",
       "duration": {
         "unfreeze": null,
         "prepare": null,
@@ -13085,7 +14240,7 @@
       "includeDishes": [],
       "note": "Dùng cho 300g thịt",
       "isCompleted": true,
-      "image": "",
+      "image": "https://cdn.sforum.vn/sforum/wp-content/uploads/2023/09/cach-lam-cha-vien-nuong-thumb.jpg",
       "duration": {
         "unfreeze": null,
         "prepare": null,
@@ -13189,7 +14344,7 @@
       "includeDishes": [],
       "note": "",
       "isCompleted": false,
-      "image": "",
+      "image": "https://www.bigc.vn/files/cam-nang-mua-sam-27-11-2023-14-35-21/vao-bep-cung-go-27-11-2023-14-39-10/cach-lam-banh-mi-thit-nuong.jpg",
       "duration": {
         "unfreeze": null,
         "prepare": null,
@@ -13293,7 +14448,7 @@
       "includeDishes": [],
       "note": "",
       "isCompleted": false,
-      "image": "",
+      "image": "https://www.bigc.vn/files/cam-nang-mua-sam-27-11-2023-14-35-21/vao-bep-cung-go-27-11-2023-14-39-10/cach-lam-banh-mi-thit-nuong.jpg",
       "duration": {
         "unfreeze": null,
         "prepare": null,
@@ -14202,7 +15357,7 @@
       "name": "Sườn chua cay Thái",
       "includeDishes": [],
       "note": "",
-      "image": ""
+      "image": "https://cdn.tgdd.vn/Files/2017/03/24/964475/cach-lam-suon-xao-chua-ngot-ngon-bat-bai-vo-cung-don-gian-202212051056278431.jpg"
     }
   ]
 }

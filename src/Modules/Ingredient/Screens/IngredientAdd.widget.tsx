@@ -7,10 +7,12 @@ import { Stack } from "@components/Layout/Stack"
 import { useMessage } from "@components/Message"
 import { SmartForm, useSmartForm } from "@components/SmartForm"
 import { nanoid } from "@reduxjs/toolkit"
-import { INGREDIENT_CATEGORIES, INGREDIENT_PRESERVATION_OPTIONS, INGREDIENT_SHELF_LIFE_OPTIONS, Ingredient, IngredientUnit } from "@store/Models/Ingredient"
+import { INGREDIENT_CATEGORIES, INGREDIENT_PRESERVATION_OPTIONS, INGREDIENT_SHELF_LIFE_OPTIONS, Ingredient, IngredientPriceEstimate, IngredientUnit } from "@store/Models/Ingredient"
 import { addIngredient } from "@store/Reducers/IngredientReducer"
 import { IngredientUnitHelper } from "@common/Helpers/IngredientUnitHelper"
+import { IngredientPriceHelper } from "@common/Helpers/IngredientPriceHelper"
 import { IngredientUnitRulesEditor } from "./IngredientUnitRulesEditor"
+import { IngredientPriceEstimateEditor } from "./IngredientPriceEstimateEditor"
 import { useState } from "react"
 import { useDispatch } from "react-redux"
 
@@ -25,6 +27,7 @@ export const IngredientAddWidget = () => {
     const [conversionValues, setConversionValues] = useState<Partial<Record<IngredientUnit, number>>>(() =>
         IngredientUnitHelper.normalizeRecipeConversions("g", ["g", "kg"], {})
     );
+    const [priceEstimate, setPriceEstimate] = useState<Partial<IngredientPriceEstimate>>(() => ({ amount: 1, unit: "kg" as IngredientUnit, currency: "VND" }));
 
     const addIngredientForm = useSmartForm<Ingredient>({
         defaultValues: {
@@ -37,11 +40,17 @@ export const IngredientAddWidget = () => {
             baseUnit,
             inventoryUnits,
             recipeUnitConversions: conversionValues,
+            priceEstimate: undefined,
         },
         onSubmit: (values) => {
             const error = IngredientUnitHelper.validateRules(values.transformValues);
             if (error) {
                 message.error(error);
+                return;
+            }
+            const priceError = IngredientPriceHelper.validatePriceEstimate(priceEstimate);
+            if (priceError) {
+                message.error(priceError);
                 return;
             }
             dispatch(addIngredient(values.transformValues));
@@ -58,6 +67,7 @@ export const IngredientAddWidget = () => {
             baseUnit: { name: ObjectPropertyHelper.nameof(defaultValues, e => e.baseUnit), noMarkup: true },
             inventoryUnits: { name: ObjectPropertyHelper.nameof(defaultValues, e => e.inventoryUnits), noMarkup: true },
             recipeUnitConversions: { name: ObjectPropertyHelper.nameof(defaultValues, e => e.recipeUnitConversions), noMarkup: true },
+            priceEstimate: { name: ObjectPropertyHelper.nameof(defaultValues, e => e.priceEstimate), noMarkup: true },
         }),
         transformFunc: (values) => ({
             ...values,
@@ -65,6 +75,7 @@ export const IngredientAddWidget = () => {
             baseUnit,
             inventoryUnits: uniqueUnits([...inventoryUnits, baseUnit]),
             recipeUnitConversions: IngredientUnitHelper.normalizeRecipeConversions(baseUnit, recipeUnits, conversionValues),
+            priceEstimate: IngredientPriceHelper.normalizePriceEstimate(priceEstimate),
         })
     })
 
@@ -130,6 +141,11 @@ export const IngredientAddWidget = () => {
             onInventoryUnitsChange={_onInventoryUnitsChange}
             onRecipeUnitsChange={_onRecipeUnitsChange}
             onConversionChange={_onConversionChange}
+        />
+        <IngredientPriceEstimateEditor
+            value={priceEstimate}
+            unitOptions={uniqueUnits([...inventoryUnits, baseUnit])}
+            onChange={setPriceEstimate}
         />
         <Stack fullwidth justify="flex-end">
             <Button onClick={_onSave}>Lưu</Button>
