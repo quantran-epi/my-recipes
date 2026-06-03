@@ -4,7 +4,6 @@ import { Input } from "@components/Form/Input";
 import { Image } from "@components/Image";
 import { Space } from "@components/Layout/Space";
 import { Stack } from "@components/Layout/Stack";
-import { List } from "@components/List";
 import { Modal } from "@components/Modal";
 import { Popconfirm } from "@components/Popconfirm";
 import { Tooltip } from "@components/Tootip";
@@ -14,12 +13,12 @@ import { InventoryHelper } from "@common/Helpers/InventoryHelper";
 import { IngredientUnitHelper } from "@common/Helpers/IngredientUnitHelper";
 import { Ingredient, INGREDIENT_PRESERVATION_OPTIONS, INGREDIENT_SHELF_LIFE_OPTIONS } from "@store/Models/Ingredient";
 import { removeIngredient } from "@store/Reducers/IngredientReducer";
-import { selectIngredients, selectInventoryById } from "@store/Selectors";
+import { selectInventoryById } from "@store/Selectors";
 import { RootState } from "@store/Store";
 import { debounce, sortBy } from "lodash";
 import React, { useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { List as VirtualList, type RowComponentProps } from "react-window";
+import { List as VirtualList, useDynamicRowHeight, type RowComponentProps } from "react-window";
 import VegetablesIcon from "../../../../assets/icons/vegetable.png";
 import { IngredientAddWidget } from "./IngredientAdd.widget";
 import { IngredientEditWidget } from "./IngredientEdit.widget";
@@ -36,10 +35,12 @@ const IngredientRow = ({ index, style, items, onDelete, isAdmin, onSuggest }: Ro
 };
 
 export const IngredientListScreen = () => {
-    const ingredients = useSelector((state: RootState) => state.shared.ingredient.ingredients);    const toggleAddModal = useToggle({ defaultValue: false });
+    const ingredients = useSelector((state: RootState) => state.shared.ingredient.ingredients);
+    const toggleAddModal = useToggle({ defaultValue: false });
     const dispatch = useDispatch();
     const { } = useScreenTitle({ value: "Nguyên liệu", deps: [] });
     const [searchText, setSearchText] = useState("");
+    const rowHeight = useDynamicRowHeight({ defaultRowHeight: 132, key: searchText });
     const { isAdmin } = useAdminMode();
 
     const toggleUseFirst = useToggle({ defaultValue: false });
@@ -78,7 +79,7 @@ export const IngredientListScreen = () => {
         <VirtualList
             rowComponent={IngredientRow}
             rowCount={filteredIngredients.length + (filteredIngredients.length > 0 ? 2 : 0)}
-            rowHeight={57}
+            rowHeight={rowHeight}
             rowProps={{ items: filteredIngredients, onDelete: _onDelete, isAdmin, onSuggest: _onSuggest }}
             style={{ height: window.screen.availHeight - 210 - 80 }}
         />
@@ -119,61 +120,107 @@ export const IngredientItem: React.FunctionComponent<IngredientItemProps> = (pro
     const toggleInventory = useToggle({ defaultValue: false });
 
     const inv = useSelector(selectInventoryById(props.item.id));
-    const totalAmt = InventoryHelper.totalAmount(inv, props.item);
+    const totalAmt = InventoryHelper.totalUsableAmount(inv, props.item);
     const inventoryUnit = IngredientUnitHelper.getBaseUnit(props.item);
     const preservation = INGREDIENT_PRESERVATION_OPTIONS.find(o => o.value === props.item.preservationCondition);
-    const invLabel = props.item.alwaysAvailable ? "Luôn có" : inv ? `${IngredientUnitHelper.formatAmount(totalAmt)} ${inventoryUnit}` : null;
-    const invColor = props.item.alwaysAvailable ? "#52c41a" : !inv ? "#aaa" : totalAmt <= 0 ? "#ff4d4f" : totalAmt <= 2 ? "#faad14" : "#52c41a";
+    const shelfLife = INGREDIENT_SHELF_LIFE_OPTIONS.find(o => o.value === props.item.shelfLife);
+    const nearestExpiry = InventoryHelper.nearestExpiryBatch(inv, props.item);
+    const expiryBadge = nearestExpiry ? InventoryHelper.expiryBadge(nearestExpiry.daysLeft) : null;
+    const inventoryUnits = IngredientUnitHelper.getInventoryUnits(props.item);
+    const recipeUnits = IngredientUnitHelper.getRecipeUnits(props.item);
+    const visibleRecipeUnits = recipeUnits.slice(0, 4).join(", ");
+    const extraRecipeUnitCount = Math.max(0, recipeUnits.length - 4);
+    const inventoryStatus = props.item.alwaysAvailable
+        ? { label: "Luôn có", detail: "Không cần quản lý tồn kho", color: "#389e0d", background: "#f6ffed", border: "#b7eb8f" }
+        : !inv
+            ? { label: "Chưa có tồn kho", detail: "Bấm để nhập lô đầu tiên", color: "#8c8c8c", background: "#fafafa", border: "#d9d9d9" }
+            : totalAmt <= 0
+                ? { label: "Hết khả dụng", detail: "Không còn lô dùng được", color: "#cf1322", background: "#fff1f0", border: "#ffa39e" }
+                : totalAmt <= 2
+                    ? { label: `${IngredientUnitHelper.formatAmount(totalAmt)} ${inventoryUnit}`, detail: "Tồn kho thấp", color: "#d46b08", background: "#fff7e6", border: "#ffd591" }
+                    : { label: `${IngredientUnitHelper.formatAmount(totalAmt)} ${inventoryUnit}`, detail: "Tồn kho ổn", color: "#389e0d", background: "#f6ffed", border: "#b7eb8f" };
+    const railColor = expiryBadge && nearestExpiry?.daysLeft <= 3 ? expiryBadge.color : inventoryStatus.color;
 
     return <React.Fragment>
-        <div style={{ display: 'flex', alignItems: 'center', padding: '8px 0', borderBottom: '1px solid rgba(5,5,5,0.06)', gap: 10 }}>
-            {/* Name */}
-            <div style={{ flex: 1, minWidth: 0 }}>
-                <Tooltip title={props.item.name}>
-                    <Typography.Paragraph style={{ width: 160, marginBottom: 0 }} ellipsis>{props.item.name}</Typography.Paragraph>
-                </Tooltip>
-                <Stack gap={4} align="center">
-                    {props.item.category && (
-                        <Typography.Text type="secondary" style={{ fontSize: 11 }}>{props.item.category}</Typography.Text>
-                    )}
-                    {props.item.shelfLife && (() => {
-                        const opt = INGREDIENT_SHELF_LIFE_OPTIONS.find(o => o.value === props.item.shelfLife);
-                        return opt ? (
-                            <Tooltip title={opt.description}>
-                                <span style={{ fontSize: 11, color: opt.color, fontWeight: 500, cursor: "default" }}>
-                                    {opt.emoji} {opt.label}
-                                </span>
+        <div style={{ padding: "6px 0 8px", boxSizing: "border-box" }}>
+            <div style={{
+                display: "grid",
+                gridTemplateColumns: "5px minmax(0, 1fr)",
+                minHeight: 112,
+                border: "1px solid #e8e8e8",
+                borderRadius: 8,
+                background: "#fff",
+                boxShadow: "0 2px 8px rgba(0,0,0,0.04)",
+                overflow: "hidden",
+                boxSizing: "border-box",
+            }}>
+                <div style={{ background: railColor }} />
+                <div style={{ padding: 10, minWidth: 0, display: "flex", flexDirection: "column", gap: 8 }}>
+                    <div style={{ display: "grid", gridTemplateColumns: "minmax(0, 1fr) auto", gap: 8, alignItems: "start" }}>
+                        <div style={{ minWidth: 0 }}>
+                            <Tooltip title={props.item.name}>
+                                <Typography.Paragraph style={{ marginBottom: 2, fontWeight: 650, lineHeight: "21px" }} ellipsis={{ rows: 2 }}>
+                                    {props.item.name}
+                                </Typography.Paragraph>
                             </Tooltip>
-                        ) : null;
-                    })()}
-                    {preservation && (
-                        <Typography.Text type="secondary" style={{ fontSize: 11 }}>{preservation.label}</Typography.Text>
-                    )}
-                </Stack>
-            </div>
+                            <div style={{ display: "flex", gap: 5, flexWrap: "wrap", alignItems: "center" }}>
+                                {props.item.category && <span style={{ padding: "1px 7px", borderRadius: 999, background: "#f0f5ff", color: "#1d39c4", fontSize: 11, lineHeight: "18px", fontWeight: 600 }}>{props.item.category}</span>}
+                                <span style={{ padding: "1px 7px", borderRadius: 999, background: "#fafafa", color: "#595959", border: "1px solid #f0f0f0", fontSize: 11, lineHeight: "18px" }}>Gốc: {inventoryUnit}</span>
+                                {shelfLife && <Tooltip title={shelfLife.description}>
+                                    <span style={{ padding: "1px 7px", borderRadius: 999, background: `${shelfLife.color}14`, color: shelfLife.color, border: `1px solid ${shelfLife.color}33`, fontSize: 11, lineHeight: "18px", fontWeight: 600 }}>{shelfLife.emoji} {shelfLife.label}</span>
+                                </Tooltip>}
+                                {preservation && <Tooltip title={preservation.description}>
+                                    <span style={{ padding: "1px 7px", borderRadius: 999, background: "#f9f0ff", color: "#531dab", border: "1px solid #efdbff", fontSize: 11, lineHeight: "18px" }}>{preservation.label}</span>
+                                </Tooltip>}
+                            </div>
+                        </div>
 
-            {/* Inventory badge */}
-            <Tooltip title={props.item.alwaysAvailable ? "Luôn có sẵn, không cần quản lý tồn kho" : inv ? `Tồn kho: ${totalAmt} ${inv.unit}` : "Chưa cập nhật tồn kho"}>
-                <div
-                    onClick={toggleInventory.show}
-                    style={{
-                        padding: "2px 10px", borderRadius: 12, fontSize: 12, fontWeight: 600,
-                        background: invColor + "22", color: invColor, cursor: "pointer",
-                        border: `1px solid ${invColor}44`, whiteSpace: "nowrap", flexShrink: 0,
-                    }}
-                >
-                    {invLabel ?? "—"}
+                        <div style={{ display: "flex", alignItems: "center", gap: 4, flexShrink: 0 }}>
+                            {props.isAdmin && <Button onClick={toggleEdit.show} icon={<EditOutlined />} style={{ width: 34, paddingInline: 0 }} />}
+                            {props.isAdmin && (
+                                <Popconfirm title="Xóa?" onConfirm={() => props.onDelete(props.item)}>
+                                    <Button danger icon={<DeleteOutlined />} style={{ width: 34, paddingInline: 0 }} />
+                                </Popconfirm>
+                            )}
+                        </div>
+                    </div>
+
+                    <div style={{ display: "grid", gridTemplateColumns: "minmax(120px, 0.92fr) minmax(0, 1.08fr)", gap: 8, alignItems: "stretch" }}>
+                        <button
+                            type="button"
+                            onClick={toggleInventory.show}
+                            style={{
+                                border: `1px solid ${inventoryStatus.border}`,
+                                background: inventoryStatus.background,
+                                borderRadius: 8,
+                                padding: "7px 9px",
+                                textAlign: "left",
+                                cursor: "pointer",
+                                minWidth: 0,
+                            }}
+                        >
+                            <Typography.Text type="secondary" style={{ display: "block", fontSize: 11, lineHeight: "14px" }}>Tồn kho khả dụng</Typography.Text>
+                            <Typography.Text strong style={{ display: "block", color: inventoryStatus.color, fontSize: 14, lineHeight: "19px", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                                <DatabaseOutlined /> {inventoryStatus.label}
+                            </Typography.Text>
+                            <Typography.Text type="secondary" style={{ display: "block", fontSize: 11, lineHeight: "14px", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{inventoryStatus.detail}</Typography.Text>
+                        </button>
+
+                        <div style={{ minWidth: 0, display: "flex", flexDirection: "column", justifyContent: "center", gap: 4, border: "1px solid #f0f0f0", borderRadius: 8, background: "#fafafa", padding: "7px 9px" }}>
+                            <Typography.Text type="secondary" style={{ fontSize: 11, lineHeight: "14px" }}>Đơn vị công thức</Typography.Text>
+                            <Typography.Text strong style={{ fontSize: 13, lineHeight: "18px", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                                {visibleRecipeUnits}{extraRecipeUnitCount > 0 ? ` +${extraRecipeUnitCount}` : ""}
+                            </Typography.Text>
+                            <Typography.Text type="secondary" style={{ fontSize: 11, lineHeight: "14px", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                                Nhập kho: {inventoryUnits.join(", ")}
+                            </Typography.Text>
+                        </div>
+                    </div>
+
+                    {expiryBadge && <Typography.Text style={{ color: expiryBadge.color, fontSize: 12, lineHeight: "16px" }}>
+                        <FireOutlined style={{ fontSize: 11 }} /> Lô gần nhất: {expiryBadge.label}
+                    </Typography.Text>}
                 </div>
-            </Tooltip>
-
-            {/* Action buttons */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: 4, flexShrink: 0 }}>
-                {props.isAdmin && <Button size="small" onClick={toggleEdit.show} icon={<EditOutlined />} />}
-                {props.isAdmin && (
-                    <Popconfirm title="Xóa?" onConfirm={() => props.onDelete(props.item)}>
-                        <Button size="small" danger icon={<DeleteOutlined />} />
-                    </Popconfirm>
-                )}
             </div>
         </div>
 
