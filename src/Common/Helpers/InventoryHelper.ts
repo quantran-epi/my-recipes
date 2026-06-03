@@ -41,14 +41,23 @@ const getShelfLifeDays = (
     return PRESERVATION_SHELF_LIFE_DAYS[shelfLife]?.[preservationCondition] ?? SHELF_LIFE_DAYS[shelfLife];
 };
 
+const roundInventoryAmount = (value: number): number => {
+    if (!isFinite(value)) return 0;
+    return Math.round(value);
+};
+
 export const InventoryHelper = {
+    roundAmount(value: number): number {
+        return roundInventoryAmount(value);
+    },
+
     isAlwaysAvailable(ingredient?: Ingredient): boolean {
         return ingredient?.alwaysAvailable === true;
     },
 
     /** Total amount across all batches */
     totalAmount(inv: IngredientInventory | undefined, ingredient?: Ingredient): number {
-        return IngredientUnitHelper.totalInventoryAmount(inv, ingredient);
+        return roundInventoryAmount(IngredientUnitHelper.totalInventoryAmount(inv, ingredient));
     },
 
     /** Total amount from batches that are not expired. Batches without expiry data are treated as usable. */
@@ -57,27 +66,28 @@ export const InventoryHelper = {
         if (!inv.batches) {
             const legacyAmount = (inv as any).amount ?? 0;
             const legacyUnit = inv.unit ?? IngredientUnitHelper.getBaseUnit(ingredient);
-            return IngredientUnitHelper.toBaseAmount(ingredient, legacyAmount, legacyUnit, IngredientUnitHelper.getBaseUnit(ingredient, [legacyUnit])) ?? legacyAmount;
+            return roundInventoryAmount(IngredientUnitHelper.toBaseAmount(ingredient, legacyAmount, legacyUnit, IngredientUnitHelper.getBaseUnit(ingredient, [legacyUnit])) ?? legacyAmount);
         }
 
         const baseUnit = IngredientUnitHelper.getBaseUnit(ingredient, [inv.unit].filter(Boolean) as any);
-        return inv.batches.reduce((sum, batch) => {
+        const total = inv.batches.reduce((sum, batch) => {
             if (InventoryHelper.isBatchExpired(batch, ingredient)) return sum;
             const unit = IngredientUnitHelper.getBatchUnit(inv, batch, ingredient);
             const converted = IngredientUnitHelper.toBaseAmount(ingredient, batch.amount, unit, baseUnit);
             return sum + (converted ?? batch.amount);
         }, 0);
+        return roundInventoryAmount(total);
     },
 
     /** Amount available for coverage checks. Always-available ingredients satisfy their required amount. */
     availableAmount(inv: IngredientInventory | undefined, ingredient: Ingredient | undefined, requiredAmount: number): number {
-        if (InventoryHelper.isAlwaysAvailable(ingredient)) return requiredAmount;
+        if (InventoryHelper.isAlwaysAvailable(ingredient)) return roundInventoryAmount(requiredAmount);
         return InventoryHelper.totalUsableAmount(inv, ingredient);
     },
 
     isCovered(inv: IngredientInventory | undefined, ingredient: Ingredient | undefined, requiredAmount: number): boolean {
         if (InventoryHelper.isAlwaysAvailable(ingredient)) return true;
-        return InventoryHelper.availableAmount(inv, ingredient, requiredAmount) >= requiredAmount;
+        return InventoryHelper.availableAmount(inv, ingredient, requiredAmount) >= roundInventoryAmount(requiredAmount);
     },
 
     /** Returns estimated expiry as a dayjs for a single batch, or null if missing data */

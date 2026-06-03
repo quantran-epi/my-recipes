@@ -161,14 +161,14 @@ export const CostEstimateHelper = {
                 const converted = IngredientUnitHelper.toBaseAmount(ingredient, item.amount, item.unit, unit);
                 return sum + (converted ?? IngredientUnitHelper.parseAmount(item.amount));
             }, 0);
-            const requiredAmount = getAmount(group.filter(item => item.required !== false));
-            const optionalAmount = getAmount(group.filter(item => item.required === false));
-            const amount = requiredAmount + optionalAmount;
+            const requiredAmount = InventoryHelper.roundAmount(getAmount(group.filter(item => item.required !== false)));
+            const optionalAmount = InventoryHelper.roundAmount(getAmount(group.filter(item => item.required === false)));
+            const amount = InventoryHelper.roundAmount(requiredAmount + optionalAmount);
             const availableAmount = InventoryHelper.availableAmount(options.inventoryItems?.[ingredientId], ingredient, amount);
-            const requiredMissingAmount = InventoryHelper.isAlwaysAvailable(ingredient) ? 0 : Math.max(0, requiredAmount - availableAmount);
+            const requiredMissingAmount = InventoryHelper.isAlwaysAvailable(ingredient) ? 0 : InventoryHelper.roundAmount(Math.max(0, requiredAmount - availableAmount));
             const remainingAvailableForOptional = Math.max(0, availableAmount - requiredAmount);
-            const optionalMissingAmount = InventoryHelper.isAlwaysAvailable(ingredient) ? 0 : Math.max(0, optionalAmount - remainingAvailableForOptional);
-            const missingAmount = requiredMissingAmount + optionalMissingAmount;
+            const optionalMissingAmount = InventoryHelper.isAlwaysAvailable(ingredient) ? 0 : InventoryHelper.roundAmount(Math.max(0, optionalAmount - remainingAvailableForOptional));
+            const missingAmount = InventoryHelper.roundAmount(requiredMissingAmount + optionalMissingAmount);
 
             if (missingAmount > 0) {
                 CostEstimateHelper.addAmount(estimate.missing, ingredient, missingAmount, unit);

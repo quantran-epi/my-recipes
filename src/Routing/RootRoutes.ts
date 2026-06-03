@@ -2,9 +2,19 @@ import IngredientRoutes from '@modules/Ingredient/Routing/IngredientRouteConfig'
 import DishesRoutes from '@modules/Dishes/Routing/DishesRouteConfig';
 import ShoppingListRoutes from '@modules/ShoppingList/Routing/ShoppingListRouteConfig';
 import ScheduledMealRoutes from '@modules/ScheduledMeal/Routing/ScheduledMealRouteConfig';
+import { RouteHelpers } from '@common/Helpers/RouteHelper';
+
+const ExpensePlanner = (dishId?: string, targetServings?: number) => {
+    if (!dishId) return RouteHelpers.CreateRoute('/expense-planner');
+    return RouteHelpers.CreateRoute('/expense-planner', [], {
+        dish: dishId,
+        ...(targetServings ? { servings: String(targetServings) } : {}),
+    });
+}
 
 const AuthorizedRoutes = {
     Root: () => "/",
+    ExpensePlanner,
     IngredientRoutes,
     DishesRoutes,
     ShoppingListRoutes,

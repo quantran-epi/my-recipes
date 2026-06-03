@@ -141,7 +141,7 @@ export const IngredientInventoryWidget: React.FC<IngredientInventoryWidgetProps>
         onDone?.();
     };
 
-    const totalAmount = IngredientUnitHelper.totalInventoryAmount({
+    const totalAmount = InventoryHelper.totalAmount({
         unit: baseUnit,
         lastUpdated: new Date(),
         batches: batches.map(_toInventoryBatch),
@@ -357,7 +357,7 @@ export const IngredientInventoryWidget: React.FC<IngredientInventoryWidgetProps>
             <Divider style={{ margin: "8px 0" }} />
             <Stack justify="space-between" align="center" style={{ marginBottom: 10 }}>
                 <Typography.Text type="secondary" style={{ fontSize: 12 }}>
-                    Tổng: <Typography.Text strong>{totalAmount} {unit}</Typography.Text>
+                    Tổng: <Typography.Text strong>{IngredientUnitHelper.formatAmount(totalAmount)} {unit}</Typography.Text>
                     {batches.filter(b => b.amount > 0).length > 1 && (
                         <Typography.Text type="secondary" style={{ fontSize: 11, marginLeft: 6 }}>
                             ({batches.filter(b => b.amount > 0).length} lô)

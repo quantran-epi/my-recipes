@@ -3,6 +3,7 @@ import { Button } from "@components/Button"
 import { ImageInput } from "@components/Form/ImageInput"
 import { Input, TextArea } from "@components/Form/Input"
 import { Option, Select } from "@components/Form/Select"
+import { ServingSizeInput } from "@components/Form/ServingSizeInput"
 import { Stack } from "@components/Layout/Stack"
 import { useMessage } from "@components/Message"
 import { SmartForm, useSmartForm } from "@components/SmartForm"
@@ -11,8 +12,6 @@ import { DISH_TAGS, Dishes } from "@store/Models/Dishes"
 import { addDishes } from "@store/Reducers/DishesReducer"
 import { RootState } from "@store/Store"
 import { useDispatch, useSelector } from "react-redux"
-
-import { InputNumber } from '@components/Form/InputNumber'
 
 export const DishesAddWidget = () => {
     const dispatch = useDispatch();
@@ -72,7 +71,7 @@ export const DishesAddWidget = () => {
             <Input placeholder="Nhập tên" autoFocus />
         </SmartForm.Item>
         <SmartForm.Item {...addDishesForm.itemDefinitions.baseServings}>
-            <InputNumber min={1} precision={0} style={{ width: '100%' }} />
+            <ServingSizeInput style={{ width: '100%' }} />
         </SmartForm.Item>
         <SmartForm.Item {...addDishesForm.itemDefinitions.includeDishes}>
             <Select

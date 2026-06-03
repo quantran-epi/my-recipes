@@ -3,6 +3,7 @@ import { Button } from "@components/Button"
 import { ImageInput } from "@components/Form/ImageInput"
 import { Input, TextArea } from "@components/Form/Input"
 import { Option, Select } from "@components/Form/Select"
+import { ServingSizeInput } from "@components/Form/ServingSizeInput"
 import { Switch } from "@components/Form/Switch"
 import { Stack } from "@components/Layout/Stack"
 import { useMessage } from "@components/Message"
@@ -13,8 +14,6 @@ import { ShoppingListIngredientHelpers, updateShoppingListIngredientDishData } f
 import { RootState } from "@store/Store"
 import { range } from "lodash"
 import { useDispatch, useSelector } from "react-redux"
-
-import { InputNumber } from '@components/Form/InputNumber'
 
 export const DishesEditWidget = ({ item, onDone }) => {
     const dispatch = useDispatch();
@@ -58,7 +57,7 @@ export const DishesEditWidget = ({ item, onDone }) => {
             <Input placeholder="Nhập tên" autoFocus />
         </SmartForm.Item>
         <SmartForm.Item {...editDishesForm.itemDefinitions.baseServings}>
-            <InputNumber min={1} precision={0} style={{ width: '100%' }} />
+            <ServingSizeInput style={{ width: '100%' }} />
         </SmartForm.Item>
         <SmartForm.Item {...editDishesForm.itemDefinitions.includeDishes}>
             <Select

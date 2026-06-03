@@ -1,6 +1,7 @@
 import { EditOutlined, QuestionCircleOutlined } from "@ant-design/icons";
 import { IngredientUnitHelper } from "@common/Helpers/IngredientUnitHelper";
 import { InventoryHelper } from "@common/Helpers/InventoryHelper";
+import { ServingSizeInput } from "@components/Form/ServingSizeInput";
 import { Button } from "@components/Button";
 import { Empty } from "@components/Empty";
 import { Image } from "@components/Image";
@@ -30,7 +31,6 @@ import { DishCostEstimateWidget } from "./DishCostEstimate.widget";
 import { DishImageWidget } from "./DishImage.widget";
 
 import { DishServingHelper } from '@common/Helpers/DishServingHelper';
-import { InputNumber } from 'antd';
 
 type DishesReadonlyDetailModalProps = {
     dish: Dishes;
@@ -78,12 +78,14 @@ type DishesReadonlyDetailWidgetProps = {
 export const DishesReadonlyDetailWidget: React.FunctionComponent<DishesReadonlyDetailWidgetProps> = ({ dish, targetServings: initialTargetServings }) => {
     const dishes = useSelector(selectDishes);
     const [selectedIncludedDish, setSelectedIncludedDish] = useState<Dishes>();
+    const [showServingPicker, setShowServingPicker] = useState(false);
     const baseServings = DishServingHelper.getBaseServings(dish);
     const [targetServings, setTargetServings] = useState<number>(() => DishServingHelper.getTargetServings(dish, initialTargetServings));
     const scaledIngredients = useMemo(() => DishServingHelper.scaleIngredientAmounts(dish, targetServings), [dish, targetServings]);
 
     useEffect(() => {
         setTargetServings(DishServingHelper.getTargetServings(dish, initialTargetServings));
+        setShowServingPicker(false);
     }, [dish.id, baseServings, initialTargetServings]);
 
     const includedDishes = useMemo(() => {
@@ -110,28 +112,28 @@ export const DishesReadonlyDetailWidget: React.FunctionComponent<DishesReadonlyD
         <DishImageWidget src={dish.image} height={180} borderRadius={8} style={{ marginBottom: 12 }} />
 
         <Box style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            gap: 8,
             padding: '8px 10px',
             border: '1px solid #f0f0f0',
             borderRadius: 8,
             background: '#fafafa',
             marginBottom: 12,
         }}>
-            <div>
-                <Typography.Text strong style={{ display: 'block' }}>Khẩu phần</Typography.Text>
-                <Typography.Text type='secondary' style={{ fontSize: 12 }}>Gốc {baseServings} phần</Typography.Text>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8, width: '100%' }}>
+                <div style={{ minWidth: 0 }}>
+                    <Typography.Text strong style={{ display: 'block' }}>Khẩu phần</Typography.Text>
+                    <Typography.Text type='secondary' style={{ display: 'block', fontSize: 12 }}>
+                        Đang tính {targetServings} phần · gốc {baseServings} phần
+                    </Typography.Text>
+                </div>
+                <Button size='small' type='link' onClick={() => setShowServingPicker(value => !value)} style={{ paddingInline: 0, whiteSpace: 'nowrap' }}>
+                    {showServingPicker ? 'Ẩn' : 'Đổi' }
+                </Button>
             </div>
-            <InputNumber
-                min={1}
-                precision={0}
-                value={targetServings}
-                onChange={(value) => setTargetServings(DishServingHelper.normalizeTargetServings(value, baseServings))}
-                addonAfter='phần'
-                style={{ width: 118 }}
-            />
+            {showServingPicker && <ServingSizeInput
+                    value={targetServings}
+                    onChange={(value) => setTargetServings(DishServingHelper.normalizeTargetServings(value, baseServings))}
+                    style={{ width: 178, marginTop: 8 }}
+                />}
         </Box>
 
         <DishCostEstimateWidget dish={dish} targetServings={targetServings} />

@@ -38,6 +38,7 @@ import DishesIcon from "../../assets/icons/noodles.png";
 import ShoppingListIcon from "../../assets/icons/shoppingList.png";
 import IngredientIcon from "../../assets/icons/vegetable.png";
 import SuggesterIcon from "../../assets/icons/cooking.png";
+import BudgetIcon from "../../assets/icons/budget.png";
 import { RootRoutes } from "./RootRoutes";
 
 const layoutStyles: React.CSSProperties = {
@@ -55,6 +56,7 @@ export const MasterPage = () => {
             case "Thực đơn": return MealsIcon;
             case "Lịch mua sắm": return ShoppingListIcon;
             case "Nguyên liệu": return IngredientIcon;
+            case "Kế hoạch chi phí": return BudgetIcon;
             case 'Tổng quan': return LogoIcon;
             default: return null;
         }
@@ -205,6 +207,12 @@ const SidebarDrawer = () => {
                                 <img src={DishesIcon} width={24} />
                                 <span>Món ăn</span>
                             </Flex>, onClick: () => onNavigate(RootRoutes.AuthorizedRoutes.DishesRoutes.List())
+                        },
+                        {
+                            key: "expensePlanner", label: <Flex align="center" gap={10}>
+                                <img src={BudgetIcon} width={24} />
+                                <span>Kế hoạch chi phí</span>
+                            </Flex>, onClick: () => onNavigate(RootRoutes.AuthorizedRoutes.ExpensePlanner())
                         },
                         {
                             key: "shoppingList", label: <Flex align="center" gap={10}>

@@ -1,5 +1,6 @@
 import { ArrowLeftOutlined, ArrowRightOutlined, CheckCircleOutlined, ShoppingCartOutlined, PlayCircleOutlined } from "@ant-design/icons";
 import { Button } from "@components/Button";
+import { ServingSizeInput } from "@components/Form/ServingSizeInput";
 import { Stack } from "@components/Layout/Stack";
 import { Tag } from "@components/Tag";
 import { Typography } from "@components/Typography";
@@ -23,7 +24,6 @@ import { FinishCookingWidget } from "./FinishCooking.widget";
 import { RootRoutes } from "@routing/RootRoutes";
 
 import { DishServingHelper } from '@common/Helpers/DishServingHelper';
-import { InputNumber } from 'antd';
 
 type CookingIngredientRow = {
     ingredient: Ingredient;
@@ -87,9 +87,10 @@ export const CookingSessionWidget: React.FunctionComponent<CookingSessionWidgetP
             const ingredient = allIngredients.find(i => i.id === ingredientId);
             if (!ingredient) return null;
             const inv = inventoryItems[ingredientId];
-            const inStock = InventoryHelper.availableAmount(inv, ingredient, total);
-            const lacking = Math.max(0, total - inStock);
-            return { ingredient, required: total, unit, inStock, lacking, sufficient: inStock >= total } as CookingIngredientRow;
+            const required = InventoryHelper.roundAmount(total);
+            const inStock = InventoryHelper.availableAmount(inv, ingredient, required);
+            const lacking = InventoryHelper.roundAmount(Math.max(0, required - inStock));
+            return { ingredient, required, unit, inStock, lacking, sufficient: inStock >= required } as CookingIngredientRow;
         }).filter(Boolean) as CookingIngredientRow[];
     }, [dish, allDishes, allIngredients, inventoryItems, targetServings]);
 
@@ -205,6 +206,7 @@ export const CookingSessionWidget: React.FunctionComponent<CookingSessionWidgetP
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',
+            flexWrap: 'wrap',
             gap: 8,
             marginTop: 12,
             padding: '8px 10px',
@@ -216,13 +218,10 @@ export const CookingSessionWidget: React.FunctionComponent<CookingSessionWidgetP
                 <Typography.Text strong style={{ display: 'block' }}>Khẩu phần</Typography.Text>
                 <Typography.Text type='secondary' style={{ fontSize: 12 }}>Gốc {baseServings} phần</Typography.Text>
             </div>
-            <InputNumber
-                min={1}
-                precision={0}
+            <ServingSizeInput
                 value={targetServings}
                 onChange={(value) => setTargetServings(DishServingHelper.normalizeTargetServings(value, baseServings))}
-                addonAfter='phần'
-                style={{ width: 118 }}
+                style={{ width: 178, flexShrink: 0 }}
             />
         </div>
 

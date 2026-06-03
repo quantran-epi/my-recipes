@@ -15,12 +15,14 @@ import { ShoppingListScreen } from "@modules/ShoppingList/Screens/ShoppingList.s
 import { DashboardScreen } from "@modules/Home/Screens/Dashboard.screen";
 import { ScheduledMealRouter } from "@modules/ScheduledMeal/Routing/ScheduledMealRouter";
 import { ScheduledMealListScreen } from "@modules/ScheduledMeal/Screens/ScheduledMealList.screen";
+import { DishExpensePlannerScreen } from "@modules/Dishes/Screens/DishExpensePlanner.screen";
 
 export const RootRouter = () => {
     return <BrowserRouter basename="/my-recipes">
         <Routes>
             <Route path={RootRoutes.AuthorizedRoutes.Root()} element={<MasterPage />}>
                 <Route index element={<DashboardScreen />} />
+                <Route path={RootRoutes.AuthorizedRoutes.ExpensePlanner()} element={<DishExpensePlannerScreen />} />
                 <Route path={RootRoutes.AuthorizedRoutes.IngredientRoutes.Root()} element={<IngredientRouter />}>
                     <Route path={RootRoutes.AuthorizedRoutes.IngredientRoutes.List()} element={<IngredientListScreen />} />
                     <Route path={RootRoutes.AuthorizedRoutes.IngredientRoutes.Detail()} element={<IngredientDetailScreen />} />

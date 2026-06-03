@@ -1,9 +1,9 @@
 import { DishServingHelper } from '@common/Helpers/DishServingHelper';
+import { ServingSizeInput } from '@components/Form/ServingSizeInput';
 import { Box } from '@components/Layout/Box';
 import { Stack } from '@components/Layout/Stack';
 import { Typography } from '@components/Typography';
 import { Dishes } from '@store/Models/Dishes';
-import { InputNumber } from 'antd';
 import React from 'react';
 
 type DishServingSelectorProps = {
@@ -57,7 +57,7 @@ export const DishServingSelector: React.FunctionComponent<DishServingSelectorPro
 
                 return <div key={dish.id} style={{
                     display: 'grid',
-                    gridTemplateColumns: 'minmax(0, 1fr) 104px',
+                    gridTemplateColumns: 'minmax(0, 1fr) 178px',
                     gap: 8,
                     alignItems: 'center',
                 }}>
@@ -69,12 +69,9 @@ export const DishServingSelector: React.FunctionComponent<DishServingSelectorPro
                             Gốc {baseServings} phần
                         </Typography.Text>
                     </div>
-                    <InputNumber
-                        min={1}
-                        precision={0}
+                    <ServingSizeInput
                         value={targetServings}
                         onChange={(nextValue) => _onServingChange(dish.id, nextValue)}
-                        addonAfter='phần'
                         style={{ width: '100%' }}
                     />
                 </div>
