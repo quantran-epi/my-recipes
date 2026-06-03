@@ -35,7 +35,7 @@ export const ShoppingListEditWidget: FunctionComponent<ShoppingListEditWidgetPro
         },
         onSubmit: (values) => {
             dispatch(editShoppingList(values.transformValues));
-            message.success();
+            message.success("Đã lưu lịch mua sắm");
             editShoppingListForm.reset();
             onDone();
         },

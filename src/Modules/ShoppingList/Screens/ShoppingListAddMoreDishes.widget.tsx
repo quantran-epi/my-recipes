@@ -2,6 +2,7 @@ import { ObjectPropertyHelper } from "@common/Helpers/ObjectProperty";
 import { Button } from "@components/Button";
 import { Option, Select } from "@components/Form/Select";
 import { Stack } from "@components/Layout/Stack";
+import { useMessage } from "@components/Message";
 import { SmartForm, useSmartForm } from "@components/SmartForm";
 import { ShoppingList } from "@store/Models/ShoppingList";
 import { ShoppingListAddDishesParams, addDishesToShoppingList } from "@store/Reducers/ShoppingListReducer";
@@ -19,6 +20,7 @@ type ShoppingListAddMoreDishesWidgetProps = {
 
 export const ShoppingListAddMoreDishesWidget: React.FunctionComponent<ShoppingListAddMoreDishesWidgetProps> = (props) => {
     const dispatch = useDispatch();
+    const message = useMessage();
     const dishes = useSelector((state: RootState) => state.shared.dishes.dishes);
     const [selectedDishIds, setSelectedDishIds] = useState<string[]>(props.shoppingList.dishes ?? []);
     const [dishServings, setDishServings] = useState<Record<string, number>>(() => normalizeDishServings(props.shoppingList.dishes ?? [], dishes, props.shoppingList.dishServings ?? {}));
@@ -35,6 +37,7 @@ export const ShoppingListAddMoreDishesWidget: React.FunctionComponent<ShoppingLi
                 ...values.transformValues,
                 dishServings: normalizedDishServings,
             }));
+            message.success("Đã cập nhật món trong lịch mua sắm");
             addDishesToShoppingListForm.reset();
             props.onDone();
         },

@@ -80,6 +80,7 @@ type ShoppingListCostMetricProps = {
     summary: CostEstimateSummary;
     primary?: boolean;
     emptyText?: string;
+    testId?: string;
 }
 
 type CompletionReviewValue = {
@@ -182,8 +183,10 @@ const getShoppingListIngredientPriceEstimate = (
 
     const status = getIngredientGroupStatus(group, ingredient, inventory);
     const explicitBoughtAmount = group.boughtAmount ?? 0;
-    const amount = explicitBoughtAmount > 0 ? explicitBoughtAmount : status.needToBuy;
-    const unit = explicitBoughtAmount > 0 ? (group.boughtUnit ?? status.unit) : status.unit;
+    const amount = explicitBoughtAmount > 0
+        ? Math.max(0, status.needToBuy - status.boughtBaseAmount)
+        : group.isDone ? 0 : status.needToBuy;
+    const unit = status.unit;
     if (amount <= 0) return null;
 
     return {
@@ -334,7 +337,7 @@ export const ShoppingListDetailWidget: React.FunctionComponent<ShoppingListDetai
         <Tabs defaultActiveKey="ingredients" items={[
             {
                 key: "ingredients", icon: <Image src={IngredientIcon} preview={false} width={22} style={{ marginBottom: 3 }} />, label: "Nguyên liệu " + `(${props.shoppingList.ingredients.length})`,
-                children: <React.Fragment>
+                children: <div data-testid="shopping-list-ingredients-tab">
                     <Stack fullwidth justify="space-between" style={{ marginBottom: 10 }}>
                         <Space>
                             <Image src={ChecklistIcon} preview={false} width={18} style={{ marginBottom: 3 }} />
@@ -373,11 +376,11 @@ export const ShoppingListDetailWidget: React.FunctionComponent<ShoppingListDetai
                             />
                         }
                     </Box>
-                </React.Fragment>
+                </div>
             },
             {
                 key: "cost", icon: <WalletOutlined />, label: "Chi phí",
-                children: <Box>
+                children: <Box data-testid="shopping-list-cost-tab">
                     <div style={{ display: "flex", flexDirection: "column", gap: 10, width: "100%", boxSizing: "border-box" }}>
                         <ShoppingListCostSummaryWidget summary={costSummary} />
                         <ShoppingListCompletionAuditWidget shoppingList={props.shoppingList} />
@@ -386,7 +389,7 @@ export const ShoppingListDetailWidget: React.FunctionComponent<ShoppingListDetai
             },
             {
                 key: "dishes", icon: <Image src={DishesIcon} preview={false} width={22} style={{ marginBottom: 3 }} />, label: "Món ăn " + `(${props.shoppingList.dishes.length})`,
-                children: <Box>
+                children: <Box data-testid="shopping-list-dishes-tab">
                     <List
                         size="small"
                         style={{ overflowX: "auto" }}
@@ -397,7 +400,7 @@ export const ShoppingListDetailWidget: React.FunctionComponent<ShoppingListDetai
             },
             {
                 key: "meals", icon: <Image src={MealsIcon} preview={false} width={22} style={{ marginBottom: 3 }} />, label: "Thực đơn " + `(${props.shoppingList.scheduledMeals.length})`,
-                children: <Box>
+                children: <Box data-testid="shopping-list-meals-tab">
                     <List
                         size="small"
                         style={{ overflowX: "auto" }}
@@ -457,11 +460,13 @@ export const ShoppingListDetailWidget: React.FunctionComponent<ShoppingListDetai
                 </Space>
             </div>}
         >
+            <div data-testid="purchase-completion-review">
             <PurchaseCompletionReviewWidget
                 plans={boughtImportPlans}
                 values={completionReviewValues}
                 onPatch={_patchCompletionReviewValue}
             />
+            </div>
         </Modal>
     </React.Fragment >
 
@@ -632,8 +637,8 @@ const formatCostSummary = (summary: CostEstimateSummary, emptyText = "0đ"): str
     return IngredientPriceHelper.formatRange(summary);
 }
 
-const ShoppingListCostMetric: React.FunctionComponent<ShoppingListCostMetricProps> = ({ label, description, summary, primary, emptyText }) => {
-    return <div style={{
+const ShoppingListCostMetric: React.FunctionComponent<ShoppingListCostMetricProps> = ({ label, description, summary, primary, emptyText, testId }) => {
+    return <div data-testid={testId} style={{
         minWidth: 0,
         minHeight: 62,
         padding: "12px",
@@ -681,6 +686,7 @@ const ShoppingListCostSummaryWidget: React.FunctionComponent<{ summary: Shopping
             </div>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", gap: 10, width: "100%" }}>
                 <ShoppingListCostMetric
+                    testId="shopping-cost-cart"
                     label="Giỏ mua"
                     description="Theo lượng còn thiếu"
                     summary={summary.cart}
@@ -688,12 +694,14 @@ const ShoppingListCostSummaryWidget: React.FunctionComponent<{ summary: Shopping
                     emptyText="0đ"
                 />
                 <ShoppingListCostMetric
+                    testId="shopping-cost-recipe"
                     label="Theo công thức"
                     description="Tổng lượng món cần"
                     summary={summary.recipe}
                     emptyText="Chưa có giá"
                 />
                 {CostEstimateHelper.hasAny(summary.bought) && <ShoppingListCostMetric
+                    testId="shopping-cost-bought"
                     label="Đã mua"
                     description="Theo lượng đã đánh dấu"
                     summary={summary.bought}
@@ -720,6 +728,7 @@ const ShoppingListIngredientPanelItem: React.FunctionComponent<ShoppingListIngre
     const inventory = inventoryItems[props.item.ingredientId];
     const status = getIngredientGroupStatus(props.item, ingredient, inventory);
     const priceEstimate = getShoppingListIngredientPriceEstimate(props.item, ingredient, inventory);
+    const remainingToBuy = priceEstimate?.amount ?? 0;
     const effectiveIsDone = props.item.isDone;
     const inventoryUnits = IngredientUnitHelper.getInventoryUnits(ingredient);
     const boughtUnit = props.item.boughtUnit ?? status.unit;
@@ -836,7 +845,7 @@ const ShoppingListIngredientPanelItem: React.FunctionComponent<ShoppingListIngre
         </div>;
     }
 
-    return <List.Item style={{ padding: 0, borderBottom: "none" }} actions={[]}>
+    return <List.Item data-testid={`shopping-list-ingredient-${props.item.ingredientId}`} style={{ padding: 0, borderBottom: "none" }} actions={[]}>
         <div
             style={{
                 width: "100%",
@@ -883,7 +892,7 @@ const ShoppingListIngredientPanelItem: React.FunctionComponent<ShoppingListIngre
                             {status.isAlwaysAvailable
                                 ? _statusPill("Luôn có", "green")
                                 : status.inStock > 0 && _statusPill(`Có ${IngredientUnitHelper.formatAmount(status.inStock)}${status.unit}`, "green")}
-                            {status.needToBuy > 0 && _statusPill(`Mua ${IngredientUnitHelper.formatAmount(status.needToBuy)}${status.unit}`, "orange")}
+                            {remainingToBuy > 0 && priceEstimate && _statusPill(`Mua ${IngredientUnitHelper.formatAmount(remainingToBuy)}${priceEstimate.unit}`, "orange")}
                             {props.item.boughtAmount > 0 && _statusPill(`Đã mua ${props.item.boughtAmount}${boughtUnit}`, "purple")}
                             {status.inventoryCovered && !props.item.isDone && !status.isAlwaysAvailable && _statusPill("Đủ hàng", "green")}
                             {priceEstimate?.range && _statusPill(`~ ${IngredientPriceHelper.formatRange(priceEstimate.range)}`, "gray")}
@@ -1069,7 +1078,7 @@ export const ShoppingListDishesItem: React.FunctionComponent<ShoppingListDishesI
         ? IngredientPriceHelper.formatRange(costEstimate.required)
         : null;
 
-    return <List.Item style={{ padding: "6px 0" }}>
+    return <List.Item data-testid={`shopping-list-dish-${props.dish.id}`} style={{ padding: "6px 0" }}>
         <Button
             fullwidth
             style={{

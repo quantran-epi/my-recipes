@@ -56,7 +56,7 @@ export const DishesAddIngredientWidget: React.FunctionComponent<DishesAddIngredi
                 dishId: props.dish.id,
                 ingres: [values.transformValues]
             }));
-            message.success();
+            message.success("Đã thêm nguyên liệu vào món");
             addIngreToDishForm.reset();
             setSelectedIngredientId("");
             props.onDone?.();

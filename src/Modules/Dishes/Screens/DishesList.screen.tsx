@@ -224,7 +224,7 @@ export const DishesItem: React.FunctionComponent<DishesItemProps> = (props) => {
     const _onSaveDuration = (value: DishesDurationEditParams) => {
         dispatch(updateDishDuration(value));
         toggleEditDuration.hide();
-        message.success();
+        message.success("Đã lưu thời gian món ăn");
     }
 
     return <React.Fragment>

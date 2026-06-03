@@ -1,13 +1,8 @@
-import React, { FunctionComponent } from 'react';
+import React from 'react';
 
-interface IBoxProps {
-    id?: string;
+interface IBoxProps extends React.HTMLAttributes<HTMLDivElement> {
     width?: string | number;
     height?: string | number;
-    style?: React.CSSProperties;
-    children?: React.ReactNode;
-    className?: string;
-    onClick?: () => void;
     visible?: boolean;
 }
 
@@ -19,7 +14,8 @@ export const Box = React.forwardRef<HTMLDivElement, IBoxProps>(({
     children,
     className,
     onClick,
-    visible = true
+    visible = true,
+    ...props
 }, ref) => {
     const _style = (): React.CSSProperties => {
         let o: React.CSSProperties = {};
@@ -33,7 +29,7 @@ export const Box = React.forwardRef<HTMLDivElement, IBoxProps>(({
         }
     }
 
-    return <div ref={ref} id={id} style={_style()} className={className} onClick={onClick}>
+    return <div {...props} ref={ref} id={id} style={_style()} className={className} onClick={onClick}>
         {children}
     </div>
 })

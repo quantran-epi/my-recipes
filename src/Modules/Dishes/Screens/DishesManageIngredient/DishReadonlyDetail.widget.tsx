@@ -64,7 +64,7 @@ export const DishesReadonlyDetailModal: React.FunctionComponent<DishesReadonlyDe
             <Button type="primary" icon={<EditOutlined />} onClick={_onOpenDetail}>Mở trang chi tiết</Button>
         </Space>}
     >
-        <Box style={{ maxHeight: "70vh", overflowY: "auto", paddingRight: 4 }}>
+        <Box data-testid="dish-readonly-detail-modal" style={{ maxHeight: "70vh", overflowY: "auto", paddingRight: 4 }}>
             <DishesReadonlyDetailWidget dish={dish} targetServings={targetServings} />
         </Box>
     </Modal>
@@ -218,7 +218,7 @@ const ReadonlyIngredientItem: React.FunctionComponent<ReadonlyIngredientItemProp
                 ? { color: "#d46b08", label: `◐ Còn ${IngredientUnitHelper.formatAmount(stockAmount)}/${IngredientUnitHelper.formatAmount(requiredAmount)}${baseUnit}` }
                 : { color: "#ff4d4f", label: "✗ Chưa có" };
 
-    return <List.Item style={{ padding: "8px 0" }}>
+    return <List.Item data-testid={`dish-readonly-ingredient-${item.ingredientId}`} style={{ padding: "8px 0" }}>
         <List.Item.Meta
             title={<Stack justify="space-between" fullwidth align="flex-start" gap={8}>
                 <Typography.Text strong style={{ overflowWrap: "anywhere" }}>{ingredient?.name ?? item.ingredientId}</Typography.Text>

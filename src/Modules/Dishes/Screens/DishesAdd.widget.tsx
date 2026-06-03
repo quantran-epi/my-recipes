@@ -41,7 +41,7 @@ export const DishesAddWidget = () => {
         },
         onSubmit: (values) => {
             dispatch(addDishes(values.transformValues));
-            message.success();
+            message.success("Đã thêm món ăn");
             addDishesForm.reset();
         },
         itemDefinitions: defaultValues => ({

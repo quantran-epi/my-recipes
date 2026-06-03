@@ -68,7 +68,7 @@ export const ShoppingListAddWidget: FunctionComponent<ShoppingListAddWidgetProps
                 autoMarkCoveredByInventory: true,
                 dishServings: normalizedDishServings,
             }));
-            message.success();
+            message.success("Đã tạo lịch mua sắm");
             addShoppingListForm.reset();
             onDone();
             onCreated?.(transformedWithServings);

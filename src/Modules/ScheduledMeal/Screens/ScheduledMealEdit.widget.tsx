@@ -26,7 +26,7 @@ export const ScheduledMealEditWidget = ({ item, onDone }) => {
         onSubmit: (values) => {
             dispatch(editScheduledMeal(values.transformValues));
             dispatch(updateShoppingListIngredientMealData(values.transformValues));
-            message.success();
+            message.success("Đã lưu thực đơn");
             editScheduledMealForm.reset();
             onDone();
         },

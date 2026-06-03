@@ -38,7 +38,7 @@ export const DishesEditIngredientWidget: React.FunctionComponent<DishesEditIngre
                 dishId: props.dish.id,
                 ingres: values.transformValues
             }));
-            message.success();
+            message.success("Đã lưu nguyên liệu trong món");
             editIngreToDishForm.reset();
             props.onDone?.();
         },

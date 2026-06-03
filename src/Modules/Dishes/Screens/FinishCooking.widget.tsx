@@ -1,6 +1,7 @@
 import { CheckCircleOutlined, CloseCircleOutlined } from "@ant-design/icons";
 import { Button } from "@components/Button";
 import { Stack } from "@components/Layout/Stack";
+import { useMessage } from "@components/Message";
 import { Tag } from "@components/Tag";
 import { Typography } from "@components/Typography";
 import { CookingSession } from "@store/Models/CookingSession";
@@ -26,6 +27,7 @@ type FinishCookingWidgetProps = {
 
 export const FinishCookingWidget: React.FunctionComponent<FinishCookingWidgetProps> = ({ session, onDone }) => {
     const dispatch = useDispatch();
+    const message = useMessage();
     const allDishes = useSelector(selectDishes);
     const allIngredients = useSelector(selectIngredients);
     const inventoryItems = useSelector(selectInventory);
@@ -58,11 +60,13 @@ export const FinishCookingWidget: React.FunctionComponent<FinishCookingWidgetPro
             ingredient: allIngredients.find(i => i.id === d.id),
         })));
         dispatch(finishCooking(session.id));
+        message.success("Đã hoàn thành phiên nấu");
         onDone();
     };
 
     const _onCancel = () => {
         dispatch(cancelCooking(session.id));
+        message.success("Đã hủy phiên nấu");
         onDone();
     };
 

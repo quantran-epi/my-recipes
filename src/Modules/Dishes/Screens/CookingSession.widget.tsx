@@ -211,7 +211,7 @@ export const CookingSessionWidget: React.FunctionComponent<CookingSessionWidgetP
             border: '1px solid #f0f0f0',
             borderRadius: 8,
             background: '#fafafa',
-        }}>
+        }} data-testid="cooking-serving-control">
             <div>
                 <Typography.Text strong style={{ display: 'block' }}>Khẩu phần</Typography.Text>
                 <Typography.Text type='secondary' style={{ fontSize: 12 }}>Gốc {baseServings} phần</Typography.Text>
@@ -231,7 +231,7 @@ export const CookingSessionWidget: React.FunctionComponent<CookingSessionWidgetP
                 <Typography.Text type="secondary">Món này chưa có nguyên liệu.</Typography.Text>
             )}
             {rows.map(row => (
-                <div key={row.ingredient.id} style={{
+                <div key={row.ingredient.id} data-testid={`cooking-ingredient-${row.ingredient.id}`} style={{
                     display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                     padding: '6px 0', borderBottom: '1px solid rgba(5,5,5,0.04)'
                 }}>

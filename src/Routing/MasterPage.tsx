@@ -78,6 +78,8 @@ export const MasterPage = () => {
                 <Stack align="center" gap={4}>
                     <Button
                         type="text"
+                        aria-label="Tìm kiếm toàn cục"
+                        data-testid="global-search-button"
                         icon={<SearchOutlined style={{ fontSize: 20 }} />}
                         onClick={toggleSearch.show}
                         style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}

@@ -146,7 +146,7 @@ const EmptySection: React.FunctionComponent<{ text: string }> = ({ text }) => {
 
 const UrgentRow: React.FunctionComponent<{ item: UrgentInventoryItem; onOpen: () => void }> = ({ item, onOpen }) => {
     const badge = InventoryHelper.expiryBadge(item.daysLeft);
-    return <button onClick={onOpen} style={{ width: '100%', border: 0, background: 'transparent', padding: 0, textAlign: 'left', cursor: 'pointer' }}>
+    return <button data-testid={`dashboard-urgent-${item.ingredientId}`} onClick={onOpen} style={{ width: '100%', border: 0, background: 'transparent', padding: 0, textAlign: 'left', cursor: 'pointer' }}>
         <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) auto', gap: 8, alignItems: 'center', padding: '8px 0', borderBottom: '1px solid #f5f5f5' }}>
             <div style={{ minWidth: 0 }}>
                 <Typography.Text strong style={{ display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.ingredientName}</Typography.Text>
@@ -161,7 +161,7 @@ const UrgentRow: React.FunctionComponent<{ item: UrgentInventoryItem; onOpen: ()
 
 const SuggestionRow: React.FunctionComponent<{ item: ScoredDish; onOpen: () => void }> = ({ item, onOpen }) => {
     const matchPercent = Math.round(item.score * 100);
-    return <button onClick={onOpen} style={{ width: '100%', border: 0, background: 'transparent', padding: 0, textAlign: 'left', cursor: 'pointer' }}>
+    return <button data-testid={`dashboard-suggestion-${item.dish.id}`} onClick={onOpen} style={{ width: '100%', border: 0, background: 'transparent', padding: 0, textAlign: 'left', cursor: 'pointer' }}>
         <div style={{ padding: '8px 0', borderBottom: '1px solid #f5f5f5' }}>
             <Stack justify='space-between' align='flex-start' gap={8}>
                 <div style={{ minWidth: 0, flex: 1 }}>
@@ -186,7 +186,7 @@ const ShoppingListRow: React.FunctionComponent<{ item: ShoppingList; cost: strin
     const plannedLabel = item.plannedDate ? moment(item.plannedDate).format('DD/MM/YYYY') : 'Chưa có ngày';
     const overdue = item.plannedDate && moment(item.plannedDate).isBefore(today(), 'day');
 
-    return <button onClick={onOpen} style={{ width: '100%', border: 0, background: 'transparent', padding: 0, textAlign: 'left', cursor: 'pointer' }}>
+    return <button data-testid={`dashboard-shopping-list-${item.id}`} onClick={onOpen} style={{ width: '100%', border: 0, background: 'transparent', padding: 0, textAlign: 'left', cursor: 'pointer' }}>
         <div style={{ padding: '8px 0', borderBottom: '1px solid #f5f5f5' }}>
             <Stack justify='space-between' align='flex-start' gap={8}>
                 <div style={{ minWidth: 0, flex: 1 }}>
@@ -236,7 +236,7 @@ export const DashboardScreen = () => {
     const stockedIngredientCount = Object.entries(inventoryItems).filter(([, inventory]) => (inventory.batches ?? []).some(batch => batch.amount > 0)).length;
     const stockedBatchCount = Object.values(inventoryItems).reduce((sum, inventory) => sum + (inventory.batches ?? []).filter(batch => batch.amount > 0).length, 0);
 
-    return <Box style={{ display: 'flex', flexDirection: 'column', gap: 12, paddingBottom: 12 }}>
+    return <Box data-testid="dashboard" style={{ display: 'flex', flexDirection: 'column', gap: 12, paddingBottom: 12 }}>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(170px, 1fr))', gap: 10 }}>
             <Metric icon={<CalendarOutlined />} label='Món trong thực đơn' value={todayDishCount} detail={`${todayMeals.length} lịch ăn trong hôm nay`} tone='#1677ff' />
             <Metric icon={<ShoppingCartOutlined />} label='Lịch mua hôm nay' value={todayShoppingLists.length} detail='Danh sách có ngày mua là hôm nay' tone='#0958d9' />

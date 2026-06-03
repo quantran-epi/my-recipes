@@ -51,7 +51,7 @@ export const DishesAddStepWidget: React.FunctionComponent<DishesAddStepWidgetPro
                 }));
                     props.onDone("default");
             }
-            message.success();
+            message.success("Đã thêm bước nấu");
             addStepToDishForm.reset();
 
         },

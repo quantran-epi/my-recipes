@@ -54,7 +54,7 @@ export const IngredientAddWidget = () => {
                 return;
             }
             dispatch(addIngredient(values.transformValues));
-            message.success();
+            message.success("Đã thêm nguyên liệu");
             addIngredientForm.reset();
         },
         itemDefinitions: defaultValues => ({

@@ -77,7 +77,7 @@ export const IngredientEditWidget = ({ item, onDone }) => {
             }
 
             dispatch(editIngredient(values.transformValues));
-            message.success();
+            message.success("Đã lưu nguyên liệu");
             onDone?.();
         },
         itemDefinitions: defaultValues => ({

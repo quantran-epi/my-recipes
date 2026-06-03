@@ -23,7 +23,7 @@ export const DishesEditStepWidget: React.FunctionComponent<DishesEditStepWidgetP
         defaultValues: props.item,
         onSubmit: (values) => {
             dispatch(editStepFromDish({ dishId: props.dish.id, step: values.transformValues }));
-            message.success();
+            message.success("Đã lưu bước nấu");
             editStepToDishForm.reset();
             props.onDone();
         },

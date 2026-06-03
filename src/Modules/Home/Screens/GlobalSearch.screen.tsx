@@ -167,6 +167,8 @@ export const GlobalSearchScreen: React.FC<GlobalSearchScreenProps> = ({ open, on
             }}>
                 <Input
                     ref={inputRef}
+                    aria-label="Tìm kiếm toàn cục"
+                    data-testid="global-search-input"
                     prefix={<SearchOutlined style={{ color: '#aaa' }} />}
                     placeholder="Tìm món ăn, nguyên liệu, lịch mua sắm..."
                     allowClear

@@ -5,6 +5,7 @@ import { Option, Select } from "@components/Form/Select";
 import { Stack } from "@components/Layout/Stack";
 import { Popconfirm } from "@components/Popconfirm";
 import { Typography } from "@components/Typography";
+import { useMessage } from "@components/Message";
 import { InventoryHelper } from "@common/Helpers/InventoryHelper";
 import { INGREDIENT_PRESERVATION_OPTIONS, Ingredient, IngredientPreservationCondition, IngredientUnit, InventoryBatch, InventoryBatchDiscard } from "@store/Models/Ingredient";
 import { IngredientUnitHelper } from "@common/Helpers/IngredientUnitHelper";
@@ -35,6 +36,7 @@ const emptyBatch = (unit: IngredientUnit): BatchRow => ({ id: uuidv4(), amount: 
 
 export const IngredientInventoryWidget: React.FC<IngredientInventoryWidgetProps> = ({ item, onDone, onSuggest }) => {
     const dispatch = useDispatch();
+    const message = useMessage();
     const inventory = useSelector(selectInventoryById(item.id));
     const inventoryUnits = IngredientUnitHelper.getInventoryUnits(item);
     const baseUnit = IngredientUnitHelper.getBaseUnit(item, inventoryUnits);
@@ -135,6 +137,7 @@ export const IngredientInventoryWidget: React.FC<IngredientInventoryWidgetProps>
                     })),
             }
         }));
+        message.success("Đã lưu tồn kho");
         onDone?.();
     };
 

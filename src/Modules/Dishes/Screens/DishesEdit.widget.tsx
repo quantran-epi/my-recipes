@@ -31,7 +31,7 @@ export const DishesEditWidget = ({ item, onDone }) => {
 
             dispatch(editDishes(values.transformValues));
             dispatch(updateShoppingListIngredientDishData(values.transformValues));
-            message.success();
+            message.success("Đã lưu món ăn");
             onDone();
         },
         itemDefinitions: defaultValues => ({

@@ -35,9 +35,8 @@ export const ScheduledMealAddWidget = ({ date, onDone }) => {
             plannedDate: null
         },
         onSubmit: (values) => {
-            debugger
             dispatch(addScheduledMeal(values.transformValues));
-            message.success();
+            message.success("Đã tạo thực đơn");
             addScheduledMealForm.reset();
             onDone();
         },

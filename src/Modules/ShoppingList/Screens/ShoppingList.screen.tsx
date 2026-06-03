@@ -8,6 +8,7 @@ import { Space } from "@components/Layout/Space";
 import { Stack } from "@components/Layout/Stack";
 import { List } from "@components/List";
 import { Modal } from "@components/Modal";
+import { useMessage } from "@components/Message";
 import { useModal } from "@components/Modal/ModalProvider";
 import { Popconfirm } from "@components/Popconfirm";
 import { Tooltip } from "@components/Tootip";
@@ -124,6 +125,7 @@ export const ShoppingListItem: React.FunctionComponent<ShoppingListItemProps> = 
     const scheduledMeals = useSelector((state: RootState) => state.personal.scheduledMeal.scheduledMeals);
     const ingredients = useSelector((state: RootState) => state.shared.ingredient.ingredients);
     const dispatch = useDispatch();
+    const message = useMessage();
     const modal = useModal();
     const toggleEditModal = useToggle({ defaultValue: false });
     const toggleLoading = useToggle();
@@ -139,6 +141,7 @@ export const ShoppingListItem: React.FunctionComponent<ShoppingListItemProps> = 
             allScheduledMeals: scheduledMeals,
             allIngredients: ingredients,
         }));
+        message.success("Đã tạo lại checklist nguyên liệu");
     }
 
     const _onGenerateAndShow = () => {
