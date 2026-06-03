@@ -11,7 +11,7 @@ import { Typography } from "@components/Typography";
 import { useScreenTitle, useToggle, useAdminMode } from "@hooks";
 import { InventoryHelper } from "@common/Helpers/InventoryHelper";
 import { IngredientUnitHelper } from "@common/Helpers/IngredientUnitHelper";
-import { Ingredient, INGREDIENT_PRESERVATION_OPTIONS, INGREDIENT_SHELF_LIFE_OPTIONS } from "@store/Models/Ingredient";
+import { Ingredient, INGREDIENT_CATEGORIES, INGREDIENT_PRESERVATION_OPTIONS, INGREDIENT_SHELF_LIFE_OPTIONS } from "@store/Models/Ingredient";
 import { removeIngredient } from "@store/Reducers/IngredientReducer";
 import { selectInventoryById } from "@store/Selectors";
 import { RootState } from "@store/Store";
@@ -27,7 +27,36 @@ import { UseFirstWidget } from "./UseFirst.widget";
 import { IngredientStatsWidget } from "./IngredientStats.widget";
 import { DishSuggesterScreen } from "@modules/DishSuggester/Screens/DishSuggester.screen";
 
-const VIRTUAL_LIST_HEIGHT = "calc(100dvh - 218px)";
+type IngredientStockFilter = "all" | "in_stock" | "need_stock" | "low_stock" | "urgent" | "always_available";
+
+const INGREDIENT_STOCK_FILTERS: { value: IngredientStockFilter; label: string }[] = [
+    { value: "all", label: "Tất cả" },
+    { value: "in_stock", label: "Đang có" },
+    { value: "need_stock", label: "Cần nhập" },
+    { value: "low_stock", label: "Sắp hết" },
+    { value: "urgent", label: "Sắp hết hạn" },
+    { value: "always_available", label: "Luôn có" },
+];
+
+const filterRowStyle: React.CSSProperties = {
+    display: "flex",
+    gap: 6,
+    overflowX: "auto",
+    padding: "6px 0 2px",
+    scrollbarWidth: "none",
+};
+
+const filterChipStyle = (active: boolean): React.CSSProperties => ({
+    border: active ? "1px solid #1677ff" : "1px solid #d9d9d9",
+    background: active ? "#e6f4ff" : "#fff",
+    color: active ? "#0958d9" : "#595959",
+    borderRadius: 999,
+    padding: "3px 10px",
+    fontSize: 12,
+    lineHeight: "18px",
+    whiteSpace: "nowrap",
+    cursor: "pointer",
+});
 
 type IngredientRowProps = { items: Ingredient[]; onDelete: (item: Ingredient) => void; isAdmin: boolean; onSuggest: (ids: string[]) => void; };
 
@@ -42,7 +71,10 @@ export const IngredientListScreen = () => {
     const dispatch = useDispatch();
     const { } = useScreenTitle({ value: "Nguyên liệu", deps: [] });
     const [searchText, setSearchText] = useState("");
-    const rowHeight = useDynamicRowHeight({ defaultRowHeight: 132, key: searchText });
+    const [activeStockFilter, setActiveStockFilter] = useState<IngredientStockFilter>("all");
+    const [activeCategory, setActiveCategory] = useState<string | null>(null);
+    const inventoryItems = useSelector((state: RootState) => state.personal.inventory.items);
+    const rowHeight = useDynamicRowHeight({ defaultRowHeight: 132, key: searchText + activeStockFilter + (activeCategory ?? "") });
     const { isAdmin } = useAdminMode();
 
     const toggleUseFirst = useToggle({ defaultValue: false });
@@ -55,9 +87,27 @@ export const IngredientListScreen = () => {
         toggleSuggester.show();
     };
 
+    const availableCategories = useMemo(() => {
+        const categorySet = new Set(ingredients.map(item => item.category).filter(Boolean) as string[]);
+        return INGREDIENT_CATEGORIES.filter(category => categorySet.has(category));
+    }, [ingredients]);
+
     const filteredIngredients = useMemo(() => {
-        return sortBy(ingredients.filter(e => e.name.trim().toLowerCase().includes(searchText.trim().toLowerCase())), "name");
-    }, [ingredients, searchText])
+        return sortBy(ingredients.filter(item => {
+            const inventory = inventoryItems[item.id];
+            const usableAmount = InventoryHelper.totalUsableAmount(inventory, item);
+            const nearestExpiry = InventoryHelper.nearestExpiryBatch(inventory, item);
+            const matchesSearch = item.name.trim().toLowerCase().includes(searchText.trim().toLowerCase());
+            const matchesCategory = activeCategory === null || item.category === activeCategory;
+            const matchesStock = activeStockFilter === "all"
+                || (activeStockFilter === "in_stock" && (InventoryHelper.isAlwaysAvailable(item) || usableAmount > 0))
+                || (activeStockFilter === "need_stock" && !InventoryHelper.isAlwaysAvailable(item) && usableAmount <= 0)
+                || (activeStockFilter === "low_stock" && !InventoryHelper.isAlwaysAvailable(item) && usableAmount > 0 && usableAmount <= 2)
+                || (activeStockFilter === "urgent" && Boolean(nearestExpiry && nearestExpiry.daysLeft <= 3))
+                || (activeStockFilter === "always_available" && InventoryHelper.isAlwaysAvailable(item));
+            return matchesSearch && matchesCategory && matchesStock;
+        }), "name");
+    }, [ingredients, inventoryItems, searchText, activeCategory, activeStockFilter])
 
     const _onAdd = () => {
         toggleAddModal.show();
@@ -68,23 +118,46 @@ export const IngredientListScreen = () => {
     }
 
     return <React.Fragment>
-        <Stack.Compact style={{ marginBottom: 8 }}>
-            <Input allowClear placeholder="Tìm kiếm" onChange={debounce((e) => setSearchText(e.target.value), 350)} />
-            {isAdmin && <Button onClick={_onAdd} icon={<PlusOutlined />} />}
-            <Tooltip title="Dùng trước hết hạn">
-                <Button onClick={toggleUseFirst.show} icon={<FireOutlined style={{ color: "#ff4d4f" }} />} />
-            </Tooltip>
-            <Tooltip title="Thống kê nguyên liệu">
-                <Button onClick={toggleStats.show} icon={<BarChartOutlined style={{ color: "#1677ff" }} />} />
-            </Tooltip>
-        </Stack.Compact>
-        <VirtualList
-            rowComponent={IngredientRow}
-            rowCount={filteredIngredients.length}
-            rowHeight={rowHeight}
-            rowProps={{ items: filteredIngredients, onDelete: _onDelete, isAdmin, onSuggest: _onSuggest }}
-            style={{ height: VIRTUAL_LIST_HEIGHT }}
-        />
+        <div style={{ height: "100%", display: "flex", flexDirection: "column", minHeight: 0 }}>
+            <Stack.Compact>
+                <Input allowClear placeholder="Tìm kiếm" onChange={debounce((e) => setSearchText(e.target.value), 350)} />
+                {isAdmin && <Button onClick={_onAdd} icon={<PlusOutlined />} />}
+                <Tooltip title="Dùng trước hết hạn">
+                    <Button onClick={toggleUseFirst.show} icon={<FireOutlined style={{ color: "#ff4d4f" }} />} />
+                </Tooltip>
+                <Tooltip title="Thống kê nguyên liệu">
+                    <Button onClick={toggleStats.show} icon={<BarChartOutlined style={{ color: "#1677ff" }} />} />
+                </Tooltip>
+            </Stack.Compact>
+            <div style={filterRowStyle}>
+                {INGREDIENT_STOCK_FILTERS.map(item => (
+                    <button key={item.value} type="button" onClick={() => setActiveStockFilter(item.value)} style={filterChipStyle(activeStockFilter === item.value)}>
+                        {item.label}
+                    </button>
+                ))}
+            </div>
+            {availableCategories.length > 0 && (
+                <div style={filterRowStyle}>
+                    <button type="button" onClick={() => setActiveCategory(null)} style={filterChipStyle(activeCategory === null)}>
+                        Tất cả nhóm
+                    </button>
+                    {availableCategories.map(category => (
+                        <button key={category} type="button" onClick={() => setActiveCategory(activeCategory === category ? null : category)} style={filterChipStyle(activeCategory === category)}>
+                            {category}
+                        </button>
+                    ))}
+                </div>
+            )}
+            <div style={{ flex: 1, minHeight: 0 }}>
+                <VirtualList
+                    rowComponent={IngredientRow}
+                    rowCount={filteredIngredients.length}
+                    rowHeight={rowHeight}
+                    rowProps={{ items: filteredIngredients, onDelete: _onDelete, isAdmin, onSuggest: _onSuggest }}
+                    style={{ height: "100%" }}
+                />
+            </div>
+        </div>
         <Modal width={640} open={toggleAddModal.value} title={
             <Space>
                 <Image src={VegetablesIcon} preview={false} width={24} style={{ marginBottom: 3 }} />

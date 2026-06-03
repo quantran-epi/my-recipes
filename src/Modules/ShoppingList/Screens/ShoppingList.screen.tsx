@@ -31,7 +31,44 @@ import { ShoppingListEditWidget } from "./ShoppingListEdit.widget";
 import { DateHelpers } from "@common/Helpers/DateHelper";
 import { RootRoutes } from "@routing/RootRoutes";
 
-const VIRTUAL_LIST_HEIGHT = "calc(100dvh - 218px)";
+type ShoppingListStatusFilter = "all" | "buying" | "overdue" | "checklist_done" | "completed" | "empty_checklist";
+
+const SHOPPING_LIST_STATUS_FILTERS: { value: ShoppingListStatusFilter; label: string }[] = [
+    { value: "all", label: "Tất cả" },
+    { value: "buying", label: "Đang mua" },
+    { value: "overdue", label: "Quá hạn" },
+    { value: "checklist_done", label: "Checklist xong" },
+    { value: "completed", label: "Đã hoàn tất" },
+    { value: "empty_checklist", label: "Chưa checklist" },
+];
+
+const filterRowStyle: React.CSSProperties = {
+    display: "flex",
+    gap: 6,
+    overflowX: "auto",
+    padding: "6px 0 2px",
+    scrollbarWidth: "none",
+};
+
+const filterChipStyle = (active: boolean): React.CSSProperties => ({
+    border: active ? "1px solid #1677ff" : "1px solid #d9d9d9",
+    background: active ? "#e6f4ff" : "#fff",
+    color: active ? "#0958d9" : "#595959",
+    borderRadius: 999,
+    padding: "3px 10px",
+    fontSize: 12,
+    lineHeight: "18px",
+    whiteSpace: "nowrap",
+    cursor: "pointer",
+});
+
+const isShoppingListOverdue = (item: ShoppingList): boolean => {
+    return Boolean(item.plannedDate) && !item.completedAt && DateHelpers.calculateDaysBetween(new Date(), item.plannedDate) < 0;
+};
+
+const isShoppingListChecklistDone = (item: ShoppingList): boolean => {
+    return item.ingredients.length > 0 && item.ingredients.every(ingredient => ingredient.isDone);
+};
 
 type ShoppingListRowProps = { items: ShoppingList[]; onDelete: (item: ShoppingList) => void; };
 
@@ -48,12 +85,25 @@ export const ShoppingListScreen = () => {
     const navigate = useNavigate();
     const { } = useScreenTitle({ value: "Lịch mua sắm", deps: [] });
     const [searchText, setSearchText] = useState("");
-    const rowHeight = useDynamicRowHeight({ defaultRowHeight: 164, key: searchText });
+    const [activeStatus, setActiveStatus] = useState<ShoppingListStatusFilter>("all");
+    const rowHeight = useDynamicRowHeight({ defaultRowHeight: 164, key: searchText + activeStatus });
     const filteredShoppingLists = useMemo<ShoppingList[]>(() => {
-        return orderBy(shoppingLists.filter(e => e.name.trim().toLowerCase().includes(searchText.trim().toLowerCase())
-            || moment(e.createdDate).format("DD/MM/YYYY hh:mm:ss A").includes(searchText.trim().toLowerCase())),
+        return orderBy(shoppingLists.filter(item => {
+            const normalizedSearch = searchText.trim().toLowerCase();
+            const matchesSearch = item.name.trim().toLowerCase().includes(normalizedSearch)
+                || moment(item.createdDate).format("DD/MM/YYYY hh:mm:ss A").includes(normalizedSearch);
+            const checklistDone = isShoppingListChecklistDone(item);
+            const isReadonly = Boolean(item.completedAt);
+            const matchesStatus = activeStatus === "all"
+                || (activeStatus === "buying" && !isReadonly && item.ingredients.length > 0 && !checklistDone)
+                || (activeStatus === "overdue" && isShoppingListOverdue(item))
+                || (activeStatus === "checklist_done" && !isReadonly && checklistDone)
+                || (activeStatus === "completed" && isReadonly)
+                || (activeStatus === "empty_checklist" && !isReadonly && item.ingredients.length === 0);
+            return matchesSearch && matchesStatus;
+        }),
             [(obj) => new Date(obj.createdDate)], ['desc'])
-    }, [shoppingLists, searchText])
+    }, [shoppingLists, searchText, activeStatus])
     const [selectedDate, setSelectedDate] = useState<Date>();
 
     const _onAdd = () => {
@@ -74,18 +124,29 @@ export const ShoppingListScreen = () => {
     }
 
     return <React.Fragment>
-        <Stack.Compact style={{ marginBottom: 8 }}>
-            <Input allowClear placeholder="Tìm kiếm" onChange={debounce((e) => setSearchText(e.target.value), 350)} />
-            <Button onClick={_onAdd} icon={<PlusOutlined />} />
-            <Button onClick={_onShowCalendar} icon={<CalendarOutlined />} />
-        </Stack.Compact>
-        <VirtualList
-            rowComponent={ShoppingListRow}
-            rowCount={filteredShoppingLists.length}
-            rowHeight={rowHeight}
-            rowProps={{ items: filteredShoppingLists, onDelete: _onDelete }}
-            style={{ height: VIRTUAL_LIST_HEIGHT }}
-        />
+        <div style={{ height: "100%", display: "flex", flexDirection: "column", minHeight: 0 }}>
+            <Stack.Compact>
+                <Input allowClear placeholder="Tìm kiếm" onChange={debounce((e) => setSearchText(e.target.value), 350)} />
+                <Button onClick={_onAdd} icon={<PlusOutlined />} />
+                <Button onClick={_onShowCalendar} icon={<CalendarOutlined />} />
+            </Stack.Compact>
+            <div style={filterRowStyle}>
+                {SHOPPING_LIST_STATUS_FILTERS.map(item => (
+                    <button key={item.value} type="button" onClick={() => setActiveStatus(item.value)} style={filterChipStyle(activeStatus === item.value)}>
+                        {item.label}
+                    </button>
+                ))}
+            </div>
+            <div style={{ flex: 1, minHeight: 0 }}>
+                <VirtualList
+                    rowComponent={ShoppingListRow}
+                    rowCount={filteredShoppingLists.length}
+                    rowHeight={rowHeight}
+                    rowProps={{ items: filteredShoppingLists, onDelete: _onDelete }}
+                    style={{ height: "100%" }}
+                />
+            </div>
+        </div>
         <Modal open={toggleAddModal.value} title={<Space>
             <Image src={ShoppinglistIcon} preview={false} width={24} style={{ marginBottom: 3 }} />
             Thêm lịch mua sắm

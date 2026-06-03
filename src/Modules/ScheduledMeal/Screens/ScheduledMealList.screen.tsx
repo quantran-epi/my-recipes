@@ -285,13 +285,13 @@ export const ScheduledMealItem = ({ item, onDelete }: { item: ScheduledMeal; onD
             : { label: "Sắp tới", color: "#389e0d", background: "#f6ffed", border: "#b7eb8f" };
     const railColor = selected ? "#1677ff" : plannedStatus.color;
 
-    const MealRow = ({ icon, label, dishIds }: { icon: string; label: string; dishIds: string[] }) => (
-        <Box style={{ border: "1px solid #f0f0f0", borderRadius: 8, background: "#fafafa", padding: "7px 8px", minWidth: 0 }}>
-            <Stack gap={6} align="center" style={{ marginBottom: 5 }}>
+    const MealRow = ({ icon, label, dishIds, color, background, border }: { icon: string; label: string; dishIds: string[]; color: string; background: string; border: string }) => (
+        <Box style={{ border: `1px solid ${border}`, borderRadius: 8, background, padding: "8px 9px", minWidth: 0 }}>
+            <div style={{ display: "grid", gridTemplateColumns: "auto minmax(0, 1fr) auto", gap: 7, alignItems: "center", marginBottom: 6 }}>
                 <Image src={icon} preview={false} width={15} style={{ marginBottom: 2 }} />
-                <Typography.Text strong style={{ fontSize: 12 }}>{label}</Typography.Text>
-                <Typography.Text type="secondary" style={{ fontSize: 11 }}>{dishIds.length} món</Typography.Text>
-            </Stack>
+                <Typography.Text strong style={{ fontSize: 13, color, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{label}</Typography.Text>
+                <Typography.Text type="secondary" style={{ fontSize: 11, whiteSpace: "nowrap" }}>{dishIds.length} món</Typography.Text>
+            </div>
             {dishIds.length === 0 ? (
                 <Typography.Text type="secondary" style={{ display: "block", fontSize: 12, lineHeight: "18px" }}>Chưa chọn</Typography.Text>
             ) : (
@@ -356,8 +356,8 @@ export const ScheduledMealItem = ({ item, onDelete }: { item: ScheduledMeal; onD
                         </Stack>
                     </div>
 
-                    <div style={{ display: "grid", gridTemplateColumns: "repeat(3, minmax(0, 1fr))", gap: 7 }}>
-                        {mealGroups.map(group => <MealRow key={group.label} icon={group.icon} label={group.label} dishIds={group.dishIds} />)}
+                    <div style={{ display: "grid", gridTemplateColumns: "minmax(0, 1fr)", gap: 7 }}>
+                        {mealGroups.map(group => <MealRow key={group.label} icon={group.icon} label={group.label} dishIds={group.dishIds} color={group.color} background={group.background} border={group.border} />)}
                     </div>
                 </div>
             </Box>

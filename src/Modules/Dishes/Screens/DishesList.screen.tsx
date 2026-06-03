@@ -39,8 +39,35 @@ import 'moment/locale/vi';
 
 type DishRowProps = { dishes: Dishes[]; onDelete: (item: Dishes) => void; onDuplicate: (item: Dishes) => void; isAdmin: boolean; };
 
-const BASE_VIRTUAL_LIST_HEIGHT = "calc(100dvh - 218px)";
-const TAGGED_VIRTUAL_LIST_HEIGHT = "calc(100dvh - 248px)";
+type DishStatusFilter = "all" | "ready" | "needs_update" | "has_ingredients" | "has_steps";
+
+const DISH_STATUS_FILTERS: { value: DishStatusFilter; label: string }[] = [
+    { value: "all", label: "Tất cả" },
+    { value: "ready", label: "Hoàn thiện" },
+    { value: "needs_update", label: "Cần cập nhật" },
+    { value: "has_ingredients", label: "Có nguyên liệu" },
+    { value: "has_steps", label: "Có bước nấu" },
+];
+
+const filterRowStyle: React.CSSProperties = {
+    display: "flex",
+    gap: 6,
+    overflowX: "auto",
+    padding: "6px 0 2px",
+    scrollbarWidth: "none",
+};
+
+const filterChipStyle = (active: boolean): React.CSSProperties => ({
+    border: active ? "1px solid #1677ff" : "1px solid #d9d9d9",
+    background: active ? "#e6f4ff" : "#fff",
+    color: active ? "#0958d9" : "#595959",
+    borderRadius: 999,
+    padding: "3px 10px",
+    fontSize: 12,
+    lineHeight: "18px",
+    whiteSpace: "nowrap",
+    cursor: "pointer",
+});
 
 const DishRow = ({ index, style, dishes, onDelete, onDuplicate, isAdmin }: RowComponentProps<DishRowProps>) => {
     if (!dishes[index]) return null;
@@ -52,9 +79,10 @@ export const DishesListScreen = () => {
     const toggleAddModal = useToggle({ defaultValue: false });
     const [searchText, setSearchText] = useState<string>("");
     const [activeTag, setActiveTag] = useState<string | null>(null);
+    const [activeStatus, setActiveStatus] = useState<DishStatusFilter>("all");
     const dispatch = useDispatch();
     const { } = useScreenTitle({ value: "Món ăn", deps: [] });
-    const rowHeight = useDynamicRowHeight({ defaultRowHeight: 204, key: searchText + (activeTag ?? "") });
+    const rowHeight = useDynamicRowHeight({ defaultRowHeight: 204, key: searchText + (activeTag ?? "") + activeStatus });
     const { isAdmin } = useAdminMode();
 
     const allTags = useMemo<string[]>(() => {
@@ -65,14 +93,19 @@ export const DishesListScreen = () => {
 
     const filteredDishes = useMemo<Dishes[]>(() => {
         return sortBy(
-            dishes.filter(e =>
-                e.name.trim().toLowerCase().includes(searchText?.trim().toLowerCase()) &&
-                (activeTag === null || e.tags?.includes(activeTag))
-            ),
+            dishes.filter(e => {
+                const matchesSearch = e.name.trim().toLowerCase().includes(searchText?.trim().toLowerCase());
+                const matchesTag = activeTag === null || e.tags?.includes(activeTag);
+                const matchesStatus = activeStatus === "all"
+                    || (activeStatus === "ready" && e.isCompleted)
+                    || (activeStatus === "needs_update" && !e.isCompleted)
+                    || (activeStatus === "has_ingredients" && (e.ingredients?.length ?? 0) > 0)
+                    || (activeStatus === "has_steps" && (e.steps?.length ?? 0) > 0);
+                return matchesSearch && matchesTag && matchesStatus;
+            }),
             "name"
         );
-    }, [dishes, searchText, activeTag]);
-    const virtualListHeight = allTags.length > 0 ? TAGGED_VIRTUAL_LIST_HEIGHT : BASE_VIRTUAL_LIST_HEIGHT;
+    }, [dishes, searchText, activeTag, activeStatus]);
 
     const _onDelete = (item: Dishes) => {
         dispatch(removeDishes([item.id]));
@@ -83,39 +116,40 @@ export const DishesListScreen = () => {
     }
 
     return <React.Fragment>
-        <Stack.Compact>
-            <Input allowClear placeholder="Tìm kiếm" onChange={debounce((e) => setSearchText(e.target.value), 350)} />
-            {isAdmin && <Button onClick={toggleAddModal.show} icon={<PlusOutlined />} />}
-        </Stack.Compact>
-        {allTags.length > 0 && (
-            <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap', padding: '6px 0' }}>
-                <Tag
-                    onClick={() => setActiveTag(null)}
-                    color={activeTag === null ? "blue" : undefined}
-                    style={{ cursor: 'pointer', userSelect: 'none' }}
-                    
-                >
-                    Tất cả
-                </Tag>
-                {allTags.map(tag => (
-                    <Tag
-                        key={tag}
-                        onClick={() => setActiveTag(activeTag === tag ? null : tag)}
-                        color={activeTag === tag ? "blue" : undefined}
-                        style={{ cursor: 'pointer', userSelect: 'none' }}
-                    >
-                        {tag}
-                    </Tag>
+        <div style={{ height: "100%", display: "flex", flexDirection: "column", minHeight: 0 }}>
+            <Stack.Compact>
+                <Input allowClear placeholder="Tìm kiếm" onChange={debounce((e) => setSearchText(e.target.value), 350)} />
+                {isAdmin && <Button onClick={toggleAddModal.show} icon={<PlusOutlined />} />}
+            </Stack.Compact>
+            <div style={filterRowStyle}>
+                {DISH_STATUS_FILTERS.map(item => (
+                    <button key={item.value} type="button" onClick={() => setActiveStatus(item.value)} style={filterChipStyle(activeStatus === item.value)}>
+                        {item.label}
+                    </button>
                 ))}
             </div>
-        )}
-        <VirtualList
-            rowComponent={DishRow}
-            rowCount={filteredDishes.length}
-            rowHeight={rowHeight}
-            rowProps={{ dishes: filteredDishes, onDelete: _onDelete, onDuplicate: _onDuplicate, isAdmin }}
-            style={{ height: virtualListHeight }}
-        />
+            {allTags.length > 0 && (
+                <div style={filterRowStyle}>
+                    <button type="button" onClick={() => setActiveTag(null)} style={filterChipStyle(activeTag === null)}>
+                        Tất cả tag
+                    </button>
+                    {allTags.map(tag => (
+                        <button key={tag} type="button" onClick={() => setActiveTag(activeTag === tag ? null : tag)} style={filterChipStyle(activeTag === tag)}>
+                            {tag}
+                        </button>
+                    ))}
+                </div>
+            )}
+            <div style={{ flex: 1, minHeight: 0 }}>
+                <VirtualList
+                    rowComponent={DishRow}
+                    rowCount={filteredDishes.length}
+                    rowHeight={rowHeight}
+                    rowProps={{ dishes: filteredDishes, onDelete: _onDelete, onDuplicate: _onDuplicate, isAdmin }}
+                    style={{ height: "100%" }}
+                />
+            </div>
+        </div>
         <Modal open={toggleAddModal.value} title={
             <Space>
                 <Image src={NoodlesIcon} preview={false} width={24} style={{ marginBottom: 3 }} />
