@@ -73,8 +73,9 @@ type ShoppingListIngredientPriceEstimate = {
 }
 
 type ShoppingListCostSummary = {
-    recipe: CostEstimateSummary;
-    cart: CostEstimateSummary;
+    requiredToBuy: CostEstimateSummary;
+    recipeTotal: CostEstimateSummary;
+    needMore: CostEstimateSummary;
     bought: CostEstimateSummary;
 }
 
@@ -251,25 +252,30 @@ export const ShoppingListDetailWidget: React.FunctionComponent<ShoppingListDetai
         return props.shoppingList.ingredients.reduce((summary, group) => {
             const ingredient = allIngredients.find(item => item.id === group.ingredientId);
             const inventory = inventoryItems[group.ingredientId];
-            const status = getIngredientGroupStatus(group, ingredient, inventory, { requiredOnly: true });
-            CostEstimateHelper.addAmount(summary.recipe, ingredient, status.totalRequired, status.unit);
+            const recipeStatus = getIngredientGroupStatus(group, ingredient, inventory);
+            const requiredStatus = getIngredientGroupStatus(group, ingredient, inventory, { requiredOnly: true });
+            CostEstimateHelper.addAmount(summary.recipeTotal, ingredient, recipeStatus.totalRequired, recipeStatus.unit);
 
             const cartEstimate = getShoppingListIngredientPriceEstimate(group, ingredient, inventory, { requiredOnly: true });
-            if (cartEstimate) CostEstimateHelper.addAmount(summary.cart, ingredient, cartEstimate.amount, cartEstimate.unit);
+            if (!requiredStatus.isAlwaysAvailable) {
+                CostEstimateHelper.addAmount(summary.requiredToBuy, ingredient, requiredStatus.needToBuy, requiredStatus.unit);
+                if (cartEstimate) CostEstimateHelper.addAmount(summary.needMore, ingredient, cartEstimate.amount, cartEstimate.unit);
+            }
 
-            if (!status.isAlwaysAvailable) {
+            if (!requiredStatus.isAlwaysAvailable) {
                 const explicitBoughtAmount = group.boughtAmount ?? 0;
                 if (explicitBoughtAmount > 0) {
-                    CostEstimateHelper.addAmount(summary.bought, ingredient, explicitBoughtAmount, group.boughtUnit ?? status.unit);
-                } else if (group.isDone && status.needToBuy > 0) {
-                    CostEstimateHelper.addAmount(summary.bought, ingredient, status.needToBuy, status.unit);
+                    CostEstimateHelper.addAmount(summary.bought, ingredient, explicitBoughtAmount, group.boughtUnit ?? requiredStatus.unit);
+                } else if (group.isDone && requiredStatus.needToBuy > 0) {
+                    CostEstimateHelper.addAmount(summary.bought, ingredient, requiredStatus.needToBuy, requiredStatus.unit);
                 }
             }
 
             return summary;
         }, {
-            recipe: CostEstimateHelper.emptySummary(),
-            cart: CostEstimateHelper.emptySummary(),
+            requiredToBuy: CostEstimateHelper.emptySummary(),
+            recipeTotal: CostEstimateHelper.emptySummary(),
+            needMore: CostEstimateHelper.emptySummary(),
             bought: CostEstimateHelper.emptySummary(),
         } as ShoppingListCostSummary);
     }, [props.shoppingList.ingredients, allIngredients, inventoryItems]);
@@ -679,8 +685,9 @@ const ShoppingListCostMetric: React.FunctionComponent<ShoppingListCostMetricProp
 }
 
 const ShoppingListCostSummaryWidget: React.FunctionComponent<{ summary: ShoppingListCostSummary }> = ({ summary }) => {
-    const hasSummary = CostEstimateHelper.hasAny(summary.recipe)
-        || CostEstimateHelper.hasAny(summary.cart)
+    const hasSummary = CostEstimateHelper.hasAny(summary.requiredToBuy)
+        || CostEstimateHelper.hasAny(summary.recipeTotal)
+        || CostEstimateHelper.hasAny(summary.needMore)
         || CostEstimateHelper.hasAny(summary.bought);
 
     if (!hasSummary) return null;
@@ -696,19 +703,26 @@ const ShoppingListCostSummaryWidget: React.FunctionComponent<{ summary: Shopping
             </div>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", gap: 10, width: "100%" }}>
                 <ShoppingListCostMetric
-                    testId="shopping-cost-cart"
-                    label="Giỏ mua"
-                    description="Theo lượng còn thiếu"
-                    summary={summary.cart}
-                    primary
+                    testId="shopping-cost-required-buy"
+                    label="Cần mua ban đầu"
+                    description="Bắt buộc còn thiếu theo kho"
+                    summary={summary.requiredToBuy}
                     emptyText="0đ"
                 />
                 <ShoppingListCostMetric
-                    testId="shopping-cost-recipe"
-                    label="Theo công thức"
-                    description="Tổng lượng món cần"
-                    summary={summary.recipe}
+                    testId="shopping-cost-recipe-total"
+                    label="Tổng công thức"
+                    description="Bao gồm bắt buộc và tùy chọn"
+                    summary={summary.recipeTotal}
                     emptyText="Chưa có giá"
+                />
+                <ShoppingListCostMetric
+                    testId="shopping-cost-need-more"
+                    label="Cần mua thêm"
+                    description="Sau khi trừ phần đã mua"
+                    summary={summary.needMore}
+                    primary
+                    emptyText="0đ"
                 />
                 {CostEstimateHelper.hasAny(summary.bought) && <ShoppingListCostMetric
                     testId="shopping-cost-bought"

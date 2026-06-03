@@ -1,9 +1,10 @@
 import { Dishes, DishesIngredientAmount } from "@store/Models/Dishes";
-import { Ingredient, IngredientUnit } from "@store/Models/Ingredient";
+import { Ingredient, IngredientInventory, IngredientUnit } from "@store/Models/Ingredient";
 import { IngredientPriceHelper, IngredientPriceRange } from "./IngredientPriceHelper";
 import { IngredientUnitHelper } from "./IngredientUnitHelper";
 
 import { DishServingHelper } from './DishServingHelper';
+import { InventoryHelper } from "./InventoryHelper";
 
 export type CostEstimateSummary = IngredientPriceRange & {
     itemCount: number;
@@ -15,6 +16,28 @@ export type DishCostEstimate = {
     total: CostEstimateSummary;
     required: CostEstimateSummary;
     optional: CostEstimateSummary;
+}
+
+export type IngredientNeedEstimateRow = {
+    ingredientId: string;
+    ingredient?: Ingredient;
+    amount: number;
+    unit: IngredientUnit;
+    availableAmount: number;
+    missingAmount: number;
+    required: boolean;
+}
+
+export type IngredientAmountCostEstimate = DishCostEstimate & {
+    missing: CostEstimateSummary;
+    missingRequired: CostEstimateSummary;
+    missingOptional: CostEstimateSummary;
+    rows: IngredientNeedEstimateRow[];
+}
+
+export type IngredientAmountCostEstimateOptions = {
+    inventoryItems?: Record<string, IngredientInventory>;
+    selectedIngredientIds?: string[];
 }
 
 const createSummary = (): CostEstimateSummary => ({
@@ -40,6 +63,18 @@ export const CostEstimateHelper = {
             total: createSummary(),
             required: createSummary(),
             optional: createSummary(),
+        };
+    },
+
+    emptyIngredientAmountEstimate(): IngredientAmountCostEstimate {
+        return {
+            total: createSummary(),
+            required: createSummary(),
+            optional: createSummary(),
+            missing: createSummary(),
+            missingRequired: createSummary(),
+            missingOptional: createSummary(),
+            rows: [],
         };
     },
 
@@ -85,17 +120,83 @@ export const CostEstimateHelper = {
         return target;
     },
 
-    estimateDish(dish: Dishes, ingredients: Ingredient[], dishes: Dishes[] = [], targetServings?: number): DishCostEstimate {
-        const estimate = CostEstimateHelper.emptyDishEstimate();
-        if (!dish) return estimate;
+    divideSummary(summary: CostEstimateSummary, divisor: number): CostEstimateSummary | null {
+        if (!isFinite(divisor) || divisor <= 0 || !CostEstimateHelper.hasPrice(summary)) return null;
+        return {
+            min: summary.min / divisor,
+            max: summary.max / divisor,
+            currency: summary.currency,
+            itemCount: summary.itemCount,
+            pricedCount: summary.pricedCount,
+            missingPriceCount: summary.missingPriceCount,
+        };
+    },
 
-        DishServingHelper.collectIngredientAmounts(dish, dishes, { targetServings }).forEach(item => {
+    estimateIngredientAmounts(
+        amounts: DishesIngredientAmount[],
+        ingredients: Ingredient[],
+        options: IngredientAmountCostEstimateOptions = {},
+    ): IngredientAmountCostEstimate {
+        const estimate = CostEstimateHelper.emptyIngredientAmountEstimate();
+        const selectedIds = options.selectedIngredientIds ? new Set(options.selectedIngredientIds) : null;
+        const includedAmounts = amounts.filter(item => !selectedIds || selectedIds.has(item.ingredientId));
+
+        includedAmounts.forEach(item => {
             const ingredient = findIngredient(ingredients, item.ingredientId);
             const target = item.required ? estimate.required : estimate.optional;
             CostEstimateHelper.addIngredientAmount(target, item, ingredient);
             CostEstimateHelper.addIngredientAmount(estimate.total, item, ingredient);
         });
 
+        const grouped = includedAmounts.reduce((result, item) => {
+            result[item.ingredientId] = [...(result[item.ingredientId] ?? []), item];
+            return result;
+        }, {} as Record<string, DishesIngredientAmount[]>);
+
+        Object.keys(grouped).forEach(ingredientId => {
+            const group = grouped[ingredientId];
+            const ingredient = findIngredient(ingredients, ingredientId);
+            const unit = IngredientUnitHelper.getBaseUnit(ingredient, group.map(item => item.unit));
+            const getAmount = (items: DishesIngredientAmount[]) => items.reduce((sum, item) => {
+                const converted = IngredientUnitHelper.toBaseAmount(ingredient, item.amount, item.unit, unit);
+                return sum + (converted ?? IngredientUnitHelper.parseAmount(item.amount));
+            }, 0);
+            const requiredAmount = getAmount(group.filter(item => item.required !== false));
+            const optionalAmount = getAmount(group.filter(item => item.required === false));
+            const amount = requiredAmount + optionalAmount;
+            const availableAmount = InventoryHelper.availableAmount(options.inventoryItems?.[ingredientId], ingredient, amount);
+            const requiredMissingAmount = InventoryHelper.isAlwaysAvailable(ingredient) ? 0 : Math.max(0, requiredAmount - availableAmount);
+            const remainingAvailableForOptional = Math.max(0, availableAmount - requiredAmount);
+            const optionalMissingAmount = InventoryHelper.isAlwaysAvailable(ingredient) ? 0 : Math.max(0, optionalAmount - remainingAvailableForOptional);
+            const missingAmount = requiredMissingAmount + optionalMissingAmount;
+
+            if (missingAmount > 0) {
+                CostEstimateHelper.addAmount(estimate.missing, ingredient, missingAmount, unit);
+            }
+            if (requiredMissingAmount > 0) CostEstimateHelper.addAmount(estimate.missingRequired, ingredient, requiredMissingAmount, unit);
+            if (optionalMissingAmount > 0) CostEstimateHelper.addAmount(estimate.missingOptional, ingredient, optionalMissingAmount, unit);
+
+            estimate.rows.push({
+                ingredientId,
+                ingredient,
+                amount,
+                unit,
+                availableAmount,
+                missingAmount: InventoryHelper.isAlwaysAvailable(ingredient) ? 0 : missingAmount,
+                required: group.some(item => item.required !== false),
+            });
+        });
+
         return estimate;
+    },
+
+    estimateDish(dish: Dishes, ingredients: Ingredient[], dishes: Dishes[] = [], targetServings?: number): DishCostEstimate {
+        const estimate = CostEstimateHelper.emptyDishEstimate();
+        if (!dish) return estimate;
+
+        return CostEstimateHelper.estimateIngredientAmounts(
+            DishServingHelper.collectIngredientAmounts(dish, dishes, { targetServings }),
+            ingredients,
+        );
     },
 };
