@@ -1,4 +1,4 @@
-import { CheckCircleOutlined, MinusOutlined, PlusOutlined, QuestionCircleOutlined, ShoppingCartOutlined, WalletOutlined, WarningOutlined } from "@ant-design/icons";
+import { CheckCircleOutlined, MinusOutlined, PlusOutlined, QuestionCircleOutlined, ShoppingCartOutlined, WarningOutlined } from "@ant-design/icons";
 import { Button } from "@components/Button";
 import { Checkbox } from "@components/Form/Checkbox";
 import { DatePicker } from "@components/Form/DatePicker";
@@ -31,6 +31,7 @@ import { nanoid } from "nanoid";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import ChecklistIcon from "../../../../assets/icons/done.png";
+import BudgetIcon from "../../../../assets/icons/budget.png";
 import MealsIcon from "../../../../assets/icons/meals.png";
 import CalendarIcon from "../../../../assets/icons/nineteen.png";
 import DishesIcon from "../../../../assets/icons/noodles.png";
@@ -395,7 +396,7 @@ export const ShoppingListDetailWidget: React.FunctionComponent<ShoppingListDetai
                 </div>
             },
             {
-                key: "cost", icon: <WalletOutlined />, label: "Chi phí",
+                key: "cost", icon: <Image src={BudgetIcon} preview={false} width={22} style={{ marginBottom: 3 }} />, label: "Chi phí",
                 children: <Box data-testid="shopping-list-cost-tab">
                     <div style={{ display: "flex", flexDirection: "column", gap: 10, width: "100%", boxSizing: "border-box" }}>
                         <ShoppingListCostSummaryWidget summary={costSummary} />
