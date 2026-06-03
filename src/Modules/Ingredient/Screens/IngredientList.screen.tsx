@@ -27,6 +27,8 @@ import { UseFirstWidget } from "./UseFirst.widget";
 import { IngredientStatsWidget } from "./IngredientStats.widget";
 import { DishSuggesterScreen } from "@modules/DishSuggester/Screens/DishSuggester.screen";
 
+const VIRTUAL_LIST_HEIGHT = "calc(100dvh - 218px)";
+
 type IngredientRowProps = { items: Ingredient[]; onDelete: (item: Ingredient) => void; isAdmin: boolean; onSuggest: (ids: string[]) => void; };
 
 const IngredientRow = ({ index, style, items, onDelete, isAdmin, onSuggest }: RowComponentProps<IngredientRowProps>) => {
@@ -81,7 +83,7 @@ export const IngredientListScreen = () => {
             rowCount={filteredIngredients.length}
             rowHeight={rowHeight}
             rowProps={{ items: filteredIngredients, onDelete: _onDelete, isAdmin, onSuggest: _onSuggest }}
-            style={{ height: window.screen.availHeight - 210 - 80 }}
+            style={{ height: VIRTUAL_LIST_HEIGHT }}
         />
         <Modal width={640} open={toggleAddModal.value} title={
             <Space>

@@ -31,6 +31,8 @@ import { ShoppingListEditWidget } from "./ShoppingListEdit.widget";
 import { DateHelpers } from "@common/Helpers/DateHelper";
 import { RootRoutes } from "@routing/RootRoutes";
 
+const VIRTUAL_LIST_HEIGHT = "calc(100dvh - 218px)";
+
 type ShoppingListRowProps = { items: ShoppingList[]; onDelete: (item: ShoppingList) => void; };
 
 const ShoppingListRow = ({ index, style, items, onDelete }: RowComponentProps<ShoppingListRowProps>) => {
@@ -82,7 +84,7 @@ export const ShoppingListScreen = () => {
             rowCount={filteredShoppingLists.length}
             rowHeight={rowHeight}
             rowProps={{ items: filteredShoppingLists, onDelete: _onDelete }}
-            style={{ height: window.screen.availHeight - 210 - 80 }}
+            style={{ height: VIRTUAL_LIST_HEIGHT }}
         />
         <Modal open={toggleAddModal.value} title={<Space>
             <Image src={ShoppinglistIcon} preview={false} width={24} style={{ marginBottom: 3 }} />

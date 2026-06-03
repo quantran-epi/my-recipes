@@ -1,19 +1,20 @@
 import {
     CopyOutlined, DeleteOutlined, EditOutlined,
-    PlusOutlined, ShoppingCartOutlined
+    HolderOutlined, PlusOutlined, ShoppingCartOutlined
 } from "@ant-design/icons";
 import { Badge } from "@components/Badge";
 import { Button } from "@components/Button";
+import { Dropdown } from "@components/Dropdown";
 import { Space } from "@components/Layout/Space";
 import { Stack } from "@components/Layout/Stack";
 import { Modal } from "@components/Modal";
-import { Popconfirm } from "@components/Popconfirm";
+import { Tooltip } from "@components/Tootip";
 import { Typography } from "@components/Typography";
 import { useScreenTitle, useTheme, useToggle } from "@hooks";
 import { ScheduledMeal } from "@store/Models/ScheduledMeal";
 import { addScheduledMeal, removeScheduledMeal, toggleSelectedMeals } from "@store/Reducers/ScheduledMealReducer";
 import { RootState } from "@store/Store";
-import { Calendar, DatePicker, Divider, Tag } from "antd";
+import { Calendar, DatePicker, Tag } from "antd";
 import { SelectInfo } from "antd/es/calendar/generateCalendar";
 import dayjs, { Dayjs } from "dayjs";
 import { nanoid } from "nanoid";
@@ -89,32 +90,53 @@ export const ScheduledMealListScreen = () => {
     };
 
     const mealsToday = _findScheduledMealsByDate(selectedDate);
+    const selectedDayStatus = dayjs(selectedDate).isSame(dayjs(), "day")
+        ? { label: "Hôm nay", color: "#1677ff", background: "#e6f4ff", border: "#91caff" }
+        : dayjs(selectedDate).isBefore(dayjs(), "day")
+            ? { label: "Đã qua", color: "#8c8c8c", background: "#fafafa", border: "#d9d9d9" }
+            : { label: "Sắp tới", color: "#389e0d", background: "#f6ffed", border: "#b7eb8f" };
 
     return (
         <React.Fragment>
-            {/* ── Range shopping button ── */}
-            <Stack justify="flex-end" style={{ padding: "8px 12px 0", marginBottom: 10 }}>
-                <Button
-                    icon={<ShoppingCartOutlined />}
-                    onClick={_onOpenRangeShopping}
-                    style={{ borderRadius: 16 }}
-                >
+            <Stack justify="flex-end" style={{ padding: "8px 12px 0", marginBottom: 8 }}>
+                <Button icon={<ShoppingCartOutlined />} onClick={_onOpenRangeShopping}>
                     Giỏ hàng theo khoảng ngày
                 </Button>
             </Stack>
 
-            <Calendar fullscreen={false} onSelect={_onSelect} cellRender={_cellRender} />
-
-            <Divider orientation="left" style={{ marginTop: 4 }}>
-                Thực đơn {moment(selectedDate).format("DD/MM/YYYY")}
-            </Divider>
             <Box style={{ padding: "0 12px" }}>
-                <Button fullwidth onClick={toggleAddModal.show} icon={<PlusOutlined />} />
+                <Box style={{ border: "1px solid #f0f0f0", borderRadius: 8, background: "#fff", padding: 8 }}>
+                    <Calendar fullscreen={false} onSelect={_onSelect} cellRender={_cellRender} />
+                </Box>
             </Box>
 
-            <Box style={{ padding: "0 12px", marginTop: 15 }}>
+            <Box style={{ padding: "10px 12px 0" }}>
+                <Box style={{
+                    display: "grid",
+                    gridTemplateColumns: "minmax(0, 1fr) auto",
+                    gap: 8,
+                    alignItems: "center",
+                    border: "1px solid #f0f0f0",
+                    borderRadius: 8,
+                    background: "#fff",
+                    padding: 10,
+                }}>
+                    <div style={{ minWidth: 0 }}>
+                        <Typography.Text strong style={{ display: "block", fontSize: 15, lineHeight: "20px", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                            {moment(selectedDate).format("dddd, DD/MM/YYYY")}
+                        </Typography.Text>
+                        <Space size={5} wrap>
+                            <span style={{ padding: "1px 7px", borderRadius: 999, background: selectedDayStatus.background, color: selectedDayStatus.color, border: `1px solid ${selectedDayStatus.border}`, fontSize: 11, lineHeight: "18px", fontWeight: 650 }}>{selectedDayStatus.label}</span>
+                            <Typography.Text type="secondary" style={{ fontSize: 12 }}>{mealsToday.length} thực đơn</Typography.Text>
+                        </Space>
+                    </div>
+                    <Button onClick={toggleAddModal.show} icon={<PlusOutlined />}>Thêm</Button>
+                </Box>
+            </Box>
+
+            <Box style={{ padding: "8px 12px 16px" }}>
                 {mealsToday.length === 0 ? (
-                    <Box style={{ textAlign: "center", padding: "24px 0" }}>
+                    <Box style={{ textAlign: "center", padding: "24px 0", border: "1px dashed #d9d9d9", borderRadius: 8, background: "#fafafa" }}>
                         <Typography.Text type="secondary">Chưa có thực đơn trong ngày này</Typography.Text>
                     </Box>
                 ) : (
@@ -212,6 +234,7 @@ export const ScheduledMealItem = ({ item, onDelete }: { item: ScheduledMeal; onD
     const toggleEditModal = useToggle({ defaultValue: false });
     const toggleMealModal = useToggle({ defaultValue: false });
     const toggleCopyModal = useToggle({ defaultValue: false });
+    const toggleDeleteConfirm = useToggle({ defaultValue: false });
     const [copyDate, setCopyDate] = useState<Dayjs | null>(null);
     const selectedMeals = useSelector((state: RootState) => state.personal.scheduledMeal.selectedMeals);
     const dishes = useSelector((state: RootState) => state.shared.dishes.dishes);
@@ -238,22 +261,47 @@ export const ScheduledMealItem = ({ item, onDelete }: { item: ScheduledMeal; onD
         setCopyDate(null);
     };
 
+    const _onMoreActionClick = (e) => {
+        switch (e.key) {
+            case "copy": toggleCopyModal.show(); break;
+            case "edit": toggleEditModal.show(); break;
+            case "delete": toggleDeleteConfirm.show(); break;
+        }
+    };
+
+    const selected = _isSelected();
+    const mealGroups = [
+        { icon: MorningIcon, label: "Sáng", dishIds: item.meals.breakfast, color: "#faad14", background: "#fffbe6", border: "#ffe58f" },
+        { icon: NoonIcon, label: "Trưa", dishIds: item.meals.lunch, color: "#d46b08", background: "#fff7e6", border: "#ffd591" },
+        { icon: NightIcon, label: "Tối", dishIds: item.meals.dinner, color: "#531dab", background: "#f9f0ff", border: "#efdbff" },
+    ];
+    const allDishIds = mealGroups.flatMap(group => group.dishIds);
+    const totalDishCount = allDishIds.length;
+    const uniqueDishCount = new Set(allDishIds).size;
+    const plannedStatus = dayjs(item.plannedDate).isSame(dayjs(), "day")
+        ? { label: "Hôm nay", color: "#1677ff", background: "#e6f4ff", border: "#91caff" }
+        : dayjs(item.plannedDate).isBefore(dayjs(), "day")
+            ? { label: "Đã qua", color: "#8c8c8c", background: "#fafafa", border: "#d9d9d9" }
+            : { label: "Sắp tới", color: "#389e0d", background: "#f6ffed", border: "#b7eb8f" };
+    const railColor = selected ? "#1677ff" : plannedStatus.color;
+
     const MealRow = ({ icon, label, dishIds }: { icon: string; label: string; dishIds: string[] }) => (
-        <Box style={{ marginBottom: dishIds.length > 0 ? 6 : 2 }}>
-            <Stack gap={6} align="center" style={{ marginBottom: dishIds.length > 0 ? 3 : 0 }}>
-                <Image src={icon} preview={false} width={14} style={{ marginBottom: 2 }} />
-                <Typography.Text style={{ fontSize: 12, color: "#888" }}>{label}</Typography.Text>
-                {dishIds.length === 0 && (
-                    <Typography.Text style={{ fontSize: 12, color: "#bbb" }}>—</Typography.Text>
-                )}
+        <Box style={{ border: "1px solid #f0f0f0", borderRadius: 8, background: "#fafafa", padding: "7px 8px", minWidth: 0 }}>
+            <Stack gap={6} align="center" style={{ marginBottom: 5 }}>
+                <Image src={icon} preview={false} width={15} style={{ marginBottom: 2 }} />
+                <Typography.Text strong style={{ fontSize: 12 }}>{label}</Typography.Text>
+                <Typography.Text type="secondary" style={{ fontSize: 11 }}>{dishIds.length} món</Typography.Text>
             </Stack>
-            {dishIds.length > 0 && (
-                <Stack wrap="wrap" gap={4} style={{ paddingLeft: 20 }}>
-                    {dishIds.map(id => (
-                        <Tag key={id} style={{ fontSize: 11, padding: "1px 7px", margin: 0, borderRadius: 10 }}>
+            {dishIds.length === 0 ? (
+                <Typography.Text type="secondary" style={{ display: "block", fontSize: 12, lineHeight: "18px" }}>Chưa chọn</Typography.Text>
+            ) : (
+                <Stack wrap="wrap" gap={4}>
+                    {dishIds.slice(0, 3).map((id, index) => (
+                        <Tag key={`${id}-${index}`} style={{ maxWidth: "100%", fontSize: 11, padding: "1px 7px", margin: 0, borderRadius: 10, overflow: "hidden", textOverflow: "ellipsis" }}>
                             {_dishName(id)}
                         </Tag>
                     ))}
+                    {dishIds.length > 3 && <Tag style={{ fontSize: 11, padding: "1px 7px", margin: 0, borderRadius: 10 }}>+{dishIds.length - 3}</Tag>}
                 </Stack>
             )}
         </Box>
@@ -262,38 +310,56 @@ export const ScheduledMealItem = ({ item, onDelete }: { item: ScheduledMeal; onD
     return (
         <React.Fragment>
             <Box style={{
-                borderRadius: 10,
-                border: `1px solid ${_isSelected() ? "#1677ff" : theme.token.colorBorder}`,
-                background: _isSelected() ? "#e6f4ff" : "#fafafa",
-                padding: "10px 12px",
+                display: "grid",
+                gridTemplateColumns: "5px minmax(0, 1fr)",
+                borderRadius: 8,
+                border: `1px solid ${selected ? "#1677ff" : theme.token.colorBorder}`,
+                background: selected ? "#f0f7ff" : "#fff",
                 marginBottom: 8,
                 transition: "all 0.15s",
+                overflow: "hidden",
+                boxShadow: "0 2px 8px rgba(0,0,0,0.04)",
             }}>
-                {/* Header row */}
-                <Stack justify="space-between" align="center" style={{ marginBottom: 8 }}>
-                    <Stack gap={6} align="center">
-                        <Checkbox checked={_isSelected()} onChange={_onToggleSelect} style={{ marginRight: 0 }} />
-                        <Button
-                            style={{ paddingInline: 4, height: "auto" }}
-                            type="text"
-                            onClick={toggleMealModal.show}
-                        >
-                            <Typography.Text strong style={{ fontSize: 14 }}>{item.name}</Typography.Text>
-                        </Button>
-                    </Stack>
-                    <Stack gap={4}>
-                        <Button size="small" type="text" icon={<CopyOutlined />} onClick={toggleCopyModal.show} />
-                        <Button size="small" type="text" icon={<EditOutlined />} onClick={toggleEditModal.show} />
-                        <Popconfirm title="Xóa?" onConfirm={() => onDelete(item)}>
-                            <Button size="small" type="text" danger icon={<DeleteOutlined />} />
-                        </Popconfirm>
-                    </Stack>
-                </Stack>
+                <div style={{ background: railColor }} />
+                <div style={{ padding: 10, minWidth: 0, display: "flex", flexDirection: "column", gap: 9 }}>
+                    <div style={{ display: "grid", gridTemplateColumns: "minmax(0, 1fr) auto", gap: 8, alignItems: "start" }}>
+                        <Stack gap={7} align="flex-start" style={{ minWidth: 0 }}>
+                            <Checkbox checked={selected} onChange={_onToggleSelect} style={{ marginTop: 2, marginRight: 0 }} />
+                            <div style={{ minWidth: 0 }}>
+                                <Tooltip title={item.name}>
+                                    <Typography.Paragraph style={{ marginBottom: 2, fontWeight: 650, lineHeight: "21px" }} ellipsis={{ rows: 2 }}>
+                                        {item.name}
+                                    </Typography.Paragraph>
+                                </Tooltip>
+                                <Space size={5} wrap>
+                                    <span style={{ padding: "1px 7px", borderRadius: 999, background: plannedStatus.background, color: plannedStatus.color, border: `1px solid ${plannedStatus.border}`, fontSize: 11, lineHeight: "18px", fontWeight: 650 }}>{plannedStatus.label}</span>
+                                    <Typography.Text type="secondary" style={{ fontSize: 12 }}>{moment(item.plannedDate).format("DD/MM/YYYY")}</Typography.Text>
+                                    <Typography.Text type="secondary" style={{ fontSize: 12 }}>{totalDishCount} lượt món</Typography.Text>
+                                    {uniqueDishCount !== totalDishCount && <Typography.Text type="secondary" style={{ fontSize: 12 }}>{uniqueDishCount} món khác nhau</Typography.Text>}
+                                </Space>
+                            </div>
+                        </Stack>
 
-                {/* Inline dish names */}
-                <MealRow icon={MorningIcon} label="Sáng" dishIds={item.meals.breakfast} />
-                <MealRow icon={NoonIcon} label="Trưa" dishIds={item.meals.lunch} />
-                <MealRow icon={NightIcon} label="Tối" dishIds={item.meals.dinner} />
+                        <Stack gap={4} align="center">
+                            <Button onClick={toggleMealModal.show}>Chi tiết</Button>
+                            <Dropdown menu={{
+                                items: [
+                                    { label: "Sao chép", key: "copy", icon: <CopyOutlined /> },
+                                    { label: "Sửa", key: "edit", icon: <EditOutlined /> },
+                                    { type: "divider" },
+                                    { label: "Xóa", key: "delete", icon: <DeleteOutlined />, danger: true },
+                                ],
+                                onClick: _onMoreActionClick,
+                            }} placement="bottomRight">
+                                <Button type="text" icon={<HolderOutlined />} style={{ width: 34, paddingInline: 0 }} />
+                            </Dropdown>
+                        </Stack>
+                    </div>
+
+                    <div style={{ display: "grid", gridTemplateColumns: "repeat(3, minmax(0, 1fr))", gap: 7 }}>
+                        {mealGroups.map(group => <MealRow key={group.label} icon={group.icon} label={group.label} dishIds={group.dishIds} />)}
+                    </div>
+                </div>
             </Box>
 
             {/* Edit */}
@@ -353,6 +419,18 @@ export const ScheduledMealItem = ({ item, onDelete }: { item: ScheduledMeal; onD
                         disabledDate={d => d.isSame(dayjs(item.plannedDate), "day")}
                     />
                 </Box>
+            </Modal>
+            <Modal
+                open={toggleDeleteConfirm.value}
+                title={<Space><DeleteOutlined style={{ color: "red" }} />Xác nhận xóa</Space>}
+                onCancel={toggleDeleteConfirm.hide}
+                onOk={() => { onDelete(item); toggleDeleteConfirm.hide(); }}
+                okText="Xóa"
+                cancelText="Hủy"
+                okButtonProps={{ danger: true }}
+                destroyOnClose
+            >
+                Bạn có chắc muốn xóa thực đơn <b>{item.name}</b> không? Hành động này không thể hoàn tác.
             </Modal>
         </React.Fragment>
     );

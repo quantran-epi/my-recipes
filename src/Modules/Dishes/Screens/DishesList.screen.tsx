@@ -39,6 +39,9 @@ import 'moment/locale/vi';
 
 type DishRowProps = { dishes: Dishes[]; onDelete: (item: Dishes) => void; onDuplicate: (item: Dishes) => void; isAdmin: boolean; };
 
+const BASE_VIRTUAL_LIST_HEIGHT = "calc(100dvh - 218px)";
+const TAGGED_VIRTUAL_LIST_HEIGHT = "calc(100dvh - 248px)";
+
 const DishRow = ({ index, style, dishes, onDelete, onDuplicate, isAdmin }: RowComponentProps<DishRowProps>) => {
     if (!dishes[index]) return null;
     return <div style={style}><DishesItem item={dishes[index]} onDelete={onDelete} onDuplicate={onDuplicate} isAdmin={isAdmin} /></div>;
@@ -69,6 +72,7 @@ export const DishesListScreen = () => {
             "name"
         );
     }, [dishes, searchText, activeTag]);
+    const virtualListHeight = allTags.length > 0 ? TAGGED_VIRTUAL_LIST_HEIGHT : BASE_VIRTUAL_LIST_HEIGHT;
 
     const _onDelete = (item: Dishes) => {
         dispatch(removeDishes([item.id]));
@@ -110,7 +114,7 @@ export const DishesListScreen = () => {
             rowCount={filteredDishes.length}
             rowHeight={rowHeight}
             rowProps={{ dishes: filteredDishes, onDelete: _onDelete, onDuplicate: _onDuplicate, isAdmin }}
-            style={{ height: window.screen.availHeight - 210 - 80 }}
+            style={{ height: virtualListHeight }}
         />
         <Modal open={toggleAddModal.value} title={
             <Space>
