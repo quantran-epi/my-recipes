@@ -55,6 +55,10 @@ type IngredientGroupStatus = {
     isAlwaysAvailable: boolean;
 }
 
+type IngredientGroupStatusOptions = {
+    requiredOnly?: boolean;
+}
+
 type BoughtImportPlan = {
     ingredientId: string;
     ingredient?: Ingredient;
@@ -94,9 +98,14 @@ const getIngredientGroupStatus = (
     group: ShoppingListIngredientGroup,
     ingredient: Ingredient | undefined,
     inventory: IngredientInventory | undefined,
+    options?: IngredientGroupStatusOptions,
 ): IngredientGroupStatus => {
-    const unit = IngredientUnitHelper.getBaseUnit(ingredient, group.amounts.map(amt => amt.unit));
-    const totalRequired = group.amounts.reduce((sum, amt) => {
+    const amounts = options?.requiredOnly
+        ? group.amounts.filter(amt => amt.required !== false)
+        : group.amounts;
+    const unitSourceAmounts = amounts.length > 0 ? amounts : group.amounts;
+    const unit = IngredientUnitHelper.getBaseUnit(ingredient, unitSourceAmounts.map(amt => amt.unit));
+    const totalRequired = amounts.reduce((sum, amt) => {
         const converted = IngredientUnitHelper.toBaseAmount(ingredient, amt.amount, amt.unit, unit);
         return sum + (converted ?? IngredientUnitHelper.parseAmount(amt.amount));
     }, 0);
@@ -178,10 +187,11 @@ const getShoppingListIngredientPriceEstimate = (
     group: ShoppingListIngredientGroup,
     ingredient: Ingredient | undefined,
     inventory: IngredientInventory | undefined,
+    options?: IngredientGroupStatusOptions,
 ): ShoppingListIngredientPriceEstimate | null => {
     if (InventoryHelper.isAlwaysAvailable(ingredient)) return null;
 
-    const status = getIngredientGroupStatus(group, ingredient, inventory);
+    const status = getIngredientGroupStatus(group, ingredient, inventory, options);
     const explicitBoughtAmount = group.boughtAmount ?? 0;
     const amount = explicitBoughtAmount > 0
         ? Math.max(0, status.needToBuy - status.boughtBaseAmount)
@@ -241,10 +251,10 @@ export const ShoppingListDetailWidget: React.FunctionComponent<ShoppingListDetai
         return props.shoppingList.ingredients.reduce((summary, group) => {
             const ingredient = allIngredients.find(item => item.id === group.ingredientId);
             const inventory = inventoryItems[group.ingredientId];
-            const status = getIngredientGroupStatus(group, ingredient, inventory);
+            const status = getIngredientGroupStatus(group, ingredient, inventory, { requiredOnly: true });
             CostEstimateHelper.addAmount(summary.recipe, ingredient, status.totalRequired, status.unit);
 
-            const cartEstimate = getShoppingListIngredientPriceEstimate(group, ingredient, inventory);
+            const cartEstimate = getShoppingListIngredientPriceEstimate(group, ingredient, inventory, { requiredOnly: true });
             if (cartEstimate) CostEstimateHelper.addAmount(summary.cart, ingredient, cartEstimate.amount, cartEstimate.unit);
 
             if (!status.isAlwaysAvailable) {
