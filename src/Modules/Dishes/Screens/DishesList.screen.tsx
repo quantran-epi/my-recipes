@@ -1,4 +1,4 @@
-import { ClockCircleOutlined, CopyOutlined, DeleteOutlined, EditOutlined, FileTextOutlined, HolderOutlined, PlusOutlined, QuestionCircleOutlined, FireOutlined } from "@ant-design/icons";
+import { CheckCircleOutlined, ClockCircleOutlined, CopyOutlined, DeleteOutlined, EditOutlined, ExclamationCircleOutlined, FileTextOutlined, HolderOutlined, PlusOutlined, QuestionCircleOutlined, FireOutlined } from "@ant-design/icons";
 import { Button } from "@components/Button";
 import { Dropdown } from "@components/Dropdown";
 import { Input } from "@components/Form/Input";
@@ -9,7 +9,6 @@ import { Stack } from "@components/Layout/Stack";
 import { List } from "@components/List";
 import { useMessage } from "@components/Message";
 import { Modal } from "@components/Modal";
-import { Popconfirm } from "@components/Popconfirm";
 import { Popover } from "@components/Popover";
 import { Tag } from "@components/Tag";
 import { Tooltip } from "@components/Tootip";
@@ -52,7 +51,7 @@ export const DishesListScreen = () => {
     const [activeTag, setActiveTag] = useState<string | null>(null);
     const dispatch = useDispatch();
     const { } = useScreenTitle({ value: "Món ăn", deps: [] });
-    const rowHeight = useDynamicRowHeight({ defaultRowHeight: 110, key: searchText + (activeTag ?? "") });
+    const rowHeight = useDynamicRowHeight({ defaultRowHeight: 204, key: searchText + (activeTag ?? "") });
     const { isAdmin } = useAdminMode();
 
     const allTags = useMemo<string[]>(() => {
@@ -162,13 +161,6 @@ export const DishesItem: React.FunctionComponent<DishesItemProps> = (props) => {
         return Object.values(props.item.duration).some(e => e !== null);
     }
 
-    const _hasIncludeDishes = () => {
-        return props.item.includeDishes.filter(id => dishes.find(e => e.id === id)).length > 0;
-    }
-
-    const _hasIngredients = () => props.item.ingredients.length > 0;
-    const _hasSteps = () => props.item.steps.length > 0;
-
     const _allIngredients = (): typeof props.item.ingredients => {
         const collect = (dish: Dishes, visited = new Set<string>()): typeof props.item.ingredients => {
             if (visited.has(dish.id)) return [];
@@ -227,80 +219,144 @@ export const DishesItem: React.FunctionComponent<DishesItemProps> = (props) => {
         message.success("Đã lưu thời gian món ăn");
     }
 
+    const allDishIngredients = _allIngredients();
+    const allDishSteps = _allSteps();
+    const requiredIngredientCount = allDishIngredients.filter(item => item.required !== false).length;
+    const optionalIngredientCount = allDishIngredients.length - requiredIngredientCount;
+    const includedDishCount = props.item.includeDishes.filter(id => dishes.find(e => e.id === id)).length;
+    const hasDuration = _hasDuration();
+    const hasIngredients = allDishIngredients.length > 0;
+    const hasSteps = allDishSteps.length > 0;
+    const visibleTags = props.item.tags?.slice(0, 3) ?? [];
+    const extraTagCount = Math.max(0, (props.item.tags?.length ?? 0) - visibleTags.length);
+    const baseServings = props.item.baseServings ?? 2;
+
     return <React.Fragment>
-        <div style={{ display: 'flex', alignItems: 'center', padding: '8px 0', borderBottom: '1px solid rgba(5,5,5,0.06)', gap: 12 }}>
-            {/* avatar */}
-            <div onClick={toggleDishesDetail.show} style={{ cursor: "pointer", flexShrink: 0 }}>
-                <DishImageWidget src={props.item.image} width={48} height={48} borderRadius={6} fallbackIconSize={24} showBrokenLabel={false} />
-            </div>
-            {/* meta content */}
-            <div style={{ flex: 1, minWidth: 0 }}>
-                <Typography.Paragraph
-                    onClick={toggleDishesDetail.show}
-                    style={{ width: 200, marginBottom: 0, color: !props.item.isCompleted ? "orangered" : undefined, cursor: "pointer" }}
-                    ellipsis={{ tooltip: props.item.name }}
-                >
-                    {props.item.name}
-                </Typography.Paragraph>
-                <Stack direction="column" align="flex-start" gap={0}>
-                    {props.item.tags?.length > 0 && (
-                        <Space size={0} wrap style={{ marginBottom: 2 }}>
-                            {props.item.tags.map(tag => <Tag key={tag} color="geekblue" style={{ fontSize: 11, padding: '0 4px' }}>{tag}</Tag>)}
+        <div style={{ padding: "6px 0 8px", boxSizing: "border-box" }}>
+            <Box style={{
+                display: "grid",
+                gridTemplateColumns: "88px minmax(0, 1fr)",
+                gap: 10,
+                minHeight: 146,
+                padding: 10,
+                border: "1px solid #e8e8e8",
+                borderRadius: 8,
+                background: "#fff",
+                boxShadow: "0 2px 8px rgba(0,0,0,0.04)",
+                boxSizing: "border-box",
+            }}>
+                <div onClick={toggleDishesDetail.show} style={{ position: "relative", cursor: "pointer", width: 88, height: 122 }}>
+                    <DishImageWidget src={props.item.image} width={88} height={122} borderRadius={8} fallbackIconSize={34} showBrokenLabel={false} />
+                    <div style={{
+                        position: "absolute",
+                        left: 6,
+                        right: 6,
+                        bottom: 6,
+                        padding: "2px 6px",
+                        borderRadius: 8,
+                        background: props.item.isCompleted ? "rgba(82,196,26,0.92)" : "rgba(250,140,22,0.94)",
+                        color: "#fff",
+                        fontSize: 11,
+                        lineHeight: "16px",
+                        textAlign: "center",
+                        whiteSpace: "nowrap",
+                    }}>
+                        {props.item.isCompleted ? "Hoàn thiện" : "Cần cập nhật"}
+                    </div>
+                </div>
+
+                <div style={{ minWidth: 0, display: "flex", flexDirection: "column", gap: 7 }}>
+                    <div style={{ display: "grid", gridTemplateColumns: "minmax(0, 1fr) auto", gap: 8, alignItems: "start" }}>
+                        <div style={{ minWidth: 0 }}>
+                            <Typography.Paragraph
+                                onClick={toggleDishesDetail.show}
+                                style={{ marginBottom: 2, color: !props.item.isCompleted ? "#d46b08" : undefined, cursor: "pointer", fontWeight: 650, lineHeight: "21px" }}
+                                ellipsis={{ rows: 2, tooltip: props.item.name }}
+                            >
+                                {props.item.name}
+                            </Typography.Paragraph>
+                            <Space size={[4, 4]} wrap>
+                                {visibleTags.map(tag => <Tag key={tag} color="geekblue" style={{ fontSize: 11, padding: "0 5px", marginInlineEnd: 0 }}>{tag}</Tag>)}
+                                {extraTagCount > 0 && <Tag style={{ fontSize: 11, padding: "0 5px", marginInlineEnd: 0 }}>+{extraTagCount}</Tag>}
+                                <Tag color="blue" style={{ fontSize: 11, padding: "0 5px", marginInlineEnd: 0 }}>{baseServings} phần</Tag>
+                            </Space>
+                        </div>
+
+                        <Dropdown menu={{
+                            items: [
+                                { label: "Bắt đầu nấu", key: "cook", icon: <FireOutlined /> },
+                                { label: "Export", key: "export", icon: <FileTextOutlined /> },
+                                ...(props.isAdmin ? [
+                                    { type: "divider" as const },
+                                    { label: "Sửa món ăn", key: "edit", icon: <EditOutlined /> },
+                                    { label: "Thời lượng", key: "duration", icon: <ClockCircleOutlined /> },
+                                    { label: "Nhân bản", key: "duplicate", icon: <CopyOutlined /> },
+                                    { type: "divider" as const },
+                                    { label: "Xóa", key: "delete", icon: <DeleteOutlined />, danger: true },
+                                ] : []),
+                            ],
+                            onClick: (e) => e.key === "export" ? toggleExport.show() : _onMoreActionClick(e)
+                        }} placement="bottomRight">
+                            <Button type="text" icon={<HolderOutlined />} style={{ width: 32, paddingInline: 0 }} />
+                        </Dropdown>
+                    </div>
+
+                    <div style={{ display: "grid", gridTemplateColumns: "repeat(3, minmax(0, 1fr))", gap: 6 }}>
+                        <button type="button" onClick={hasIngredients ? toggleIngredientsOverview.show : undefined} style={{ border: "1px solid #f0f0f0", background: "#fafafa", borderRadius: 8, padding: "6px 7px", textAlign: "left", cursor: hasIngredients ? "pointer" : "default", minWidth: 0 }}>
+                            <Typography.Text type="secondary" style={{ display: "block", fontSize: 11, lineHeight: "14px" }}>Nguyên liệu</Typography.Text>
+                            <Typography.Text strong style={{ display: "block", fontSize: 13, lineHeight: "18px", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                                {hasIngredients ? `${allDishIngredients.length} nguyên liệu` : "Chưa có"}
+                            </Typography.Text>
+                            {optionalIngredientCount > 0 && <Typography.Text type="secondary" style={{ display: "block", fontSize: 11, lineHeight: "14px" }}>{optionalIngredientCount} tùy chọn</Typography.Text>}
+                        </button>
+
+                        <Popover title="Thời lượng" content={<List size="small" dataSource={Object.entries(props.item.duration)} renderItem={item => {
+                            let processName = "";
+                            switch (item[0] as keyof DishDuration) {
+                                case "unfreeze": processName = "Rã đông"; break;
+                                case "prepare": processName = "Sơ chế"; break;
+                                case "cooking": processName = "Nấu nướng"; break;
+                                case "serve": processName = "Trình bày"; break;
+                                case "cooldown": processName = "Để nguội"; break;
+                            }
+                            return <List.Item style={{ paddingInline: 0 }}>
+                                <Stack fullwidth justify="space-between">
+                                    <Typography.Text style={{ fontSize: 16 }}>{processName}:</Typography.Text>
+                                    {Boolean(item[1]) && <Tag>{moment.duration(item[1], "minutes").locale("vi").humanize()}</Tag>}
+                                </Stack>
+                            </List.Item>
+                        }} />}>
+                            <button type="button" style={{ border: "1px solid #f0f0f0", background: "#fafafa", borderRadius: 8, padding: "6px 7px", textAlign: "left", cursor: hasDuration ? "pointer" : "default", minWidth: 0 }}>
+                                <Typography.Text type="secondary" style={{ display: "block", fontSize: 11, lineHeight: "14px" }}>Thời gian</Typography.Text>
+                                <Typography.Text strong style={{ display: "block", fontSize: 13, lineHeight: "18px", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                                    {hasDuration ? _sumDuration() : "Chưa set"}
+                                </Typography.Text>
+                            </button>
+                        </Popover>
+
+                        <button type="button" onClick={hasSteps ? toggleStepsOverview.show : undefined} style={{ border: "1px solid #f0f0f0", background: "#fafafa", borderRadius: 8, padding: "6px 7px", textAlign: "left", cursor: hasSteps ? "pointer" : "default", minWidth: 0 }}>
+                            <Typography.Text type="secondary" style={{ display: "block", fontSize: 11, lineHeight: "14px" }}>Quy trình</Typography.Text>
+                            <Typography.Text strong style={{ display: "block", fontSize: 13, lineHeight: "18px", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                                {hasSteps ? `${allDishSteps.length} bước` : "Chưa có"}
+                            </Typography.Text>
+                            {includedDishCount > 0 && <Typography.Text type="secondary" style={{ display: "block", fontSize: 11, lineHeight: "14px" }}>{includedDishCount} món kèm</Typography.Text>}
+                        </button>
+                    </div>
+
+                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8, marginTop: "auto", flexWrap: "wrap" }}>
+                        <Space size={6} style={{ minWidth: 0 }}>
+                            {props.item.isCompleted
+                                ? <Typography.Text style={{ color: "#389e0d", fontSize: 12 }}><CheckCircleOutlined /> Sẵn sàng</Typography.Text>
+                                : <Typography.Text style={{ color: "#d46b08", fontSize: 12 }}><ExclamationCircleOutlined /> Cần cập nhật</Typography.Text>}
+                            {requiredIngredientCount > 0 && <Typography.Text type="secondary" style={{ fontSize: 12 }}>{requiredIngredientCount} bắt buộc</Typography.Text>}
                         </Space>
-                    )}
-                    <Space size={0}>
-                        {(_hasIngredients() || _hasIncludeDishes()) && (
-                            <Button onClick={toggleIngredientsOverview.show} type="text" size="small" style={{ paddingInline: 0, fontSize: 14 }} icon={<Image src={VegetablesIcon} preview={false} width={18} style={{ marginBottom: 3 }} />}>
-                                {_allIngredients().length} nguyên liệu
-                            </Button>
-                        )}
-                        {(_hasIngredients() || _hasIncludeDishes()) && _hasDuration() && (
-                            <Typography.Text type="secondary" style={{ paddingLeft: 6, paddingRight: 2, fontSize: 14 }}>·</Typography.Text>
-                        )}
-                        {_hasDuration() && (
-                            <Popover title="Thời lượng" content={<List size="small" dataSource={Object.entries(props.item.duration)} renderItem={item => {
-                                let processName = "";
-                                switch (item[0] as keyof DishDuration) {
-                                    case "unfreeze": processName = "Rã đông"; break;
-                                    case "prepare": processName = "Sơ chế"; break;
-                                    case "cooking": processName = "Nấu nướng"; break;
-                                    case "serve": processName = "Trình bày"; break;
-                                    case "cooldown": processName = "Để nguội"; break;
-                                }
-                                return <List.Item style={{ paddingInline: 0 }}>
-                                    <Stack fullwidth justify="space-between">
-                                        <Typography.Text style={{ fontSize: 16 }}>{processName}:</Typography.Text>
-                                        {Boolean(item[1]) && <Tag>{moment.duration(item[1], "minutes").locale("vi").humanize()}</Tag>}
-                                    </Stack>
-                                </List.Item>
-                            }} />}>
-                                <Button type="text" size="small" style={{ paddingInline: 0, fontSize: 14 }} icon={<Image src={Clock2Icon} preview={false} width={18} style={{ marginBottom: 3 }} />}>
-                                    {_sumDuration()}
-                                </Button>
-                            </Popover>
-                        )}
-                    </Space>                </Stack>
-            </div>
-            {/* actions */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: 4, flexShrink: 0 }}>
-                <Button size="small" icon={<FileTextOutlined />} onClick={toggleExport.show} />
-                <Dropdown menu={{
-                    items: [
-                        { label: 'Bắt đầu nấu', key: 'cook', icon: <FireOutlined />, },
-                        ...(props.isAdmin ? [
-                            { type: 'divider' as const },
-                            { label: 'Sửa món ăn', key: 'edit', icon: <EditOutlined /> },
-                            { label: 'Thời lượng', key: 'duration', icon: <ClockCircleOutlined /> },
-                            { label: 'Nhân bản', key: 'duplicate', icon: <CopyOutlined /> },
-                            { type: 'divider' as const },
-                            { label: 'Xóa', key: 'delete', icon: <DeleteOutlined />, danger: true },
-                        ] : []),
-                    ],
-                    onClick: _onMoreActionClick
-                }} placement="bottom">
-                    <Button size="small" icon={<HolderOutlined />} />
-                </Dropdown>
-            </div>
+                        <Space size={6}>
+                            <Button type="primary" icon={<FireOutlined />} onClick={toggleCooking.show}>Nấu</Button>
+                            <Button onClick={toggleDishesDetail.show}>Chi tiết</Button>
+                        </Space>
+                    </div>
+                </div>
+            </Box>
         </div>
         <Modal style={{ top: 50 }} open={toggleDishesDetail.value} title={
             <Space>
