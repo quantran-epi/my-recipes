@@ -38,6 +38,11 @@ const floatIconStyle: React.CSSProperties = {
 const quickNavDescriptionCss = `
 .quick-nav-float .ant-float-btn:not(.ant-float-btn-group-trigger) .ant-float-btn-body,
 .quick-nav-float .ant-float-btn:not(.ant-float-btn-group-trigger) .ant-float-btn-content {
+    position: relative;
+    overflow: visible;
+}
+.quick-nav-float .ant-float-btn:not(.ant-float-btn-group-trigger) {
+    position: relative;
     overflow: visible;
 }
 .quick-nav-float .ant-float-btn:not(.ant-float-btn-group-trigger) .ant-float-btn-description {
@@ -45,18 +50,20 @@ const quickNavDescriptionCss = `
     right: 46px;
     top: 50%;
     transform: translateY(-50%);
-    max-width: 132px;
-    padding: 3px 8px;
-    border: 1px solid rgba(0,0,0,0.06);
+    max-width: 150px;
+    padding: 4px 10px;
+    border: 1px solid rgba(255,255,255,0.14);
     border-radius: 999px;
-    background: rgba(255,255,255,0.96);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-    color: #262626;
+    background: rgba(24,24,27,0.92);
+    box-shadow: 0 8px 22px rgba(0,0,0,0.22);
+    color: #fff;
     font-size: 12px;
+    font-weight: 650;
     line-height: 18px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    pointer-events: none;
 }
 `;
 

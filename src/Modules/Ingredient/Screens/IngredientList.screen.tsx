@@ -4,7 +4,7 @@ import { Input } from "@components/Form/Input";
 import { Image } from "@components/Image";
 import { Space } from "@components/Layout/Space";
 import { Stack } from "@components/Layout/Stack";
-import { VirtualListScrollTopButton } from "@components/List";
+import { scrollVirtualListToTop, VirtualListScrollTopButton } from "@components/List";
 import { Modal } from "@components/Modal";
 import { Popconfirm } from "@components/Popconfirm";
 import { Tooltip } from "@components/Tootip";
@@ -16,7 +16,7 @@ import { Ingredient, IngredientInventory, INGREDIENT_CATEGORIES, INGREDIENT_PRES
 import { removeIngredient } from "@store/Reducers/IngredientReducer";
 import { RootState } from "@store/Store";
 import { debounce, sortBy } from "lodash";
-import React, { useMemo, useRef, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { List as VirtualList, useDynamicRowHeight, type ListImperativeAPI, type RowComponentProps } from "react-window";
 import VegetablesIcon from "../../../../assets/icons/vegetable.png";
@@ -128,6 +128,7 @@ export const IngredientListScreen = () => {
     const inventoryItems = useSelector((state: RootState) => state.personal.inventory.items);
     const rowHeight = useDynamicRowHeight({ defaultRowHeight: 132, key: searchText + activeStockFilter + (activeCategory ?? "") });
     const listRef = useRef<ListImperativeAPI | null>(null);
+    const [showScrollTop, setShowScrollTop] = useState(false);
     const { isAdmin } = useAdminMode();
     const normalizedSearch = searchText.trim().toLowerCase();
 
@@ -206,6 +207,27 @@ export const IngredientListScreen = () => {
         dispatch(removeIngredient([item.id]));
     }
 
+    const _scrollToTop = useCallback(() => {
+        const scrolled = scrollVirtualListToTop(listRef.current);
+        if (scrolled) setShowScrollTop(false);
+        return scrolled;
+    }, []);
+
+    useEffect(() => {
+        let frameId: number | undefined;
+        let retryCount = 0;
+        const reset = () => {
+            if (!_scrollToTop() && retryCount < 20) {
+                retryCount += 1;
+                frameId = window.requestAnimationFrame(reset);
+            }
+        };
+        reset();
+        return () => {
+            if (frameId !== undefined) window.cancelAnimationFrame(frameId);
+        };
+    }, [_scrollToTop, activeStockFilter, activeCategory, searchText, filteredIngredients.length]);
+
     return <React.Fragment>
         <div style={{ height: "100%", display: "flex", flexDirection: "column", minHeight: 0 }}>
             <Stack.Compact>
@@ -243,10 +265,12 @@ export const IngredientListScreen = () => {
                     rowComponent={IngredientRow}
                     rowCount={filteredIngredients.length}
                     rowHeight={rowHeight}
+                    onScroll={(event) => setShowScrollTop(event.currentTarget.scrollTop > 180)}
+                    onRowsRendered={(visibleRows) => setShowScrollTop(visibleRows.startIndex > 1)}
                     rowProps={{ items: filteredIngredients, stockSnapshots, onDelete: _onDelete, isAdmin, onSuggest: _onSuggest }}
                     style={{ height: "100%" }}
                 />
-                <VirtualListScrollTopButton listRef={listRef} rowCount={filteredIngredients.length} />
+                <VirtualListScrollTopButton listRef={listRef} rowCount={filteredIngredients.length} visible={showScrollTop} />
             </div>
         </div>
         <Modal width={640} open={toggleAddModal.value} title={

@@ -4,7 +4,7 @@ import { Dropdown } from "@components/Dropdown";
 import { Input } from "@components/Form/Input";
 import { Image } from "@components/Image";
 import { Box } from "@components/Layout/Box";
-import { VirtualListScrollTopButton } from "@components/List";
+import { scrollVirtualListToTop, VirtualListScrollTopButton } from "@components/List";
 import { Space } from "@components/Layout/Space";
 import { Stack } from "@components/Layout/Stack";
 import { Modal } from "@components/Modal";
@@ -18,7 +18,7 @@ import { generateIngredient, removeShoppingList } from "@store/Reducers/Shopping
 import { RootState } from "@store/Store";
 import { debounce, orderBy } from "lodash";
 import moment from "moment";
-import React, { useMemo, useRef, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { List as VirtualList, useDynamicRowHeight, type ListImperativeAPI, type RowComponentProps } from "react-window";
@@ -105,6 +105,7 @@ export const ShoppingListScreen = () => {
     const [activeStatus, setActiveStatus] = useState<ShoppingListStatusFilter>("all");
     const rowHeight = useDynamicRowHeight({ defaultRowHeight: 164, key: searchText + activeStatus });
     const listRef = useRef<ListImperativeAPI | null>(null);
+    const [showScrollTop, setShowScrollTop] = useState(false);
     const normalizedSearch = searchText.trim().toLowerCase();
     const filterData = useMemo(() => {
         const statusCounts = SHOPPING_LIST_STATUS_FILTERS.reduce((result, item) => {
@@ -146,6 +147,27 @@ export const ShoppingListScreen = () => {
         _onAdd();
     }
 
+    const _scrollToTop = useCallback(() => {
+        const scrolled = scrollVirtualListToTop(listRef.current);
+        if (scrolled) setShowScrollTop(false);
+        return scrolled;
+    }, []);
+
+    useEffect(() => {
+        let frameId: number | undefined;
+        let retryCount = 0;
+        const reset = () => {
+            if (!_scrollToTop() && retryCount < 20) {
+                retryCount += 1;
+                frameId = window.requestAnimationFrame(reset);
+            }
+        };
+        reset();
+        return () => {
+            if (frameId !== undefined) window.cancelAnimationFrame(frameId);
+        };
+    }, [_scrollToTop, activeStatus, searchText, filteredShoppingLists.length]);
+
     return <React.Fragment>
         <div style={{ height: "100%", display: "flex", flexDirection: "column", minHeight: 0 }}>
             <Stack.Compact>
@@ -166,10 +188,12 @@ export const ShoppingListScreen = () => {
                     rowComponent={ShoppingListRow}
                     rowCount={filteredShoppingLists.length}
                     rowHeight={rowHeight}
+                    onScroll={(event) => setShowScrollTop(event.currentTarget.scrollTop > 180)}
+                    onRowsRendered={(visibleRows) => setShowScrollTop(visibleRows.startIndex > 1)}
                     rowProps={{ items: filteredShoppingLists, onDelete: _onDelete }}
                     style={{ height: "100%" }}
                 />
-                <VirtualListScrollTopButton listRef={listRef} rowCount={filteredShoppingLists.length} />
+                <VirtualListScrollTopButton listRef={listRef} rowCount={filteredShoppingLists.length} visible={showScrollTop} />
             </div>
         </div>
         <Modal open={toggleAddModal.value} title={<Space>

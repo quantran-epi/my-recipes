@@ -79,6 +79,14 @@ export const MasterPage = () => {
     const theme = useTheme();
     const currentFeatureName = useSelector((state: RootState) => state.personal.appContext.currentFeatureName);    const { isOnline } = useOnlineStatus();
     const toggleSearch = useToggle();
+    const location = useLocation();
+
+    React.useEffect(() => {
+        const content = document.getElementById("app-content");
+        if (!content) return;
+        content.scrollTop = 0;
+        content.scrollTo({ top: 0, behavior: "auto" });
+    }, [location.pathname]);
 
     const _featureIcon = () => {
         switch (currentFeatureName) {

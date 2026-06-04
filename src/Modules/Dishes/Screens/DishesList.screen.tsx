@@ -6,7 +6,7 @@ import { Image } from "@components/Image";
 import { Box } from "@components/Layout/Box";
 import { Space } from "@components/Layout/Space";
 import { Stack } from "@components/Layout/Stack";
-import { List, VirtualListScrollTopButton } from "@components/List";
+import { List, scrollVirtualListToTop, VirtualListScrollTopButton } from "@components/List";
 import { useMessage } from "@components/Message";
 import { Modal } from "@components/Modal";
 import { Popover } from "@components/Popover";
@@ -20,7 +20,7 @@ import { DishesDurationEditParams, duplicateDish, removeDishes, updateDishDurati
 import { RootState } from "@store/Store";
 import { RootRoutes } from "@routing/RootRoutes";
 import { debounce, orderBy, sortBy } from "lodash";
-import React, { useMemo, useRef, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { List as VirtualList, useDynamicRowHeight, type ListImperativeAPI, type RowComponentProps } from "react-window";
@@ -180,6 +180,7 @@ export const DishesListScreen = () => {
     const { } = useScreenTitle({ value: "Món ăn", deps: [] });
     const rowHeight = useDynamicRowHeight({ defaultRowHeight: 204, key: searchText + (activeTag ?? "") + activeStatus });
     const listRef = useRef<ListImperativeAPI | null>(null);
+    const [showScrollTop, setShowScrollTop] = useState(false);
     const { isAdmin } = useAdminMode();
     const normalizedSearch = searchText.trim().toLowerCase();
 
@@ -245,6 +246,27 @@ export const DishesListScreen = () => {
         dispatch(duplicateDish(item.id));
     }
 
+    const _scrollToTop = useCallback(() => {
+        const scrolled = scrollVirtualListToTop(listRef.current);
+        if (scrolled) setShowScrollTop(false);
+        return scrolled;
+    }, []);
+
+    useEffect(() => {
+        let frameId: number | undefined;
+        let retryCount = 0;
+        const reset = () => {
+            if (!_scrollToTop() && retryCount < 20) {
+                retryCount += 1;
+                frameId = window.requestAnimationFrame(reset);
+            }
+        };
+        reset();
+        return () => {
+            if (frameId !== undefined) window.cancelAnimationFrame(frameId);
+        };
+    }, [_scrollToTop, activeStatus, activeTag, searchText, filteredDishes.length]);
+
     return <React.Fragment>
         <div style={{ height: "100%", display: "flex", flexDirection: "column", minHeight: 0 }}>
             <Stack.Compact>
@@ -276,10 +298,12 @@ export const DishesListScreen = () => {
                     rowComponent={DishRow}
                     rowCount={filteredDishes.length}
                     rowHeight={rowHeight}
+                    onScroll={(event) => setShowScrollTop(event.currentTarget.scrollTop > 180)}
+                    onRowsRendered={(visibleRows) => setShowScrollTop(visibleRows.startIndex > 1)}
                     rowProps={{ items: filteredDishes, allDishes: dishes, allIngredients: ingredients, summaries: dishSummaries, onDelete: _onDelete, onDuplicate: _onDuplicate, isAdmin }}
                     style={{ height: "100%" }}
                 />
-                <VirtualListScrollTopButton listRef={listRef} rowCount={filteredDishes.length} />
+                <VirtualListScrollTopButton listRef={listRef} rowCount={filteredDishes.length} visible={showScrollTop} />
             </div>
         </div>
         <Modal open={toggleAddModal.value} title={
@@ -380,6 +404,22 @@ export const DishesItem: React.FunctionComponent<DishesItemProps> = (props) => {
     const visibleTags = props.item.tags?.slice(0, 3) ?? [];
     const extraTagCount = Math.max(0, (props.item.tags?.length ?? 0) - visibleTags.length);
     const baseServings = props.item.baseServings ?? 2;
+    const durationDetail = <List size="small" dataSource={Object.entries(props.item.duration)} renderItem={item => {
+        let processName = "";
+        switch (item[0] as keyof DishDuration) {
+            case "unfreeze": processName = "Rã đông"; break;
+            case "prepare": processName = "Sơ chế"; break;
+            case "cooking": processName = "Nấu nướng"; break;
+            case "serve": processName = "Trình bày"; break;
+            case "cooldown": processName = "Để nguội"; break;
+        }
+        return <List.Item style={{ paddingInline: 0 }}>
+            <Stack fullwidth justify="space-between">
+                <Typography.Text style={{ fontSize: 16 }}>{processName}:</Typography.Text>
+                {Boolean(item[1]) && <Tag>{moment.duration(item[1], "minutes").locale("vi").humanize()}</Tag>}
+            </Stack>
+        </List.Item>
+    }} />;
 
     return <React.Fragment>
         <div style={{ padding: "6px 0 8px", boxSizing: "border-box" }}>
@@ -397,6 +437,37 @@ export const DishesItem: React.FunctionComponent<DishesItemProps> = (props) => {
             }}>
                 <div onClick={toggleDishesDetail.show} style={{ position: "relative", cursor: "pointer", width: 88, height: 122 }}>
                     <DishImageWidget src={props.item.image} width={88} height={122} borderRadius={8} fallbackIconSize={34} showBrokenLabel={false} />
+                    <Popover title="Thời lượng" content={durationDetail}>
+                        <button
+                            type="button"
+                            onClick={(event) => event.stopPropagation()}
+                            style={{
+                                position: "absolute",
+                                left: 6,
+                                right: 6,
+                                bottom: 29,
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                gap: 4,
+                                minWidth: 0,
+                                border: "1px solid rgba(255,255,255,0.28)",
+                                borderRadius: 999,
+                                padding: "2px 6px",
+                                background: hasDuration ? "rgba(0,0,0,0.72)" : "rgba(89,89,89,0.78)",
+                                color: "#fff",
+                                boxShadow: "0 4px 12px rgba(0,0,0,0.2)",
+                                fontSize: 11,
+                                lineHeight: "16px",
+                                cursor: "pointer",
+                            }}
+                        >
+                            <ClockCircleOutlined style={{ fontSize: 11, flexShrink: 0 }} />
+                            <span style={{ minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                                {hasDuration ? _sumDuration() : "Chưa set"}
+                            </span>
+                        </button>
+                    </Popover>
                     <div style={{
                         position: "absolute",
                         left: 6,
@@ -430,28 +501,6 @@ export const DishesItem: React.FunctionComponent<DishesItemProps> = (props) => {
                                 {extraTagCount > 0 && <Tag style={{ fontSize: 11, padding: "0 5px", marginInlineEnd: 0 }}>+{extraTagCount}</Tag>}
                                 <Tag color="blue" style={{ fontSize: 11, padding: "0 5px", marginInlineEnd: 0 }}>{baseServings} phần</Tag>
                             </Space>
-                            <Popover title="Thời lượng" content={<List size="small" dataSource={Object.entries(props.item.duration)} renderItem={item => {
-                                let processName = "";
-                                switch (item[0] as keyof DishDuration) {
-                                    case "unfreeze": processName = "Rã đông"; break;
-                                    case "prepare": processName = "Sơ chế"; break;
-                                    case "cooking": processName = "Nấu nướng"; break;
-                                    case "serve": processName = "Trình bày"; break;
-                                    case "cooldown": processName = "Để nguội"; break;
-                                }
-                                return <List.Item style={{ paddingInline: 0 }}>
-                                    <Stack fullwidth justify="space-between">
-                                        <Typography.Text style={{ fontSize: 16 }}>{processName}:</Typography.Text>
-                                        {Boolean(item[1]) && <Tag>{moment.duration(item[1], "minutes").locale("vi").humanize()}</Tag>}
-                                    </Stack>
-                                </List.Item>
-                            }} />}>
-                                <button type="button" style={{ border: 0, background: "transparent", padding: 0, marginTop: 4, textAlign: "left", cursor: hasDuration ? "pointer" : "default" }}>
-                                    <Typography.Text type="secondary" style={{ fontSize: 12, lineHeight: "16px" }}>
-                                        <ClockCircleOutlined style={{ marginRight: 4 }} />{hasDuration ? _sumDuration() : "Chưa set thời gian"}
-                                    </Typography.Text>
-                                </button>
-                            </Popover>
                         </div>
 
                         <Dropdown menu={{

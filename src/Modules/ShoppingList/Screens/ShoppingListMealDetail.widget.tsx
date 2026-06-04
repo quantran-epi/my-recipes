@@ -1,5 +1,4 @@
 import { Button } from "@components/Button";
-import { Image } from "@components/Image";
 import { Divider } from "@components/Layout/Divider";
 import { Stack } from "@components/Layout/Stack";
 import { List } from "@components/List";
