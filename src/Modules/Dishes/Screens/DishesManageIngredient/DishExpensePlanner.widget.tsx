@@ -300,6 +300,7 @@ export const DishExpensePlannerWidget: React.FunctionComponent<DishExpensePlanne
             <Box style={{ width: "100%", boxSizing: "border-box", padding: "10px 12px", border: "1px solid #91caff", borderRadius: 8, background: "#f0f7ff" }}>
                 <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 12, flexWrap: "wrap", width: "100%" }}>
                     <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "flex-start", flexWrap: "wrap", gap: 18, minWidth: 0 }}>
+                        <CostSummaryText label="Tổng món chưa trừ kho" summary={estimate.total} emptyText="0đ" />
                         <CostSummaryText label="Cần mua bắt buộc" summary={estimate.missingRequired} primary emptyText="0đ" />
                         <CostSummaryText label="Cần mua tùy chọn" summary={estimate.missingOptional} emptyText="0đ" />
                     </div>

@@ -70,6 +70,22 @@ const isShoppingListChecklistDone = (item: ShoppingList): boolean => {
     return item.ingredients.length > 0 && item.ingredients.every(ingredient => ingredient.isDone);
 };
 
+const shoppingListMatchesSearch = (item: ShoppingList, normalizedSearch: string): boolean => {
+    return item.name.trim().toLowerCase().includes(normalizedSearch)
+        || moment(item.createdDate).format("DD/MM/YYYY hh:mm:ss A").includes(normalizedSearch);
+}
+
+const shoppingListMatchesStatus = (item: ShoppingList, status: ShoppingListStatusFilter): boolean => {
+    const checklistDone = isShoppingListChecklistDone(item);
+    const isReadonly = Boolean(item.completedAt);
+    return status === "all"
+        || (status === "buying" && !isReadonly && item.ingredients.length > 0 && !checklistDone)
+        || (status === "overdue" && isShoppingListOverdue(item))
+        || (status === "checklist_done" && !isReadonly && checklistDone)
+        || (status === "completed" && isReadonly)
+        || (status === "empty_checklist" && !isReadonly && item.ingredients.length === 0);
+}
+
 type ShoppingListRowProps = { items: ShoppingList[]; onDelete: (item: ShoppingList) => void; };
 
 const ShoppingListRow = ({ index, style, items, onDelete }: RowComponentProps<ShoppingListRowProps>) => {
@@ -87,23 +103,28 @@ export const ShoppingListScreen = () => {
     const [searchText, setSearchText] = useState("");
     const [activeStatus, setActiveStatus] = useState<ShoppingListStatusFilter>("all");
     const rowHeight = useDynamicRowHeight({ defaultRowHeight: 164, key: searchText + activeStatus });
-    const filteredShoppingLists = useMemo<ShoppingList[]>(() => {
-        return orderBy(shoppingLists.filter(item => {
-            const normalizedSearch = searchText.trim().toLowerCase();
-            const matchesSearch = item.name.trim().toLowerCase().includes(normalizedSearch)
-                || moment(item.createdDate).format("DD/MM/YYYY hh:mm:ss A").includes(normalizedSearch);
-            const checklistDone = isShoppingListChecklistDone(item);
-            const isReadonly = Boolean(item.completedAt);
-            const matchesStatus = activeStatus === "all"
-                || (activeStatus === "buying" && !isReadonly && item.ingredients.length > 0 && !checklistDone)
-                || (activeStatus === "overdue" && isShoppingListOverdue(item))
-                || (activeStatus === "checklist_done" && !isReadonly && checklistDone)
-                || (activeStatus === "completed" && isReadonly)
-                || (activeStatus === "empty_checklist" && !isReadonly && item.ingredients.length === 0);
-            return matchesSearch && matchesStatus;
-        }),
-            [(obj) => new Date(obj.createdDate)], ['desc'])
-    }, [shoppingLists, searchText, activeStatus])
+    const normalizedSearch = searchText.trim().toLowerCase();
+    const filterData = useMemo(() => {
+        const statusCounts = SHOPPING_LIST_STATUS_FILTERS.reduce((result, item) => {
+            result[item.value] = 0;
+            return result;
+        }, {} as Record<ShoppingListStatusFilter, number>);
+        const filtered: ShoppingList[] = [];
+
+        shoppingLists.forEach(shoppingList => {
+            if (!shoppingListMatchesSearch(shoppingList, normalizedSearch)) return;
+            SHOPPING_LIST_STATUS_FILTERS.forEach(item => {
+                if (shoppingListMatchesStatus(shoppingList, item.value)) statusCounts[item.value] += 1;
+            });
+            if (shoppingListMatchesStatus(shoppingList, activeStatus)) filtered.push(shoppingList);
+        });
+
+        return {
+            filteredShoppingLists: orderBy(filtered, [(obj) => new Date(obj.createdDate)], ['desc']),
+            statusCounts,
+        };
+    }, [shoppingLists, normalizedSearch, activeStatus]);
+    const { filteredShoppingLists, statusCounts } = filterData;
     const [selectedDate, setSelectedDate] = useState<Date>();
 
     const _onAdd = () => {
@@ -133,7 +154,7 @@ export const ShoppingListScreen = () => {
             <div style={filterRowStyle}>
                 {SHOPPING_LIST_STATUS_FILTERS.map(item => (
                     <button key={item.value} type="button" onClick={() => setActiveStatus(item.value)} style={filterChipStyle(activeStatus === item.value)}>
-                        {item.label}
+                        {item.label} ({statusCounts[item.value] ?? 0})
                     </button>
                 ))}
             </div>

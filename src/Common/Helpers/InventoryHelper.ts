@@ -43,7 +43,7 @@ const getShelfLifeDays = (
 
 const roundInventoryAmount = (value: number): number => {
     if (!isFinite(value)) return 0;
-    return Math.round(value);
+    return Math.round(value * 10) / 10;
 };
 
 export const InventoryHelper = {

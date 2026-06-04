@@ -186,7 +186,7 @@ export const DishScorer = {
                     missingPriceCount: extraShoppingSummary.missingPriceCount,
                 } as ScoredDish;
             })
-            .filter((s): s is ScoredDish => s !== null && (s.stockedIngredientIds?.length ?? 0) > 0)
+            .filter((s): s is ScoredDish => s !== null && s.score > 0 && (s.stockedIngredientIds?.length ?? 0) > 0)
             .sort(compareInventoryPriority);
     },
 

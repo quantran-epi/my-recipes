@@ -11,7 +11,7 @@ import { Typography } from "@components/Typography";
 import { useScreenTitle, useToggle, useAdminMode } from "@hooks";
 import { InventoryHelper } from "@common/Helpers/InventoryHelper";
 import { IngredientUnitHelper } from "@common/Helpers/IngredientUnitHelper";
-import { Ingredient, INGREDIENT_CATEGORIES, INGREDIENT_PRESERVATION_OPTIONS, INGREDIENT_SHELF_LIFE_OPTIONS } from "@store/Models/Ingredient";
+import { Ingredient, IngredientInventory, INGREDIENT_CATEGORIES, INGREDIENT_PRESERVATION_OPTIONS, INGREDIENT_SHELF_LIFE_OPTIONS } from "@store/Models/Ingredient";
 import { removeIngredient } from "@store/Reducers/IngredientReducer";
 import { selectInventoryById } from "@store/Selectors";
 import { RootState } from "@store/Store";
@@ -58,6 +58,45 @@ const filterChipStyle = (active: boolean): React.CSSProperties => ({
     cursor: "pointer",
 });
 
+const ingredientMatchesSearch = (ingredient: Ingredient, normalizedSearch: string): boolean => {
+    return ingredient.name.trim().toLowerCase().includes(normalizedSearch);
+}
+
+const ingredientMatchesCategory = (ingredient: Ingredient, category: string | null): boolean => {
+    return category === null || ingredient.category === category;
+}
+
+type IngredientStockSnapshot = {
+    usableAmount: number;
+    urgent: boolean;
+}
+
+const getIngredientStockSnapshot = (
+    ingredient: Ingredient,
+    inventoryItems: Record<string, IngredientInventory>,
+): IngredientStockSnapshot => {
+    const inventory = inventoryItems[ingredient.id];
+    const usableAmount = InventoryHelper.totalUsableAmount(inventory, ingredient);
+    const nearestExpiry = InventoryHelper.nearestExpiryBatch(inventory, ingredient);
+    return {
+        usableAmount,
+        urgent: Boolean(nearestExpiry && nearestExpiry.daysLeft <= 3),
+    };
+}
+
+const ingredientMatchesStock = (
+    ingredient: Ingredient,
+    stockFilter: IngredientStockFilter,
+    stock: IngredientStockSnapshot,
+): boolean => {
+    return stockFilter === "all"
+        || (stockFilter === "in_stock" && (InventoryHelper.isAlwaysAvailable(ingredient) || stock.usableAmount > 0))
+        || (stockFilter === "need_stock" && !InventoryHelper.isAlwaysAvailable(ingredient) && stock.usableAmount <= 0)
+        || (stockFilter === "low_stock" && !InventoryHelper.isAlwaysAvailable(ingredient) && stock.usableAmount > 0 && stock.usableAmount <= 2)
+        || (stockFilter === "urgent" && stock.urgent)
+        || (stockFilter === "always_available" && InventoryHelper.isAlwaysAvailable(ingredient));
+}
+
 type IngredientRowProps = { items: Ingredient[]; onDelete: (item: Ingredient) => void; isAdmin: boolean; onSuggest: (ids: string[]) => void; };
 
 const IngredientRow = ({ index, style, items, onDelete, isAdmin, onSuggest }: RowComponentProps<IngredientRowProps>) => {
@@ -76,6 +115,7 @@ export const IngredientListScreen = () => {
     const inventoryItems = useSelector((state: RootState) => state.personal.inventory.items);
     const rowHeight = useDynamicRowHeight({ defaultRowHeight: 132, key: searchText + activeStockFilter + (activeCategory ?? "") });
     const { isAdmin } = useAdminMode();
+    const normalizedSearch = searchText.trim().toLowerCase();
 
     const toggleUseFirst = useToggle({ defaultValue: false });
     const toggleStats = useToggle({ defaultValue: false });
@@ -92,22 +132,50 @@ export const IngredientListScreen = () => {
         return INGREDIENT_CATEGORIES.filter(category => categorySet.has(category));
     }, [ingredients]);
 
-    const filteredIngredients = useMemo(() => {
-        return sortBy(ingredients.filter(item => {
-            const inventory = inventoryItems[item.id];
-            const usableAmount = InventoryHelper.totalUsableAmount(inventory, item);
-            const nearestExpiry = InventoryHelper.nearestExpiryBatch(inventory, item);
-            const matchesSearch = item.name.trim().toLowerCase().includes(searchText.trim().toLowerCase());
-            const matchesCategory = activeCategory === null || item.category === activeCategory;
-            const matchesStock = activeStockFilter === "all"
-                || (activeStockFilter === "in_stock" && (InventoryHelper.isAlwaysAvailable(item) || usableAmount > 0))
-                || (activeStockFilter === "need_stock" && !InventoryHelper.isAlwaysAvailable(item) && usableAmount <= 0)
-                || (activeStockFilter === "low_stock" && !InventoryHelper.isAlwaysAvailable(item) && usableAmount > 0 && usableAmount <= 2)
-                || (activeStockFilter === "urgent" && Boolean(nearestExpiry && nearestExpiry.daysLeft <= 3))
-                || (activeStockFilter === "always_available" && InventoryHelper.isAlwaysAvailable(item));
-            return matchesSearch && matchesCategory && matchesStock;
-        }), "name");
-    }, [ingredients, inventoryItems, searchText, activeCategory, activeStockFilter])
+    const filterData = useMemo(() => {
+        const stockCounts = INGREDIENT_STOCK_FILTERS.reduce((result, item) => {
+            result[item.value] = 0;
+            return result;
+        }, {} as Record<IngredientStockFilter, number>);
+        const categoryCounts: Record<string, number> = { __all: 0 };
+        const categorySet = new Set(availableCategories);
+        const filtered: Ingredient[] = [];
+
+        ingredients.forEach(ingredient => {
+            const matchesSearch = ingredientMatchesSearch(ingredient, normalizedSearch);
+            if (!matchesSearch) return;
+            const stock = getIngredientStockSnapshot(ingredient, inventoryItems);
+
+            if (ingredientMatchesCategory(ingredient, activeCategory)) {
+                INGREDIENT_STOCK_FILTERS.forEach(item => {
+                    if (ingredientMatchesStock(ingredient, item.value, stock)) stockCounts[item.value] += 1;
+                });
+            }
+
+            if (ingredientMatchesStock(ingredient, activeStockFilter, stock)) {
+                categoryCounts.__all += 1;
+                if (ingredient.category && categorySet.has(ingredient.category)) {
+                    categoryCounts[ingredient.category] = (categoryCounts[ingredient.category] ?? 0) + 1;
+                }
+            }
+
+            if (ingredientMatchesCategory(ingredient, activeCategory) && ingredientMatchesStock(ingredient, activeStockFilter, stock)) {
+                filtered.push(ingredient);
+            }
+        });
+
+        availableCategories.forEach(category => {
+            categoryCounts[category] = categoryCounts[category] ?? 0;
+        });
+
+        return {
+            filteredIngredients: sortBy(filtered, "name"),
+            stockCounts,
+            categoryCounts,
+        };
+    }, [ingredients, inventoryItems, normalizedSearch, activeCategory, activeStockFilter, availableCategories]);
+
+    const { filteredIngredients, stockCounts, categoryCounts } = filterData;
 
     const _onAdd = () => {
         toggleAddModal.show();
@@ -132,18 +200,18 @@ export const IngredientListScreen = () => {
             <div style={filterRowStyle}>
                 {INGREDIENT_STOCK_FILTERS.map(item => (
                     <button key={item.value} type="button" onClick={() => setActiveStockFilter(item.value)} style={filterChipStyle(activeStockFilter === item.value)}>
-                        {item.label}
+                        {item.label} ({stockCounts[item.value] ?? 0})
                     </button>
                 ))}
             </div>
             {availableCategories.length > 0 && (
                 <div style={filterRowStyle}>
                     <button type="button" onClick={() => setActiveCategory(null)} style={filterChipStyle(activeCategory === null)}>
-                        Tất cả nhóm
+                        Tất cả nhóm ({categoryCounts.__all ?? 0})
                     </button>
                     {availableCategories.map(category => (
                         <button key={category} type="button" onClick={() => setActiveCategory(activeCategory === category ? null : category)} style={filterChipStyle(activeCategory === category)}>
-                            {category}
+                            {category} ({categoryCounts[category] ?? 0})
                         </button>
                     ))}
                 </div>

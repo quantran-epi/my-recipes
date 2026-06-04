@@ -123,6 +123,7 @@ const SidebarDrawer = () => {
     const { isAdmin, tryUnlock, lock } = useAdminMode();
     const { publishSharedData, isPublishing, lastPublishAt } = useSharedPublish();
     const navigate = useNavigate();
+    const location = useLocation();
     const dispatch = useDispatch();
     const message = useMessage();
     const toggleHistory = useToggle();
@@ -136,9 +137,10 @@ const SidebarDrawer = () => {
         setOpen(false);
     };
 
-    const onNavigate = (href) => {
-        navigate(href);
+    const onNavigate = (href: string) => {
         setOpen(false);
+        if (location.pathname === href) return;
+        React.startTransition(() => navigate(href));
     }
 
     const onUnlock = () => {
@@ -184,6 +186,7 @@ const SidebarDrawer = () => {
                 }
                 onClose={onClose}
                 open={open}
+                destroyOnClose
                 styles={{ body: { padding: 0, display: "flex", flexDirection: "column", height: "100%", overflowY: "auto" } }}
             >
                 {/* ── Navigation ── */}

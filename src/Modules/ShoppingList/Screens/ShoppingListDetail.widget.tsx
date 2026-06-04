@@ -96,6 +96,111 @@ type CompletionReviewValue = {
 
 type CompletionReviewValues = Record<string, CompletionReviewValue>;
 
+const createShoppingListCostSummary = (): ShoppingListCostSummary => ({
+    requiredToBuy: CostEstimateHelper.emptySummary(),
+    recipeTotal: CostEstimateHelper.emptySummary(),
+    needMore: CostEstimateHelper.emptySummary(),
+    bought: CostEstimateHelper.emptySummary(),
+});
+
+const getCompletionImportsForIngredient = (
+    shoppingList: ShoppingList,
+    ingredientId: string,
+): ShoppingListCompletionImport[] => {
+    return (shoppingList.completionImports ?? []).filter(item => item.ingredientId === ingredientId);
+}
+
+const getInventoryBeforeCompletionImports = (
+    inventory: IngredientInventory | undefined,
+    imports: ShoppingListCompletionImport[],
+): IngredientInventory | undefined => {
+    if (!inventory?.batches || imports.length === 0) return inventory;
+    const importBatchIds = new Set(imports.map(item => item.batchId));
+    return {
+        ...inventory,
+        batches: inventory.batches.filter(batch => !importBatchIds.has(batch.id)),
+    };
+}
+
+const getImportedAmountInUnit = (
+    imports: ShoppingListCompletionImport[],
+    ingredient: Ingredient | undefined,
+    unit: IngredientUnit,
+): number => {
+    return InventoryHelper.roundAmount(imports.reduce((sum, item) => {
+        const converted = IngredientUnitHelper.toBaseAmount(ingredient, item.amount, item.unit, unit);
+        return sum + (converted ?? item.amount);
+    }, 0));
+}
+
+const addCompletionImportCosts = (
+    summary: CostEstimateSummary,
+    imports: ShoppingListCompletionImport[],
+    ingredient: Ingredient | undefined,
+): void => {
+    imports.forEach(item => {
+        if (item.estimatedCost) {
+            CostEstimateHelper.addRange(summary, item.estimatedCost);
+            return;
+        }
+        CostEstimateHelper.addAmount(summary, ingredient, item.amount, item.unit);
+    });
+}
+
+const addActiveBoughtCost = (
+    summary: CostEstimateSummary,
+    group: ShoppingListIngredientGroup,
+    ingredient: Ingredient | undefined,
+    recipeStatus: IngredientGroupStatus,
+): void => {
+    const explicitBoughtAmount = group.boughtAmount ?? 0;
+    if (explicitBoughtAmount > 0) {
+        CostEstimateHelper.addAmount(summary, ingredient, explicitBoughtAmount, group.boughtUnit ?? recipeStatus.unit);
+        return;
+    }
+
+    if (group.isDone && recipeStatus.needToBuy > 0) {
+        CostEstimateHelper.addAmount(summary, ingredient, recipeStatus.needToBuy, recipeStatus.unit);
+    }
+}
+
+const buildShoppingListCostSummary = (
+    shoppingList: ShoppingList,
+    allIngredients: Ingredient[],
+    inventoryItems: Record<string, IngredientInventory>,
+): ShoppingListCostSummary => {
+    const isCompleted = Boolean(shoppingList.completedAt);
+
+    return shoppingList.ingredients.reduce((summary, group) => {
+        const ingredient = allIngredients.find(item => item.id === group.ingredientId);
+        const completionImports = isCompleted ? getCompletionImportsForIngredient(shoppingList, group.ingredientId) : [];
+        const inventory = isCompleted
+            ? getInventoryBeforeCompletionImports(inventoryItems[group.ingredientId], completionImports)
+            : inventoryItems[group.ingredientId];
+        const recipeStatus = getIngredientGroupStatus(group, ingredient, inventory);
+        const requiredStatus = getIngredientGroupStatus(group, ingredient, inventory, { requiredOnly: true });
+        CostEstimateHelper.addAmount(summary.recipeTotal, ingredient, recipeStatus.totalRequired, recipeStatus.unit);
+
+        if (requiredStatus.isAlwaysAvailable) return summary;
+
+        CostEstimateHelper.addAmount(summary.requiredToBuy, ingredient, requiredStatus.needToBuy, requiredStatus.unit);
+
+        if (isCompleted && completionImports.length > 0) {
+            const importedRequiredUnitAmount = getImportedAmountInUnit(completionImports, ingredient, requiredStatus.unit);
+            const needMoreAmount = InventoryHelper.roundAmount(Math.max(0, requiredStatus.needToBuy - importedRequiredUnitAmount));
+            CostEstimateHelper.addAmount(summary.needMore, ingredient, needMoreAmount, requiredStatus.unit);
+            addCompletionImportCosts(summary.bought, completionImports, ingredient);
+            return summary;
+        }
+
+        const cartEstimate = getShoppingListIngredientPriceEstimate(group, ingredient, inventory, { requiredOnly: true });
+        if (cartEstimate) CostEstimateHelper.addAmount(summary.needMore, ingredient, cartEstimate.amount, cartEstimate.unit);
+        addActiveBoughtCost(summary.bought, group, ingredient, recipeStatus);
+
+        return summary;
+    }, createShoppingListCostSummary());
+}
+
 const getIngredientGroupStatus = (
     group: ShoppingListIngredientGroup,
     ingredient: Ingredient | undefined,
@@ -107,18 +212,18 @@ const getIngredientGroupStatus = (
         : group.amounts;
     const unitSourceAmounts = amounts.length > 0 ? amounts : group.amounts;
     const unit = IngredientUnitHelper.getBaseUnit(ingredient, unitSourceAmounts.map(amt => amt.unit));
-    const totalRequired = amounts.reduce((sum, amt) => {
+    const totalRequired = InventoryHelper.roundAmount(amounts.reduce((sum, amt) => {
         const converted = IngredientUnitHelper.toBaseAmount(ingredient, amt.amount, amt.unit, unit);
         return sum + (converted ?? IngredientUnitHelper.parseAmount(amt.amount));
-    }, 0);
+    }, 0));
     const isAlwaysAvailable = InventoryHelper.isAlwaysAvailable(ingredient);
-    const inStock = InventoryHelper.availableAmount(inventory, ingredient, totalRequired);
-    const needToBuy = Math.max(0, totalRequired - inStock);
+    const inStock = InventoryHelper.roundAmount(InventoryHelper.availableAmount(inventory, ingredient, totalRequired));
+    const needToBuy = InventoryHelper.roundAmount(Math.max(0, totalRequired - inStock));
     const boughtUnit = group.boughtUnit ?? unit;
     const boughtAmount = group.boughtAmount ?? 0;
-    const boughtBaseAmount = boughtAmount > 0
+    const boughtBaseAmount = InventoryHelper.roundAmount(boughtAmount > 0
         ? (IngredientUnitHelper.toBaseAmount(ingredient, boughtAmount, boughtUnit, unit) ?? boughtAmount)
-        : 0;
+        : 0);
 
     return {
         unit,
@@ -195,9 +300,9 @@ const getShoppingListIngredientPriceEstimate = (
 
     const status = getIngredientGroupStatus(group, ingredient, inventory, options);
     const explicitBoughtAmount = group.boughtAmount ?? 0;
-    const amount = explicitBoughtAmount > 0
+    const amount = InventoryHelper.roundAmount(explicitBoughtAmount > 0
         ? Math.max(0, status.needToBuy - status.boughtBaseAmount)
-        : group.isDone ? 0 : status.needToBuy;
+        : group.isDone ? 0 : status.needToBuy);
     const unit = status.unit;
     if (amount <= 0) return null;
 
@@ -250,36 +355,8 @@ export const ShoppingListDetailWidget: React.FunctionComponent<ShoppingListDetai
     }, [props.shoppingList.ingredients, allIngredients]);
 
     const costSummary = useMemo(() => {
-        return props.shoppingList.ingredients.reduce((summary, group) => {
-            const ingredient = allIngredients.find(item => item.id === group.ingredientId);
-            const inventory = inventoryItems[group.ingredientId];
-            const recipeStatus = getIngredientGroupStatus(group, ingredient, inventory);
-            const requiredStatus = getIngredientGroupStatus(group, ingredient, inventory, { requiredOnly: true });
-            CostEstimateHelper.addAmount(summary.recipeTotal, ingredient, recipeStatus.totalRequired, recipeStatus.unit);
-
-            const cartEstimate = getShoppingListIngredientPriceEstimate(group, ingredient, inventory, { requiredOnly: true });
-            if (!requiredStatus.isAlwaysAvailable) {
-                CostEstimateHelper.addAmount(summary.requiredToBuy, ingredient, requiredStatus.needToBuy, requiredStatus.unit);
-                if (cartEstimate) CostEstimateHelper.addAmount(summary.needMore, ingredient, cartEstimate.amount, cartEstimate.unit);
-            }
-
-            if (!requiredStatus.isAlwaysAvailable) {
-                const explicitBoughtAmount = group.boughtAmount ?? 0;
-                if (explicitBoughtAmount > 0) {
-                    CostEstimateHelper.addAmount(summary.bought, ingredient, explicitBoughtAmount, group.boughtUnit ?? requiredStatus.unit);
-                } else if (group.isDone && requiredStatus.needToBuy > 0) {
-                    CostEstimateHelper.addAmount(summary.bought, ingredient, requiredStatus.needToBuy, requiredStatus.unit);
-                }
-            }
-
-            return summary;
-        }, {
-            requiredToBuy: CostEstimateHelper.emptySummary(),
-            recipeTotal: CostEstimateHelper.emptySummary(),
-            needMore: CostEstimateHelper.emptySummary(),
-            bought: CostEstimateHelper.emptySummary(),
-        } as ShoppingListCostSummary);
-    }, [props.shoppingList.ingredients, allIngredients, inventoryItems]);
+        return buildShoppingListCostSummary(props.shoppingList, allIngredients, inventoryItems);
+    }, [props.shoppingList, allIngredients, inventoryItems]);
 
     const _completeShoppingList = () => {
         if (props.shoppingList.completedAt) return;

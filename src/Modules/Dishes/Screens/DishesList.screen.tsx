@@ -69,6 +69,22 @@ const filterChipStyle = (active: boolean): React.CSSProperties => ({
     cursor: "pointer",
 });
 
+const dishMatchesSearch = (dish: Dishes, normalizedSearch: string): boolean => {
+    return dish.name.trim().toLowerCase().includes(normalizedSearch);
+}
+
+const dishMatchesTag = (dish: Dishes, tag: string | null): boolean => {
+    return tag === null || dish.tags?.includes(tag) === true;
+}
+
+const dishMatchesStatus = (dish: Dishes, status: DishStatusFilter): boolean => {
+    return status === "all"
+        || (status === "ready" && dish.isCompleted)
+        || (status === "needs_update" && !dish.isCompleted)
+        || (status === "has_ingredients" && (dish.ingredients?.length ?? 0) > 0)
+        || (status === "has_steps" && (dish.steps?.length ?? 0) > 0);
+}
+
 const DishRow = ({ index, style, dishes, onDelete, onDuplicate, isAdmin }: RowComponentProps<DishRowProps>) => {
     if (!dishes[index]) return null;
     return <div style={style}><DishesItem item={dishes[index]} onDelete={onDelete} onDuplicate={onDuplicate} isAdmin={isAdmin} /></div>;
@@ -84,6 +100,7 @@ export const DishesListScreen = () => {
     const { } = useScreenTitle({ value: "Món ăn", deps: [] });
     const rowHeight = useDynamicRowHeight({ defaultRowHeight: 204, key: searchText + (activeTag ?? "") + activeStatus });
     const { isAdmin } = useAdminMode();
+    const normalizedSearch = searchText.trim().toLowerCase();
 
     const allTags = useMemo<string[]>(() => {
         const tagSet = new Set<string>();
@@ -91,21 +108,51 @@ export const DishesListScreen = () => {
         return DISH_TAGS.filter(t => tagSet.has(t));
     }, [dishes]);
 
-    const filteredDishes = useMemo<Dishes[]>(() => {
-        return sortBy(
-            dishes.filter(e => {
-                const matchesSearch = e.name.trim().toLowerCase().includes(searchText?.trim().toLowerCase());
-                const matchesTag = activeTag === null || e.tags?.includes(activeTag);
-                const matchesStatus = activeStatus === "all"
-                    || (activeStatus === "ready" && e.isCompleted)
-                    || (activeStatus === "needs_update" && !e.isCompleted)
-                    || (activeStatus === "has_ingredients" && (e.ingredients?.length ?? 0) > 0)
-                    || (activeStatus === "has_steps" && (e.steps?.length ?? 0) > 0);
-                return matchesSearch && matchesTag && matchesStatus;
-            }),
-            "name"
-        );
-    }, [dishes, searchText, activeTag, activeStatus]);
+    const filterData = useMemo(() => {
+        const statusCounts = DISH_STATUS_FILTERS.reduce((result, item) => {
+            result[item.value] = 0;
+            return result;
+        }, {} as Record<DishStatusFilter, number>);
+        const result: Record<string, number> = {
+            __all: 0,
+        };
+        const tagSet = new Set(allTags);
+        const filtered: Dishes[] = [];
+
+        dishes.forEach(dish => {
+            const matchesSearch = dishMatchesSearch(dish, normalizedSearch);
+            if (!matchesSearch) return;
+
+            if (dishMatchesTag(dish, activeTag)) {
+                DISH_STATUS_FILTERS.forEach(item => {
+                    if (dishMatchesStatus(dish, item.value)) statusCounts[item.value] += 1;
+                });
+            }
+
+            if (dishMatchesStatus(dish, activeStatus)) {
+                result.__all += 1;
+                dish.tags?.forEach(tag => {
+                    if (tagSet.has(tag)) result[tag] = (result[tag] ?? 0) + 1;
+                });
+            }
+
+            if (dishMatchesTag(dish, activeTag) && dishMatchesStatus(dish, activeStatus)) {
+                filtered.push(dish);
+            }
+        });
+
+        allTags.forEach(tag => {
+            result[tag] = result[tag] ?? 0;
+        });
+
+        return {
+            filteredDishes: sortBy(filtered, "name"),
+            statusCounts,
+            tagCounts: result,
+        };
+    }, [dishes, normalizedSearch, activeTag, activeStatus, allTags]);
+
+    const { filteredDishes, statusCounts, tagCounts } = filterData;
 
     const _onDelete = (item: Dishes) => {
         dispatch(removeDishes([item.id]));
@@ -124,18 +171,18 @@ export const DishesListScreen = () => {
             <div style={filterRowStyle}>
                 {DISH_STATUS_FILTERS.map(item => (
                     <button key={item.value} type="button" onClick={() => setActiveStatus(item.value)} style={filterChipStyle(activeStatus === item.value)}>
-                        {item.label}
+                        {item.label} ({statusCounts[item.value] ?? 0})
                     </button>
                 ))}
             </div>
             {allTags.length > 0 && (
                 <div style={filterRowStyle}>
                     <button type="button" onClick={() => setActiveTag(null)} style={filterChipStyle(activeTag === null)}>
-                        Tất cả tag
+                        Tất cả tag ({tagCounts.__all ?? 0})
                     </button>
                     {allTags.map(tag => (
                         <button key={tag} type="button" onClick={() => setActiveTag(activeTag === tag ? null : tag)} style={filterChipStyle(activeTag === tag)}>
-                            {tag}
+                            {tag} ({tagCounts[tag] ?? 0})
                         </button>
                     ))}
                 </div>
@@ -323,7 +370,7 @@ export const DishesItem: React.FunctionComponent<DishesItemProps> = (props) => {
                         <Dropdown menu={{
                             items: [
                                 { label: "Bắt đầu nấu", key: "cook", icon: <FireOutlined /> },
-                                { label: "Export", key: "export", icon: <FileTextOutlined /> },
+                                { label: "Xuất dữ liệu", key: "export", icon: <FileTextOutlined /> },
                                 ...(props.isAdmin ? [
                                     { type: "divider" as const },
                                     { label: "Sửa món ăn", key: "edit", icon: <EditOutlined /> },

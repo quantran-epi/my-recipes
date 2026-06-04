@@ -11,10 +11,15 @@ const isPositiveNumber = (value: unknown): value is number => {
     return typeof value === "number" && isFinite(value) && value > 0;
 }
 
+const roundMoneyAmount = (value: number): number => {
+    if (!isFinite(value)) return 0;
+    return Math.round(value);
+}
+
 export const IngredientPriceHelper = {
     formatCurrency(value: number): string {
         if (!isFinite(value)) return "0đ";
-        return `${Math.round(value).toLocaleString("vi-VN")}đ`;
+        return `${roundMoneyAmount(value).toLocaleString("vi-VN")}đ`;
     },
 
     formatRange(range: IngredientPriceRange): string {
@@ -55,8 +60,8 @@ export const IngredientPriceHelper = {
 
         const multiplier = amountBase / priceAmountBase;
         return {
-            min: price.min * multiplier,
-            max: price.max * multiplier,
+            min: roundMoneyAmount(price.min * multiplier),
+            max: roundMoneyAmount(price.max * multiplier),
             currency: price.currency,
         };
     },
