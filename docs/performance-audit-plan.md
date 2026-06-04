@@ -206,7 +206,7 @@ Notes:
 
 ### PERF-04: Image And Network Budget
 
-Status: Planned
+Status: Audited
 
 Purpose:
 - Keep route loading predictable by limiting unnecessary image requests, oversized assets, and background network work.
@@ -217,6 +217,11 @@ Implementation:
 - Use appropriately sized image variants where the app has control over source assets.
 - Avoid preloading or fetching detail-only assets before the user opens the relevant route, tab, or modal.
 - Define a route-level image and request budget that can be checked during future audits.
+- 2026-06-04 implementation: wrapped the shared `@components/Image` export so app icons and Ant Design images default to `preview={false}`, `loading="lazy"`, and `decoding="async"` unless a caller opts into eager loading.
+- 2026-06-04 implementation: kept the current header feature icon and drawer logo eager because they are above-the-fold identity/navigation signals.
+- 2026-06-04 implementation: converted global-search and drawer raw icon `<img>` tags to the shared `Image` component with decorative `alt=""`, eliminating eager raw icon requests and the related missing-alt warnings.
+- 2026-06-04 implementation: preserved `DishImageWidget`'s existing intersection-observer gate plus native lazy image loading for user dish photos.
+- 2026-06-04 budget: primary dev routes should stay at or below 10 total resource requests, 7 image requests, and 1.9 MB transfer size under the current seeded Playwright baseline; production audits should record a separate production-build transfer budget.
 
 Acceptance Criteria:
 - Primary list routes do not eagerly load hidden modal images or below-the-fold detail images.
@@ -230,10 +235,21 @@ Audit Checklist:
 - Manual browser checks if needed: inspect DevTools Network with cache disabled and enabled; confirm lazy images are not requested before they are visible or needed.
 
 Test Evidence:
-- Pending until implemented/audited.
+- 2026-06-04 static audit command: `rg -n "<img" src/Modules src/Routing src/Components`.
+- 2026-06-04 static result: only `DishImageWidget` and `ImageInput` still use raw `<img>`; dish photos are intersection-observer/native lazy loaded, and image-input previews are local user-selected data.
+- 2026-06-04 asset audit: largest bundled icons are 512x512 PNGs; top sizes were `noodles.png` 70,103 bytes, `clock (1).png` 57,007 bytes, `vegetable1.png` 45,428 bytes, `budget.png` 35,624 bytes, and `logo.png` 35,228 bytes.
+- 2026-06-04 route budget command: `$env:PERF_BASELINE='1'; $env:E2E_PORT='3026'; npx.cmd playwright test tests/e2e/performance-baseline.spec.ts --output D:\tmp\my-recipes-perf04-artifacts`.
+- 2026-06-04 route budget result: passed 1 Playwright baseline test; route evidence written to `test-results/performance/perf-00-baseline.json` and artifacts at `D:\tmp\my-recipes-perf04-artifacts`.
+- 2026-06-04 route budget counts: dashboard 7 requests/4 images; ingredient list 7/4; dish list 7/4; shopping list 6/3; shopping-list detail 10/7; scheduled-meal list 10/7; expense planner 7/4.
+- 2026-06-04 route transfer snapshot: sampled dev routes were 1,748,551-1,850,250 bytes transfer; largest resource remained dev `static/js/bundle.js` at 1,615,283 bytes.
+- 2026-06-04 build command: `npm run build`.
+- 2026-06-04 build result: passed with the existing lint/dependency warning set; latest bundle reported `build\static\js\main.a13010e4.js` at 567.01 kB gzip.
+- 2026-06-04 e2e command: `$env:E2E_PORT='3032'; npx.cmd playwright test --output D:\tmp\my-recipes-e2e-perf04-artifacts`.
+- 2026-06-04 e2e result: passed 9 Playwright tests and skipped 1 explicit `PERF-00` baseline test; report at `playwright-report/index.html`, JSON at `test-results/e2e-results.json`, artifacts at `D:\tmp\my-recipes-e2e-perf04-artifacts`.
 
 Notes:
-- Record budget numbers after PERF-00 baseline measurement so the budget matches real app behavior and data volume.
+- The budget numbers are dev-server measurements for the current seeded Playwright data. Re-record budgets separately for production-build profiling before using transfer-size thresholds in CI.
+- Icon source files remain 512x512 PNGs; replacing them with smaller encoded variants is a future asset-pipeline optimization, not required for this step because current route image counts and transfer sizes are within budget.
 
 ### PERF-05: Navigation And Loading Overlay
 
@@ -337,3 +353,4 @@ Notes:
 | 2026-06-04 | PERF-01 | Static row audit; `npm run build`; `$env:E2E_PORT='3032'; npx.cmd playwright test --output D:\tmp\my-recipes-e2e-perf01-artifacts` | Audited row render hot paths; build passed with existing warnings; final full e2e passed 9 and skipped 1 explicit `PERF-00` baseline test. | `playwright-report/index.html`; `test-results/e2e-results.json`; `D:\tmp\my-recipes-e2e-perf01-artifacts` | Continue with `PERF-02` selector and lookup normalization. |
 | 2026-06-04 | PERF-02 | Static selector audit; `npm run build`; `$env:E2E_PORT='3032'; npx.cmd playwright test --output D:\tmp\my-recipes-e2e-perf02-artifacts` | Added shared memoized lookup selectors; migrated feature modules/routing to typed selectors; build passed with existing warnings; full e2e passed 9 and skipped 1 explicit `PERF-00` baseline test. | `src/Store/Selectors.ts`; `playwright-report/index.html`; `test-results/e2e-results.json`; `D:\tmp\my-recipes-e2e-perf02-artifacts` | Continue with `PERF-03` lazy tabs, panels, and modal bodies. |
 | 2026-06-04 | PERF-03 | Static lazy-render audit; `npm run build`; `$env:E2E_PORT='3032'; npx.cmd playwright test --output D:\tmp\my-recipes-e2e-perf03-artifacts` | Lazy-rendered shopping-list detail tabs and deferred heavy modal bodies across scheduled meals, shopping lists, cooking, global overlays, and backup dialogs; build passed with existing warnings; full e2e passed 9 and skipped 1 explicit `PERF-00` baseline test. | `src/Components/Modal/Modal.tsx`; `playwright-report/index.html`; `test-results/e2e-results.json`; `D:\tmp\my-recipes-e2e-perf03-artifacts` | Deploy `PERF-03`, then continue with `PERF-04` image and network budget. |
+| 2026-06-04 | PERF-04 | Static image audit; `npm run build`; `$env:PERF_BASELINE='1'; $env:E2E_PORT='3026'; npx.cmd playwright test tests/e2e/performance-baseline.spec.ts --output D:\tmp\my-recipes-perf04-artifacts`; `$env:E2E_PORT='3032'; npx.cmd playwright test --output D:\tmp\my-recipes-e2e-perf04-artifacts` | Added shared lazy/async image defaults, converted remaining route raw icon images, documented route request/image/transfer budgets, and verified build plus e2e. | `src/Components/Image/Image.tsx`; `test-results/performance/perf-00-baseline.json`; `playwright-report/index.html`; `test-results/e2e-results.json`; `D:\tmp\my-recipes-perf04-artifacts`; `D:\tmp\my-recipes-e2e-perf04-artifacts` | Deploy `PERF-04`, then continue with `PERF-05` navigation and loading overlay. |

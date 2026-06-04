@@ -151,7 +151,7 @@ export const MasterPage = () => {
                         onClick={toggleSearch.show}
                         style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                     />
-                    {_featureIcon() && <Image preview={false} src={_featureIcon()} width={36} style={{ marginBottom: 5 }} />}
+                    {_featureIcon() && <Image src={_featureIcon()} width={36} loading="eager" alt={currentFeatureName} style={{ marginBottom: 5 }} />}
                 </Stack>
             </Stack>
         </Header>
@@ -346,7 +346,7 @@ const SidebarDrawer = () => {
                 placement="left"
                 title={
                     <Flex align="center" gap={10}>
-                        <Image src={LogoIcon} preview={false} width={32} />
+                        <Image src={LogoIcon} width={32} loading="eager" alt="My Recipes" />
                         <Typography.Text style={{ fontFamily: "kanit", fontSize: 22, fontWeight: 600 }}>My Recipes</Typography.Text>
                     </Flex>
                 }
@@ -361,37 +361,37 @@ const SidebarDrawer = () => {
                     items={[
                         {
                             key: 'dashboard', label: <Flex align="center" gap={10}>
-                                <img src={LogoIcon} width={24} />
+                                <Image src={LogoIcon} width={24} alt="" />
                                 <span>Tổng quan</span>
                             </Flex>, onClick: () => onNavigate(RootRoutes.AuthorizedRoutes.Root())
                         },
                         {
                             key: "ingredients", label: <Flex align="center" gap={10}>
-                                <img src={IngredientIcon} width={24} />
+                                <Image src={IngredientIcon} width={24} alt="" />
                                 <span>Nguyên liệu</span>
                             </Flex>, onClick: () => onNavigate(RootRoutes.AuthorizedRoutes.IngredientRoutes.List())
                         },
                         {
                             key: "dishes", label: <Flex align="center" gap={10}>
-                                <img src={DishesIcon} width={24} />
+                                <Image src={DishesIcon} width={24} alt="" />
                                 <span>Món ăn</span>
                             </Flex>, onClick: () => onNavigate(RootRoutes.AuthorizedRoutes.DishesRoutes.List())
                         },
                         {
                             key: "expensePlanner", label: <Flex align="center" gap={10}>
-                                <img src={BudgetIcon} width={24} />
+                                <Image src={BudgetIcon} width={24} alt="" />
                                 <span>Kế hoạch chi phí</span>
                             </Flex>, onClick: () => onNavigate(RootRoutes.AuthorizedRoutes.ExpensePlanner())
                         },
                         {
                             key: "shoppingList", label: <Flex align="center" gap={10}>
-                                <img src={ShoppingListIcon} width={24} />
+                                <Image src={ShoppingListIcon} width={24} alt="" />
                                 <span>Lịch mua sắm</span>
                             </Flex>, onClick: () => onNavigate(RootRoutes.AuthorizedRoutes.ShoppingListRoutes.List())
                         },
                         {
                             key: "meals", label: <Flex align="center" gap={10}>
-                                <img src={MealsIcon} width={24} />
+                                <Image src={MealsIcon} width={24} alt="" />
                                 <span>Thực đơn</span>
                             </Flex>, onClick: () => onNavigate(RootRoutes.AuthorizedRoutes.ScheduledMealRoutes.List())
                         }

@@ -1,5 +1,6 @@
 import { CloseOutlined, SearchOutlined } from '@ant-design/icons';
 import { Box } from '@components/Layout/Box';
+import { Image } from '@components/Image';
 import { Stack } from '@components/Layout/Stack';
 import { Typography } from '@components/Typography';
 import { Ingredient } from '@store/Models/Ingredient';
@@ -235,7 +236,7 @@ export const GlobalSearchScreen: React.FC<GlobalSearchScreenProps> = ({ open, on
                 {matchedDishes.length > 0 && (
                     <Box style={{ background: '#fff', margin: '10px 12px', borderRadius: 10, overflow: 'hidden' }}>
                         <Stack align="center" gap={8} style={{ padding: '10px 16px 8px', borderBottom: '1px solid #f0f0f0' }}>
-                            <img src={NoodlesIcon} width={18} style={{ marginBottom: 2 }} />
+                            <Image src={NoodlesIcon} width={18} alt="" style={{ marginBottom: 2 }} />
                             <Typography.Text strong style={{ fontSize: 13 }}>Món ăn</Typography.Text>
                             <span style={{ marginLeft: 'auto', fontSize: 11, color: '#aaa' }}>
                                 {matchedDishes.length} kết quả
@@ -283,7 +284,7 @@ export const GlobalSearchScreen: React.FC<GlobalSearchScreenProps> = ({ open, on
                 {matchedIngredients.length > 0 && (
                     <Box style={{ background: '#fff', margin: '10px 12px', borderRadius: 10, overflow: 'hidden' }}>
                         <Stack align="center" gap={8} style={{ padding: '10px 16px 8px', borderBottom: '1px solid #f0f0f0' }}>
-                            <img src={IngredientIcon} width={18} style={{ marginBottom: 2 }} />
+                            <Image src={IngredientIcon} width={18} alt="" style={{ marginBottom: 2 }} />
                             <Typography.Text strong style={{ fontSize: 13 }}>Nguyên liệu</Typography.Text>
                             <span style={{ marginLeft: 'auto', fontSize: 11, color: '#aaa' }}>
                                 {matchedIngredients.length} kết quả
@@ -326,7 +327,7 @@ export const GlobalSearchScreen: React.FC<GlobalSearchScreenProps> = ({ open, on
                 {matchedLists.length > 0 && (
                     <Box style={{ background: '#fff', margin: '10px 12px 20px', borderRadius: 10, overflow: 'hidden' }}>
                         <Stack align="center" gap={8} style={{ padding: '10px 16px 8px', borderBottom: '1px solid #f0f0f0' }}>
-                            <img src={ShoppingListIcon} width={18} style={{ marginBottom: 2 }} />
+                            <Image src={ShoppingListIcon} width={18} alt="" style={{ marginBottom: 2 }} />
                             <Typography.Text strong style={{ fontSize: 13 }}>Lịch mua sắm</Typography.Text>
                             <span style={{ marginLeft: 'auto', fontSize: 11, color: '#aaa' }}>
                                 {matchedLists.length} kết quả
