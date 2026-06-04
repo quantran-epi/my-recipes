@@ -1,4 +1,4 @@
-import { CloudDownloadOutlined, CloudUploadOutlined, ExportOutlined, HistoryOutlined, ImportOutlined, LockOutlined, MenuOutlined, UnlockOutlined, FireOutlined, SettingOutlined, QuestionCircleOutlined, SearchOutlined } from "@ant-design/icons";
+import { CloudDownloadOutlined, CloudUploadOutlined, ExportOutlined, HistoryOutlined, ImportOutlined, LockOutlined, MenuOutlined, UnlockOutlined, FireOutlined, SettingOutlined, QuestionCircleOutlined, SearchOutlined, LoadingOutlined } from "@ant-design/icons";
 import { ObjectPropertyHelper } from "@common/Helpers/ObjectProperty";
 import { Button } from "@components/Button";
 import { TextArea, Input } from "@components/Form/Input";
@@ -45,6 +45,35 @@ import { RootRoutes } from "./RootRoutes";
 const layoutStyles: React.CSSProperties = {
     height: "100%"
 }
+
+const sidebarTransitionOverlayStyle: React.CSSProperties = {
+    position: "fixed",
+    top: 60,
+    left: 0,
+    right: 0,
+    bottom: 80,
+    zIndex: 850,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    background: "rgba(255,255,255,0.86)",
+    backdropFilter: "blur(2px)",
+    pointerEvents: "auto",
+};
+
+const sidebarTransitionContentStyle: React.CSSProperties = {
+    display: "flex",
+    alignItems: "center",
+    gap: 8,
+    padding: "8px 12px",
+    borderRadius: 999,
+    border: "1px solid #e6f4ff",
+    background: "#fff",
+    boxShadow: "0 6px 20px rgba(0,0,0,0.08)",
+    color: "#0958d9",
+    fontSize: 13,
+    fontWeight: 600,
+};
 
 export const MasterPage = () => {
     const theme = useTheme();
@@ -117,6 +146,7 @@ export const MasterPage = () => {
 
 const SidebarDrawer = () => {
     const [open, setOpen] = useState(false);
+    const [routeLoading, setRouteLoading] = useState(false);
     const [pinModalOpen, setPinModalOpen] = useState(false);
     const [pin, setPin] = useState("");
     const [pinError, setPinError] = useState("");
@@ -130,12 +160,70 @@ const SidebarDrawer = () => {
     const toggleHistory = useToggle();
     const toggleGuide = useToggle();
     const navigationTimerRef = React.useRef<number | null>(null);
+    const loadingTimerRef = React.useRef<number | null>(null);
+    const loadingFrameRef = React.useRef<number | null>(null);
+    const loadingFallbackTimerRef = React.useRef<number | null>(null);
+    const pendingRouteRef = React.useRef<string | null>(null);
+
+    const clearNavigationTimer = () => {
+        if (navigationTimerRef.current !== null) {
+            window.clearTimeout(navigationTimerRef.current);
+            navigationTimerRef.current = null;
+        }
+    };
+
+    const clearLoadingTimer = () => {
+        if (loadingTimerRef.current !== null) {
+            window.clearTimeout(loadingTimerRef.current);
+            loadingTimerRef.current = null;
+        }
+    };
+
+    const clearLoadingFrame = () => {
+        if (loadingFrameRef.current !== null) {
+            window.cancelAnimationFrame(loadingFrameRef.current);
+            loadingFrameRef.current = null;
+        }
+    };
+
+    const clearLoadingFallbackTimer = () => {
+        if (loadingFallbackTimerRef.current !== null) {
+            window.clearTimeout(loadingFallbackTimerRef.current);
+            loadingFallbackTimerRef.current = null;
+        }
+    };
+
+    const finishRouteLoading = () => {
+        pendingRouteRef.current = null;
+        clearLoadingTimer();
+        clearLoadingFrame();
+        clearLoadingFallbackTimer();
+        setRouteLoading(false);
+    };
 
     React.useEffect(() => {
         return () => {
-            if (navigationTimerRef.current !== null) window.clearTimeout(navigationTimerRef.current);
+            clearNavigationTimer();
+            clearLoadingTimer();
+            clearLoadingFrame();
+            clearLoadingFallbackTimer();
         };
     }, []);
+
+    React.useEffect(() => {
+        if (!routeLoading) return;
+        const pendingRoute = pendingRouteRef.current;
+        if (pendingRoute && location.pathname !== pendingRoute) return;
+
+        clearLoadingTimer();
+        clearLoadingFrame();
+        loadingFrameRef.current = window.requestAnimationFrame(() => {
+            loadingFrameRef.current = window.requestAnimationFrame(() => {
+                loadingFrameRef.current = null;
+                loadingTimerRef.current = window.setTimeout(finishRouteLoading, 80);
+            });
+        });
+    }, [location.pathname, routeLoading]);
 
     const showDrawer = () => {
         setOpen(true);
@@ -146,14 +234,33 @@ const SidebarDrawer = () => {
     };
 
     const onNavigate = (href: string) => {
-        flushSync(() => setOpen(false));
-        if (location.pathname === href) return;
+        if (location.pathname === href) {
+            flushSync(() => setOpen(false));
+            return;
+        }
 
-        if (navigationTimerRef.current !== null) window.clearTimeout(navigationTimerRef.current);
-        navigationTimerRef.current = window.setTimeout(() => {
-            navigationTimerRef.current = null;
+        clearNavigationTimer();
+        clearLoadingTimer();
+        clearLoadingFrame();
+        clearLoadingFallbackTimer();
+        pendingRouteRef.current = href;
+        const navigationDelay = open ? 80 : 0;
+        flushSync(() => {
+            setOpen(false);
+            setRouteLoading(true);
+        });
+        const runNavigation = () => {
             React.startTransition(() => navigate(href));
-        }, 80);
+        };
+        if (navigationDelay === 0) {
+            runNavigation();
+        } else {
+            navigationTimerRef.current = window.setTimeout(() => {
+                navigationTimerRef.current = null;
+                runNavigation();
+            }, navigationDelay);
+        }
+        loadingFallbackTimerRef.current = window.setTimeout(finishRouteLoading, 1200);
     }
 
     const onUnlock = () => {
@@ -189,6 +296,14 @@ const SidebarDrawer = () => {
     return (
         <React.Fragment>
             <Button type="primary" onClick={showDrawer} icon={<MenuOutlined />} />
+            {routeLoading && (
+                <div style={sidebarTransitionOverlayStyle}>
+                    <div style={sidebarTransitionContentStyle}>
+                        <LoadingOutlined />
+                        <span>Đang mở...</span>
+                    </div>
+                </div>
+            )}
             <Drawer
                 placement="left"
                 title={
@@ -363,7 +478,7 @@ const SidebarDrawer = () => {
                     {pinError && <Typography.Text type="danger">{pinError}</Typography.Text>}
                 </Flex>
             </Modal>
-            <ScheduledMealToolkitWidget />
+            <ScheduledMealToolkitWidget onNavigate={onNavigate} />
             <CookingHistoryWidget open={toggleHistory.value} onClose={toggleHistory.hide} />
             <UserGuideScreen open={toggleGuide.value} onClose={toggleGuide.hide} />
         </React.Fragment>

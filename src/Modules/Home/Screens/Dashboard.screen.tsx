@@ -13,6 +13,8 @@ import { useScreenTitle } from '@hooks';
 import { DishScorer, ScoredDish } from '@modules/DishSuggester/Helpers/DishScorer';
 import { RootRoutes } from '@routing/RootRoutes';
 import { Ingredient, IngredientInventory, IngredientUnit, InventoryBatch } from '@store/Models/Ingredient';
+import { CookingSession } from '@store/Models/CookingSession';
+import { ScheduledMeal } from '@store/Models/ScheduledMeal';
 import { ShoppingList, ShoppingListIngredientGroup } from '@store/Models/ShoppingList';
 import { selectCookingSessions, selectDishes, selectIngredients, selectInventory, selectScheduledMeals, selectShoppingLists } from '@store/Selectors';
 import moment from 'moment';
@@ -118,17 +120,35 @@ const buildUrgentInventory = (
 }
 
 const Section: React.FunctionComponent<{ title: string; action?: React.ReactNode; children: React.ReactNode }> = ({ title, action, children }) => {
-    return <Box style={{ background: '#fff', border: '1px solid #f0f0f0', borderRadius: 8, padding: 12 }}>
-        <Stack justify='space-between' align='center' style={{ marginBottom: 10 }}>
+    return <section>
+        <Stack justify='space-between' align='center' style={{ marginBottom: 8 }}>
             <Typography.Text strong style={{ fontSize: 16 }}>{title}</Typography.Text>
             {action}
         </Stack>
-        {children}
+        <Stack direction='column' align='stretch' gap={8}>{children}</Stack>
+    </section>;
+}
+
+const EmptySection: React.FunctionComponent<{ text: string }> = ({ text }) => {
+    return <Box style={{ padding: '18px 8px', background: '#fff', border: '1px dashed #d9d9d9', borderRadius: 8 }}>
+        <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description={<Typography.Text type='secondary'>{text}</Typography.Text>} />
     </Box>;
 }
 
-const Metric: React.FunctionComponent<{ icon: React.ReactNode; label: string; value: string | number; detail?: React.ReactNode; tone?: string }> = ({ icon, label, value, detail, tone }) => {
-    return <Box style={{ padding: '10px 12px', border: '1px solid #f0f0f0', borderRadius: 8, background: '#fafafa', minWidth: 0 }}>
+const StatusChip: React.FunctionComponent<{ icon: React.ReactNode; label: string; value: string | number; tone: string }> = ({ icon, label, value, tone }) => {
+    return <Box style={{ minWidth: 0, border: `1px solid ${tone}26`, background: `${tone}0f`, borderRadius: 8, padding: '8px 10px' }}>
+        <Stack align='center' gap={7} style={{ minWidth: 0 }}>
+            <span style={{ color: tone, flexShrink: 0 }}>{icon}</span>
+            <div style={{ minWidth: 0 }}>
+                <Typography.Text strong style={{ display: 'block', color: tone, lineHeight: '17px' }}>{value}</Typography.Text>
+                <Typography.Text type='secondary' style={{ display: 'block', fontSize: 11, lineHeight: '14px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{label}</Typography.Text>
+            </div>
+        </Stack>
+    </Box>;
+}
+
+const DataMetric: React.FunctionComponent<{ icon: React.ReactNode; label: string; value: string | number; detail?: React.ReactNode; tone?: string }> = ({ icon, label, value, detail, tone }) => {
+    return <Box style={{ padding: '10px 12px', border: '1px solid #f0f0f0', borderRadius: 8, background: '#fff', minWidth: 0 }}>
         <Stack align='flex-start' gap={8}>
             <span style={{ color: tone ?? '#1677ff', flexShrink: 0 }}>{icon}</span>
             <div style={{ minWidth: 0 }}>
@@ -140,68 +160,139 @@ const Metric: React.FunctionComponent<{ icon: React.ReactNode; label: string; va
     </Box>;
 }
 
-const EmptySection: React.FunctionComponent<{ text: string }> = ({ text }) => {
-    return <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description={<Typography.Text type='secondary'>{text}</Typography.Text>} />;
+type PriorityAction = {
+    icon: React.ReactNode;
+    title: string;
+    description: string;
+    actionLabel: string;
+    tone: string;
+    onOpen?: () => void;
+    tags?: React.ReactNode;
+}
+
+const PriorityPanel: React.FunctionComponent<{ item: PriorityAction }> = ({ item }) => {
+    return <Box style={{ background: '#fff', border: `1px solid ${item.tone}33`, borderRadius: 8, overflow: 'hidden', boxShadow: '0 2px 10px rgba(0,0,0,0.04)' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '5px minmax(0, 1fr)', minHeight: 92 }}>
+            <div style={{ background: item.tone }} />
+            <div style={{ padding: 12, display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) auto', gap: 12, alignItems: 'center' }}>
+                <div style={{ minWidth: 0 }}>
+                    <Typography.Text type='secondary' style={{ display: 'block', fontSize: 12, lineHeight: '16px', marginBottom: 3 }}>Cần xử lý ngay</Typography.Text>
+                    <Typography.Text strong style={{ display: 'block', fontSize: 17, lineHeight: '22px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        <span style={{ color: item.tone, marginRight: 6 }}>{item.icon}</span>{item.title}
+                    </Typography.Text>
+                    <Typography.Text type='secondary' style={{ display: 'block', fontSize: 12, lineHeight: '17px', marginTop: 3, overflowWrap: 'anywhere' }}>{item.description}</Typography.Text>
+                    {item.tags && <Stack wrap='wrap' gap={5} style={{ marginTop: 8 }}>{item.tags}</Stack>}
+                </div>
+                {item.onOpen && <Button type='primary' onClick={item.onOpen}>{item.actionLabel}</Button>}
+            </div>
+        </div>
+    </Box>;
+}
+
+const ActionRow: React.FunctionComponent<{
+    testId?: string;
+    title: string;
+    description: React.ReactNode;
+    accent: string;
+    icon?: React.ReactNode;
+    right?: React.ReactNode;
+    tags?: React.ReactNode;
+    onOpen: () => void;
+}> = ({ testId, title, description, accent, icon, right, tags, onOpen }) => {
+    return <button data-testid={testId} onClick={onOpen} style={{ width: '100%', border: 0, background: 'transparent', padding: 0, textAlign: 'left', cursor: 'pointer' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '5px minmax(0, 1fr)', border: '1px solid #f0f0f0', borderRadius: 8, background: '#fff', overflow: 'hidden' }}>
+            <div style={{ background: accent }} />
+            <div style={{ padding: '10px 11px', minWidth: 0 }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) auto', gap: 8, alignItems: 'start' }}>
+                    <div style={{ minWidth: 0 }}>
+                        <Typography.Text strong style={{ display: 'block', lineHeight: '19px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                            {icon && <span style={{ color: accent, marginRight: 6 }}>{icon}</span>}{title}
+                        </Typography.Text>
+                        <Typography.Text type='secondary' style={{ display: 'block', fontSize: 12, lineHeight: '16px', marginTop: 2 }}>{description}</Typography.Text>
+                    </div>
+                    <Stack align='center' gap={6} style={{ flexShrink: 0 }}>
+                        {right}
+                        <RightOutlined style={{ color: '#bfbfbf', fontSize: 12 }} />
+                    </Stack>
+                </div>
+                {tags && <Stack wrap='wrap' gap={5} style={{ marginTop: 8 }}>{tags}</Stack>}
+            </div>
+        </div>
+    </button>;
 }
 
 const UrgentRow: React.FunctionComponent<{ item: UrgentInventoryItem; onOpen: () => void }> = ({ item, onOpen }) => {
     const badge = InventoryHelper.expiryBadge(item.daysLeft);
-    return <button data-testid={`dashboard-urgent-${item.ingredientId}`} onClick={onOpen} style={{ width: '100%', border: 0, background: 'transparent', padding: 0, textAlign: 'left', cursor: 'pointer' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) auto', gap: 8, alignItems: 'center', padding: '8px 0', borderBottom: '1px solid #f5f5f5' }}>
-            <div style={{ minWidth: 0 }}>
-                <Typography.Text strong style={{ display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.ingredientName}</Typography.Text>
-                <Typography.Text type='secondary' style={{ fontSize: 12 }}>
-                    {IngredientUnitHelper.formatAmount(item.amount)} {item.unit} · Hạn {item.expiresAtLabel}
-                </Typography.Text>
-            </div>
-            {badge && <Tag color={item.daysLeft < 0 ? 'red' : item.daysLeft <= 1 ? 'volcano' : 'orange'} style={{ marginInlineEnd: 0 }}>{badge.label}</Tag>}
-        </div>
-    </button>;
+    const accent = item.daysLeft < 0 ? '#cf1322' : item.daysLeft <= 1 ? '#fa541c' : '#fa8c16';
+    return <ActionRow
+        testId={`dashboard-urgent-${item.ingredientId}`}
+        title={item.ingredientName}
+        description={`${IngredientUnitHelper.formatAmount(item.amount)} ${item.unit} · Hạn ${item.expiresAtLabel}`}
+        accent={accent}
+        icon={<WarningOutlined />}
+        right={badge && <Tag color={item.daysLeft < 0 ? 'red' : item.daysLeft <= 1 ? 'volcano' : 'orange'} style={{ marginInlineEnd: 0 }}>{badge.label}</Tag>}
+        onOpen={onOpen}
+    />;
 }
 
 const SuggestionRow: React.FunctionComponent<{ item: ScoredDish; onOpen: () => void }> = ({ item, onOpen }) => {
     const matchPercent = Math.round(item.score * 100);
-    return <button data-testid={`dashboard-suggestion-${item.dish.id}`} onClick={onOpen} style={{ width: '100%', border: 0, background: 'transparent', padding: 0, textAlign: 'left', cursor: 'pointer' }}>
-        <div style={{ padding: '8px 0', borderBottom: '1px solid #f5f5f5' }}>
-            <Stack justify='space-between' align='flex-start' gap={8}>
-                <div style={{ minWidth: 0, flex: 1 }}>
-                    <Typography.Text strong style={{ display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.dish.name}</Typography.Text>
-                    <Typography.Text type='secondary' style={{ fontSize: 12 }}>
-                        {item.matchedIngredientIds.length} đủ · {item.partialIngredientIds?.length ?? 0} còn một phần · {item.missingIngredientIds.length} thiếu
-                    </Typography.Text>
-                </div>
-                <Tag color={matchPercent >= 100 ? 'green' : matchPercent >= 50 ? 'gold' : 'orange'} style={{ marginInlineEnd: 0 }}>{matchPercent}%</Tag>
-            </Stack>
-            <Stack wrap='wrap' gap={5} style={{ marginTop: 6 }}>
-                {(item.urgentIngredients?.length ?? 0) > 0 && <Tag color='volcano' style={{ marginInlineEnd: 0 }}>Cần dùng sớm</Tag>}
-                {item.extraShoppingCost && <Tag color='blue' style={{ marginInlineEnd: 0 }}>Mua thêm {IngredientPriceHelper.formatRange(item.extraShoppingCost)}</Tag>}
-                {(item.missingPriceCount ?? 0) > 0 && <Tag style={{ marginInlineEnd: 0 }}>{item.missingPriceCount} thiếu giá</Tag>}
-            </Stack>
-        </div>
-    </button>;
+    const accent = matchPercent >= 100 ? '#389e0d' : matchPercent >= 50 ? '#d48806' : '#d46b08';
+    return <ActionRow
+        testId={`dashboard-suggestion-${item.dish.id}`}
+        title={item.dish.name}
+        description={`${item.matchedIngredientIds.length} đủ · ${item.partialIngredientIds?.length ?? 0} còn một phần · ${item.missingIngredientIds.length} thiếu`}
+        accent={accent}
+        icon={<FireOutlined />}
+        right={<Tag color={matchPercent >= 100 ? 'green' : matchPercent >= 50 ? 'gold' : 'orange'} style={{ marginInlineEnd: 0 }}>{matchPercent}%</Tag>}
+        tags={<>
+            {(item.urgentIngredients?.length ?? 0) > 0 && <Tag color='volcano' style={{ marginInlineEnd: 0 }}>Cần dùng sớm</Tag>}
+            {item.extraShoppingCost && <Tag color='blue' style={{ marginInlineEnd: 0 }}>Mua thêm {IngredientPriceHelper.formatRange(item.extraShoppingCost)}</Tag>}
+            {(item.missingPriceCount ?? 0) > 0 && <Tag style={{ marginInlineEnd: 0 }}>{item.missingPriceCount} thiếu giá</Tag>}
+        </>}
+        onOpen={onOpen}
+    />;
 }
 
 const ShoppingListRow: React.FunctionComponent<{ item: ShoppingList; cost: string; onOpen: () => void }> = ({ item, cost, onOpen }) => {
     const progress = getProgress(item);
     const plannedLabel = item.plannedDate ? moment(item.plannedDate).format('DD/MM/YYYY') : 'Chưa có ngày';
     const overdue = item.plannedDate && moment(item.plannedDate).isBefore(today(), 'day');
+    const accent = overdue ? '#cf1322' : progress.percent === 100 ? '#389e0d' : '#0958d9';
 
-    return <button data-testid={`dashboard-shopping-list-${item.id}`} onClick={onOpen} style={{ width: '100%', border: 0, background: 'transparent', padding: 0, textAlign: 'left', cursor: 'pointer' }}>
-        <div style={{ padding: '8px 0', borderBottom: '1px solid #f5f5f5' }}>
-            <Stack justify='space-between' align='flex-start' gap={8}>
-                <div style={{ minWidth: 0, flex: 1 }}>
-                    <Typography.Text strong style={{ display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.name}</Typography.Text>
-                    <Typography.Text type={overdue ? 'danger' : 'secondary'} style={{ fontSize: 12 }}>
-                        {plannedLabel} · {progress.done}/{progress.total} nguyên liệu
-                    </Typography.Text>
-                </div>
-                <Typography.Text strong style={{ color: '#0958d9', whiteSpace: 'nowrap' }}>{cost}</Typography.Text>
-            </Stack>
-            <div style={{ height: 5, borderRadius: 5, background: '#f0f0f0', overflow: 'hidden', marginTop: 8 }}>
-                <div style={{ height: '100%', width: `${progress.percent}%`, background: progress.percent === 100 ? '#52c41a' : '#1677ff' }} />
-            </div>
-        </div>
-    </button>;
+    return <ActionRow
+        testId={`dashboard-shopping-list-${item.id}`}
+        title={item.name}
+        description={`${plannedLabel} · ${progress.done}/${progress.total} nguyên liệu`}
+        accent={accent}
+        icon={<ShoppingCartOutlined />}
+        right={<Typography.Text strong style={{ color: accent, whiteSpace: 'nowrap' }}>{cost}</Typography.Text>}
+        tags={<div style={{ height: 5, width: '100%', minWidth: 120, borderRadius: 5, background: '#f0f0f0', overflow: 'hidden' }}>
+            <div style={{ height: '100%', width: `${progress.percent}%`, background: accent }} />
+        </div>}
+        onOpen={onOpen}
+    />;
+}
+
+const TodayMealRow: React.FunctionComponent<{ item: ScheduledMeal; onOpen: () => void }> = ({ item, onOpen }) => {
+    const dishCount = Object.values(item.meals).flat().length;
+    return <ActionRow
+        title={item.name}
+        description={`${dishCount} món · ${moment(item.plannedDate).format('DD/MM/YYYY')}`}
+        accent='#1677ff'
+        icon={<CalendarOutlined />}
+        onOpen={onOpen}
+    />;
+}
+
+const CookingRow: React.FunctionComponent<{ item: CookingSession; onOpen: () => void }> = ({ item, onOpen }) => {
+    return <ActionRow
+        title={item.dishName}
+        description={`Bước ${(item.currentStepIndex ?? 0) + 1}/${item.steps.length || 1}`}
+        accent='#fa8c16'
+        icon={<FireOutlined />}
+        onOpen={onOpen}
+    />;
 }
 
 export const DashboardScreen = () => {
@@ -235,13 +326,74 @@ export const DashboardScreen = () => {
     const incompleteDishes = dishes.filter(item => !item.isCompleted);
     const stockedIngredientCount = Object.entries(inventoryItems).filter(([, inventory]) => (inventory.batches ?? []).some(batch => batch.amount > 0)).length;
     const stockedBatchCount = Object.values(inventoryItems).reduce((sum, inventory) => sum + (inventory.batches ?? []).filter(batch => batch.amount > 0).length, 0);
+    const firstUrgentInventory = urgentInventory[0];
+    const firstActiveSession = activeSessions[0];
+    const firstTodayShoppingList = todayShoppingLists[0];
+    const firstTodayMeal = todayMeals[0];
+    const firstSuggestion = suggestions[0];
+    const priorityAction: PriorityAction = firstUrgentInventory
+        ? {
+            icon: <WarningOutlined />,
+            title: firstUrgentInventory.daysLeft < 0 ? 'Bỏ lô hết hạn' : 'Dùng nguyên liệu sớm',
+            description: `${firstUrgentInventory.ingredientName} · ${IngredientUnitHelper.formatAmount(firstUrgentInventory.amount)} ${firstUrgentInventory.unit} · hạn ${firstUrgentInventory.expiresAtLabel}`,
+            actionLabel: 'Mở kho',
+            tone: firstUrgentInventory.daysLeft < 0 ? '#cf1322' : '#fa8c16',
+            onOpen: () => navigate(RootRoutes.AuthorizedRoutes.IngredientRoutes.Detail(firstUrgentInventory.ingredientId)),
+            tags: <Tag color={firstUrgentInventory.daysLeft < 0 ? 'red' : 'orange'} style={{ marginInlineEnd: 0 }}>{InventoryHelper.expiryBadge(firstUrgentInventory.daysLeft)?.label}</Tag>,
+        }
+        : firstActiveSession
+            ? {
+                icon: <FireOutlined />,
+                title: 'Tiếp tục phiên nấu',
+                description: `${firstActiveSession.dishName} · bước ${(firstActiveSession.currentStepIndex ?? 0) + 1}/${firstActiveSession.steps.length || 1}`,
+                actionLabel: 'Mở món',
+                tone: '#fa8c16',
+                onOpen: () => navigate(RootRoutes.AuthorizedRoutes.DishesRoutes.ManageIngredient(firstActiveSession.dishId)),
+            }
+            : firstTodayShoppingList
+                ? {
+                    icon: <ShoppingCartOutlined />,
+                    title: 'Hoàn tất mua sắm hôm nay',
+                    description: `${firstTodayShoppingList.name} · ${getProgress(firstTodayShoppingList).done}/${getProgress(firstTodayShoppingList).total} nguyên liệu · ${shoppingListCosts[firstTodayShoppingList.id] ?? '0đ'}`,
+                    actionLabel: 'Mở danh sách',
+                    tone: '#0958d9',
+                    onOpen: () => navigate(RootRoutes.AuthorizedRoutes.ShoppingListRoutes.Detail(firstTodayShoppingList.id)),
+                }
+                : firstTodayMeal
+                    ? {
+                        icon: <CalendarOutlined />,
+                        title: 'Kiểm tra thực đơn hôm nay',
+                        description: `${firstTodayMeal.name} · ${Object.values(firstTodayMeal.meals).flat().length} món`,
+                        actionLabel: 'Mở thực đơn',
+                        tone: '#1677ff',
+                        onOpen: () => navigate(RootRoutes.AuthorizedRoutes.ScheduledMealRoutes.List()),
+                    }
+                    : firstSuggestion
+                        ? {
+                            icon: <FireOutlined />,
+                            title: 'Có món phù hợp với tồn kho',
+                            description: `${firstSuggestion.dish.name} · khớp ${Math.round(firstSuggestion.score * 100)}% nguyên liệu`,
+                            actionLabel: 'Mở món',
+                            tone: '#389e0d',
+                            onOpen: () => navigate(RootRoutes.AuthorizedRoutes.DishesRoutes.ManageIngredient(firstSuggestion.dish.id)),
+                        }
+                        : {
+                            icon: <CheckCircleOutlined />,
+                            title: 'Không có việc gấp',
+                            description: 'Tồn kho, lịch mua sắm và thực đơn hôm nay chưa có mục cần xử lý ngay.',
+                            actionLabel: 'Mở món ăn',
+                            tone: '#389e0d',
+                            onOpen: () => navigate(RootRoutes.AuthorizedRoutes.DishesRoutes.List()),
+                        };
 
-    return <Box data-testid="dashboard" style={{ display: 'flex', flexDirection: 'column', gap: 12, paddingBottom: 12 }}>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(170px, 1fr))', gap: 10 }}>
-            <Metric icon={<CalendarOutlined />} label='Món trong thực đơn' value={todayDishCount} detail={`${todayMeals.length} lịch ăn trong hôm nay`} tone='#1677ff' />
-            <Metric icon={<ShoppingCartOutlined />} label='Lịch mua hôm nay' value={todayShoppingLists.length} detail='Danh sách có ngày mua là hôm nay' tone='#0958d9' />
-            <Metric icon={<WarningOutlined />} label='Lô hết hạn' value={expiredCount} detail='Lô tồn kho đã quá hạn sử dụng' tone='#cf1322' />
-            <Metric icon={<FireOutlined />} label='Đang nấu' value={activeSessions.length} detail='Phiên nấu chưa kết thúc' tone='#fa8c16' />
+    return <Box data-testid="dashboard" style={{ display: 'flex', flexDirection: 'column', gap: 14, paddingBottom: 12 }}>
+        <PriorityPanel item={priorityAction} />
+
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(78px, 1fr))', gap: 8 }}>
+            <StatusChip icon={<CalendarOutlined />} label='món hôm nay' value={todayDishCount} tone='#1677ff' />
+            <StatusChip icon={<ShoppingCartOutlined />} label='lịch mua' value={todayShoppingLists.length} tone='#0958d9' />
+            <StatusChip icon={<WarningOutlined />} label='lô quá hạn' value={expiredCount} tone='#cf1322' />
+            <StatusChip icon={<FireOutlined />} label='đang nấu' value={activeSessions.length} tone='#fa8c16' />
         </div>
 
         <Section
@@ -250,19 +402,11 @@ export const DashboardScreen = () => {
         >
             {activeSessions.length === 0 && todayMeals.length === 0 && todayShoppingLists.length === 0
                 ? <EmptySection text='Không có việc nào được lên lịch hôm nay.' />
-                : <Stack direction='column' align='stretch' gap={8}>
-                    {activeSessions.slice(0, 2).map(session => <Box key={session.id} style={{ padding: '8px 10px', border: '1px solid #fff1b8', borderRadius: 8, background: '#fffbe6' }}>
-                        <Stack justify='space-between' align='center'>
-                            <Typography.Text strong><FireOutlined style={{ color: '#fa8c16' }} /> {session.dishName}</Typography.Text>
-                            <Typography.Text type='secondary' style={{ fontSize: 12 }}>Bước {(session.currentStepIndex ?? 0) + 1}/{session.steps.length || 1}</Typography.Text>
-                        </Stack>
-                    </Box>)}
-                    {todayMeals.slice(0, 3).map(meal => <Box key={meal.id} style={{ padding: '8px 0', borderBottom: '1px solid #f5f5f5' }}>
-                        <Typography.Text strong style={{ display: 'block' }}>{meal.name}</Typography.Text>
-                        <Typography.Text type='secondary' style={{ fontSize: 12 }}>{Object.values(meal.meals).flat().length} món · {moment(meal.plannedDate).format('DD/MM/YYYY')}</Typography.Text>
-                    </Box>)}
+                : <>
+                    {activeSessions.slice(0, 2).map(session => <CookingRow key={session.id} item={session} onOpen={() => navigate(RootRoutes.AuthorizedRoutes.DishesRoutes.ManageIngredient(session.dishId))} />)}
+                    {todayMeals.slice(0, 3).map(meal => <TodayMealRow key={meal.id} item={meal} onOpen={() => navigate(RootRoutes.AuthorizedRoutes.ScheduledMealRoutes.List())} />)}
                     {todayShoppingLists.slice(0, 2).map(list => <ShoppingListRow key={list.id} item={list} cost={shoppingListCosts[list.id] ?? '0đ'} onOpen={() => navigate(RootRoutes.AuthorizedRoutes.ShoppingListRoutes.Detail(list.id))} />)}
-                </Stack>}
+                </>}
         </Section>
 
         <Section
@@ -292,11 +436,13 @@ export const DashboardScreen = () => {
                 : openShoppingLists.slice(0, 5).map(item => <ShoppingListRow key={item.id} item={item} cost={shoppingListCosts[item.id] ?? '0đ'} onOpen={() => navigate(RootRoutes.AuthorizedRoutes.ShoppingListRoutes.Detail(item.id))} />)}
         </Section>
 
-        <Box style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(190px, 1fr))', gap: 10 }}>
-            <Metric icon={<CheckCircleOutlined />} label='Món đã hoàn thiện' value={completedDishes.length} detail='Đã bật trạng thái hoàn thiện' tone='#389e0d' />
-            <Metric icon={<ClockCircleOutlined />} label='Món chưa hoàn thiện' value={incompleteDishes.length} detail={incompleteDishes.length > 0 ? `Chưa bật hoàn thiện: ${formatNamePreview(incompleteDishes.map(item => item.name), 'Không có món nào', 'món khác')}` : 'Không có món cần cập nhật'} tone='#d46b08' />
-            <Metric icon={<DollarCircleOutlined />} label='Danh sách đang mở' value={openShoppingLists.length} detail={openShoppingLists.length > 0 ? `Chưa bấm hoàn tất: ${formatNamePreview(openShoppingLists.map(item => item.name), 'Không có danh sách nào', 'danh sách khác')}` : 'Không có danh sách đang mở'} tone='#0958d9' />
-            <Metric icon={<RightOutlined />} label='Nguyên liệu có tồn kho' value={stockedIngredientCount} detail={`${stockedBatchCount} lô còn số lượng trong kho`} tone='#722ed1' />
-        </Box>
+        <Section title='Tổng quan dữ liệu'>
+            <Box style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(190px, 1fr))', gap: 10 }}>
+                <DataMetric icon={<CheckCircleOutlined />} label='Món đã hoàn thiện' value={completedDishes.length} detail='Đã bật trạng thái hoàn thiện' tone='#389e0d' />
+                <DataMetric icon={<ClockCircleOutlined />} label='Món chưa hoàn thiện' value={incompleteDishes.length} detail={incompleteDishes.length > 0 ? `Chưa bật hoàn thiện: ${formatNamePreview(incompleteDishes.map(item => item.name), 'Không có món nào', 'món khác')}` : 'Không có món cần cập nhật'} tone='#d46b08' />
+                <DataMetric icon={<DollarCircleOutlined />} label='Danh sách đang mở' value={openShoppingLists.length} detail={openShoppingLists.length > 0 ? `Chưa bấm hoàn tất: ${formatNamePreview(openShoppingLists.map(item => item.name), 'Không có danh sách nào', 'danh sách khác')}` : 'Không có danh sách đang mở'} tone='#0958d9' />
+                <DataMetric icon={<RightOutlined />} label='Nguyên liệu có tồn kho' value={stockedIngredientCount} detail={`${stockedBatchCount} lô còn số lượng trong kho`} tone='#722ed1' />
+            </Box>
+        </Section>
     </Box>;
 }
