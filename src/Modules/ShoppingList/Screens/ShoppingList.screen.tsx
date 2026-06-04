@@ -107,6 +107,25 @@ export const ShoppingListScreen = () => {
     const listRef = useRef<ListImperativeAPI | null>(null);
     const [showScrollTop, setShowScrollTop] = useState(false);
     const normalizedSearch = searchText.trim().toLowerCase();
+
+    const _onSearchChange = useMemo(() => debounce((event: React.ChangeEvent<HTMLInputElement>) => {
+        setSearchText(event.target.value);
+    }, 350), []);
+
+    useEffect(() => () => _onSearchChange.cancel(), [_onSearchChange]);
+
+    const _setScrollTopVisible = useCallback((nextVisible: boolean) => {
+        setShowScrollTop(current => current === nextVisible ? current : nextVisible);
+    }, []);
+
+    const _onListScroll = useCallback((event: React.UIEvent<HTMLElement>) => {
+        _setScrollTopVisible(event.currentTarget.scrollTop > 180);
+    }, [_setScrollTopVisible]);
+
+    const _onRowsRendered = useCallback((visibleRows: { startIndex: number }) => {
+        _setScrollTopVisible(visibleRows.startIndex > 1);
+    }, [_setScrollTopVisible]);
+
     const filterData = useMemo(() => {
         const statusCounts = SHOPPING_LIST_STATUS_FILTERS.reduce((result, item) => {
             result[item.value] = 0;
@@ -134,9 +153,14 @@ export const ShoppingListScreen = () => {
         toggleAddModal.show();
     }
 
-    const _onDelete = (item) => {
+    const _onDelete = useCallback((item) => {
         dispatch(removeShoppingList([item.id]));
-    }
+    }, [dispatch]);
+
+    const shoppingListRowProps = useMemo(() => ({
+        items: filteredShoppingLists,
+        onDelete: _onDelete,
+    }), [filteredShoppingLists, _onDelete]);
 
     const _onShowCalendar = () => {
         toggleCalendarModal.show();
@@ -166,12 +190,12 @@ export const ShoppingListScreen = () => {
         return () => {
             if (frameId !== undefined) window.cancelAnimationFrame(frameId);
         };
-    }, [_scrollToTop, activeStatus, searchText, filteredShoppingLists.length]);
+    }, [_scrollToTop, activeStatus, searchText]);
 
     return <React.Fragment>
         <div style={{ height: "100%", display: "flex", flexDirection: "column", minHeight: 0 }}>
             <Stack.Compact>
-                <Input allowClear placeholder="Tìm kiếm" onChange={debounce((e) => setSearchText(e.target.value), 350)} />
+                <Input allowClear placeholder="Tìm kiếm" onChange={_onSearchChange} />
                 <Button onClick={_onAdd} icon={<PlusOutlined />} />
                 <Button onClick={_onShowCalendar} icon={<CalendarOutlined />} />
             </Stack.Compact>
@@ -188,9 +212,9 @@ export const ShoppingListScreen = () => {
                     rowComponent={ShoppingListRow}
                     rowCount={filteredShoppingLists.length}
                     rowHeight={rowHeight}
-                    onScroll={(event) => setShowScrollTop(event.currentTarget.scrollTop > 180)}
-                    onRowsRendered={(visibleRows) => setShowScrollTop(visibleRows.startIndex > 1)}
-                    rowProps={{ items: filteredShoppingLists, onDelete: _onDelete }}
+                    onScroll={_onListScroll}
+                    onRowsRendered={_onRowsRendered}
+                    rowProps={shoppingListRowProps}
                     style={{ height: "100%" }}
                 />
                 <VirtualListScrollTopButton listRef={listRef} rowCount={filteredShoppingLists.length} visible={showScrollTop} />

@@ -39,16 +39,23 @@ import moment from "moment";
 import 'moment/locale/vi';
 
 type DishListItemSummary = {
-    ingredients: DishesIngredientAmount[];
-    steps: DishesStep[];
+    ingredientCount: number;
+    stepCount: number;
     requiredIngredientCount: number;
     optionalIngredientCount: number;
     includedDishCount: number;
 };
 
+type DishIngredientCounts = {
+    total: number;
+    required: number;
+    optional: number;
+};
+
 type DishRowProps = {
     items: Dishes[];
     allDishes: Dishes[];
+    dishById: Map<string, Dishes>;
     allIngredients: Ingredient[];
     summaries: Record<string, DishListItemSummary>;
     onDelete: (item: Dishes) => void;
@@ -103,70 +110,122 @@ const dishMatchesStatus = (dish: Dishes, status: DishStatusFilter): boolean => {
 }
 
 const EMPTY_DISH_SUMMARY: DishListItemSummary = {
-    ingredients: [],
-    steps: [],
+    ingredientCount: 0,
+    stepCount: 0,
     requiredIngredientCount: 0,
     optionalIngredientCount: 0,
     includedDishCount: 0,
 };
 
-const buildDishListSummaries = (dishes: Dishes[]): Record<string, DishListItemSummary> => {
-    const dishById = new Map(dishes.map(dish => [dish.id, dish]));
-    const ingredientCache = new Map<string, DishesIngredientAmount[]>();
-    const stepCache = new Map<string, DishesStep[]>();
+const collectDishIngredients = (
+    dish: Dishes,
+    dishById: Map<string, Dishes>,
+    cache = new Map<string, DishesIngredientAmount[]>(),
+    visiting = new Set<string>(),
+): DishesIngredientAmount[] => {
+    const cached = cache.get(dish.id);
+    if (cached) return cached;
+    if (visiting.has(dish.id)) return [];
 
-    const collectIngredients = (dish: Dishes, visiting = new Set<string>()): DishesIngredientAmount[] => {
-        const cached = ingredientCache.get(dish.id);
+    visiting.add(dish.id);
+    const included = (dish.includeDishes ?? []).flatMap(id => {
+        const found = dishById.get(id);
+        return found ? collectDishIngredients(found, dishById, cache, visiting) : [];
+    });
+    visiting.delete(dish.id);
+
+    const result = [...(dish.ingredients ?? []), ...included];
+    cache.set(dish.id, result);
+    return result;
+};
+
+const collectDishSteps = (
+    dish: Dishes,
+    dishById: Map<string, Dishes>,
+    cache = new Map<string, DishesStep[]>(),
+    visiting = new Set<string>(),
+): DishesStep[] => {
+    const cached = cache.get(dish.id);
+    if (cached) return cached;
+    if (visiting.has(dish.id)) return [];
+
+    visiting.add(dish.id);
+    const included = (dish.includeDishes ?? []).flatMap(id => {
+        const found = dishById.get(id);
+        return found ? collectDishSteps(found, dishById, cache, visiting) : [];
+    });
+    visiting.delete(dish.id);
+
+    const result = [...included, ...(dish.steps ?? [])];
+    cache.set(dish.id, result);
+    return result;
+};
+
+const buildDishListSummaries = (allDishes: Dishes[], visibleDishes: Dishes[] = allDishes): Record<string, DishListItemSummary> => {
+    const dishById = new Map(allDishes.map(dish => [dish.id, dish]));
+    const ingredientCountCache = new Map<string, DishIngredientCounts>();
+    const stepCountCache = new Map<string, number>();
+
+    const collectIngredientCounts = (dish: Dishes, visiting = new Set<string>()): DishIngredientCounts => {
+        const cached = ingredientCountCache.get(dish.id);
         if (cached) return cached;
-        if (visiting.has(dish.id)) return [];
+        if (visiting.has(dish.id)) return { total: 0, required: 0, optional: 0 };
 
-        const nextVisiting = new Set(visiting);
-        nextVisiting.add(dish.id);
-        const own = dish.ingredients ?? [];
-        const included = (dish.includeDishes ?? []).flatMap(id => {
+        visiting.add(dish.id);
+        const ownIngredients = dish.ingredients ?? [];
+        const counts = ownIngredients.reduce((result, item) => {
+            result.total += 1;
+            if (item.required === false) result.optional += 1;
+            else result.required += 1;
+            return result;
+        }, { total: 0, required: 0, optional: 0 } as DishIngredientCounts);
+
+        (dish.includeDishes ?? []).forEach(id => {
             const found = dishById.get(id);
-            return found ? collectIngredients(found, nextVisiting) : [];
+            if (!found) return;
+            const included = collectIngredientCounts(found, visiting);
+            counts.total += included.total;
+            counts.required += included.required;
+            counts.optional += included.optional;
         });
-        const result = [...own, ...included];
-        ingredientCache.set(dish.id, result);
-        return result;
+        visiting.delete(dish.id);
+        ingredientCountCache.set(dish.id, counts);
+        return counts;
     };
 
-    const collectSteps = (dish: Dishes, visiting = new Set<string>()): DishesStep[] => {
-        const cached = stepCache.get(dish.id);
-        if (cached) return cached;
-        if (visiting.has(dish.id)) return [];
+    const collectStepCount = (dish: Dishes, visiting = new Set<string>()): number => {
+        const cached = stepCountCache.get(dish.id);
+        if (cached !== undefined) return cached;
+        if (visiting.has(dish.id)) return 0;
 
-        const nextVisiting = new Set(visiting);
-        nextVisiting.add(dish.id);
-        const included = (dish.includeDishes ?? []).flatMap(id => {
+        visiting.add(dish.id);
+        let count = dish.steps?.length ?? 0;
+        (dish.includeDishes ?? []).forEach(id => {
             const found = dishById.get(id);
-            return found ? collectSteps(found, nextVisiting) : [];
+            if (found) count += collectStepCount(found, visiting);
         });
-        const result = [...included, ...(dish.steps ?? [])];
-        stepCache.set(dish.id, result);
-        return result;
+        visiting.delete(dish.id);
+        stepCountCache.set(dish.id, count);
+        return count;
     };
 
-    return dishes.reduce((result, dish) => {
-        const ingredients = collectIngredients(dish);
-        const steps = collectSteps(dish);
-        const requiredIngredientCount = ingredients.filter(item => item.required !== false).length;
+    return visibleDishes.reduce((result, dish) => {
+        const ingredients = collectIngredientCounts(dish);
         result[dish.id] = {
-            ingredients,
-            steps,
-            requiredIngredientCount,
-            optionalIngredientCount: ingredients.length - requiredIngredientCount,
+            ingredientCount: ingredients.total,
+            stepCount: collectStepCount(dish),
+            requiredIngredientCount: ingredients.required,
+            optionalIngredientCount: ingredients.optional,
             includedDishCount: (dish.includeDishes ?? []).filter(id => dishById.has(id)).length,
         };
         return result;
     }, {} as Record<string, DishListItemSummary>);
 };
 
-const DishRow = ({ index, style, items, allDishes, allIngredients, summaries, onDelete, onDuplicate, isAdmin }: RowComponentProps<DishRowProps>) => {
+const DishRow = ({ index, style, items, allDishes, dishById, allIngredients, summaries, onDelete, onDuplicate, isAdmin }: RowComponentProps<DishRowProps>) => {
     if (!items[index]) return null;
     const item = items[index];
-    return <div style={style}><DishesItem item={item} allDishes={allDishes} allIngredients={allIngredients} summary={summaries[item.id] ?? EMPTY_DISH_SUMMARY} onDelete={onDelete} onDuplicate={onDuplicate} isAdmin={isAdmin} /></div>;
+    return <div style={style}><DishesItem item={item} allDishes={allDishes} dishById={dishById} allIngredients={allIngredients} summary={summaries[item.id] ?? EMPTY_DISH_SUMMARY} onDelete={onDelete} onDuplicate={onDuplicate} isAdmin={isAdmin} /></div>;
 };
 
 export const DishesListScreen = () => {
@@ -184,13 +243,31 @@ export const DishesListScreen = () => {
     const { isAdmin } = useAdminMode();
     const normalizedSearch = searchText.trim().toLowerCase();
 
-    const dishSummaries = useMemo(() => buildDishListSummaries(dishes), [dishes]);
+    const _onSearchChange = useMemo(() => debounce((event: React.ChangeEvent<HTMLInputElement>) => {
+        setSearchText(event.target.value);
+    }, 350), []);
+
+    useEffect(() => () => _onSearchChange.cancel(), [_onSearchChange]);
+
+    const _setScrollTopVisible = useCallback((nextVisible: boolean) => {
+        setShowScrollTop(current => current === nextVisible ? current : nextVisible);
+    }, []);
+
+    const _onListScroll = useCallback((event: React.UIEvent<HTMLElement>) => {
+        _setScrollTopVisible(event.currentTarget.scrollTop > 180);
+    }, [_setScrollTopVisible]);
+
+    const _onRowsRendered = useCallback((visibleRows: { startIndex: number }) => {
+        _setScrollTopVisible(visibleRows.startIndex > 1);
+    }, [_setScrollTopVisible]);
 
     const allTags = useMemo<string[]>(() => {
         const tagSet = new Set<string>();
         dishes.forEach(d => d.tags?.forEach(t => tagSet.add(t)));
         return DISH_TAGS.filter(t => tagSet.has(t));
     }, [dishes]);
+
+    const dishById = useMemo(() => new Map(dishes.map(dish => [dish.id, dish])), [dishes]);
 
     const filterData = useMemo(() => {
         const statusCounts = DISH_STATUS_FILTERS.reduce((result, item) => {
@@ -237,14 +314,26 @@ export const DishesListScreen = () => {
     }, [dishes, normalizedSearch, activeTag, activeStatus, allTags]);
 
     const { filteredDishes, statusCounts, tagCounts } = filterData;
+    const dishSummaries = useMemo(() => buildDishListSummaries(dishes, filteredDishes), [dishes, filteredDishes]);
 
-    const _onDelete = (item: Dishes) => {
+    const _onDelete = useCallback((item: Dishes) => {
         dispatch(removeDishes([item.id]));
-    }
+    }, [dispatch]);
 
-    const _onDuplicate = (item: Dishes) => {
+    const _onDuplicate = useCallback((item: Dishes) => {
         dispatch(duplicateDish(item.id));
-    }
+    }, [dispatch]);
+
+    const dishRowProps = useMemo(() => ({
+        items: filteredDishes,
+        allDishes: dishes,
+        dishById,
+        allIngredients: ingredients,
+        summaries: dishSummaries,
+        onDelete: _onDelete,
+        onDuplicate: _onDuplicate,
+        isAdmin,
+    }), [filteredDishes, dishes, dishById, ingredients, dishSummaries, _onDelete, _onDuplicate, isAdmin]);
 
     const _scrollToTop = useCallback(() => {
         const scrolled = scrollVirtualListToTop(listRef.current);
@@ -265,12 +354,12 @@ export const DishesListScreen = () => {
         return () => {
             if (frameId !== undefined) window.cancelAnimationFrame(frameId);
         };
-    }, [_scrollToTop, activeStatus, activeTag, searchText, filteredDishes.length]);
+    }, [_scrollToTop, activeStatus, activeTag, searchText]);
 
     return <React.Fragment>
         <div style={{ height: "100%", display: "flex", flexDirection: "column", minHeight: 0 }}>
             <Stack.Compact>
-                <Input allowClear placeholder="Tìm kiếm" onChange={debounce((e) => setSearchText(e.target.value), 350)} />
+                <Input allowClear placeholder="Tìm kiếm" onChange={_onSearchChange} />
                 {isAdmin && <Button onClick={toggleAddModal.show} icon={<PlusOutlined />} />}
             </Stack.Compact>
             <div style={filterRowStyle}>
@@ -298,9 +387,10 @@ export const DishesListScreen = () => {
                     rowComponent={DishRow}
                     rowCount={filteredDishes.length}
                     rowHeight={rowHeight}
-                    onScroll={(event) => setShowScrollTop(event.currentTarget.scrollTop > 180)}
-                    onRowsRendered={(visibleRows) => setShowScrollTop(visibleRows.startIndex > 1)}
-                    rowProps={{ items: filteredDishes, allDishes: dishes, allIngredients: ingredients, summaries: dishSummaries, onDelete: _onDelete, onDuplicate: _onDuplicate, isAdmin }}
+                    overscanCount={1}
+                    onScroll={_onListScroll}
+                    onRowsRendered={_onRowsRendered}
+                    rowProps={dishRowProps}
                     style={{ height: "100%" }}
                 />
                 <VirtualListScrollTopButton listRef={listRef} rowCount={filteredDishes.length} visible={showScrollTop} />
@@ -320,6 +410,7 @@ export const DishesListScreen = () => {
 type DishesItemProps = {
     item: Dishes;
     allDishes: Dishes[];
+    dishById: Map<string, Dishes>;
     allIngredients: Ingredient[];
     summary: DishListItemSummary;
     onDelete: (item: Dishes) => void;
@@ -342,6 +433,12 @@ export const DishesItem: React.FunctionComponent<DishesItemProps> = (props) => {
     const navigate = useNavigate();
     const dishes = props.allDishes;
     const ingredients = props.allIngredients;
+    const expandedIngredients = useMemo(() => {
+        return toggleIngredientsOverview.value ? collectDishIngredients(props.item, props.dishById) : [];
+    }, [props.item, props.dishById, toggleIngredientsOverview.value]);
+    const expandedSteps = useMemo(() => {
+        return toggleStepsOverview.value ? collectDishSteps(props.item, props.dishById) : [];
+    }, [props.item, props.dishById, toggleStepsOverview.value]);
 
     const _onEdit = () => toggleEdit.show();
     const _onEditDuration = () => toggleEditDuration.show();
@@ -358,9 +455,9 @@ export const DishesItem: React.FunctionComponent<DishesItemProps> = (props) => {
         return Object.values(props.item.duration).some(e => e !== null);
     }
 
-    const _allIngredients = () => props.summary.ingredients;
+    const _allIngredients = () => expandedIngredients;
 
-    const _allSteps = () => props.summary.steps;
+    const _allSteps = () => expandedSteps;
 
     const toggleExport = useToggle();
     const toggleDeleteConfirm = useToggle();
@@ -393,14 +490,14 @@ export const DishesItem: React.FunctionComponent<DishesItemProps> = (props) => {
         message.success("Đã lưu thời gian món ăn");
     }
 
-    const allDishIngredients = props.summary.ingredients;
-    const allDishSteps = props.summary.steps;
+    const ingredientCount = props.summary.ingredientCount;
+    const stepCount = props.summary.stepCount;
     const requiredIngredientCount = props.summary.requiredIngredientCount;
     const optionalIngredientCount = props.summary.optionalIngredientCount;
     const includedDishCount = props.summary.includedDishCount;
     const hasDuration = _hasDuration();
-    const hasIngredients = allDishIngredients.length > 0;
-    const hasSteps = allDishSteps.length > 0;
+    const hasIngredients = ingredientCount > 0;
+    const hasSteps = stepCount > 0;
     const visibleTags = props.item.tags?.slice(0, 3) ?? [];
     const extraTagCount = Math.max(0, (props.item.tags?.length ?? 0) - visibleTags.length);
     const baseServings = props.item.baseServings ?? 2;
@@ -526,7 +623,7 @@ export const DishesItem: React.FunctionComponent<DishesItemProps> = (props) => {
                         <button type="button" onClick={hasIngredients ? toggleIngredientsOverview.show : undefined} style={{ border: "1px solid #f0f0f0", background: "#fafafa", borderRadius: 8, padding: "6px 7px", textAlign: "left", cursor: hasIngredients ? "pointer" : "default", minWidth: 0 }}>
                             <Typography.Text type="secondary" style={{ display: "block", fontSize: 11, lineHeight: "14px" }}>Nguyên liệu</Typography.Text>
                             <Typography.Text strong style={{ display: "block", fontSize: 13, lineHeight: "18px", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
-                                {hasIngredients ? `${allDishIngredients.length} nguyên liệu` : "Chưa có"}
+                                {hasIngredients ? `${ingredientCount} nguyên liệu` : "Chưa có"}
                             </Typography.Text>
                             {optionalIngredientCount > 0 && <Typography.Text type="secondary" style={{ display: "block", fontSize: 11, lineHeight: "14px" }}>{optionalIngredientCount} tùy chọn</Typography.Text>}
                         </button>
@@ -534,7 +631,7 @@ export const DishesItem: React.FunctionComponent<DishesItemProps> = (props) => {
                         <button type="button" onClick={hasSteps ? toggleStepsOverview.show : undefined} style={{ border: "1px solid #f0f0f0", background: "#fafafa", borderRadius: 8, padding: "6px 7px", textAlign: "left", cursor: hasSteps ? "pointer" : "default", minWidth: 0 }}>
                             <Typography.Text type="secondary" style={{ display: "block", fontSize: 11, lineHeight: "14px" }}>Quy trình</Typography.Text>
                             <Typography.Text strong style={{ display: "block", fontSize: 13, lineHeight: "18px", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
-                                {hasSteps ? `${allDishSteps.length} bước` : "Chưa có"}
+                                {hasSteps ? `${stepCount} bước` : "Chưa có"}
                             </Typography.Text>
                             {includedDishCount > 0 && <Typography.Text type="secondary" style={{ display: "block", fontSize: 11, lineHeight: "14px" }}>{includedDishCount} món kèm</Typography.Text>}
                         </button>

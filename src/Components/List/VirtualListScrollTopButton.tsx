@@ -13,20 +13,13 @@ type VirtualListScrollTopButtonProps = {
 
 const SCROLL_THRESHOLD = 180;
 
-const isScrollableElement = (element: HTMLElement): boolean => {
-    const style = window.getComputedStyle(element);
-    return element.scrollHeight > element.clientHeight && style.overflowY !== "visible";
-}
-
 const getScrollTargets = (element?: HTMLElement | null): HTMLElement[] => {
-    if (!element) return [];
-    const targets: HTMLElement[] = [element];
-    let parent = element.parentElement;
-    while (parent && parent !== document.body) {
-        if (isScrollableElement(parent)) targets.push(parent);
-        parent = parent.parentElement;
-    }
-    if (document.scrollingElement instanceof HTMLElement) targets.push(document.scrollingElement);
+    const appContent = document.getElementById("app-content");
+    const targets = [
+        element,
+        appContent instanceof HTMLElement ? appContent : null,
+        document.scrollingElement instanceof HTMLElement ? document.scrollingElement : null,
+    ].filter((target): target is HTMLElement => Boolean(target));
     return Array.from(new Set(targets));
 }
 
@@ -45,31 +38,37 @@ export const scrollVirtualListToTop = (list?: ListImperativeAPI | null): boolean
 }
 
 export const VirtualListScrollTopButton: React.FunctionComponent<VirtualListScrollTopButtonProps> = ({ listRef, rowCount, visible, style }) => {
-    const [domVisible, setDomVisible] = React.useState(false);
-    const shouldShow = Boolean(visible || domVisible);
+    const [elementVisible, setElementVisible] = React.useState(false);
+    const elementVisibleRef = React.useRef(false);
+    const shouldShow = Boolean(visible || elementVisible);
 
     React.useEffect(() => {
         if (rowCount <= 1) {
-            setDomVisible(false);
+            elementVisibleRef.current = false;
+            setElementVisible(false);
             return;
         }
 
-        let cleanup: (() => void) | undefined;
         let frameId: number | undefined;
         let retryCount = 0;
+        let cleanup: (() => void) | undefined;
+
+        const setNextVisible = (nextVisible: boolean) => {
+            if (elementVisibleRef.current === nextVisible) return;
+            elementVisibleRef.current = nextVisible;
+            setElementVisible(nextVisible);
+        };
 
         const bindScroll = () => {
             const element = listRef.current?.element;
-            if (!element) {
-                if (retryCount < 20) {
+            if (!element && retryCount < 60) {
                     retryCount += 1;
                     frameId = window.requestAnimationFrame(bindScroll);
-                }
                 return;
             }
 
             const targets = getScrollTargets(element);
-            const updateVisible = () => setDomVisible(targets.some(target => target.scrollTop > SCROLL_THRESHOLD));
+            const updateVisible = () => setNextVisible(targets.some(target => target.scrollTop > SCROLL_THRESHOLD));
             updateVisible();
             targets.forEach(target => target.addEventListener("scroll", updateVisible, { passive: true }));
             cleanup = () => targets.forEach(target => target.removeEventListener("scroll", updateVisible));
@@ -86,8 +85,9 @@ export const VirtualListScrollTopButton: React.FunctionComponent<VirtualListScro
 
     const _onClick = () => {
         const list = listRef.current;
-        if (!scrollVirtualListToTop(list)) return;
-        setDomVisible(false);
+        scrollVirtualListToTop(list);
+        elementVisibleRef.current = false;
+        setElementVisible(false);
     };
 
     return <Tooltip title="Lên đầu danh sách">
@@ -97,8 +97,9 @@ export const VirtualListScrollTopButton: React.FunctionComponent<VirtualListScro
             onClick={_onClick}
             style={{
                 position: "fixed",
-                right: 16,
-                bottom: 164,
+                left: "50%",
+                bottom: 96,
+                transform: "translateX(-50%)",
                 zIndex: 955,
                 width: 38,
                 height: 38,

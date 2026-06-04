@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 
 type UseToggleProps = {
     defaultValue?: boolean;
@@ -15,18 +15,18 @@ export const useToggle = (props?: UseToggleProps): UseToggle => {
     let defaultValue = props?.defaultValue || false;
     const [value, setValue] = useState(defaultValue);
 
-    const show = () => {
+    const show = useCallback(() => {
         setValue(true);
-    }
+    }, []);
 
-    const hide = () => {
+    const hide = useCallback(() => {
         setValue(false);
-    }
+    }, []);
 
-    return {
+    return useMemo(() => ({
         show,
         hide,
         value,
         toggle: setValue
-    }
+    }), [hide, show, value]);
 }

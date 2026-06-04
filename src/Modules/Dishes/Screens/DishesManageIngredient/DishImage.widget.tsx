@@ -2,7 +2,7 @@ import { PictureOutlined } from "@ant-design/icons";
 import { Image } from "@components/Image";
 import { Box } from "@components/Layout/Box";
 import { Typography } from "@components/Typography";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import NoodlesIcon from "../../../../../assets/icons/noodles.png";
 
 type DishImageWidgetProps = {
@@ -12,6 +12,7 @@ type DishImageWidgetProps = {
     borderRadius?: number;
     fallbackIconSize?: number;
     showBrokenLabel?: boolean;
+    loading?: "eager" | "lazy";
     style?: React.CSSProperties;
 }
 
@@ -22,16 +23,39 @@ export const DishImageWidget: React.FunctionComponent<DishImageWidgetProps> = ({
     borderRadius = 8,
     fallbackIconSize = 26,
     showBrokenLabel = true,
+    loading = "lazy",
     style,
 }) => {
+    const containerRef = useRef<HTMLDivElement | null>(null);
     const [failed, setFailed] = useState(false);
-    const hasImage = Boolean(src) && !failed;
+    const [canLoad, setCanLoad] = useState(loading === "eager");
+    const hasImage = Boolean(src) && canLoad && !failed;
 
     useEffect(() => {
         setFailed(false);
-    }, [src]);
+        setCanLoad(loading === "eager");
+    }, [loading, src]);
 
-    return <Box style={{
+    useEffect(() => {
+        if (!src || loading === "eager" || canLoad) return;
+        const element = containerRef.current;
+        if (!element) return;
+        if (!("IntersectionObserver" in window)) {
+            setCanLoad(true);
+            return;
+        }
+
+        const observer = new IntersectionObserver(entries => {
+            if (!entries.some(entry => entry.isIntersecting)) return;
+            setCanLoad(true);
+            observer.disconnect();
+        }, { root: null, rootMargin: "180px 0px", threshold: 0.01 });
+
+        observer.observe(element);
+        return () => observer.disconnect();
+    }, [canLoad, loading, src]);
+
+    return <Box ref={containerRef} style={{
         position: "relative",
         width,
         height,
@@ -48,6 +72,8 @@ export const DishImageWidget: React.FunctionComponent<DishImageWidgetProps> = ({
             ? <img
                 src={src}
                 alt=""
+                loading={loading}
+                decoding="async"
                 onError={() => setFailed(true)}
                 style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
             />

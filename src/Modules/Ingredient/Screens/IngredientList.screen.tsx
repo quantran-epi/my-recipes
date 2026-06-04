@@ -81,13 +81,12 @@ const getIngredientStockSnapshot = (
     inventoryItems: Record<string, IngredientInventory>,
 ): IngredientStockSnapshot => {
     const inventory = inventoryItems[ingredient.id];
-    const usableAmount = InventoryHelper.totalUsableAmount(inventory, ingredient);
-    const nearestExpiry = InventoryHelper.nearestExpiryBatch(inventory, ingredient);
+    const snapshot = InventoryHelper.inventorySnapshot(inventory, ingredient);
     return {
-        usableAmount,
-        hasInventory: Boolean(inventory),
-        nearestExpiry,
-        urgent: Boolean(nearestExpiry && nearestExpiry.daysLeft <= 3),
+        usableAmount: snapshot.usableAmount,
+        hasInventory: snapshot.hasInventory,
+        nearestExpiry: snapshot.nearestExpiry,
+        urgent: Boolean(snapshot.nearestExpiry && snapshot.nearestExpiry.daysLeft <= 3),
     };
 }
 
@@ -132,6 +131,24 @@ export const IngredientListScreen = () => {
     const { isAdmin } = useAdminMode();
     const normalizedSearch = searchText.trim().toLowerCase();
 
+    const _onSearchChange = useMemo(() => debounce((event: React.ChangeEvent<HTMLInputElement>) => {
+        setSearchText(event.target.value);
+    }, 350), []);
+
+    useEffect(() => () => _onSearchChange.cancel(), [_onSearchChange]);
+
+    const _setScrollTopVisible = useCallback((nextVisible: boolean) => {
+        setShowScrollTop(current => current === nextVisible ? current : nextVisible);
+    }, []);
+
+    const _onListScroll = useCallback((event: React.UIEvent<HTMLElement>) => {
+        _setScrollTopVisible(event.currentTarget.scrollTop > 180);
+    }, [_setScrollTopVisible]);
+
+    const _onRowsRendered = useCallback((visibleRows: { startIndex: number }) => {
+        _setScrollTopVisible(visibleRows.startIndex > 1);
+    }, [_setScrollTopVisible]);
+
     const stockSnapshots = useMemo(() => {
         return ingredients.reduce((result, ingredient) => {
             result[ingredient.id] = getIngredientStockSnapshot(ingredient, inventoryItems);
@@ -144,10 +161,10 @@ export const IngredientListScreen = () => {
     const toggleSuggester = useToggle({ defaultValue: false });
     const [suggestIds, setSuggestIds] = useState<string[]>([]);
 
-    const _onSuggest = (ids: string[]) => {
+    const _onSuggest = useCallback((ids: string[]) => {
         setSuggestIds(ids);
         toggleSuggester.show();
-    };
+    }, [toggleSuggester]);
 
     const availableCategories = useMemo(() => {
         const categorySet = new Set(ingredients.map(item => item.category).filter(Boolean) as string[]);
@@ -203,9 +220,17 @@ export const IngredientListScreen = () => {
         toggleAddModal.show();
     }
 
-    const _onDelete = (item) => {
+    const _onDelete = useCallback((item) => {
         dispatch(removeIngredient([item.id]));
-    }
+    }, [dispatch]);
+
+    const ingredientRowProps = useMemo(() => ({
+        items: filteredIngredients,
+        stockSnapshots,
+        onDelete: _onDelete,
+        isAdmin,
+        onSuggest: _onSuggest,
+    }), [filteredIngredients, stockSnapshots, _onDelete, isAdmin, _onSuggest]);
 
     const _scrollToTop = useCallback(() => {
         const scrolled = scrollVirtualListToTop(listRef.current);
@@ -226,12 +251,12 @@ export const IngredientListScreen = () => {
         return () => {
             if (frameId !== undefined) window.cancelAnimationFrame(frameId);
         };
-    }, [_scrollToTop, activeStockFilter, activeCategory, searchText, filteredIngredients.length]);
+    }, [_scrollToTop, activeStockFilter, activeCategory, searchText]);
 
     return <React.Fragment>
         <div style={{ height: "100%", display: "flex", flexDirection: "column", minHeight: 0 }}>
             <Stack.Compact>
-                <Input allowClear placeholder="Tìm kiếm" onChange={debounce((e) => setSearchText(e.target.value), 350)} />
+                <Input allowClear placeholder="Tìm kiếm" onChange={_onSearchChange} />
                 {isAdmin && <Button onClick={_onAdd} icon={<PlusOutlined />} />}
                 <Tooltip title="Dùng trước hết hạn">
                     <Button onClick={toggleUseFirst.show} icon={<FireOutlined style={{ color: "#ff4d4f" }} />} />
@@ -265,9 +290,9 @@ export const IngredientListScreen = () => {
                     rowComponent={IngredientRow}
                     rowCount={filteredIngredients.length}
                     rowHeight={rowHeight}
-                    onScroll={(event) => setShowScrollTop(event.currentTarget.scrollTop > 180)}
-                    onRowsRendered={(visibleRows) => setShowScrollTop(visibleRows.startIndex > 1)}
-                    rowProps={{ items: filteredIngredients, stockSnapshots, onDelete: _onDelete, isAdmin, onSuggest: _onSuggest }}
+                    onScroll={_onListScroll}
+                    onRowsRendered={_onRowsRendered}
+                    rowProps={ingredientRowProps}
                     style={{ height: "100%" }}
                 />
                 <VirtualListScrollTopButton listRef={listRef} rowCount={filteredIngredients.length} visible={showScrollTop} />

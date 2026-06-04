@@ -56,23 +56,50 @@ const sidebarTransitionOverlayStyle: React.CSSProperties = {
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
-    background: "rgba(255,255,255,0.86)",
-    backdropFilter: "blur(2px)",
+    background: "linear-gradient(180deg, rgba(255,255,255,0.9), rgba(244,248,255,0.86))",
+    backdropFilter: "blur(6px)",
     pointerEvents: "auto",
 };
 
 const sidebarTransitionContentStyle: React.CSSProperties = {
     display: "flex",
     alignItems: "center",
-    gap: 8,
-    padding: "8px 12px",
-    borderRadius: 999,
-    border: "1px solid #e6f4ff",
-    background: "#fff",
-    boxShadow: "0 6px 20px rgba(0,0,0,0.08)",
-    color: "#0958d9",
+    gap: 12,
+    minWidth: 190,
+    padding: "13px 16px",
+    borderRadius: 18,
+    border: "1px solid rgba(22,119,255,0.14)",
+    background: "rgba(255,255,255,0.96)",
+    boxShadow: "0 18px 42px rgba(15,35,80,0.14)",
+    color: "#12355f",
+};
+
+const sidebarTransitionIconStyle: React.CSSProperties = {
+    width: 36,
+    height: 36,
+    borderRadius: 14,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    background: "linear-gradient(135deg, #e6f4ff, #f6ffed)",
+    color: "#1677ff",
+    fontSize: 18,
+    boxShadow: "inset 0 0 0 1px rgba(22,119,255,0.08)",
+};
+
+const sidebarTransitionTextStyle: React.CSSProperties = {
+    display: "block",
+    color: "#102a43",
     fontSize: 13,
-    fontWeight: 600,
+    fontWeight: 700,
+    lineHeight: "18px",
+};
+
+const sidebarTransitionHintStyle: React.CSSProperties = {
+    display: "block",
+    color: "#6b7c93",
+    fontSize: 11,
+    lineHeight: "15px",
 };
 
 export const MasterPage = () => {
@@ -307,8 +334,11 @@ const SidebarDrawer = () => {
             {routeLoading && (
                 <div style={sidebarTransitionOverlayStyle}>
                     <div style={sidebarTransitionContentStyle}>
-                        <LoadingOutlined />
-                        <span>Đang mở...</span>
+                        <div style={sidebarTransitionIconStyle}><LoadingOutlined /></div>
+                        <div>
+                            <span style={sidebarTransitionTextStyle}>Đang mở trang</span>
+                            <span style={sidebarTransitionHintStyle}>Chuẩn bị dữ liệu hiển thị</span>
+                        </div>
                     </div>
                 </div>
             )}
@@ -661,6 +691,63 @@ const BottomTabNavigator = () => {
     const location = useLocation();
     const theme = useTheme();
     const toggleSuggester = useToggle();
+    const [routeLoading, setRouteLoading] = useState(false);
+    const loadingTimerRef = React.useRef<number | null>(null);
+    const loadingFrameRef = React.useRef<number | null>(null);
+    const loadingFallbackTimerRef = React.useRef<number | null>(null);
+    const pendingRouteRef = React.useRef<string | null>(null);
+
+    const clearLoadingTimer = () => {
+        if (loadingTimerRef.current !== null) {
+            window.clearTimeout(loadingTimerRef.current);
+            loadingTimerRef.current = null;
+        }
+    };
+
+    const clearLoadingFrame = () => {
+        if (loadingFrameRef.current !== null) {
+            window.cancelAnimationFrame(loadingFrameRef.current);
+            loadingFrameRef.current = null;
+        }
+    };
+
+    const clearLoadingFallbackTimer = () => {
+        if (loadingFallbackTimerRef.current !== null) {
+            window.clearTimeout(loadingFallbackTimerRef.current);
+            loadingFallbackTimerRef.current = null;
+        }
+    };
+
+    const finishRouteLoading = () => {
+        pendingRouteRef.current = null;
+        clearLoadingTimer();
+        clearLoadingFrame();
+        clearLoadingFallbackTimer();
+        setRouteLoading(false);
+    };
+
+    React.useEffect(() => {
+        return () => {
+            clearLoadingTimer();
+            clearLoadingFrame();
+            clearLoadingFallbackTimer();
+        };
+    }, []);
+
+    React.useEffect(() => {
+        if (!routeLoading) return;
+        const pendingRoute = pendingRouteRef.current;
+        if (pendingRoute && location.pathname !== pendingRoute) return;
+
+        clearLoadingTimer();
+        clearLoadingFrame();
+        loadingFrameRef.current = window.requestAnimationFrame(() => {
+            loadingFrameRef.current = window.requestAnimationFrame(() => {
+                loadingFrameRef.current = null;
+                loadingTimerRef.current = window.setTimeout(finishRouteLoading, 80);
+            });
+        });
+    }, [location.pathname, routeLoading]);
 
     const _buttonStyles = (): React.CSSProperties => {
         return {
@@ -698,11 +785,28 @@ const BottomTabNavigator = () => {
 
     const onNavigate = (href: string) => {
         if (location.pathname === href) return;
+        clearLoadingTimer();
+        clearLoadingFrame();
+        clearLoadingFallbackTimer();
+        pendingRouteRef.current = href;
+        setRouteLoading(true);
         React.startTransition(() => navigate(href));
+        loadingFallbackTimerRef.current = window.setTimeout(finishRouteLoading, 1200);
     }
 
     return <>
-        <Stack justify="space-evenly" style={_containerStyles()}>
+        {routeLoading && (
+            <div style={sidebarTransitionOverlayStyle}>
+                <div style={sidebarTransitionContentStyle}>
+                    <div style={sidebarTransitionIconStyle}><LoadingOutlined /></div>
+                    <div>
+                        <span style={sidebarTransitionTextStyle}>Đang mở trang</span>
+                        <span style={sidebarTransitionHintStyle}>Chuẩn bị dữ liệu hiển thị</span>
+                    </div>
+                </div>
+            </div>
+        )}
+	        <Stack justify="space-evenly" style={_containerStyles()}>
             <Button type="text" style={_buttonStyles()} icon={<Image src={DishesIcon} preview={false} width={28} style={{ marginLeft: 2 }} />} onClick={() => onNavigate(RootRoutes.AuthorizedRoutes.DishesRoutes.List())}>
                 <Typography.Text style={_textStyles(RootRoutes.AuthorizedRoutes.DishesRoutes.List())}>Món ăn</Typography.Text>
             </Button>

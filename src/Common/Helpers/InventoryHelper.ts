@@ -21,6 +21,12 @@ const PRESERVATION_SHELF_LIFE_DAYS: Record<IngredientShelfLife, Record<Ingredien
 
 type ExpiryContext = Ingredient | IngredientShelfLife | undefined;
 
+type InventorySnapshot = {
+    usableAmount: number;
+    hasInventory: boolean;
+    nearestExpiry: { batch: InventoryBatch; daysLeft: number } | null;
+};
+
 const getShelfLife = (context: ExpiryContext): IngredientShelfLife | undefined => {
     return typeof context === "string" ? context : context?.shelfLife;
 };
@@ -62,21 +68,45 @@ export const InventoryHelper = {
 
     /** Total amount from batches that are not expired. Batches without expiry data are treated as usable. */
     totalUsableAmount(inv: IngredientInventory | undefined, ingredient?: Ingredient): number {
-        if (!inv) return 0;
+        return InventoryHelper.inventorySnapshot(inv, ingredient).usableAmount;
+    },
+
+    /** Single-pass stock snapshot for list/detail screens that need usable amount and nearest expiry together. */
+    inventorySnapshot(inv: IngredientInventory | undefined, ingredient?: Ingredient): InventorySnapshot {
+        if (!inv) return { usableAmount: 0, hasInventory: false, nearestExpiry: null };
         if (!inv.batches) {
             const legacyAmount = (inv as any).amount ?? 0;
             const legacyUnit = inv.unit ?? IngredientUnitHelper.getBaseUnit(ingredient);
-            return roundInventoryAmount(IngredientUnitHelper.toBaseAmount(ingredient, legacyAmount, legacyUnit, IngredientUnitHelper.getBaseUnit(ingredient, [legacyUnit])) ?? legacyAmount);
+            const baseUnit = IngredientUnitHelper.getBaseUnit(ingredient, [legacyUnit]);
+            const usableAmount = roundInventoryAmount(IngredientUnitHelper.toBaseAmount(ingredient, legacyAmount, legacyUnit, baseUnit) ?? legacyAmount);
+            return { usableAmount, hasInventory: true, nearestExpiry: null };
         }
 
         const baseUnit = IngredientUnitHelper.getBaseUnit(ingredient, [inv.unit].filter(Boolean) as any);
-        const total = inv.batches.reduce((sum, batch) => {
-            if (InventoryHelper.isBatchExpired(batch, ingredient)) return sum;
+        const today = dayjs().startOf("day");
+        let total = 0;
+        let nearestExpiry: InventorySnapshot["nearestExpiry"] = null;
+
+        for (const batch of inv.batches) {
+            const expiry = InventoryHelper.batchExpiry(batch, ingredient);
+            const daysLeft = expiry ? expiry.startOf("day").diff(today, "day") : null;
+            if (daysLeft !== null && daysLeft < 0) continue;
+
             const unit = IngredientUnitHelper.getBatchUnit(inv, batch, ingredient);
             const converted = IngredientUnitHelper.toBaseAmount(ingredient, batch.amount, unit, baseUnit);
-            return sum + (converted ?? batch.amount);
-        }, 0);
-        return roundInventoryAmount(total);
+            total += converted ?? batch.amount;
+
+            if (batch.amount <= 0 || daysLeft === null) continue;
+            if (nearestExpiry === null || daysLeft < nearestExpiry.daysLeft) {
+                nearestExpiry = { batch, daysLeft };
+            }
+        }
+
+        return {
+            usableAmount: roundInventoryAmount(total),
+            hasInventory: true,
+            nearestExpiry,
+        };
     },
 
     /** Amount available for coverage checks. Always-available ingredients satisfy their required amount. */
@@ -150,15 +180,16 @@ export const InventoryHelper = {
     nearestExpiryBatch(inv: IngredientInventory | undefined, context: ExpiryContext): {
         batch: InventoryBatch; daysLeft: number
     } | null {
-        if (!inv) return null;
-        if (!inv.batches) return null; // old persisted data guard
+        if (!inv?.batches) return null;
         let best: { batch: InventoryBatch; daysLeft: number } | null = null;
+        const today = dayjs().startOf("day");
         for (const batch of inv.batches) {
             if (batch.amount <= 0) continue;
-            const days = InventoryHelper.daysUntilBatchExpiry(batch, context);
-            if (days === null || days < 0) continue;
-            if (best === null || days < best.daysLeft) {
-                best = { batch, daysLeft: days };
+            const expiry = InventoryHelper.batchExpiry(batch, context);
+            const daysLeft = expiry ? expiry.startOf("day").diff(today, "day") : null;
+            if (daysLeft === null || daysLeft < 0) continue;
+            if (best === null || daysLeft < best.daysLeft) {
+                best = { batch, daysLeft };
             }
         }
         return best;

@@ -70,27 +70,27 @@ export const DishSuggesterScreen: React.FC<DishSuggesterScreenProps> = ({ open, 
     const [fridgeSearchIds, setFridgeSearchIds] = useState<string[]>([]);
     const [durationSearchIds, setDurationSearchIds] = useState<string[]>([]);
 
-    const inventoryIngredientIds = useMemo(() =>
-        Object.entries(inventory)
+    const inventoryIngredientIds = useMemo(() => {
+        if (!open) return [];
+        return Object.entries(inventory)
             .filter(([id, inv]) => {
                 const ingredient = allIngredients.find(i => i.id === id);
                 return !InventoryHelper.isAlwaysAvailable(ingredient)
                     && InventoryHelper.totalUsableAmount(inv as any, ingredient) > 0;
             })
-            .map(([id]) => id),
-        [inventory, allIngredients]
-    );
+            .map(([id]) => id);
+    }, [open, inventory, allIngredients]);
 
-    const ingredientScored = useMemo(() =>
-        DishScorer.score(dishes, selectedIngredientIds, dishes),
-        [dishes, selectedIngredientIds]
-    );
+    const ingredientScored = useMemo(() => {
+        if (!open || mode !== "ingredients" || step !== 1) return [];
+        return DishScorer.score(dishes, selectedIngredientIds, dishes);
+    }, [open, mode, step, dishes, selectedIngredientIds]);
     const ingredientGroups = useMemo(() => DishScorer.group(ingredientScored), [ingredientScored]);
 
-    const inventoryScored = useMemo(() =>
-        DishScorer.scoreWithInventory(dishes, inventory as any, dishes, allIngredients),
-        [dishes, inventory, allIngredients]
-    );
+    const inventoryScored = useMemo(() => {
+        if (!open || mode !== "inventory") return [];
+        return DishScorer.scoreWithInventory(dishes, inventory as any, dishes, allIngredients);
+    }, [open, mode, dishes, inventory, allIngredients]);
     const inventoryGroups = useMemo(() => DishScorer.group(inventoryScored), [inventoryScored]);
 
     const filteredInventoryGroups = useMemo(() => {
@@ -107,10 +107,11 @@ export const DishSuggesterScreen: React.FC<DishSuggesterScreenProps> = ({ open, 
     }, [inventoryGroups, fridgeSearchIds]);
 
     const durationFiltered = useMemo(() => {
+        if (!open || mode !== "duration") return [];
         return dishes
             .filter(d => { const t = totalDurationMins(d); return t > 0 && t <= maxMinutes; })
             .sort((a, b) => totalDurationMins(a) - totalDurationMins(b));
-    }, [dishes, maxMinutes]);
+    }, [open, mode, dishes, maxMinutes]);
 
     const filteredDurationDishes = useMemo(() => {
         if (durationSearchIds.length === 0) return durationFiltered;
