@@ -14,7 +14,8 @@ import { Tag } from "@components/Tag";
 import { Tooltip } from "@components/Tootip";
 import { Typography } from "@components/Typography";
 import { useScreenTitle, useToggle, useAdminMode } from "@hooks";
-import { DISH_TAGS, DishDuration, Dishes } from "@store/Models/Dishes";
+import { DISH_TAGS, DishDuration, Dishes, DishesIngredientAmount, DishesStep } from "@store/Models/Dishes";
+import { Ingredient } from "@store/Models/Ingredient";
 import { DishesDurationEditParams, duplicateDish, removeDishes, updateDishDuration } from "@store/Reducers/DishesReducer";
 import { RootState } from "@store/Store";
 import { RootRoutes } from "@routing/RootRoutes";
@@ -37,7 +38,23 @@ import { CookingSessionWidget } from "./CookingSession.widget";
 import moment from "moment";
 import 'moment/locale/vi';
 
-type DishRowProps = { dishes: Dishes[]; onDelete: (item: Dishes) => void; onDuplicate: (item: Dishes) => void; isAdmin: boolean; };
+type DishListItemSummary = {
+    ingredients: DishesIngredientAmount[];
+    steps: DishesStep[];
+    requiredIngredientCount: number;
+    optionalIngredientCount: number;
+    includedDishCount: number;
+};
+
+type DishRowProps = {
+    items: Dishes[];
+    allDishes: Dishes[];
+    allIngredients: Ingredient[];
+    summaries: Record<string, DishListItemSummary>;
+    onDelete: (item: Dishes) => void;
+    onDuplicate: (item: Dishes) => void;
+    isAdmin: boolean;
+};
 
 type DishStatusFilter = "all" | "ready" | "needs_update" | "has_ingredients" | "has_steps";
 
@@ -85,13 +102,76 @@ const dishMatchesStatus = (dish: Dishes, status: DishStatusFilter): boolean => {
         || (status === "has_steps" && (dish.steps?.length ?? 0) > 0);
 }
 
-const DishRow = ({ index, style, dishes, onDelete, onDuplicate, isAdmin }: RowComponentProps<DishRowProps>) => {
-    if (!dishes[index]) return null;
-    return <div style={style}><DishesItem item={dishes[index]} onDelete={onDelete} onDuplicate={onDuplicate} isAdmin={isAdmin} /></div>;
+const EMPTY_DISH_SUMMARY: DishListItemSummary = {
+    ingredients: [],
+    steps: [],
+    requiredIngredientCount: 0,
+    optionalIngredientCount: 0,
+    includedDishCount: 0,
+};
+
+const buildDishListSummaries = (dishes: Dishes[]): Record<string, DishListItemSummary> => {
+    const dishById = new Map(dishes.map(dish => [dish.id, dish]));
+    const ingredientCache = new Map<string, DishesIngredientAmount[]>();
+    const stepCache = new Map<string, DishesStep[]>();
+
+    const collectIngredients = (dish: Dishes, visiting = new Set<string>()): DishesIngredientAmount[] => {
+        const cached = ingredientCache.get(dish.id);
+        if (cached) return cached;
+        if (visiting.has(dish.id)) return [];
+
+        const nextVisiting = new Set(visiting);
+        nextVisiting.add(dish.id);
+        const own = dish.ingredients ?? [];
+        const included = (dish.includeDishes ?? []).flatMap(id => {
+            const found = dishById.get(id);
+            return found ? collectIngredients(found, nextVisiting) : [];
+        });
+        const result = [...own, ...included];
+        ingredientCache.set(dish.id, result);
+        return result;
+    };
+
+    const collectSteps = (dish: Dishes, visiting = new Set<string>()): DishesStep[] => {
+        const cached = stepCache.get(dish.id);
+        if (cached) return cached;
+        if (visiting.has(dish.id)) return [];
+
+        const nextVisiting = new Set(visiting);
+        nextVisiting.add(dish.id);
+        const included = (dish.includeDishes ?? []).flatMap(id => {
+            const found = dishById.get(id);
+            return found ? collectSteps(found, nextVisiting) : [];
+        });
+        const result = [...included, ...(dish.steps ?? [])];
+        stepCache.set(dish.id, result);
+        return result;
+    };
+
+    return dishes.reduce((result, dish) => {
+        const ingredients = collectIngredients(dish);
+        const steps = collectSteps(dish);
+        const requiredIngredientCount = ingredients.filter(item => item.required !== false).length;
+        result[dish.id] = {
+            ingredients,
+            steps,
+            requiredIngredientCount,
+            optionalIngredientCount: ingredients.length - requiredIngredientCount,
+            includedDishCount: (dish.includeDishes ?? []).filter(id => dishById.has(id)).length,
+        };
+        return result;
+    }, {} as Record<string, DishListItemSummary>);
+};
+
+const DishRow = ({ index, style, items, allDishes, allIngredients, summaries, onDelete, onDuplicate, isAdmin }: RowComponentProps<DishRowProps>) => {
+    if (!items[index]) return null;
+    const item = items[index];
+    return <div style={style}><DishesItem item={item} allDishes={allDishes} allIngredients={allIngredients} summary={summaries[item.id] ?? EMPTY_DISH_SUMMARY} onDelete={onDelete} onDuplicate={onDuplicate} isAdmin={isAdmin} /></div>;
 };
 
 export const DishesListScreen = () => {
     const dishes = useSelector((state: RootState) => state.shared.dishes.dishes);
+    const ingredients = useSelector((state: RootState) => state.shared.ingredient.ingredients);
     const toggleAddModal = useToggle({ defaultValue: false });
     const [searchText, setSearchText] = useState<string>("");
     const [activeTag, setActiveTag] = useState<string | null>(null);
@@ -101,6 +181,8 @@ export const DishesListScreen = () => {
     const rowHeight = useDynamicRowHeight({ defaultRowHeight: 204, key: searchText + (activeTag ?? "") + activeStatus });
     const { isAdmin } = useAdminMode();
     const normalizedSearch = searchText.trim().toLowerCase();
+
+    const dishSummaries = useMemo(() => buildDishListSummaries(dishes), [dishes]);
 
     const allTags = useMemo<string[]>(() => {
         const tagSet = new Set<string>();
@@ -192,7 +274,7 @@ export const DishesListScreen = () => {
                     rowComponent={DishRow}
                     rowCount={filteredDishes.length}
                     rowHeight={rowHeight}
-                    rowProps={{ dishes: filteredDishes, onDelete: _onDelete, onDuplicate: _onDuplicate, isAdmin }}
+                    rowProps={{ items: filteredDishes, allDishes: dishes, allIngredients: ingredients, summaries: dishSummaries, onDelete: _onDelete, onDuplicate: _onDuplicate, isAdmin }}
                     style={{ height: "100%" }}
                 />
             </div>
@@ -210,6 +292,9 @@ export const DishesListScreen = () => {
 
 type DishesItemProps = {
     item: Dishes;
+    allDishes: Dishes[];
+    allIngredients: Ingredient[];
+    summary: DishListItemSummary;
     onDelete: (item: Dishes) => void;
     onDuplicate: (item: Dishes) => void;
     isAdmin: boolean;
@@ -224,12 +309,12 @@ export const DishesItem: React.FunctionComponent<DishesItemProps> = (props) => {
     const toggleStepsOverview = useToggle();
     const toggleDishesDetail = useToggle();
     const toggleCooking = useToggle();
-    const dishes = useSelector((state: RootState) => state.shared.dishes.dishes);
-    const ingredients = useSelector((state: RootState) => state.shared.ingredient.ingredients);
     const toggleEditDuration = useToggle();
     const message = useMessage();
     const dispatch = useDispatch();
     const navigate = useNavigate();
+    const dishes = props.allDishes;
+    const ingredients = props.allIngredients;
 
     const _onEdit = () => toggleEdit.show();
     const _onEditDuration = () => toggleEditDuration.show();
@@ -246,32 +331,9 @@ export const DishesItem: React.FunctionComponent<DishesItemProps> = (props) => {
         return Object.values(props.item.duration).some(e => e !== null);
     }
 
-    const _allIngredients = (): typeof props.item.ingredients => {
-        const collect = (dish: Dishes, visited = new Set<string>()): typeof props.item.ingredients => {
-            if (visited.has(dish.id)) return [];
-            visited.add(dish.id);
-            const own = dish.ingredients ?? [];
-            const fromIncluded = (dish.includeDishes ?? []).flatMap(id => {
-                const found = dishes.find(d => d.id === id);
-                return found ? collect(found, visited) : [];
-            });
-            return [...own, ...fromIncluded];
-        };
-        return collect(props.item);
-    };
+    const _allIngredients = () => props.summary.ingredients;
 
-    const _allSteps = (): typeof props.item.steps => {
-        const collect = (dish: Dishes, visited = new Set<string>()): typeof props.item.steps => {
-            if (visited.has(dish.id)) return [];
-            visited.add(dish.id);
-            const fromIncluded = (dish.includeDishes ?? []).flatMap(id => {
-                const found = dishes.find(d => d.id === id);
-                return found ? collect(found, visited) : [];
-            });
-            return [...fromIncluded, ...(dish.steps ?? [])];
-        };
-        return collect(props.item);
-    };
+    const _allSteps = () => props.summary.steps;
 
     const toggleExport = useToggle();
     const toggleDeleteConfirm = useToggle();
@@ -304,11 +366,11 @@ export const DishesItem: React.FunctionComponent<DishesItemProps> = (props) => {
         message.success("Đã lưu thời gian món ăn");
     }
 
-    const allDishIngredients = _allIngredients();
-    const allDishSteps = _allSteps();
-    const requiredIngredientCount = allDishIngredients.filter(item => item.required !== false).length;
-    const optionalIngredientCount = allDishIngredients.length - requiredIngredientCount;
-    const includedDishCount = props.item.includeDishes.filter(id => dishes.find(e => e.id === id)).length;
+    const allDishIngredients = props.summary.ingredients;
+    const allDishSteps = props.summary.steps;
+    const requiredIngredientCount = props.summary.requiredIngredientCount;
+    const optionalIngredientCount = props.summary.optionalIngredientCount;
+    const includedDishCount = props.summary.includedDishCount;
     const hasDuration = _hasDuration();
     const hasIngredients = allDishIngredients.length > 0;
     const hasSteps = allDishSteps.length > 0;
@@ -443,7 +505,7 @@ export const DishesItem: React.FunctionComponent<DishesItemProps> = (props) => {
                 </div>
             </Box>
         </div>
-        <Modal style={{ top: 50 }} open={toggleDishesDetail.value} title={
+        {toggleDishesDetail.value && <Modal style={{ top: 50 }} open={toggleDishesDetail.value} title={
             <Space>
                 <Image src={NoodlesIcon} preview={false} width={24} style={{ marginBottom: 3 }} />
                 {props.item.name}
@@ -455,16 +517,16 @@ export const DishesItem: React.FunctionComponent<DishesItemProps> = (props) => {
             <Box style={{ maxHeight: 550, overflowY: "auto" }}>
                 <DishesDetailWidget dish={props.item} />
             </Box>
-        </Modal>
-        <Modal open={toggleEdit.value} title={
+        </Modal>}
+        {toggleEdit.value && <Modal open={toggleEdit.value} title={
             <Space>
                 <Image src={NoodlesIcon} preview={false} width={24} style={{ marginBottom: 3 }} />
                 Chỉnh sửa món ăn
             </Space>
         } destroyOnClose={true} onCancel={toggleEdit.hide} footer={null}>
             <DishesEditWidget item={props.item} onDone={() => toggleEdit.hide()} />
-        </Modal>
-        <Modal open={toggleIngredientsOverview.value} title={
+        </Modal>}
+        {toggleIngredientsOverview.value && <Modal open={toggleIngredientsOverview.value} title={
             <Space>
                 <Image src={VegetablesIcon} preview={false} width={24} style={{ marginBottom: 3 }} />
                 Bao gồm các nguyên liệu
@@ -482,8 +544,8 @@ export const DishesItem: React.FunctionComponent<DishesItemProps> = (props) => {
                         </Space>
                     </List.Item>} />
             </Box>
-        </Modal>
-        <Modal open={toggleStepsOverview.value} title={<Space>
+        </Modal>}
+        {toggleStepsOverview.value && <Modal open={toggleStepsOverview.value} title={<Space>
             <Image src={StepsIcon} preview={false} width={18} style={{ marginBottom: 3 }} />
             Bao gồm các bước
         </Space>} destroyOnClose={true} onCancel={toggleStepsOverview.hide} footer={null}>
@@ -501,8 +563,8 @@ export const DishesItem: React.FunctionComponent<DishesItemProps> = (props) => {
                         </Stack>
                     </List.Item>} />
             </Box>
-        </Modal>
-        <Modal open={toggleEditDuration.value} title={<Stack gap={0} direction="column" align="flex-start">
+        </Modal>}
+        {toggleEditDuration.value && <Modal open={toggleEditDuration.value} title={<Stack gap={0} direction="column" align="flex-start">
             <Space>
                 <Image src={Clock2Icon} preview={false} width={24} style={{ marginBottom: 3 }} />
                 <Typography.Title level={5} style={{ margin: 0 }}>Thời lượng</Typography.Title>
@@ -510,9 +572,9 @@ export const DishesItem: React.FunctionComponent<DishesItemProps> = (props) => {
             <Typography.Text type="secondary">{props.item.name}</Typography.Text>
         </Stack>} destroyOnClose={true} onCancel={toggleEditDuration.hide} footer={null}>
             <DishDurationWidget dish={props.item} onSave={_onSaveDuration} />
-        </Modal>
-        <DishesExportWidget dish={props.item} allIngredients={ingredients} open={toggleExport.value} onClose={toggleExport.hide} />
-        <Modal
+        </Modal>}
+        {toggleExport.value && <DishesExportWidget dish={props.item} allIngredients={ingredients} open={toggleExport.value} onClose={toggleExport.hide} />}
+        {toggleDeleteConfirm.value && <Modal
             open={toggleDeleteConfirm.value}
             title={<Space><DeleteOutlined style={{ color: "red" }} />Xác nhận xóa</Space>}
             onCancel={toggleDeleteConfirm.hide}
@@ -523,8 +585,8 @@ export const DishesItem: React.FunctionComponent<DishesItemProps> = (props) => {
             destroyOnClose
         >
             Bạn có chắc muốn xóa món <b>{props.item.name}</b> không? Hành động này không thể hoàn tác.
-        </Modal>
-        <Modal
+        </Modal>}
+        {toggleCooking.value && <Modal
             open={toggleCooking.value}
             title={<Space><FireOutlined style={{ color: "#fa8c16" }} />{props.item.name} — Bắt đầu nấu</Space>}
             destroyOnClose
@@ -532,6 +594,6 @@ export const DishesItem: React.FunctionComponent<DishesItemProps> = (props) => {
             footer={null}
         >
             <CookingSessionWidget dish={props.item} onDone={toggleCooking.hide} />
-        </Modal>
+        </Modal>}
     </React.Fragment>
 }

@@ -84,7 +84,9 @@ type DishesExportWidgetProps = {
 export const DishesExportWidget: React.FC<DishesExportWidgetProps> = ({ dish, allIngredients, open, onClose }) => {
     const message = useMessage();
     const allDishes = useSelector((state: RootState) => state.shared.dishes.dishes);
-    const text = formatDishToText(dish, allIngredients, allDishes);
+    const text = React.useMemo(() => open ? formatDishToText(dish, allIngredients, allDishes) : "", [open, dish, allIngredients, allDishes]);
+
+    if (!open) return null;
 
     const _onCopy = () => {
         navigator.clipboard.writeText(text).then(() => {

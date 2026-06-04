@@ -13,7 +13,6 @@ import { InventoryHelper } from "@common/Helpers/InventoryHelper";
 import { IngredientUnitHelper } from "@common/Helpers/IngredientUnitHelper";
 import { Ingredient, IngredientInventory, INGREDIENT_CATEGORIES, INGREDIENT_PRESERVATION_OPTIONS, INGREDIENT_SHELF_LIFE_OPTIONS } from "@store/Models/Ingredient";
 import { removeIngredient } from "@store/Reducers/IngredientReducer";
-import { selectInventoryById } from "@store/Selectors";
 import { RootState } from "@store/Store";
 import { debounce, sortBy } from "lodash";
 import React, { useMemo, useState } from "react";
@@ -25,7 +24,10 @@ import { IngredientEditWidget } from "./IngredientEdit.widget";
 import { IngredientInventoryWidget } from "./IngredientInventory.widget";
 import { UseFirstWidget } from "./UseFirst.widget";
 import { IngredientStatsWidget } from "./IngredientStats.widget";
-import { DishSuggesterScreen } from "@modules/DishSuggester/Screens/DishSuggester.screen";
+
+const LazyDishSuggesterScreen = React.lazy(() => import("@modules/DishSuggester/Screens/DishSuggester.screen").then(module => ({
+    default: module.DishSuggesterScreen,
+})));
 
 type IngredientStockFilter = "all" | "in_stock" | "need_stock" | "low_stock" | "urgent" | "always_available";
 
@@ -69,6 +71,8 @@ const ingredientMatchesCategory = (ingredient: Ingredient, category: string | nu
 type IngredientStockSnapshot = {
     usableAmount: number;
     urgent: boolean;
+    hasInventory: boolean;
+    nearestExpiry: ReturnType<typeof InventoryHelper.nearestExpiryBatch>;
 }
 
 const getIngredientStockSnapshot = (
@@ -80,6 +84,8 @@ const getIngredientStockSnapshot = (
     const nearestExpiry = InventoryHelper.nearestExpiryBatch(inventory, ingredient);
     return {
         usableAmount,
+        hasInventory: Boolean(inventory),
+        nearestExpiry,
         urgent: Boolean(nearestExpiry && nearestExpiry.daysLeft <= 3),
     };
 }
@@ -97,11 +103,17 @@ const ingredientMatchesStock = (
         || (stockFilter === "always_available" && InventoryHelper.isAlwaysAvailable(ingredient));
 }
 
-type IngredientRowProps = { items: Ingredient[]; onDelete: (item: Ingredient) => void; isAdmin: boolean; onSuggest: (ids: string[]) => void; };
+type IngredientRowProps = {
+    items: Ingredient[];
+    stockSnapshots: Record<string, IngredientStockSnapshot>;
+    onDelete: (item: Ingredient) => void;
+    isAdmin: boolean;
+    onSuggest: (ids: string[]) => void;
+};
 
-const IngredientRow = ({ index, style, items, onDelete, isAdmin, onSuggest }: RowComponentProps<IngredientRowProps>) => {
+const IngredientRow = ({ index, style, items, stockSnapshots, onDelete, isAdmin, onSuggest }: RowComponentProps<IngredientRowProps>) => {
     if (!items[index]) return null;
-    return <div style={style}><IngredientItem item={items[index]} onDelete={onDelete} isAdmin={isAdmin} onSuggest={onSuggest} /></div>;
+    return <div style={style}><IngredientItem item={items[index]} stockSnapshot={stockSnapshots[items[index].id]} onDelete={onDelete} isAdmin={isAdmin} onSuggest={onSuggest} /></div>;
 };
 
 export const IngredientListScreen = () => {
@@ -116,6 +128,13 @@ export const IngredientListScreen = () => {
     const rowHeight = useDynamicRowHeight({ defaultRowHeight: 132, key: searchText + activeStockFilter + (activeCategory ?? "") });
     const { isAdmin } = useAdminMode();
     const normalizedSearch = searchText.trim().toLowerCase();
+
+    const stockSnapshots = useMemo(() => {
+        return ingredients.reduce((result, ingredient) => {
+            result[ingredient.id] = getIngredientStockSnapshot(ingredient, inventoryItems);
+            return result;
+        }, {} as Record<string, IngredientStockSnapshot>);
+    }, [ingredients, inventoryItems]);
 
     const toggleUseFirst = useToggle({ defaultValue: false });
     const toggleStats = useToggle({ defaultValue: false });
@@ -144,7 +163,7 @@ export const IngredientListScreen = () => {
         ingredients.forEach(ingredient => {
             const matchesSearch = ingredientMatchesSearch(ingredient, normalizedSearch);
             if (!matchesSearch) return;
-            const stock = getIngredientStockSnapshot(ingredient, inventoryItems);
+            const stock = stockSnapshots[ingredient.id];
 
             if (ingredientMatchesCategory(ingredient, activeCategory)) {
                 INGREDIENT_STOCK_FILTERS.forEach(item => {
@@ -173,7 +192,7 @@ export const IngredientListScreen = () => {
             stockCounts,
             categoryCounts,
         };
-    }, [ingredients, inventoryItems, normalizedSearch, activeCategory, activeStockFilter, availableCategories]);
+    }, [ingredients, stockSnapshots, normalizedSearch, activeCategory, activeStockFilter, availableCategories]);
 
     const { filteredIngredients, stockCounts, categoryCounts } = filterData;
 
@@ -221,7 +240,7 @@ export const IngredientListScreen = () => {
                     rowComponent={IngredientRow}
                     rowCount={filteredIngredients.length}
                     rowHeight={rowHeight}
-                    rowProps={{ items: filteredIngredients, onDelete: _onDelete, isAdmin, onSuggest: _onSuggest }}
+                    rowProps={{ items: filteredIngredients, stockSnapshots, onDelete: _onDelete, isAdmin, onSuggest: _onSuggest }}
                     style={{ height: "100%" }}
                 />
             </div>
@@ -234,25 +253,28 @@ export const IngredientListScreen = () => {
         } destroyOnClose={true} onCancel={toggleAddModal.hide} footer={null}>
             <IngredientAddWidget />
         </Modal>
-        <UseFirstWidget
+        {toggleUseFirst.value && <UseFirstWidget
             open={toggleUseFirst.value}
             onClose={toggleUseFirst.hide}
             onSuggest={_onSuggest}
-        />
-        <IngredientStatsWidget
+        />}
+        {toggleStats.value && <IngredientStatsWidget
             open={toggleStats.value}
             onClose={toggleStats.hide}
-        />
-        <DishSuggesterScreen
-            open={toggleSuggester.value}
-            onClose={toggleSuggester.hide}
-            initialIngredientIds={suggestIds}
-        />
+        />}
+        {toggleSuggester.value && <React.Suspense fallback={null}>
+            <LazyDishSuggesterScreen
+                open={toggleSuggester.value}
+                onClose={toggleSuggester.hide}
+                initialIngredientIds={suggestIds}
+            />
+        </React.Suspense>}
     </React.Fragment>
 }
 
 type IngredientItemProps = {
     item: Ingredient;
+    stockSnapshot: IngredientStockSnapshot;
     onDelete: (item: Ingredient) => void;
     isAdmin: boolean;
     onSuggest: (ids: string[]) => void;
@@ -262,12 +284,11 @@ export const IngredientItem: React.FunctionComponent<IngredientItemProps> = (pro
     const toggleEdit = useToggle({ defaultValue: false });
     const toggleInventory = useToggle({ defaultValue: false });
 
-    const inv = useSelector(selectInventoryById(props.item.id));
-    const totalAmt = InventoryHelper.totalUsableAmount(inv, props.item);
+    const totalAmt = props.stockSnapshot?.usableAmount ?? 0;
     const inventoryUnit = IngredientUnitHelper.getBaseUnit(props.item);
     const preservation = INGREDIENT_PRESERVATION_OPTIONS.find(o => o.value === props.item.preservationCondition);
     const shelfLife = INGREDIENT_SHELF_LIFE_OPTIONS.find(o => o.value === props.item.shelfLife);
-    const nearestExpiry = InventoryHelper.nearestExpiryBatch(inv, props.item);
+    const nearestExpiry = props.stockSnapshot?.nearestExpiry ?? null;
     const expiryBadge = nearestExpiry ? InventoryHelper.expiryBadge(nearestExpiry.daysLeft) : null;
     const inventoryUnits = IngredientUnitHelper.getInventoryUnits(props.item);
     const recipeUnits = IngredientUnitHelper.getRecipeUnits(props.item);
@@ -275,7 +296,7 @@ export const IngredientItem: React.FunctionComponent<IngredientItemProps> = (pro
     const extraRecipeUnitCount = Math.max(0, recipeUnits.length - 4);
     const inventoryStatus = props.item.alwaysAvailable
         ? { label: "Luôn có", detail: "Không cần quản lý tồn kho", color: "#389e0d", background: "#f6ffed", border: "#b7eb8f" }
-        : !inv
+        : !props.stockSnapshot?.hasInventory
             ? { label: "Chưa có tồn kho", detail: "Bấm để nhập lô đầu tiên", color: "#8c8c8c", background: "#fafafa", border: "#d9d9d9" }
             : totalAmt <= 0
                 ? { label: "Hết khả dụng", detail: "Không còn lô dùng được", color: "#cf1322", background: "#fff1f0", border: "#ffa39e" }

@@ -30,6 +30,7 @@ import { RootState } from "@store/Store";
 import { Drawer, Flex, Input as AntInput, Layout, Divider } from "antd";
 import React, { useState } from "react";
 import { CopyToClipboard } from 'react-copy-to-clipboard';
+import { flushSync } from "react-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import LogoIcon from "../../assets/icons/logo.png";
@@ -128,6 +129,13 @@ const SidebarDrawer = () => {
     const message = useMessage();
     const toggleHistory = useToggle();
     const toggleGuide = useToggle();
+    const navigationTimerRef = React.useRef<number | null>(null);
+
+    React.useEffect(() => {
+        return () => {
+            if (navigationTimerRef.current !== null) window.clearTimeout(navigationTimerRef.current);
+        };
+    }, []);
 
     const showDrawer = () => {
         setOpen(true);
@@ -138,9 +146,14 @@ const SidebarDrawer = () => {
     };
 
     const onNavigate = (href: string) => {
-        setOpen(false);
+        flushSync(() => setOpen(false));
         if (location.pathname === href) return;
-        React.startTransition(() => navigate(href));
+
+        if (navigationTimerRef.current !== null) window.clearTimeout(navigationTimerRef.current);
+        navigationTimerRef.current = window.setTimeout(() => {
+            navigationTimerRef.current = null;
+            React.startTransition(() => navigate(href));
+        }, 80);
     }
 
     const onUnlock = () => {
@@ -546,7 +559,9 @@ const BottomTabNavigator = () => {
             width: "100%",
             backgroundColor: "#fff",
             height: 80,
-            borderTop: "0.5px solid " + theme.token.colorBorder
+            borderTop: "0.5px solid " + theme.token.colorBorder,
+            zIndex: 900,
+            touchAction: "manipulation",
         }
     }
 
@@ -558,8 +573,9 @@ const BottomTabNavigator = () => {
         }
     }
 
-    const onNavigate = (href) => {
-        navigate(href);
+    const onNavigate = (href: string) => {
+        if (location.pathname === href) return;
+        React.startTransition(() => navigate(href));
     }
 
     return <>
