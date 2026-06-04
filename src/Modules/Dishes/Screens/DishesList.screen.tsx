@@ -395,7 +395,7 @@ export const DishesItem: React.FunctionComponent<DishesItemProps> = (props) => {
     const _onEditDuration = () => toggleEditDuration.show();
     const _onOpenDetailPage = () => {
         toggleDishesDetail.hide();
-        navigate(RootRoutes.AuthorizedRoutes.DishesRoutes.ManageIngredient(props.item.id));
+        React.startTransition(() => navigate(RootRoutes.AuthorizedRoutes.DishesRoutes.ManageIngredient(props.item.id)));
     }
 
     const _sumDuration = () => {

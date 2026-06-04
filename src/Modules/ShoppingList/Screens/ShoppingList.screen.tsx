@@ -304,7 +304,7 @@ export const ShoppingListItem: React.FunctionComponent<ShoppingListItemProps> = 
 
     const _onOpenDetailPage = () => {
         toggleIngredient.hide();
-        navigate(RootRoutes.AuthorizedRoutes.ShoppingListRoutes.Detail(props.item.id));
+        React.startTransition(() => navigate(RootRoutes.AuthorizedRoutes.ShoppingListRoutes.Detail(props.item.id)));
     }
 
     const _onAddMoreDishes = () => {

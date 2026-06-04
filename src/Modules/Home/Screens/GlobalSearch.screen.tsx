@@ -135,8 +135,8 @@ export const GlobalSearchScreen: React.FC<GlobalSearchScreenProps> = ({ open, on
 
     const _navigate = (path: string) => {
         _commit();
-        navigate(path);
         onClose();
+        React.startTransition(() => navigate(path));
     };
 
     if (!open) return null;

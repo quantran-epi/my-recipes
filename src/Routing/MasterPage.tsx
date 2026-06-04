@@ -102,6 +102,77 @@ const sidebarTransitionHintStyle: React.CSSProperties = {
     lineHeight: "15px",
 };
 
+const useRouteLoadingFeedback = (pathname: string) => {
+    const [routeLoading, setRouteLoading] = useState(false);
+    const loadingTimerRef = React.useRef<number | null>(null);
+    const loadingFrameRef = React.useRef<number | null>(null);
+    const loadingFallbackTimerRef = React.useRef<number | null>(null);
+    const pendingRouteRef = React.useRef<string | null>(null);
+
+    const clearLoadingTimer = React.useCallback(() => {
+        if (loadingTimerRef.current !== null) {
+            window.clearTimeout(loadingTimerRef.current);
+            loadingTimerRef.current = null;
+        }
+    }, []);
+
+    const clearLoadingFrame = React.useCallback(() => {
+        if (loadingFrameRef.current !== null) {
+            window.cancelAnimationFrame(loadingFrameRef.current);
+            loadingFrameRef.current = null;
+        }
+    }, []);
+
+    const clearLoadingFallbackTimer = React.useCallback(() => {
+        if (loadingFallbackTimerRef.current !== null) {
+            window.clearTimeout(loadingFallbackTimerRef.current);
+            loadingFallbackTimerRef.current = null;
+        }
+    }, []);
+
+    const finishRouteLoading = React.useCallback(() => {
+        pendingRouteRef.current = null;
+        clearLoadingTimer();
+        clearLoadingFrame();
+        clearLoadingFallbackTimer();
+        setRouteLoading(false);
+    }, [clearLoadingFallbackTimer, clearLoadingFrame, clearLoadingTimer]);
+
+    const startRouteLoading = React.useCallback((href: string) => {
+        clearLoadingTimer();
+        clearLoadingFrame();
+        clearLoadingFallbackTimer();
+        pendingRouteRef.current = href;
+        setRouteLoading(true);
+        loadingFallbackTimerRef.current = window.setTimeout(finishRouteLoading, 1200);
+    }, [clearLoadingFallbackTimer, clearLoadingFrame, clearLoadingTimer, finishRouteLoading]);
+
+    React.useEffect(() => {
+        return () => {
+            clearLoadingTimer();
+            clearLoadingFrame();
+            clearLoadingFallbackTimer();
+        };
+    }, [clearLoadingFallbackTimer, clearLoadingFrame, clearLoadingTimer]);
+
+    React.useEffect(() => {
+        if (!routeLoading) return;
+        const pendingRoute = pendingRouteRef.current;
+        if (pendingRoute && pathname !== pendingRoute) return;
+
+        clearLoadingTimer();
+        clearLoadingFrame();
+        loadingFrameRef.current = window.requestAnimationFrame(() => {
+            loadingFrameRef.current = window.requestAnimationFrame(() => {
+                loadingFrameRef.current = null;
+                loadingTimerRef.current = window.setTimeout(finishRouteLoading, 80);
+            });
+        });
+    }, [clearLoadingFrame, clearLoadingTimer, finishRouteLoading, pathname, routeLoading]);
+
+    return { routeLoading, startRouteLoading };
+};
+
 export const MasterPage = () => {
     const theme = useTheme();
     const currentFeatureName = useSelector(selectCurrentFeatureName);    const { isOnline } = useOnlineStatus();
@@ -181,7 +252,6 @@ export const MasterPage = () => {
 
 const SidebarDrawer = () => {
     const [open, setOpen] = useState(false);
-    const [routeLoading, setRouteLoading] = useState(false);
     const [pinModalOpen, setPinModalOpen] = useState(false);
     const [pin, setPin] = useState("");
     const [pinError, setPinError] = useState("");
@@ -194,71 +264,7 @@ const SidebarDrawer = () => {
     const message = useMessage();
     const toggleHistory = useToggle();
     const toggleGuide = useToggle();
-    const navigationTimerRef = React.useRef<number | null>(null);
-    const loadingTimerRef = React.useRef<number | null>(null);
-    const loadingFrameRef = React.useRef<number | null>(null);
-    const loadingFallbackTimerRef = React.useRef<number | null>(null);
-    const pendingRouteRef = React.useRef<string | null>(null);
-
-    const clearNavigationTimer = () => {
-        if (navigationTimerRef.current !== null) {
-            window.clearTimeout(navigationTimerRef.current);
-            navigationTimerRef.current = null;
-        }
-    };
-
-    const clearLoadingTimer = () => {
-        if (loadingTimerRef.current !== null) {
-            window.clearTimeout(loadingTimerRef.current);
-            loadingTimerRef.current = null;
-        }
-    };
-
-    const clearLoadingFrame = () => {
-        if (loadingFrameRef.current !== null) {
-            window.cancelAnimationFrame(loadingFrameRef.current);
-            loadingFrameRef.current = null;
-        }
-    };
-
-    const clearLoadingFallbackTimer = () => {
-        if (loadingFallbackTimerRef.current !== null) {
-            window.clearTimeout(loadingFallbackTimerRef.current);
-            loadingFallbackTimerRef.current = null;
-        }
-    };
-
-    const finishRouteLoading = () => {
-        pendingRouteRef.current = null;
-        clearLoadingTimer();
-        clearLoadingFrame();
-        clearLoadingFallbackTimer();
-        setRouteLoading(false);
-    };
-
-    React.useEffect(() => {
-        return () => {
-            clearNavigationTimer();
-            clearLoadingTimer();
-            clearLoadingFrame();
-            clearLoadingFallbackTimer();
-        };
-    }, []);
-
-    React.useEffect(() => {
-        if (!routeLoading) return;
-        const pendingRoute = pendingRouteRef.current;
-        if (pendingRoute && location.pathname !== pendingRoute) return;
-
-        clearLoadingTimer();
-        clearLoadingFrame();
-        loadingFrameRef.current = window.requestAnimationFrame(() => {
-            loadingFrameRef.current = window.requestAnimationFrame(() => {
-                loadingFrameRef.current = null;
-                loadingTimerRef.current = window.setTimeout(finishRouteLoading, 80);
-            });
-        });
-    }, [location.pathname, routeLoading]);
+    const { routeLoading, startRouteLoading } = useRouteLoadingFeedback(location.pathname);
 
     const showDrawer = () => {
         setOpen(true);
@@ -274,28 +280,11 @@ const SidebarDrawer = () => {
             return;
         }
 
-        clearNavigationTimer();
-        clearLoadingTimer();
-        clearLoadingFrame();
-        clearLoadingFallbackTimer();
-        pendingRouteRef.current = href;
-        const navigationDelay = open ? 80 : 0;
         flushSync(() => {
             setOpen(false);
-            setRouteLoading(true);
+            startRouteLoading(href);
         });
-        const runNavigation = () => {
-            React.startTransition(() => navigate(href));
-        };
-        if (navigationDelay === 0) {
-            runNavigation();
-        } else {
-            navigationTimerRef.current = window.setTimeout(() => {
-                navigationTimerRef.current = null;
-                runNavigation();
-            }, navigationDelay);
-        }
-        loadingFallbackTimerRef.current = window.setTimeout(finishRouteLoading, 1200);
+        React.startTransition(() => navigate(href));
     }
 
     const onUnlock = () => {
@@ -694,63 +683,7 @@ const BottomTabNavigator = () => {
     const location = useLocation();
     const theme = useTheme();
     const toggleSuggester = useToggle();
-    const [routeLoading, setRouteLoading] = useState(false);
-    const loadingTimerRef = React.useRef<number | null>(null);
-    const loadingFrameRef = React.useRef<number | null>(null);
-    const loadingFallbackTimerRef = React.useRef<number | null>(null);
-    const pendingRouteRef = React.useRef<string | null>(null);
-
-    const clearLoadingTimer = () => {
-        if (loadingTimerRef.current !== null) {
-            window.clearTimeout(loadingTimerRef.current);
-            loadingTimerRef.current = null;
-        }
-    };
-
-    const clearLoadingFrame = () => {
-        if (loadingFrameRef.current !== null) {
-            window.cancelAnimationFrame(loadingFrameRef.current);
-            loadingFrameRef.current = null;
-        }
-    };
-
-    const clearLoadingFallbackTimer = () => {
-        if (loadingFallbackTimerRef.current !== null) {
-            window.clearTimeout(loadingFallbackTimerRef.current);
-            loadingFallbackTimerRef.current = null;
-        }
-    };
-
-    const finishRouteLoading = () => {
-        pendingRouteRef.current = null;
-        clearLoadingTimer();
-        clearLoadingFrame();
-        clearLoadingFallbackTimer();
-        setRouteLoading(false);
-    };
-
-    React.useEffect(() => {
-        return () => {
-            clearLoadingTimer();
-            clearLoadingFrame();
-            clearLoadingFallbackTimer();
-        };
-    }, []);
-
-    React.useEffect(() => {
-        if (!routeLoading) return;
-        const pendingRoute = pendingRouteRef.current;
-        if (pendingRoute && location.pathname !== pendingRoute) return;
-
-        clearLoadingTimer();
-        clearLoadingFrame();
-        loadingFrameRef.current = window.requestAnimationFrame(() => {
-            loadingFrameRef.current = window.requestAnimationFrame(() => {
-                loadingFrameRef.current = null;
-                loadingTimerRef.current = window.setTimeout(finishRouteLoading, 80);
-            });
-        });
-    }, [location.pathname, routeLoading]);
+    const { routeLoading, startRouteLoading } = useRouteLoadingFeedback(location.pathname);
 
     const _buttonStyles = (): React.CSSProperties => {
         return {
@@ -788,13 +721,8 @@ const BottomTabNavigator = () => {
 
     const onNavigate = (href: string) => {
         if (location.pathname === href) return;
-        clearLoadingTimer();
-        clearLoadingFrame();
-        clearLoadingFallbackTimer();
-        pendingRouteRef.current = href;
-        setRouteLoading(true);
+        flushSync(() => startRouteLoading(href));
         React.startTransition(() => navigate(href));
-        loadingFallbackTimerRef.current = window.setTimeout(finishRouteLoading, 1200);
     }
 
     return <>

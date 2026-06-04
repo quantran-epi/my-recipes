@@ -253,7 +253,7 @@ Notes:
 
 ### PERF-05: Navigation And Loading Overlay
 
-Status: Planned
+Status: Audited
 
 Purpose:
 - Make route transitions feel immediate and prevent loading indicators from adding avoidable delay or masking blocked main-thread work.
@@ -264,6 +264,11 @@ Implementation:
 - Keep route feedback visible during data preparation or lazy component loading.
 - Avoid loading overlays that block interaction longer than necessary after the target route is ready.
 - Confirm back/forward navigation and query-param navigation preserve expected behavior.
+- 2026-06-04 implementation: extracted duplicated sidebar/bottom-tab route feedback timers into `useRouteLoadingFeedback`, with stable callback dependencies and shared fallback cleanup.
+- 2026-06-04 implementation: removed the sidebar drawer's 80ms navigation delay; sidebar navigation now closes the drawer, shows feedback, and starts route navigation immediately.
+- 2026-06-04 implementation: kept bottom-tab navigation feedback immediate by flushing the loading state before starting route navigation.
+- 2026-06-04 implementation: changed global-search result navigation to close the search overlay before starting the route transition.
+- 2026-06-04 implementation: wrapped dashboard card/action navigation, list-row detail navigation, and read-only dish detail navigation in `React.startTransition` so heavy route updates are not scheduled as urgent UI work.
 
 Acceptance Criteria:
 - Clicking navigation controls produces immediate visual feedback.
@@ -277,10 +282,15 @@ Audit Checklist:
 - Manual browser checks if needed: use slow CPU throttling and click through primary routes; confirm feedback appears before heavy work completes.
 
 Test Evidence:
-- Pending until implemented/audited.
+- 2026-06-04 static audit command: `rg -n "navigationDelay|navigationTimerRef|useRouteLoadingFeedback|startRouteLoading|React\.startTransition\(\(\) => navigate|openRoute" src/Routing/MasterPage.tsx src/Modules/Home/Screens/GlobalSearch.screen.tsx src/Modules/Home/Screens/Dashboard.screen.tsx src/Modules/Dishes/Screens/DishesList.screen.tsx src/Modules/ShoppingList/Screens/ShoppingList.screen.tsx src/Modules/Dishes/Screens/DishesManageIngredient/DishReadonlyDetail.widget.tsx`.
+- 2026-06-04 static result: no `navigationDelay` or `navigationTimerRef` matches remain; route feedback is centralized in `useRouteLoadingFeedback`, and high-traffic dashboard/search/list/detail links use transition-wrapped navigation.
+- 2026-06-04 build command: `npm run build`.
+- 2026-06-04 build result: passed with the existing lint/dependency warning set; the previous `MasterPage.tsx` `finishRouteLoading` dependency warnings are gone; latest bundle reported `build\static\js\main.9ac9d2ba.js` at 566.95 kB gzip.
+- 2026-06-04 e2e command: `$env:E2E_PORT='3032'; npx.cmd playwright test --output D:\tmp\my-recipes-e2e-perf05-artifacts`.
+- 2026-06-04 e2e result: passed 9 Playwright tests and skipped 1 explicit `PERF-00` baseline test; report at `playwright-report/index.html`, JSON at `test-results/e2e-results.json`, artifacts at `D:\tmp\my-recipes-e2e-perf05-artifacts`.
 
 Notes:
-- Existing notes indicate sidebar navigation has already been improved to overlap drawer closing with route transition. Re-audit it with the rest of the navigation paths.
+- Direct browser back/list actions and post-create callbacks remain functionally unchanged unless they were part of a heavy route-entry path audited here.
 
 ### PERF-06: Heavy Calculation Scheduling
 
@@ -354,3 +364,4 @@ Notes:
 | 2026-06-04 | PERF-02 | Static selector audit; `npm run build`; `$env:E2E_PORT='3032'; npx.cmd playwright test --output D:\tmp\my-recipes-e2e-perf02-artifacts` | Added shared memoized lookup selectors; migrated feature modules/routing to typed selectors; build passed with existing warnings; full e2e passed 9 and skipped 1 explicit `PERF-00` baseline test. | `src/Store/Selectors.ts`; `playwright-report/index.html`; `test-results/e2e-results.json`; `D:\tmp\my-recipes-e2e-perf02-artifacts` | Continue with `PERF-03` lazy tabs, panels, and modal bodies. |
 | 2026-06-04 | PERF-03 | Static lazy-render audit; `npm run build`; `$env:E2E_PORT='3032'; npx.cmd playwright test --output D:\tmp\my-recipes-e2e-perf03-artifacts` | Lazy-rendered shopping-list detail tabs and deferred heavy modal bodies across scheduled meals, shopping lists, cooking, global overlays, and backup dialogs; build passed with existing warnings; full e2e passed 9 and skipped 1 explicit `PERF-00` baseline test. | `src/Components/Modal/Modal.tsx`; `playwright-report/index.html`; `test-results/e2e-results.json`; `D:\tmp\my-recipes-e2e-perf03-artifacts` | Deploy `PERF-03`, then continue with `PERF-04` image and network budget. |
 | 2026-06-04 | PERF-04 | Static image audit; `npm run build`; `$env:PERF_BASELINE='1'; $env:E2E_PORT='3026'; npx.cmd playwright test tests/e2e/performance-baseline.spec.ts --output D:\tmp\my-recipes-perf04-artifacts`; `$env:E2E_PORT='3032'; npx.cmd playwright test --output D:\tmp\my-recipes-e2e-perf04-artifacts` | Added shared lazy/async image defaults, converted remaining route raw icon images, documented route request/image/transfer budgets, and verified build plus e2e. | `src/Components/Image/Image.tsx`; `test-results/performance/perf-00-baseline.json`; `playwright-report/index.html`; `test-results/e2e-results.json`; `D:\tmp\my-recipes-perf04-artifacts`; `D:\tmp\my-recipes-e2e-perf04-artifacts` | Deploy `PERF-04`, then continue with `PERF-05` navigation and loading overlay. |
+| 2026-06-04 | PERF-05 | Static navigation audit; `npm run build`; `$env:E2E_PORT='3032'; npx.cmd playwright test --output D:\tmp\my-recipes-e2e-perf05-artifacts` | Centralized sidebar/bottom-tab route feedback, removed sidebar navigation delay, transition-wrapped high-traffic dashboard/search/list/detail navigation, and verified build plus e2e. | `src/Routing/MasterPage.tsx`; `src/Modules/Home/Screens/Dashboard.screen.tsx`; `src/Modules/Home/Screens/GlobalSearch.screen.tsx`; `playwright-report/index.html`; `test-results/e2e-results.json`; `D:\tmp\my-recipes-e2e-perf05-artifacts` | Deploy `PERF-05`, then continue with `PERF-06` heavy calculation scheduling. |

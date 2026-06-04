@@ -45,7 +45,7 @@ export const DishesReadonlyDetailModal: React.FunctionComponent<DishesReadonlyDe
 
     const _onOpenDetail = () => {
         onClose();
-        navigate(RootRoutes.AuthorizedRoutes.DishesRoutes.ManageIngredient(dish.id));
+        React.startTransition(() => navigate(RootRoutes.AuthorizedRoutes.DishesRoutes.ManageIngredient(dish.id)));
     }
 
     return <Modal

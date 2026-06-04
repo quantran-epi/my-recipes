@@ -297,6 +297,9 @@ const CookingRow: React.FunctionComponent<{ item: CookingSession; onOpen: () => 
 
 export const DashboardScreen = () => {
     const navigate = useNavigate();
+    const openRoute = React.useCallback((href: string) => {
+        React.startTransition(() => navigate(href));
+    }, [navigate]);
     const ingredients = useSelector(selectIngredients);
     const ingredientsById = useSelector(selectIngredientsById);
     const dishes = useSelector(selectDishes);
@@ -360,7 +363,7 @@ export const DashboardScreen = () => {
             description: `${firstUrgentInventory.ingredientName} · ${IngredientUnitHelper.formatAmount(firstUrgentInventory.amount)} ${firstUrgentInventory.unit} · hạn ${firstUrgentInventory.expiresAtLabel}`,
             actionLabel: 'Mở kho',
             tone: firstUrgentInventory.daysLeft < 0 ? '#cf1322' : '#fa8c16',
-            onOpen: () => navigate(RootRoutes.AuthorizedRoutes.IngredientRoutes.Detail(firstUrgentInventory.ingredientId)),
+            onOpen: () => openRoute(RootRoutes.AuthorizedRoutes.IngredientRoutes.Detail(firstUrgentInventory.ingredientId)),
             tags: <Tag color={firstUrgentInventory.daysLeft < 0 ? 'red' : 'orange'} style={{ marginInlineEnd: 0 }}>{InventoryHelper.expiryBadge(firstUrgentInventory.daysLeft)?.label}</Tag>,
         }
         : firstActiveSession
@@ -370,7 +373,7 @@ export const DashboardScreen = () => {
                 description: `${firstActiveSession.dishName} · bước ${(firstActiveSession.currentStepIndex ?? 0) + 1}/${firstActiveSession.steps.length || 1}`,
                 actionLabel: 'Mở món',
                 tone: '#fa8c16',
-                onOpen: () => navigate(RootRoutes.AuthorizedRoutes.DishesRoutes.ManageIngredient(firstActiveSession.dishId)),
+                onOpen: () => openRoute(RootRoutes.AuthorizedRoutes.DishesRoutes.ManageIngredient(firstActiveSession.dishId)),
             }
             : firstTodayShoppingList
                 ? {
@@ -379,7 +382,7 @@ export const DashboardScreen = () => {
                     description: `${firstTodayShoppingList.name} · ${getProgress(firstTodayShoppingList).done}/${getProgress(firstTodayShoppingList).total} nguyên liệu · ${shoppingListCosts[firstTodayShoppingList.id] ?? '0đ'}`,
                     actionLabel: 'Mở danh sách',
                     tone: '#0958d9',
-                    onOpen: () => navigate(RootRoutes.AuthorizedRoutes.ShoppingListRoutes.Detail(firstTodayShoppingList.id)),
+                    onOpen: () => openRoute(RootRoutes.AuthorizedRoutes.ShoppingListRoutes.Detail(firstTodayShoppingList.id)),
                 }
                 : firstTodayMeal
                     ? {
@@ -388,7 +391,7 @@ export const DashboardScreen = () => {
                         description: `${firstTodayMeal.name} · ${Object.values(firstTodayMeal.meals).flat().length} món`,
                         actionLabel: 'Mở thực đơn',
                         tone: '#1677ff',
-                        onOpen: () => navigate(RootRoutes.AuthorizedRoutes.ScheduledMealRoutes.List()),
+                        onOpen: () => openRoute(RootRoutes.AuthorizedRoutes.ScheduledMealRoutes.List()),
                     }
                     : firstSuggestion
                         ? {
@@ -397,7 +400,7 @@ export const DashboardScreen = () => {
                             description: `${firstSuggestion.dish.name} · khớp ${Math.round(firstSuggestion.score * 100)}% nguyên liệu`,
                             actionLabel: 'Mở món',
                             tone: '#389e0d',
-                            onOpen: () => navigate(RootRoutes.AuthorizedRoutes.DishesRoutes.ManageIngredient(firstSuggestion.dish.id)),
+                            onOpen: () => openRoute(RootRoutes.AuthorizedRoutes.DishesRoutes.ManageIngredient(firstSuggestion.dish.id)),
                         }
                         : {
                             icon: <CheckCircleOutlined />,
@@ -405,7 +408,7 @@ export const DashboardScreen = () => {
                             description: 'Tồn kho, lịch mua sắm và thực đơn hôm nay chưa có mục cần xử lý ngay.',
                             actionLabel: 'Mở món ăn',
                             tone: '#389e0d',
-                            onOpen: () => navigate(RootRoutes.AuthorizedRoutes.DishesRoutes.List()),
+                            onOpen: () => openRoute(RootRoutes.AuthorizedRoutes.DishesRoutes.List()),
                         };
 
     return <Box data-testid="dashboard" style={{ display: 'flex', flexDirection: 'column', gap: 14, paddingBottom: 12 }}>
@@ -420,42 +423,42 @@ export const DashboardScreen = () => {
 
         <Section
             title='Hôm nay'
-            action={<Button type='link' onClick={() => navigate(RootRoutes.AuthorizedRoutes.ScheduledMealRoutes.List())}>Mở thực đơn</Button>}
+            action={<Button type='link' onClick={() => openRoute(RootRoutes.AuthorizedRoutes.ScheduledMealRoutes.List())}>Mở thực đơn</Button>}
         >
             {activeSessions.length === 0 && todayMeals.length === 0 && todayShoppingLists.length === 0
                 ? <EmptySection text='Không có việc nào được lên lịch hôm nay.' />
                 : <>
-                    {activeSessions.slice(0, 2).map(session => <CookingRow key={session.id} item={session} onOpen={() => navigate(RootRoutes.AuthorizedRoutes.DishesRoutes.ManageIngredient(session.dishId))} />)}
-                    {todayMeals.slice(0, 3).map(meal => <TodayMealRow key={meal.id} item={meal} onOpen={() => navigate(RootRoutes.AuthorizedRoutes.ScheduledMealRoutes.List())} />)}
-                    {todayShoppingLists.slice(0, 2).map(list => <ShoppingListRow key={list.id} item={list} cost={shoppingListCosts[list.id] ?? '0đ'} onOpen={() => navigate(RootRoutes.AuthorizedRoutes.ShoppingListRoutes.Detail(list.id))} />)}
+                    {activeSessions.slice(0, 2).map(session => <CookingRow key={session.id} item={session} onOpen={() => openRoute(RootRoutes.AuthorizedRoutes.DishesRoutes.ManageIngredient(session.dishId))} />)}
+                    {todayMeals.slice(0, 3).map(meal => <TodayMealRow key={meal.id} item={meal} onOpen={() => openRoute(RootRoutes.AuthorizedRoutes.ScheduledMealRoutes.List())} />)}
+                    {todayShoppingLists.slice(0, 2).map(list => <ShoppingListRow key={list.id} item={list} cost={shoppingListCosts[list.id] ?? '0đ'} onOpen={() => openRoute(RootRoutes.AuthorizedRoutes.ShoppingListRoutes.Detail(list.id))} />)}
                 </>}
         </Section>
 
         <Section
             title='Nguyên liệu cần dùng sớm'
-            action={<Button type='link' onClick={() => navigate(RootRoutes.AuthorizedRoutes.IngredientRoutes.List())}>Mở kho</Button>}
+            action={<Button type='link' onClick={() => openRoute(RootRoutes.AuthorizedRoutes.IngredientRoutes.List())}>Mở kho</Button>}
         >
             {urgentInventory.length === 0
                 ? <EmptySection text='Chưa có lô nào hết hạn hoặc sắp hết hạn trong 3 ngày.' />
-                : urgentInventory.slice(0, 6).map(item => <UrgentRow key={`${item.ingredientId}-${item.expiresAtLabel}-${item.amount}`} item={item} onOpen={() => navigate(RootRoutes.AuthorizedRoutes.IngredientRoutes.Detail(item.ingredientId))} />)}
+                : urgentInventory.slice(0, 6).map(item => <UrgentRow key={`${item.ingredientId}-${item.expiresAtLabel}-${item.amount}`} item={item} onOpen={() => openRoute(RootRoutes.AuthorizedRoutes.IngredientRoutes.Detail(item.ingredientId))} />)}
         </Section>
 
         <Section
             title='Gợi ý món nên nấu'
-            action={<Button type='link' onClick={() => navigate(RootRoutes.AuthorizedRoutes.DishesRoutes.List())}>Mở món ăn</Button>}
+            action={<Button type='link' onClick={() => openRoute(RootRoutes.AuthorizedRoutes.DishesRoutes.List())}>Mở món ăn</Button>}
         >
             {suggestions.length === 0
                 ? <EmptySection text='Chưa có đủ dữ liệu tồn kho để gợi ý món.' />
-                : suggestions.map(item => <SuggestionRow key={item.dish.id} item={item} onOpen={() => navigate(RootRoutes.AuthorizedRoutes.DishesRoutes.ManageIngredient(item.dish.id))} />)}
+                : suggestions.map(item => <SuggestionRow key={item.dish.id} item={item} onOpen={() => openRoute(RootRoutes.AuthorizedRoutes.DishesRoutes.ManageIngredient(item.dish.id))} />)}
         </Section>
 
         <Section
             title='Danh sách mua sắm đang mở'
-            action={<Button type='link' onClick={() => navigate(RootRoutes.AuthorizedRoutes.ShoppingListRoutes.List())}>Mở mua sắm</Button>}
+            action={<Button type='link' onClick={() => openRoute(RootRoutes.AuthorizedRoutes.ShoppingListRoutes.List())}>Mở mua sắm</Button>}
         >
             {openShoppingLists.length === 0
                 ? <EmptySection text='Không có danh sách mua sắm đang mở.' />
-                : openShoppingLists.slice(0, 5).map(item => <ShoppingListRow key={item.id} item={item} cost={shoppingListCosts[item.id] ?? '0đ'} onOpen={() => navigate(RootRoutes.AuthorizedRoutes.ShoppingListRoutes.Detail(item.id))} />)}
+                : openShoppingLists.slice(0, 5).map(item => <ShoppingListRow key={item.id} item={item} cost={shoppingListCosts[item.id] ?? '0đ'} onOpen={() => openRoute(RootRoutes.AuthorizedRoutes.ShoppingListRoutes.Detail(item.id))} />)}
         </Section>
 
         <Section title='Tổng quan dữ liệu'>
