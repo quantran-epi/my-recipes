@@ -1,4 +1,4 @@
-import { CostEstimateHelper, CostEstimateSummary, IngredientNeedEstimateRow } from "@common/Helpers/CostEstimateHelper";
+import { CostEstimateHelper, CostEstimateSummary, IngredientAmountCostEstimate, IngredientNeedEstimateRow } from "@common/Helpers/CostEstimateHelper";
 import { DishServingHelper } from "@common/Helpers/DishServingHelper";
 import { IngredientPriceHelper } from "@common/Helpers/IngredientPriceHelper";
 import { IngredientUnitHelper } from "@common/Helpers/IngredientUnitHelper";
@@ -7,8 +7,10 @@ import { Box } from "@components/Layout/Box";
 import { Stack } from "@components/Layout/Stack";
 import { Modal } from "@components/Modal";
 import { Typography } from "@components/Typography";
+import { useScheduledCalculation } from "@hooks";
 import { Dishes } from "@store/Models/Dishes";
 import { selectDishes, selectDishesById, selectIngredients, selectInventory } from "@store/Selectors";
+import { Spin } from "antd";
 import React, { useMemo, useState } from "react";
 import { useSelector } from "react-redux";
 
@@ -18,6 +20,29 @@ type ScheduledMealEstimateSummaryProps = {
     maxRows?: number;
     defaultExpanded?: boolean;
 }
+
+type ScheduledMealEstimateMetrics = {
+    estimate: IngredientAmountCostEstimate;
+    rows: IngredientNeedEstimateRow[];
+    missingRows: IngredientNeedEstimateRow[];
+    coveredRows: IngredientNeedEstimateRow[];
+}
+
+const createEmptyScheduledMealEstimateMetrics = (): ScheduledMealEstimateMetrics => ({
+    estimate: CostEstimateHelper.emptyIngredientAmountEstimate(),
+    rows: [],
+    missingRows: [],
+    coveredRows: [],
+});
+
+const PendingEstimateBox: React.FunctionComponent<{ text: string }> = ({ text }) => {
+    return <Box style={{ minHeight: 120, display: "flex", alignItems: "center", justifyContent: "center", textAlign: "center" }}>
+        <Stack direction="column" align="center" gap={8}>
+            <Spin size="small" />
+            <Typography.Text type="secondary">{text}</Typography.Text>
+        </Stack>
+    </Box>;
+};
 
 const formatCost = (summary: CostEstimateSummary, emptyText = "0đ"): string => {
     if (!CostEstimateHelper.hasAny(summary)) return emptyText;
@@ -44,21 +69,29 @@ export const ScheduledMealEstimateSummary: React.FunctionComponent<ScheduledMeal
             .filter((item): item is Dishes => Boolean(item));
     }, [dishIds, dishesById]);
 
-    const estimate = useMemo(() => {
+    const calculateEstimate = React.useCallback((): ScheduledMealEstimateMetrics => {
         const amounts = selectedDishes.flatMap(dish => DishServingHelper.collectIngredientAmounts(dish, dishes));
-        return CostEstimateHelper.estimateIngredientAmounts(amounts, ingredients, { inventoryItems });
-    }, [selectedDishes, dishes, ingredients, inventoryItems]);
+        const estimate = CostEstimateHelper.estimateIngredientAmounts(amounts, ingredients, { inventoryItems });
+        const rows = estimate.rows.slice().sort((a, b) => {
+            if ((a.missingAmount > 0) !== (b.missingAmount > 0)) return a.missingAmount > 0 ? -1 : 1;
+            if (a.required !== b.required) return a.required ? -1 : 1;
+            return (a.ingredient?.name ?? a.ingredientId).localeCompare(b.ingredient?.name ?? b.ingredientId);
+        });
 
-    const rows = useMemo(() => estimate.rows.slice().sort((a, b) => {
-        if ((a.missingAmount > 0) !== (b.missingAmount > 0)) return a.missingAmount > 0 ? -1 : 1;
-        if (a.required !== b.required) return a.required ? -1 : 1;
-        return (a.ingredient?.name ?? a.ingredientId).localeCompare(b.ingredient?.name ?? b.ingredientId);
-    }), [estimate.rows]);
+        return {
+            estimate,
+            rows,
+            missingRows: rows.filter(row => row.missingAmount > 0),
+            coveredRows: rows.filter(row => row.missingAmount <= 0),
+        };
+    }, [selectedDishes, dishes, ingredients, inventoryItems]);
+    const { value: estimateMetrics, pending: estimatePending } = useScheduledCalculation(calculateEstimate, {
+        enabled: selectedDishes.length > 0,
+        initialValue: createEmptyScheduledMealEstimateMetrics,
+    });
+    const { estimate, rows, missingRows, coveredRows } = estimateMetrics;
 
     if (selectedDishes.length === 0) return null;
-
-    const missingRows = rows.filter(row => row.missingAmount > 0);
-    const coveredRows = rows.filter(row => row.missingAmount <= 0);
 
     const summaryRows = <div style={{ display: "flex", flexDirection: "column", gap: 5, paddingTop: 2 }}>
         <div style={{ display: "grid", gridTemplateColumns: "76px minmax(0, 1fr)", gap: 8, alignItems: "start" }}>
@@ -81,7 +114,7 @@ export const ScheduledMealEstimateSummary: React.FunctionComponent<ScheduledMeal
             <div style={{ minWidth: 0 }}>
                 <Typography.Text strong style={{ display: "block", lineHeight: "20px", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{title}</Typography.Text>
                 <Typography.Text type="secondary" style={{ display: "block", fontSize: 12, lineHeight: "16px", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
-                    {selectedDishes.length} món · {coveredRows.length} đủ · {missingRows.length} thiếu
+                    {estimatePending ? "Đang tính chi phí..." : `${selectedDishes.length} món · ${coveredRows.length} đủ · ${missingRows.length} thiếu`}
                 </Typography.Text>
             </div>
             <Button type="link" onClick={() => setDetailOpen(true)} style={{ paddingInline: 0, flexShrink: 0 }}>
@@ -92,28 +125,30 @@ export const ScheduledMealEstimateSummary: React.FunctionComponent<ScheduledMeal
 
         {detailOpen && <Modal open={detailOpen} onCancel={() => setDetailOpen(false)} footer={null} title={title} destroyOnClose width={640}>
             <div style={{ display: "flex", flexDirection: "column", gap: 10, maxHeight: 620, overflowY: "auto", paddingRight: 4 }}>
-                {summaryRows}
-                <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-            {rows.map(row => {
-                const status = rowStatus(row);
-                return <div key={row.ingredientId} style={{ display: "grid", gridTemplateColumns: "minmax(0, 1fr) auto", gap: 8, alignItems: "center", borderTop: "1px solid #e6f4ff", paddingTop: 6 }}>
-                    <div style={{ minWidth: 0 }}>
-                        <Typography.Text strong style={{ display: "block", fontSize: 12, lineHeight: "16px", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
-                            {row.ingredient?.name ?? row.ingredientId}
-                        </Typography.Text>
-                        <Typography.Text type="secondary" style={{ display: "block", fontSize: 11, lineHeight: "15px" }}>
-                            {row.ingredient?.alwaysAvailable
-                                ? `Cần ${IngredientUnitHelper.formatAmount(row.amount)} ${row.unit} · Luôn có`
-                                : `Cần ${IngredientUnitHelper.formatAmount(row.amount)} ${row.unit} · Có ${IngredientUnitHelper.formatAmount(row.availableAmount)} ${row.unit}`}
-                        </Typography.Text>
+                {estimatePending ? <PendingEstimateBox text="Đang tính chi phí thực đơn..." /> : <React.Fragment>
+                    {summaryRows}
+                    <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                        {rows.map(row => {
+                            const status = rowStatus(row);
+                            return <div key={row.ingredientId} style={{ display: "grid", gridTemplateColumns: "minmax(0, 1fr) auto", gap: 8, alignItems: "center", borderTop: "1px solid #e6f4ff", paddingTop: 6 }}>
+                                <div style={{ minWidth: 0 }}>
+                                    <Typography.Text strong style={{ display: "block", fontSize: 12, lineHeight: "16px", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                                        {row.ingredient?.name ?? row.ingredientId}
+                                    </Typography.Text>
+                                    <Typography.Text type="secondary" style={{ display: "block", fontSize: 11, lineHeight: "15px" }}>
+                                        {row.ingredient?.alwaysAvailable
+                                            ? `Cần ${IngredientUnitHelper.formatAmount(row.amount)} ${row.unit} · Luôn có`
+                                            : `Cần ${IngredientUnitHelper.formatAmount(row.amount)} ${row.unit} · Có ${IngredientUnitHelper.formatAmount(row.availableAmount)} ${row.unit}`}
+                                    </Typography.Text>
+                                </div>
+                                <Typography.Text strong style={{ color: status.color, fontSize: 12, lineHeight: "16px", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", maxWidth: 118 }}>
+                                    {status.label}
+                                </Typography.Text>
+                            </div>
+                        })}
                     </div>
-                    <Typography.Text strong style={{ color: status.color, fontSize: 12, lineHeight: "16px", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", maxWidth: 118 }}>
-                        {status.label}
-                    </Typography.Text>
-                </div>
-            })}
-                </div>
-        </div>
+                </React.Fragment>}
+            </div>
         </Modal>}
     </React.Fragment>;
 }

@@ -294,7 +294,7 @@ Notes:
 
 ### PERF-06: Heavy Calculation Scheduling
 
-Status: Planned
+Status: Audited
 
 Purpose:
 - Keep unavoidable heavy calculations from blocking urgent user interactions, route feedback, and modal shell rendering.
@@ -305,6 +305,10 @@ Implementation:
 - Split large calculations into smaller chunks if they can block interaction on representative data.
 - Cache derived results with clear invalidation rules based on source data changes.
 - Keep user-visible totals, badges, and warnings correct when scheduled work finishes.
+- 2026-06-04 implementation: added `useScheduledCalculation` to run nonurgent derived calculations after two animation frames and publish results through transition state updates.
+- 2026-06-04 implementation: moved dashboard inventory dish scoring and shopping-list cost aggregation out of render and added pending-safe dashboard cost/suggestion states.
+- 2026-06-04 implementation: scheduled dish suggester ingredient scoring, inventory scoring, and duration filtering with pending result panels and disabled create-cart actions while current results are stale.
+- 2026-06-04 implementation: scheduled dish detail cost estimates, full expense planner ingredient/cost rollups, scheduled-meal estimate summaries, and shopping-list cost-tab summaries with visible pending states.
 
 Acceptance Criteria:
 - Heavy nonurgent work does not run before initial route feedback or modal shell render.
@@ -318,10 +322,15 @@ Audit Checklist:
 - Manual browser checks if needed: profile representative heavy interactions and confirm long tasks move out of urgent paths or are split.
 
 Test Evidence:
-- Pending until implemented/audited.
+- 2026-06-04 static audit: CodeGraph context/explore plus focused diff review identified render-path cost/scoring call sites in dashboard, dish suggester, dish cost estimate, expense planner, scheduled-meal estimate summary, and shopping-list cost tab.
+- 2026-06-04 diff review command: `git diff --stat -- src\Hooks\useScheduledCalculation.ts src\Hooks\index.ts src\Modules\Home\Screens\Dashboard.screen.tsx src\Modules\DishSuggester\Screens\DishSuggester.screen.tsx src\Modules\Dishes\Screens\DishesManageIngredient\DishCostEstimate.widget.tsx src\Modules\Dishes\Screens\DishesManageIngredient\DishExpensePlanner.widget.tsx src\Modules\ScheduledMeal\Screens\ScheduledMealEstimateSummary.widget.tsx src\Modules\ShoppingList\Screens\ShoppingListDetail.widget.tsx`.
+- 2026-06-04 build command: `npm run build`.
+- 2026-06-04 build result: passed with the existing warning set; latest bundle reported `build\static\js\main.84d532a9.js` at 567.81 kB gzip.
+- 2026-06-04 e2e command: `$env:E2E_PORT='3032'; npx.cmd playwright test --output D:\tmp\my-recipes-e2e-perf06-artifacts`.
+- 2026-06-04 e2e result: passed 9 Playwright tests and skipped 1 explicit `PERF-00` baseline test; JSON stats were `expected: 9`, `skipped: 1`, `unexpected: 0`, `flaky: 0`; report at `playwright-report/index.html`, artifacts at `D:\tmp\my-recipes-e2e-perf06-artifacts`.
 
 Notes:
-- Do not defer calculations whose absence would make the UI misleading without a clear pending state.
+- The shared scheduler currently defers work until after the first two animation frames. Chunking or workerization remains a follow-up only if larger representative data still shows long tasks after this scheduling pass.
 
 ### PERF-07: Performance Regression Suite
 
@@ -365,3 +374,4 @@ Notes:
 | 2026-06-04 | PERF-03 | Static lazy-render audit; `npm run build`; `$env:E2E_PORT='3032'; npx.cmd playwright test --output D:\tmp\my-recipes-e2e-perf03-artifacts` | Lazy-rendered shopping-list detail tabs and deferred heavy modal bodies across scheduled meals, shopping lists, cooking, global overlays, and backup dialogs; build passed with existing warnings; full e2e passed 9 and skipped 1 explicit `PERF-00` baseline test. | `src/Components/Modal/Modal.tsx`; `playwright-report/index.html`; `test-results/e2e-results.json`; `D:\tmp\my-recipes-e2e-perf03-artifacts` | Deploy `PERF-03`, then continue with `PERF-04` image and network budget. |
 | 2026-06-04 | PERF-04 | Static image audit; `npm run build`; `$env:PERF_BASELINE='1'; $env:E2E_PORT='3026'; npx.cmd playwright test tests/e2e/performance-baseline.spec.ts --output D:\tmp\my-recipes-perf04-artifacts`; `$env:E2E_PORT='3032'; npx.cmd playwright test --output D:\tmp\my-recipes-e2e-perf04-artifacts` | Added shared lazy/async image defaults, converted remaining route raw icon images, documented route request/image/transfer budgets, and verified build plus e2e. | `src/Components/Image/Image.tsx`; `test-results/performance/perf-00-baseline.json`; `playwright-report/index.html`; `test-results/e2e-results.json`; `D:\tmp\my-recipes-perf04-artifacts`; `D:\tmp\my-recipes-e2e-perf04-artifacts` | Deploy `PERF-04`, then continue with `PERF-05` navigation and loading overlay. |
 | 2026-06-04 | PERF-05 | Static navigation audit; `npm run build`; `$env:E2E_PORT='3032'; npx.cmd playwright test --output D:\tmp\my-recipes-e2e-perf05-artifacts` | Centralized sidebar/bottom-tab route feedback, removed sidebar navigation delay, transition-wrapped high-traffic dashboard/search/list/detail navigation, and verified build plus e2e. | `src/Routing/MasterPage.tsx`; `src/Modules/Home/Screens/Dashboard.screen.tsx`; `src/Modules/Home/Screens/GlobalSearch.screen.tsx`; `playwright-report/index.html`; `test-results/e2e-results.json`; `D:\tmp\my-recipes-e2e-perf05-artifacts` | Deploy `PERF-05`, then continue with `PERF-06` heavy calculation scheduling. |
+| 2026-06-04 | PERF-06 | CodeGraph static audit; focused diff review; `npm run build`; `$env:E2E_PORT='3032'; npx.cmd playwright test --output D:\tmp\my-recipes-e2e-perf06-artifacts` | Added shared scheduled calculation hook, moved dashboard/suggester/planner/cost-tab heavy calculations out of urgent render paths, added pending-safe UI states, and verified build plus e2e. | `src/Hooks/useScheduledCalculation.ts`; `src/Modules/DishSuggester/Screens/DishSuggester.screen.tsx`; `src/Modules/Dishes/Screens/DishesManageIngredient/DishExpensePlanner.widget.tsx`; `playwright-report/index.html`; `test-results/e2e-results.json`; `D:\tmp\my-recipes-e2e-perf06-artifacts` | Deploy `PERF-06`, then continue with `PERF-07` performance regression suite. |

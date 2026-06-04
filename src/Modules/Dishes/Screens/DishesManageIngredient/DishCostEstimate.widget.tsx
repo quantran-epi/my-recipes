@@ -1,13 +1,16 @@
-import { CostEstimateHelper } from "@common/Helpers/CostEstimateHelper";
+import { CostEstimateHelper, CostEstimateSummary, IngredientAmountCostEstimate } from "@common/Helpers/CostEstimateHelper";
 import { DishServingHelper } from "@common/Helpers/DishServingHelper";
 import { Button } from "@components/Button";
 import { Image } from "@components/Image";
 import { Box } from "@components/Layout/Box";
+import { Stack } from "@components/Layout/Stack";
 import { Typography } from "@components/Typography";
+import { useScheduledCalculation } from "@hooks";
 import { RootRoutes } from "@routing/RootRoutes";
 import { Dishes } from "@store/Models/Dishes";
 import { selectDishes, selectIngredients } from "@store/Selectors";
-import React, { useMemo, useState } from "react";
+import { Spin } from "antd";
+import React, { useState } from "react";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import BudgetIcon from "../../../../../assets/icons/budget.png";
@@ -18,24 +21,58 @@ type DishCostEstimateWidgetProps = {
     targetServings?: number;
 }
 
+type DishCostEstimateMetrics = {
+    estimate: IngredientAmountCostEstimate;
+    requiredPerServing: CostEstimateSummary | null;
+    missingCount: number;
+    shouldShow: boolean;
+}
+
+const createEmptyDishCostEstimateMetrics = (): DishCostEstimateMetrics => {
+    return {
+        estimate: CostEstimateHelper.emptyIngredientAmountEstimate(),
+        requiredPerServing: null,
+        missingCount: 0,
+        shouldShow: false,
+    };
+};
+
+const PendingCostEstimate: React.FunctionComponent = () => {
+    return <Box style={{ minHeight: 76, display: "flex", alignItems: "center", justifyContent: "center", textAlign: "center" }}>
+        <Stack direction="column" align="center" gap={8}>
+            <Spin size="small" />
+            <Typography.Text type="secondary">Đang tính chi phí...</Typography.Text>
+        </Stack>
+    </Box>;
+};
+
 export const DishCostEstimateWidget: React.FunctionComponent<DishCostEstimateWidgetProps> = ({ dish, targetServings }) => {
     const ingredients = useSelector(selectIngredients);
     const dishes = useSelector(selectDishes);
     const navigate = useNavigate();
     const [plannerOpen, setPlannerOpen] = useState(false);
     const normalizedTargetServings = DishServingHelper.getTargetServings(dish, targetServings);
-    const collectedAmounts = useMemo(() => DishServingHelper.collectIngredientAmounts(dish, dishes, { targetServings: normalizedTargetServings }), [dish, dishes, normalizedTargetServings]);
-    const estimate = useMemo(() => CostEstimateHelper.estimateIngredientAmounts(collectedAmounts, ingredients), [collectedAmounts, ingredients]);
-    const requiredPerServing = CostEstimateHelper.divideSummary(estimate.required, normalizedTargetServings);
-    const missingCount = estimate.total.missingPriceCount;
-    const shouldShow = CostEstimateHelper.hasAny(estimate.total);
+    const calculateCostEstimate = React.useCallback((): DishCostEstimateMetrics => {
+        const collectedAmounts = DishServingHelper.collectIngredientAmounts(dish, dishes, { targetServings: normalizedTargetServings });
+        const estimate = CostEstimateHelper.estimateIngredientAmounts(collectedAmounts, ingredients);
+        return {
+            estimate,
+            requiredPerServing: CostEstimateHelper.divideSummary(estimate.required, normalizedTargetServings),
+            missingCount: estimate.total.missingPriceCount,
+            shouldShow: CostEstimateHelper.hasAny(estimate.total),
+        };
+    }, [dish, dishes, ingredients, normalizedTargetServings]);
+    const { value: costEstimateMetrics, pending: costEstimatePending } = useScheduledCalculation(calculateCostEstimate, {
+        initialValue: createEmptyDishCostEstimateMetrics,
+    });
+    const { estimate, requiredPerServing, missingCount, shouldShow } = costEstimateMetrics;
 
     const _openFullPlanner = () => {
         setPlannerOpen(false);
         navigate(RootRoutes.AuthorizedRoutes.ExpensePlanner(dish.id, normalizedTargetServings));
     };
 
-    if (!shouldShow) return null;
+    if (!shouldShow && !costEstimatePending) return null;
 
     return <React.Fragment>
         <Box style={{
@@ -57,6 +94,7 @@ export const DishCostEstimateWidget: React.FunctionComponent<DishCostEstimateWid
                     </Button>
                 </div>
 
+                {costEstimatePending ? <PendingCostEstimate /> : <React.Fragment>
                 <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "flex-start", flexWrap: "wrap", gap: 16, width: "100%" }}>
                     <div style={{ flex: "0 1 150px", minWidth: 130 }}>
                         <CostSummaryText label="Tổng bắt buộc" summary={estimate.required} primary />
@@ -77,6 +115,7 @@ export const DishCostEstimateWidget: React.FunctionComponent<DishCostEstimateWid
                         Chưa có giá cho {missingCount} nguyên liệu.
                     </Typography.Text>}
                 </div>
+                </React.Fragment>}
             </div>
         </Box>
 

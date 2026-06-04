@@ -6,3 +6,4 @@ export * from './useOnlineStatus';
 export * from './useSharedPublish';
 export * from './useSharedDataSync';
 export * from './useGistBackup';
+export * from './useScheduledCalculation';

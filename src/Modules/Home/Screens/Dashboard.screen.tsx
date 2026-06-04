@@ -9,7 +9,7 @@ import { Box } from '@components/Layout/Box';
 import { Stack } from '@components/Layout/Stack';
 import { Tag } from '@components/Tag';
 import { Typography } from '@components/Typography';
-import { useScreenTitle } from '@hooks';
+import { useScheduledCalculation, useScreenTitle } from '@hooks';
 import { DishScorer, ScoredDish } from '@modules/DishSuggester/Helpers/DishScorer';
 import { RootRoutes } from '@routing/RootRoutes';
 import { Ingredient, IngredientInventory, IngredientUnit, InventoryBatch } from '@store/Models/Ingredient';
@@ -18,7 +18,7 @@ import { ScheduledMeal } from '@store/Models/ScheduledMeal';
 import { ShoppingList, ShoppingListIngredientGroup } from '@store/Models/ShoppingList';
 import { selectCookingSessions, selectDishes, selectIngredients, selectIngredientsById, selectInventory, selectScheduledMeals, selectShoppingLists } from '@store/Selectors';
 import moment from 'moment';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 
@@ -170,6 +170,16 @@ type PriorityAction = {
     tags?: React.ReactNode;
 }
 
+type DashboardExpensiveMetrics = {
+    suggestions: ScoredDish[];
+    shoppingListCosts: Record<string, string>;
+}
+
+const createEmptyDashboardExpensiveMetrics = (): DashboardExpensiveMetrics => ({
+    suggestions: [],
+    shoppingListCosts: {},
+});
+
 const PriorityPanel: React.FunctionComponent<{ item: PriorityAction }> = ({ item }) => {
     return <Box style={{ background: '#fff', border: `1px solid ${item.tone}33`, borderRadius: 8, overflow: 'hidden', boxShadow: '0 2px 10px rgba(0,0,0,0.04)' }}>
         <div style={{ display: 'grid', gridTemplateColumns: '5px minmax(0, 1fr)', minHeight: 92 }}>
@@ -307,25 +317,7 @@ export const DashboardScreen = () => {
     const shoppingLists = useSelector(selectShoppingLists);
     const scheduledMeals = useSelector(selectScheduledMeals);
     const cookingSessions = useSelector(selectCookingSessions);
-    const [expensiveMetricsReady, setExpensiveMetricsReady] = useState(false);
     useScreenTitle({ value: 'Tổng quan', deps: [] });
-
-    useEffect(() => {
-        setExpensiveMetricsReady(false);
-        let firstFrame: number | undefined;
-        let secondFrame: number | undefined;
-        const schedule = window.requestAnimationFrame ?? ((callback: FrameRequestCallback) => window.setTimeout(callback, 0) as unknown as number);
-        const cancel = window.cancelAnimationFrame ?? window.clearTimeout;
-
-        firstFrame = schedule(() => {
-            secondFrame = schedule(() => setExpensiveMetricsReady(true));
-        });
-
-        return () => {
-            if (firstFrame !== undefined) cancel(firstFrame);
-            if (secondFrame !== undefined) cancel(secondFrame);
-        };
-    }, [dishes, inventoryItems, ingredients]);
 
     const activeSessions = useMemo(() => cookingSessions.filter(item => item.status === 'cooking'), [cookingSessions]);
     const todayMeals = useMemo(() => scheduledMeals.filter(item => isSameDay(item.plannedDate)), [scheduledMeals]);
@@ -334,16 +326,21 @@ export const DashboardScreen = () => {
         .sort((a, b) => moment(a.plannedDate ?? a.createdDate).valueOf() - moment(b.plannedDate ?? b.createdDate).valueOf()), [shoppingLists]);
     const todayShoppingLists = useMemo(() => openShoppingLists.filter(item => isSameDay(item.plannedDate)), [openShoppingLists]);
     const urgentInventory = useMemo(() => buildUrgentInventory(inventoryItems, ingredientsById), [inventoryItems, ingredientsById]);
-    const suggestions = useMemo(() => expensiveMetricsReady
-        ? DishScorer.scoreWithInventory(dishes, inventoryItems, dishes, ingredients).slice(0, 4)
-        : [], [expensiveMetricsReady, dishes, inventoryItems, ingredients]);
-    const shoppingListCosts = useMemo(() => {
-        if (!expensiveMetricsReady) return {} as Record<string, string>;
-        return openShoppingLists.reduce((result, item) => {
+    const calculateExpensiveMetrics = React.useCallback((): DashboardExpensiveMetrics => {
+        const shoppingListCosts = openShoppingLists.reduce((result, item) => {
             result[item.id] = formatCostSummary(estimateShoppingListCart(item, ingredientsById, inventoryItems));
             return result;
         }, {} as Record<string, string>);
-    }, [expensiveMetricsReady, openShoppingLists, ingredientsById, inventoryItems]);
+
+        return {
+            suggestions: DishScorer.scoreWithInventory(dishes, inventoryItems, dishes, ingredients).slice(0, 4),
+            shoppingListCosts,
+        };
+    }, [dishes, ingredients, ingredientsById, inventoryItems, openShoppingLists]);
+    const { value: expensiveMetrics, pending: expensiveMetricsPending } = useScheduledCalculation(calculateExpensiveMetrics, {
+        initialValue: createEmptyDashboardExpensiveMetrics,
+    });
+    const { suggestions, shoppingListCosts } = expensiveMetrics;
 
     const expiredCount = urgentInventory.filter(item => item.daysLeft < 0).length;
     const todayDishCount = todayMeals.reduce((sum, meal) => sum + Object.values(meal.meals).flat().length, 0);
@@ -379,7 +376,7 @@ export const DashboardScreen = () => {
                 ? {
                     icon: <ShoppingCartOutlined />,
                     title: 'Hoàn tất mua sắm hôm nay',
-                    description: `${firstTodayShoppingList.name} · ${getProgress(firstTodayShoppingList).done}/${getProgress(firstTodayShoppingList).total} nguyên liệu · ${shoppingListCosts[firstTodayShoppingList.id] ?? '0đ'}`,
+                    description: `${firstTodayShoppingList.name} · ${getProgress(firstTodayShoppingList).done}/${getProgress(firstTodayShoppingList).total} nguyên liệu · ${expensiveMetricsPending ? '...' : shoppingListCosts[firstTodayShoppingList.id] ?? '0đ'}`,
                     actionLabel: 'Mở danh sách',
                     tone: '#0958d9',
                     onOpen: () => openRoute(RootRoutes.AuthorizedRoutes.ShoppingListRoutes.Detail(firstTodayShoppingList.id)),
@@ -430,7 +427,7 @@ export const DashboardScreen = () => {
                 : <>
                     {activeSessions.slice(0, 2).map(session => <CookingRow key={session.id} item={session} onOpen={() => openRoute(RootRoutes.AuthorizedRoutes.DishesRoutes.ManageIngredient(session.dishId))} />)}
                     {todayMeals.slice(0, 3).map(meal => <TodayMealRow key={meal.id} item={meal} onOpen={() => openRoute(RootRoutes.AuthorizedRoutes.ScheduledMealRoutes.List())} />)}
-                    {todayShoppingLists.slice(0, 2).map(list => <ShoppingListRow key={list.id} item={list} cost={shoppingListCosts[list.id] ?? '0đ'} onOpen={() => openRoute(RootRoutes.AuthorizedRoutes.ShoppingListRoutes.Detail(list.id))} />)}
+                    {todayShoppingLists.slice(0, 2).map(list => <ShoppingListRow key={list.id} item={list} cost={expensiveMetricsPending ? '...' : shoppingListCosts[list.id] ?? '0đ'} onOpen={() => openRoute(RootRoutes.AuthorizedRoutes.ShoppingListRoutes.Detail(list.id))} />)}
                 </>}
         </Section>
 
@@ -447,7 +444,9 @@ export const DashboardScreen = () => {
             title='Gợi ý món nên nấu'
             action={<Button type='link' onClick={() => openRoute(RootRoutes.AuthorizedRoutes.DishesRoutes.List())}>Mở món ăn</Button>}
         >
-            {suggestions.length === 0
+            {expensiveMetricsPending
+                ? <EmptySection text='Đang tính gợi ý từ tồn kho...' />
+                : suggestions.length === 0
                 ? <EmptySection text='Chưa có đủ dữ liệu tồn kho để gợi ý món.' />
                 : suggestions.map(item => <SuggestionRow key={item.dish.id} item={item} onOpen={() => openRoute(RootRoutes.AuthorizedRoutes.DishesRoutes.ManageIngredient(item.dish.id))} />)}
         </Section>
@@ -458,7 +457,7 @@ export const DashboardScreen = () => {
         >
             {openShoppingLists.length === 0
                 ? <EmptySection text='Không có danh sách mua sắm đang mở.' />
-                : openShoppingLists.slice(0, 5).map(item => <ShoppingListRow key={item.id} item={item} cost={shoppingListCosts[item.id] ?? '0đ'} onOpen={() => openRoute(RootRoutes.AuthorizedRoutes.ShoppingListRoutes.Detail(item.id))} />)}
+                : openShoppingLists.slice(0, 5).map(item => <ShoppingListRow key={item.id} item={item} cost={expensiveMetricsPending ? '...' : shoppingListCosts[item.id] ?? '0đ'} onOpen={() => openRoute(RootRoutes.AuthorizedRoutes.ShoppingListRoutes.Detail(item.id))} />)}
         </Section>
 
         <Section title='Tổng quan dữ liệu'>

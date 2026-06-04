@@ -1,5 +1,5 @@
 import { ShoppingCartOutlined } from "@ant-design/icons";
-import { CostEstimateHelper, CostEstimateSummary, IngredientNeedEstimateRow } from "@common/Helpers/CostEstimateHelper";
+import { CostEstimateHelper, CostEstimateSummary, IngredientAmountCostEstimate, IngredientNeedEstimateRow } from "@common/Helpers/CostEstimateHelper";
 import { DishServingHelper } from "@common/Helpers/DishServingHelper";
 import { IngredientPriceHelper } from "@common/Helpers/IngredientPriceHelper";
 import { IngredientUnitHelper } from "@common/Helpers/IngredientUnitHelper";
@@ -14,7 +14,8 @@ import { ShoppingListAddWidget } from "@modules/ShoppingList/Screens/ShoppingLis
 import { RootRoutes } from "@routing/RootRoutes";
 import { Dishes } from "@store/Models/Dishes";
 import { selectDishes, selectDishesById, selectIngredients, selectInventory } from "@store/Selectors";
-import { Empty, Select } from "antd";
+import { Empty, Select, Spin } from "antd";
+import { useScheduledCalculation } from "@hooks";
 import React, { useEffect, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
@@ -54,6 +55,13 @@ type DishExpensePlannerModalProps = DishExpensePlannerWidgetProps & {
     onClose: () => void;
 }
 
+type PlannerEstimateMetrics = {
+    estimate: IngredientAmountCostEstimate;
+    rows: IngredientNeedEstimateRow[];
+    missingRows: IngredientNeedEstimateRow[];
+    coveredRows: IngredientNeedEstimateRow[];
+}
+
 export const formatCostSummary = (summary: CostEstimateSummary, emptyText = "0đ"): string => {
     if (!CostEstimateHelper.hasAny(summary)) return emptyText;
     if (!CostEstimateHelper.hasPrice(summary)) return "Chưa có giá";
@@ -87,6 +95,24 @@ const getSeedKey = (dish?: Dishes, targetServings?: number): string => {
 const getPlannerRowBackground = (row: IngredientNeedEstimateRow): string => {
     if (!row.required) return "#f9f0ff";
     return row.missingAmount > 0 ? "#fffbe6" : "#fff";
+};
+
+const createEmptyPlannerEstimateMetrics = (): PlannerEstimateMetrics => {
+    return {
+        estimate: CostEstimateHelper.emptyIngredientAmountEstimate(),
+        rows: [],
+        missingRows: [],
+        coveredRows: [],
+    };
+};
+
+const PendingCalculationBox: React.FunctionComponent<{ text: string }> = ({ text }) => {
+    return <Box style={{ minHeight: 120, display: "flex", alignItems: "center", justifyContent: "center", textAlign: "center" }}>
+        <Stack direction="column" align="center" gap={8}>
+            <Spin size="small" />
+            <Typography.Text type="secondary">{text}</Typography.Text>
+        </Stack>
+    </Box>;
 };
 
 const IngredientCoverageRow: React.FunctionComponent<{ row: IngredientNeedEstimateRow }> = ({ row }) => {
@@ -181,24 +207,32 @@ export const DishExpensePlannerWidget: React.FunctionComponent<DishExpensePlanne
             .map(item => ({ label: item.name, value: item.id }));
     }, [allDishes, selectedDishIds]);
 
-    const plannerAmounts = useMemo(() => {
-        return selectedDishDetails.flatMap(item => DishServingHelper.collectIngredientAmounts(item.dish, allDishes, {
+    const calculatePlannerEstimate = React.useCallback((): PlannerEstimateMetrics => {
+        const plannerAmounts = selectedDishDetails.flatMap(item => DishServingHelper.collectIngredientAmounts(item.dish, allDishes, {
             targetServings: item.servings,
         }));
-    }, [selectedDishDetails, allDishes]);
+        const estimate = CostEstimateHelper.estimateIngredientAmounts(plannerAmounts, ingredients, {
+            inventoryItems,
+        });
+        const rows = estimate.rows.slice().sort((a, b) => {
+            if ((a.missingAmount > 0) !== (b.missingAmount > 0)) return a.missingAmount > 0 ? -1 : 1;
+            if (a.required !== b.required) return a.required ? -1 : 1;
+            return (a.ingredient?.name ?? a.ingredientId).localeCompare(b.ingredient?.name ?? b.ingredientId);
+        });
 
-    const estimate = useMemo(() => CostEstimateHelper.estimateIngredientAmounts(plannerAmounts, ingredients, {
-        inventoryItems,
-    }), [plannerAmounts, ingredients, inventoryItems]);
+        return {
+            estimate,
+            rows,
+            missingRows: rows.filter(row => row.missingAmount > 0),
+            coveredRows: rows.filter(row => row.missingAmount <= 0),
+        };
+    }, [allDishes, ingredients, inventoryItems, selectedDishDetails]);
+    const { value: plannerEstimateMetrics, pending: plannerEstimatePending } = useScheduledCalculation(calculatePlannerEstimate, {
+        enabled: selectedDishDetails.length > 0,
+        initialValue: createEmptyPlannerEstimateMetrics,
+    });
+    const { estimate, rows, missingRows, coveredRows } = plannerEstimateMetrics;
 
-    const rows = useMemo(() => estimate.rows.slice().sort((a, b) => {
-        if ((a.missingAmount > 0) !== (b.missingAmount > 0)) return a.missingAmount > 0 ? -1 : 1;
-        if (a.required !== b.required) return a.required ? -1 : 1;
-        return (a.ingredient?.name ?? a.ingredientId).localeCompare(b.ingredient?.name ?? b.ingredientId);
-    }), [estimate.rows]);
-
-    const missingRows = rows.filter(row => row.missingAmount > 0);
-    const coveredRows = rows.filter(row => row.missingAmount <= 0);
     const listScrollStyle: React.CSSProperties = maxIngredientListHeight
         ? { maxHeight: maxIngredientListHeight, overflowY: "auto", paddingRight: 4 }
         : {};
@@ -319,7 +353,7 @@ export const DishExpensePlannerWidget: React.FunctionComponent<DishExpensePlanne
                     </div>
                     <div style={{ display: "flex", alignItems: "center", gap: 8, flexShrink: 0 }}>
                         <Typography.Text type="secondary" style={{ fontSize: 12, lineHeight: "18px", whiteSpace: "nowrap" }}>
-                            {selectedDishDetails.length} món · {missingRows.length} thiếu · {coveredRows.length} đủ
+                            {plannerEstimatePending ? "Đang tính..." : `${selectedDishDetails.length} món · ${missingRows.length} thiếu · ${coveredRows.length} đủ`}
                         </Typography.Text>
                         <Button icon={<ShoppingCartOutlined />} disabled={shoppingListDishIds.length === 0} onClick={() => setCreateShoppingListOpen(true)}>
                             Tạo lịch mua
@@ -337,8 +371,9 @@ export const DishExpensePlannerWidget: React.FunctionComponent<DishExpensePlanne
                         </Typography.Text>
                     </div>
                     <div style={{ display: "flex", flexDirection: "column", gap: 8, width: "100%", boxSizing: "border-box", ...listScrollStyle }}>
-                        {rows.length === 0 && <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} />}
-                        {rows.map(row => <Box key={row.ingredientId} style={{ width: "100%", boxSizing: "border-box", padding: "9px 10px", border: "1px solid #f0f0f0", borderRadius: 8, background: getPlannerRowBackground(row) }}>
+                        {plannerEstimatePending && <PendingCalculationBox text="Đang tính tình trạng nguyên liệu..." />}
+                        {!plannerEstimatePending && rows.length === 0 && <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} />}
+                        {!plannerEstimatePending && rows.map(row => <Box key={row.ingredientId} style={{ width: "100%", boxSizing: "border-box", padding: "9px 10px", border: "1px solid #f0f0f0", borderRadius: 8, background: getPlannerRowBackground(row) }}>
                             <IngredientCoverageRow row={row} />
                         </Box>)}
                     </div>

@@ -11,7 +11,7 @@ import { DeferredModalContent, Modal } from "@components/Modal";
 import { useMessage } from "@components/Message";
 import { Tooltip } from "@components/Tootip";
 import { Typography } from "@components/Typography";
-import { useToggle } from "@hooks";
+import { useScheduledCalculation, useToggle } from "@hooks";
 import { Dishes } from "@store/Models/Dishes";
 import { INGREDIENT_CATEGORIES, INGREDIENT_PRESERVATION_OPTIONS, Ingredient, IngredientInventory, IngredientPreservationCondition, IngredientUnit, InventoryBatch } from "@store/Models/Ingredient";
 import { InventoryHelper } from "@common/Helpers/InventoryHelper";
@@ -22,7 +22,7 @@ import { ShoppingList, ShoppingListCompletionImport, ShoppingListIngredientAmoun
 import { completeShoppingList, setIngredientBoughtAmount, toggleDoneIngredientAmount, toggleDoneIngredientGroup } from "@store/Reducers/ShoppingListReducer";
 import { setInventory } from "@store/Reducers/InventoryReducer";
 import { selectDishes, selectDishesById, selectIngredients, selectIngredientsById, selectInventory, selectScheduledMealsById } from "@store/Selectors";
-import { Divider, InputNumber, Space, Tabs } from "antd";
+import { Divider, InputNumber, Space, Spin, Tabs } from "antd";
 import { CheckboxChangeEvent } from "antd/es/checkbox";
 import { groupBy } from "lodash";
 import moment from "moment";
@@ -356,10 +356,13 @@ export const ShoppingListDetailWidget: React.FunctionComponent<ShoppingListDetai
         return orderedKeys.map(cat => ({ category: cat, items: grouped[cat] }));
     }, [activeTab, props.shoppingList.ingredients, ingredientsById]);
 
-    const costSummary = useMemo(() => {
-        if (activeTab !== "cost") return createShoppingListCostSummary();
+    const calculateCostSummary = React.useCallback(() => {
         return buildShoppingListCostSummary(props.shoppingList, ingredientsById, inventoryItems);
-    }, [activeTab, props.shoppingList, ingredientsById, inventoryItems]);
+    }, [props.shoppingList, ingredientsById, inventoryItems]);
+    const { value: costSummary, pending: costSummaryPending } = useScheduledCalculation(calculateCostSummary, {
+        enabled: activeTab === "cost",
+        initialValue: createShoppingListCostSummary,
+    });
 
     const _completeShoppingList = () => {
         if (props.shoppingList.completedAt) return;
@@ -479,7 +482,7 @@ export const ShoppingListDetailWidget: React.FunctionComponent<ShoppingListDetai
                 key: "cost", icon: <Image src={BudgetIcon} preview={false} width={22} style={{ marginBottom: 3 }} />, label: "Chi phí",
                 children: activeTab === "cost" ? <Box data-testid="shopping-list-cost-tab">
                     <div style={{ display: "flex", flexDirection: "column", gap: 10, width: "100%", boxSizing: "border-box" }}>
-                        <ShoppingListCostSummaryWidget summary={costSummary} />
+                        <ShoppingListCostSummaryWidget summary={costSummary} pending={costSummaryPending} />
                         <ShoppingListCompletionAuditWidget shoppingList={props.shoppingList} />
                     </div>
                 </Box> : null
@@ -769,15 +772,21 @@ const ShoppingListCostMetric: React.FunctionComponent<ShoppingListCostMetricProp
     </div>
 }
 
-const ShoppingListCostSummaryWidget: React.FunctionComponent<{ summary: ShoppingListCostSummary }> = ({ summary }) => {
+const ShoppingListCostSummaryWidget: React.FunctionComponent<{ summary: ShoppingListCostSummary; pending?: boolean }> = ({ summary, pending }) => {
     const hasSummary = CostEstimateHelper.hasAny(summary.requiredToBuy)
         || CostEstimateHelper.hasAny(summary.recipeTotal)
         || CostEstimateHelper.hasAny(summary.needMore)
         || CostEstimateHelper.hasAny(summary.bought);
 
-    if (!hasSummary) return null;
+    if (!hasSummary && !pending) return null;
 
     return <Box style={{ width: "100%", boxSizing: "border-box", padding: "12px", borderRadius: 8, background: "#fafafa", border: "1px solid #f0f0f0" }}>
+        {pending ? <div style={{ minHeight: 92, display: "flex", alignItems: "center", justifyContent: "center", textAlign: "center" }}>
+            <Stack direction="column" align="center" gap={8}>
+                <Spin size="small" />
+                <Typography.Text type="secondary">Đang tính chi phí mua sắm...</Typography.Text>
+            </Stack>
+        </div> :
         <div style={{ display: "flex", flexDirection: "column", gap: 10, width: "100%", boxSizing: "border-box" }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8, flexWrap: "wrap", width: "100%", boxSizing: "border-box" }}>
                 <Box>
@@ -817,7 +826,7 @@ const ShoppingListCostSummaryWidget: React.FunctionComponent<{ summary: Shopping
                     emptyText="0đ"
                 />}
             </div>
-        </div>
+        </div>}
     </Box>
 }
 

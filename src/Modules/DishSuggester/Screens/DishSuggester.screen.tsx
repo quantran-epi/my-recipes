@@ -7,10 +7,10 @@ import { Stack } from "@components/Layout/Stack";
 import { DeferredModalContent, Modal } from "@components/Modal";
 import { Tag } from "@components/Tag";
 import { Typography } from "@components/Typography";
-import { useToggle } from "@hooks";
+import { useScheduledCalculation, useToggle } from "@hooks";
 import { DishScorer, ScoredDish, ScoredDishGroup } from "../Helpers/DishScorer";
 import { selectDishes, selectIngredients, selectIngredientsById, selectInventory } from "@store/Selectors";
-import { InputNumber, Input, Select } from "antd";
+import { InputNumber, Input, Select, Spin } from "antd";
 import React, { useMemo, useState } from "react";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
@@ -38,6 +38,33 @@ const totalDurationMins = (dish: Dishes) => {
     const d = dish.duration;
     if (!d) return 0;
     return (d.unfreeze ?? 0) + (d.prepare ?? 0) + (d.cooking ?? 0) + (d.serve ?? 0) + (d.cooldown ?? 0);
+};
+
+type DishSuggestionCalculation = {
+    scored: ScoredDish[];
+    groups: ScoredDishGroup[];
+}
+
+type DurationDishCalculation = {
+    dishes: Dishes[];
+}
+
+const createEmptyDishSuggestionCalculation = (): DishSuggestionCalculation => ({
+    scored: [],
+    groups: [],
+});
+
+const createEmptyDurationDishCalculation = (): DurationDishCalculation => ({
+    dishes: [],
+});
+
+const PendingCalculationBox: React.FunctionComponent<{ text: string }> = ({ text }) => {
+    return <Box style={{ minHeight: 120, display: "flex", alignItems: "center", justifyContent: "center", textAlign: "center" }}>
+        <Stack direction="column" align="center" gap={8}>
+            <Spin size="small" />
+            <Typography.Text type="secondary">{text}</Typography.Text>
+        </Stack>
+    </Box>;
 };
 
 export const DishSuggesterScreen: React.FC<DishSuggesterScreenProps> = ({ open, onClose, initialMode, initialIngredientIds }) => {
@@ -82,17 +109,27 @@ export const DishSuggesterScreen: React.FC<DishSuggesterScreenProps> = ({ open, 
             .map(([id]) => id);
     }, [open, inventory, ingredientsById]);
 
-    const ingredientScored = useMemo(() => {
-        if (!open || mode !== "ingredients" || step !== 1) return [];
-        return DishScorer.score(dishes, selectedIngredientIds, dishes);
-    }, [open, mode, step, dishes, selectedIngredientIds]);
-    const ingredientGroups = useMemo(() => DishScorer.group(ingredientScored), [ingredientScored]);
+    const calculateIngredientSuggestions = React.useCallback((): DishSuggestionCalculation => {
+        const scored = DishScorer.score(dishes, selectedIngredientIds, dishes);
+        return { scored, groups: DishScorer.group(scored) };
+    }, [dishes, selectedIngredientIds]);
+    const { value: ingredientSuggestions, pending: ingredientSuggestionsPending } = useScheduledCalculation(calculateIngredientSuggestions, {
+        enabled: open && mode === "ingredients" && step === 1,
+        initialValue: createEmptyDishSuggestionCalculation,
+    });
+    const ingredientScored = ingredientSuggestions.scored;
+    const ingredientGroups = ingredientSuggestions.groups;
 
-    const inventoryScored = useMemo(() => {
-        if (!open || mode !== "inventory") return [];
-        return DishScorer.scoreWithInventory(dishes, inventory as any, dishes, allIngredients);
-    }, [open, mode, dishes, inventory, allIngredients]);
-    const inventoryGroups = useMemo(() => DishScorer.group(inventoryScored), [inventoryScored]);
+    const calculateInventorySuggestions = React.useCallback((): DishSuggestionCalculation => {
+        const scored = DishScorer.scoreWithInventory(dishes, inventory as any, dishes, allIngredients);
+        return { scored, groups: DishScorer.group(scored) };
+    }, [allIngredients, dishes, inventory]);
+    const { value: inventorySuggestions, pending: inventorySuggestionsPending } = useScheduledCalculation(calculateInventorySuggestions, {
+        enabled: open && mode === "inventory",
+        initialValue: createEmptyDishSuggestionCalculation,
+    });
+    const inventoryScored = inventorySuggestions.scored;
+    const inventoryGroups = inventorySuggestions.groups;
 
     const filteredInventoryGroups = useMemo(() => {
         if (fridgeSearchIds.length === 0) return inventoryGroups;
@@ -107,12 +144,18 @@ export const DishSuggesterScreen: React.FC<DishSuggesterScreenProps> = ({ open, 
             .filter(group => group.dishes.length > 0);
     }, [inventoryGroups, fridgeSearchIds]);
 
-    const durationFiltered = useMemo(() => {
-        if (!open || mode !== "duration") return [];
-        return dishes
-            .filter(d => { const t = totalDurationMins(d); return t > 0 && t <= maxMinutes; })
-            .sort((a, b) => totalDurationMins(a) - totalDurationMins(b));
-    }, [open, mode, dishes, maxMinutes]);
+    const calculateDurationDishes = React.useCallback((): DurationDishCalculation => {
+        return {
+            dishes: dishes
+                .filter(d => { const t = totalDurationMins(d); return t > 0 && t <= maxMinutes; })
+                .sort((a, b) => totalDurationMins(a) - totalDurationMins(b)),
+        };
+    }, [dishes, maxMinutes]);
+    const { value: durationCalculation, pending: durationPending } = useScheduledCalculation(calculateDurationDishes, {
+        enabled: open && mode === "duration" && step === 1,
+        initialValue: createEmptyDurationDishCalculation,
+    });
+    const durationFiltered = durationCalculation.dishes;
 
     const filteredDurationDishes = useMemo(() => {
         if (durationSearchIds.length === 0) return durationFiltered;
@@ -166,7 +209,7 @@ export const DishSuggesterScreen: React.FC<DishSuggesterScreenProps> = ({ open, 
 
     const _missingIngredientName = (id: string) => ingredientsById.get(id)?.name ?? id;
 
-    const ResultsFooter = ({ dishIds }: { dishIds: string[] }) => (
+    const ResultsFooter = ({ dishIds, pending = false }: { dishIds: string[]; pending?: boolean }) => (
         <>
             {dishIds.length > 0 && (
                 <Box style={{
@@ -210,7 +253,7 @@ export const DishSuggesterScreen: React.FC<DishSuggesterScreenProps> = ({ open, 
                 )}
                 <Button
                     type="primary"
-                    disabled={dishIds.length === 0}
+                    disabled={pending || dishIds.length === 0}
                     icon={<ShoppingCartOutlined />}
                     onClick={toggleShoppingListAdd.show}
                     style={{ borderRadius: 20, paddingInline: 20, marginLeft: "auto" }}
@@ -303,7 +346,9 @@ export const DishSuggesterScreen: React.FC<DishSuggesterScreenProps> = ({ open, 
 
             {mode === "ingredients" && step === 1 && (
                 <>
-                    {ingredientGroups.length === 0
+                    {ingredientSuggestionsPending
+                        ? <PendingCalculationBox text="Đang tính gợi ý món..." />
+                        : ingredientGroups.length === 0
                         ? <Box style={{ textAlign: "center", padding: "32px 0" }}>
                             <Typography.Text type="secondary">Không tìm thấy món phù hợp</Typography.Text>
                         </Box>
@@ -313,7 +358,7 @@ export const DishSuggesterScreen: React.FC<DishSuggesterScreenProps> = ({ open, 
                             onToggle={_toggleDish}
                         />
                     }
-                    <ResultsFooter dishIds={selectedDishIds} />
+                    <ResultsFooter dishIds={selectedDishIds} pending={ingredientSuggestionsPending} />
                 </>
             )}
 
@@ -379,7 +424,9 @@ export const DishSuggesterScreen: React.FC<DishSuggesterScreenProps> = ({ open, 
                                     label: i.name,
                                 }))}
                             />
-                            {filteredInventoryGroups.length === 0
+                            {inventorySuggestionsPending
+                                ? <PendingCalculationBox text="Đang tính món phù hợp với tủ lạnh..." />
+                                : filteredInventoryGroups.length === 0
                                 ? <Box style={{ textAlign: "center", padding: "32px 0" }}>
                                     <Typography.Text type="secondary">
                                         {fridgeSearchIds.length > 0
@@ -393,7 +440,7 @@ export const DishSuggesterScreen: React.FC<DishSuggesterScreenProps> = ({ open, 
                                     onToggle={_toggleDish}
                                 />
                             }
-                            <ResultsFooter dishIds={selectedDishIds} />
+                            <ResultsFooter dishIds={selectedDishIds} pending={inventorySuggestionsPending} />
                         </>
                     )}
                 </>
@@ -447,7 +494,9 @@ export const DishSuggesterScreen: React.FC<DishSuggesterScreenProps> = ({ open, 
 
             {mode === "duration" && step === 1 && (
                 <>
-                    {durationFiltered.length === 0 ? (
+                    {durationPending ? (
+                        <PendingCalculationBox text="Đang lọc món theo thời gian..." />
+                    ) : durationFiltered.length === 0 ? (
                         <Box style={{ textAlign: "center", padding: "32px 0" }}>
                             <Typography.Text type="secondary">
                                 Không có món nào nấu được trong {maxMinutes} phút
@@ -578,7 +627,7 @@ export const DishSuggesterScreen: React.FC<DishSuggesterScreenProps> = ({ open, 
                         </Button>
                         <Button
                             type="primary"
-                            disabled={selectedDishIds.length === 0}
+                            disabled={durationPending || selectedDishIds.length === 0}
                             icon={<ShoppingCartOutlined />}
                             onClick={toggleShoppingListAdd.show}
                             style={{ borderRadius: 20, paddingInline: 20 }}
