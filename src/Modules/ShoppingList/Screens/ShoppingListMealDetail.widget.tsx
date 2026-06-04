@@ -6,6 +6,7 @@ import { List } from "@components/List";
 import { Typography } from "@components/Typography";
 import { useToggle } from "@hooks";
 import { DishesReadonlyDetailModal } from "@modules/Dishes/Screens/DishesManageIngredient/DishReadonlyDetail.widget";
+import { ScheduledMealEstimateSummary } from "@modules/ScheduledMeal/Screens/ScheduledMealEstimateSummary.widget";
 import { Dishes } from "@store/Models/Dishes";
 import { RootState } from "@store/Store";
 import moment from "moment";
@@ -28,12 +29,19 @@ export const ShoppingListMealDetailWidget: FunctionComponent<ShoppingListMealDet
         return dishes.find(e => e.id === id);
     }
 
+    if (!meal) return <Typography.Text type="secondary">Không tìm thấy thực đơn.</Typography.Text>;
+
+    const selectedDishIds = Object.values(meal.meals).flat();
+
     return <React.Fragment>
         <Divider orientation="left">Thông tin chung</Divider>
         <Stack gap={0} direction="column" align="flex-start">
             <Typography.Text><Typography.Text strong>Tên gợi nhớ: </Typography.Text> {meal.name}</Typography.Text>
             <Typography.Text><Typography.Text strong>Ngày thực hiện: </Typography.Text> {moment(meal.plannedDate).format("ddd, DD/MM/YYYY")}</Typography.Text>
         </Stack>
+
+        <Divider orientation="left">Chi phí và tồn kho</Divider>
+        <ScheduledMealEstimateSummary dishIds={selectedDishIds} title="Ước tính thực đơn" maxRows={8} />
 
         <Divider orientation="left">Bữa sáng</Divider>
         <List
@@ -54,11 +62,13 @@ export const ShoppingListMealDetailWidget: FunctionComponent<ShoppingListMealDet
 }
 
 type ShoppingListMealDishesItemProps = {
-    dish: Dishes;
+    dish?: Dishes;
 }
 
 export const ShoppingListMealDishesItem: React.FunctionComponent<ShoppingListMealDishesItemProps> = (props) => {
     const toggleDishesDetail = useToggle();
+
+    if (!props.dish) return null;
 
     return <List.Item>
         <Button onClick={toggleDishesDetail.show} type="link" style={{ color: "blue" }}>{props.dish.name}</Button>

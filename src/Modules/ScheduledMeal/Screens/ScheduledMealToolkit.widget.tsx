@@ -35,6 +35,31 @@ const floatIconStyle: React.CSSProperties = {
     marginBottom: 2,
 };
 
+const quickNavDescriptionCss = `
+.quick-nav-float .ant-float-btn:not(.ant-float-btn-group-trigger) .ant-float-btn-body,
+.quick-nav-float .ant-float-btn:not(.ant-float-btn-group-trigger) .ant-float-btn-content {
+    overflow: visible;
+}
+.quick-nav-float .ant-float-btn:not(.ant-float-btn-group-trigger) .ant-float-btn-description {
+    position: absolute;
+    right: 46px;
+    top: 50%;
+    transform: translateY(-50%);
+    max-width: 132px;
+    padding: 3px 8px;
+    border: 1px solid rgba(0,0,0,0.06);
+    border-radius: 999px;
+    background: rgba(255,255,255,0.96);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    color: #262626;
+    font-size: 12px;
+    line-height: 18px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+`;
+
 export const ScheduledMealToolkitWidget: React.FC<ScheduledMealToolkitWidgetProps> = ({ onNavigate }) => {
     const selectedMeals = useSelector((state: RootState) => state.personal.scheduledMeal.selectedMeals);
     const toggle = useToggle();
@@ -69,7 +94,8 @@ export const ScheduledMealToolkitWidget: React.FC<ScheduledMealToolkitWidgetProp
     }
 
     return <React.Fragment>
-        <FloatButton.Group style={quickActionGroupStyle} badge={selectedMeals.length > 0 ? { count: selectedMeals.length } : undefined} shape="circle"
+        <style>{quickNavDescriptionCss}</style>
+        <FloatButton.Group className="quick-nav-float" style={quickActionGroupStyle} badge={selectedMeals.length > 0 ? { count: selectedMeals.length } : undefined} shape="circle"
             onClick={() => {
                 if (toggle.value) toggle.hide();
                 else toggle.show();
@@ -82,15 +108,15 @@ export const ScheduledMealToolkitWidget: React.FC<ScheduledMealToolkitWidgetProp
                 : <AppstoreOutlined />
             }>
             {selectedMeals.length > 0 && <Popconfirm title={"Bỏ chọn các thực đơn?"} onConfirm={_onEraseSelected}>
-                <FloatButton tooltip="Bỏ chọn thực đơn" icon={<Image preview={false} src={EraseIcon} width={20} style={{ marginBottom: 4 }} />} />
+                <FloatButton description="Bỏ chọn" tooltip="Bỏ chọn thực đơn" icon={<Image preview={false} src={EraseIcon} width={20} style={{ marginBottom: 4 }} />} />
             </Popconfirm>}
-            {selectedMeals.length > 0 && <FloatButton tooltip={`Tạo lịch mua sắm (${selectedMeals.length})`} icon={<Image preview={false} src={ShoppingListAddIcon} width={20} style={floatIconStyle} />} onClick={_onOpenAddShoppingList} />}
-            <FloatButton tooltip="Tổng quan" icon={<HomeOutlined />} onClick={() => _navigate(RootRoutes.AuthorizedRoutes.Root())} />
-            <FloatButton tooltip="Món ăn" icon={<Image preview={false} src={DishesIcon} width={20} style={floatIconStyle} />} onClick={() => _navigate(RootRoutes.AuthorizedRoutes.DishesRoutes.List())} />
-            <FloatButton tooltip="Nguyên liệu" icon={<Image preview={false} src={IngredientIcon} width={20} style={floatIconStyle} />} onClick={() => _navigate(RootRoutes.AuthorizedRoutes.IngredientRoutes.List())} />
-            <FloatButton tooltip="Mua sắm" icon={<Image preview={false} src={ShoppinglistIcon} width={20} style={floatIconStyle} />} onClick={() => _navigate(RootRoutes.AuthorizedRoutes.ShoppingListRoutes.List())} />
-            <FloatButton tooltip="Thực đơn" icon={<Image preview={false} src={MealsIcon} width={20} style={floatIconStyle} />} onClick={() => _navigate(RootRoutes.AuthorizedRoutes.ScheduledMealRoutes.List())} />
-            <FloatButton tooltip="Kế hoạch chi phí" icon={<Image preview={false} src={BudgetIcon} width={20} style={floatIconStyle} />} onClick={() => _navigate(RootRoutes.AuthorizedRoutes.ExpensePlanner())} />
+            {selectedMeals.length > 0 && <FloatButton description="Tạo lịch mua" tooltip={`Tạo lịch mua sắm (${selectedMeals.length})`} icon={<Image preview={false} src={ShoppingListAddIcon} width={20} style={floatIconStyle} />} onClick={_onOpenAddShoppingList} />}
+            <FloatButton description="Tổng quan" tooltip="Tổng quan" icon={<HomeOutlined />} onClick={() => _navigate(RootRoutes.AuthorizedRoutes.Root())} />
+            <FloatButton description="Món ăn" tooltip="Món ăn" icon={<Image preview={false} src={DishesIcon} width={20} style={floatIconStyle} />} onClick={() => _navigate(RootRoutes.AuthorizedRoutes.DishesRoutes.List())} />
+            <FloatButton description="Nguyên liệu" tooltip="Nguyên liệu" icon={<Image preview={false} src={IngredientIcon} width={20} style={floatIconStyle} />} onClick={() => _navigate(RootRoutes.AuthorizedRoutes.IngredientRoutes.List())} />
+            <FloatButton description="Mua sắm" tooltip="Mua sắm" icon={<Image preview={false} src={ShoppinglistIcon} width={20} style={floatIconStyle} />} onClick={() => _navigate(RootRoutes.AuthorizedRoutes.ShoppingListRoutes.List())} />
+            <FloatButton description="Thực đơn" tooltip="Thực đơn" icon={<Image preview={false} src={MealsIcon} width={20} style={floatIconStyle} />} onClick={() => _navigate(RootRoutes.AuthorizedRoutes.ScheduledMealRoutes.List())} />
+            <FloatButton description="Chi phí" tooltip="Kế hoạch chi phí" icon={<Image preview={false} src={BudgetIcon} width={20} style={floatIconStyle} />} onClick={() => _navigate(RootRoutes.AuthorizedRoutes.ExpensePlanner())} />
         </FloatButton.Group>
 
         <Modal open={toggleAddModal.value} title={

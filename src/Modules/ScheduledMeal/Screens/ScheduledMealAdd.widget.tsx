@@ -14,8 +14,9 @@ import { addShoppingList } from "@store/Reducers/ShoppingListReducer"
 import { RootState } from "@store/Store"
 import dayjs from "dayjs"
 import moment from "moment"
-import { useEffect } from "react"
+import { useEffect, useMemo } from "react"
 import { useDispatch, useSelector } from "react-redux"
+import { ScheduledMealEstimateSummary } from "./ScheduledMealEstimateSummary.widget"
 
 export const ScheduledMealAddWidget = ({ date, onDone }) => {
     const dispatch = useDispatch();
@@ -55,6 +56,7 @@ export const ScheduledMealAddWidget = ({ date, onDone }) => {
     })
 
     const meals = SmartForm.useWatch("meals", addScheduledMealForm.form);
+    const selectedDishIds = useMemo(() => Object.values(meals ?? { breakfast: [], lunch: [], dinner: [] }).flat(), [meals]);
 
     const _onSave = () => {
         addScheduledMealForm.submit();
@@ -136,6 +138,7 @@ export const ScheduledMealAddWidget = ({ date, onDone }) => {
         <SmartForm.Item {...addScheduledMealForm.itemDefinitions.plannedDate}>
             <DatePicker style={{ width: "100%" }} placeholder="Chọn ngày" format={"DD/MM/YYYY"} />
         </SmartForm.Item>
+        <ScheduledMealEstimateSummary dishIds={selectedDishIds} title="Ước tính ngày này" maxRows={4} />
         <Stack fullwidth justify="flex-end">
             <Button onClick={_onSave}>Lưu</Button>
         </Stack>

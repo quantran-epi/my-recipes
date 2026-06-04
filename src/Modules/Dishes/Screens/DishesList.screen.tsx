@@ -6,7 +6,7 @@ import { Image } from "@components/Image";
 import { Box } from "@components/Layout/Box";
 import { Space } from "@components/Layout/Space";
 import { Stack } from "@components/Layout/Stack";
-import { List } from "@components/List";
+import { List, VirtualListScrollTopButton } from "@components/List";
 import { useMessage } from "@components/Message";
 import { Modal } from "@components/Modal";
 import { Popover } from "@components/Popover";
@@ -20,10 +20,10 @@ import { DishesDurationEditParams, duplicateDish, removeDishes, updateDishDurati
 import { RootState } from "@store/Store";
 import { RootRoutes } from "@routing/RootRoutes";
 import { debounce, orderBy, sortBy } from "lodash";
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { List as VirtualList, useDynamicRowHeight, type RowComponentProps } from "react-window";
+import { List as VirtualList, useDynamicRowHeight, type ListImperativeAPI, type RowComponentProps } from "react-window";
 import Clock2Icon from "../../../../assets/icons/clock (2).png";
 import NoodlesIcon from "../../../../assets/icons/noodles.png";
 import StepsIcon from "../../../../assets/icons/process.png";
@@ -179,6 +179,7 @@ export const DishesListScreen = () => {
     const dispatch = useDispatch();
     const { } = useScreenTitle({ value: "Món ăn", deps: [] });
     const rowHeight = useDynamicRowHeight({ defaultRowHeight: 204, key: searchText + (activeTag ?? "") + activeStatus });
+    const listRef = useRef<ListImperativeAPI | null>(null);
     const { isAdmin } = useAdminMode();
     const normalizedSearch = searchText.trim().toLowerCase();
 
@@ -269,14 +270,16 @@ export const DishesListScreen = () => {
                     ))}
                 </div>
             )}
-            <div style={{ flex: 1, minHeight: 0 }}>
+            <div style={{ flex: 1, minHeight: 0, position: "relative" }}>
                 <VirtualList
+                    listRef={listRef}
                     rowComponent={DishRow}
                     rowCount={filteredDishes.length}
                     rowHeight={rowHeight}
                     rowProps={{ items: filteredDishes, allDishes: dishes, allIngredients: ingredients, summaries: dishSummaries, onDelete: _onDelete, onDuplicate: _onDuplicate, isAdmin }}
                     style={{ height: "100%" }}
                 />
+                <VirtualListScrollTopButton listRef={listRef} rowCount={filteredDishes.length} />
             </div>
         </div>
         <Modal open={toggleAddModal.value} title={
@@ -427,6 +430,28 @@ export const DishesItem: React.FunctionComponent<DishesItemProps> = (props) => {
                                 {extraTagCount > 0 && <Tag style={{ fontSize: 11, padding: "0 5px", marginInlineEnd: 0 }}>+{extraTagCount}</Tag>}
                                 <Tag color="blue" style={{ fontSize: 11, padding: "0 5px", marginInlineEnd: 0 }}>{baseServings} phần</Tag>
                             </Space>
+                            <Popover title="Thời lượng" content={<List size="small" dataSource={Object.entries(props.item.duration)} renderItem={item => {
+                                let processName = "";
+                                switch (item[0] as keyof DishDuration) {
+                                    case "unfreeze": processName = "Rã đông"; break;
+                                    case "prepare": processName = "Sơ chế"; break;
+                                    case "cooking": processName = "Nấu nướng"; break;
+                                    case "serve": processName = "Trình bày"; break;
+                                    case "cooldown": processName = "Để nguội"; break;
+                                }
+                                return <List.Item style={{ paddingInline: 0 }}>
+                                    <Stack fullwidth justify="space-between">
+                                        <Typography.Text style={{ fontSize: 16 }}>{processName}:</Typography.Text>
+                                        {Boolean(item[1]) && <Tag>{moment.duration(item[1], "minutes").locale("vi").humanize()}</Tag>}
+                                    </Stack>
+                                </List.Item>
+                            }} />}>
+                                <button type="button" style={{ border: 0, background: "transparent", padding: 0, marginTop: 4, textAlign: "left", cursor: hasDuration ? "pointer" : "default" }}>
+                                    <Typography.Text type="secondary" style={{ fontSize: 12, lineHeight: "16px" }}>
+                                        <ClockCircleOutlined style={{ marginRight: 4 }} />{hasDuration ? _sumDuration() : "Chưa set thời gian"}
+                                    </Typography.Text>
+                                </button>
+                            </Popover>
                         </div>
 
                         <Dropdown menu={{
@@ -448,7 +473,7 @@ export const DishesItem: React.FunctionComponent<DishesItemProps> = (props) => {
                         </Dropdown>
                     </div>
 
-                    <div style={{ display: "grid", gridTemplateColumns: "repeat(3, minmax(0, 1fr))", gap: 6 }}>
+                    <div style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: 6 }}>
                         <button type="button" onClick={hasIngredients ? toggleIngredientsOverview.show : undefined} style={{ border: "1px solid #f0f0f0", background: "#fafafa", borderRadius: 8, padding: "6px 7px", textAlign: "left", cursor: hasIngredients ? "pointer" : "default", minWidth: 0 }}>
                             <Typography.Text type="secondary" style={{ display: "block", fontSize: 11, lineHeight: "14px" }}>Nguyên liệu</Typography.Text>
                             <Typography.Text strong style={{ display: "block", fontSize: 13, lineHeight: "18px", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
@@ -456,30 +481,6 @@ export const DishesItem: React.FunctionComponent<DishesItemProps> = (props) => {
                             </Typography.Text>
                             {optionalIngredientCount > 0 && <Typography.Text type="secondary" style={{ display: "block", fontSize: 11, lineHeight: "14px" }}>{optionalIngredientCount} tùy chọn</Typography.Text>}
                         </button>
-
-                        <Popover title="Thời lượng" content={<List size="small" dataSource={Object.entries(props.item.duration)} renderItem={item => {
-                            let processName = "";
-                            switch (item[0] as keyof DishDuration) {
-                                case "unfreeze": processName = "Rã đông"; break;
-                                case "prepare": processName = "Sơ chế"; break;
-                                case "cooking": processName = "Nấu nướng"; break;
-                                case "serve": processName = "Trình bày"; break;
-                                case "cooldown": processName = "Để nguội"; break;
-                            }
-                            return <List.Item style={{ paddingInline: 0 }}>
-                                <Stack fullwidth justify="space-between">
-                                    <Typography.Text style={{ fontSize: 16 }}>{processName}:</Typography.Text>
-                                    {Boolean(item[1]) && <Tag>{moment.duration(item[1], "minutes").locale("vi").humanize()}</Tag>}
-                                </Stack>
-                            </List.Item>
-                        }} />}>
-                            <button type="button" style={{ border: "1px solid #f0f0f0", background: "#fafafa", borderRadius: 8, padding: "6px 7px", textAlign: "left", cursor: hasDuration ? "pointer" : "default", minWidth: 0 }}>
-                                <Typography.Text type="secondary" style={{ display: "block", fontSize: 11, lineHeight: "14px" }}>Thời gian</Typography.Text>
-                                <Typography.Text strong style={{ display: "block", fontSize: 13, lineHeight: "18px", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
-                                    {hasDuration ? _sumDuration() : "Chưa set"}
-                                </Typography.Text>
-                            </button>
-                        </Popover>
 
                         <button type="button" onClick={hasSteps ? toggleStepsOverview.show : undefined} style={{ border: "1px solid #f0f0f0", background: "#fafafa", borderRadius: 8, padding: "6px 7px", textAlign: "left", cursor: hasSteps ? "pointer" : "default", minWidth: 0 }}>
                             <Typography.Text type="secondary" style={{ display: "block", fontSize: 11, lineHeight: "14px" }}>Quy trình</Typography.Text>

@@ -389,7 +389,7 @@ export const DashboardScreen = () => {
     return <Box data-testid="dashboard" style={{ display: 'flex', flexDirection: 'column', gap: 14, paddingBottom: 12 }}>
         <PriorityPanel item={priorityAction} />
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(78px, 1fr))', gap: 8 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(135px, 1fr))', gap: 8 }}>
             <StatusChip icon={<CalendarOutlined />} label='món hôm nay' value={todayDishCount} tone='#1677ff' />
             <StatusChip icon={<ShoppingCartOutlined />} label='lịch mua' value={todayShoppingLists.length} tone='#0958d9' />
             <StatusChip icon={<WarningOutlined />} label='lô quá hạn' value={expiredCount} tone='#cf1322' />

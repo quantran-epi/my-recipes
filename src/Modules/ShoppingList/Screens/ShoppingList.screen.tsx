@@ -4,6 +4,7 @@ import { Dropdown } from "@components/Dropdown";
 import { Input } from "@components/Form/Input";
 import { Image } from "@components/Image";
 import { Box } from "@components/Layout/Box";
+import { VirtualListScrollTopButton } from "@components/List";
 import { Space } from "@components/Layout/Space";
 import { Stack } from "@components/Layout/Stack";
 import { Modal } from "@components/Modal";
@@ -17,10 +18,10 @@ import { generateIngredient, removeShoppingList } from "@store/Reducers/Shopping
 import { RootState } from "@store/Store";
 import { debounce, orderBy } from "lodash";
 import moment from "moment";
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { List as VirtualList, useDynamicRowHeight, type RowComponentProps } from "react-window";
+import { List as VirtualList, useDynamicRowHeight, type ListImperativeAPI, type RowComponentProps } from "react-window";
 import ShoppinglistIcon from "../../../../assets/icons/shoppingList.png";
 import { ShoppingListAddWidget } from "./ShoppingListAdd.widget";
 import { ShoppingListExportWidget } from "./ShoppingListExport.widget";
@@ -103,6 +104,7 @@ export const ShoppingListScreen = () => {
     const [searchText, setSearchText] = useState("");
     const [activeStatus, setActiveStatus] = useState<ShoppingListStatusFilter>("all");
     const rowHeight = useDynamicRowHeight({ defaultRowHeight: 164, key: searchText + activeStatus });
+    const listRef = useRef<ListImperativeAPI | null>(null);
     const normalizedSearch = searchText.trim().toLowerCase();
     const filterData = useMemo(() => {
         const statusCounts = SHOPPING_LIST_STATUS_FILTERS.reduce((result, item) => {
@@ -158,14 +160,16 @@ export const ShoppingListScreen = () => {
                     </button>
                 ))}
             </div>
-            <div style={{ flex: 1, minHeight: 0 }}>
+            <div style={{ flex: 1, minHeight: 0, position: "relative" }}>
                 <VirtualList
+                    listRef={listRef}
                     rowComponent={ShoppingListRow}
                     rowCount={filteredShoppingLists.length}
                     rowHeight={rowHeight}
                     rowProps={{ items: filteredShoppingLists, onDelete: _onDelete }}
                     style={{ height: "100%" }}
                 />
+                <VirtualListScrollTopButton listRef={listRef} rowCount={filteredShoppingLists.length} />
             </div>
         </div>
         <Modal open={toggleAddModal.value} title={<Space>

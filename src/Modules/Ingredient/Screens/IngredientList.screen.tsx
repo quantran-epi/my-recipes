@@ -4,6 +4,7 @@ import { Input } from "@components/Form/Input";
 import { Image } from "@components/Image";
 import { Space } from "@components/Layout/Space";
 import { Stack } from "@components/Layout/Stack";
+import { VirtualListScrollTopButton } from "@components/List";
 import { Modal } from "@components/Modal";
 import { Popconfirm } from "@components/Popconfirm";
 import { Tooltip } from "@components/Tootip";
@@ -15,9 +16,9 @@ import { Ingredient, IngredientInventory, INGREDIENT_CATEGORIES, INGREDIENT_PRES
 import { removeIngredient } from "@store/Reducers/IngredientReducer";
 import { RootState } from "@store/Store";
 import { debounce, sortBy } from "lodash";
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { List as VirtualList, useDynamicRowHeight, type RowComponentProps } from "react-window";
+import { List as VirtualList, useDynamicRowHeight, type ListImperativeAPI, type RowComponentProps } from "react-window";
 import VegetablesIcon from "../../../../assets/icons/vegetable.png";
 import { IngredientAddWidget } from "./IngredientAdd.widget";
 import { IngredientEditWidget } from "./IngredientEdit.widget";
@@ -126,6 +127,7 @@ export const IngredientListScreen = () => {
     const [activeCategory, setActiveCategory] = useState<string | null>(null);
     const inventoryItems = useSelector((state: RootState) => state.personal.inventory.items);
     const rowHeight = useDynamicRowHeight({ defaultRowHeight: 132, key: searchText + activeStockFilter + (activeCategory ?? "") });
+    const listRef = useRef<ListImperativeAPI | null>(null);
     const { isAdmin } = useAdminMode();
     const normalizedSearch = searchText.trim().toLowerCase();
 
@@ -235,14 +237,16 @@ export const IngredientListScreen = () => {
                     ))}
                 </div>
             )}
-            <div style={{ flex: 1, minHeight: 0 }}>
+            <div style={{ flex: 1, minHeight: 0, position: "relative" }}>
                 <VirtualList
+                    listRef={listRef}
                     rowComponent={IngredientRow}
                     rowCount={filteredIngredients.length}
                     rowHeight={rowHeight}
                     rowProps={{ items: filteredIngredients, stockSnapshots, onDelete: _onDelete, isAdmin, onSuggest: _onSuggest }}
                     style={{ height: "100%" }}
                 />
+                <VirtualListScrollTopButton listRef={listRef} rowCount={filteredIngredients.length} />
             </div>
         </div>
         <Modal width={640} open={toggleAddModal.value} title={

@@ -1,3 +1,4 @@
+import { ShoppingCartOutlined } from "@ant-design/icons";
 import { CostEstimateHelper, CostEstimateSummary, IngredientNeedEstimateRow } from "@common/Helpers/CostEstimateHelper";
 import { DishServingHelper } from "@common/Helpers/DishServingHelper";
 import { IngredientPriceHelper } from "@common/Helpers/IngredientPriceHelper";
@@ -9,12 +10,16 @@ import { Stack } from "@components/Layout/Stack";
 import { Modal } from "@components/Modal";
 import { ServingSizeInput } from "@components/Form/ServingSizeInput";
 import { Typography } from "@components/Typography";
+import { ShoppingListAddWidget } from "@modules/ShoppingList/Screens/ShoppingListAdd.widget";
+import { RootRoutes } from "@routing/RootRoutes";
 import { Dishes } from "@store/Models/Dishes";
 import { selectDishes, selectIngredients, selectInventory } from "@store/Selectors";
 import { Empty, Select } from "antd";
 import React, { useEffect, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
 import BudgetIcon from "../../../../../assets/icons/budget.png";
+import ShoppinglistIcon from "../../../../../assets/icons/shoppingList.png";
 
 const LazyDishesReadonlyDetailModal = React.lazy(() => import("./DishReadonlyDetail.widget").then(module => ({
     default: module.DishesReadonlyDetailModal,
@@ -135,6 +140,8 @@ export const DishExpensePlannerWidget: React.FunctionComponent<DishExpensePlanne
     const [dishSearch, setDishSearch] = useState("");
     const [dishSelectKey, setDishSelectKey] = useState(0);
     const [previewDish, setPreviewDish] = useState<PreviewDish>();
+    const [createShoppingListOpen, setCreateShoppingListOpen] = useState(false);
+    const navigate = useNavigate();
 
     useEffect(() => {
         const nextSeedKey = getSeedKey(initialDish, initialTargetServings);
@@ -159,6 +166,12 @@ export const DishExpensePlannerWidget: React.FunctionComponent<DishExpensePlanne
             })
             .filter(Boolean) as PlannerDishDetail[];
     }, [plannerDishes, allDishes, initialDish]);
+
+    const shoppingListDishIds = useMemo(() => selectedDishDetails.map(item => item.dish.id), [selectedDishDetails]);
+    const shoppingListDishServings = useMemo(() => selectedDishDetails.reduce((result, item) => {
+        result[item.dish.id] = item.servings;
+        return result;
+    }, {} as Record<string, number>), [selectedDishDetails]);
 
     const dishOptions = useMemo(() => {
         return allDishes
@@ -304,9 +317,14 @@ export const DishExpensePlannerWidget: React.FunctionComponent<DishExpensePlanne
                         <CostSummaryText label="Cần mua bắt buộc" summary={estimate.missingRequired} primary emptyText="0đ" />
                         <CostSummaryText label="Cần mua tùy chọn" summary={estimate.missingOptional} emptyText="0đ" />
                     </div>
-                    <Typography.Text type="secondary" style={{ fontSize: 12, lineHeight: "18px", flexShrink: 0 }}>
-                        {selectedDishDetails.length} món · {missingRows.length} thiếu · {coveredRows.length} đủ
-                    </Typography.Text>
+                    <div style={{ display: "flex", alignItems: "center", gap: 8, flexShrink: 0 }}>
+                        <Typography.Text type="secondary" style={{ fontSize: 12, lineHeight: "18px", whiteSpace: "nowrap" }}>
+                            {selectedDishDetails.length} món · {missingRows.length} thiếu · {coveredRows.length} đủ
+                        </Typography.Text>
+                        <Button icon={<ShoppingCartOutlined />} disabled={shoppingListDishIds.length === 0} onClick={() => setCreateShoppingListOpen(true)}>
+                            Tạo lịch mua
+                        </Button>
+                    </div>
                 </div>
             </Box>
 
@@ -337,6 +355,19 @@ export const DishExpensePlannerWidget: React.FunctionComponent<DishExpensePlanne
                 zIndex={2600}
             />
         </React.Suspense>}
+
+        <Modal open={createShoppingListOpen} title={<Stack align="center" gap={8}>
+            <Image src={ShoppinglistIcon} preview={false} width={22} />
+            <span>Tạo lịch mua sắm</span>
+        </Stack>} destroyOnClose onCancel={() => setCreateShoppingListOpen(false)} footer={null}>
+            <ShoppingListAddWidget
+                date={null}
+                dishIds={shoppingListDishIds}
+                initialDishServings={shoppingListDishServings}
+                onDone={() => setCreateShoppingListOpen(false)}
+                onCreated={(shoppingList) => navigate(RootRoutes.AuthorizedRoutes.ShoppingListRoutes.Detail(shoppingList.id))}
+            />
+        </Modal>
     </React.Fragment>
 }
 
