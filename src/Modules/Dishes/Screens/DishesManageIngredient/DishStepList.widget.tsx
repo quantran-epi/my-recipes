@@ -5,7 +5,7 @@ import { Dropdown } from "@components/Dropdown"
 import { Form } from "@components/Form"
 import { Stack } from "@components/Layout/Stack"
 import { List } from "@components/List"
-import { Modal } from "@components/Modal"
+import { DeferredModalContent, Modal } from "@components/Modal"
 import { useModal } from "@components/Modal/ModalProvider"
 import { useSmartForm } from "@components/SmartForm"
 import { Tooltip } from "@components/Tootip"
@@ -98,9 +98,11 @@ export const DishStepListWidget: FunctionComponent<DishStepListWidgetProps> = (p
             </Space>
             <Typography.Text type="secondary">{props.currentDist.name}</Typography.Text>
         </Stack>} destroyOnClose={true} onCancel={toggleAddStepToDishes.hide} footer={null}>
-            <DishesAddStepWidget dish={props.currentDist} currentOrder={currentOrder} addType={addType} onDone={(addType) => {
-                if (addType !== "default") toggleAddStepToDishes.hide();
-            }} />
+            <DeferredModalContent active={toggleAddStepToDishes.value}>
+                <DishesAddStepWidget dish={props.currentDist} currentOrder={currentOrder} addType={addType} onDone={(addType) => {
+                    if (addType !== "default") toggleAddStepToDishes.hide();
+                }} />
+            </DeferredModalContent>
         </Modal>
     </Form>
 }
@@ -177,9 +179,11 @@ export const StepItem: React.FunctionComponent<StepItemProps> = (props) => {
 
             <Typography.Text type="secondary">{props.dish.name}</Typography.Text>
         </Stack>} destroyOnClose={true} onCancel={toggleEditStepToDishes.hide} footer={null}>
-            <DishesEditStepWidget item={props.step} dish={props.dish} onDone={() => {
-                toggleEditStepToDishes.hide();
-            }} />
+            <DeferredModalContent active={toggleEditStepToDishes.value}>
+                <DishesEditStepWidget item={props.step} dish={props.dish} onDone={() => {
+                    toggleEditStepToDishes.hide();
+                }} />
+            </DeferredModalContent>
         </Modal>
     </React.Fragment >
 }

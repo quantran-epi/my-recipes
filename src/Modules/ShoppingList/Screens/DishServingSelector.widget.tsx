@@ -13,13 +13,19 @@ type DishServingSelectorProps = {
     onChange: (value: Record<string, number>) => void;
 }
 
+type DishLookup = Dishes[] | Map<string, Dishes>;
+
+const getDishById = (dishes: DishLookup, dishId: string): Dishes | undefined => {
+    return dishes instanceof Map ? dishes.get(dishId) : dishes.find(item => item.id === dishId);
+};
+
 export const normalizeDishServings = (
     selectedDishIds: string[],
-    dishes: Dishes[],
+    dishes: DishLookup,
     current: Record<string, number> = {},
 ): Record<string, number> => {
     return selectedDishIds.reduce((result, dishId) => {
-        const dish = dishes.find(item => item.id === dishId);
+        const dish = getDishById(dishes, dishId);
         const baseServings = DishServingHelper.getBaseServings(dish);
         result[dishId] = DishServingHelper.normalizeTargetServings(current[dishId], baseServings);
         return result;
@@ -27,16 +33,17 @@ export const normalizeDishServings = (
 };
 
 export const DishServingSelector: React.FunctionComponent<DishServingSelectorProps> = ({ selectedDishIds, dishes, value, onChange }) => {
-    const selectedDishes = selectedDishIds
-        .map(id => dishes.find(item => item.id === id))
-        .filter(Boolean) as Dishes[];
+    const dishesById = React.useMemo(() => new Map(dishes.map(item => [item.id, item])), [dishes]);
+    const selectedDishes = React.useMemo(() => selectedDishIds
+        .map(id => dishesById.get(id))
+        .filter(Boolean) as Dishes[], [selectedDishIds, dishesById]);
 
     if (selectedDishes.length === 0) return null;
 
     const _onServingChange = (dishId: string, nextValue: number | string | null) => {
-        const dish = dishes.find(item => item.id === dishId);
+        const dish = dishesById.get(dishId);
         const baseServings = DishServingHelper.getBaseServings(dish);
-        onChange(normalizeDishServings(selectedDishIds, dishes, {
+        onChange(normalizeDishServings(selectedDishIds, dishesById, {
             ...value,
             [dishId]: DishServingHelper.normalizeTargetServings(nextValue, baseServings),
         }));

@@ -6,7 +6,7 @@ import { useMessage } from "@components/Message";
 import { SmartForm, useSmartForm } from "@components/SmartForm";
 import { ShoppingList } from "@store/Models/ShoppingList";
 import { ShoppingListAddDishesParams, addDishesToShoppingList } from "@store/Reducers/ShoppingListReducer";
-import { RootState } from "@store/Store";
+import { selectDishes } from "@store/Selectors";
 import { Input } from "antd";
 import { useDispatch, useSelector } from "react-redux";
 
@@ -21,7 +21,7 @@ type ShoppingListAddMoreDishesWidgetProps = {
 export const ShoppingListAddMoreDishesWidget: React.FunctionComponent<ShoppingListAddMoreDishesWidgetProps> = (props) => {
     const dispatch = useDispatch();
     const message = useMessage();
-    const dishes = useSelector((state: RootState) => state.shared.dishes.dishes);
+    const dishes = useSelector(selectDishes);
     const [selectedDishIds, setSelectedDishIds] = useState<string[]>(props.shoppingList.dishes ?? []);
     const [dishServings, setDishServings] = useState<Record<string, number>>(() => normalizeDishServings(props.shoppingList.dishes ?? [], dishes, props.shoppingList.dishServings ?? {}));
 

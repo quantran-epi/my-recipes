@@ -4,7 +4,7 @@ import { Stack } from "@components/Layout/Stack";
 import { Modal } from "@components/Modal";
 import { Typography } from "@components/Typography";
 import { IngredientUnitHelper } from "@common/Helpers/IngredientUnitHelper";
-import { RootState } from "@store/Store";
+import { selectCookingSessions, selectDishesById, selectIngredientsById, selectShoppingLists } from "@store/Selectors";
 import { DatePicker, Divider, Empty, Progress, Table } from "antd";
 import dayjs, { Dayjs } from "dayjs";
 import React, { useMemo, useState } from "react";
@@ -30,10 +30,10 @@ export const IngredientStatsWidget: React.FC<IngredientStatsWidgetProps> = ({ op
         dayjs(),
     ]);
 
-    const ingredients = useSelector((state: RootState) => state.shared.ingredient.ingredients);
-    const dishes = useSelector((state: RootState) => state.shared.dishes.dishes);
-    const shoppingLists = useSelector((state: RootState) => state.personal.shoppingList.shoppingLists);
-    const cookingSessions = useSelector((state: RootState) => state.personal.cookingSession?.sessions ?? []);
+    const ingredientsById = useSelector(selectIngredientsById);
+    const dishesById = useSelector(selectDishesById);
+    const shoppingLists = useSelector(selectShoppingLists);
+    const cookingSessions = useSelector(selectCookingSessions);
 
     const stats = useMemo<StatRow[]>(() => {
         if (!range) return [];
@@ -53,7 +53,7 @@ export const IngredientStatsWidget: React.FC<IngredientStatsWidgetProps> = ({ op
             .forEach(sl => {
                 sl.ingredients.forEach(group => {
                     if (!group.isDone) return; // only count checked-off groups
-                    const ingredient = ingredients.find(i => i.id === group.ingredientId);
+                    const ingredient = ingredientsById.get(group.ingredientId);
                     if (ingredient?.alwaysAvailable) return;
                     const existing = boughtMap[group.ingredientId];
                     const amounts = group.amounts;
@@ -83,10 +83,10 @@ export const IngredientStatsWidget: React.FC<IngredientStatsWidgetProps> = ({ op
                     && (d.isBefore(end, "day") || d.isSame(end, "day"));
             })
             .forEach(session => {
-                const dish = dishes.find(d => d.id === session.dishId);
+                const dish = dishesById.get(session.dishId);
                 if (!dish) return;
                 dish.ingredients.forEach(ingr => {
-                    const ingredient = ingredients.find(i => i.id === ingr.ingredientId);
+                    const ingredient = ingredientsById.get(ingr.ingredientId);
                     const unit = IngredientUnitHelper.getBaseUnit(ingredient, [ingr.unit]);
                     const amt = IngredientUnitHelper.toBaseAmount(ingredient, ingr.amount, ingr.unit, unit) ?? IngredientUnitHelper.parseAmount(ingr.amount);
                     const existing = cookedMap[ingr.ingredientId];
@@ -105,7 +105,7 @@ export const IngredientStatsWidget: React.FC<IngredientStatsWidgetProps> = ({ op
         const allIds = new Set([...Object.keys(boughtMap), ...Object.keys(cookedMap)]);
         return Array.from(allIds)
             .map(id => {
-                const ingr = ingredients.find(i => i.id === id);
+                const ingr = ingredientsById.get(id);
                 const bought = boughtMap[id]?.amount ?? 0;
                 const cooked = cookedMap[id]?.amount ?? 0;
                 const unit = boughtMap[id]?.unit || cookedMap[id]?.unit || "";
@@ -120,7 +120,7 @@ export const IngredientStatsWidget: React.FC<IngredientStatsWidgetProps> = ({ op
             })
             .filter(r => r.bought > 0 || r.cooked > 0)
             .sort((a, b) => b.bought - a.bought);
-    }, [range, shoppingLists, cookingSessions, dishes, ingredients]);
+    }, [range, shoppingLists, cookingSessions, dishesById, ingredientsById]);
 
     const columns = [
         {

@@ -1,13 +1,13 @@
 import { ArrowLeftOutlined, DeleteOutlined, EditOutlined } from "@ant-design/icons"
 import { Button } from "@components/Button"
-import { Modal } from "@components/Modal"
+import { DeferredModalContent, Modal } from "@components/Modal"
 import { Popconfirm } from "@components/Popconfirm"
 import { Space } from "@components/Layout/Space"
 import { Stack } from "@components/Layout/Stack"
 import { useMessage } from "@components/Message"
 import { useAdminMode, useScreenTitle, useToggle } from "@hooks"
 import { removeDishes } from "@store/Reducers/DishesReducer"
-import { RootState } from "@store/Store"
+import { selectDishes, selectDishesById } from "@store/Selectors"
 import { Typography } from "antd"
 import React, { useMemo } from "react"
 import { useDispatch, useSelector } from "react-redux"
@@ -20,7 +20,8 @@ import { Image } from "@components/Image"
 
 export const DishesDetailScreen = () => {
     const [params] = useSearchParams();
-    const dishes = useSelector((state: RootState) => state.shared.dishes.dishes);
+    const dishes = useSelector(selectDishes);
+    const dishesById = useSelector(selectDishesById);
     const navigate = useNavigate();
     const dispatch = useDispatch();
     const message = useMessage();
@@ -28,8 +29,8 @@ export const DishesDetailScreen = () => {
     const toggleEdit = useToggle();
 
     const currentDish = useMemo(() => {
-        return dishes.find(e => e.id === params.get("dishes"));
-    }, [params, dishes]);
+        return dishesById.get(params.get("dishes"));
+    }, [params, dishesById]);
 
     useScreenTitle({ value: currentDish ? currentDish.name : "Chi tiết món ăn", deps: [currentDish] });
 
@@ -109,7 +110,9 @@ export const DishesDetailScreen = () => {
                 onCancel={toggleEdit.hide}
                 footer={null}
             >
-                <DishesEditWidget item={currentDish} onDone={toggleEdit.hide} />
+                <DeferredModalContent active={toggleEdit.value}>
+                    <DishesEditWidget item={currentDish} onDone={toggleEdit.hide} />
+                </DeferredModalContent>
             </Modal>
         </React.Fragment>
     );

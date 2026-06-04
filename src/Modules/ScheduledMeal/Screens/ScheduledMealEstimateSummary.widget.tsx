@@ -8,7 +8,7 @@ import { Stack } from "@components/Layout/Stack";
 import { Modal } from "@components/Modal";
 import { Typography } from "@components/Typography";
 import { Dishes } from "@store/Models/Dishes";
-import { selectDishes, selectIngredients, selectInventory } from "@store/Selectors";
+import { selectDishes, selectDishesById, selectIngredients, selectInventory } from "@store/Selectors";
 import React, { useMemo, useState } from "react";
 import { useSelector } from "react-redux";
 
@@ -33,15 +33,16 @@ const rowStatus = (row: IngredientNeedEstimateRow): { label: string; color: stri
 
 export const ScheduledMealEstimateSummary: React.FunctionComponent<ScheduledMealEstimateSummaryProps> = ({ dishIds, title = "Ước tính cho thực đơn", defaultExpanded = false }) => {
     const dishes = useSelector(selectDishes);
+    const dishesById = useSelector(selectDishesById);
     const ingredients = useSelector(selectIngredients);
     const inventoryItems = useSelector(selectInventory);
     const [detailOpen, setDetailOpen] = useState(defaultExpanded);
 
     const selectedDishes = useMemo<Dishes[]>(() => {
         return dishIds
-            .map(id => dishes.find(item => item.id === id))
+            .map(id => dishesById.get(id))
             .filter((item): item is Dishes => Boolean(item));
-    }, [dishIds, dishes]);
+    }, [dishIds, dishesById]);
 
     const estimate = useMemo(() => {
         const amounts = selectedDishes.flatMap(dish => DishServingHelper.collectIngredientAmounts(dish, dishes));
@@ -89,7 +90,7 @@ export const ScheduledMealEstimateSummary: React.FunctionComponent<ScheduledMeal
         </Stack>
         </Box>
 
-        <Modal open={detailOpen} onCancel={() => setDetailOpen(false)} footer={null} title={title} destroyOnClose width={640}>
+        {detailOpen && <Modal open={detailOpen} onCancel={() => setDetailOpen(false)} footer={null} title={title} destroyOnClose width={640}>
             <div style={{ display: "flex", flexDirection: "column", gap: 10, maxHeight: 620, overflowY: "auto", paddingRight: 4 }}>
                 {summaryRows}
                 <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
@@ -113,6 +114,6 @@ export const ScheduledMealEstimateSummary: React.FunctionComponent<ScheduledMeal
             })}
                 </div>
         </div>
-        </Modal>
+        </Modal>}
     </React.Fragment>;
 }

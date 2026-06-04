@@ -10,13 +10,13 @@ import { Ingredient } from "@store/Models/Ingredient";
 import { InventoryHelper } from "@common/Helpers/InventoryHelper";
 import { IngredientUnitHelper } from "@common/Helpers/IngredientUnitHelper";
 import { startCooking, setStepCooking } from "@store/Reducers/CookingSessionReducer";
-import { selectDishes, selectIngredients, selectInventory, selectCookingSessions } from "@store/Selectors";
+import { selectCookingSessions, selectDishes, selectDishesById, selectIngredientsById, selectInventory } from "@store/Selectors";
 import { Progress, Space } from "antd";
 import React, { useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { ShoppingListAddWidget } from "@modules/ShoppingList/Screens/ShoppingListAdd.widget";
-import { Modal } from "@components/Modal";
+import { DeferredModalContent, Modal } from "@components/Modal";
 import ShoppingListIcon from "../../../../assets/icons/shoppingList.png";
 import StepsIcon from "../../../../assets/icons/process.png";
 import { Image } from "@components/Image";
@@ -36,14 +36,14 @@ type CookingIngredientRow = {
 
 const collectAllSteps = (
     dish: Dishes,
-    allDishes: Dishes[],
+    dishesById: Map<string, Dishes>,
     visited = new Set<string>()
 ): string[] => {
     if (visited.has(dish.id)) return [];
     visited.add(dish.id);
     const fromIncluded = (dish.includeDishes ?? []).flatMap(id => {
-        const d = allDishes.find(d => d.id === id);
-        return d ? collectAllSteps(d, allDishes, visited) : [];
+        const d = dishesById.get(id);
+        return d ? collectAllSteps(d, dishesById, visited) : [];
     });
     return [...fromIncluded, ...(dish.steps ?? []).map(s => s.content)];
 };
@@ -57,7 +57,8 @@ export const CookingSessionWidget: React.FunctionComponent<CookingSessionWidgetP
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const allDishes = useSelector(selectDishes);
-    const allIngredients = useSelector(selectIngredients);
+    const dishesById = useSelector(selectDishesById);
+    const ingredientsById = useSelector(selectIngredientsById);
     const inventoryItems = useSelector(selectInventory);
     const sessions = useSelector(selectCookingSessions);
     const toggleShoppingList = useToggle();
@@ -71,20 +72,20 @@ export const CookingSessionWidget: React.FunctionComponent<CookingSessionWidgetP
     }, [dish.id, baseServings]);
 
     const activeSession = sessions.find(s => s.dishId === dish.id && s.status === "cooking");
-    const steps = useMemo(() => collectAllSteps(dish, allDishes), [dish, allDishes]);
+    const steps = useMemo(() => collectAllSteps(dish, dishesById), [dish, dishesById]);
 
     const rows = useMemo<CookingIngredientRow[]>(() => {
         const amounts = DishServingHelper.collectIngredientAmounts(dish, allDishes, { targetServings });
         const grouped: Record<string, { total: number; unit: string }> = {};
         amounts.forEach(amt => {
-            const ingredient = allIngredients.find(i => i.id === amt.ingredientId);
+            const ingredient = ingredientsById.get(amt.ingredientId);
             const baseUnit = IngredientUnitHelper.getBaseUnit(ingredient, [amt.unit]);
             const val = IngredientUnitHelper.toBaseAmount(ingredient, amt.amount, amt.unit, baseUnit) ?? IngredientUnitHelper.parseAmount(amt.amount);
             if (!grouped[amt.ingredientId]) grouped[amt.ingredientId] = { total: 0, unit: baseUnit };
             grouped[amt.ingredientId].total += val;
         });
         return Object.entries(grouped).map(([ingredientId, { total, unit }]) => {
-            const ingredient = allIngredients.find(i => i.id === ingredientId);
+            const ingredient = ingredientsById.get(ingredientId);
             if (!ingredient) return null;
             const inv = inventoryItems[ingredientId];
             const required = InventoryHelper.roundAmount(total);
@@ -92,7 +93,7 @@ export const CookingSessionWidget: React.FunctionComponent<CookingSessionWidgetP
             const lacking = InventoryHelper.roundAmount(Math.max(0, required - inStock));
             return { ingredient, required, unit, inStock, lacking, sufficient: inStock >= required } as CookingIngredientRow;
         }).filter(Boolean) as CookingIngredientRow[];
-    }, [dish, allDishes, allIngredients, inventoryItems, targetServings]);
+    }, [dish, allDishes, ingredientsById, inventoryItems, targetServings]);
 
     const lackingIngredientIds = rows.filter(r => !r.sufficient).map(r => r.ingredient.id);
     const allSufficient = rows.every(r => r.sufficient);
@@ -288,7 +289,7 @@ export const CookingSessionWidget: React.FunctionComponent<CookingSessionWidgetP
             </Button>
         </Stack>
 
-        <Modal
+        {toggleShoppingList.value && <Modal
             open={toggleShoppingList.value}
             title={
                 <Space>
@@ -301,13 +302,15 @@ export const CookingSessionWidget: React.FunctionComponent<CookingSessionWidgetP
             footer={null}
             zIndex={2500}
         >
-            <ShoppingListAddWidget
-                date={new Date()}
-                dishIds={[dish.id]}
-                initialDishServings={{ [dish.id]: targetServings }}
-                onDone={() => { toggleShoppingList.hide(); onDone(); }}
-                onCreated={(shoppingList) => navigate(RootRoutes.AuthorizedRoutes.ShoppingListRoutes.Detail(shoppingList.id))}
-            />
-        </Modal>
+            <DeferredModalContent active={toggleShoppingList.value}>
+                <ShoppingListAddWidget
+                    date={new Date()}
+                    dishIds={[dish.id]}
+                    initialDishServings={{ [dish.id]: targetServings }}
+                    onDone={() => { toggleShoppingList.hide(); onDone(); }}
+                    onCreated={(shoppingList) => navigate(RootRoutes.AuthorizedRoutes.ShoppingListRoutes.Detail(shoppingList.id))}
+                />
+            </DeferredModalContent>
+        </Modal>}
     </React.Fragment>;
 };

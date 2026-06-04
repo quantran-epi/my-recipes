@@ -5,7 +5,7 @@ import { Stack } from "@components/Layout/Stack";
 import { Modal } from "@components/Modal";
 import { Typography } from "@components/Typography";
 import { clearCookingHistory } from "@store/Reducers/CookingSessionReducer";
-import { RootState } from "@store/Store";
+import { selectCookingSessions } from "@store/Selectors";
 import { DatePicker, Divider, Empty, Popconfirm, Tag } from "antd";
 import dayjs, { Dayjs } from "dayjs";
 import React, { useState } from "react";
@@ -45,7 +45,7 @@ const _groupByDate = (sessions: any[]) => {
 
 export const CookingHistoryWidget: React.FC<CookingHistoryWidgetProps> = ({ open, onClose }) => {
     const dispatch = useDispatch();
-    const sessions = useSelector((state: RootState) => state.personal.cookingSession?.sessions ?? []);
+    const sessions = useSelector(selectCookingSessions);
     const [filterDate, setFilterDate] = useState<Dayjs | null>(null);
 
     const history = sessions

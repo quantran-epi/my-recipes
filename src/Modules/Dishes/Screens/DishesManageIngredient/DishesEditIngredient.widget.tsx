@@ -10,7 +10,7 @@ import { SmartForm, useSmartForm } from "@components/SmartForm";
 import { DISH_INGREDIENT_PREPARE_PRESETS, Dishes, DishesIngredientAmount } from "@store/Models/Dishes"
 import { IngredientUnitHelper } from "@common/Helpers/IngredientUnitHelper";
 import { editIngredientFromDish } from "@store/Reducers/DishesReducer";
-import { RootState } from "@store/Store";
+import { selectIngredients, selectIngredientsById } from "@store/Selectors";
 import { useDispatch, useSelector } from "react-redux";
 
 type DishesEditIngredientWidgetProps = {
@@ -20,16 +20,17 @@ type DishesEditIngredientWidgetProps = {
 }
 
 export const DishesEditIngredientWidget: React.FunctionComponent<DishesEditIngredientWidgetProps> = (props) => {
-    const ingredients = useSelector((state: RootState) => state.shared.ingredient.ingredients);
+    const ingredients = useSelector(selectIngredients);
+    const ingredientsById = useSelector(selectIngredientsById);
     const dispatch = useDispatch();
     const message = useMessage();
-    const selectedIngredient = ingredients.find(ingre => ingre.id === props.item.ingredientId);
+    const selectedIngredient = ingredientsById.get(props.item.ingredientId);
     const recipeUnits = Array.from(new Set([props.item.unit, ...IngredientUnitHelper.getRecipeUnits(selectedIngredient)]));
 
     const editIngreToDishForm = useSmartForm<DishesIngredientAmount>({
         defaultValues: props.item,
         onSubmit: (values) => {
-            const ingredient = ingredients.find(ingre => ingre.id === values.transformValues.ingredientId);
+            const ingredient = ingredientsById.get(values.transformValues.ingredientId);
             if (!IngredientUnitHelper.canConvert(ingredient, values.transformValues.unit)) {
                 message.error("This unit is not configured for the selected ingredient.");
                 return;

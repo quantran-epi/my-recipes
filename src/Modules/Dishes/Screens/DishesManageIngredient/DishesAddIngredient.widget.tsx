@@ -10,7 +10,7 @@ import { DISH_INGREDIENT_PREPARE_PRESETS, Dishes, DishesIngredientAmount } from 
 import { IngredientUnit } from "@store/Models/Ingredient";
 import { IngredientUnitHelper } from "@common/Helpers/IngredientUnitHelper";
 import { addIngredientsToDish } from "@store/Reducers/DishesReducer";
-import { RootState } from "@store/Store";
+import { selectIngredients, selectIngredientsById } from "@store/Selectors";
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
@@ -20,11 +20,12 @@ type DishesAddIngredientWidgetProps = {
 }
 
 export const DishesAddIngredientWidget: React.FunctionComponent<DishesAddIngredientWidgetProps> = (props) => {
-    const ingredients = useSelector((state: RootState) => state.shared.ingredient.ingredients);
+    const ingredients = useSelector(selectIngredients);
+    const ingredientsById = useSelector(selectIngredientsById);
     const dispatch = useDispatch();
     const message = useMessage();
     const [selectedIngredientId, setSelectedIngredientId] = useState<string>("");
-    const selectedIngredient = ingredients.find(ingre => ingre.id === selectedIngredientId);
+    const selectedIngredient = ingredientsById.get(selectedIngredientId);
     const recipeUnits = IngredientUnitHelper.getRecipeUnits(selectedIngredient);
 
     const addIngreToDishForm = useSmartForm<DishesIngredientAmount>({
@@ -39,7 +40,7 @@ export const DishesAddIngredientWidget: React.FunctionComponent<DishesAddIngredi
             meal: null
         },
         onSubmit: (values) => {
-            const ingredient = ingredients.find(ingre => ingre.id === values.transformValues.ingredientId);
+            const ingredient = ingredientsById.get(values.transformValues.ingredientId);
             if (!ingredient) {
                 message.error("Choose an ingredient first.");
                 return;
@@ -78,7 +79,7 @@ export const DishesAddIngredientWidget: React.FunctionComponent<DishesAddIngredi
     }
 
     const _onIngredientChange = (ingredientId: string) => {
-        const ingredient = ingredients.find(ingre => ingre.id === ingredientId);
+        const ingredient = ingredientsById.get(ingredientId);
         const units = IngredientUnitHelper.getRecipeUnits(ingredient);
         setSelectedIngredientId(ingredientId);
         addIngreToDishForm.form.setFieldsValue({

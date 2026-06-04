@@ -1,4 +1,4 @@
-import { CheckCircleOutlined, ClockCircleOutlined, CopyOutlined, DeleteOutlined, EditOutlined, ExclamationCircleOutlined, FileTextOutlined, HolderOutlined, PlusOutlined, QuestionCircleOutlined, FireOutlined } from "@ant-design/icons";
+import { CheckCircleOutlined, ClockCircleOutlined, CopyOutlined, DeleteOutlined, EditOutlined, ExclamationCircleOutlined, FileTextOutlined, HolderOutlined, PlusOutlined, FireOutlined } from "@ant-design/icons";
 import { Button } from "@components/Button";
 import { Dropdown } from "@components/Dropdown";
 import { Input } from "@components/Form/Input";
@@ -8,26 +8,23 @@ import { Space } from "@components/Layout/Space";
 import { Stack } from "@components/Layout/Stack";
 import { List, scrollVirtualListToTop, VirtualListScrollTopButton } from "@components/List";
 import { useMessage } from "@components/Message";
-import { Modal } from "@components/Modal";
+import { DeferredModalContent, Modal } from "@components/Modal";
 import { Popover } from "@components/Popover";
 import { Tag } from "@components/Tag";
-import { Tooltip } from "@components/Tootip";
 import { Typography } from "@components/Typography";
 import { useScreenTitle, useToggle, useAdminMode } from "@hooks";
-import { DISH_TAGS, DishDuration, Dishes, DishesIngredientAmount, DishesStep } from "@store/Models/Dishes";
+import { DISH_TAGS, DishDuration, Dishes } from "@store/Models/Dishes";
 import { Ingredient } from "@store/Models/Ingredient";
 import { DishesDurationEditParams, duplicateDish, removeDishes, updateDishDuration } from "@store/Reducers/DishesReducer";
-import { RootState } from "@store/Store";
+import { selectDishes, selectIngredients } from "@store/Selectors";
 import { RootRoutes } from "@routing/RootRoutes";
-import { debounce, orderBy, sortBy } from "lodash";
+import { debounce, sortBy } from "lodash";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { List as VirtualList, useDynamicRowHeight, type ListImperativeAPI, type RowComponentProps } from "react-window";
+import { List as VirtualList, type ListImperativeAPI, type RowComponentProps } from "react-window";
 import Clock2Icon from "../../../../assets/icons/clock (2).png";
 import NoodlesIcon from "../../../../assets/icons/noodles.png";
-import StepsIcon from "../../../../assets/icons/process.png";
-import VegetablesIcon from "../../../../assets/icons/vegetable.png";
 import { DishesAddWidget } from "./DishesAdd.widget";
 import { DishesExportWidget } from "./DishesExport.widget";
 import { DishesEditWidget } from "./DishesEdit.widget";
@@ -55,7 +52,6 @@ type DishIngredientCounts = {
 type DishRowProps = {
     items: Dishes[];
     allDishes: Dishes[];
-    dishById: Map<string, Dishes>;
     allIngredients: Ingredient[];
     summaries: Record<string, DishListItemSummary>;
     onDelete: (item: Dishes) => void;
@@ -117,48 +113,23 @@ const EMPTY_DISH_SUMMARY: DishListItemSummary = {
     includedDishCount: 0,
 };
 
-const collectDishIngredients = (
-    dish: Dishes,
-    dishById: Map<string, Dishes>,
-    cache = new Map<string, DishesIngredientAmount[]>(),
-    visiting = new Set<string>(),
-): DishesIngredientAmount[] => {
-    const cached = cache.get(dish.id);
-    if (cached) return cached;
-    if (visiting.has(dish.id)) return [];
+const DISH_ROW_HEIGHT = 204;
 
-    visiting.add(dish.id);
-    const included = (dish.includeDishes ?? []).flatMap(id => {
-        const found = dishById.get(id);
-        return found ? collectDishIngredients(found, dishById, cache, visiting) : [];
-    });
-    visiting.delete(dish.id);
-
-    const result = [...(dish.ingredients ?? []), ...included];
-    cache.set(dish.id, result);
-    return result;
+const DISH_DURATION_LABELS: Record<keyof DishDuration, string> = {
+    unfreeze: 'Rã đông',
+    prepare: 'Sơ chế',
+    cooking: 'Nấu nướng',
+    serve: 'Trình bày',
+    cooldown: 'Để nguội',
 };
 
-const collectDishSteps = (
-    dish: Dishes,
-    dishById: Map<string, Dishes>,
-    cache = new Map<string, DishesStep[]>(),
-    visiting = new Set<string>(),
-): DishesStep[] => {
-    const cached = cache.get(dish.id);
-    if (cached) return cached;
-    if (visiting.has(dish.id)) return [];
-
-    visiting.add(dish.id);
-    const included = (dish.includeDishes ?? []).flatMap(id => {
-        const found = dishById.get(id);
-        return found ? collectDishSteps(found, dishById, cache, visiting) : [];
-    });
-    visiting.delete(dish.id);
-
-    const result = [...included, ...(dish.steps ?? [])];
-    cache.set(dish.id, result);
-    return result;
+const DishDurationDetail: React.FunctionComponent<{ duration: DishDuration }> = ({ duration }) => {
+    return <List size="small" dataSource={Object.entries(duration)} renderItem={item => <List.Item style={{ paddingInline: 0 }}>
+        <Stack fullwidth justify="space-between">
+            <Typography.Text style={{ fontSize: 16 }}>{DISH_DURATION_LABELS[item[0] as keyof DishDuration]}:</Typography.Text>
+            {Boolean(item[1]) && <Tag>{moment.duration(item[1], "minutes").locale("vi").humanize()}</Tag>}
+        </Stack>
+    </List.Item>} />;
 };
 
 const buildDishListSummaries = (allDishes: Dishes[], visibleDishes: Dishes[] = allDishes): Record<string, DishListItemSummary> => {
@@ -222,22 +193,22 @@ const buildDishListSummaries = (allDishes: Dishes[], visibleDishes: Dishes[] = a
     }, {} as Record<string, DishListItemSummary>);
 };
 
-const DishRow = ({ index, style, items, allDishes, dishById, allIngredients, summaries, onDelete, onDuplicate, isAdmin }: RowComponentProps<DishRowProps>) => {
+const DishRow = ({ index, style, items, allDishes, allIngredients, summaries, onDelete, onDuplicate, isAdmin }: RowComponentProps<DishRowProps>) => {
     if (!items[index]) return null;
     const item = items[index];
-    return <div style={style}><DishesItem item={item} allDishes={allDishes} dishById={dishById} allIngredients={allIngredients} summary={summaries[item.id] ?? EMPTY_DISH_SUMMARY} onDelete={onDelete} onDuplicate={onDuplicate} isAdmin={isAdmin} /></div>;
+    return <div style={style}><DishesItem item={item} allDishes={allDishes} allIngredients={allIngredients} summary={summaries[item.id] ?? EMPTY_DISH_SUMMARY} onDelete={onDelete} onDuplicate={onDuplicate} isAdmin={isAdmin} /></div>;
 };
 
 export const DishesListScreen = () => {
-    const dishes = useSelector((state: RootState) => state.shared.dishes.dishes);
-    const ingredients = useSelector((state: RootState) => state.shared.ingredient.ingredients);
+    const dishes = useSelector(selectDishes);
+    const ingredients = useSelector(selectIngredients);
     const toggleAddModal = useToggle({ defaultValue: false });
     const [searchText, setSearchText] = useState<string>("");
     const [activeTag, setActiveTag] = useState<string | null>(null);
     const [activeStatus, setActiveStatus] = useState<DishStatusFilter>("all");
     const dispatch = useDispatch();
     const { } = useScreenTitle({ value: "Món ăn", deps: [] });
-    const rowHeight = useDynamicRowHeight({ defaultRowHeight: 204, key: searchText + (activeTag ?? "") + activeStatus });
+    const rowHeight = DISH_ROW_HEIGHT;
     const listRef = useRef<ListImperativeAPI | null>(null);
     const [showScrollTop, setShowScrollTop] = useState(false);
     const { isAdmin } = useAdminMode();
@@ -266,8 +237,6 @@ export const DishesListScreen = () => {
         dishes.forEach(d => d.tags?.forEach(t => tagSet.add(t)));
         return DISH_TAGS.filter(t => tagSet.has(t));
     }, [dishes]);
-
-    const dishById = useMemo(() => new Map(dishes.map(dish => [dish.id, dish])), [dishes]);
 
     const filterData = useMemo(() => {
         const statusCounts = DISH_STATUS_FILTERS.reduce((result, item) => {
@@ -327,13 +296,12 @@ export const DishesListScreen = () => {
     const dishRowProps = useMemo(() => ({
         items: filteredDishes,
         allDishes: dishes,
-        dishById,
         allIngredients: ingredients,
         summaries: dishSummaries,
         onDelete: _onDelete,
         onDuplicate: _onDuplicate,
         isAdmin,
-    }), [filteredDishes, dishes, dishById, ingredients, dishSummaries, _onDelete, _onDuplicate, isAdmin]);
+    }), [filteredDishes, dishes, ingredients, dishSummaries, _onDelete, _onDuplicate, isAdmin]);
 
     const _scrollToTop = useCallback(() => {
         const scrolled = scrollVirtualListToTop(listRef.current);
@@ -342,18 +310,7 @@ export const DishesListScreen = () => {
     }, []);
 
     useEffect(() => {
-        let frameId: number | undefined;
-        let retryCount = 0;
-        const reset = () => {
-            if (!_scrollToTop() && retryCount < 20) {
-                retryCount += 1;
-                frameId = window.requestAnimationFrame(reset);
-            }
-        };
-        reset();
-        return () => {
-            if (frameId !== undefined) window.cancelAnimationFrame(frameId);
-        };
+        _scrollToTop();
     }, [_scrollToTop, activeStatus, activeTag, searchText]);
 
     return <React.Fragment>
@@ -402,7 +359,9 @@ export const DishesListScreen = () => {
                 Thêm món ăn
             </Space>
         } destroyOnClose={true} onCancel={toggleAddModal.hide} footer={null}>
-            <DishesAddWidget />
+            <DeferredModalContent active={toggleAddModal.value}>
+                <DishesAddWidget />
+            </DeferredModalContent>
         </Modal>
     </React.Fragment>
 }
@@ -410,7 +369,6 @@ export const DishesListScreen = () => {
 type DishesItemProps = {
     item: Dishes;
     allDishes: Dishes[];
-    dishById: Map<string, Dishes>;
     allIngredients: Ingredient[];
     summary: DishListItemSummary;
     onDelete: (item: Dishes) => void;
@@ -423,22 +381,15 @@ moment.relativeTimeThreshold('m', 60);
 
 export const DishesItem: React.FunctionComponent<DishesItemProps> = (props) => {
     const toggleEdit = useToggle({ defaultValue: false });
-    const toggleIngredientsOverview = useToggle();
-    const toggleStepsOverview = useToggle();
     const toggleDishesDetail = useToggle();
     const toggleCooking = useToggle();
     const toggleEditDuration = useToggle();
+    const [durationOpen, setDurationOpen] = useState(false);
     const message = useMessage();
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const dishes = props.allDishes;
     const ingredients = props.allIngredients;
-    const expandedIngredients = useMemo(() => {
-        return toggleIngredientsOverview.value ? collectDishIngredients(props.item, props.dishById) : [];
-    }, [props.item, props.dishById, toggleIngredientsOverview.value]);
-    const expandedSteps = useMemo(() => {
-        return toggleStepsOverview.value ? collectDishSteps(props.item, props.dishById) : [];
-    }, [props.item, props.dishById, toggleStepsOverview.value]);
 
     const _onEdit = () => toggleEdit.show();
     const _onEditDuration = () => toggleEditDuration.show();
@@ -454,10 +405,6 @@ export const DishesItem: React.FunctionComponent<DishesItemProps> = (props) => {
     const _hasDuration = () => {
         return Object.values(props.item.duration).some(e => e !== null);
     }
-
-    const _allIngredients = () => expandedIngredients;
-
-    const _allSteps = () => expandedSteps;
 
     const toggleExport = useToggle();
     const toggleDeleteConfirm = useToggle();
@@ -501,22 +448,6 @@ export const DishesItem: React.FunctionComponent<DishesItemProps> = (props) => {
     const visibleTags = props.item.tags?.slice(0, 3) ?? [];
     const extraTagCount = Math.max(0, (props.item.tags?.length ?? 0) - visibleTags.length);
     const baseServings = props.item.baseServings ?? 2;
-    const durationDetail = <List size="small" dataSource={Object.entries(props.item.duration)} renderItem={item => {
-        let processName = "";
-        switch (item[0] as keyof DishDuration) {
-            case "unfreeze": processName = "Rã đông"; break;
-            case "prepare": processName = "Sơ chế"; break;
-            case "cooking": processName = "Nấu nướng"; break;
-            case "serve": processName = "Trình bày"; break;
-            case "cooldown": processName = "Để nguội"; break;
-        }
-        return <List.Item style={{ paddingInline: 0 }}>
-            <Stack fullwidth justify="space-between">
-                <Typography.Text style={{ fontSize: 16 }}>{processName}:</Typography.Text>
-                {Boolean(item[1]) && <Tag>{moment.duration(item[1], "minutes").locale("vi").humanize()}</Tag>}
-            </Stack>
-        </List.Item>
-    }} />;
 
     return <React.Fragment>
         <div style={{ padding: "6px 0 8px", boxSizing: "border-box" }}>
@@ -534,7 +465,7 @@ export const DishesItem: React.FunctionComponent<DishesItemProps> = (props) => {
             }}>
                 <div onClick={toggleDishesDetail.show} style={{ position: "relative", cursor: "pointer", width: 88, height: 122 }}>
                     <DishImageWidget src={props.item.image} width={88} height={122} borderRadius={8} fallbackIconSize={34} showBrokenLabel={false} />
-                    <Popover title="Thời lượng" content={durationDetail}>
+                    <Popover title="Thời lượng" content={durationOpen ? <DishDurationDetail duration={props.item.duration} /> : null} open={durationOpen} onOpenChange={setDurationOpen}>
                         <button
                             type="button"
                             onClick={(event) => event.stopPropagation()}
@@ -620,21 +551,21 @@ export const DishesItem: React.FunctionComponent<DishesItemProps> = (props) => {
                     </div>
 
                     <div style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: 6 }}>
-                        <button type="button" onClick={hasIngredients ? toggleIngredientsOverview.show : undefined} style={{ border: "1px solid #f0f0f0", background: "#fafafa", borderRadius: 8, padding: "6px 7px", textAlign: "left", cursor: hasIngredients ? "pointer" : "default", minWidth: 0 }}>
+                        <div style={{ border: "1px solid #f0f0f0", background: "#fafafa", borderRadius: 8, padding: "6px 7px", textAlign: "left", minWidth: 0 }}>
                             <Typography.Text type="secondary" style={{ display: "block", fontSize: 11, lineHeight: "14px" }}>Nguyên liệu</Typography.Text>
                             <Typography.Text strong style={{ display: "block", fontSize: 13, lineHeight: "18px", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
                                 {hasIngredients ? `${ingredientCount} nguyên liệu` : "Chưa có"}
                             </Typography.Text>
                             {optionalIngredientCount > 0 && <Typography.Text type="secondary" style={{ display: "block", fontSize: 11, lineHeight: "14px" }}>{optionalIngredientCount} tùy chọn</Typography.Text>}
-                        </button>
+                        </div>
 
-                        <button type="button" onClick={hasSteps ? toggleStepsOverview.show : undefined} style={{ border: "1px solid #f0f0f0", background: "#fafafa", borderRadius: 8, padding: "6px 7px", textAlign: "left", cursor: hasSteps ? "pointer" : "default", minWidth: 0 }}>
+                        <div style={{ border: "1px solid #f0f0f0", background: "#fafafa", borderRadius: 8, padding: "6px 7px", textAlign: "left", minWidth: 0 }}>
                             <Typography.Text type="secondary" style={{ display: "block", fontSize: 11, lineHeight: "14px" }}>Quy trình</Typography.Text>
                             <Typography.Text strong style={{ display: "block", fontSize: 13, lineHeight: "18px", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
                                 {hasSteps ? `${stepCount} bước` : "Chưa có"}
                             </Typography.Text>
                             {includedDishCount > 0 && <Typography.Text type="secondary" style={{ display: "block", fontSize: 11, lineHeight: "14px" }}>{includedDishCount} món kèm</Typography.Text>}
-                        </button>
+                        </div>
                     </div>
 
                     <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8, marginTop: "auto", flexWrap: "wrap" }}>
@@ -662,7 +593,9 @@ export const DishesItem: React.FunctionComponent<DishesItemProps> = (props) => {
             <Button type="primary" icon={<EditOutlined />} onClick={_onOpenDetailPage}>Mở trang chi tiết</Button>
         </Space>}>
             <Box style={{ maxHeight: 550, overflowY: "auto" }}>
-                <DishesDetailWidget dish={props.item} />
+                <DeferredModalContent active={toggleDishesDetail.value} minHeight={220}>
+                    <DishesDetailWidget dish={props.item} />
+                </DeferredModalContent>
             </Box>
         </Modal>}
         {toggleEdit.value && <Modal open={toggleEdit.value} title={
@@ -671,45 +604,9 @@ export const DishesItem: React.FunctionComponent<DishesItemProps> = (props) => {
                 Chỉnh sửa món ăn
             </Space>
         } destroyOnClose={true} onCancel={toggleEdit.hide} footer={null}>
-            <DishesEditWidget item={props.item} onDone={() => toggleEdit.hide()} />
-        </Modal>}
-        {toggleIngredientsOverview.value && <Modal open={toggleIngredientsOverview.value} title={
-            <Space>
-                <Image src={VegetablesIcon} preview={false} width={24} style={{ marginBottom: 3 }} />
-                Bao gồm các nguyên liệu
-            </Space>
-        } destroyOnClose={true} onCancel={toggleIngredientsOverview.hide} footer={null}>
-            <Box style={{ overflowY: "auto", maxHeight: 550 }}>
-                <List
-                    dataSource={orderBy(_allIngredients(), [obj => obj.required], ['desc'])}
-                    renderItem={(item) => <List.Item>
-                        <Space>
-                            <Typography.Text>{ingredients.find(ingre => ingre.id === item.ingredientId).name} - {item.amount} {item.unit}</Typography.Text>
-                            {!item.required && <Tooltip title="Tùy chọn">
-                                <Tag color="gold" icon={<QuestionCircleOutlined />} />
-                            </Tooltip>}
-                        </Space>
-                    </List.Item>} />
-            </Box>
-        </Modal>}
-        {toggleStepsOverview.value && <Modal open={toggleStepsOverview.value} title={<Space>
-            <Image src={StepsIcon} preview={false} width={18} style={{ marginBottom: 3 }} />
-            Bao gồm các bước
-        </Space>} destroyOnClose={true} onCancel={toggleStepsOverview.hide} footer={null}>
-            <Box style={{ overflowY: "auto", maxHeight: 550 }}>
-                <List
-                    dataSource={_allSteps()}
-                    renderItem={(item) => <List.Item>
-                        <Stack fullwidth justify="space-between">
-                            <Typography.Paragraph style={{ maxWidth: 250 }} ellipsis={{ rows: 3, expandable: true, symbol: "Xem thêm" }}>
-                                {item.content}
-                            </Typography.Paragraph>
-                            {!item.required && <Tooltip title="Tùy chọn">
-                                <Tag color="gold" icon={<QuestionCircleOutlined />} />
-                            </Tooltip>}
-                        </Stack>
-                    </List.Item>} />
-            </Box>
+            <DeferredModalContent active={toggleEdit.value}>
+                <DishesEditWidget item={props.item} onDone={() => toggleEdit.hide()} />
+            </DeferredModalContent>
         </Modal>}
         {toggleEditDuration.value && <Modal open={toggleEditDuration.value} title={<Stack gap={0} direction="column" align="flex-start">
             <Space>
@@ -740,7 +637,9 @@ export const DishesItem: React.FunctionComponent<DishesItemProps> = (props) => {
             onCancel={toggleCooking.hide}
             footer={null}
         >
-            <CookingSessionWidget dish={props.item} onDone={toggleCooking.hide} />
+            <DeferredModalContent active={toggleCooking.value}>
+                <CookingSessionWidget dish={props.item} onDone={toggleCooking.hide} />
+            </DeferredModalContent>
         </Modal>}
     </React.Fragment>
 }

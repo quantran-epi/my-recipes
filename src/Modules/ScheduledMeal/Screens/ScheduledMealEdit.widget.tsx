@@ -9,13 +9,13 @@ import { SmartForm, useSmartForm } from "@components/SmartForm"
 import { ScheduledMeal } from "@store/Models/ScheduledMeal"
 import { editScheduledMeal } from "@store/Reducers/ScheduledMealReducer"
 import { updateShoppingListIngredientMealData } from "@store/Reducers/ShoppingListReducer"
-import { RootState } from "@store/Store"
+import { selectDishes } from "@store/Selectors"
 import dayjs from "dayjs"
 import { useDispatch, useSelector } from "react-redux"
 
 export const ScheduledMealEditWidget = ({ item, onDone }) => {
     const dispatch = useDispatch();
-    const dishes = useSelector((state: RootState) => state.shared.dishes.dishes);
+    const dishes = useSelector(selectDishes);
     const message = useMessage();
 
     const editScheduledMealForm = useSmartForm<ScheduledMeal>({

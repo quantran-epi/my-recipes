@@ -7,20 +7,20 @@ import { Button } from "@components/Button";
 import { Dropdown } from "@components/Dropdown";
 import { Space } from "@components/Layout/Space";
 import { Stack } from "@components/Layout/Stack";
-import { Modal } from "@components/Modal";
+import { DeferredModalContent, Modal } from "@components/Modal";
 import { Tooltip } from "@components/Tootip";
 import { Typography } from "@components/Typography";
 import { useScreenTitle, useTheme, useToggle } from "@hooks";
 import { ScheduledMeal } from "@store/Models/ScheduledMeal";
 import { addScheduledMeal, removeScheduledMeal, toggleSelectedMeals } from "@store/Reducers/ScheduledMealReducer";
-import { RootState } from "@store/Store";
+import { selectDishNameById, selectScheduledMeals, selectSelectedMealIds } from "@store/Selectors";
 import { Calendar, DatePicker, Tag } from "antd";
 import { SelectInfo } from "antd/es/calendar/generateCalendar";
 import dayjs, { Dayjs } from "dayjs";
 import { nanoid } from "nanoid";
 import { orderBy } from "lodash";
 import moment from "moment";
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { ScheduledMealAddWidget } from "./ScheduledMealAdd.widget";
@@ -37,6 +37,8 @@ import { Checkbox } from "@components/Form/Checkbox";
 import { CheckboxChangeEvent } from "antd/es/checkbox";
 import { RootRoutes } from "@routing/RootRoutes";
 
+const getMealDateKey = (value: Date | string) => moment(value).format("YYYY-MM-DD");
+
 // ─── Main screen ─────────────────────────────────────────────────────────────
 export const ScheduledMealListScreen = () => {
     const [selectedDate, setSelectedDate] = useState<Date>(new Date());
@@ -45,12 +47,23 @@ export const ScheduledMealListScreen = () => {
     const [shoppingRangeMealIds, setShoppingRangeMealIds] = useState<string[]>([]);
     const [shoppingRangeOpen, setShoppingRangeOpen] = useState(false);
 
-    const scheduledMeals = useSelector((state: RootState) => state.personal.scheduledMeal.scheduledMeals);
+    const scheduledMeals = useSelector(selectScheduledMeals);
+    const selectedMealIds = useSelector(selectSelectedMealIds);
+    const dishNameById = useSelector(selectDishNameById);
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const { } = useScreenTitle({ value: "Thực đơn", deps: [] });
     const toggleAddModal = useToggle({ defaultValue: false });
 
+    const scheduledMealsByDate = useMemo(() => {
+        return scheduledMeals.reduce((result, item) => {
+            const key = getMealDateKey(item.plannedDate);
+            result[key] = [...(result[key] ?? []), item];
+            return result;
+        }, {} as Record<string, ScheduledMeal[]>);
+    }, [scheduledMeals]);
+
+    const scheduledMealDateKeys = useMemo(() => new Set(Object.keys(scheduledMealsByDate)), [scheduledMealsByDate]);
     const _onSelect = (d, selectInfo?: SelectInfo) => {
         setSelectedDate(d.toDate());
     };
@@ -62,12 +75,11 @@ export const ScheduledMealListScreen = () => {
 
     const _onDelete = (item) => dispatch(removeScheduledMeal([item.id]));
 
-    const _hasScheduledMeal = (date: Date) =>
-        scheduledMeals.some(e => moment(e.plannedDate).format("DD/MM/YYYY") === moment(date).format("DD/MM/YYYY"));
+    const _hasScheduledMeal = (date: Date) => scheduledMealDateKeys.has(getMealDateKey(date));
 
     const _findScheduledMealsByDate = (date: Date) =>
         orderBy(
-            scheduledMeals.filter(e => moment(e.plannedDate).format("DD/MM/YYYY") === moment(date).format("DD/MM/YYYY")),
+            scheduledMealsByDate[getMealDateKey(date)] ?? [],
             [obj => obj.createdDate],
             ["desc"]
         );
@@ -141,7 +153,7 @@ export const ScheduledMealListScreen = () => {
                     </Box>
                 ) : (
                     mealsToday.map(item => (
-                        <ScheduledMealItem key={item.id} item={item} onDelete={_onDelete} />
+                        <ScheduledMealItem key={item.id} item={item} selected={selectedMealIds.has(item.id)} dishNameById={dishNameById} onDelete={_onDelete} />
                     ))
                 )}
             </Box>
@@ -157,7 +169,9 @@ export const ScheduledMealListScreen = () => {
                 onCancel={toggleAddModal.hide}
                 footer={null}
             >
-                <ScheduledMealAddWidget date={selectedDate} onDone={toggleAddModal.hide} />
+                <DeferredModalContent active={toggleAddModal.value}>
+                    <ScheduledMealAddWidget date={selectedDate} onDone={toggleAddModal.hide} />
+                </DeferredModalContent>
             </Modal>
 
             {/* Range picker modal */}
@@ -174,6 +188,7 @@ export const ScheduledMealListScreen = () => {
                 destroyOnClose
                 okButtonProps={{ disabled: !selectedRange }}
             >
+                <DeferredModalContent active={rangePickerOpen} minHeight={96}>
                 <Box style={{ padding: "12px 0" }}>
                     <DatePicker.RangePicker
                         style={{ width: "100%" }}
@@ -199,6 +214,7 @@ export const ScheduledMealListScreen = () => {
                         );
                     })()}
                 </Box>
+                </DeferredModalContent>
             </Modal>
 
             {/* Range shopping list add */}
@@ -212,6 +228,7 @@ export const ScheduledMealListScreen = () => {
                 onCancel={() => setShoppingRangeOpen(false)}
                 footer={null}
             >
+                <DeferredModalContent active={shoppingRangeOpen} minHeight={180}>
                 {shoppingRangeMealIds.length === 0 ? (
                     <Box style={{ textAlign: "center", padding: "24px 0" }}>
                         <Typography.Text type="secondary">Không có thực đơn nào trong khoảng ngày đã chọn</Typography.Text>
@@ -224,26 +241,23 @@ export const ScheduledMealListScreen = () => {
                         onCreated={(shoppingList) => navigate(RootRoutes.AuthorizedRoutes.ShoppingListRoutes.Detail(shoppingList.id))}
                     />
                 )}
+                </DeferredModalContent>
             </Modal>
         </React.Fragment>
     );
 };
 
 // ─── Meal item ────────────────────────────────────────────────────────────────
-export const ScheduledMealItem = ({ item, onDelete }: { item: ScheduledMeal; onDelete: (item: ScheduledMeal) => void }) => {
+export const ScheduledMealItem = ({ item, selected, dishNameById, onDelete }: { item: ScheduledMeal; selected: boolean; dishNameById: Map<string, string>; onDelete: (item: ScheduledMeal) => void }) => {
     const toggleEditModal = useToggle({ defaultValue: false });
     const toggleMealModal = useToggle({ defaultValue: false });
     const toggleCopyModal = useToggle({ defaultValue: false });
     const toggleDeleteConfirm = useToggle({ defaultValue: false });
     const [copyDate, setCopyDate] = useState<Dayjs | null>(null);
-    const selectedMeals = useSelector((state: RootState) => state.personal.scheduledMeal.selectedMeals);
-    const dishes = useSelector((state: RootState) => state.shared.dishes.dishes);
     const dispatch = useDispatch();
     const theme = useTheme();
 
-    const _dishName = (id: string) => dishes.find(d => d.id === id)?.name ?? id;
-
-    const _isSelected = () => selectedMeals.includes(item.id);
+    const _dishName = (id: string) => dishNameById.get(id) ?? id;
 
     const _onToggleSelect = (e: CheckboxChangeEvent) => {
         dispatch(toggleSelectedMeals({ ids: [item.id], selected: e.target.checked }));
@@ -269,7 +283,6 @@ export const ScheduledMealItem = ({ item, onDelete }: { item: ScheduledMeal; onD
         }
     };
 
-    const selected = _isSelected();
     const mealGroups = [
         { icon: MorningIcon, label: "Sáng", dishIds: item.meals.breakfast, color: "#faad14", background: "#fffbe6", border: "#ffe58f" },
         { icon: NoonIcon, label: "Trưa", dishIds: item.meals.lunch, color: "#d46b08", background: "#fff7e6", border: "#ffd591" },
@@ -363,7 +376,7 @@ export const ScheduledMealItem = ({ item, onDelete }: { item: ScheduledMeal; onD
             </Box>
 
             {/* Edit */}
-            <Modal
+            {toggleEditModal.value && <Modal
                 open={toggleEditModal.value}
                 title={<Space>
                     <Image src={MealsIcon} preview={false} width={24} style={{ marginBottom: 3 }} />
@@ -373,11 +386,13 @@ export const ScheduledMealItem = ({ item, onDelete }: { item: ScheduledMeal; onD
                 onCancel={toggleEditModal.hide}
                 footer={null}
             >
-                <ScheduledMealEditWidget item={item} onDone={toggleEditModal.hide} />
-            </Modal>
+                <DeferredModalContent active={toggleEditModal.value}>
+                    <ScheduledMealEditWidget item={item} onDone={toggleEditModal.hide} />
+                </DeferredModalContent>
+            </Modal>}
 
             {/* Meal detail */}
-            <Modal
+            {toggleMealModal.value && <Modal
                 style={{ top: 50 }}
                 open={toggleMealModal.value}
                 title={<Space>
@@ -388,13 +403,15 @@ export const ScheduledMealItem = ({ item, onDelete }: { item: ScheduledMeal; onD
                 onCancel={toggleMealModal.hide}
                 footer={null}
             >
-                <Box style={{ maxHeight: 550, overflowY: "auto" }}>
-                    <ShoppingListMealDetailWidget mealId={item.id} />
-                </Box>
-            </Modal>
+                <DeferredModalContent active={toggleMealModal.value} minHeight={220}>
+                    <Box style={{ maxHeight: 550, overflowY: "auto" }}>
+                        <ShoppingListMealDetailWidget mealId={item.id} />
+                    </Box>
+                </DeferredModalContent>
+            </Modal>}
 
             {/* Copy to another day */}
-            <Modal
+            {toggleCopyModal.value && <Modal
                 open={toggleCopyModal.value}
                 title={<Space>
                     <CopyOutlined />
@@ -407,6 +424,7 @@ export const ScheduledMealItem = ({ item, onDelete }: { item: ScheduledMeal; onD
                 okButtonProps={{ disabled: !copyDate }}
                 destroyOnClose
             >
+                <DeferredModalContent active={toggleCopyModal.value} minHeight={96}>
                 <Box style={{ padding: "12px 0" }}>
                     <Typography.Text style={{ display: "block", marginBottom: 10 }}>
                         Chọn ngày muốn sao chép thực đơn <strong>"{item.name}"</strong> sang:
@@ -419,8 +437,9 @@ export const ScheduledMealItem = ({ item, onDelete }: { item: ScheduledMeal; onD
                         disabledDate={d => d.isSame(dayjs(item.plannedDate), "day")}
                     />
                 </Box>
-            </Modal>
-            <Modal
+                </DeferredModalContent>
+            </Modal>}
+            {toggleDeleteConfirm.value && <Modal
                 open={toggleDeleteConfirm.value}
                 title={<Space><DeleteOutlined style={{ color: "red" }} />Xác nhận xóa</Space>}
                 onCancel={toggleDeleteConfirm.hide}
@@ -431,7 +450,7 @@ export const ScheduledMealItem = ({ item, onDelete }: { item: ScheduledMeal; onD
                 destroyOnClose
             >
                 Bạn có chắc muốn xóa thực đơn <b>{item.name}</b> không? Hành động này không thể hoàn tác.
-            </Modal>
+            </Modal>}
         </React.Fragment>
     );
 };

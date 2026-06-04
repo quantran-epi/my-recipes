@@ -1,9 +1,7 @@
 import React from "react";
-import { FileTextOutlined } from "@ant-design/icons";
 import { Button } from "@components/Button";
 import { Modal } from "@components/Modal";
 import { Typography } from "@components/Typography";
-import { useToggle } from "@hooks";
 import { ShoppingList } from "@store/Models/ShoppingList";
 import { Ingredient } from "@store/Models/Ingredient";
 import { Box } from "@components/Layout/Box";
@@ -13,7 +11,7 @@ import ShoppingListIcon from "../../../../assets/icons/shoppingList.png";
 import { Image } from "@components/Image";
 import moment from "moment";
 
-const formatShoppingListToText = (shoppingList: ShoppingList, allIngredients: Ingredient[]): string => {
+const formatShoppingListToText = (shoppingList: ShoppingList, ingredientsById: Map<string, Ingredient>): string => {
     const lines: string[] = [];
 
     lines.push(`🛒 ${shoppingList.name.toUpperCase()}`);
@@ -27,7 +25,7 @@ const formatShoppingListToText = (shoppingList: ShoppingList, allIngredients: In
         lines.push("-".repeat(40));
 
         shoppingList.ingredients.forEach(group => {
-            const ingInfo = allIngredients.find(i => i.id === group.ingredientId);
+            const ingInfo = ingredientsById.get(group.ingredientId);
             const name = ingInfo?.name || group.ingredientId;
             const done = group.isDone ? " ✅" : "";
 
@@ -56,7 +54,10 @@ type ShoppingListExportWidgetProps = {
 
 export const ShoppingListExportWidget: React.FC<ShoppingListExportWidgetProps> = ({ shoppingList, allIngredients, open, onClose }) => {
     const message = useMessage();
-    const text = formatShoppingListToText(shoppingList, allIngredients);
+    const ingredientsById = React.useMemo(() => open ? new Map(allIngredients.map(item => [item.id, item])) : new Map<string, Ingredient>(), [open, allIngredients]);
+    const text = React.useMemo(() => open ? formatShoppingListToText(shoppingList, ingredientsById) : '', [open, shoppingList, ingredientsById]);
+
+    if (!open) return null;
 
     const _onCopy = () => {
         navigator.clipboard.writeText(text).then(() => {

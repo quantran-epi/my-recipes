@@ -11,7 +11,7 @@ import { nanoid } from "@reduxjs/toolkit"
 import { ShoppingList } from "@store/Models/ShoppingList"
 import { removeAllSelectedMeals } from "@store/Reducers/ScheduledMealReducer"
 import { addShoppingList, editShoppingList } from "@store/Reducers/ShoppingListReducer"
-import { RootState } from "@store/Store"
+import { selectDishes, selectScheduledMeals } from "@store/Selectors"
 import dayjs from "dayjs"
 import moment from "moment"
 import React, { FunctionComponent, useEffect } from "react"
@@ -24,8 +24,8 @@ type ShoppingListEditWidgetProps = {
 
 export const ShoppingListEditWidget: FunctionComponent<ShoppingListEditWidgetProps> = ({ item, onDone }) => {
     const dispatch = useDispatch();
-    const dishes = useSelector((state: RootState) => state.shared.dishes.dishes);
-    const scheduledMeals = useSelector((state: RootState) => state.personal.scheduledMeal.scheduledMeals);
+    const dishes = useSelector(selectDishes);
+    const scheduledMeals = useSelector(selectScheduledMeals);
     const message = useMessage();
 
     const editShoppingListForm = useSmartForm<ShoppingList>({

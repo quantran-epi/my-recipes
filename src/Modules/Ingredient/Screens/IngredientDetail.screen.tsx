@@ -7,16 +7,16 @@ import { Image } from "@components/Image";
 import { Box } from "@components/Layout/Box";
 import { Space } from "@components/Layout/Space";
 import { Stack } from "@components/Layout/Stack";
-import { Modal } from "@components/Modal";
+import { DeferredModalContent, Modal } from "@components/Modal";
 import { Result } from "@components/Result/Result";
 import { Typography } from "@components/Typography";
 import { useAdminMode, useScreenTitle, useToggle } from "@hooks";
 import { DishSuggesterScreen } from "@modules/DishSuggester/Screens/DishSuggester.screen";
 import { RootRoutes } from "@routing/RootRoutes";
 import { INGREDIENT_PRESERVATION_OPTIONS, INGREDIENT_SHELF_LIFE_OPTIONS } from "@store/Models/Ingredient";
-import { selectIngredients, selectInventoryById } from "@store/Selectors";
+import { selectIngredientsById, selectInventoryById } from "@store/Selectors";
 import { Divider } from "antd";
-import React, { useMemo, useState } from "react";
+import React, { useState } from "react";
 import { useSelector } from "react-redux";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import VegetablesIcon from "../../../../assets/icons/vegetable.png";
@@ -27,14 +27,14 @@ export const IngredientDetailScreen = () => {
     const [searchParams] = useSearchParams();
     const navigate = useNavigate();
     const ingredientId = searchParams.get("ingredient") ?? "";
-    const ingredients = useSelector(selectIngredients);
+    const ingredientsById = useSelector(selectIngredientsById);
     const inventory = useSelector(selectInventoryById(ingredientId));
     const { isAdmin } = useAdminMode();
     const toggleEdit = useToggle();
     const toggleSuggester = useToggle();
     const [suggestIds, setSuggestIds] = useState<string[]>([]);
 
-    const ingredient = useMemo(() => ingredients.find(item => item.id === ingredientId), [ingredients, ingredientId]);
+    const ingredient = ingredientsById.get(ingredientId);
     useScreenTitle({ value: ingredient?.name ?? "Nguyên liệu", deps: [ingredient?.name] });
 
     const _backToList = () => navigate(RootRoutes.AuthorizedRoutes.IngredientRoutes.List());
@@ -119,13 +119,15 @@ export const IngredientDetailScreen = () => {
                 Chỉnh sửa nguyên liệu
             </Space>
         } destroyOnClose={true} onCancel={toggleEdit.hide} footer={null}>
-            <IngredientEditWidget item={ingredient} onDone={toggleEdit.hide} />
+            <DeferredModalContent active={toggleEdit.value}>
+                <IngredientEditWidget item={ingredient} onDone={toggleEdit.hide} />
+            </DeferredModalContent>
         </Modal>
 
-        <DishSuggesterScreen
+        {toggleSuggester.value && <DishSuggesterScreen
             open={toggleSuggester.value}
             onClose={toggleSuggester.hide}
             initialIngredientIds={suggestIds}
-        />
+        />}
     </React.Fragment>;
 }

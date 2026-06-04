@@ -7,13 +7,13 @@ import { Button } from "@components/Button";
 import { Image } from "@components/Image";
 import { Box } from "@components/Layout/Box";
 import { Stack } from "@components/Layout/Stack";
-import { Modal } from "@components/Modal";
+import { DeferredModalContent, Modal } from "@components/Modal";
 import { ServingSizeInput } from "@components/Form/ServingSizeInput";
 import { Typography } from "@components/Typography";
 import { ShoppingListAddWidget } from "@modules/ShoppingList/Screens/ShoppingListAdd.widget";
 import { RootRoutes } from "@routing/RootRoutes";
 import { Dishes } from "@store/Models/Dishes";
-import { selectDishes, selectIngredients, selectInventory } from "@store/Selectors";
+import { selectDishes, selectDishesById, selectIngredients, selectInventory } from "@store/Selectors";
 import { Empty, Select } from "antd";
 import React, { useEffect, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
@@ -76,8 +76,8 @@ const createPlannerDish = (dish: Dishes, targetServings?: number): PlannerDish =
     servings: DishServingHelper.getTargetServings(dish, targetServings),
 });
 
-const findPlannerDish = (dishId: string, allDishes: Dishes[], fallbackDish?: Dishes): Dishes | undefined => {
-    return allDishes.find(item => item.id === dishId) ?? (fallbackDish?.id === dishId ? fallbackDish : undefined);
+const findPlannerDish = (dishId: string, dishById: Map<string, Dishes>, fallbackDish?: Dishes): Dishes | undefined => {
+    return dishById.get(dishId) ?? (fallbackDish?.id === dishId ? fallbackDish : undefined);
 };
 
 const getSeedKey = (dish?: Dishes, targetServings?: number): string => {
@@ -132,6 +132,7 @@ export const DishExpensePlannerWidget: React.FunctionComponent<DishExpensePlanne
     maxIngredientListHeight,
 }) => {
     const allDishes = useSelector(selectDishes);
+    const dishById = useSelector(selectDishesById);
     const ingredients = useSelector(selectIngredients);
     const inventoryItems = useSelector(selectInventory);
     const [plannerDishes, setPlannerDishes] = useState<PlannerDish[]>(() => initialDish ? [createPlannerDish(initialDish, initialTargetServings)] : []);
@@ -142,7 +143,6 @@ export const DishExpensePlannerWidget: React.FunctionComponent<DishExpensePlanne
     const [previewDish, setPreviewDish] = useState<PreviewDish>();
     const [createShoppingListOpen, setCreateShoppingListOpen] = useState(false);
     const navigate = useNavigate();
-
     useEffect(() => {
         const nextSeedKey = getSeedKey(initialDish, initialTargetServings);
         if (!initialDish || !nextSeedKey || appliedSeedKey === nextSeedKey) return;
@@ -155,7 +155,7 @@ export const DishExpensePlannerWidget: React.FunctionComponent<DishExpensePlanne
     const selectedDishDetails = useMemo<PlannerDishDetail[]>(() => {
         return plannerDishes
             .map(item => {
-                const selectedDish = findPlannerDish(item.dishId, allDishes, initialDish);
+                const selectedDish = findPlannerDish(item.dishId, dishById, initialDish);
                 if (!selectedDish) return null;
                 const baseServings = DishServingHelper.getBaseServings(selectedDish);
                 return {
@@ -165,7 +165,7 @@ export const DishExpensePlannerWidget: React.FunctionComponent<DishExpensePlanne
                 };
             })
             .filter(Boolean) as PlannerDishDetail[];
-    }, [plannerDishes, allDishes, initialDish]);
+    }, [plannerDishes, dishById, initialDish]);
 
     const shoppingListDishIds = useMemo(() => selectedDishDetails.map(item => item.dish.id), [selectedDishDetails]);
     const shoppingListDishServings = useMemo(() => selectedDishDetails.reduce((result, item) => {
@@ -204,7 +204,7 @@ export const DishExpensePlannerWidget: React.FunctionComponent<DishExpensePlanne
         : {};
 
     const _onAddDish = (dishId: string) => {
-        const nextDish = allDishes.find(item => item.id === dishId);
+        const nextDish = dishById.get(dishId);
         if (!nextDish) return;
         setPlannerDishes(current => current.some(item => item.dishId === dishId) ? current : [...current, createPlannerDish(nextDish)]);
         setDishToAdd(undefined);
@@ -218,7 +218,7 @@ export const DishExpensePlannerWidget: React.FunctionComponent<DishExpensePlanne
     };
 
     const _onServingChange = (dishId: string, value: number) => {
-        const selectedDish = findPlannerDish(dishId, allDishes, initialDish);
+        const selectedDish = findPlannerDish(dishId, dishById, initialDish);
         const baseServings = DishServingHelper.getBaseServings(selectedDish);
         setPlannerDishes(current => current.map(item => item.dishId === dishId
             ? { ...item, servings: DishServingHelper.normalizeTargetServings(value, baseServings) }
@@ -360,13 +360,15 @@ export const DishExpensePlannerWidget: React.FunctionComponent<DishExpensePlanne
             <Image src={ShoppinglistIcon} preview={false} width={22} />
             <span>Tạo lịch mua sắm</span>
         </Stack>} destroyOnClose onCancel={() => setCreateShoppingListOpen(false)} footer={null}>
-            <ShoppingListAddWidget
-                date={null}
-                dishIds={shoppingListDishIds}
-                initialDishServings={shoppingListDishServings}
-                onDone={() => setCreateShoppingListOpen(false)}
-                onCreated={(shoppingList) => navigate(RootRoutes.AuthorizedRoutes.ShoppingListRoutes.Detail(shoppingList.id))}
-            />
+            <DeferredModalContent active={createShoppingListOpen}>
+                <ShoppingListAddWidget
+                    date={null}
+                    dishIds={shoppingListDishIds}
+                    initialDishServings={shoppingListDishServings}
+                    onDone={() => setCreateShoppingListOpen(false)}
+                    onCreated={(shoppingList) => navigate(RootRoutes.AuthorizedRoutes.ShoppingListRoutes.Detail(shoppingList.id))}
+                />
+            </DeferredModalContent>
         </Modal>
     </React.Fragment>
 }
@@ -383,6 +385,8 @@ export const DishExpensePlannerModal: React.FunctionComponent<DishExpensePlanner
             <span>Lập kế hoạch chi phí</span>
         </Stack>}
     >
-        <DishExpensePlannerWidget {...plannerProps} maxIngredientListHeight={plannerProps.maxIngredientListHeight ?? 420} />
+        <DeferredModalContent active={open} minHeight={240}>
+            <DishExpensePlannerWidget {...plannerProps} maxIngredientListHeight={plannerProps.maxIngredientListHeight ?? 420} />
+        </DeferredModalContent>
     </Modal>
 }

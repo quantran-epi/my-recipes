@@ -1,5 +1,5 @@
 import { List } from "@components/List";
-import { RootState } from "@store/Store";
+import { selectDishes, selectIngredients, selectScheduledMeals, selectShoppingLists } from "@store/Selectors";
 import { Calendar, Divider } from "antd"
 import { SelectInfo } from "antd/es/calendar/generateCalendar"
 import moment from "moment";
@@ -14,7 +14,10 @@ import { PlusOutlined } from "@ant-design/icons";
 
 export const ShoppingListCalendarWidget = ({ onAdd }) => {
     const [selectedDate, setSelectedDate] = useState<Date>(new Date());
-    const shoppingLists = useSelector((state: RootState) => state.personal.shoppingList.shoppingLists);
+    const shoppingLists = useSelector(selectShoppingLists);
+    const dishes = useSelector(selectDishes);
+    const scheduledMeals = useSelector(selectScheduledMeals);
+    const ingredients = useSelector(selectIngredients);
     const dispatch = useDispatch();
 
     const _onSelect = (d, selectInfo: SelectInfo) => {
@@ -53,7 +56,7 @@ export const ShoppingListCalendarWidget = ({ onAdd }) => {
             }}
             itemLayout="horizontal"
             dataSource={_findShoppingListsByDate(selectedDate)}
-            renderItem={(item) => <ShoppingListItem item={item} onDelete={_onDelete} />}
+            renderItem={(item) => <ShoppingListItem item={item} allDishes={dishes} allScheduledMeals={scheduledMeals} allIngredients={ingredients} onDelete={_onDelete} />}
         />
     </React.Fragment>
 }

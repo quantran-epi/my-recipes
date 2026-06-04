@@ -12,7 +12,7 @@ import { IngredientUnitHelper } from "@common/Helpers/IngredientUnitHelper"
 import { IngredientPriceHelper } from "@common/Helpers/IngredientPriceHelper"
 import { IngredientUnitRulesEditor } from "./IngredientUnitRulesEditor"
 import { IngredientPriceEstimateEditor } from "./IngredientPriceEstimateEditor"
-import { RootState } from "@store/Store"
+import { selectDishes, selectInventoryById } from "@store/Selectors"
 import { useState } from "react"
 import { useDispatch, useSelector } from "react-redux"
 
@@ -21,8 +21,8 @@ const uniqueUnits = (units: IngredientUnit[]): IngredientUnit[] => Array.from(ne
 export const IngredientEditWidget = ({ item, onDone }) => {
     const dispatch = useDispatch();
     const message = useMessage();
-    const dishes = useSelector((state: RootState) => state.shared.dishes.dishes);
-    const inventory = useSelector((state: RootState) => state.personal.inventory.items[item.id]);
+    const dishes = useSelector(selectDishes);
+    const inventory = useSelector(selectInventoryById(item.id));
     const [baseUnit, setBaseUnit] = useState<IngredientUnit>(() => IngredientUnitHelper.getBaseUnit(item));
     const [inventoryUnits, setInventoryUnits] = useState<IngredientUnit[]>(() => IngredientUnitHelper.getInventoryUnits(item));
     const [recipeUnits, setRecipeUnits] = useState<IngredientUnit[]>(() => IngredientUnitHelper.getRecipeUnits(item));

@@ -4,11 +4,11 @@ import { Box } from "@components/Layout/Box"
 import { Divider } from "@components/Layout/Divider"
 import { Space } from "@components/Layout/Space"
 import { Stack } from "@components/Layout/Stack"
-import { Modal } from "@components/Modal"
+import { DeferredModalContent, Modal } from "@components/Modal"
 import { useToggle } from "@hooks"
 import { Dishes } from "@store/Models/Dishes"
 import { test } from "@store/Reducers/DishesReducer"
-import { RootState } from "@store/Store"
+import { selectDishesById } from "@store/Selectors"
 import { Typography } from "antd"
 import React, { useEffect, useMemo, useState } from "react"
 import { useDispatch, useSelector } from "react-redux"
@@ -32,7 +32,7 @@ type DishDetailWidgetProps = {
 }
 
 export const DishesDetailWidget: React.FunctionComponent<DishDetailWidgetProps> = (props) => {
-    const dishes = useSelector((state: RootState) => state.shared.dishes.dishes);
+    const dishesById = useSelector(selectDishesById);
     const navigate = useNavigate();
     const toggleDishesDetail = useToggle();
     const toggleCooking = useToggle();
@@ -40,15 +40,15 @@ export const DishesDetailWidget: React.FunctionComponent<DishDetailWidgetProps> 
     const [currentIncludeDish, setCurrentIncludeDish] = useState<string>();
 
     const _getDishesById = (id: string) => {
-        return dishes.find(e => id === e.id);
+        return dishesById.get(id);
     }
 
     const dish = useMemo(() => {
         return _getDishesById(currentIncludeDish);
-    }, [currentIncludeDish, dishes])
+    }, [currentIncludeDish, dishesById])
 
     const _getDishesByIds = (ids: string[]) => {
-        return dishes.filter(e => ids.includes(e.id));
+        return ids.map(id => dishesById.get(id)).filter(Boolean) as Dishes[];
     }
 
     const _showDish = (dish: Dishes) => {
@@ -112,14 +112,16 @@ export const DishesDetailWidget: React.FunctionComponent<DishDetailWidgetProps> 
         </Space></Divider>
         <DishStepListWidget currentDist={props.dish} />
 
-        {currentIncludeDish && <Modal style={{ top: 50 }} open={toggleDishesDetail.value} title={
+        {currentIncludeDish && dish && <Modal style={{ top: 50 }} open={toggleDishesDetail.value} title={
             <Space>
                 <Image src={NoodlesIcon} preview={false} width={24} style={{ marginBottom: 3 }} />
                 {dish.name}
             </Space>
         } destroyOnClose={true} onCancel={toggleDishesDetail.hide} footer={null} zIndex={2200}>
             <Box style={{ maxHeight: 550, overflowY: "auto" }}>
-                <DishesDetailWidget dish={dish} />
+                <DeferredModalContent active={toggleDishesDetail.value} minHeight={220}>
+                    <DishesDetailWidget dish={dish} />
+                </DeferredModalContent>
             </Box>
         </Modal>}
 
@@ -131,7 +133,9 @@ export const DishesDetailWidget: React.FunctionComponent<DishDetailWidgetProps> 
             footer={null}
             zIndex={2300}
         >
-            <CookingSessionWidget dish={props.dish} onDone={toggleCooking.hide} />
+            <DeferredModalContent active={toggleCooking.value}>
+                <CookingSessionWidget dish={props.dish} onDone={toggleCooking.hide} />
+            </DeferredModalContent>
         </Modal>
 
         <Modal
@@ -142,12 +146,14 @@ export const DishesDetailWidget: React.FunctionComponent<DishDetailWidgetProps> 
             footer={null}
             zIndex={2300}
         >
-            <ShoppingListAddWidget
-                date={null}
-                dishIds={[props.dish.id]}
-                onDone={toggleShoppingList.hide}
-                onCreated={(shoppingList) => navigate(RootRoutes.AuthorizedRoutes.ShoppingListRoutes.Detail(shoppingList.id))}
-            />
+            <DeferredModalContent active={toggleShoppingList.value}>
+                <ShoppingListAddWidget
+                    date={null}
+                    dishIds={[props.dish.id]}
+                    onDone={toggleShoppingList.hide}
+                    onCreated={(shoppingList) => navigate(RootRoutes.AuthorizedRoutes.ShoppingListRoutes.Detail(shoppingList.id))}
+                />
+            </DeferredModalContent>
         </Modal>
     </React.Fragment>
 }

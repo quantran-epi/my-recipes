@@ -49,10 +49,6 @@ const createSummary = (): CostEstimateSummary => ({
     missingPriceCount: 0,
 });
 
-const findIngredient = (ingredients: Ingredient[], ingredientId: string): Ingredient | undefined => {
-    return ingredients.find(item => item.id === ingredientId);
-};
-
 export const CostEstimateHelper = {
     emptySummary(): CostEstimateSummary {
         return createSummary();
@@ -138,11 +134,12 @@ export const CostEstimateHelper = {
         options: IngredientAmountCostEstimateOptions = {},
     ): IngredientAmountCostEstimate {
         const estimate = CostEstimateHelper.emptyIngredientAmountEstimate();
+        const ingredientById = new Map(ingredients.map(item => [item.id, item]));
         const selectedIds = options.selectedIngredientIds ? new Set(options.selectedIngredientIds) : null;
         const includedAmounts = amounts.filter(item => !selectedIds || selectedIds.has(item.ingredientId));
 
         includedAmounts.forEach(item => {
-            const ingredient = findIngredient(ingredients, item.ingredientId);
+            const ingredient = ingredientById.get(item.ingredientId);
             const target = item.required ? estimate.required : estimate.optional;
             CostEstimateHelper.addIngredientAmount(target, item, ingredient);
             CostEstimateHelper.addIngredientAmount(estimate.total, item, ingredient);
@@ -155,7 +152,7 @@ export const CostEstimateHelper = {
 
         Object.keys(grouped).forEach(ingredientId => {
             const group = grouped[ingredientId];
-            const ingredient = findIngredient(ingredients, ingredientId);
+            const ingredient = ingredientById.get(ingredientId);
             const unit = IngredientUnitHelper.getBaseUnit(ingredient, group.map(item => item.unit));
             const getAmount = (items: DishesIngredientAmount[]) => items.reduce((sum, item) => {
                 const converted = IngredientUnitHelper.toBaseAmount(ingredient, item.amount, item.unit, unit);

@@ -7,21 +7,24 @@ import { Box } from "@components/Layout/Box";
 import { scrollVirtualListToTop, VirtualListScrollTopButton } from "@components/List";
 import { Space } from "@components/Layout/Space";
 import { Stack } from "@components/Layout/Stack";
-import { Modal } from "@components/Modal";
+import { DeferredModalContent, Modal } from "@components/Modal";
 import { useMessage } from "@components/Message";
 import { useModal } from "@components/Modal/ModalProvider";
 import { Tooltip } from "@components/Tootip";
 import { Typography } from "@components/Typography";
 import { useScreenTitle, useToggle } from "@hooks";
+import { Dishes } from "@store/Models/Dishes";
+import { Ingredient } from "@store/Models/Ingredient";
+import { ScheduledMeal } from "@store/Models/ScheduledMeal";
 import { ShoppingList } from "@store/Models/ShoppingList";
 import { generateIngredient, removeShoppingList } from "@store/Reducers/ShoppingListReducer";
-import { RootState } from "@store/Store";
+import { selectDishes, selectIngredients, selectScheduledMeals, selectShoppingLists } from "@store/Selectors";
 import { debounce, orderBy } from "lodash";
 import moment from "moment";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { List as VirtualList, useDynamicRowHeight, type ListImperativeAPI, type RowComponentProps } from "react-window";
+import { List as VirtualList, type ListImperativeAPI, type RowComponentProps } from "react-window";
 import ShoppinglistIcon from "../../../../assets/icons/shoppingList.png";
 import { ShoppingListAddWidget } from "./ShoppingListAdd.widget";
 import { ShoppingListExportWidget } from "./ShoppingListExport.widget";
@@ -42,6 +45,8 @@ const SHOPPING_LIST_STATUS_FILTERS: { value: ShoppingListStatusFilter; label: st
     { value: "completed", label: "Đã hoàn tất" },
     { value: "empty_checklist", label: "Chưa checklist" },
 ];
+
+const SHOPPING_LIST_ROW_HEIGHT = 164;
 
 const filterRowStyle: React.CSSProperties = {
     display: "flex",
@@ -87,15 +92,24 @@ const shoppingListMatchesStatus = (item: ShoppingList, status: ShoppingListStatu
         || (status === "empty_checklist" && !isReadonly && item.ingredients.length === 0);
 }
 
-type ShoppingListRowProps = { items: ShoppingList[]; onDelete: (item: ShoppingList) => void; };
+type ShoppingListRowProps = {
+    items: ShoppingList[];
+    allDishes: Dishes[];
+    allScheduledMeals: ScheduledMeal[];
+    allIngredients: Ingredient[];
+    onDelete: (item: ShoppingList) => void;
+};
 
-const ShoppingListRow = ({ index, style, items, onDelete }: RowComponentProps<ShoppingListRowProps>) => {
+const ShoppingListRow = ({ index, style, items, allDishes, allScheduledMeals, allIngredients, onDelete }: RowComponentProps<ShoppingListRowProps>) => {
     if (!items[index]) return null;
-    return <div style={style}><ShoppingListItem item={items[index]} onDelete={onDelete} /></div>;
+    return <div style={style}><ShoppingListItem item={items[index]} allDishes={allDishes} allScheduledMeals={allScheduledMeals} allIngredients={allIngredients} onDelete={onDelete} /></div>;
 };
 
 export const ShoppingListScreen = () => {
-    const shoppingLists = useSelector((state: RootState) => state.personal.shoppingList.shoppingLists);
+    const shoppingLists = useSelector(selectShoppingLists);
+    const dishes = useSelector(selectDishes);
+    const scheduledMeals = useSelector(selectScheduledMeals);
+    const ingredients = useSelector(selectIngredients);
     const toggleCalendarModal = useToggle({ defaultValue: false });
     const toggleAddModal = useToggle({ defaultValue: false });
     const dispatch = useDispatch();
@@ -103,7 +117,7 @@ export const ShoppingListScreen = () => {
     const { } = useScreenTitle({ value: "Lịch mua sắm", deps: [] });
     const [searchText, setSearchText] = useState("");
     const [activeStatus, setActiveStatus] = useState<ShoppingListStatusFilter>("all");
-    const rowHeight = useDynamicRowHeight({ defaultRowHeight: 164, key: searchText + activeStatus });
+    const rowHeight = SHOPPING_LIST_ROW_HEIGHT;
     const listRef = useRef<ListImperativeAPI | null>(null);
     const [showScrollTop, setShowScrollTop] = useState(false);
     const normalizedSearch = searchText.trim().toLowerCase();
@@ -159,8 +173,11 @@ export const ShoppingListScreen = () => {
 
     const shoppingListRowProps = useMemo(() => ({
         items: filteredShoppingLists,
+        allDishes: dishes,
+        allScheduledMeals: scheduledMeals,
+        allIngredients: ingredients,
         onDelete: _onDelete,
-    }), [filteredShoppingLists, _onDelete]);
+    }), [filteredShoppingLists, dishes, scheduledMeals, ingredients, _onDelete]);
 
     const _onShowCalendar = () => {
         toggleCalendarModal.show();
@@ -178,18 +195,7 @@ export const ShoppingListScreen = () => {
     }, []);
 
     useEffect(() => {
-        let frameId: number | undefined;
-        let retryCount = 0;
-        const reset = () => {
-            if (!_scrollToTop() && retryCount < 20) {
-                retryCount += 1;
-                frameId = window.requestAnimationFrame(reset);
-            }
-        };
-        reset();
-        return () => {
-            if (frameId !== undefined) window.cancelAnimationFrame(frameId);
-        };
+        _scrollToTop();
     }, [_scrollToTop, activeStatus, searchText]);
 
     return <React.Fragment>
@@ -224,26 +230,33 @@ export const ShoppingListScreen = () => {
             <Image src={ShoppinglistIcon} preview={false} width={24} style={{ marginBottom: 3 }} />
             Thêm lịch mua sắm
         </Space>} destroyOnClose={true} onCancel={toggleAddModal.hide} footer={null}>
-            <ShoppingListAddWidget
-                date={selectedDate}
-                onDone={toggleAddModal.hide}
-                onCreated={(shoppingList) => navigate(RootRoutes.AuthorizedRoutes.ShoppingListRoutes.Detail(shoppingList.id))}
-            />
+            <DeferredModalContent active={toggleAddModal.value}>
+                <ShoppingListAddWidget
+                    date={selectedDate}
+                    onDone={toggleAddModal.hide}
+                    onCreated={(shoppingList) => navigate(RootRoutes.AuthorizedRoutes.ShoppingListRoutes.Detail(shoppingList.id))}
+                />
+            </DeferredModalContent>
         </Modal>
 
         <Modal style={{ top: 50 }} open={toggleCalendarModal.value} title={<Space>
             <Image src={ShoppinglistIcon} preview={false} width={24} style={{ marginBottom: 3 }} />
             Lịch mua sắm
         </Space>} destroyOnClose={true} onCancel={toggleCalendarModal.hide} footer={null}>
-            <Box style={{ maxHeight: 550, overflowY: "auto" }}>
-                <ShoppingListCalendarWidget onAdd={_onAddWithDate} />
-            </Box>
+            <DeferredModalContent active={toggleCalendarModal.value} minHeight={220}>
+                <Box style={{ maxHeight: 550, overflowY: "auto" }}>
+                    <ShoppingListCalendarWidget onAdd={_onAddWithDate} />
+                </Box>
+            </DeferredModalContent>
         </Modal>
     </React.Fragment>
 }
 
 type ShoppingListItemProps = {
     item: ShoppingList;
+    allDishes: Dishes[];
+    allScheduledMeals: ScheduledMeal[];
+    allIngredients: Ingredient[];
     onDelete: (item: ShoppingList) => void;
 }
 
@@ -251,9 +264,6 @@ export const ShoppingListItem: React.FunctionComponent<ShoppingListItemProps> = 
     const toggleIngredient = useToggle({ defaultValue: false });
     const toggleAddMoreDishes = useToggle({ defaultValue: false });
     const navigate = useNavigate();
-    const dishes = useSelector((state: RootState) => state.shared.dishes.dishes);
-    const scheduledMeals = useSelector((state: RootState) => state.personal.scheduledMeal.scheduledMeals);
-    const ingredients = useSelector((state: RootState) => state.shared.ingredient.ingredients);
     const dispatch = useDispatch();
     const message = useMessage();
     const modal = useModal();
@@ -267,9 +277,9 @@ export const ShoppingListItem: React.FunctionComponent<ShoppingListItemProps> = 
         if (isReadonly) return;
         dispatch(generateIngredient({
             shoppingListId: props.item.id,
-            allDishes: dishes,
-            allScheduledMeals: scheduledMeals,
-            allIngredients: ingredients,
+            allDishes: props.allDishes,
+            allScheduledMeals: props.allScheduledMeals,
+            allIngredients: props.allIngredients,
         }));
         message.success("Đã tạo lại checklist nguyên liệu");
     }
@@ -425,7 +435,7 @@ export const ShoppingListItem: React.FunctionComponent<ShoppingListItemProps> = 
                 </div>
             </div>
         </div>
-        <Modal style={{ top: 50 }} open={toggleIngredient.value} title={<Space>
+        {toggleIngredient.value && <Modal style={{ top: 50 }} open={toggleIngredient.value} title={<Space>
             <Image src={ShoppinglistIcon} preview={false} width={24} style={{ marginBottom: 3 }} />
             {props.item.name}
         </Space>} destroyOnClose={true} onCancel={toggleIngredient.hide} footer={<Space>
@@ -433,8 +443,8 @@ export const ShoppingListItem: React.FunctionComponent<ShoppingListItemProps> = 
             <Button type="primary" icon={<EditOutlined />} onClick={_onOpenDetailPage}>Mở trang chi tiết</Button>
         </Space>} afterOpenChange={() => toggleLoading.hide()}>
             <ShoppingListDetailWidget shoppingList={props.item} />
-        </Modal>
-        <Modal style={{ top: 50 }} open={toggleAddMoreDishes.value} title={<Space>
+        </Modal>}
+        {toggleAddMoreDishes.value && <Modal style={{ top: 50 }} open={toggleAddMoreDishes.value} title={<Space>
             <Image src={ShoppinglistIcon} preview={false} width={24} style={{ marginBottom: 3 }} />
             Sửa món ăn
         </Space>} destroyOnClose={true} onCancel={toggleAddMoreDishes.hide} footer={null}>
@@ -451,17 +461,17 @@ export const ShoppingListItem: React.FunctionComponent<ShoppingListItemProps> = 
                     })
                 }} />
             </Box>
-        </Modal>
-        <Modal open={toggleEditModal.value} title={
+        </Modal>}
+        {toggleEditModal.value && <Modal open={toggleEditModal.value} title={
             <Space>
                 <Image src={ShoppinglistIcon} preview={false} width={24} style={{ marginBottom: 3 }} />
                 Sửa lịch mua sắm
             </Space>
         } destroyOnClose={true} onCancel={toggleEditModal.hide} footer={null}>
             <ShoppingListEditWidget item={props.item} onDone={toggleEditModal.hide} />
-        </Modal>
-        <ShoppingListExportWidget shoppingList={props.item} allIngredients={ingredients} open={toggleExport.value} onClose={toggleExport.hide} />
-        <Modal
+        </Modal>}
+        {toggleExport.value && <ShoppingListExportWidget shoppingList={props.item} allIngredients={props.allIngredients} open={toggleExport.value} onClose={toggleExport.hide} />}
+        {toggleDeleteConfirm.value && <Modal
             open={toggleDeleteConfirm.value}
             title={<Space><DeleteOutlined style={{ color: "red" }} />Xác nhận xóa</Space>}
             onCancel={toggleDeleteConfirm.hide}
@@ -472,6 +482,6 @@ export const ShoppingListItem: React.FunctionComponent<ShoppingListItemProps> = 
             destroyOnClose
         >
             Bạn có chắc muốn xóa lịch <b>{props.item.name}</b> không? Hành động này không thể hoàn tác.
-        </Modal>
+        </Modal>}
     </React.Fragment >
 }

@@ -10,13 +10,13 @@ import { Divider } from "@components/Layout/Divider";
 import { Space } from "@components/Layout/Space";
 import { Stack } from "@components/Layout/Stack";
 import { List } from "@components/List";
-import { Modal } from "@components/Modal";
+import { DeferredModalContent, Modal } from "@components/Modal";
 import { Tag } from "@components/Tag";
 import { Tooltip } from "@components/Tootip";
 import { Typography } from "@components/Typography";
 import { RootRoutes } from "@routing/RootRoutes";
 import { Dishes, DishesIngredientAmount, DishesStep } from "@store/Models/Dishes";
-import { selectDishes, selectIngredients, selectInventory } from "@store/Selectors";
+import { selectDishesById, selectIngredientsById, selectInventory } from "@store/Selectors";
 import { orderBy } from "lodash";
 import React, { useEffect, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
@@ -65,7 +65,9 @@ export const DishesReadonlyDetailModal: React.FunctionComponent<DishesReadonlyDe
         </Space>}
     >
         <Box data-testid="dish-readonly-detail-modal" style={{ maxHeight: "70vh", overflowY: "auto", paddingRight: 4 }}>
-            <DishesReadonlyDetailWidget dish={dish} targetServings={targetServings} />
+            <DeferredModalContent active={open} minHeight={220}>
+                <DishesReadonlyDetailWidget dish={dish} targetServings={targetServings} />
+            </DeferredModalContent>
         </Box>
     </Modal>
 }
@@ -76,7 +78,7 @@ type DishesReadonlyDetailWidgetProps = {
 }
 
 export const DishesReadonlyDetailWidget: React.FunctionComponent<DishesReadonlyDetailWidgetProps> = ({ dish, targetServings: initialTargetServings }) => {
-    const dishes = useSelector(selectDishes);
+    const dishesById = useSelector(selectDishesById);
     const [selectedIncludedDish, setSelectedIncludedDish] = useState<Dishes>();
     const [showServingPicker, setShowServingPicker] = useState(false);
     const baseServings = DishServingHelper.getBaseServings(dish);
@@ -90,9 +92,9 @@ export const DishesReadonlyDetailWidget: React.FunctionComponent<DishesReadonlyD
 
     const includedDishes = useMemo(() => {
         return dish.includeDishes
-            .map(id => dishes.find(item => item.id === id))
+            .map(id => dishesById.get(id))
             .filter(Boolean) as Dishes[];
-    }, [dish.includeDishes, dishes]);
+    }, [dish.includeDishes, dishesById]);
 
     const durationItems = useMemo(() => {
         const labels: Record<keyof Dishes["duration"], string> = {
@@ -201,9 +203,9 @@ type ReadonlyIngredientItemProps = {
 }
 
 const ReadonlyIngredientItem: React.FunctionComponent<ReadonlyIngredientItemProps> = ({ item }) => {
-    const ingredients = useSelector(selectIngredients);
+    const ingredientsById = useSelector(selectIngredientsById);
     const inventoryItems = useSelector(selectInventory);
-    const ingredient = ingredients.find(entry => entry.id === item.ingredientId);
+    const ingredient = ingredientsById.get(item.ingredientId);
     const inventory = inventoryItems[item.ingredientId];
     const baseUnit = IngredientUnitHelper.getBaseUnit(ingredient, [item.unit]);
     const requiredAmount = IngredientUnitHelper.toBaseAmount(ingredient, item.amount, item.unit, baseUnit)

@@ -5,7 +5,7 @@ import { Typography } from '@components/Typography';
 import { Ingredient } from '@store/Models/Ingredient';
 import { Dishes } from '@store/Models/Dishes';
 import { ShoppingList } from '@store/Models/ShoppingList';
-import { RootState } from '@store/Store';
+import { selectDishes, selectIngredients, selectIngredientsById, selectShoppingLists } from '@store/Selectors';
 import { Input } from 'antd';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
@@ -69,9 +69,10 @@ export const GlobalSearchScreen: React.FC<GlobalSearchScreenProps> = ({ open, on
     const [showAllLists, setShowAllLists] = useState(false);
     const inputRef = useRef<any>(null);
 
-    const dishes = useSelector((state: RootState) => state.shared.dishes.dishes);
-    const allIngredients = useSelector((state: RootState) => state.shared.ingredient.ingredients);
-    const shoppingLists = useSelector((state: RootState) => state.personal.shoppingList.shoppingLists);
+    const dishes = useSelector(selectDishes);
+    const allIngredients = useSelector(selectIngredients);
+    const ingredientsById = useSelector(selectIngredientsById);
+    const shoppingLists = useSelector(selectShoppingLists);
 
     useEffect(() => {
         if (open) {
@@ -98,12 +99,12 @@ export const GlobalSearchScreen: React.FC<GlobalSearchScreenProps> = ({ open, on
             .map(dish => {
                 const nameMatch = dish.name.toLowerCase().includes(q);
                 const matchedIngredientNames = (dish.ingredients ?? [])
-                    .map(req => allIngredients.find(i => i.id === req.ingredientId)?.name ?? '')
+                    .map(req => ingredientsById.get(req.ingredientId)?.name ?? '')
                     .filter(name => name.toLowerCase().includes(q));
                 return { dish, nameMatch, matchedIngredientNames };
             })
             .filter(r => r.nameMatch || r.matchedIngredientNames.length > 0);
-    }, [dishes, allIngredients, q]);
+    }, [dishes, ingredientsById, q]);
 
     const matchedIngredients = useMemo<Ingredient[]>(() => {
         if (!q) return [];
@@ -118,12 +119,12 @@ export const GlobalSearchScreen: React.FC<GlobalSearchScreenProps> = ({ open, on
             .map(list => {
                 const nameMatch = list.name.toLowerCase().includes(q);
                 const matchedIngredientNames = (list.ingredients ?? [])
-                    .map(g => allIngredients.find(i => i.id === g.ingredientId)?.name ?? '')
+                    .map(g => ingredientsById.get(g.ingredientId)?.name ?? '')
                     .filter(name => name.toLowerCase().includes(q));
                 return { list, nameMatch, matchedIngredientNames };
             })
             .filter(r => r.nameMatch || r.matchedIngredientNames.length > 0);
-    }, [shoppingLists, allIngredients, q]);
+    }, [shoppingLists, ingredientsById, q]);
 
     const totalResults = matchedDishes.length + matchedIngredients.length + matchedLists.length;
 
@@ -293,6 +294,7 @@ export const GlobalSearchScreen: React.FC<GlobalSearchScreenProps> = ({ open, on
                             return (
                                 <div
                                     key={ing.id}
+                                    data-testid={`global-search-ingredient-${ing.id}`}
                                     onClick={() => _navigate(RootRoutes.AuthorizedRoutes.IngredientRoutes.Detail(ing.id))}
                                     style={{
                                         padding: '10px 16px',
@@ -337,6 +339,7 @@ export const GlobalSearchScreen: React.FC<GlobalSearchScreenProps> = ({ open, on
                             return (
                                 <div
                                     key={r.list.id}
+                                    data-testid={`global-search-shopping-list-${r.list.id}`}
                                     onClick={() => _navigate(RootRoutes.AuthorizedRoutes.ShoppingListRoutes.Detail(r.list.id))}
                                     style={{
                                         padding: '10px 16px',

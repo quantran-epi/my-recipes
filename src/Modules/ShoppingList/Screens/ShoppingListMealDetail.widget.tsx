@@ -7,9 +7,9 @@ import { useToggle } from "@hooks";
 import { DishesReadonlyDetailModal } from "@modules/Dishes/Screens/DishesManageIngredient/DishReadonlyDetail.widget";
 import { ScheduledMealEstimateSummary } from "@modules/ScheduledMeal/Screens/ScheduledMealEstimateSummary.widget";
 import { Dishes } from "@store/Models/Dishes";
-import { RootState } from "@store/Store";
+import { selectDishesById, selectScheduledMealsById } from "@store/Selectors";
 import moment from "moment";
-import React, { FunctionComponent, useMemo } from "react";
+import React, { FunctionComponent } from "react";
 import { useSelector } from "react-redux";
 
 type ShoppingListMealDetailWidgetProps = {
@@ -17,15 +17,12 @@ type ShoppingListMealDetailWidgetProps = {
 }
 
 export const ShoppingListMealDetailWidget: FunctionComponent<ShoppingListMealDetailWidgetProps> = ({ mealId }) => {
-    const dishes = useSelector((state: RootState) => state.shared.dishes.dishes);
-    const scheduledMeals = useSelector((state: RootState) => state.personal.scheduledMeal.scheduledMeals);
-
-    const meal = useMemo(() => {
-        return scheduledMeals.find(e => e.id === mealId);
-    }, [mealId, scheduledMeals])
+    const dishesById = useSelector(selectDishesById);
+    const scheduledMealsById = useSelector(selectScheduledMealsById);
+    const meal = scheduledMealsById.get(mealId);
 
     const _getDishesById = (id: string) => {
-        return dishes.find(e => e.id === id);
+        return dishesById.get(id);
     }
 
     if (!meal) return <Typography.Text type="secondary">Không tìm thấy thực đơn.</Typography.Text>;

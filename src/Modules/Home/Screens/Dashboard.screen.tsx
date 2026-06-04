@@ -16,9 +16,9 @@ import { Ingredient, IngredientInventory, IngredientUnit, InventoryBatch } from 
 import { CookingSession } from '@store/Models/CookingSession';
 import { ScheduledMeal } from '@store/Models/ScheduledMeal';
 import { ShoppingList, ShoppingListIngredientGroup } from '@store/Models/ShoppingList';
-import { selectCookingSessions, selectDishes, selectIngredients, selectInventory, selectScheduledMeals, selectShoppingLists } from '@store/Selectors';
+import { selectCookingSessions, selectDishes, selectIngredients, selectIngredientsById, selectInventory, selectScheduledMeals, selectShoppingLists } from '@store/Selectors';
 import moment from 'moment';
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 
@@ -54,8 +54,8 @@ const formatNamePreview = (names: string[], emptyText: string, hiddenLabel = 'm�
     return hiddenCount > 0 ? `${shown.join(', ')} và ${hiddenCount} ${hiddenLabel}` : shown.join(', ');
 }
 
-const getIngredientById = (ingredients: Ingredient[], id: string): Ingredient | undefined => {
-    return ingredients.find(item => item.id === id);
+const getIngredientById = (ingredientsById: Map<string, Ingredient>, id: string): Ingredient | undefined => {
+    return ingredientsById.get(id);
 }
 
 const getGroupNeedToBuy = (
@@ -74,11 +74,11 @@ const getGroupNeedToBuy = (
 
 const estimateShoppingListCart = (
     shoppingList: ShoppingList,
-    ingredients: Ingredient[],
+    ingredientsById: Map<string, Ingredient>,
     inventoryItems: Record<string, IngredientInventory>,
 ): CostEstimateSummary => {
     return shoppingList.ingredients.reduce((summary, group) => {
-        const ingredient = getIngredientById(ingredients, group.ingredientId);
+        const ingredient = getIngredientById(ingredientsById, group.ingredientId);
         if (InventoryHelper.isAlwaysAvailable(ingredient)) return summary;
         const need = getGroupNeedToBuy(group, ingredient, inventoryItems[group.ingredientId]);
         if (need.amount > 0) CostEstimateHelper.addAmount(summary, ingredient, need.amount, need.unit);
@@ -94,10 +94,10 @@ const getProgress = (shoppingList: ShoppingList): { done: number; total: number;
 
 const buildUrgentInventory = (
     inventoryItems: Record<string, IngredientInventory>,
-    ingredients: Ingredient[],
+    ingredientsById: Map<string, Ingredient>,
 ): UrgentInventoryItem[] => {
     return Object.entries(inventoryItems).flatMap(([ingredientId, inventory]) => {
-        const ingredient = getIngredientById(ingredients, ingredientId);
+        const ingredient = getIngredientById(ingredientsById, ingredientId);
         if (InventoryHelper.isAlwaysAvailable(ingredient)) return [];
         const batches = inventory.batches ?? [];
         return batches
@@ -298,12 +298,31 @@ const CookingRow: React.FunctionComponent<{ item: CookingSession; onOpen: () => 
 export const DashboardScreen = () => {
     const navigate = useNavigate();
     const ingredients = useSelector(selectIngredients);
+    const ingredientsById = useSelector(selectIngredientsById);
     const dishes = useSelector(selectDishes);
     const inventoryItems = useSelector(selectInventory);
     const shoppingLists = useSelector(selectShoppingLists);
     const scheduledMeals = useSelector(selectScheduledMeals);
     const cookingSessions = useSelector(selectCookingSessions);
+    const [expensiveMetricsReady, setExpensiveMetricsReady] = useState(false);
     useScreenTitle({ value: 'Tổng quan', deps: [] });
+
+    useEffect(() => {
+        setExpensiveMetricsReady(false);
+        let firstFrame: number | undefined;
+        let secondFrame: number | undefined;
+        const schedule = window.requestAnimationFrame ?? ((callback: FrameRequestCallback) => window.setTimeout(callback, 0) as unknown as number);
+        const cancel = window.cancelAnimationFrame ?? window.clearTimeout;
+
+        firstFrame = schedule(() => {
+            secondFrame = schedule(() => setExpensiveMetricsReady(true));
+        });
+
+        return () => {
+            if (firstFrame !== undefined) cancel(firstFrame);
+            if (secondFrame !== undefined) cancel(secondFrame);
+        };
+    }, [dishes, inventoryItems, ingredients]);
 
     const activeSessions = useMemo(() => cookingSessions.filter(item => item.status === 'cooking'), [cookingSessions]);
     const todayMeals = useMemo(() => scheduledMeals.filter(item => isSameDay(item.plannedDate)), [scheduledMeals]);
@@ -311,14 +330,17 @@ export const DashboardScreen = () => {
         .filter(item => !item.completedAt)
         .sort((a, b) => moment(a.plannedDate ?? a.createdDate).valueOf() - moment(b.plannedDate ?? b.createdDate).valueOf()), [shoppingLists]);
     const todayShoppingLists = useMemo(() => openShoppingLists.filter(item => isSameDay(item.plannedDate)), [openShoppingLists]);
-    const urgentInventory = useMemo(() => buildUrgentInventory(inventoryItems, ingredients), [inventoryItems, ingredients]);
-    const suggestions = useMemo(() => DishScorer.scoreWithInventory(dishes, inventoryItems, dishes, ingredients).slice(0, 4), [dishes, inventoryItems, ingredients]);
+    const urgentInventory = useMemo(() => buildUrgentInventory(inventoryItems, ingredientsById), [inventoryItems, ingredientsById]);
+    const suggestions = useMemo(() => expensiveMetricsReady
+        ? DishScorer.scoreWithInventory(dishes, inventoryItems, dishes, ingredients).slice(0, 4)
+        : [], [expensiveMetricsReady, dishes, inventoryItems, ingredients]);
     const shoppingListCosts = useMemo(() => {
+        if (!expensiveMetricsReady) return {} as Record<string, string>;
         return openShoppingLists.reduce((result, item) => {
-            result[item.id] = formatCostSummary(estimateShoppingListCart(item, ingredients, inventoryItems));
+            result[item.id] = formatCostSummary(estimateShoppingListCart(item, ingredientsById, inventoryItems));
             return result;
         }, {} as Record<string, string>);
-    }, [openShoppingLists, ingredients, inventoryItems]);
+    }, [expensiveMetricsReady, openShoppingLists, ingredientsById, inventoryItems]);
 
     const expiredCount = urgentInventory.filter(item => item.daysLeft < 0).length;
     const todayDishCount = todayMeals.reduce((sum, meal) => sum + Object.values(meal.meals).flat().length, 0);

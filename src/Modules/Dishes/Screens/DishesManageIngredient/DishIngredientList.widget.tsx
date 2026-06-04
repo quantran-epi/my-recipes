@@ -7,14 +7,15 @@ import { Form } from "@components/Form"
 import { Space } from "@components/Layout/Space"
 import { Stack } from "@components/Layout/Stack"
 import { List } from "@components/List"
-import { Modal } from "@components/Modal"
+import { DeferredModalContent, Modal } from "@components/Modal"
 import { Popconfirm } from "@components/Popconfirm"
 import { useSmartForm } from "@components/SmartForm"
 import { Tooltip } from "@components/Tootip"
 import { useToggle } from "@hooks"
 import { Dishes, DishesIngredientAmount } from "@store/Models/Dishes"
+import { Ingredient, IngredientInventory } from "@store/Models/Ingredient"
 import { DishesIngredientAddParams, removeIngredientsFromDish } from "@store/Reducers/DishesReducer"
-import { RootState } from "@store/Store"
+import { selectIngredientsById, selectInventory } from "@store/Selectors"
 import { Typography } from "antd"
 import React, { FunctionComponent, useEffect, useMemo } from "react"
 import { useDispatch, useSelector } from "react-redux"
@@ -34,6 +35,9 @@ type DishIngredientListWidgetProps = {
 export const DishIngredientListWidget: FunctionComponent<DishIngredientListWidgetProps> = (props) => {
     const toggleAddIngredientToDishes = useToggle({ defaultValue: false });
     const dispatch = useDispatch();
+    const ingredientsById = useSelector(selectIngredientsById);
+    const inventoryItems = useSelector(selectInventory);
+    const sortedIngredients = useMemo(() => orderBy(props.currentDist.ingredients, [obj => obj.required], ['desc']), [props.currentDist.ingredients]);
 
     const addDishesForm = useSmartForm<DishesIngredientAddParams>({
         defaultValues: {
@@ -68,8 +72,8 @@ export const DishIngredientListWidget: FunctionComponent<DishIngredientListWidge
     return <Form {...addDishesForm.defaultProps}>
         <Button fullwidth onClick={_onAddIngredient}>Thêm nguyên liệu</Button>
         <List
-            dataSource={orderBy(props.currentDist.ingredients, [obj => obj.required], ['desc'])}
-            renderItem={(item) => <IngredientItem dish={props.currentDist} ingredientAmount={item} onDelete={_onDelete} />} />
+            dataSource={sortedIngredients}
+            renderItem={(item) => <IngredientItem dish={props.currentDist} ingredientAmount={item} ingredient={ingredientsById.get(item.ingredientId)} inventory={inventoryItems[item.ingredientId]} onDelete={_onDelete} />} />
 
         <Modal open={toggleAddIngredientToDishes.value} title={<Stack gap={0} direction="column" align="flex-start">
             <Space>
@@ -78,7 +82,9 @@ export const DishIngredientListWidget: FunctionComponent<DishIngredientListWidge
             </Space>
             <Typography.Text type="secondary">{props.currentDist.name}</Typography.Text>
         </Stack>} destroyOnClose={true} onCancel={toggleAddIngredientToDishes.hide} footer={null}>
-            <DishesAddIngredientWidget dish={props.currentDist} />
+            <DeferredModalContent active={toggleAddIngredientToDishes.value}>
+                <DishesAddIngredientWidget dish={props.currentDist} />
+            </DeferredModalContent>
         </Modal>
     </Form>
 }
@@ -86,16 +92,15 @@ export const DishIngredientListWidget: FunctionComponent<DishIngredientListWidge
 type IngredientItemProps = {
     dish: Dishes;
     ingredientAmount: DishesIngredientAmount;
+    ingredient?: Ingredient;
+    inventory?: IngredientInventory;
     onDelete: (dish: Dishes, ingredientAmount: DishesIngredientAmount) => void;
 }
 
 export const IngredientItem: React.FunctionComponent<IngredientItemProps> = (props) => {
-    const ingredients = useSelector((state: RootState) => state.shared.ingredient.ingredients);
-    const inventory = useSelector((state: RootState) => state.personal.inventory.items[props.ingredientAmount.ingredientId]);
     const togglEditIngredientToDishes = useToggle();
-    const ingredientAmount = useMemo(() => {
-        return ingredients.find(e => e.id === props.ingredientAmount.ingredientId);
-    }, [ingredients, props.ingredientAmount])
+    const ingredientAmount = props.ingredient;
+    const inventory = props.inventory;
 
     const baseUnit = IngredientUnitHelper.getBaseUnit(ingredientAmount, [props.ingredientAmount.unit]);
     const requiredAmount = IngredientUnitHelper.toBaseAmount(ingredientAmount, props.ingredientAmount.amount, props.ingredientAmount.unit, baseUnit)
@@ -176,14 +181,16 @@ export const IngredientItem: React.FunctionComponent<IngredientItemProps> = (pro
 
             </Space> */}
         </List.Item>
-        <Modal open={togglEditIngredientToDishes.value} title={<Stack gap={0} direction="column" align="flex-start">
+        {togglEditIngredientToDishes.value && <Modal open={togglEditIngredientToDishes.value} title={<Stack gap={0} direction="column" align="flex-start">
             <Space>
                 <Image src={IngredientIcon} preview={false} width={24} style={{ marginBottom: 3 }} />
                 <Typography.Title level={5} style={{ margin: 0 }}>Sửa nguyên liệu</Typography.Title>
             </Space>
             <Typography.Text type="secondary">{props.dish.name}</Typography.Text>
         </Stack>} destroyOnClose={true} onCancel={togglEditIngredientToDishes.hide} footer={null}>
-            <DishesEditIngredientWidget item={props.ingredientAmount} dish={props.dish} onDone={togglEditIngredientToDishes.hide} />
-        </Modal>
+            <DeferredModalContent active={togglEditIngredientToDishes.value}>
+                <DishesEditIngredientWidget item={props.ingredientAmount} dish={props.dish} onDone={togglEditIngredientToDishes.hide} />
+            </DeferredModalContent>
+        </Modal>}
     </React.Fragment>
 }

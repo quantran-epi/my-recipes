@@ -4,7 +4,7 @@ import { Stack } from "@components/Layout/Stack";
 import { Tag } from "@components/Tag";
 import { Typography } from "@components/Typography";
 import { ScoredDish } from "../Helpers/DishScorer";
-import { RootState } from "@store/Store";
+import { selectIngredientsById } from "@store/Selectors";
 import React, { useState } from "react";
 import { useSelector } from "react-redux";
 import { DishImageWidget } from "@modules/Dishes/Screens/DishesManageIngredient/DishImage.widget";
@@ -18,10 +18,10 @@ type DishSuggestionItemProps = {
 }
 
 export const DishSuggestionItem: React.FC<DishSuggestionItemProps> = ({ scored, selected, onToggle }) => {
-    const allIngredients = useSelector((state: RootState) => state.shared.ingredient.ingredients);
+    const ingredientsById = useSelector(selectIngredientsById);
     const [expanded, setExpanded] = useState(false);
 
-    const _name = (id: string) => allIngredients.find(i => i.id === id)?.name ?? id;
+    const _name = (id: string) => ingredientsById.get(id)?.name ?? id;
 
     const pct = Math.round(scored.score * 100);
     const scoreColor = pct >= 100 ? "#52c41a" : pct >= 50 ? "#faad14" : "#fa8c16";

@@ -5,14 +5,11 @@ import { useMessage } from "@components/Message";
 import { Tag } from "@components/Tag";
 import { Typography } from "@components/Typography";
 import { CookingSession } from "@store/Models/CookingSession";
-import { Dishes } from "@store/Models/Dishes";
 import { InventoryHelper } from "@common/Helpers/InventoryHelper";
 import { IngredientUnitHelper } from "@common/Helpers/IngredientUnitHelper";
 import { cancelCooking, finishCooking } from "@store/Reducers/CookingSessionReducer";
 import { deductInventory } from "@store/Reducers/InventoryReducer";
-import { selectDishes, selectIngredients, selectInventory } from "@store/Selectors";
-import { RootState } from "@store/Store";
-import { Space } from "antd";
+import { selectDishes, selectDishesById, selectIngredientsById, selectInventory } from "@store/Selectors";
 import moment from "moment";
 import 'moment/locale/vi';
 import React, { useMemo } from "react";
@@ -29,17 +26,18 @@ export const FinishCookingWidget: React.FunctionComponent<FinishCookingWidgetPro
     const dispatch = useDispatch();
     const message = useMessage();
     const allDishes = useSelector(selectDishes);
-    const allIngredients = useSelector(selectIngredients);
+    const dishesById = useSelector(selectDishesById);
+    const ingredientsById = useSelector(selectIngredientsById);
     const inventoryItems = useSelector(selectInventory);
 
-    const dish = allDishes.find(d => d.id === session.dishId);
+    const dish = dishesById.get(session.dishId);
 
     const deductions = useMemo(() => {
         if (!dish) return [];
         const amounts = DishServingHelper.collectIngredientAmounts(dish, allDishes, { targetServings: session.targetServings });
         const grouped: Record<string, { total: number; unit: string; name: string }> = {};
         amounts.forEach(amt => {
-            const ingre = allIngredients.find(i => i.id === amt.ingredientId);
+            const ingre = ingredientsById.get(amt.ingredientId);
             const baseUnit = IngredientUnitHelper.getBaseUnit(ingre, [amt.unit]);
             const val = IngredientUnitHelper.toBaseAmount(ingre, amt.amount, amt.unit, baseUnit) ?? IngredientUnitHelper.parseAmount(amt.amount);
             if (!grouped[amt.ingredientId]) {
@@ -48,16 +46,16 @@ export const FinishCookingWidget: React.FunctionComponent<FinishCookingWidgetPro
             grouped[amt.ingredientId].total += val;
         });
         return Object.entries(grouped)
-            .filter(([id]) => inventoryItems[id] != null && !InventoryHelper.isAlwaysAvailable(allIngredients.find(i => i.id === id)))
+            .filter(([id]) => inventoryItems[id] != null && !InventoryHelper.isAlwaysAvailable(ingredientsById.get(id)))
             .map(([id, { total, unit, name }]) => ({ id, total, unit, name }));
-    }, [dish, allDishes, allIngredients, inventoryItems, session.targetServings]);
+    }, [dish, allDishes, ingredientsById, inventoryItems, session.targetServings]);
 
     const _onFinish = () => {
         deductions.forEach(d => dispatch(deductInventory({
             ingredientId: d.id,
             amount: d.total,
             unit: d.unit as any,
-            ingredient: allIngredients.find(i => i.id === d.id),
+            ingredient: ingredientsById.get(d.id),
         })));
         dispatch(finishCooking(session.id));
         message.success("Đã hoàn thành phiên nấu");

@@ -8,9 +8,9 @@ import { Result } from "@components/Result/Result";
 import { Typography } from "@components/Typography";
 import { useScreenTitle } from "@hooks";
 import { RootRoutes } from "@routing/RootRoutes";
-import { selectShoppingLists } from "@store/Selectors";
+import { selectShoppingListsById } from "@store/Selectors";
 import moment from "moment";
-import React, { useMemo } from "react";
+import React from "react";
 import { useSelector } from "react-redux";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import ShoppingListIcon from "../../../../assets/icons/shoppingList.png";
@@ -20,8 +20,8 @@ export const ShoppingListDetailScreen = () => {
     const [searchParams] = useSearchParams();
     const navigate = useNavigate();
     const shoppingListId = searchParams.get("shoppingList") ?? "";
-    const shoppingLists = useSelector(selectShoppingLists);
-    const shoppingList = useMemo(() => shoppingLists.find(item => item.id === shoppingListId), [shoppingLists, shoppingListId]);
+    const shoppingListsById = useSelector(selectShoppingListsById);
+    const shoppingList = shoppingListsById.get(shoppingListId);
 
     useScreenTitle({ value: shoppingList?.name ?? "Lịch mua sắm", deps: [shoppingList?.name] });
 

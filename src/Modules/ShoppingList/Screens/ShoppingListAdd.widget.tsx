@@ -11,7 +11,7 @@ import { nanoid } from "@reduxjs/toolkit"
 import { ShoppingList } from "@store/Models/ShoppingList"
 import { removeAllSelectedMeals } from "@store/Reducers/ScheduledMealReducer"
 import { addShoppingList, generateIngredient } from "@store/Reducers/ShoppingListReducer"
-import { RootState } from "@store/Store"
+import { selectDishes, selectIngredients, selectInventory, selectScheduledMeals } from "@store/Selectors"
 import dayjs from "dayjs"
 import moment from "moment"
 import React, { FunctionComponent, useEffect, useState } from "react"
@@ -31,10 +31,10 @@ type ShoppingListAddWidgetProps = {
 
 export const ShoppingListAddWidget: FunctionComponent<ShoppingListAddWidgetProps> = ({ date, scheduledMealIds, dishIds, initialDishServings, alreadyHaveIngredientIds, onDone, onCreated }) => {
     const dispatch = useDispatch();
-    const dishes = useSelector((state: RootState) => state.shared.dishes.dishes);
-    const scheduledMeals = useSelector((state: RootState) => state.personal.scheduledMeal.scheduledMeals);
-    const allIngredients = useSelector((state: RootState) => state.shared.ingredient.ingredients);
-    const inventory = useSelector((state: RootState) => state.personal.inventory.items);
+    const dishes = useSelector(selectDishes);
+    const scheduledMeals = useSelector(selectScheduledMeals);
+    const allIngredients = useSelector(selectIngredients);
+    const inventory = useSelector(selectInventory);
     const message = useMessage();
     const [selectedDishIds, setSelectedDishIds] = useState<string[]>(dishIds ?? []);
     const [dishServings, setDishServings] = useState<Record<string, number>>(() => normalizeDishServings(dishIds ?? [], dishes, initialDishServings ?? {}));

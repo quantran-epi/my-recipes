@@ -3,19 +3,19 @@ import { Box } from "@components/Layout/Box";
 import { Typography } from "@components/Typography";
 import { useScreenTitle } from "@hooks";
 import { DishExpensePlannerWidget } from "@modules/Dishes/Screens/DishesManageIngredient/DishExpensePlanner.widget";
-import { selectDishes } from "@store/Selectors";
-import React, { useMemo } from "react";
+import { selectDishesById } from "@store/Selectors";
+import React from "react";
 import { useSelector } from "react-redux";
 import { useSearchParams } from "react-router-dom";
 import BudgetIcon from "../../../../assets/icons/budget.png";
 
 export const DishExpensePlannerScreen = () => {
     useScreenTitle({ value: "Kế hoạch chi phí", deps: [] });
-    const dishes = useSelector(selectDishes);
+    const dishesById = useSelector(selectDishesById);
     const [searchParams] = useSearchParams();
     const initialDishId = searchParams.get("dish") ?? undefined;
     const initialTargetServings = Number(searchParams.get("servings"));
-    const initialDish = useMemo(() => dishes.find(item => item.id === initialDishId), [dishes, initialDishId]);
+    const initialDish = initialDishId ? dishesById.get(initialDishId) : undefined;
     const normalizedInitialServings = isFinite(initialTargetServings) && initialTargetServings > 0 ? initialTargetServings : undefined;
 
     return <div data-testid="expense-planner-screen" style={{ display: "flex", flexDirection: "column", gap: 12, paddingBottom: 20 }}>

@@ -5,7 +5,7 @@ import { Image } from "@components/Image";
 import { Space } from "@components/Layout/Space";
 import { Stack } from "@components/Layout/Stack";
 import { scrollVirtualListToTop, VirtualListScrollTopButton } from "@components/List";
-import { Modal } from "@components/Modal";
+import { DeferredModalContent, Modal } from "@components/Modal";
 import { Popconfirm } from "@components/Popconfirm";
 import { Tooltip } from "@components/Tootip";
 import { Typography } from "@components/Typography";
@@ -14,11 +14,11 @@ import { InventoryHelper } from "@common/Helpers/InventoryHelper";
 import { IngredientUnitHelper } from "@common/Helpers/IngredientUnitHelper";
 import { Ingredient, IngredientInventory, INGREDIENT_CATEGORIES, INGREDIENT_PRESERVATION_OPTIONS, INGREDIENT_SHELF_LIFE_OPTIONS } from "@store/Models/Ingredient";
 import { removeIngredient } from "@store/Reducers/IngredientReducer";
-import { RootState } from "@store/Store";
+import { selectIngredients, selectInventory } from "@store/Selectors";
 import { debounce, sortBy } from "lodash";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { List as VirtualList, useDynamicRowHeight, type ListImperativeAPI, type RowComponentProps } from "react-window";
+import { List as VirtualList, type ListImperativeAPI, type RowComponentProps } from "react-window";
 import VegetablesIcon from "../../../../assets/icons/vegetable.png";
 import { IngredientAddWidget } from "./IngredientAdd.widget";
 import { IngredientEditWidget } from "./IngredientEdit.widget";
@@ -40,6 +40,8 @@ const INGREDIENT_STOCK_FILTERS: { value: IngredientStockFilter; label: string }[
     { value: "urgent", label: "Sắp hết hạn" },
     { value: "always_available", label: "Luôn có" },
 ];
+
+const INGREDIENT_ROW_HEIGHT = 132;
 
 const filterRowStyle: React.CSSProperties = {
     display: "flex",
@@ -117,15 +119,15 @@ const IngredientRow = ({ index, style, items, stockSnapshots, onDelete, isAdmin,
 };
 
 export const IngredientListScreen = () => {
-    const ingredients = useSelector((state: RootState) => state.shared.ingredient.ingredients);
+    const ingredients = useSelector(selectIngredients);
     const toggleAddModal = useToggle({ defaultValue: false });
     const dispatch = useDispatch();
     const { } = useScreenTitle({ value: "Nguyên liệu", deps: [] });
     const [searchText, setSearchText] = useState("");
     const [activeStockFilter, setActiveStockFilter] = useState<IngredientStockFilter>("all");
     const [activeCategory, setActiveCategory] = useState<string | null>(null);
-    const inventoryItems = useSelector((state: RootState) => state.personal.inventory.items);
-    const rowHeight = useDynamicRowHeight({ defaultRowHeight: 132, key: searchText + activeStockFilter + (activeCategory ?? "") });
+    const inventoryItems = useSelector(selectInventory);
+    const rowHeight = INGREDIENT_ROW_HEIGHT;
     const listRef = useRef<ListImperativeAPI | null>(null);
     const [showScrollTop, setShowScrollTop] = useState(false);
     const { isAdmin } = useAdminMode();
@@ -239,18 +241,7 @@ export const IngredientListScreen = () => {
     }, []);
 
     useEffect(() => {
-        let frameId: number | undefined;
-        let retryCount = 0;
-        const reset = () => {
-            if (!_scrollToTop() && retryCount < 20) {
-                retryCount += 1;
-                frameId = window.requestAnimationFrame(reset);
-            }
-        };
-        reset();
-        return () => {
-            if (frameId !== undefined) window.cancelAnimationFrame(frameId);
-        };
+        _scrollToTop();
     }, [_scrollToTop, activeStockFilter, activeCategory, searchText]);
 
     return <React.Fragment>
@@ -304,7 +295,9 @@ export const IngredientListScreen = () => {
                 Thêm nguyên liệu
             </Space>
         } destroyOnClose={true} onCancel={toggleAddModal.hide} footer={null}>
-            <IngredientAddWidget />
+            <DeferredModalContent active={toggleAddModal.value}>
+                <IngredientAddWidget />
+            </DeferredModalContent>
         </Modal>
         {toggleUseFirst.value && <UseFirstWidget
             open={toggleUseFirst.value}
@@ -442,24 +435,28 @@ export const IngredientItem: React.FunctionComponent<IngredientItemProps> = (pro
         </div>
 
         {/* Edit modal */}
-        <Modal width={640} open={toggleEdit.value} title={
+        {toggleEdit.value && <Modal width={640} open={toggleEdit.value} title={
             <Space>
                 <Image src={VegetablesIcon} preview={false} width={24} style={{ marginBottom: 3 }} />
                 Chỉnh sửa nguyên liệu
             </Space>
         } destroyOnClose={true} onCancel={toggleEdit.hide} footer={null}>
-            <IngredientEditWidget item={props.item} onDone={() => toggleEdit.hide()} />
-        </Modal>
+            <DeferredModalContent active={toggleEdit.value}>
+                <IngredientEditWidget item={props.item} onDone={() => toggleEdit.hide()} />
+            </DeferredModalContent>
+        </Modal>}
 
         {/* Inventory modal */}
-        <Modal open={toggleInventory.value} title={
+        {toggleInventory.value && <Modal open={toggleInventory.value} title={
             <Space>
                 <DatabaseOutlined />
                 Tồn kho — {props.item.name}
             </Space>
         } destroyOnClose={true} onCancel={toggleInventory.hide} footer={null}>
-            <IngredientInventoryWidget item={props.item} onDone={toggleInventory.hide} onSuggest={props.onSuggest} />
-        </Modal>
+            <DeferredModalContent active={toggleInventory.value} minHeight={180}>
+                <IngredientInventoryWidget item={props.item} onDone={toggleInventory.hide} onSuggest={props.onSuggest} />
+            </DeferredModalContent>
+        </Modal>}
     </React.Fragment>
 }
 

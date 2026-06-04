@@ -28,7 +28,7 @@ const scaleAmountString = (amount: string | number, scale: number): string => {
 
 const collectWithScale = (
     dish: Dishes,
-    allDishes: Dishes[],
+    dishById: Map<string, Dishes>,
     scale: number,
     visited: Set<string>,
 ): DishesIngredientAmount[] => {
@@ -49,8 +49,8 @@ const collectWithScale = (
         dish: dishMeta,
     }));
     const fromIncluded = (dish.includeDishes ?? []).flatMap(id => {
-        const includedDish = allDishes.find(item => item.id === id);
-        return includedDish ? collectWithScale(includedDish, allDishes, scale, visited) : [];
+        const includedDish = dishById.get(id);
+        return includedDish ? collectWithScale(includedDish, dishById, scale, visited) : [];
     });
 
     return [...own, ...fromIncluded];
@@ -98,6 +98,8 @@ export const DishServingHelper = {
         options: DishServingCollectOptions = {},
     ): DishesIngredientAmount[] {
         const scale = DishServingHelper.getScale(dish, options.targetServings);
-        return collectWithScale(dish, allDishes, scale, new Set<string>());
+        const dishById = new Map(allDishes.map(item => [item.id, item]));
+        if (dish && !dishById.has(dish.id)) dishById.set(dish.id, dish);
+        return collectWithScale(dish, dishById, scale, new Set<string>());
     },
 };

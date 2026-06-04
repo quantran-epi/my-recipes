@@ -7,7 +7,7 @@ import { Image } from "@components/Image";
 import { Box } from "@components/Layout/Box";
 import { Stack } from "@components/Layout/Stack";
 import { List } from "@components/List";
-import { Modal } from "@components/Modal";
+import { DeferredModalContent, Modal } from "@components/Modal";
 import { useMessage } from "@components/Message";
 import { Tooltip } from "@components/Tootip";
 import { Typography } from "@components/Typography";
@@ -21,8 +21,7 @@ import { CostEstimateHelper, CostEstimateSummary } from "@common/Helpers/CostEst
 import { ShoppingList, ShoppingListCompletionImport, ShoppingListIngredientAmount, ShoppingListIngredientGroup } from "@store/Models/ShoppingList";
 import { completeShoppingList, setIngredientBoughtAmount, toggleDoneIngredientAmount, toggleDoneIngredientGroup } from "@store/Reducers/ShoppingListReducer";
 import { setInventory } from "@store/Reducers/InventoryReducer";
-import { selectDishes, selectIngredients, selectInventory } from "@store/Selectors";
-import { RootState } from "@store/Store";
+import { selectDishes, selectDishesById, selectIngredients, selectIngredientsById, selectInventory, selectScheduledMealsById } from "@store/Selectors";
 import { Divider, InputNumber, Space, Tabs } from "antd";
 import { CheckboxChangeEvent } from "antd/es/checkbox";
 import { groupBy } from "lodash";
@@ -166,13 +165,13 @@ const addActiveBoughtCost = (
 
 const buildShoppingListCostSummary = (
     shoppingList: ShoppingList,
-    allIngredients: Ingredient[],
+    ingredientsById: Map<string, Ingredient>,
     inventoryItems: Record<string, IngredientInventory>,
 ): ShoppingListCostSummary => {
     const isCompleted = Boolean(shoppingList.completedAt);
 
     return shoppingList.ingredients.reduce((summary, group) => {
-        const ingredient = allIngredients.find(item => item.id === group.ingredientId);
+        const ingredient = ingredientsById.get(group.ingredientId);
         const completionImports = isCompleted ? getCompletionImportsForIngredient(shoppingList, group.ingredientId) : [];
         const inventory = isCompleted
             ? getInventoryBeforeCompletionImports(inventoryItems[group.ingredientId], completionImports)
@@ -251,11 +250,11 @@ const getExistingBatches = (
 
 const getBoughtImportPlans = (
     shoppingList: ShoppingList,
-    ingredients: Ingredient[],
+    ingredientsById: Map<string, Ingredient>,
     inventoryItems: Record<string, IngredientInventory>,
 ): BoughtImportPlan[] => {
     return shoppingList.ingredients.reduce((plans, group) => {
-        const ingredient = ingredients.find(item => item.id === group.ingredientId);
+        const ingredient = ingredientsById.get(group.ingredientId);
         if (InventoryHelper.isAlwaysAvailable(ingredient)) return plans;
 
         const inventory = inventoryItems[group.ingredientId];
@@ -317,25 +316,27 @@ export const ShoppingListDetailWidget: React.FunctionComponent<ShoppingListDetai
     const dispatch = useDispatch();
     const message = useMessage();
     const dishes = useSelector(selectDishes);
-    const allIngredients = useSelector(selectIngredients);
+    const dishesById = useSelector(selectDishesById);
+    const ingredientsById = useSelector(selectIngredientsById);
     const inventoryItems = useSelector(selectInventory);
-    const scheduledMeals = useSelector((state: RootState) => state.personal.scheduledMeal.scheduledMeals);
+    const scheduledMealsById = useSelector(selectScheduledMealsById);
     const toggleMealModal = useToggle();
     const toggleCompletionReview = useToggle();
     const [selectedMeal, setSelectedMeal] = useState<string>();
     const [completionReviewValues, setCompletionReviewValues] = useState<CompletionReviewValues>({});
+    const [activeTab, setActiveTab] = useState("ingredients");
     const isReadonly = Boolean(props.shoppingList.completedAt);
 
     const boughtImportPlans = useMemo(() => {
-        return getBoughtImportPlans(props.shoppingList, allIngredients, inventoryItems);
-    }, [props.shoppingList, allIngredients, inventoryItems]);
+        return getBoughtImportPlans(props.shoppingList, ingredientsById, inventoryItems);
+    }, [props.shoppingList, ingredientsById, inventoryItems]);
 
     const _getDishesByIds = (ids: string[]) => {
-        return dishes.filter(e => ids.includes(e.id));
+        return ids.map(id => dishesById.get(id)).filter(Boolean) as Dishes[];
     }
 
     const _getScheduledMealsByIds = (ids: string[]) => {
-        return scheduledMeals.filter(e => ids.includes(e.id));
+        return ids.map(id => scheduledMealsById.get(id)).filter(Boolean);
     }
 
     const _onShowMeal = (mealId: string) => {
@@ -344,19 +345,21 @@ export const ShoppingListDetailWidget: React.FunctionComponent<ShoppingListDetai
     }
 
     const groupedIngredients = useMemo(() => {
+        if (activeTab !== "ingredients") return [];
         const grouped = groupBy(props.shoppingList.ingredients, item => {
-            return allIngredients.find(i => i.id === item.ingredientId)?.category ?? "Khác";
+            return ingredientsById.get(item.ingredientId)?.category ?? "Khác";
         });
         // INGREDIENT_CATEGORIES already includes "Khác"; add any unknown categories at the end
         const baseOrder = [...INGREDIENT_CATEGORIES];
         Object.keys(grouped).forEach(k => { if (!baseOrder.includes(k)) baseOrder.push(k); });
         const orderedKeys = baseOrder.filter(cat => grouped[cat]?.length > 0);
         return orderedKeys.map(cat => ({ category: cat, items: grouped[cat] }));
-    }, [props.shoppingList.ingredients, allIngredients]);
+    }, [activeTab, props.shoppingList.ingredients, ingredientsById]);
 
     const costSummary = useMemo(() => {
-        return buildShoppingListCostSummary(props.shoppingList, allIngredients, inventoryItems);
-    }, [props.shoppingList, allIngredients, inventoryItems]);
+        if (activeTab !== "cost") return createShoppingListCostSummary();
+        return buildShoppingListCostSummary(props.shoppingList, ingredientsById, inventoryItems);
+    }, [activeTab, props.shoppingList, ingredientsById, inventoryItems]);
 
     const _completeShoppingList = () => {
         if (props.shoppingList.completedAt) return;
@@ -428,10 +431,10 @@ export const ShoppingListDetailWidget: React.FunctionComponent<ShoppingListDetai
     }
 
     return <React.Fragment>
-        <Tabs defaultActiveKey="ingredients" items={[
+        <Tabs activeKey={activeTab} onChange={setActiveTab} items={[
             {
                 key: "ingredients", icon: <Image src={IngredientIcon} preview={false} width={22} style={{ marginBottom: 3 }} />, label: "Nguyên liệu " + `(${props.shoppingList.ingredients.length})`,
-                children: <div data-testid="shopping-list-ingredients-tab">
+                children: activeTab === "ingredients" ? <div data-testid="shopping-list-ingredients-tab">
                     <Stack fullwidth justify="space-between" style={{ marginBottom: 10 }}>
                         <Space>
                             <Image src={ChecklistIcon} preview={false} width={18} style={{ marginBottom: 3 }} />
@@ -470,31 +473,31 @@ export const ShoppingListDetailWidget: React.FunctionComponent<ShoppingListDetai
                             />
                         }
                     </Box>
-                </div>
+                </div> : null
             },
             {
                 key: "cost", icon: <Image src={BudgetIcon} preview={false} width={22} style={{ marginBottom: 3 }} />, label: "Chi phí",
-                children: <Box data-testid="shopping-list-cost-tab">
+                children: activeTab === "cost" ? <Box data-testid="shopping-list-cost-tab">
                     <div style={{ display: "flex", flexDirection: "column", gap: 10, width: "100%", boxSizing: "border-box" }}>
                         <ShoppingListCostSummaryWidget summary={costSummary} />
                         <ShoppingListCompletionAuditWidget shoppingList={props.shoppingList} />
                     </div>
-                </Box>
+                </Box> : null
             },
             {
                 key: "dishes", icon: <Image src={DishesIcon} preview={false} width={22} style={{ marginBottom: 3 }} />, label: "Món ăn " + `(${props.shoppingList.dishes.length})`,
-                children: <Box data-testid="shopping-list-dishes-tab">
+                children: activeTab === "dishes" ? <Box data-testid="shopping-list-dishes-tab">
                     <List
                         size="small"
                         style={{ overflowX: "auto" }}
                         dataSource={_getDishesByIds(props.shoppingList.dishes)}
                         renderItem={(item) => <ShoppingListDishesItem dish={item} targetServings={props.shoppingList.dishServings?.[item.id]} />}
                     />
-                </Box>
+                </Box> : null
             },
             {
                 key: "meals", icon: <Image src={MealsIcon} preview={false} width={22} style={{ marginBottom: 3 }} />, label: "Thực đơn " + `(${props.shoppingList.scheduledMeals.length})`,
-                children: <Box data-testid="shopping-list-meals-tab">
+                children: activeTab === "meals" ? <Box data-testid="shopping-list-meals-tab">
                     <List
                         size="small"
                         style={{ overflowX: "auto" }}
@@ -523,7 +526,7 @@ export const ShoppingListDetailWidget: React.FunctionComponent<ShoppingListDetai
                         </List.Item>
                         }
                     />
-                </Box>
+                </Box> : null
             }
         ]} />
         <Modal style={{ top: 50 }} open={toggleMealModal.value} title={<Space>
@@ -531,7 +534,9 @@ export const ShoppingListDetailWidget: React.FunctionComponent<ShoppingListDetai
             Thực đơn
         </Space>} destroyOnClose={true} onCancel={toggleMealModal.hide} footer={null}>
             <Box style={{ maxHeight: 550, overflowY: "auto" }}>
-                <ShoppingListMealDetailWidget mealId={selectedMeal} />
+                <DeferredModalContent active={toggleMealModal.value} minHeight={220}>
+                    <ShoppingListMealDetailWidget mealId={selectedMeal} />
+                </DeferredModalContent>
             </Box>
         </Modal>
         <Modal
@@ -555,11 +560,13 @@ export const ShoppingListDetailWidget: React.FunctionComponent<ShoppingListDetai
             </div>}
         >
             <div data-testid="purchase-completion-review">
-            <PurchaseCompletionReviewWidget
-                plans={boughtImportPlans}
-                values={completionReviewValues}
-                onPatch={_patchCompletionReviewValue}
-            />
+                <DeferredModalContent active={toggleCompletionReview.value} minHeight={220}>
+                    <PurchaseCompletionReviewWidget
+                        plans={boughtImportPlans}
+                        values={completionReviewValues}
+                        onPatch={_patchCompletionReviewValue}
+                    />
+                </DeferredModalContent>
             </div>
         </Modal>
     </React.Fragment >
@@ -822,11 +829,11 @@ type ShoppingListIngredientPanelItemProps = {
 
 const ShoppingListIngredientPanelItem: React.FunctionComponent<ShoppingListIngredientPanelItemProps> = (props) => {
     const dispatch = useDispatch();
-    const ingredients = useSelector(selectIngredients);
+    const ingredientsById = useSelector(selectIngredientsById);
     const inventoryItems = useSelector(selectInventory);
     const [expanded, setExpanded] = useState(false);
 
-    const ingredient = ingredients.find(e => e.id === props.item.ingredientId);
+    const ingredient = ingredientsById.get(props.item.ingredientId);
     const inventory = inventoryItems[props.item.ingredientId];
     const status = getIngredientGroupStatus(props.item, ingredient, inventory);
     const priceEstimate = getShoppingListIngredientPriceEstimate(props.item, ingredient, inventory);
@@ -837,7 +844,7 @@ const ShoppingListIngredientPanelItem: React.FunctionComponent<ShoppingListIngre
     const boughtUnitOptions = Array.from(new Set([...inventoryUnits, boughtUnit]));
 
     const _getIngredientNameById = (id: string) => {
-        return ingredients.find(e => e.id === id)?.name || "";
+        return ingredientsById.get(id)?.name || "";
     }
 
     const _onCheckedAllChange = (e: CheckboxChangeEvent) => {
@@ -1058,10 +1065,10 @@ type ShoppingListIngredientItemProps = {
 
 export const ShoppingListIngredientItem: React.FunctionComponent<ShoppingListIngredientItemProps> = (props) => {
     const dispatch = useDispatch();
-    const ingredients = useSelector(selectIngredients);
+    const ingredientsById = useSelector(selectIngredientsById);
     const inventoryItems = useSelector(selectInventory);
 
-    const ingredient = ingredients.find(e => e.id === props.item.ingredientId);
+    const ingredient = ingredientsById.get(props.item.ingredientId);
     const inventory = inventoryItems[props.item.ingredientId];
 
     // Sum total required (numeric prefix, e.g. "200g" → 200)
@@ -1079,7 +1086,7 @@ export const ShoppingListIngredientItem: React.FunctionComponent<ShoppingListIng
     const needToBuy = Math.max(0, totalRequired - inStock);
 
     const _getIngredientNameById = (id: string) => {
-        return ingredients.find(e => e.id === id)?.name || "";
+        return ingredientsById.get(id)?.name || "";
     }
 
     const _onCheckedAllChange = (e: CheckboxChangeEvent) => {

@@ -7,7 +7,7 @@ import { Stack } from "@components/Layout/Stack";
 import { Tag } from "@components/Tag";
 import { Typography } from "@components/Typography";
 import { INGREDIENT_CATEGORIES, Ingredient } from "@store/Models/Ingredient";
-import { RootState } from "@store/Store";
+import { selectIngredients, selectIngredientsById } from "@store/Selectors";
 import { Divider } from "antd";
 import { groupBy } from "lodash";
 import React, { useMemo, useState } from "react";
@@ -20,7 +20,8 @@ type IngredientPickerWidgetProps = {
 }
 
 export const IngredientPickerWidget: React.FC<IngredientPickerWidgetProps> = ({ selectedIds, onChange }) => {
-    const allIngredients = useSelector((state: RootState) => state.shared.ingredient.ingredients);
+    const allIngredients = useSelector(selectIngredients);
+    const ingredientsById = useSelector(selectIngredientsById);
     const [activeCategory, setActiveCategory] = useState<string | null>(null);
     const [search, setSearch] = useState("");
 
@@ -132,7 +133,7 @@ export const IngredientPickerWidget: React.FC<IngredientPickerWidgetProps> = ({ 
                     <Box style={{ overflowX: "auto", paddingBottom: 2 }}>
                         <Stack gap={5} style={{ flexWrap: "nowrap", minWidth: "max-content" }}>
                             {selectedIds.map(id => {
-                                const name = allIngredients.find(i => i.id === id)?.name ?? id;
+                                const name = ingredientsById.get(id)?.name ?? id;
                                 return (
                                     <div
                                         key={id}

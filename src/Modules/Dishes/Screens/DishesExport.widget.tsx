@@ -8,11 +8,11 @@ import { Ingredient } from "@store/Models/Ingredient";
 import { Box } from "@components/Layout/Box";
 import { Space } from "@components/Layout/Space";
 import { useSelector } from "react-redux";
-import { RootState } from "@store/Store";
+import { selectDishesById } from "@store/Selectors";
 import NoodlesIcon from "../../../../assets/icons/noodles.png";
 import { Image } from "@components/Image";
 
-const formatDishToText = (dish: Dishes, allIngredients: Ingredient[], allDishes: Dishes[], depth: number = 0): string => {
+const formatDishToText = (dish: Dishes, ingredientsById: Map<string, Ingredient>, dishesById: Map<string, Dishes>, depth: number = 0): string => {
     const lines: string[] = [];
     const indent = "  ".repeat(depth);
     const header = depth === 0 ? "🍜" : "↳ 🍜";
@@ -41,7 +41,7 @@ const formatDishToText = (dish: Dishes, allIngredients: Ingredient[], allDishes:
     if (dish.ingredients && dish.ingredients.length > 0) {
         lines.push(`${indent}🧺 NGUYÊN LIỆU:`);
         dish.ingredients.forEach(ing => {
-            const ingInfo = allIngredients.find(i => i.id === ing.ingredientId);
+            const ingInfo = ingredientsById.get(ing.ingredientId);
             const name = ingInfo?.name || ing.ingredientId;
             const prepare = ing.prepare && ing.prepare.length > 0 ? ` (${ing.prepare.join(", ")})` : "";
             const required = ing.required ? "" : " [tùy chọn]";
@@ -64,9 +64,9 @@ const formatDishToText = (dish: Dishes, allIngredients: Ingredient[], allDishes:
         lines.push(`${indent}🔗 BAO GỒM CÁC MÓN:`);
         lines.push("");
         dish.includeDishes.forEach(subDishId => {
-            const subDish = allDishes.find(d => d.id === subDishId);
+            const subDish = dishesById.get(subDishId);
             if (subDish) {
-                lines.push(formatDishToText(subDish, allIngredients, allDishes, depth + 1));
+                lines.push(formatDishToText(subDish, ingredientsById, dishesById, depth + 1));
             }
         });
     }
@@ -83,8 +83,9 @@ type DishesExportWidgetProps = {
 
 export const DishesExportWidget: React.FC<DishesExportWidgetProps> = ({ dish, allIngredients, open, onClose }) => {
     const message = useMessage();
-    const allDishes = useSelector((state: RootState) => state.shared.dishes.dishes);
-    const text = React.useMemo(() => open ? formatDishToText(dish, allIngredients, allDishes) : "", [open, dish, allIngredients, allDishes]);
+    const dishesById = useSelector(selectDishesById);
+    const ingredientsById = React.useMemo(() => open ? new Map(allIngredients.map(item => [item.id, item])) : new Map<string, Ingredient>(), [open, allIngredients]);
+    const text = React.useMemo(() => open ? formatDishToText(dish, ingredientsById, dishesById) : "", [open, dish, ingredientsById, dishesById]);
 
     if (!open) return null;
 

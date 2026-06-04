@@ -1,9 +1,9 @@
 import { AppstoreOutlined, HomeOutlined } from "@ant-design/icons";
-import { Modal } from "@components/Modal";
+import { DeferredModalContent, Modal } from "@components/Modal";
 import { useToggle } from "@hooks";
 import { ShoppingListAddWidget } from "@modules/ShoppingList/Screens/ShoppingListAdd.widget";
 import { removeAllSelectedMeals } from "@store/Reducers/ScheduledMealReducer";
-import { RootState } from "@store/Store"
+import { selectSelectedMeals } from "@store/Selectors"
 import { FloatButton } from "antd"
 import React from "react"
 import { useDispatch, useSelector } from "react-redux"
@@ -68,7 +68,7 @@ const quickNavDescriptionCss = `
 `;
 
 export const ScheduledMealToolkitWidget: React.FC<ScheduledMealToolkitWidgetProps> = ({ onNavigate }) => {
-    const selectedMeals = useSelector((state: RootState) => state.personal.scheduledMeal.selectedMeals);
+    const selectedMeals = useSelector(selectSelectedMeals);
     const toggle = useToggle();
     const toggleAddModal = useToggle();
     const dispatch = useDispatch();
@@ -126,18 +126,20 @@ export const ScheduledMealToolkitWidget: React.FC<ScheduledMealToolkitWidgetProp
             <FloatButton description="Chi phí" tooltip="Kế hoạch chi phí" icon={<Image preview={false} src={BudgetIcon} width={20} style={floatIconStyle} />} onClick={() => _navigate(RootRoutes.AuthorizedRoutes.ExpensePlanner())} />
         </FloatButton.Group>
 
-        <Modal open={toggleAddModal.value} title={
+        {toggleAddModal.value && <Modal open={toggleAddModal.value} title={
             <Space>
                 <Image src={ShoppinglistIcon} preview={false} width={24} style={{ marginBottom: 3 }} />
                 Thêm lịch mua sắm
             </Space>
         } destroyOnClose={true} onCancel={toggleAddModal.hide} footer={null}>
-            <ShoppingListAddWidget
-                date={null}
-                scheduledMealIds={selectedMeals}
-                onDone={_onAddShoppingListDone}
-                onCreated={(shoppingList) => navigate(RootRoutes.AuthorizedRoutes.ShoppingListRoutes.Detail(shoppingList.id))}
-            />
-        </Modal>
+            <DeferredModalContent active={toggleAddModal.value}>
+                <ShoppingListAddWidget
+                    date={null}
+                    scheduledMealIds={selectedMeals}
+                    onDone={_onAddShoppingListDone}
+                    onCreated={(shoppingList) => navigate(RootRoutes.AuthorizedRoutes.ShoppingListRoutes.Detail(shoppingList.id))}
+                />
+            </DeferredModalContent>
+        </Modal>}
     </React.Fragment>
 }

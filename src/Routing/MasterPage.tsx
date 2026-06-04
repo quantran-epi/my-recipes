@@ -10,7 +10,7 @@ import { Space } from "@components/Layout/Space";
 import { Stack } from "@components/Layout/Stack";
 import { Menu } from "@components/Menu";
 import { useMessage } from "@components/Message";
-import { Modal } from "@components/Modal";
+import { DeferredModalContent, Modal } from "@components/Modal";
 import { SmartForm, useSmartForm } from "@components/SmartForm";
 import { Tooltip } from "@components/Tootip";
 import { Typography } from "@components/Typography";
@@ -26,7 +26,7 @@ import { addDishes, resetDishes } from "@store/Reducers/DishesReducer";
 import { addIngredient, resetIngredient } from "@store/Reducers/IngredientReducer";
 import { addScheduledMeal, resetScheduleMeals } from "@store/Reducers/ScheduledMealReducer";
 import { addShoppingList, resetShoppingList } from "@store/Reducers/ShoppingListReducer";
-import { RootState } from "@store/Store";
+import { selectCookingSessions, selectCurrentFeatureName, selectDishesById } from "@store/Selectors";
 import { Drawer, Flex, Input as AntInput, Layout, Divider } from "antd";
 import React, { useState } from "react";
 import { CopyToClipboard } from 'react-copy-to-clipboard';
@@ -104,7 +104,7 @@ const sidebarTransitionHintStyle: React.CSSProperties = {
 
 export const MasterPage = () => {
     const theme = useTheme();
-    const currentFeatureName = useSelector((state: RootState) => state.personal.appContext.currentFeatureName);    const { isOnline } = useOnlineStatus();
+    const currentFeatureName = useSelector(selectCurrentFeatureName);    const { isOnline } = useOnlineStatus();
     const toggleSearch = useToggle();
     const location = useLocation();
 
@@ -175,7 +175,7 @@ export const MasterPage = () => {
         </Content>
         <BottomTabNavigator />
         <CookingPill />
-        <GlobalSearchScreen open={toggleSearch.value} onClose={toggleSearch.hide} />
+        {toggleSearch.value && <GlobalSearchScreen open={toggleSearch.value} onClose={toggleSearch.hide} />}
     </Layout>
 }
 
@@ -517,16 +517,16 @@ const SidebarDrawer = () => {
                 </Flex>
             </Modal>
             <ScheduledMealToolkitWidget onNavigate={onNavigate} />
-            <CookingHistoryWidget open={toggleHistory.value} onClose={toggleHistory.hide} />
-            <UserGuideScreen open={toggleGuide.value} onClose={toggleGuide.hide} />
+            {toggleHistory.value && <CookingHistoryWidget open={toggleHistory.value} onClose={toggleHistory.hide} />}
+            {toggleGuide.value && <UserGuideScreen open={toggleGuide.value} onClose={toggleGuide.hide} />}
         </React.Fragment>
     );
 };
 
 const CookingPill = () => {
-    const sessions = useSelector((state: RootState) => state.personal.cookingSession?.sessions ?? []);
-    const allDishes = useSelector((state: RootState) => state.shared.dishes.dishes);
-    const activeSessions = sessions.filter(s => s.status === "cooking");
+    const sessions = useSelector(selectCookingSessions);
+    const dishesById = useSelector(selectDishesById);
+    const activeSessions = React.useMemo(() => sessions.filter(s => s.status === "cooking"), [sessions]);
 
     const [sessionListOpen, setSessionListOpen] = React.useState(false);
     const [focusedSessionId, setFocusedSessionId] = React.useState<string | null>(null);
@@ -535,7 +535,7 @@ const CookingPill = () => {
     if (activeSessions.length === 0) return null;
 
     const focusedSession = activeSessions.find(s => s.id === focusedSessionId) ?? activeSessions[0];
-    const focusedDish = allDishes.find(d => d.id === focusedSession?.dishId);
+    const focusedDish = dishesById.get(focusedSession?.dishId);
 
     const _onPillClick = () => {
         if (activeSessions.length === 1) {
@@ -613,9 +613,9 @@ const CookingPill = () => {
             style={{ top: 80 }}
             destroyOnClose={false}
         >
-            <Flex vertical gap={10}>
+            <DeferredModalContent active={sessionListOpen} minHeight={120}>
+                {sessionListOpen ? <Flex vertical gap={10}>
                 {activeSessions.map(s => {
-                    const dish = allDishes.find(d => d.id === s.dishId);
                     const progress = s.steps?.length > 0
                         ? Math.round(((s.currentStepIndex ?? 0) + 1) / s.steps.length * 100)
                         : null;
@@ -665,7 +665,8 @@ const CookingPill = () => {
                         </div>
                     );
                 })}
-            </Flex>
+                </Flex> : null}
+            </DeferredModalContent>
         </Modal>
 
         {/* ── Single session cooking modal ── */}
@@ -676,12 +677,14 @@ const CookingPill = () => {
             onCancel={() => setCookingModalOpen(false)}
             footer={null}
         >
-            {focusedDish && (
-                <CookingSessionWidget
-                    dish={focusedDish}
-                    onDone={() => setCookingModalOpen(false)}
-                />
-            )}
+            <DeferredModalContent active={cookingModalOpen} minHeight={220}>
+                {cookingModalOpen && focusedDish ? (
+                    <CookingSessionWidget
+                        dish={focusedDish}
+                        onDone={() => setCookingModalOpen(false)}
+                    />
+                ) : null}
+            </DeferredModalContent>
         </Modal>
     </React.Fragment>;
 };
@@ -817,7 +820,7 @@ const BottomTabNavigator = () => {
                 <Typography.Text style={{ fontSize: 16 }}>Nấu gì?</Typography.Text>
             </Button>
         </Stack>
-        <DishSuggesterScreen open={toggleSuggester.value} onClose={toggleSuggester.hide} />
+        {toggleSuggester.value && <DishSuggesterScreen open={toggleSuggester.value} onClose={toggleSuggester.hide} />}
     </>
 }
 
@@ -879,21 +882,29 @@ export const DataBackup = ({ onImportCloud }: { onImportCloud?: () => Promise<vo
         </Space>
 
         <Modal title="Export — persist:personal" open={toggleShowData.value} onCancel={toggleShowData.hide} footer={null}>
-            <Box style={{ height: 300, overflowY: "auto", wordBreak: "break-all", fontSize: 12 }}>
-                {exportedData}
-            </Box>
-            <br />
-            <CopyToClipboard text={exportedData} onCopy={() => message.success("Copied")}>
-                <Stack justify="flex-end"><Button>Copy</Button></Stack>
-            </CopyToClipboard>
+            <DeferredModalContent active={toggleShowData.value} minHeight={320}>
+                {toggleShowData.value ? <React.Fragment>
+                    <Box style={{ height: 300, overflowY: "auto", wordBreak: "break-all", fontSize: 12 }}>
+                        {exportedData}
+                    </Box>
+                    <br />
+                    <CopyToClipboard text={exportedData} onCopy={() => message.success("Copied")}>
+                        <Stack justify="flex-end"><Button>Copy</Button></Stack>
+                    </CopyToClipboard>
+                </React.Fragment> : null}
+            </DeferredModalContent>
         </Modal>
 
         <Modal title="Import — persist:personal" open={toggleImportData.value} onCancel={toggleImportData.hide} footer={null}>
-            <SmartForm {...importDataForm.defaultProps}>
-                <SmartForm.Item {...importDataForm.itemDefinitions.data}>
-                    <TextArea rows={10} />
-                </SmartForm.Item>
-            </SmartForm>
+            <DeferredModalContent active={toggleImportData.value} minHeight={240}>
+                {toggleImportData.value ? <React.Fragment>
+                    <SmartForm {...importDataForm.defaultProps}>
+                        <SmartForm.Item {...importDataForm.itemDefinitions.data}>
+                            <TextArea rows={10} />
+                        </SmartForm.Item>
+                    </SmartForm>
+                </React.Fragment> : null}
+            </DeferredModalContent>
             <Button onClick={importDataForm.submit}>Khôi phục</Button>
         </Modal>
     </React.Fragment>

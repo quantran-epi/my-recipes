@@ -24,17 +24,18 @@ const getScrollTargets = (element?: HTMLElement | null): HTMLElement[] => {
 }
 
 export const scrollVirtualListToTop = (list?: ListImperativeAPI | null): boolean => {
-    if (!list) return false;
-    try {
-        list.scrollToRow({ index: 0, align: "start", behavior: "instant" });
-    } catch {
-        // Empty filtered lists have no row 0; still reset any parent scroll container below.
+    if (list) {
+        try {
+            list.scrollToRow({ index: 0, align: "start", behavior: "instant" });
+        } catch {
+            // Empty filtered lists have no row 0; still reset any parent scroll container below.
+        }
     }
-    getScrollTargets(list.element).forEach(target => {
+    getScrollTargets(list?.element).forEach(target => {
         target.scrollTop = 0;
         target.scrollTo({ top: 0, behavior: "auto" });
     });
-    return true;
+    return Boolean(list);
 }
 
 export const VirtualListScrollTopButton: React.FunctionComponent<VirtualListScrollTopButtonProps> = ({ listRef, rowCount, visible, style }) => {

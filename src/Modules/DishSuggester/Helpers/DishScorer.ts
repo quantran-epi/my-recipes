@@ -43,26 +43,44 @@ export type ScoredDishGroup = {
 }
 
 // Recursively collect all unique ingredient IDs from a dish and its included dishes
-const collectAllIngredientIds = (dish: Dishes, allDishes: Dishes[], visited = new Set<string>()): string[] => {
+const collectAllIngredientIds = (
+    dish: Dishes,
+    dishById: Map<string, Dishes>,
+    cache = new Map<string, string[]>(),
+    visited = new Set<string>(),
+): string[] => {
     if (visited.has(dish.id)) return [];
+    const cached = cache.get(dish.id);
+    if (cached) return cached;
     visited.add(dish.id);
     const own = dish.ingredients.filter(i => i.required !== false).map(i => i.ingredientId);
     const fromIncluded = dish.includeDishes.flatMap(id => {
-        const d = allDishes.find(d => d.id === id);
-        return d ? collectAllIngredientIds(d, allDishes, visited) : [];
+        const d = dishById.get(id);
+        return d ? collectAllIngredientIds(d, dishById, cache, visited) : [];
     });
-    return Array.from(new Set([...own, ...fromIncluded]));
+    const result = Array.from(new Set([...own, ...fromIncluded]));
+    cache.set(dish.id, result);
+    return result;
 };
 
-const collectAllIngredientAmounts = (dish: Dishes, allDishes: Dishes[], visited = new Set<string>()): DishesIngredientAmount[] => {
+const collectAllIngredientAmounts = (
+    dish: Dishes,
+    dishById: Map<string, Dishes>,
+    cache = new Map<string, DishesIngredientAmount[]>(),
+    visited = new Set<string>(),
+): DishesIngredientAmount[] => {
     if (visited.has(dish.id)) return [];
+    const cached = cache.get(dish.id);
+    if (cached) return cached;
     visited.add(dish.id);
     const own = dish.ingredients.filter(i => i.required !== false);
     const fromIncluded = dish.includeDishes.flatMap(id => {
-        const d = allDishes.find(d => d.id === id);
-        return d ? collectAllIngredientAmounts(d, allDishes, visited) : [];
+        const d = dishById.get(id);
+        return d ? collectAllIngredientAmounts(d, dishById, cache, visited) : [];
     });
-    return [...own, ...fromIncluded];
+    const result = [...own, ...fromIncluded];
+    cache.set(dish.id, result);
+    return result;
 };
 
 const URGENT_DAYS_THRESHOLD = 3;
@@ -92,13 +110,17 @@ export const DishScorer = {
     score(dishes: Dishes[], selectedIngredientIds: string[], allDishes: Dishes[]): ScoredDish[] {
         if (selectedIngredientIds.length === 0) return [];
 
+        const dishById = new Map(allDishes.map(dish => [dish.id, dish]));
+        const ingredientIdsCache = new Map<string, string[]>();
+        const selectedIngredientSet = new Set(selectedIngredientIds);
+
         return dishes
             .map(dish => {
-                const allRequired = collectAllIngredientIds(dish, allDishes);
+                const allRequired = collectAllIngredientIds(dish, dishById, ingredientIdsCache);
                 if (allRequired.length === 0) return null;
 
-                const matched = allRequired.filter(id => selectedIngredientIds.includes(id));
-                const missing = allRequired.filter(id => !selectedIngredientIds.includes(id));
+                const matched = allRequired.filter(id => selectedIngredientSet.has(id));
+                const missing = allRequired.filter(id => !selectedIngredientSet.has(id));
                 const score = matched.length / allRequired.length;
 
                 return {
@@ -118,12 +140,16 @@ export const DishScorer = {
     scoreWithInventory(dishes: Dishes[], inventory: Record<string, IngredientInventory>, allDishes: Dishes[], allIngredients: Ingredient[]): ScoredDish[] {
         if (Object.keys(inventory).length === 0) return [];
 
+        const dishById = new Map(allDishes.map(dish => [dish.id, dish]));
+        const ingredientById = new Map(allIngredients.map(ingredient => [ingredient.id, ingredient]));
+        const amountsCache = new Map<string, DishesIngredientAmount[]>();
+
         return dishes
             .map(dish => {
-                const amounts = collectAllIngredientAmounts(dish, allDishes);
+                const amounts = collectAllIngredientAmounts(dish, dishById, amountsCache);
                 const grouped: Record<string, { required: number; unit: IngredientUnit; ingredient?: Ingredient }> = {};
                 amounts.forEach(amount => {
-                    const ingredient = allIngredients.find(i => i.id === amount.ingredientId);
+                    const ingredient = ingredientById.get(amount.ingredientId);
                     if (InventoryHelper.isAlwaysAvailable(ingredient)) return;
                     const baseUnit = IngredientUnitHelper.getBaseUnit(ingredient, [amount.unit]);
                     const required = IngredientUnitHelper.toBaseAmount(ingredient, amount.amount, amount.unit, baseUnit)
@@ -153,7 +179,8 @@ export const DishScorer = {
                 });
                 const stocked = ingredientDetails.filter(item => item.inStockAmount > 0).map(item => item.ingredientId);
                 const matched = ingredientDetails.filter(item => item.matched).map(item => item.ingredientId);
-                const missing = requiredIds.filter(id => !matched.includes(id));
+                const matchedSet = new Set(matched);
+                const missing = requiredIds.filter(id => !matchedSet.has(id));
                 const partial = ingredientDetails.filter(item => item.partial).map(item => item.ingredientId);
                 const score = matched.length / requiredIds.length;
                 const extraShoppingSummary = ingredientDetails.reduce((summary, detail) => {

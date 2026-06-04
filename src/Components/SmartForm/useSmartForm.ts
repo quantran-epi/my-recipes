@@ -42,6 +42,7 @@ type UseSmartFormProps<T = any, TSubmit = any> = {
 
 export const useSmartForm = <T, TSubmit = T>(props: UseSmartFormProps<T, TSubmit>): UseSmartForm<T, TSubmit> => {
     const [form] = Form.useForm<T>();
+    const itemDefinitions = props.itemDefinitions(props.defaultValues);
 
     const isDirty = () => {
         return isEqual(getValues(), props.defaultValues);
@@ -104,7 +105,7 @@ export const useSmartForm = <T, TSubmit = T>(props: UseSmartFormProps<T, TSubmit
         transform: _getTransformValues,
         submittedValues,
         defaultProps: {
-            itemDefinitions: props.itemDefinitions(props.defaultValues),
+            itemDefinitions,
             layout: props.layout || "vertical",
             form: form,
             initialValues: props.defaultValues,
@@ -112,6 +113,6 @@ export const useSmartForm = <T, TSubmit = T>(props: UseSmartFormProps<T, TSubmit
             onFinish: _onFormFinish,
             onFinishFailed: _onFormFinishFailed
         },
-        itemDefinitions: props.itemDefinitions(props.defaultValues)
+        itemDefinitions
     }
 }

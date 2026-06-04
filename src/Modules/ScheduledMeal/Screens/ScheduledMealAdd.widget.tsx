@@ -9,7 +9,7 @@ import { SmartForm, useSmartForm } from "@components/SmartForm"
 import { nanoid } from "@reduxjs/toolkit"
 import { ScheduledMeal } from "@store/Models/ScheduledMeal"
 import { addScheduledMeal } from "@store/Reducers/ScheduledMealReducer"
-import { RootState } from "@store/Store"
+import { selectDishes } from "@store/Selectors"
 import dayjs from "dayjs"
 import { useEffect, useMemo } from "react"
 import { useDispatch, useSelector } from "react-redux"
@@ -17,7 +17,7 @@ import { ScheduledMealEstimateSummary } from "./ScheduledMealEstimateSummary.wid
 
 export const ScheduledMealAddWidget = ({ date, onDone }) => {
     const dispatch = useDispatch();
-    const dishes = useSelector((state: RootState) => state.shared.dishes.dishes);
+    const dishes = useSelector(selectDishes);
     const message = useMessage();
 
     const addScheduledMealForm = useSmartForm<ScheduledMeal>({

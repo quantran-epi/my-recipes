@@ -4,12 +4,12 @@ import { Image } from "@components/Image";
 import { Box } from "@components/Layout/Box";
 import { Space } from "@components/Layout/Space";
 import { Stack } from "@components/Layout/Stack";
-import { Modal } from "@components/Modal";
+import { DeferredModalContent, Modal } from "@components/Modal";
 import { Tag } from "@components/Tag";
 import { Typography } from "@components/Typography";
 import { useToggle } from "@hooks";
 import { DishScorer, ScoredDish, ScoredDishGroup } from "../Helpers/DishScorer";
-import { RootState } from "@store/Store";
+import { selectDishes, selectIngredients, selectIngredientsById, selectInventory } from "@store/Selectors";
 import { InputNumber, Input, Select } from "antd";
 import React, { useMemo, useState } from "react";
 import { useSelector } from "react-redux";
@@ -42,9 +42,10 @@ const totalDurationMins = (dish: Dishes) => {
 
 export const DishSuggesterScreen: React.FC<DishSuggesterScreenProps> = ({ open, onClose, initialMode, initialIngredientIds }) => {
     const navigate = useNavigate();
-    const dishes = useSelector((state: RootState) => state.shared.dishes.dishes);
-    const allIngredients = useSelector((state: RootState) => state.shared.ingredient.ingredients);
-    const inventory = useSelector((state: RootState) => state.personal.inventory?.items ?? {});
+    const dishes = useSelector(selectDishes);
+    const allIngredients = useSelector(selectIngredients);
+    const ingredientsById = useSelector(selectIngredientsById);
+    const inventory = useSelector(selectInventory);
 
     const [mode, setMode] = useState<Mode>(initialMode ?? "ingredients");
     const [step, setStep] = useState(0);
@@ -74,12 +75,12 @@ export const DishSuggesterScreen: React.FC<DishSuggesterScreenProps> = ({ open, 
         if (!open) return [];
         return Object.entries(inventory)
             .filter(([id, inv]) => {
-                const ingredient = allIngredients.find(i => i.id === id);
+                const ingredient = ingredientsById.get(id);
                 return !InventoryHelper.isAlwaysAvailable(ingredient)
                     && InventoryHelper.totalUsableAmount(inv as any, ingredient) > 0;
             })
             .map(([id]) => id);
-    }, [open, inventory, allIngredients]);
+    }, [open, inventory, ingredientsById]);
 
     const ingredientScored = useMemo(() => {
         if (!open || mode !== "ingredients" || step !== 1) return [];
@@ -163,7 +164,7 @@ export const DishSuggesterScreen: React.FC<DishSuggesterScreenProps> = ({ open, 
         setDurationSearchIds([]);
     };
 
-    const _missingIngredientName = (id: string) => allIngredients.find(i => i.id === id)?.name ?? id;
+    const _missingIngredientName = (id: string) => ingredientsById.get(id)?.name ?? id;
 
     const ResultsFooter = ({ dishIds }: { dishIds: string[] }) => (
         <>
@@ -342,7 +343,7 @@ export const DishSuggesterScreen: React.FC<DishSuggesterScreenProps> = ({ open, 
                                         <Box style={{ maxHeight: 180, overflowY: "auto" }}>
                                             <Stack wrap="wrap" gap={6}>
                                                 {inventoryIngredientIds.map(id => {
-                                                    const ingr = allIngredients.find(i => i.id === id);
+                                                    const ingr = ingredientsById.get(id);
                                                     const inv = inventory[id];
                                                     const amt = InventoryHelper.totalAmount(inv as any, ingr);
                                                     const unit = IngredientUnitHelper.getBaseUnit(ingr);
@@ -491,7 +492,7 @@ export const DishSuggesterScreen: React.FC<DishSuggesterScreenProps> = ({ open, 
                                     const selected = selectedDishIds.includes(dish.id);
                                     const ingredients = dish.ingredients ?? [];
                                     const availableCount = ingredients.filter(req => {
-                                        const ingr = allIngredients.find(i => i.id === req.ingredientId);
+                                        const ingr = ingredientsById.get(req.ingredientId);
                                         const unit = IngredientUnitHelper.getBaseUnit(ingr, [req.unit]);
                                         const stockAmt = InventoryHelper.totalAmount(inventory[req.ingredientId] as any, ingr);
                                         const needed = IngredientUnitHelper.toBaseAmount(ingr, req.amount, req.unit, unit) ?? 0;
@@ -524,7 +525,7 @@ export const DishSuggesterScreen: React.FC<DishSuggesterScreenProps> = ({ open, 
                                             {ingredients.length > 0 && (
                                                 <Stack wrap="wrap" gap={4}>
                                                     {ingredients.map(req => {
-                                                        const ingr = allIngredients.find(i => i.id === req.ingredientId);
+                                                        const ingr = ingredientsById.get(req.ingredientId);
                                                         const inv = inventory[req.ingredientId];
                                                         const unit = IngredientUnitHelper.getBaseUnit(ingr, [req.unit]);
                                                         const stockAmt = InventoryHelper.totalAmount(inv as any, ingr);
@@ -589,7 +590,7 @@ export const DishSuggesterScreen: React.FC<DishSuggesterScreenProps> = ({ open, 
             )}
         </Modal>
 
-        <Modal
+        {toggleShoppingListAdd.value && <Modal
             open={toggleShoppingListAdd.value}
             onCancel={toggleShoppingListAdd.hide}
             footer={null}
@@ -602,19 +603,21 @@ export const DishSuggesterScreen: React.FC<DishSuggesterScreenProps> = ({ open, 
             }
             style={{ top: 30 }}
         >
-            <ShoppingListAddWidget
-                date={new Date()}
-                dishIds={selectedDishIds}
-                alreadyHaveIngredientIds={
-                    mode === "ingredients" ? selectedIngredientIds :
-                    mode === "inventory" ? matchedIngredientIds : []
-                }
-                onDone={() => {
-                    toggleShoppingListAdd.hide();
-                    _onClose();
-                }}
-                onCreated={(shoppingList) => navigate(RootRoutes.AuthorizedRoutes.ShoppingListRoutes.Detail(shoppingList.id))}
-            />
-        </Modal>
+            <DeferredModalContent active={toggleShoppingListAdd.value}>
+                <ShoppingListAddWidget
+                    date={new Date()}
+                    dishIds={selectedDishIds}
+                    alreadyHaveIngredientIds={
+                        mode === "ingredients" ? selectedIngredientIds :
+                        mode === "inventory" ? matchedIngredientIds : []
+                    }
+                    onDone={() => {
+                        toggleShoppingListAdd.hide();
+                        _onClose();
+                    }}
+                    onCreated={(shoppingList) => navigate(RootRoutes.AuthorizedRoutes.ShoppingListRoutes.Detail(shoppingList.id))}
+                />
+            </DeferredModalContent>
+        </Modal>}
     </>;
 };

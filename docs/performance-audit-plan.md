@@ -1,0 +1,339 @@
+# Performance Audit Plan
+
+## Overview
+
+Goal: make app performance work systematic, measurable, and auditable. This file is the source of truth for planned performance implementation, audit scope, current status, acceptance criteria, and test evidence.
+
+Default performance targets:
+
+- Route feedback appears immediately after user navigation begins.
+- Large list screens avoid heavy synchronous row work and show useful content quickly.
+- Modal shells open before expensive modal body work starts.
+- Image and network requests stay within a visible budget for the current route.
+- Hidden tabs, panels, overlays, and closed dialogs do not perform heavy calculations or mount expensive trees.
+
+## How To Use This File
+
+- To implement one item, prompt: `implement PERF-01`.
+- To audit one item, prompt: `audit PERF-01`.
+- To audit the whole performance plan, prompt: `run performance audit`.
+- Each work item has a status, implementation notes, acceptance criteria, audit checklist, test evidence, and notes.
+- When implementation or audit work is completed, update the matching work item and append a row to the audit log.
+- Keep evidence concrete: command output summaries, browser observations, screenshots, traces, or file paths.
+
+## Status Legend
+
+- Planned: scoped but not started.
+- In Progress: actively being implemented or audited.
+- Partially Implemented: some intended changes exist, but the full item has not passed its audit checklist.
+- Implemented: code changes are complete and ready for audit.
+- Audited: implementation passed the checklist and has evidence recorded.
+- Blocked: cannot proceed without a decision, dependency, or missing environment capability.
+- Needs Rework: implemented or audited work failed acceptance criteria.
+
+## Performance Work Items
+
+### PERF-00: Baseline Measurement
+
+Status: Audited
+
+Purpose:
+- Establish repeatable before-and-after performance evidence so later changes can be judged against a known baseline.
+
+Implementation:
+- Identify the highest-traffic routes for dashboard, dish list, ingredient list, shopping list, inventory, and relevant detail pages.
+- Record initial route load behavior, list paint behavior, modal open latency, and visible loading feedback.
+- Capture browser performance profiles for at least one heavy list route and one heavy modal route.
+- Record current request counts, image counts, and large asset sizes for primary routes.
+- Document measurement environment, browser, seed data, device profile, and commands used.
+
+Acceptance Criteria:
+- Baseline includes at least one route-level measurement for every primary list page.
+- Baseline includes at least one modal open measurement from a known heavy modal.
+- Baseline identifies the top synchronous work sources visible in browser profiling.
+- Baseline records request count and largest image or data payload for sampled routes.
+- Baseline evidence is added to the audit log with paths or clear reproduction notes.
+
+Audit Checklist:
+- Static inspection checks: confirm sampled routes cover the main page families and not only the fastest screens.
+- Automated test checks: run existing regression or smoke tests if available to confirm baseline data is gathered from a working app.
+- Manual browser checks if needed: use DevTools Performance and Network panels on representative data, including at least one list page with enough rows to expose slow row work.
+
+Test Evidence:
+- 2026-06-04: Added explicit Playwright baseline harness at `tests/e2e/performance-baseline.spec.ts`; it is skipped unless `PERF_BASELINE=1` is set.
+- Baseline command: `$env:PERF_BASELINE='1'; $env:E2E_PORT='3026'; npx.cmd playwright test tests/e2e/performance-baseline.spec.ts --output D:\tmp\my-recipes-perf-artifacts`.
+- Baseline result: passed 1 Playwright test on `msedge`; evidence written to `test-results/performance/perf-00-baseline.json`.
+- Route visible timings: dashboard 1729ms; ingredient list 1370ms; dish list 1335ms; shopping list 1273ms; shopping-list detail 1240ms; scheduled-meal list 1207ms; expense planner 1224ms.
+- Request/image snapshot: sampled routes made 6-10 resource requests and 3-7 image requests; largest sampled resource was dev `static/js/bundle.js` at 1,613,453 bytes.
+- Heavy interaction profile evidence: `test-results/performance/perf-00-shopping-list-detail.cpuprofile` and `test-results/performance/perf-00-shopping-list-readonly-dish-modal.cpuprofile`.
+- Modal shell baseline: shopping-list read-only dish modal became visible in 357ms.
+- Regression command: `$env:E2E_PORT='3029'; npx.cmd playwright test --output D:\tmp\my-recipes-e2e-artifacts`.
+- Regression result: passed 9, skipped 1 explicit `PERF-00` baseline test; report at `playwright-report/index.html` and JSON at `test-results/e2e-results.json`.
+
+Notes:
+- This is a dev-server baseline. Compare future measurements against the same browser, seeded data, and dev-server mode unless a production-build baseline is captured separately.
+- `RootRouter` does not expose a standalone inventory list route; inventory-related baseline coverage comes through ingredient list, ingredient stock data, shopping-list detail, and dashboard urgent inventory rows.
+- Initial e2e verification exposed stale assertions in dashboard, global search, and shopping-list cost tests; those were repaired before the final passing suite run.
+
+### PERF-01: Remove Heavy Work From List Rows
+
+Status: Audited
+
+Purpose:
+- Keep list rows cheap to render so navigation, scrolling, filtering, and route transitions are not blocked by repeated per-row calculations or hidden modal work.
+
+Implementation:
+- Audit all primary list rows for recursive traversal, aggregation, formatting, sorting, export generation, modal preparation, and selector work performed during render.
+- Move repeated calculations from row components to parent-level memoized summaries keyed by stable entity IDs and source data versions.
+- Pass precomputed row summaries into row components instead of recalculating from full collections inside each row.
+- Mount closed row modal bodies only after the modal is opened.
+- Defer expensive export or preview text generation until the user explicitly opens or requests that output.
+- Preserve existing row behavior, empty states, sorting, filtering, badges, counts, and navigation actions.
+- 2026-06-04 implementation: moved shopping-list row entity selectors to the screen/calendar parents and passed shared dish, scheduled-meal, and ingredient collections through row props.
+- 2026-06-04 implementation: moved dish ingredient lookups to parent memoized maps, passed ingredient and inventory snapshots into rows, and kept row edit modal bodies unmounted until opened.
+- 2026-06-04 implementation: moved scheduled-meal selection and dish-name lookup work to parent memoized `Set`/`Map` structures and passed compact row props.
+- 2026-06-04 implementation: gated closed row modals in shopping-list, dish, dish-ingredient, scheduled-meal, and ingredient-list rows; deferred shopping-list export text and dish duration detail generation until opened.
+
+Acceptance Criteria:
+- Dish list, ingredient list, shopping list, inventory list, and any dashboard list rows have no repeated heavy calculations in row render paths.
+- Closed row modals do not mount detail bodies or perform detail-only calculations.
+- Row components receive compact summaries or IDs instead of full graph-like data when practical.
+- Large list navigation and scrolling feel responsive on representative seeded data.
+- Existing automated UI flows for list interactions still pass.
+
+Audit Checklist:
+- Static inspection checks: inspect row components and their child components for recursive traversal, full-array scans, expensive formatting, and closed modal bodies mounted by default.
+- Automated test checks: run list, modal, and navigation regression tests that cover dish, ingredient, shopping-list, and inventory flows.
+- Manual browser checks if needed: profile a large list route before and after row audit; confirm row render stacks shrink and closed modal content is absent until opened.
+
+Test Evidence:
+- 2026-06-04 static audit: inspected shopping-list rows, dish rows, dish-ingredient rows, scheduled-meal rows, ingredient-list stock rows, and dashboard urgent rows for row-local selectors, full-array scans, closed modal bodies, and hidden export/detail work.
+- 2026-06-04 static result: row-local selectors were removed from the changed row hot paths; dashboard urgent rows and ingredient stock rows use parent-computed summaries/snapshots; no standalone inventory route exists.
+- 2026-06-04 build command: `npm run build`.
+- 2026-06-04 build result: passed with the existing lint/dependency warning set; latest bundle reported `build\static\js\main.0c692a08.js` at 566.96 kB gzip.
+- 2026-06-04 e2e command: `$env:E2E_PORT='3032'; npx.cmd playwright test --output D:\tmp\my-recipes-e2e-perf01-artifacts`.
+- 2026-06-04 e2e result: passed 9 Playwright tests and skipped 1 explicit `PERF-00` baseline test; report at `playwright-report/index.html`, JSON at `test-results/e2e-results.json`, artifacts at `D:\tmp\my-recipes-e2e-perf01-artifacts`.
+- 2026-06-04 retry note: one earlier full-suite run hit a non-reproducible Playwright page setup timeout in a shopping-list test; targeted shopping-list rerun passed all 5 tests, and the final full-suite rerun passed.
+
+Notes:
+- `PERF-02` remains the follow-up for broader selector normalization and shared lookup-map patterns outside the row-render hot paths addressed here.
+- No fresh `PERF_BASELINE=1` profile was captured for this item; use the `PERF-00` baseline files for before/after comparison if another timing pass is needed.
+
+### PERF-02: Normalize Selectors And Lookup Maps
+
+Status: Audited
+
+Purpose:
+- Reduce repeated full-collection scans by using stable selectors, lookup maps, and memoized derived data near shared state boundaries.
+
+Implementation:
+- Identify selectors and components that repeatedly call `find`, `filter`, `map`, `reduce`, or recursive helpers against full entity arrays during render.
+- Create or reuse normalized lookup maps for ingredients, dishes, shopping lists, inventory batches, meal plans, and other high-use entities.
+- Keep memoization dependencies narrow and stable so updates invalidate only affected summaries.
+- Move cross-entity relationship derivation into shared selector helpers when multiple screens need the same calculation.
+- Avoid duplicating normalized state if the existing store already provides an equivalent source of truth.
+- 2026-06-04 implementation: added memoized `reselect` lookup selectors for ingredients, dishes, dish names, shopping lists, scheduled meals, and selected meal ids in `src/Store/Selectors.ts`.
+- 2026-06-04 implementation: migrated feature modules and routing away from direct `RootState` selector lambdas to shared typed selectors.
+- 2026-06-04 implementation: replaced repeated cross-entity `find` scans with shared maps in dashboard, global search, dish suggester, dish detail/export/cooking flows, ingredient detail/stats/use-first flows, scheduled-meal summaries, shopping-list detail, and route-level detail screens.
+- 2026-06-04 implementation: left local `Set`/`Map` work in place where it is calculation-specific, such as recursive dish scoring, list filter counts, selected row sets, and formatter-local maps built lazily from component props.
+
+Acceptance Criteria:
+- High-traffic screens no longer rebuild identical lookup maps independently in many child components.
+- Repeated entity lookups use keyed maps or memoized selectors instead of full-array scans where that materially reduces work.
+- Selector outputs are stable enough to avoid avoidable rerenders in list rows and detail panels.
+- Data correctness is unchanged for edits, deletes, imports, and route transitions.
+
+Audit Checklist:
+- Static inspection checks: inspect selectors, hooks, and page components for repeated full-array scans and duplicated lookup-map construction.
+- Automated test checks: run regression tests for entity edit/delete flows and cross-entity screens that consume normalized selectors.
+- Manual browser checks if needed: use React profiling or browser Performance traces to confirm selector recalculation drops on large seeded data.
+
+Test Evidence:
+- 2026-06-04 static audit command: `rg -n "useSelector\(\(state: RootState\)|RootState" src/Modules src/Routing src/Hooks`.
+- 2026-06-04 static result: no direct `RootState` selector lambdas remain under modules, routing, or hooks.
+- 2026-06-04 static audit: confirmed shared lookup selector usage across dashboard, global search, dish suggester, cooking, dish detail/export, ingredient detail/stats/use-first, scheduled-meal, shopping-list detail, and master-page cooking pill flows.
+- 2026-06-04 build command: `npm run build`.
+- 2026-06-04 build result: passed with the existing lint/dependency warning set; latest bundle reported `build\static\js\main.895b0909.js` at 566.76 kB gzip.
+- 2026-06-04 e2e command: `$env:E2E_PORT='3032'; npx.cmd playwright test --output D:\tmp\my-recipes-e2e-perf02-artifacts`.
+- 2026-06-04 e2e result: passed 9 Playwright tests and skipped 1 explicit `PERF-00` baseline test; report at `playwright-report/index.html`, JSON at `test-results/e2e-results.json`, artifacts at `D:\tmp\my-recipes-e2e-perf02-artifacts`.
+
+Notes:
+- Used existing `reselect` dependency only; no new state library, store migration, or duplicated normalized state was introduced.
+- Reducer-local scans remain unchanged because they mutate scoped reducer state or operate on action payloads rather than render selectors.
+
+### PERF-03: Lazy Tabs, Panels, And Modal Bodies
+
+Status: Audited
+
+Purpose:
+- Prevent inactive UI surfaces from mounting expensive trees, fetching data, or running calculations before the user asks for them.
+
+Implementation:
+- Audit tabs, accordions, panels, drawers, overlays, and dialogs for hidden content that mounts by default.
+- Render inactive tab and panel bodies only when selected, unless preserving internal state is required.
+- Render modal shells immediately, then mount heavy body content after open state is true.
+- Use lightweight placeholders or skeletons when deferred body content needs one frame to prepare.
+- Keep focus management, accessibility labels, keyboard close behavior, and transition behavior intact.
+- 2026-06-04 implementation: gated global search, cooking history, user guide, dish suggester, ingredient-detail suggester, scheduled-meal estimate detail, and nested dish-suggester shopping-list overlays so closed overlays do not mount their heavy trees.
+- 2026-06-04 implementation: lazy-rendered shopping-list detail tabs by active key and skipped grouped-ingredient work unless the ingredients tab is active.
+- 2026-06-04 implementation: wrapped scheduled-meal add/edit/detail/copy/range shopping, shopping-list add/calendar, cooking-session shopping-list, active cooking session, session switcher, and backup import/export bodies in `DeferredModalContent`.
+- 2026-06-04 implementation: kept modal shells available for focus/transition behavior while deferring form, detail, calendar, export, and shopping-list generation bodies until open.
+
+Acceptance Criteria:
+- Closed modals do not run detail-only selectors, exports, charts, or expensive formatting.
+- Inactive tabs and panels avoid mounting heavy bodies until selected.
+- Opening a modal shows a shell quickly and then fills body content without layout jumps.
+- Existing modal, drawer, tab, and keyboard interaction tests still pass.
+
+Audit Checklist:
+- Static inspection checks: inspect modal and tab call sites for unconditional child rendering while closed or inactive.
+- Automated test checks: run modal, drawer, tab, and route navigation regression tests.
+- Manual browser checks if needed: profile route load and modal open paths; confirm hidden content disappears from initial render stacks.
+
+Test Evidence:
+- 2026-06-04 static audit command: `rg -n -C 4 "<ShoppingListAddWidget|<ScheduledMealAddWidget|<ScheduledMealEditWidget|<ShoppingListMealDetailWidget|<CookingSessionWidget|<ShoppingListCalendarWidget" src/Modules src/Routing`.
+- 2026-06-04 static result: heavy modal body widgets are either parent-gated or wrapped in `DeferredModalContent` at the audited call sites.
+- 2026-06-04 static audit command: `rg -n "<Tabs|children: activeTab|children: \(" src/Modules src/Routing`.
+- 2026-06-04 static result: shopping-list detail tabs render active-tab bodies only; remaining collapse children are either light guide/search summaries or behind already-gated modal screens.
+- 2026-06-04 build command: `npm run build`.
+- 2026-06-04 build result: passed with the existing lint/dependency warning set; latest bundle reported `build\static\js\main.4c625560.js` at 566.95 kB gzip.
+- 2026-06-04 e2e command: `$env:E2E_PORT='3032'; npx.cmd playwright test --output D:\tmp\my-recipes-e2e-perf03-artifacts`.
+- 2026-06-04 e2e result: passed 9 Playwright tests and skipped 1 explicit `PERF-00` baseline test; report at `playwright-report/index.html`, JSON at `test-results/e2e-results.json`, artifacts at `D:\tmp\my-recipes-e2e-perf03-artifacts`.
+
+Notes:
+- `DataBackup` still renders a lightweight restore button while the import modal is closed; the heavy `SmartForm` and textarea body are deferred.
+- Dish suggester and user-guide collapse panels remain within parent-gated modal screens; no separate state-preservation exception was needed for the audited heavy modal bodies.
+
+### PERF-04: Image And Network Budget
+
+Status: Planned
+
+Purpose:
+- Keep route loading predictable by limiting unnecessary image requests, oversized assets, and background network work.
+
+Implementation:
+- Audit primary routes for image count, image dimensions, encoded size, lazy-loading behavior, and cache behavior.
+- Ensure below-the-fold and hidden images use lazy loading or deferred rendering.
+- Use appropriately sized image variants where the app has control over source assets.
+- Avoid preloading or fetching detail-only assets before the user opens the relevant route, tab, or modal.
+- Define a route-level image and request budget that can be checked during future audits.
+
+Acceptance Criteria:
+- Primary list routes do not eagerly load hidden modal images or below-the-fold detail images.
+- Large image assets have an explicit reason or a smaller replacement path.
+- Network panel evidence shows route request counts and transfer size within the documented budget.
+- Existing visual behavior is preserved, including thumbnails, placeholders, and fallback images.
+
+Audit Checklist:
+- Static inspection checks: inspect image components, modal content, route preloads, and data fetching hooks for eager hidden work.
+- Automated test checks: run visual or smoke tests that cover image-heavy routes if available.
+- Manual browser checks if needed: inspect DevTools Network with cache disabled and enabled; confirm lazy images are not requested before they are visible or needed.
+
+Test Evidence:
+- Pending until implemented/audited.
+
+Notes:
+- Record budget numbers after PERF-00 baseline measurement so the budget matches real app behavior and data volume.
+
+### PERF-05: Navigation And Loading Overlay
+
+Status: Planned
+
+Purpose:
+- Make route transitions feel immediate and prevent loading indicators from adding avoidable delay or masking blocked main-thread work.
+
+Implementation:
+- Audit sidebar, header, global search, detail-link, and row-link navigation paths.
+- Ensure navigation starts promptly after user intent and does not wait for nonessential animation or cleanup.
+- Keep route feedback visible during data preparation or lazy component loading.
+- Avoid loading overlays that block interaction longer than necessary after the target route is ready.
+- Confirm back/forward navigation and query-param navigation preserve expected behavior.
+
+Acceptance Criteria:
+- Clicking navigation controls produces immediate visual feedback.
+- Route changes are not delayed by drawer close animations, unnecessary timeouts, or synchronous cleanup.
+- Loading overlay appears only while useful and disappears promptly after route content is usable.
+- Existing navigation regression tests still pass.
+
+Audit Checklist:
+- Static inspection checks: inspect navigation handlers for delayed route changes, broad synchronous work before navigation, and overlay state that can remain stuck.
+- Automated test checks: run global search, sidebar, row navigation, and detail navigation tests.
+- Manual browser checks if needed: use slow CPU throttling and click through primary routes; confirm feedback appears before heavy work completes.
+
+Test Evidence:
+- Pending until implemented/audited.
+
+Notes:
+- Existing notes indicate sidebar navigation has already been improved to overlap drawer closing with route transition. Re-audit it with the rest of the navigation paths.
+
+### PERF-06: Heavy Calculation Scheduling
+
+Status: Planned
+
+Purpose:
+- Keep unavoidable heavy calculations from blocking urgent user interactions, route feedback, and modal shell rendering.
+
+Implementation:
+- Identify heavy calculations that cannot be removed through memoization or normalized lookup maps.
+- Schedule nonurgent calculations after first paint, after modal shell open, or during idle periods where practical.
+- Split large calculations into smaller chunks if they can block interaction on representative data.
+- Cache derived results with clear invalidation rules based on source data changes.
+- Keep user-visible totals, badges, and warnings correct when scheduled work finishes.
+
+Acceptance Criteria:
+- Heavy nonurgent work does not run before initial route feedback or modal shell render.
+- Scheduled work has a visible loading, pending, or stale-safe state when needed.
+- Derived values update correctly after source data changes.
+- Browser profiling shows reduced long tasks in the interaction path being optimized.
+
+Audit Checklist:
+- Static inspection checks: inspect expensive helpers, recursive graph calculations, recommendation engines, export generation, and statistics panels for synchronous interaction-path work.
+- Automated test checks: run tests that validate derived totals, suggestions, summaries, and update-after-edit behavior.
+- Manual browser checks if needed: profile representative heavy interactions and confirm long tasks move out of urgent paths or are split.
+
+Test Evidence:
+- Pending until implemented/audited.
+
+Notes:
+- Do not defer calculations whose absence would make the UI misleading without a clear pending state.
+
+### PERF-07: Performance Regression Suite
+
+Status: Planned
+
+Purpose:
+- Add repeatable checks that prevent the same performance regressions from returning after implementation work is complete.
+
+Implementation:
+- Define a small set of performance smoke flows for list navigation, row rendering, modal opening, tab activation, and image-heavy routes.
+- Seed enough deterministic data to expose row and selector work without making the suite too slow.
+- Add assertions for user-visible responsiveness where feasible, such as route feedback, modal shell visibility, and lazy content behavior.
+- Record request counts or asset budgets for key routes if the test environment supports stable network inspection.
+- Keep the suite maintainable and focused on regressions that have already occurred or are likely to recur.
+
+Acceptance Criteria:
+- Regression suite covers at least one heavy list route and one heavy modal interaction.
+- Tests fail when closed modal bodies, inactive heavy tabs, or hidden images are mounted or requested too early where assertions are practical.
+- Suite can be run locally with documented commands.
+- Test results and artifact paths are recorded in the audit log after each relevant run.
+
+Audit Checklist:
+- Static inspection checks: confirm test names, seeded data, and assertions map back to the performance risks in this file.
+- Automated test checks: run the performance regression suite and relevant existing e2e smoke tests.
+- Manual browser checks if needed: compare automated coverage against a manual DevTools profile and document gaps that automation cannot catch reliably.
+
+Test Evidence:
+- Pending until implemented/audited.
+
+Notes:
+- Prefer extending existing Playwright or regression infrastructure instead of adding a separate performance toolchain unless the existing setup cannot measure the required behavior.
+
+## Audit Log
+
+| Date | Step ID | Command/test run | Result | Evidence path | Follow-up |
+|---|---|---|---|---|---|
+| 2026-06-04 | PERF-00 | `$env:PERF_BASELINE='1'; $env:E2E_PORT='3026'; npx.cmd playwright test tests/e2e/performance-baseline.spec.ts --output D:\tmp\my-recipes-perf-artifacts` | Passed 1 Playwright baseline test; captured route timings, request/image counts, CDP metrics, and CPU profiles. | `test-results/performance/perf-00-baseline.json`; `test-results/performance/perf-00-shopping-list-detail.cpuprofile`; `test-results/performance/perf-00-shopping-list-readonly-dish-modal.cpuprofile` | Use as comparison baseline for `PERF-01` through `PERF-04`. |
+| 2026-06-04 | PERF-00 | `$env:E2E_PORT='3029'; npx.cmd playwright test --output D:\tmp\my-recipes-e2e-artifacts` | Passed 9, skipped 1 explicit baseline test. | `playwright-report/index.html`; `test-results/e2e-results.json` | None for `PERF-00`; stale e2e selectors were repaired before the final run. |
+| 2026-06-04 | PERF-01 | Static row audit; `npm run build`; `$env:E2E_PORT='3032'; npx.cmd playwright test --output D:\tmp\my-recipes-e2e-perf01-artifacts` | Audited row render hot paths; build passed with existing warnings; final full e2e passed 9 and skipped 1 explicit `PERF-00` baseline test. | `playwright-report/index.html`; `test-results/e2e-results.json`; `D:\tmp\my-recipes-e2e-perf01-artifacts` | Continue with `PERF-02` selector and lookup normalization. |
+| 2026-06-04 | PERF-02 | Static selector audit; `npm run build`; `$env:E2E_PORT='3032'; npx.cmd playwright test --output D:\tmp\my-recipes-e2e-perf02-artifacts` | Added shared memoized lookup selectors; migrated feature modules/routing to typed selectors; build passed with existing warnings; full e2e passed 9 and skipped 1 explicit `PERF-00` baseline test. | `src/Store/Selectors.ts`; `playwright-report/index.html`; `test-results/e2e-results.json`; `D:\tmp\my-recipes-e2e-perf02-artifacts` | Continue with `PERF-03` lazy tabs, panels, and modal bodies. |
+| 2026-06-04 | PERF-03 | Static lazy-render audit; `npm run build`; `$env:E2E_PORT='3032'; npx.cmd playwright test --output D:\tmp\my-recipes-e2e-perf03-artifacts` | Lazy-rendered shopping-list detail tabs and deferred heavy modal bodies across scheduled meals, shopping lists, cooking, global overlays, and backup dialogs; build passed with existing warnings; full e2e passed 9 and skipped 1 explicit `PERF-00` baseline test. | `src/Components/Modal/Modal.tsx`; `playwright-report/index.html`; `test-results/e2e-results.json`; `D:\tmp\my-recipes-e2e-perf03-artifacts` | Deploy `PERF-03`, then continue with `PERF-04` image and network budget. |
