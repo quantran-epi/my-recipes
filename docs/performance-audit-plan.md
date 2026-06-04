@@ -334,7 +334,7 @@ Notes:
 
 ### PERF-07: Performance Regression Suite
 
-Status: Planned
+Status: Audited
 
 Purpose:
 - Add repeatable checks that prevent the same performance regressions from returning after implementation work is complete.
@@ -345,6 +345,10 @@ Implementation:
 - Add assertions for user-visible responsiveness where feasible, such as route feedback, modal shell visibility, and lazy content behavior.
 - Record request counts or asset budgets for key routes if the test environment supports stable network inspection.
 - Keep the suite maintainable and focused on regressions that have already occurred or are likely to recur.
+- 2026-06-04 implementation: added `tests/e2e/performance-regression.spec.ts` to the normal Playwright suite.
+- 2026-06-04 implementation: added assertions that inactive shopping-list detail tabs and read-only dish modal bodies stay unmounted until requested.
+- 2026-06-04 implementation: added smoke budgets for dashboard-to-shopping-list-detail navigation, lazy dishes-tab activation, read-only dish modal visibility, route request count, route image count, and hidden external dish-image requests before modal open.
+- 2026-06-04 implementation: wrote repeatable PERF-07 evidence to `test-results/performance/perf-07-regression.json`.
 
 Acceptance Criteria:
 - Regression suite covers at least one heavy list route and one heavy modal interaction.
@@ -358,10 +362,15 @@ Audit Checklist:
 - Manual browser checks if needed: compare automated coverage against a manual DevTools profile and document gaps that automation cannot catch reliably.
 
 Test Evidence:
-- Pending until implemented/audited.
+- 2026-06-04 targeted command: `$env:E2E_PORT='5000'; npx.cmd playwright test tests/e2e/performance-regression.spec.ts --output D:\tmp\my-recipes-e2e-perf07-artifacts`.
+- 2026-06-04 targeted result: passed 2 PERF-07 Playwright tests.
+- 2026-06-04 full-suite command: `$env:E2E_PORT='5000'; npx.cmd playwright test --output D:\tmp\my-recipes-e2e-perf07-full-artifacts`.
+- 2026-06-04 full-suite result: passed 11 Playwright tests and skipped 1 explicit `PERF-00` baseline test.
+- 2026-06-04 PERF-07 evidence: `test-results/performance/perf-07-regression.json` recorded dashboard-to-detail at 405ms, dishes-tab visibility at 132ms, read-only dish modal visibility at 327ms, route resources at 7 requests and 6 images, and zero external dish-image requests before modal open.
 
 Notes:
-- Prefer extending existing Playwright or regression infrastructure instead of adding a separate performance toolchain unless the existing setup cannot measure the required behavior.
+- The repo's `.env` pins CRA to `PORT=5000`, so the verified PERF-07 Playwright commands used `E2E_PORT=5000` to reuse the reachable dev server.
+- The explicit `PERF-00` baseline test remains opt-in; the new PERF-07 regression spec runs in the standard suite.
 
 ## Audit Log
 
@@ -375,3 +384,4 @@ Notes:
 | 2026-06-04 | PERF-04 | Static image audit; `npm run build`; `$env:PERF_BASELINE='1'; $env:E2E_PORT='3026'; npx.cmd playwright test tests/e2e/performance-baseline.spec.ts --output D:\tmp\my-recipes-perf04-artifacts`; `$env:E2E_PORT='3032'; npx.cmd playwright test --output D:\tmp\my-recipes-e2e-perf04-artifacts` | Added shared lazy/async image defaults, converted remaining route raw icon images, documented route request/image/transfer budgets, and verified build plus e2e. | `src/Components/Image/Image.tsx`; `test-results/performance/perf-00-baseline.json`; `playwright-report/index.html`; `test-results/e2e-results.json`; `D:\tmp\my-recipes-perf04-artifacts`; `D:\tmp\my-recipes-e2e-perf04-artifacts` | Deploy `PERF-04`, then continue with `PERF-05` navigation and loading overlay. |
 | 2026-06-04 | PERF-05 | Static navigation audit; `npm run build`; `$env:E2E_PORT='3032'; npx.cmd playwright test --output D:\tmp\my-recipes-e2e-perf05-artifacts` | Centralized sidebar/bottom-tab route feedback, removed sidebar navigation delay, transition-wrapped high-traffic dashboard/search/list/detail navigation, and verified build plus e2e. | `src/Routing/MasterPage.tsx`; `src/Modules/Home/Screens/Dashboard.screen.tsx`; `src/Modules/Home/Screens/GlobalSearch.screen.tsx`; `playwright-report/index.html`; `test-results/e2e-results.json`; `D:\tmp\my-recipes-e2e-perf05-artifacts` | Deploy `PERF-05`, then continue with `PERF-06` heavy calculation scheduling. |
 | 2026-06-04 | PERF-06 | CodeGraph static audit; focused diff review; `npm run build`; `$env:E2E_PORT='3032'; npx.cmd playwright test --output D:\tmp\my-recipes-e2e-perf06-artifacts` | Added shared scheduled calculation hook, moved dashboard/suggester/planner/cost-tab heavy calculations out of urgent render paths, added pending-safe UI states, and verified build plus e2e. | `src/Hooks/useScheduledCalculation.ts`; `src/Modules/DishSuggester/Screens/DishSuggester.screen.tsx`; `src/Modules/Dishes/Screens/DishesManageIngredient/DishExpensePlanner.widget.tsx`; `playwright-report/index.html`; `test-results/e2e-results.json`; `D:\tmp\my-recipes-e2e-perf06-artifacts` | Deploy `PERF-06`, then continue with `PERF-07` performance regression suite. |
+| 2026-06-04 | PERF-07 | `$env:E2E_PORT='5000'; npx.cmd playwright test tests/e2e/performance-regression.spec.ts --output D:\tmp\my-recipes-e2e-perf07-artifacts`; `$env:E2E_PORT='5000'; npx.cmd playwright test --output D:\tmp\my-recipes-e2e-perf07-full-artifacts` | Added normal-suite performance regression tests for lazy tab/modal mounting, route/modal smoke budgets, route request/image budget, and hidden dish-image requests; targeted PERF-07 passed 2 tests; full suite passed 11 and skipped 1 explicit baseline. | `tests/e2e/performance-regression.spec.ts`; `test-results/performance/perf-07-regression.json`; `playwright-report/index.html`; `test-results/e2e-results.json`; `D:\tmp\my-recipes-e2e-perf07-artifacts`; `D:\tmp\my-recipes-e2e-perf07-full-artifacts` | Deploy `PERF-07`; performance plan implementation is complete. |
