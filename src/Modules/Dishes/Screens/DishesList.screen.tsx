@@ -12,7 +12,7 @@ import { DeferredModalContent, Modal } from "@components/Modal";
 import { Popover } from "@components/Popover";
 import { Tag } from "@components/Tag";
 import { Typography } from "@components/Typography";
-import { useScreenTitle, useToggle, useAdminMode } from "@hooks";
+import { useScreenTitle, useToggle, useAdminMode, usePagedVirtualItems } from "@hooks";
 import { DISH_TAGS, DishDuration, Dishes } from "@store/Models/Dishes";
 import { Ingredient } from "@store/Models/Ingredient";
 import { DishesDurationEditParams, duplicateDish, removeDishes, updateDishDuration } from "@store/Reducers/DishesReducer";
@@ -22,7 +22,7 @@ import { debounce, sortBy } from "lodash";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { List as VirtualList, type ListImperativeAPI, type RowComponentProps } from "react-window";
+import { List as VirtualList, useDynamicRowHeight, type ListImperativeAPI, type RowComponentProps } from "react-window";
 import Clock2Icon from "../../../../assets/icons/clock (2).png";
 import NoodlesIcon from "../../../../assets/icons/noodles.png";
 import { DishesAddWidget } from "./DishesAdd.widget";
@@ -113,7 +113,8 @@ const EMPTY_DISH_SUMMARY: DishListItemSummary = {
     includedDishCount: 0,
 };
 
-const DISH_ROW_HEIGHT = 226;
+const DISH_ROW_DEFAULT_HEIGHT = 184;
+const DISH_LOAD_MORE_THRESHOLD = 8;
 
 const DISH_DURATION_LABELS: Record<keyof DishDuration, string> = {
     unfreeze: 'Rã đông',
@@ -196,7 +197,7 @@ const buildDishListSummaries = (allDishes: Dishes[], visibleDishes: Dishes[] = a
 const DishRow = ({ index, style, items, allDishes, allIngredients, summaries, onDelete, onDuplicate, isAdmin }: RowComponentProps<DishRowProps>) => {
     if (!items[index]) return null;
     const item = items[index];
-    return <VirtualListRowFrame style={style}>
+    return <VirtualListRowFrame style={style} layout="dynamic">
         <DishesItem item={item} allDishes={allDishes} allIngredients={allIngredients} summary={summaries[item.id] ?? EMPTY_DISH_SUMMARY} onDelete={onDelete} onDuplicate={onDuplicate} isAdmin={isAdmin} />
     </VirtualListRowFrame>;
 };
@@ -210,7 +211,6 @@ export const DishesListScreen = () => {
     const [activeStatus, setActiveStatus] = useState<DishStatusFilter>("all");
     const dispatch = useDispatch();
     const { } = useScreenTitle({ value: "Món ăn", deps: [] });
-    const rowHeight = DISH_ROW_HEIGHT;
     const virtualListStyle = useMemo<React.CSSProperties>(() => ({
         height: "100%",
         overscrollBehavior: "contain",
@@ -234,10 +234,6 @@ export const DishesListScreen = () => {
 
     const _onListScroll = useCallback((event: React.UIEvent<HTMLElement>) => {
         _setScrollTopVisible(event.currentTarget.scrollTop > 180);
-    }, [_setScrollTopVisible]);
-
-    const _onRowsRendered = useCallback((visibleRows: { startIndex: number }) => {
-        _setScrollTopVisible(visibleRows.startIndex > 1);
     }, [_setScrollTopVisible]);
 
     const allTags = useMemo<string[]>(() => {
@@ -291,7 +287,16 @@ export const DishesListScreen = () => {
     }, [dishes, normalizedSearch, activeTag, activeStatus, allTags]);
 
     const { filteredDishes, statusCounts, tagCounts } = filterData;
-    const dishSummaries = useMemo(() => buildDishListSummaries(dishes, filteredDishes), [dishes, filteredDishes]);
+    const pagedDishesResetKey = `${activeStatus}|${activeTag ?? "all"}|${normalizedSearch}`;
+    const {
+        visibleItems: visibleDishes,
+        loadedCount: loadedDishCount,
+        totalCount: totalDishCount,
+        hasMore: hasMoreDishes,
+        loadMore: loadMoreDishes,
+    } = usePagedVirtualItems({ items: filteredDishes, resetKey: pagedDishesResetKey });
+    const rowHeight = useDynamicRowHeight({ defaultRowHeight: DISH_ROW_DEFAULT_HEIGHT, key: pagedDishesResetKey });
+    const dishSummaries = useMemo(() => buildDishListSummaries(dishes, visibleDishes), [dishes, visibleDishes]);
 
     const _onDelete = useCallback((item: Dishes) => {
         dispatch(removeDishes([item.id]));
@@ -302,20 +307,27 @@ export const DishesListScreen = () => {
     }, [dispatch]);
 
     const dishRowProps = useMemo(() => ({
-        items: filteredDishes,
+        items: visibleDishes,
         allDishes: dishes,
         allIngredients: ingredients,
         summaries: dishSummaries,
         onDelete: _onDelete,
         onDuplicate: _onDuplicate,
         isAdmin,
-    }), [filteredDishes, dishes, ingredients, dishSummaries, _onDelete, _onDuplicate, isAdmin]);
+    }), [visibleDishes, dishes, ingredients, dishSummaries, _onDelete, _onDuplicate, isAdmin]);
 
     const _scrollToTop = useCallback(() => {
         const scrolled = scrollVirtualListToTop(listRef.current);
         if (scrolled) setShowScrollTop(false);
         return scrolled;
     }, []);
+
+    const _onRowsRendered = useCallback((visibleRows: { startIndex: number; stopIndex: number }) => {
+        _setScrollTopVisible(visibleRows.startIndex > 1);
+        if (hasMoreDishes && visibleRows.stopIndex >= Math.max(0, loadedDishCount - DISH_LOAD_MORE_THRESHOLD)) {
+            loadMoreDishes();
+        }
+    }, [_setScrollTopVisible, hasMoreDishes, loadedDishCount, loadMoreDishes]);
 
     useEffect(() => {
         if (!didMountScrollRef.current) {
@@ -354,7 +366,7 @@ export const DishesListScreen = () => {
                 <VirtualList
                     listRef={listRef}
                     rowComponent={DishRow}
-                    rowCount={filteredDishes.length}
+                    rowCount={visibleDishes.length}
                     rowHeight={rowHeight}
                     overscanCount={1}
                     onScroll={_onListScroll}
@@ -363,7 +375,10 @@ export const DishesListScreen = () => {
                     style={virtualListStyle}
                     data-testid="dish-virtual-list"
                 />
-                <VirtualListScrollTopButton listRef={listRef} rowCount={filteredDishes.length} visible={showScrollTop} />
+                {hasMoreDishes && <div data-testid="dish-list-page-status" style={{ position: "absolute", left: "50%", bottom: 10, transform: "translateX(-50%)", padding: "4px 10px", borderRadius: 999, background: "rgba(255,255,255,0.94)", border: "1px solid #f0f0f0", boxShadow: "0 4px 14px rgba(0,0,0,0.08)", fontSize: 12, color: "#595959", pointerEvents: "none" }}>
+                    Đã tải {loadedDishCount}/{totalDishCount}
+                </div>}
+                <VirtualListScrollTopButton listRef={listRef} rowCount={visibleDishes.length} visible={showScrollTop} />
             </div>
         </div>
         <Modal open={toggleAddModal.value} title={

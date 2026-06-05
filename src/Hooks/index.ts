@@ -7,3 +7,4 @@ export * from './useSharedPublish';
 export * from './useSharedDataSync';
 export * from './useGistBackup';
 export * from './useScheduledCalculation';
+export * from './usePagedVirtualItems';

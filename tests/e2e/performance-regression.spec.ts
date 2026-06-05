@@ -61,7 +61,30 @@ const summarizeResources = async (page: Page): Promise<ResourceSummary> => {
 };
 
 test.describe('PERF-07 performance regressions', () => {
+  test('keeps dynamic dish row gaps consistent from the first item onward', async ({ page }) => {
+    await page.goto('dishes/list');
+    const list = page.getByTestId('dish-virtual-list');
+    await expect(list).toBeVisible();
+
+    const cards = list.locator('[data-testid^="dish-list-item-"]');
+    await expect(cards.nth(2)).toBeVisible();
+
+    await expect.poll(async () => {
+      const boxes = await Promise.all([
+        cards.nth(0).boundingBox(),
+        cards.nth(1).boundingBox(),
+        cards.nth(2).boundingBox(),
+      ]);
+      const [first, second, third] = boxes;
+      if (!first || !second || !third) return 999;
+      const firstGap = Math.round(second.y - (first.y + first.height));
+      const nextGap = Math.round(third.y - (second.y + second.height));
+      return Math.abs(firstGap - nextGap);
+    }).toBeLessThanOrEqual(6);
+  });
+
   test('keeps virtualized ingredient rows spaced and treats drag as scroll intent', async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 800 });
     await page.goto('ingredient/list');
     const list = page.getByTestId('ingredient-virtual-list');
     await expect(list).toBeVisible();
@@ -76,11 +99,19 @@ test.describe('PERF-07 performance regressions', () => {
     expect(firstBox.height).toBeGreaterThan(130);
     expect(secondBox.y - firstBox.y).toBeGreaterThan(120);
 
+    const wrappedIngredient = page.getByTestId(`ingredient-list-item-${TEST_IDS.ingredients.chicken}`);
+    await expect(wrappedIngredient).toBeVisible();
+    const wrappedRowFrame = wrappedIngredient.locator('xpath=ancestor::*[@data-virtual-list-row-frame="true"][1]');
+    await expect.poll(async () => wrappedRowFrame.evaluate(element => element.scrollHeight <= element.clientHeight + 1)).toBeTruthy();
+
     const listBox = await list.boundingBox();
     if (!listBox) throw new Error('Ingredient virtual list was not measurable.');
-    await page.mouse.move(listBox.x + listBox.width / 2, listBox.y + listBox.height / 2);
-    await page.mouse.wheel(0, 1600);
-    const lastIngredient = page.getByTestId(`ingredient-list-item-${TEST_IDS.ingredients.scrollLast}`);
+    const lastIngredient = page.getByTestId(`ingredient-list-item-${TEST_IDS.ingredients.pagedLast}`);
+    for (let attempt = 0; attempt < 8 && (await lastIngredient.count()) === 0; attempt += 1) {
+      await page.mouse.move(listBox.x + listBox.width / 2, listBox.y + listBox.height / 2);
+      await page.mouse.wheel(0, 1800);
+      await page.waitForTimeout(60);
+    }
     await expect(lastIngredient).toBeVisible();
 
     const inventoryButton = lastIngredient.locator('button').filter({ hasText: /Tồn kho khả dụng/ }).first();

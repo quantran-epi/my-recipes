@@ -3,6 +3,7 @@ import React from "react";
 type VirtualListRowFrameProps = {
     style: React.CSSProperties;
     children: React.ReactNode;
+    layout?: "fixed" | "dynamic";
 }
 
 type PointerStart = {
@@ -18,10 +19,11 @@ const hasMovedPastThreshold = (start: PointerStart, x: number, y: number): boole
     return Math.abs(x - start.x) > DRAG_CLICK_THRESHOLD_PX || Math.abs(y - start.y) > DRAG_CLICK_THRESHOLD_PX;
 };
 
-export const VirtualListRowFrame: React.FunctionComponent<VirtualListRowFrameProps> = ({ style, children }) => {
+export const VirtualListRowFrame: React.FunctionComponent<VirtualListRowFrameProps> = ({ style, children, layout = "fixed" }) => {
     const pointerStartRef = React.useRef<PointerStart | null>(null);
     const suppressNextClickRef = React.useRef(false);
     const clearTimerRef = React.useRef<number | null>(null);
+    const isDynamic = layout === "dynamic";
 
     const _clearInteractionSoon = React.useCallback(() => {
         if (clearTimerRef.current !== null) window.clearTimeout(clearTimerRef.current);
@@ -87,8 +89,8 @@ export const VirtualListRowFrame: React.FunctionComponent<VirtualListRowFramePro
         style={{
             ...style,
             boxSizing: "border-box",
-            padding: "2px 4px 6px",
-            overflow: "hidden",
+            padding: isDynamic ? "0 4px 8px" : "2px 4px 6px",
+            overflow: isDynamic ? "visible" : "hidden",
             touchAction: "pan-y",
             overscrollBehavior: "contain",
         }}
@@ -103,6 +105,6 @@ export const VirtualListRowFrame: React.FunctionComponent<VirtualListRowFramePro
         onTouchCancelCapture={_onPointerUpCapture}
         onClickCapture={_onClickCapture}
     >
-        <div style={{ height: "100%", boxSizing: "border-box" }}>{children}</div>
+        <div style={{ height: isDynamic ? undefined : "100%", boxSizing: "border-box" }}>{children}</div>
     </div>;
 };

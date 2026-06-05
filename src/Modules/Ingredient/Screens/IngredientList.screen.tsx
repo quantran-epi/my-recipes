@@ -9,7 +9,7 @@ import { DeferredModalContent, Modal } from "@components/Modal";
 import { Popconfirm } from "@components/Popconfirm";
 import { Tooltip } from "@components/Tootip";
 import { Typography } from "@components/Typography";
-import { useScreenTitle, useToggle, useAdminMode } from "@hooks";
+import { useScreenTitle, useToggle, useAdminMode, usePagedVirtualItems } from "@hooks";
 import { InventoryHelper } from "@common/Helpers/InventoryHelper";
 import { IngredientUnitHelper } from "@common/Helpers/IngredientUnitHelper";
 import { Ingredient, IngredientInventory, INGREDIENT_CATEGORIES, INGREDIENT_PRESERVATION_OPTIONS, INGREDIENT_SHELF_LIFE_OPTIONS } from "@store/Models/Ingredient";
@@ -18,7 +18,7 @@ import { selectIngredients, selectInventory } from "@store/Selectors";
 import { debounce, sortBy } from "lodash";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { List as VirtualList, type ListImperativeAPI, type RowComponentProps } from "react-window";
+import { List as VirtualList, useDynamicRowHeight, type ListImperativeAPI, type RowComponentProps } from "react-window";
 import VegetablesIcon from "../../../../assets/icons/vegetable.png";
 import { IngredientAddWidget } from "./IngredientAdd.widget";
 import { IngredientEditWidget } from "./IngredientEdit.widget";
@@ -41,7 +41,8 @@ const INGREDIENT_STOCK_FILTERS: { value: IngredientStockFilter; label: string }[
     { value: "always_available", label: "Luôn có" },
 ];
 
-const INGREDIENT_ROW_HEIGHT = 152;
+const INGREDIENT_ROW_DEFAULT_HEIGHT = 166;
+const INGREDIENT_LOAD_MORE_THRESHOLD = 8;
 
 const filterRowStyle: React.CSSProperties = {
     display: "flex",
@@ -111,25 +112,26 @@ type IngredientRowProps = {
     onDelete: (item: Ingredient) => void;
     isAdmin: boolean;
     onSuggest: (ids: string[]) => void;
+    onOpenInventory: (item: Ingredient) => void;
 };
 
-const IngredientRow = ({ index, style, items, stockSnapshots, onDelete, isAdmin, onSuggest }: RowComponentProps<IngredientRowProps>) => {
+const IngredientRow = ({ index, style, items, stockSnapshots, onDelete, isAdmin, onSuggest, onOpenInventory }: RowComponentProps<IngredientRowProps>) => {
     if (!items[index]) return null;
-    return <VirtualListRowFrame style={style}>
-        <IngredientItem item={items[index]} stockSnapshot={stockSnapshots[items[index].id]} onDelete={onDelete} isAdmin={isAdmin} onSuggest={onSuggest} />
+    return <VirtualListRowFrame style={style} layout="dynamic">
+        <IngredientItem item={items[index]} stockSnapshot={stockSnapshots[items[index].id]} onDelete={onDelete} isAdmin={isAdmin} onSuggest={onSuggest} onOpenInventory={onOpenInventory} />
     </VirtualListRowFrame>;
 };
 
 export const IngredientListScreen = () => {
     const ingredients = useSelector(selectIngredients);
     const toggleAddModal = useToggle({ defaultValue: false });
+    const [inventoryIngredient, setInventoryIngredient] = useState<Ingredient | null>(null);
     const dispatch = useDispatch();
     const { } = useScreenTitle({ value: "Nguyên liệu", deps: [] });
     const [searchText, setSearchText] = useState("");
     const [activeStockFilter, setActiveStockFilter] = useState<IngredientStockFilter>("all");
     const [activeCategory, setActiveCategory] = useState<string | null>(null);
     const inventoryItems = useSelector(selectInventory);
-    const rowHeight = INGREDIENT_ROW_HEIGHT;
     const virtualListStyle = useMemo<React.CSSProperties>(() => ({
         height: "100%",
         overscrollBehavior: "contain",
@@ -153,10 +155,6 @@ export const IngredientListScreen = () => {
 
     const _onListScroll = useCallback((event: React.UIEvent<HTMLElement>) => {
         _setScrollTopVisible(event.currentTarget.scrollTop > 180);
-    }, [_setScrollTopVisible]);
-
-    const _onRowsRendered = useCallback((visibleRows: { startIndex: number }) => {
-        _setScrollTopVisible(visibleRows.startIndex > 1);
     }, [_setScrollTopVisible]);
 
     const stockSnapshots = useMemo(() => {
@@ -225,6 +223,15 @@ export const IngredientListScreen = () => {
     }, [ingredients, stockSnapshots, normalizedSearch, activeCategory, activeStockFilter, availableCategories]);
 
     const { filteredIngredients, stockCounts, categoryCounts } = filterData;
+    const pagedIngredientsResetKey = `${activeStockFilter}|${activeCategory ?? "all"}|${normalizedSearch}`;
+    const {
+        visibleItems: visibleIngredients,
+        loadedCount: loadedIngredientCount,
+        totalCount: totalIngredientCount,
+        hasMore: hasMoreIngredients,
+        loadMore: loadMoreIngredients,
+    } = usePagedVirtualItems({ items: filteredIngredients, resetKey: pagedIngredientsResetKey });
+    const rowHeight = useDynamicRowHeight({ defaultRowHeight: INGREDIENT_ROW_DEFAULT_HEIGHT, key: pagedIngredientsResetKey });
 
     const _onAdd = () => {
         toggleAddModal.show();
@@ -234,19 +241,35 @@ export const IngredientListScreen = () => {
         dispatch(removeIngredient([item.id]));
     }, [dispatch]);
 
+    const _onOpenInventory = useCallback((item: Ingredient) => {
+        setInventoryIngredient(item);
+    }, []);
+
+    const _onCloseInventory = useCallback(() => {
+        setInventoryIngredient(null);
+    }, []);
+
     const ingredientRowProps = useMemo(() => ({
-        items: filteredIngredients,
+        items: visibleIngredients,
         stockSnapshots,
         onDelete: _onDelete,
         isAdmin,
         onSuggest: _onSuggest,
-    }), [filteredIngredients, stockSnapshots, _onDelete, isAdmin, _onSuggest]);
+        onOpenInventory: _onOpenInventory,
+    }), [visibleIngredients, stockSnapshots, _onDelete, isAdmin, _onSuggest, _onOpenInventory]);
 
     const _scrollToTop = useCallback(() => {
         const scrolled = scrollVirtualListToTop(listRef.current);
         if (scrolled) setShowScrollTop(false);
         return scrolled;
     }, []);
+
+    const _onRowsRendered = useCallback((visibleRows: { startIndex: number; stopIndex: number }) => {
+        _setScrollTopVisible(visibleRows.startIndex > 1);
+        if (hasMoreIngredients && visibleRows.stopIndex >= Math.max(0, loadedIngredientCount - INGREDIENT_LOAD_MORE_THRESHOLD)) {
+            loadMoreIngredients();
+        }
+    }, [_setScrollTopVisible, hasMoreIngredients, loadedIngredientCount, loadMoreIngredients]);
 
     useEffect(() => {
         if (!didMountScrollRef.current) {
@@ -291,7 +314,7 @@ export const IngredientListScreen = () => {
                 <VirtualList
                     listRef={listRef}
                     rowComponent={IngredientRow}
-                    rowCount={filteredIngredients.length}
+                    rowCount={visibleIngredients.length}
                     rowHeight={rowHeight}
                     overscanCount={1}
                     onScroll={_onListScroll}
@@ -300,7 +323,10 @@ export const IngredientListScreen = () => {
                     style={virtualListStyle}
                     data-testid="ingredient-virtual-list"
                 />
-                <VirtualListScrollTopButton listRef={listRef} rowCount={filteredIngredients.length} visible={showScrollTop} />
+                {hasMoreIngredients && <div data-testid="ingredient-list-page-status" style={{ position: "absolute", left: "50%", bottom: 10, transform: "translateX(-50%)", padding: "4px 10px", borderRadius: 999, background: "rgba(255,255,255,0.94)", border: "1px solid #f0f0f0", boxShadow: "0 4px 14px rgba(0,0,0,0.08)", fontSize: 12, color: "#595959", pointerEvents: "none" }}>
+                    Đã tải {loadedIngredientCount}/{totalIngredientCount}
+                </div>}
+                <VirtualListScrollTopButton listRef={listRef} rowCount={visibleIngredients.length} visible={showScrollTop} />
             </div>
         </div>
         <Modal width={640} open={toggleAddModal.value} title={
@@ -329,6 +355,16 @@ export const IngredientListScreen = () => {
                 initialIngredientIds={suggestIds}
             />
         </React.Suspense>}
+        {inventoryIngredient && <Modal open={Boolean(inventoryIngredient)} title={
+            <Space>
+                <DatabaseOutlined />
+                Tồn kho - {inventoryIngredient.name}
+            </Space>
+        } destroyOnClose={true} onCancel={_onCloseInventory} footer={null}>
+            <DeferredModalContent active={Boolean(inventoryIngredient)} minHeight={180}>
+                <IngredientInventoryWidget item={inventoryIngredient} onDone={_onCloseInventory} onSuggest={_onSuggest} />
+            </DeferredModalContent>
+        </Modal>}
     </React.Fragment>
 }
 
@@ -338,11 +374,11 @@ type IngredientItemProps = {
     onDelete: (item: Ingredient) => void;
     isAdmin: boolean;
     onSuggest: (ids: string[]) => void;
+    onOpenInventory: (item: Ingredient) => void;
 }
 
 const IngredientItemComponent: React.FunctionComponent<IngredientItemProps> = (props) => {
     const toggleEdit = useToggle({ defaultValue: false });
-    const toggleInventory = useToggle({ defaultValue: false });
 
     const totalAmt = props.stockSnapshot?.usableAmount ?? 0;
     const inventoryUnit = IngredientUnitHelper.getBaseUnit(props.item);
@@ -412,7 +448,7 @@ const IngredientItemComponent: React.FunctionComponent<IngredientItemProps> = (p
                     <div style={{ display: "grid", gridTemplateColumns: "minmax(120px, 0.92fr) minmax(0, 1.08fr)", gap: 8, alignItems: "stretch" }}>
                         <button
                             type="button"
-                            onClick={toggleInventory.show}
+                            onClick={() => props.onOpenInventory(props.item)}
                             style={{
                                 border: `1px solid ${inventoryStatus.border}`,
                                 background: inventoryStatus.background,
@@ -460,17 +496,6 @@ const IngredientItemComponent: React.FunctionComponent<IngredientItemProps> = (p
             </DeferredModalContent>
         </Modal>}
 
-        {/* Inventory modal */}
-        {toggleInventory.value && <Modal open={toggleInventory.value} title={
-            <Space>
-                <DatabaseOutlined />
-                Tồn kho — {props.item.name}
-            </Space>
-        } destroyOnClose={true} onCancel={toggleInventory.hide} footer={null}>
-            <DeferredModalContent active={toggleInventory.value} minHeight={180}>
-                <IngredientInventoryWidget item={props.item} onDone={toggleInventory.hide} onSuggest={props.onSuggest} />
-            </DeferredModalContent>
-        </Modal>}
     </React.Fragment>
 }
 
