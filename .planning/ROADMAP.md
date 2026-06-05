@@ -36,8 +36,17 @@ Decimal phases appear between their surrounding integers in numeric order.
 **Plans:** 3 plans
 
 Plans:
+
+**Wave 1**
+
 - [ ] 01-01: Wire repo-local performance tooling and package scripts.
+
+**Wave 2** *(blocked on Wave 1 completion)*
+
 - [ ] 01-02: Add deterministic large-list seed coverage for ingredient, dish, and shopping-list screens.
+
+**Wave 3** *(blocked on Wave 2 completion)*
+
 - [ ] 01-03: Capture baseline timing/resource evidence and document smoke budgets.
 
 ### Phase 2: Large-List Interaction Hot Paths
