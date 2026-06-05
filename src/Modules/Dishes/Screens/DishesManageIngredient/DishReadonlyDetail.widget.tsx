@@ -111,7 +111,7 @@ export const DishesReadonlyDetailWidget: React.FunctionComponent<DishesReadonlyD
     }, [dish.duration]);
 
     return <React.Fragment>
-        <DishImageWidget src={dish.image} height={180} borderRadius={8} style={{ marginBottom: 12 }} />
+        <DishImageWidget src={dish.image} height={180} borderRadius={8} surface="detail" style={{ marginBottom: 12 }} />
 
         <Box style={{
             padding: '8px 10px',

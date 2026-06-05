@@ -13,6 +13,8 @@ type DishImageWidgetProps = {
     fallbackIconSize?: number;
     showBrokenLabel?: boolean;
     loading?: "eager" | "lazy";
+    surface?: "list" | "detail";
+    testId?: string;
     style?: React.CSSProperties;
 }
 
@@ -22,22 +24,29 @@ export const DishImageWidget: React.FunctionComponent<DishImageWidgetProps> = ({
     height = 150,
     borderRadius = 8,
     fallbackIconSize = 26,
-    showBrokenLabel = true,
+    showBrokenLabel,
     loading = "lazy",
+    surface = "detail",
+    testId,
     style,
 }) => {
     const containerRef = useRef<HTMLDivElement | null>(null);
     const [failed, setFailed] = useState(false);
-    const [canLoad, setCanLoad] = useState(loading === "eager");
-    const hasImage = Boolean(src) && canLoad && !failed;
+    const effectiveLoading = surface === "list" ? "lazy" : loading;
+    const effectiveShowBrokenLabel = showBrokenLabel ?? surface !== "list";
+    const rootMargin = surface === "list" ? "48px 0px" : "180px 0px";
+    const [canLoad, setCanLoad] = useState(effectiveLoading === "eager");
+    const [loaded, setLoaded] = useState(false);
+    const shouldRequestImage = Boolean(src) && canLoad && !failed;
 
     useEffect(() => {
         setFailed(false);
-        setCanLoad(loading === "eager");
-    }, [loading, src]);
+        setLoaded(false);
+        setCanLoad(effectiveLoading === "eager");
+    }, [effectiveLoading, src]);
 
     useEffect(() => {
-        if (!src || loading === "eager" || canLoad) return;
+        if (!src || effectiveLoading === "eager" || canLoad) return;
         const element = containerRef.current;
         if (!element) return;
         if (!("IntersectionObserver" in window)) {
@@ -49,37 +58,57 @@ export const DishImageWidget: React.FunctionComponent<DishImageWidgetProps> = ({
             if (!entries.some(entry => entry.isIntersecting)) return;
             setCanLoad(true);
             observer.disconnect();
-        }, { root: null, rootMargin: "180px 0px", threshold: 0.01 });
+        }, { root: null, rootMargin, threshold: 0.01 });
 
         observer.observe(element);
         return () => observer.disconnect();
-    }, [canLoad, loading, src]);
+    }, [canLoad, effectiveLoading, rootMargin, src]);
 
-    return <Box ref={containerRef} style={{
+    const _onImageLoad = async (event: React.SyntheticEvent<HTMLImageElement>) => {
+        const image = event.currentTarget;
+        try {
+            if (typeof image.decode === "function") await image.decode();
+            if (image.naturalWidth > 0) setLoaded(true);
+            else setFailed(true);
+        } catch {
+            setFailed(true);
+        }
+    };
+
+    return <Box ref={containerRef} data-testid={testId} data-dish-image-surface={surface} style={{
         position: "relative",
         width,
         height,
         borderRadius,
         overflow: "hidden",
         background: "#f5f5f5",
-        border: hasImage ? undefined : "1px solid #f0f0f0",
+        border: loaded ? undefined : "1px solid #f0f0f0",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
         ...style,
     }}>
-        {hasImage
-            ? <img
-                src={src}
-                alt=""
-                loading={loading}
-                decoding="async"
-                onError={() => setFailed(true)}
-                style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
-            />
-            : <Image src={NoodlesIcon} preview={false} width={fallbackIconSize} />}
+        {!loaded && <Image src={NoodlesIcon} preview={false} width={fallbackIconSize} />}
 
-        {failed && showBrokenLabel && <div style={{
+        {shouldRequestImage && <img
+            src={src}
+            alt=""
+            loading={effectiveLoading}
+            decoding="async"
+            onLoad={_onImageLoad}
+            onError={() => setFailed(true)}
+            style={{
+                position: "absolute",
+                inset: 0,
+                width: "100%",
+                height: "100%",
+                objectFit: "cover",
+                display: "block",
+                opacity: loaded ? 1 : 0,
+            }}
+        />}
+
+        {failed && effectiveShowBrokenLabel && <div style={{
             position: "absolute",
             right: 6,
             bottom: 6,

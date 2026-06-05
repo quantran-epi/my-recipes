@@ -163,7 +163,11 @@ export const useSharedDataSync = (): UseSharedDataSyncResult => {
     const dismissSync = () => setPendingSync(null);
 
     const markSynced = (versions: SyncedVersions) => {
-        saveSyncedVersions(versions);
+        const current = getSyncedVersions();
+        saveSyncedVersions({
+            ingredientsVersion: versions.ingredientsVersion || current.ingredientsVersion,
+            dishesVersion: versions.dishesVersion || current.dishesVersion,
+        });
         setPendingSync(null);
     };
 

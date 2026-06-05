@@ -76,7 +76,7 @@ export const DishesDetailWidget: React.FunctionComponent<DishDetailWidgetProps> 
             </Button>
         </div>
 
-        <DishImageWidget src={props.dish.image} height={150} borderRadius={10} />
+        <DishImageWidget src={props.dish.image} height={150} borderRadius={10} surface="detail" />
 
         <DishCostEstimateWidget dish={props.dish} />
 

@@ -505,7 +505,7 @@ const DishesItemComponent: React.FunctionComponent<DishesItemProps> = (props) =>
                 boxSizing: "border-box",
             }}>
                 <div onClick={toggleDishesDetail.show} style={{ position: "relative", cursor: "pointer", width: 88, height: 122 }}>
-                    <DishImageWidget src={props.item.image} width={88} height={122} borderRadius={8} fallbackIconSize={34} showBrokenLabel={false} />
+                    <DishImageWidget src={props.item.image} width={88} height={122} borderRadius={8} fallbackIconSize={34} surface="list" testId={`dish-row-image-${props.item.id}`} />
                     <Popover title="Thời lượng" content={durationOpen ? <DishDurationDetail duration={props.item.duration} /> : null} open={durationOpen} onOpenChange={setDurationOpen}>
                         <button
                             type="button"
