@@ -1,5 +1,6 @@
 import { expect, test as base, type Page } from '@playwright/test';
 import { seedApp } from './fixtures/seedApp';
+import { createPerformanceSeed } from './fixtures/performanceSeed';
 import {
   collectInteractionWarnings,
   measureInteraction,
@@ -473,5 +474,138 @@ base.describe('PERF-08 phase3 startup sync isolation', () => {
     await expect(page.getByTestId('dish-list-item-perf-daily-dish-0001')).toBeVisible({ timeout: 15_000 });
     await expect.poll(() => page.evaluate(() => navigator.onLine)).toBe(false);
     await expect(page.getByText('Có dữ liệu dùng chung mới')).toHaveCount(0);
+  });
+});
+
+base.describe('PERF-09 phase3 sync prompt and dish image isolation', () => {
+  base('renders sync manifest rows before delayed shared data and preserves selective versions', async ({ page }) => {
+    const seed = createPerformanceSeed('daily');
+    const ingredientId = 'perf-daily-ing-0004';
+    const dishId = 'perf-daily-dish-0001';
+    const sharedManifest = {
+      ingredientsVersion: 'phase3-ingredients-v2',
+      dishesVersion: 'phase3-dishes-v2',
+      ingredientChanges: [
+        { id: ingredientId, name: 'Perf daily ingredient 0004', action: 'modified' },
+      ],
+      dishChanges: [
+        { id: dishId, name: 'Perf daily dish 0001', action: 'modified' },
+      ],
+    };
+
+    const appliedNetwork = await seedApp(page, {
+      dataset: 'daily',
+      networkMode: 'online-normal',
+      imageMode: 'fast',
+      syncCheckState: 'due',
+      sharedDataDelayMs: 2500,
+      sharedManifest,
+      sharedData: {
+        ingredients: seed.shared.ingredient.ingredients,
+        dishes: seed.shared.dishes.dishes,
+      },
+    });
+
+    await page.goto('dishes/list', { waitUntil: 'domcontentloaded' });
+    await expect(page.getByTestId(`dish-list-item-${dishId}`)).toBeVisible({ timeout: 15_000 });
+
+    const title = page.getByText('Có dữ liệu dùng chung mới');
+    await expect(title).toBeVisible({ timeout: 8_000 });
+    await expect(page.getByText('Chọn những mục bạn muốn cập nhật vào thiết bị này:')).toBeVisible();
+    await expect(page.getByTestId(`shared-sync-ingredient-${ingredientId}`)).toContainText('Perf daily ingredient 0004');
+    await expect(page.getByTestId(`shared-sync-dish-${dishId}`)).toContainText('Perf daily dish 0001');
+    await expect(page.getByText('Đang tải dữ liệu...')).toBeVisible({ timeout: 2_000 });
+
+    const syncButton = page.getByRole('button', { name: /Đồng bộ/ });
+    await expect(syncButton).toBeDisabled();
+    await expect(page.getByRole('button', { name: 'Để sau' })).toBeEnabled();
+
+    const dishCheckbox = page.getByTestId(`shared-sync-dish-checkbox-${dishId}`);
+    await expect(dishCheckbox).toBeChecked();
+    await dishCheckbox.click();
+    await expect(dishCheckbox).not.toBeChecked();
+    await expect(syncButton).toContainText('Đồng bộ (1)');
+
+    await expect(syncButton).toBeEnabled({ timeout: 8_000 });
+    await syncButton.click();
+    await expect(title).toHaveCount(0, { timeout: 5_000 });
+
+    const syncedVersions = await page.evaluate(() => JSON.parse(localStorage.getItem('shared_synced_versions') ?? '{}'));
+    expect(syncedVersions.ingredientsVersion).toBe('phase3-ingredients-v2');
+    expect(syncedVersions.dishesVersion).toBe('e2e');
+    expect(appliedNetwork.diagnostics.sharedManifestRequestCount).toBeGreaterThanOrEqual(1);
+    expect(appliedNetwork.diagnostics.sharedDataRequestCount).toBeGreaterThanOrEqual(1);
+  });
+
+  base('keeps dish list image box stable while slow image work is pending', async ({ page }, testInfo) => {
+    const appliedNetwork = await seedApp(page, {
+      dataset: 'daily',
+      networkMode: 'online-normal',
+      imageMode: 'slow',
+      imageDelayMs: 2500,
+    });
+    const dishId = 'perf-daily-dish-0001';
+    const secondDishId = 'perf-daily-dish-0002';
+    const dishRow = () => page.getByTestId(`dish-list-item-${dishId}`);
+    const imageBox = () => page.getByTestId(`dish-row-image-${dishId}`);
+    const visibleMenuItem = (name: RegExp) => page.locator('[role="menuitem"]:visible').filter({ hasText: name }).first();
+
+    await page.goto('dishes/list', { waitUntil: 'domcontentloaded' });
+    await expect(dishRow()).toBeVisible({ timeout: 15_000 });
+    await expect(imageBox()).toBeVisible();
+    await expect.poll(() => appliedNetwork.diagnostics.imageRequestCount, { timeout: 5_000 }).toBeGreaterThanOrEqual(1);
+
+    const imageBoxSize = async () => {
+      const box = await imageBox().boundingBox();
+      if (!box) return null;
+      return { width: Math.round(box.width), height: Math.round(box.height) };
+    };
+    await expect.poll(imageBoxSize).toEqual({ width: 88, height: 122 });
+
+    const interactions = [];
+    interactions.push(await measureInteraction({
+      id: 'phase3-image-dish-row-menu-open',
+      action: async () => { await page.getByTestId(`dish-row-menu-${dishId}`).click(); },
+      shellLocator: () => visibleMenuItem(/Bắt đầu nấu/),
+      contentReadyLocator: () => visibleMenuItem(/Xuất dữ liệu/),
+      shellBudgetMs: phase2Budgets.rowMenuShellMs,
+      contentReadyBudgetMs: phase2Budgets.rowMenuContentMs,
+      strictShellTargetMs: phase2Budgets.shellTargetMs,
+    }));
+    await page.keyboard.press('Escape');
+
+    const searchInput = page.getByTestId('dish-search-input');
+    await searchInput.fill('0001');
+    await expect(dishRow()).toBeVisible({ timeout: 15_000 });
+    await expect(page.getByTestId(`dish-list-item-${secondDishId}`)).toHaveCount(0, { timeout: 15_000 });
+    interactions.push(await measureInteraction({
+      id: 'phase3-image-dish-search-reset',
+      action: async () => { await searchInput.fill(''); },
+      shellLocator: () => searchInput,
+      contentReadyLocator: () => page.getByTestId(`dish-list-item-${secondDishId}`),
+      shellBudgetMs: phase2Budgets.searchResetShellMs,
+      contentReadyBudgetMs: phase2Budgets.searchResetContentMs,
+      strictShellTargetMs: phase2Budgets.shellTargetMs,
+    }));
+    await expect.poll(imageBoxSize).toEqual({ width: 88, height: 122 });
+
+    const warnings = collectInteractionWarnings(interactions);
+    await writePerformanceEvidence(testInfo, {
+      capturedAt: new Date().toISOString(),
+      command: 'E2E_BROWSER_CHANNEL=chrome PERF_DATASET=daily PERF_NETWORK_MODE=online-normal npm run test:e2e:performance',
+      browserName: testInfo.project.name,
+      dataset: 'daily',
+      networkMode: appliedNetwork.networkMode,
+      imageMode: appliedNetwork.imageMode,
+      budgets: { ...budgets, ...phase2Budgets },
+      interactions,
+      warnings,
+      resources: await summarizeResources(page),
+      diagnostics: {
+        imageDelayMs: appliedNetwork.imageDelayMs,
+        network: appliedNetwork.diagnostics,
+      },
+      notes: ['Phase 3 image isolation keeps the dish list row image box stable while slow external image work is pending.'],
+    }, 'perf-09-phase3-sync-prompt-image');
   });
 });

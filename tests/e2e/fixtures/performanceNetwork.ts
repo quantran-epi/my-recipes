@@ -8,6 +8,7 @@ export type PerformanceNetworkOptions = {
   imageMode?: PerformanceImageMode;
   realNetwork?: boolean;
   githubDelayMs?: number;
+  sharedDataDelayMs?: number;
   imageDelayMs?: number;
   githubStatus?: number;
   sharedManifest?: unknown;
@@ -28,6 +29,7 @@ export type AppliedPerformanceNetworkMode = {
   imageMode?: PerformanceImageMode;
   realNetwork: boolean;
   githubDelayMs: number;
+  sharedDataDelayMs: number | null;
   imageDelayMs: number;
   diagnostics: PerformanceNetworkDiagnostics;
 };
@@ -89,6 +91,7 @@ export const applyPerformanceNetworkMode = async (
   const imageMode = options.imageMode ?? defaultImageMode(networkMode);
   const realNetwork = options.realNetwork ?? process.env.PERF_REAL_NETWORK === '1';
   const githubDelayMs = options.githubDelayMs ?? (networkMode === 'mocked-slow-network' ? 1500 : 0);
+  const sharedDataDelayMs = options.sharedDataDelayMs ?? null;
   const imageDelayMs = options.imageDelayMs ?? (imageMode === 'slow' ? 1200 : 0);
   const githubStatus = options.githubStatus ?? 200;
   const diagnostics: PerformanceNetworkDiagnostics = {
@@ -124,7 +127,8 @@ export const applyPerformanceNetworkMode = async (
       diagnostics.githubRawRequestCount += 1;
       if (isSharedManifestUrl(url)) diagnostics.sharedManifestRequestCount += 1;
       if (isSharedDataUrl(url)) diagnostics.sharedDataRequestCount += 1;
-      if (githubDelayMs > 0) await delay(githubDelayMs);
+      const requestDelayMs = isSharedDataUrl(url) && sharedDataDelayMs !== null ? sharedDataDelayMs : githubDelayMs;
+      if (requestDelayMs > 0) await delay(requestDelayMs);
       if (isSharedManifestUrl(url) && options.sharedManifest !== undefined) {
         await route.fulfill({ status: githubStatus, contentType: 'application/json', body: JSON.stringify(options.sharedManifest) });
         return;
@@ -155,5 +159,5 @@ export const applyPerformanceNetworkMode = async (
     await route.continue();
   });
 
-  return { networkMode, imageMode, realNetwork, githubDelayMs, imageDelayMs, diagnostics };
+  return { networkMode, imageMode, realNetwork, githubDelayMs, sharedDataDelayMs, imageDelayMs, diagnostics };
 };

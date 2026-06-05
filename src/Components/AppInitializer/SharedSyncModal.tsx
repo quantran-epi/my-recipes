@@ -275,8 +275,9 @@ export const SharedSyncModal: React.FC<Props> = ({
                     </Divider>
                     <Flex vertical gap={6}>
                         {manifest.ingredientChanges.map(c => (
-                            <Flex key={c.id} align="center" gap={8}>
+                            <Flex key={c.id} data-testid={`shared-sync-ingredient-${c.id}`} align="center" gap={8}>
                                 <Checkbox
+                                    data-testid={`shared-sync-ingredient-checkbox-${c.id}`}
                                     checked={selectedIngredients.has(c.id)}
                                     onChange={e => toggleIngredient(c.id, e.target.checked)}
                                 />
@@ -303,9 +304,10 @@ export const SharedSyncModal: React.FC<Props> = ({
                     )}
                     <Flex vertical gap={6}>
                         {manifest.dishChanges.map(c => (
-                            <Flex key={c.id} vertical gap={4}>
+                            <Flex key={c.id} data-testid={`shared-sync-dish-${c.id}`} vertical gap={4}>
                                 <Flex align="center" gap={8}>
                                     <Checkbox
+                                        data-testid={`shared-sync-dish-checkbox-${c.id}`}
                                         checked={selectedDishes.has(c.id)}
                                         onChange={e => toggleDish(c.id, e.target.checked)}
                                     />

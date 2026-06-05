@@ -74,7 +74,7 @@ const isCheckDue = (): boolean => {
 
 export const useSharedDataSync = (): UseSharedDataSyncResult => {
     const [pendingSync, setPendingSync] = useState<PendingSync | null>(null);
-    const [isSyncChecking, setIsSyncChecking] = useState(false);
+    const isSyncCheckingRef = useRef(false);
     const lastInteractionAtRef = useRef(Date.now());
 
     useEffect(() => {
@@ -95,7 +95,7 @@ export const useSharedDataSync = (): UseSharedDataSyncResult => {
 
         const runManifestCheck = async () => {
             if (cancelled) return;
-            setIsSyncChecking(true);
+            isSyncCheckingRef.current = true;
             try {
                 const res = await fetch(MANIFEST_URL + "?t=" + Date.now());
                 if (!res.ok) return;
@@ -125,7 +125,7 @@ export const useSharedDataSync = (): UseSharedDataSyncResult => {
             } catch {
                 // silently ignore network errors
             } finally {
-                if (!cancelled) setIsSyncChecking(false);
+                if (!cancelled) isSyncCheckingRef.current = false;
             }
 
         };
@@ -171,5 +171,5 @@ export const useSharedDataSync = (): UseSharedDataSyncResult => {
         setPendingSync(null);
     };
 
-    return { pendingSync, isSyncChecking, dismissSync, markSynced };
+    return { pendingSync, isSyncChecking: isSyncCheckingRef.current, dismissSync, markSynced };
 };
