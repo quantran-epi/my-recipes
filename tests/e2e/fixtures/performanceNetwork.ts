@@ -9,6 +9,18 @@ export type PerformanceNetworkOptions = {
   realNetwork?: boolean;
   githubDelayMs?: number;
   imageDelayMs?: number;
+  githubStatus?: number;
+  sharedManifest?: unknown;
+  sharedData?: unknown;
+};
+
+export type PerformanceNetworkDiagnostics = {
+  githubRawRequestCount: number;
+  sharedManifestRequestCount: number;
+  sharedDataRequestCount: number;
+  imageRequestCount: number;
+  blockedImageRequestCount: number;
+  delayedImageRequestCount: number;
 };
 
 export type AppliedPerformanceNetworkMode = {
@@ -17,6 +29,7 @@ export type AppliedPerformanceNetworkMode = {
   realNetwork: boolean;
   githubDelayMs: number;
   imageDelayMs: number;
+  diagnostics: PerformanceNetworkDiagnostics;
 };
 
 const transparentPng = Buffer.from(
@@ -27,6 +40,22 @@ const transparentPng = Buffer.from(
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 const isGitHubRawUrl = (url: string) => url.startsWith('https://raw.githubusercontent.com/');
+
+const isSharedManifestUrl = (url: string) => {
+  try {
+    return new URL(url).pathname.endsWith('/docs/shared-manifest.json');
+  } catch {
+    return false;
+  }
+};
+
+const isSharedDataUrl = (url: string) => {
+  try {
+    return new URL(url).pathname.endsWith('/docs/shared-data.json');
+  } catch {
+    return false;
+  }
+};
 
 const isLocalUrl = (url: string) => {
   try {
@@ -61,6 +90,15 @@ export const applyPerformanceNetworkMode = async (
   const realNetwork = options.realNetwork ?? process.env.PERF_REAL_NETWORK === '1';
   const githubDelayMs = options.githubDelayMs ?? (networkMode === 'mocked-slow-network' ? 1500 : 0);
   const imageDelayMs = options.imageDelayMs ?? (imageMode === 'slow' ? 1200 : 0);
+  const githubStatus = options.githubStatus ?? 200;
+  const diagnostics: PerformanceNetworkDiagnostics = {
+    githubRawRequestCount: 0,
+    sharedManifestRequestCount: 0,
+    sharedDataRequestCount: 0,
+    imageRequestCount: 0,
+    blockedImageRequestCount: 0,
+    delayedImageRequestCount: 0,
+  };
 
   if (networkMode === 'browser-offline') {
     await page.addInitScript(() => {
@@ -83,17 +121,33 @@ export const applyPerformanceNetworkMode = async (
     }
 
     if (isGitHubRawUrl(url) && !realNetwork) {
+      diagnostics.githubRawRequestCount += 1;
+      if (isSharedManifestUrl(url)) diagnostics.sharedManifestRequestCount += 1;
+      if (isSharedDataUrl(url)) diagnostics.sharedDataRequestCount += 1;
       if (githubDelayMs > 0) await delay(githubDelayMs);
+      if (isSharedManifestUrl(url) && options.sharedManifest !== undefined) {
+        await route.fulfill({ status: githubStatus, contentType: 'application/json', body: JSON.stringify(options.sharedManifest) });
+        return;
+      }
+      if (isSharedDataUrl(url) && options.sharedData !== undefined) {
+        await route.fulfill({ status: githubStatus, contentType: 'application/json', body: JSON.stringify(options.sharedData) });
+        return;
+      }
       await route.fulfill({ status: 404, contentType: 'text/plain', body: '' });
       return;
     }
 
     if (imageMode && isExternal && isImageRequest(request)) {
+      diagnostics.imageRequestCount += 1;
       if (imageMode === 'blocked') {
+        diagnostics.blockedImageRequestCount += 1;
         await route.abort('blockedbyclient');
         return;
       }
-      if (imageDelayMs > 0) await delay(imageDelayMs);
+      if (imageDelayMs > 0) {
+        diagnostics.delayedImageRequestCount += 1;
+        await delay(imageDelayMs);
+      }
       await route.fulfill({ status: 200, contentType: 'image/png', body: transparentPng });
       return;
     }
@@ -101,5 +155,5 @@ export const applyPerformanceNetworkMode = async (
     await route.continue();
   });
 
-  return { networkMode, imageMode, realNetwork, githubDelayMs, imageDelayMs };
+  return { networkMode, imageMode, realNetwork, githubDelayMs, imageDelayMs, diagnostics };
 };

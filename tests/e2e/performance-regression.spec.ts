@@ -371,3 +371,107 @@ dailyPerformanceTest.describe('PERF-07 daily large-list smoke', () => {
     }, 'perf-07-daily-large-list');
   });
 });
+
+base.describe('PERF-08 phase3 startup sync isolation', () => {
+  base('keeps due-sync startup list interactions inside Phase 2 budgets', async ({ page }, testInfo) => {
+    const appliedNetwork = await seedApp(page, {
+      dataset: 'daily',
+      networkMode: 'online-normal',
+      imageMode: 'fast',
+      syncCheckState: 'due',
+      githubDelayMs: 3000,
+      sharedManifest: {
+        ingredientsVersion: 'e2e',
+        dishesVersion: 'e2e',
+        ingredientChanges: [],
+        dishChanges: [],
+      },
+    });
+
+    const dishId = 'perf-daily-dish-0001';
+    const secondDishId = 'perf-daily-dish-0002';
+    const ingredientId = 'perf-daily-ing-0004';
+    const ingredientName = 'Perf daily ingredient 0004';
+    const shoppingListId = 'perf-daily-sl-0001';
+    const dishRow = () => page.getByTestId(`dish-list-item-${dishId}`);
+    const ingredientDialog = () => page.getByRole('dialog').filter({ hasText: `Tồn kho - ${ingredientName}` });
+    const visibleMenuItem = (name: RegExp) => page.locator('[role="menuitem"]:visible').filter({ hasText: name }).first();
+
+    await page.goto('dishes/list', { waitUntil: 'domcontentloaded' });
+    await expect(dishRow()).toBeVisible({ timeout: 15_000 });
+    await page.waitForTimeout(1700);
+    await page.evaluate(() => performance.clearResourceTimings());
+
+    const interactions = [];
+    const searchInput = page.getByTestId('dish-search-input');
+    await searchInput.fill('0001');
+    await expect(dishRow()).toBeVisible({ timeout: 15_000 });
+    await expect(page.getByTestId(`dish-list-item-${secondDishId}`)).toHaveCount(0, { timeout: 15_000 });
+    interactions.push(await measureInteraction({
+      id: 'phase3-startup-dish-search-reset',
+      action: async () => { await searchInput.fill(''); },
+      shellLocator: () => searchInput,
+      contentReadyLocator: () => page.getByTestId(`dish-list-item-${secondDishId}`),
+      shellBudgetMs: phase2Budgets.searchResetShellMs,
+      contentReadyBudgetMs: phase2Budgets.searchResetContentMs,
+      strictShellTargetMs: phase2Budgets.shellTargetMs,
+    }));
+
+    await page.goto('ingredient/list', { waitUntil: 'domcontentloaded' });
+    await expect(page.getByTestId(`ingredient-list-item-${ingredientId}`)).toBeVisible({ timeout: 15_000 });
+    interactions.push(await measureInteraction({
+      id: 'phase3-startup-ingredient-inventory-modal-open',
+      action: async () => { await page.getByTestId(`ingredient-inventory-button-${ingredientId}`).click(); },
+      shellLocator: ingredientDialog,
+      contentReadyLocator: () => ingredientDialog().getByText(/Tồn kho:/).first(),
+      shellBudgetMs: phase2Budgets.modalShellMs,
+      contentReadyBudgetMs: phase2Budgets.modalContentMs,
+      strictShellTargetMs: phase2Budgets.shellTargetMs,
+    }));
+
+    await page.goto('shoppingList/list', { waitUntil: 'domcontentloaded' });
+    await expect(page.getByTestId(`shopping-list-item-${shoppingListId}`)).toBeVisible({ timeout: 15_000 });
+    interactions.push(await measureInteraction({
+      id: 'phase3-startup-shopping-list-row-menu-open',
+      action: async () => { await page.getByTestId(`shopping-list-row-menu-${shoppingListId}`).click(); },
+      shellLocator: () => visibleMenuItem(/Xuất danh sách/),
+      contentReadyLocator: () => visibleMenuItem(/Xóa/),
+      shellBudgetMs: phase2Budgets.rowMenuShellMs,
+      contentReadyBudgetMs: phase2Budgets.rowMenuContentMs,
+      strictShellTargetMs: phase2Budgets.shellTargetMs,
+    }));
+
+    const warnings = collectInteractionWarnings(interactions);
+    await writePerformanceEvidence(testInfo, {
+      capturedAt: new Date().toISOString(),
+      command: 'E2E_BROWSER_CHANNEL=chrome PERF_DATASET=daily PERF_NETWORK_MODE=online-normal npm run test:e2e:performance',
+      browserName: testInfo.project.name,
+      dataset: 'daily',
+      networkMode: appliedNetwork.networkMode,
+      imageMode: appliedNetwork.imageMode,
+      budgets: { ...budgets, ...phase2Budgets },
+      interactions,
+      warnings,
+      resources: await summarizeResources(page),
+      diagnostics: {
+        githubDelayMs: appliedNetwork.githubDelayMs,
+        network: appliedNetwork.diagnostics,
+      },
+      notes: ['Phase 3 startup sync test seeds due shared sync and keeps GitHub Raw controlled without PERF_REAL_NETWORK=1.'],
+    }, 'perf-08-phase3-startup-sync');
+  });
+
+  base('keeps offline local-first lists usable without sync UI', async ({ page }) => {
+    await seedApp(page, {
+      dataset: 'daily',
+      networkMode: 'browser-offline',
+      imageMode: 'blocked',
+      syncCheckState: 'due',
+    });
+
+    await page.goto('dishes/list', { waitUntil: 'domcontentloaded' });
+    await expect(page.getByTestId('dish-list-item-perf-daily-dish-0001')).toBeVisible({ timeout: 15_000 });
+    await expect.poll(() => page.evaluate(() => navigator.onLine)).toBe(false);
+    await expect(page.getByText('Có dữ liệu dùng chung mới')).toHaveCount(0);
+  });
+});

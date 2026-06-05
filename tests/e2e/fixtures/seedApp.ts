@@ -4,9 +4,13 @@ import { createPerformanceSeed, type PerformanceDatasetName } from './performanc
 import { createRegressionSeed } from './testData';
 
 type PersistSlices = Record<string, unknown>;
+export type SyncCheckState = 'fresh' | 'due' | 'missing';
+
+const SYNC_CHECK_INTERVAL_MS = 24 * 60 * 60 * 1000;
 
 export type SeedAppOptions = PerformanceNetworkOptions & {
   dataset?: PerformanceDatasetName;
+  syncCheckState?: SyncCheckState;
 };
 
 const persistRoot = (slices: PersistSlices): string => {
@@ -18,10 +22,11 @@ const persistRoot = (slices: PersistSlices): string => {
 
 export const seedApp = async (page: Page, options: SeedAppOptions = {}) => {
   const seed = options.dataset ? createPerformanceSeed(options.dataset) : createRegressionSeed();
+  const syncCheckState = options.syncCheckState ?? 'fresh';
 
-  await applyPerformanceNetworkMode(page, options);
+  const networkMode = await applyPerformanceNetworkMode(page, options);
 
-  await page.addInitScript(({ shared, personal }) => {
+  await page.addInitScript(({ shared, personal, syncCheckState, syncCheckIntervalMs }) => {
     localStorage.clear();
     sessionStorage.clear();
 
@@ -40,7 +45,13 @@ export const seedApp = async (page: Page, options: SeedAppOptions = {}) => {
       _persist: JSON.stringify({ version: -1, rehydrated: true }),
     }));
 
-    localStorage.setItem('shared_last_checked', Date.now().toString());
+    if (syncCheckState === 'fresh') {
+      localStorage.setItem('shared_last_checked', Date.now().toString());
+    } else if (syncCheckState === 'due') {
+      localStorage.setItem('shared_last_checked', String(Date.now() - syncCheckIntervalMs - 1000));
+    } else {
+      localStorage.removeItem('shared_last_checked');
+    }
     localStorage.setItem('shared_synced_versions', JSON.stringify({ ingredientsVersion: 'e2e', dishesVersion: 'e2e' }));
 
     void navigator.serviceWorker?.getRegistrations?.().then(registrations => {
@@ -49,7 +60,9 @@ export const seedApp = async (page: Page, options: SeedAppOptions = {}) => {
     void caches?.keys?.().then(keys => {
       keys.forEach(key => void caches.delete(key));
     });
-  }, seed);
+  }, { ...seed, syncCheckState, syncCheckIntervalMs: SYNC_CHECK_INTERVAL_MS });
+
+  return networkMode;
 };
 
 export const createPersistedSeed = () => {
