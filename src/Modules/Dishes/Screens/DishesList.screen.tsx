@@ -223,13 +223,26 @@ export const DishesListScreen = () => {
     const normalizedSearch = searchText.trim().toLowerCase();
 
     const _onSearchChange = useMemo(() => debounce((event: React.ChangeEvent<HTMLInputElement>) => {
-        setSearchText(event.target.value);
+        const nextValue = event.target.value;
+        React.startTransition(() => setSearchText(nextValue));
     }, 350), []);
 
     useEffect(() => () => _onSearchChange.cancel(), [_onSearchChange]);
 
     const _setScrollTopVisible = useCallback((nextVisible: boolean) => {
         setShowScrollTop(current => current === nextVisible ? current : nextVisible);
+    }, []);
+
+    const _setActiveStatus = useCallback((nextStatus: DishStatusFilter) => {
+        React.startTransition(() => setActiveStatus(nextStatus));
+    }, []);
+
+    const _resetActiveTag = useCallback(() => {
+        React.startTransition(() => setActiveTag(null));
+    }, []);
+
+    const _toggleActiveTag = useCallback((tag: string) => {
+        React.startTransition(() => setActiveTag(current => current === tag ? null : tag));
     }, []);
 
     const _onListScroll = useCallback((event: React.UIEvent<HTMLElement>) => {
@@ -345,18 +358,18 @@ export const DishesListScreen = () => {
             </Stack.Compact>
             <div style={filterRowStyle}>
                 {DISH_STATUS_FILTERS.map(item => (
-                    <button key={item.value} type="button" data-testid={`dish-filter-${item.value}`} onClick={() => setActiveStatus(item.value)} style={filterChipStyle(activeStatus === item.value)}>
+                    <button key={item.value} type="button" data-testid={`dish-filter-${item.value}`} onClick={() => _setActiveStatus(item.value)} style={filterChipStyle(activeStatus === item.value)}>
                         {item.label} ({statusCounts[item.value] ?? 0})
                     </button>
                 ))}
             </div>
             {allTags.length > 0 && (
                 <div style={filterRowStyle}>
-                    <button type="button" data-testid="dish-tag-filter-reset" onClick={() => setActiveTag(null)} style={filterChipStyle(activeTag === null)}>
+                    <button type="button" data-testid="dish-tag-filter-reset" onClick={_resetActiveTag} style={filterChipStyle(activeTag === null)}>
                         Tất cả tag ({tagCounts.__all ?? 0})
                     </button>
                     {allTags.map(tag => (
-                        <button key={tag} type="button" onClick={() => setActiveTag(activeTag === tag ? null : tag)} style={filterChipStyle(activeTag === tag)}>
+                        <button key={tag} type="button" onClick={() => _toggleActiveTag(tag)} style={filterChipStyle(activeTag === tag)}>
                             {tag} ({tagCounts[tag] ?? 0})
                         </button>
                     ))}

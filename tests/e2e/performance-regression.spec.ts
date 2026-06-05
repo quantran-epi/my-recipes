@@ -30,6 +30,16 @@ const budgets = {
   routeImageCount: 16,
 };
 
+const phase2Budgets = {
+  shellTargetMs: 100,
+  rowMenuShellMs: 3_500,
+  rowMenuContentMs: 3_500,
+  modalShellMs: 1_500,
+  modalContentMs: 5_000,
+  searchResetShellMs: 2_500,
+  searchResetContentMs: 5_000,
+};
+
 const shoppingListDetailPath = `shoppingList/detail?shoppingList=${TEST_IDS.shoppingLists.regression}`;
 
 test.describe('PERF-07 performance regressions', () => {
@@ -229,8 +239,9 @@ dailyPerformanceTest.describe('PERF-07 daily large-list smoke', () => {
       action: async () => { await page.getByTestId(`dish-row-menu-${dishId}`).click(); },
       shellLocator: () => visibleMenuItem(/Bắt đầu nấu/),
       contentReadyLocator: () => visibleMenuItem(/Xuất dữ liệu/),
-      shellBudgetMs: budgets.lazyTabVisibleMs,
-      contentReadyBudgetMs: budgets.lazyTabVisibleMs,
+      shellBudgetMs: phase2Budgets.rowMenuShellMs,
+      contentReadyBudgetMs: phase2Budgets.rowMenuContentMs,
+      strictShellTargetMs: phase2Budgets.shellTargetMs,
     }));
     await page.keyboard.press('Escape');
 
@@ -239,8 +250,9 @@ dailyPerformanceTest.describe('PERF-07 daily large-list smoke', () => {
       action: async () => { await dishRow().getByRole('button', { name: /Chi tiết/ }).click(); },
       shellLocator: dishDialog,
       contentReadyLocator: () => dishDialog().getByText(/Danh sách nguyên liệu/).first(),
-      shellBudgetMs: budgets.readonlyDishModalVisibleMs,
-      contentReadyBudgetMs: budgets.readonlyDishModalVisibleMs,
+      shellBudgetMs: phase2Budgets.modalShellMs,
+      contentReadyBudgetMs: phase2Budgets.modalContentMs,
+      strictShellTargetMs: phase2Budgets.shellTargetMs,
     }));
 
     await dishDialog().getByRole('button', { name: /Đóng/ }).click();
@@ -252,8 +264,9 @@ dailyPerformanceTest.describe('PERF-07 daily large-list smoke', () => {
       action: async () => { await searchInput.fill(''); },
       shellLocator: () => searchInput,
       contentReadyLocator: () => page.getByTestId(`dish-list-item-${secondDishId}`),
-      shellBudgetMs: budgets.lazyTabVisibleMs,
-      contentReadyBudgetMs: budgets.dashboardToShoppingListDetailMs,
+      shellBudgetMs: phase2Budgets.searchResetShellMs,
+      contentReadyBudgetMs: phase2Budgets.searchResetContentMs,
+      strictShellTargetMs: phase2Budgets.shellTargetMs,
     }));
 
     const warnings = collectInteractionWarnings(interactions);
@@ -264,7 +277,7 @@ dailyPerformanceTest.describe('PERF-07 daily large-list smoke', () => {
       dataset: 'daily',
       networkMode: 'online-normal',
       imageMode: 'fast',
-      budgets,
+      budgets: { ...budgets, ...phase2Budgets },
       interactions,
       warnings,
       resources: await summarizeResources(page),
