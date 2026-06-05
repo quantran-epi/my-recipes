@@ -1,27 +1,63 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import type { Locator, Page } from '@playwright/test';
-import { expect, test } from './fixtures/appTest';
-import { TEST_IDS } from './fixtures/testData';
+import { expect, test, type Page } from '@playwright/test';
+import { seedApp } from './fixtures/seedApp';
+import type { PerformanceDatasetName } from './fixtures/performanceSeed';
+import type { PerformanceImageMode, PerformanceNetworkMode } from './fixtures/performanceNetwork';
+import {
+  PERFORMANCE_OUTPUT_DIR,
+  collectInteractionWarnings,
+  measureInteraction,
+  summarizeResources,
+  writePerformanceEvidence,
+} from './fixtures/performanceReport';
 
-type RouteCase = {
-  id: string;
-  path: string;
-  waitFor: (page: Page) => Locator;
+const DATASETS: PerformanceDatasetName[] = ['daily', 'stress'];
+const NETWORK_MODES: PerformanceNetworkMode[] = ['online-normal', 'browser-offline', 'mocked-slow-network'];
+
+const budgets = {
+  shellTargetMs: 100,
+  drawerShellMs: 5_000,
+  rowMenuShellMs: 12_000,
+  modalShellMs: 8_000,
+  modalContentMs: 12_000,
+  detailRouteShellMs: 10_000,
+  detailRouteContentMs: 15_000,
+  searchResetShellMs: 30_000,
+  searchResetContentMs: 30_000,
 };
 
-type ResourceSummary = {
-  requestCount: number;
-  imageCount: number;
-  transferSizeBytes: number;
-  encodedBodySizeBytes: number;
-  largestResource: { name: string; initiatorType: string; sizeBytes: number; durationMs: number } | null;
+const measureBaselineInteraction = (options: Parameters<typeof measureInteraction>[0]) => {
+  return measureInteraction({ ...options, enforceBudgets: false });
 };
 
-const outputDir = path.join(process.cwd(), 'test-results', 'performance');
-const outputPath = path.join(outputDir, 'perf-00-baseline.json');
+const parseDatasets = (): PerformanceDatasetName[] => {
+  const raw = process.env.PERF_DATASET;
+  if (!raw) return DATASETS;
+  return raw.split(',').map(item => item.trim()).filter(Boolean) as PerformanceDatasetName[];
+};
+
+const parseNetworkModes = (): PerformanceNetworkMode[] => {
+  const raw = process.env.PERF_NETWORK_MODE;
+  if (!raw) return NETWORK_MODES;
+  return raw.split(',').map(item => item.trim()).filter(Boolean) as PerformanceNetworkMode[];
+};
+
+const imageModeFor = (networkMode: PerformanceNetworkMode): PerformanceImageMode => {
+  if (networkMode === 'online-normal') return 'fast';
+  return 'blocked';
+};
+
+const perfDishId = (dataset: PerformanceDatasetName, index: number) => `perf-${dataset}-dish-${String(index).padStart(4, '0')}`;
+const perfDishName = (dataset: PerformanceDatasetName, index: number) => `Perf ${dataset} dish ${String(index).padStart(4, '0')}`;
+
+const baselineCommand = () => process.env.PERF_DIAGNOSTIC === '1'
+  ? 'npm run test:e2e:performance:diagnostic'
+  : 'npm run test:e2e:performance:baseline';
 
 const startCpuProfile = async (page: Page) => {
+  if (process.env.PERF_DIAGNOSTIC !== '1') return null;
+
   try {
     const session = await page.context().newCDPSession(page);
     await session.send('Profiler.enable');
@@ -49,7 +85,7 @@ const summarizeCpuProfile = (profile: any) => {
   const sampleCounts = new Map<number, number>();
   profile.samples.forEach((sampleId: number) => sampleCounts.set(sampleId, (sampleCounts.get(sampleId) ?? 0) + 1));
 
-  return [...sampleCounts.entries()]
+  return Array.from(sampleCounts.entries())
     .map(([nodeId, samples]) => {
       const node = nodesById.get(nodeId);
       const frame = node?.callFrame ?? {};
@@ -66,8 +102,8 @@ const summarizeCpuProfile = (profile: any) => {
 };
 
 const writeCpuProfile = (id: string, profile: any) => {
-  const profilePath = path.join(outputDir, `perf-00-${id}.cpuprofile`);
-  fs.mkdirSync(outputDir, { recursive: true });
+  const profilePath = path.join(PERFORMANCE_OUTPUT_DIR, `${id}.cpuprofile`);
+  fs.mkdirSync(PERFORMANCE_OUTPUT_DIR, { recursive: true });
   fs.writeFileSync(profilePath, `${JSON.stringify(profile)}\n`);
   return {
     id,
@@ -76,149 +112,121 @@ const writeCpuProfile = (id: string, profile: any) => {
   };
 };
 
-const routeCases: RouteCase[] = [
-  { id: 'dashboard', path: './', waitFor: page => page.getByTestId('dashboard') },
-  { id: 'ingredient-list', path: 'ingredient/list', waitFor: page => page.getByText('Ga regression thit dui') },
-  { id: 'dish-list', path: 'dishes/list', waitFor: page => page.getByText('Com ga regression') },
-  { id: 'shopping-list', path: 'shoppingList/list', waitFor: page => page.getByText('Regression shopping list') },
-  { id: 'shopping-list-detail', path: `shoppingList/detail?shoppingList=${TEST_IDS.shoppingLists.regression}`, waitFor: page => page.getByRole('heading', { name: 'Regression shopping list' }) },
-  { id: 'scheduled-meal-list', path: 'scheduledMeal/list', waitFor: page => page.getByText('Regression meal today') },
-  { id: 'expense-planner', path: 'expense-planner', waitFor: page => page.getByTestId('expense-planner-screen') },
-];
+const measureRequiredInteractions = async (
+  page: Page,
+  dataset: PerformanceDatasetName,
+) => {
+  const dishId = perfDishId(dataset, 1);
+  const dishName = perfDishName(dataset, 1);
+  const dishRow = () => page.getByTestId(`dish-list-item-${dishId}`);
+  const dishDialog = () => page.getByRole('dialog').filter({ hasText: dishName });
+  const visibleMenuItem = (name: RegExp) => page.locator('[role="menuitem"]:visible').filter({ hasText: name }).first();
+  const interactions = [];
 
-const summarizeResources = async (page: Page): Promise<ResourceSummary> => {
-  return page.evaluate(() => {
-    const resources = performance.getEntriesByType('resource') as PerformanceResourceTiming[];
-    const entries = resources.map(entry => {
-      const sizeBytes = entry.transferSize || entry.encodedBodySize || entry.decodedBodySize || 0;
-      return {
-        name: entry.name,
-        initiatorType: entry.initiatorType,
-        sizeBytes,
-        encodedBodySize: entry.encodedBodySize || 0,
-        durationMs: Math.round(entry.duration),
-      };
-    });
-    const largestResource = entries.reduce<typeof entries[number] | null>((largest, entry) => {
-      if (!largest || entry.sizeBytes > largest.sizeBytes) return entry;
-      return largest;
-    }, null);
+  await page.goto('./', { waitUntil: 'domcontentloaded' });
+  await expect(page.getByTestId('dashboard')).toBeVisible({ timeout: 15_000 });
+  interactions.push(await measureBaselineInteraction({
+    id: 'sidebar-drawer-open',
+    action: async () => { await page.getByTestId('sidebar-drawer-button').click(); },
+    shellLocator: () => page.getByText('My Recipes').first(),
+    contentReadyLocator: () => page.getByText('Du lieu dung chung').or(page.getByText('Dữ liệu dùng chung')),
+    shellBudgetMs: budgets.drawerShellMs,
+    contentReadyBudgetMs: budgets.drawerShellMs,
+    strictShellTargetMs: budgets.shellTargetMs,
+  }));
+  await page.keyboard.press('Escape');
 
-    return {
-      requestCount: resources.length,
-      imageCount: entries.filter(entry => entry.initiatorType === 'img' || /\.(png|jpe?g|webp|gif|svg)(\?|$)/i.test(entry.name)).length,
-      transferSizeBytes: entries.reduce((sum, entry) => sum + entry.sizeBytes, 0),
-      encodedBodySizeBytes: entries.reduce((sum, entry) => sum + entry.encodedBodySize, 0),
-      largestResource: largestResource
-        ? {
-          name: largestResource.name,
-          initiatorType: largestResource.initiatorType,
-          sizeBytes: largestResource.sizeBytes,
-          durationMs: largestResource.durationMs,
-        }
-        : null,
-    };
-  });
-};
+  await page.goto('dishes/list', { waitUntil: 'domcontentloaded' });
+  await expect(dishRow()).toBeVisible({ timeout: 15_000 });
 
-const navigationSummary = async (page: Page) => {
-  return page.evaluate(() => {
-    const navigation = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming | undefined;
-    if (!navigation) return null;
-    return {
-      domContentLoadedMs: Math.round(navigation.domContentLoadedEventEnd),
-      loadEventMs: Math.round(navigation.loadEventEnd),
-      durationMs: Math.round(navigation.duration),
-      responseEndMs: Math.round(navigation.responseEnd),
-    };
-  });
-};
+  interactions.push(await measureBaselineInteraction({
+    id: 'dish-row-menu-open',
+    action: async () => { await page.getByTestId(`dish-row-menu-${dishId}`).click(); },
+    shellLocator: () => visibleMenuItem(/Bat dau nau|Bắt đầu nấu/),
+    contentReadyLocator: () => visibleMenuItem(/Xuat du lieu|Xuất dữ liệu/),
+    shellBudgetMs: budgets.rowMenuShellMs,
+    contentReadyBudgetMs: budgets.rowMenuShellMs,
+    strictShellTargetMs: budgets.shellTargetMs,
+  }));
+  await page.keyboard.press('Escape');
 
-const cdpMetrics = async (page: Page) => {
-  try {
-    const session = await page.context().newCDPSession(page);
-    await session.send('Performance.enable');
-    const raw = await session.send('Performance.getMetrics');
-    const metric = (name: string) => raw.metrics.find(item => item.name === name)?.value ?? null;
-    await session.detach();
-    return {
-      taskDurationSeconds: metric('TaskDuration'),
-      scriptDurationSeconds: metric('ScriptDuration'),
-      layoutDurationSeconds: metric('LayoutDuration'),
-      recalcStyleDurationSeconds: metric('RecalcStyleDuration'),
-      jsHeapUsedBytes: metric('JSHeapUsedSize'),
-      jsHeapTotalBytes: metric('JSHeapTotalSize'),
-    };
-  } catch (error) {
-    return { unavailable: error instanceof Error ? error.message : String(error) };
-  }
+  interactions.push(await measureBaselineInteraction({
+    id: 'dish-detail-modal-open',
+    action: async () => { await dishRow().getByRole('button', { name: /Chi tiet|Chi tiết/ }).click(); },
+    shellLocator: dishDialog,
+    contentReadyLocator: () => dishDialog().getByText(/Danh sach nguyen lieu|Danh sách nguyên liệu/).first(),
+    shellBudgetMs: budgets.modalShellMs,
+    contentReadyBudgetMs: budgets.modalContentMs,
+    strictShellTargetMs: budgets.shellTargetMs,
+  }));
+
+  interactions.push(await measureBaselineInteraction({
+    id: 'dish-detail-route-navigation',
+    action: async () => { await dishDialog().getByRole('button', { name: /Mo trang chi tiet|Mở trang chi tiết/ }).click(); },
+    shellLocator: () => page.getByText(dishName).first(),
+    contentReadyLocator: () => page.getByText(/Ghi chu:|Ghi chú:/).first(),
+    shellBudgetMs: budgets.detailRouteShellMs,
+    contentReadyBudgetMs: budgets.detailRouteContentMs,
+    strictShellTargetMs: budgets.shellTargetMs,
+  }));
+
+  await page.goto('dishes/list', { waitUntil: 'domcontentloaded' });
+  const searchInput = page.getByTestId('dish-search-input');
+  await searchInput.fill('0001');
+  await expect(dishRow()).toBeVisible({ timeout: 15_000 });
+  interactions.push(await measureBaselineInteraction({
+    id: 'dish-search-reset',
+    action: async () => {
+      await searchInput.fill('');
+      await page.waitForTimeout(450);
+    },
+    shellLocator: () => searchInput,
+    contentReadyLocator: () => page.getByTestId('dish-virtual-list'),
+    shellBudgetMs: budgets.searchResetShellMs,
+    contentReadyBudgetMs: budgets.searchResetContentMs,
+    strictShellTargetMs: budgets.shellTargetMs,
+  }));
+
+  return interactions;
 };
 
 test.describe('PERF-00 baseline', () => {
   test.skip(process.env.PERF_BASELINE !== '1', 'Run explicitly with PERF_BASELINE=1 when collecting baseline evidence.');
 
-  test('captures route, request, and modal baseline evidence', async ({ page }, testInfo) => {
-    const routes = [];
-    const cpuProfiles = [];
+  for (const dataset of parseDatasets()) {
+    for (const networkMode of parseNetworkModes()) {
+      const imageMode = imageModeFor(networkMode);
 
-    for (const routeCase of routeCases) {
-      const profile = routeCase.id === 'shopping-list-detail' ? await startCpuProfile(page) : null;
-      const startedAt = Date.now();
-      await page.goto(routeCase.path, { waitUntil: 'domcontentloaded' });
-      await expect(routeCase.waitFor(page).first()).toBeVisible({ timeout: 15_000 });
-      const visibleMs = Date.now() - startedAt;
-      await page.waitForLoadState('networkidle', { timeout: 5_000 }).catch(() => undefined);
-      if (profile) cpuProfiles.push(writeCpuProfile(routeCase.id, await profile.stop()));
+      test(`captures ${dataset} ${networkMode} interaction baseline`, async ({ page }, testInfo) => {
+        test.setTimeout(90_000);
+        await seedApp(page, { dataset, networkMode, imageMode });
+        const profile = await startCpuProfile(page);
+        const interactions = await measureRequiredInteractions(page, dataset);
+        const resources = await summarizeResources(page);
+        const diagnostics = profile
+          ? { cpuProfile: writeCpuProfile(`perf-00-${dataset}-${networkMode}`, await profile.stop()) }
+          : undefined;
+        const warnings = collectInteractionWarnings(interactions);
 
-      routes.push({
-        id: routeCase.id,
-        path: routeCase.path,
-        visibleMs,
-        navigation: await navigationSummary(page),
-        resources: await summarizeResources(page),
-        cdp: await cdpMetrics(page),
+        await writePerformanceEvidence(testInfo, {
+          capturedAt: new Date().toISOString(),
+          command: baselineCommand(),
+          browserName: testInfo.project.name,
+          dataset,
+          networkMode,
+          imageMode,
+          budgets,
+          interactions,
+          warnings,
+          resources,
+          diagnostics,
+          notes: [
+            'Phase 1 records strict 100 ms shell-visible misses as warnings, not failures.',
+            'Normal runs stub GitHub Raw unless PERF_REAL_NETWORK=1 is set.',
+            'CPU profile output is written only when PERF_DIAGNOSTIC=1.',
+          ],
+        }, `perf-00-baseline-${dataset}-${networkMode}`);
       });
     }
-
-    await page.goto(`shoppingList/detail?shoppingList=${TEST_IDS.shoppingLists.regression}`, { waitUntil: 'domcontentloaded' });
-    await expect(page.getByRole('heading', { name: 'Regression shopping list' })).toBeVisible();
-    await page.getByRole('tab').nth(2).click();
-    const dishRow = page.getByTestId(`shopping-list-dish-${TEST_IDS.dishes.comGa}`);
-    await expect(dishRow).toContainText('Com ga regression');
-    const modalProfile = await startCpuProfile(page);
-    const modalStartedAt = Date.now();
-    await dishRow.getByRole('button').first().click();
-    await expect(page.getByTestId('dish-readonly-detail-modal')).toBeVisible({ timeout: 15_000 });
-    const modalVisibleMs = Date.now() - modalStartedAt;
-    cpuProfiles.push(writeCpuProfile('shopping-list-readonly-dish-modal', await modalProfile.stop()));
-
-    const evidence = {
-      capturedAt: new Date().toISOString(),
-      command: 'PERF_BASELINE=1 npx playwright test tests/e2e/performance-baseline.spec.ts',
-      browserName: testInfo.project.name,
-      baseURL: (testInfo.project.use as { baseURL?: string }).baseURL ?? null,
-      environment: {
-        node: process.version,
-        platform: process.platform,
-        viewport: testInfo.project.use.viewport ?? null,
-      },
-      routes,
-      cpuProfiles,
-      modal: {
-        id: 'shopping-list-readonly-dish-modal',
-        path: `shoppingList/detail?shoppingList=${TEST_IDS.shoppingLists.regression}`,
-        visibleMs: modalVisibleMs,
-        cdp: await cdpMetrics(page),
-      },
-      notes: [
-        'Times are local Playwright measurements from click/navigation start until the target UI is visible.',
-        'Resource counts come from browser PerformanceResourceTiming entries after each route is visible.',
-        'This baseline is an explicit audit run and is skipped unless PERF_BASELINE=1 is set.',
-      ],
-    };
-
-    fs.mkdirSync(outputDir, { recursive: true });
-    fs.writeFileSync(outputPath, `${JSON.stringify(evidence, null, 2)}\n`);
-    await testInfo.attach('perf-00-baseline', { path: outputPath, contentType: 'application/json' });
-  });
+  }
 });

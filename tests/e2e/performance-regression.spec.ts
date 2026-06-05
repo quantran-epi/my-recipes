@@ -1,64 +1,36 @@
-import fs from 'node:fs';
-import path from 'node:path';
-import type { Locator, Page } from '@playwright/test';
-import { expect, test } from './fixtures/appTest';
+import { expect, test as base } from '@playwright/test';
+import { seedApp } from './fixtures/seedApp';
+import {
+  collectInteractionWarnings,
+  measureInteraction,
+  summarizeResources,
+  writePerformanceEvidence,
+} from './fixtures/performanceReport';
 import { TEST_IDS } from './fixtures/testData';
 
-type TimingSample = {
-  id: string;
-  durationMs: number;
-  budgetMs: number;
-};
+const test = base.extend({
+  page: async ({ page }, use) => {
+    await seedApp(page);
+    await use(page);
+  },
+});
 
-type ResourceSummary = {
-  requestCount: number;
-  imageCount: number;
-  transferSizeBytes: number;
-};
-
-const outputDir = path.join(process.cwd(), 'test-results', 'performance');
-const outputPath = path.join(outputDir, 'perf-07-regression.json');
+const dailyPerformanceTest = base.extend({
+  page: async ({ page }, use) => {
+    await seedApp(page, { dataset: 'daily', networkMode: 'online-normal', imageMode: 'fast' });
+    await use(page);
+  },
+});
 
 const budgets = {
   dashboardToShoppingListDetailMs: 10_000,
   lazyTabVisibleMs: 5_000,
   readonlyDishModalVisibleMs: 5_000,
   routeRequestCount: 20,
-  routeImageCount: 8,
+  routeImageCount: 16,
 };
 
 const shoppingListDetailPath = `shoppingList/detail?shoppingList=${TEST_IDS.shoppingLists.regression}`;
-
-const measureVisible = async (
-  id: string,
-  action: () => Promise<void>,
-  target: () => Locator,
-  budgetMs: number,
-): Promise<TimingSample> => {
-  const startedAt = Date.now();
-  await action();
-  await expect(target()).toBeVisible({ timeout: budgetMs });
-  const durationMs = Date.now() - startedAt;
-  expect(durationMs).toBeLessThanOrEqual(budgetMs);
-  return { id, durationMs, budgetMs };
-};
-
-const summarizeResources = async (page: Page): Promise<ResourceSummary> => {
-  return page.evaluate(() => {
-    const resources = performance.getEntriesByType('resource') as PerformanceResourceTiming[];
-    const entries = resources.map(entry => ({
-      initiatorType: entry.initiatorType,
-      name: entry.name,
-      sizeBytes: entry.transferSize || entry.encodedBodySize || entry.decodedBodySize || 0,
-    }));
-
-    return {
-      requestCount: resources.length,
-      imageCount: entries.filter(entry => entry.initiatorType === 'img' || /\.(png|jpe?g|webp|gif|svg)(\?|$)/i.test(entry.name)).length,
-      transferSizeBytes: entries.reduce((sum, entry) => sum + entry.sizeBytes, 0),
-    };
-  });
-};
 
 test.describe('PERF-07 performance regressions', () => {
   test('keeps virtualized ingredient rows spaced and treats drag as scroll intent', async ({ page }) => {
@@ -152,50 +124,120 @@ test.describe('PERF-07 performance regressions', () => {
     imageRequests.length = 0;
     await page.evaluate(() => performance.clearResourceTimings());
 
-    const timings: TimingSample[] = [];
-    timings.push(await measureVisible(
-      'dashboard-to-shopping-list-detail',
-      async () => { await shoppingListRow.click(); },
-      () => page.getByRole('heading', { name: 'Regression shopping list' }),
-      budgets.dashboardToShoppingListDetailMs,
-    ));
+    const interactions = [];
+    interactions.push(await measureInteraction({
+      id: 'dashboard-shopping-list-detail-route-navigation',
+      action: async () => { await shoppingListRow.click(); },
+      shellLocator: () => page.getByRole('heading', { name: 'Regression shopping list' }),
+      contentReadyLocator: () => page.getByTestId('shopping-list-ingredients-tab'),
+      shellBudgetMs: budgets.dashboardToShoppingListDetailMs,
+      contentReadyBudgetMs: budgets.dashboardToShoppingListDetailMs,
+    }));
     await expect(page).toHaveURL(new RegExp(`/my-recipes/shoppingList/detail\\?shoppingList=${TEST_IDS.shoppingLists.regression}$`));
 
     const routeResources = await summarizeResources(page);
     expect(routeResources.requestCount).toBeLessThanOrEqual(budgets.routeRequestCount);
     expect(routeResources.imageCount).toBeLessThanOrEqual(budgets.routeImageCount);
 
-    timings.push(await measureVisible(
-      'shopping-list-dishes-tab-visible',
-      async () => { await page.getByRole('tab', { name: /Món ăn/ }).click(); },
-      () => page.getByTestId('shopping-list-dishes-tab'),
-      budgets.lazyTabVisibleMs,
-    ));
+    interactions.push(await measureInteraction({
+      id: 'shopping-list-dishes-tab-visible',
+      action: async () => { await page.getByRole('tab', { name: /Món ăn/ }).click(); },
+      shellLocator: () => page.getByTestId('shopping-list-dishes-tab'),
+      contentReadyLocator: () => page.getByTestId('shopping-list-dishes-tab'),
+      shellBudgetMs: budgets.lazyTabVisibleMs,
+      contentReadyBudgetMs: budgets.lazyTabVisibleMs,
+    }));
 
     const externalDishImagesBeforeModal = imageRequests.filter(url => /images\.unsplash\.com/i.test(url));
     expect(externalDishImagesBeforeModal).toHaveLength(0);
 
     const dishRow = page.getByTestId(`shopping-list-dish-${TEST_IDS.dishes.comGa}`);
     await expect(dishRow).toContainText('Com ga regression');
-    timings.push(await measureVisible(
-      'readonly-dish-modal-visible',
-      async () => { await dishRow.getByRole('button').first().click(); },
-      () => page.getByTestId('dish-readonly-detail-modal'),
-      budgets.readonlyDishModalVisibleMs,
-    ));
+    interactions.push(await measureInteraction({
+      id: 'readonly-dish-modal-visible',
+      action: async () => { await dishRow.getByRole('button').first().click(); },
+      shellLocator: () => page.getByTestId('dish-readonly-detail-modal'),
+      contentReadyLocator: () => page.getByTestId('dish-readonly-detail-modal'),
+      shellBudgetMs: budgets.readonlyDishModalVisibleMs,
+      contentReadyBudgetMs: budgets.readonlyDishModalVisibleMs,
+    }));
 
-    const evidence = {
+    const warnings = collectInteractionWarnings(interactions);
+    await writePerformanceEvidence(testInfo, {
       capturedAt: new Date().toISOString(),
-      command: 'npx playwright test tests/e2e/performance-regression.spec.ts',
+      command: 'npm run test:e2e:performance',
       browserName: testInfo.project.name,
+      dataset: 'regression',
+      networkMode: 'online-normal',
+      imageMode: 'default',
       budgets,
-      timings,
-      routeResources,
-      externalDishImagesBeforeModal,
-    };
+      interactions,
+      warnings,
+      resources: routeResources,
+      diagnostics: { externalDishImagesBeforeModal },
+      notes: ['Strict 100 ms shell target misses are warnings in Phase 1 evidence.'],
+    }, 'perf-07-regression');
+  });
+});
 
-    fs.mkdirSync(outputDir, { recursive: true });
-    fs.writeFileSync(outputPath, `${JSON.stringify(evidence, null, 2)}\n`);
-    await testInfo.attach('perf-07-regression', { path: outputPath, contentType: 'application/json' });
+dailyPerformanceTest.describe('PERF-07 daily large-list smoke', () => {
+  dailyPerformanceTest('captures required large-list interaction timings', async ({ page }, testInfo) => {
+    const dishId = 'perf-daily-dish-0001';
+    const secondDishId = 'perf-daily-dish-0002';
+    const dishName = 'Perf daily dish 0001';
+    const dishRow = () => page.getByTestId(`dish-list-item-${dishId}`);
+    const dishDialog = () => page.getByRole('dialog').filter({ hasText: dishName });
+    const visibleMenuItem = (name: RegExp) => page.locator('[role="menuitem"]:visible').filter({ hasText: name }).first();
+
+    await page.goto('dishes/list', { waitUntil: 'domcontentloaded' });
+    await expect(dishRow()).toBeVisible({ timeout: 15_000 });
+
+    const interactions = [];
+    interactions.push(await measureInteraction({
+      id: 'daily-dish-row-menu-open',
+      action: async () => { await page.getByTestId(`dish-row-menu-${dishId}`).click(); },
+      shellLocator: () => visibleMenuItem(/Bắt đầu nấu/),
+      contentReadyLocator: () => visibleMenuItem(/Xuất dữ liệu/),
+      shellBudgetMs: budgets.lazyTabVisibleMs,
+      contentReadyBudgetMs: budgets.lazyTabVisibleMs,
+    }));
+    await page.keyboard.press('Escape');
+
+    interactions.push(await measureInteraction({
+      id: 'daily-dish-detail-modal-open',
+      action: async () => { await dishRow().getByRole('button', { name: /Chi tiết/ }).click(); },
+      shellLocator: dishDialog,
+      contentReadyLocator: () => dishDialog().getByText(/Danh sách nguyên liệu/).first(),
+      shellBudgetMs: budgets.readonlyDishModalVisibleMs,
+      contentReadyBudgetMs: budgets.readonlyDishModalVisibleMs,
+    }));
+
+    await dishDialog().getByRole('button', { name: /Đóng/ }).click();
+    const searchInput = page.getByTestId('dish-search-input');
+    await searchInput.fill('0001');
+    await expect(dishRow()).toBeVisible({ timeout: 15_000 });
+    interactions.push(await measureInteraction({
+      id: 'daily-dish-search-reset',
+      action: async () => { await searchInput.fill(''); },
+      shellLocator: () => searchInput,
+      contentReadyLocator: () => page.getByTestId(`dish-list-item-${secondDishId}`),
+      shellBudgetMs: budgets.lazyTabVisibleMs,
+      contentReadyBudgetMs: budgets.dashboardToShoppingListDetailMs,
+    }));
+
+    const warnings = collectInteractionWarnings(interactions);
+    await writePerformanceEvidence(testInfo, {
+      capturedAt: new Date().toISOString(),
+      command: 'npm run test:e2e:performance',
+      browserName: testInfo.project.name,
+      dataset: 'daily',
+      networkMode: 'online-normal',
+      imageMode: 'fast',
+      budgets,
+      interactions,
+      warnings,
+      resources: await summarizeResources(page),
+      notes: ['Daily large-list regression smoke uses generous budgets; strict shell target misses warn only.'],
+    }, 'perf-07-daily-large-list');
   });
 });

@@ -328,19 +328,19 @@ export const DishesListScreen = () => {
     return <React.Fragment>
         <div style={{ height: "100%", display: "flex", flexDirection: "column", minHeight: 0 }}>
             <Stack.Compact>
-                <Input allowClear placeholder="Tìm kiếm" onChange={_onSearchChange} />
+                <Input allowClear data-testid="dish-search-input" placeholder="Tìm kiếm" onChange={_onSearchChange} />
                 {isAdmin && <Button onClick={toggleAddModal.show} icon={<PlusOutlined />} />}
             </Stack.Compact>
             <div style={filterRowStyle}>
                 {DISH_STATUS_FILTERS.map(item => (
-                    <button key={item.value} type="button" onClick={() => setActiveStatus(item.value)} style={filterChipStyle(activeStatus === item.value)}>
+                    <button key={item.value} type="button" data-testid={`dish-filter-${item.value}`} onClick={() => setActiveStatus(item.value)} style={filterChipStyle(activeStatus === item.value)}>
                         {item.label} ({statusCounts[item.value] ?? 0})
                     </button>
                 ))}
             </div>
             {allTags.length > 0 && (
                 <div style={filterRowStyle}>
-                    <button type="button" onClick={() => setActiveTag(null)} style={filterChipStyle(activeTag === null)}>
+                    <button type="button" data-testid="dish-tag-filter-reset" onClick={() => setActiveTag(null)} style={filterChipStyle(activeTag === null)}>
                         Tất cả tag ({tagCounts.__all ?? 0})
                     </button>
                     {allTags.map(tag => (
@@ -559,7 +559,7 @@ const DishesItemComponent: React.FunctionComponent<DishesItemProps> = (props) =>
                             ],
                             onClick: (e) => e.key === "export" ? toggleExport.show() : _onMoreActionClick(e)
                         }} placement="bottomRight">
-                            <Button type="text" icon={<HolderOutlined />} style={{ width: 32, paddingInline: 0 }} />
+                            <Button type="text" data-testid={`dish-row-menu-${props.item.id}`} icon={<HolderOutlined />} style={{ width: 32, paddingInline: 0 }} />
                         </Dropdown>
                     </div>
 

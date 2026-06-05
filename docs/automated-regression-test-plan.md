@@ -26,6 +26,26 @@ Open the HTML report after a run:
 npm run test:e2e:report
 ```
 
+Run the performance regression smoke suite:
+
+```bash
+npm run test:e2e:performance
+```
+
+Capture Phase 1 performance baseline evidence:
+
+```bash
+npm run test:e2e:performance:baseline
+```
+
+Capture diagnostic baseline evidence with CPU profiles/traces enabled:
+
+```bash
+npm run test:e2e:performance:diagnostic
+```
+
+Performance evidence is written to `test-results/performance/` as JSON plus markdown summaries. The baseline command records daily and stress datasets across online-normal, browser-offline, and mocked slow-network modes unless narrowed with `PERF_DATASET` or `PERF_NETWORK_MODE`. Phase 1 treats shell visible under 100 ms as the desired UX target; misses are recorded as warnings rather than failing strict gates.
+
 ## Seed Data
 
 The automation seed is defined in `tests/e2e/fixtures/testData.ts` and injected by `tests/e2e/fixtures/seedApp.ts` before React starts.

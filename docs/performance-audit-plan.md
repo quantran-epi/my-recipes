@@ -13,6 +13,33 @@ Default performance targets:
 - Hidden tabs, panels, overlays, and closed dialogs do not perform heavy calculations or mount expensive trees.
 - Virtualized list rows preserve visual spacing, allow immediate first scroll, and do not turn drag-scroll gestures into accidental row actions.
 
+## Phase 1 Measurement Harness
+
+Stable commands:
+
+```bash
+npm run test:e2e:performance
+npm run test:e2e:performance:baseline
+npm run test:e2e:performance:diagnostic
+```
+
+Use `E2E_BROWSER_CHANNEL=chrome` or another installed browser channel when Playwright's managed Chromium is not downloaded locally. Use `PERF_DATASET=daily` or `PERF_DATASET=stress` to limit baseline runs; without `PERF_DATASET`, the baseline command runs both datasets. Use `PERF_NETWORK_MODE=online-normal,browser-offline,mocked-slow-network` to override the default network matrix. Real GitHub Raw network is opt-in with `PERF_REAL_NETWORK=1`.
+
+Evidence is written under `test-results/performance/` as JSON plus a short markdown summary. JSON evidence includes `capturedAt`, `command`, `browserName`, `dataset`, `networkMode`, `imageMode`, `budgets`, `interactions`, `warnings`, and optional `diagnostics`. Each interaction records separate `shellVisibleMs` and `contentReadyMs` values.
+
+Phase 1 is baseline-first: the desired UX target is shell visible under 100 ms, but strict 100 ms target misses are warnings, not failures. Regression runs enforce only generous smoke budgets so setup/runtime failures and broad regressions still fail. Later phases can turn selected warning thresholds into hard gates after fixes land.
+
+Proposed smoke budgets for Phase 1:
+
+| Interaction | Regression budget | Baseline budget policy |
+|---|---:|---|
+| Drawer/sidebar shell | 5,000 ms | Record warning on miss |
+| Row menu shell/content | 5,000 ms regression, 12,000 ms baseline | Record warning on baseline miss |
+| Modal shell/content | 5,000-12,000 ms | Record warning on strict 100 ms miss |
+| Detail route navigation | 10,000-15,000 ms | Record warning on strict 100 ms miss |
+| Search/filter reset | 10,000 ms regression, 30,000 ms baseline | Record current large-list slowness as evidence |
+| Route resources | 20 requests, 16 images | Regression smoke guard only |
+
 ## How To Use This File
 
 - To implement one item, prompt: `implement PERF-01`.

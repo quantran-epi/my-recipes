@@ -213,13 +213,13 @@ export const ShoppingListScreen = () => {
     return <React.Fragment>
         <div style={{ height: "100%", display: "flex", flexDirection: "column", minHeight: 0 }}>
             <Stack.Compact>
-                <Input allowClear placeholder="Tìm kiếm" onChange={_onSearchChange} />
+                <Input allowClear data-testid="shopping-list-search-input" placeholder="Tìm kiếm" onChange={_onSearchChange} />
                 <Button onClick={_onAdd} icon={<PlusOutlined />} />
                 <Button onClick={_onShowCalendar} icon={<CalendarOutlined />} />
             </Stack.Compact>
             <div style={filterRowStyle}>
                 {SHOPPING_LIST_STATUS_FILTERS.map(item => (
-                    <button key={item.value} type="button" onClick={() => setActiveStatus(item.value)} style={filterChipStyle(activeStatus === item.value)}>
+                    <button key={item.value} type="button" data-testid={`shopping-list-filter-${item.value}`} onClick={() => setActiveStatus(item.value)} style={filterChipStyle(activeStatus === item.value)}>
                         {item.label} ({statusCounts[item.value] ?? 0})
                     </button>
                 ))}
@@ -419,7 +419,7 @@ const ShoppingListItemComponent: React.FunctionComponent<ShoppingListItemProps> 
                                 ],
                                 onClick: _onMoreActionClick
                             }} placement="bottomRight">
-                                <Button type="text" icon={<HolderOutlined />} style={{ width: 34, paddingInline: 0 }} />
+                                <Button type="text" data-testid={`shopping-list-row-menu-${props.item.id}`} icon={<HolderOutlined />} style={{ width: 34, paddingInline: 0 }} />
                             </Dropdown>
                         </div>
                     </div>

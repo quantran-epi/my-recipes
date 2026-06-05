@@ -259,7 +259,7 @@ export const IngredientListScreen = () => {
     return <React.Fragment>
         <div style={{ height: "100%", display: "flex", flexDirection: "column", minHeight: 0 }}>
             <Stack.Compact>
-                <Input allowClear placeholder="Tìm kiếm" onChange={_onSearchChange} />
+                <Input allowClear data-testid="ingredient-search-input" placeholder="Tìm kiếm" onChange={_onSearchChange} />
                 {isAdmin && <Button onClick={_onAdd} icon={<PlusOutlined />} />}
                 <Tooltip title="Dùng trước hết hạn">
                     <Button onClick={toggleUseFirst.show} icon={<FireOutlined style={{ color: "#ff4d4f" }} />} />
@@ -270,14 +270,14 @@ export const IngredientListScreen = () => {
             </Stack.Compact>
             <div style={filterRowStyle}>
                 {INGREDIENT_STOCK_FILTERS.map(item => (
-                    <button key={item.value} type="button" onClick={() => setActiveStockFilter(item.value)} style={filterChipStyle(activeStockFilter === item.value)}>
+                    <button key={item.value} type="button" data-testid={`ingredient-filter-${item.value}`} onClick={() => setActiveStockFilter(item.value)} style={filterChipStyle(activeStockFilter === item.value)}>
                         {item.label} ({stockCounts[item.value] ?? 0})
                     </button>
                 ))}
             </div>
             {availableCategories.length > 0 && (
                 <div style={filterRowStyle}>
-                    <button type="button" onClick={() => setActiveCategory(null)} style={filterChipStyle(activeCategory === null)}>
+                    <button type="button" data-testid="ingredient-category-filter-reset" onClick={() => setActiveCategory(null)} style={filterChipStyle(activeCategory === null)}>
                         Tất cả nhóm ({categoryCounts.__all ?? 0})
                     </button>
                     {availableCategories.map(category => (
@@ -475,4 +475,3 @@ const IngredientItemComponent: React.FunctionComponent<IngredientItemProps> = (p
 }
 
 export const IngredientItem = React.memo(IngredientItemComponent);
-

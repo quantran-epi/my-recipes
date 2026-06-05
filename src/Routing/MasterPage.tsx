@@ -319,7 +319,7 @@ const SidebarDrawer = () => {
 
     return (
         <React.Fragment>
-            <Button type="primary" onClick={showDrawer} icon={<MenuOutlined />} />
+            <Button type="primary" data-testid="sidebar-drawer-button" onClick={showDrawer} icon={<MenuOutlined />} />
             {routeLoading && (
                 <div style={sidebarTransitionOverlayStyle}>
                     <div style={sidebarTransitionContentStyle}>
@@ -341,6 +341,7 @@ const SidebarDrawer = () => {
                 }
                 onClose={onClose}
                 open={open}
+                data-testid="sidebar-drawer"
                 destroyOnClose
                 styles={{ body: { padding: 0, display: "flex", flexDirection: "column", height: "100%", overflowY: "auto" } }}
             >
