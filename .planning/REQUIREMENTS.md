@@ -9,8 +9,8 @@ Requirements for the first milestone: stabilize large-list and online/offline re
 
 ### Performance Measurement
 
-- [ ] **PERF-01**: Maintainer can reproduce large-list scenarios for ingredients, dishes, and shopping lists with deterministic seeded data.
-- [ ] **PERF-02**: Maintainer can measure time-to-visible for modals, drawers, detail views, row menus, and navigation from large-list screens.
+- [x] **PERF-01**: Maintainer can reproduce large-list scenarios for ingredients, dishes, and shopping lists with deterministic seeded data.
+- [x] **PERF-02**: Maintainer can measure time-to-visible for modals, drawers, detail views, row menus, and navigation from large-list screens.
 - [ ] **PERF-03**: Maintainer can compare online and offline runs to identify whether sync, image loading, service worker, or network work affects perceived responsiveness.
 
 ### Large-List Responsiveness
@@ -29,14 +29,14 @@ Requirements for the first milestone: stabilize large-list and online/offline re
 
 ### Regression Coverage
 
-- [ ] **TEST-01**: Maintainer can run repo-local performance regression checks through package scripts, without relying on globally installed Playwright tooling.
+- [x] **TEST-01**: Maintainer can run repo-local performance regression checks through package scripts, without relying on globally installed Playwright tooling.
 - [ ] **TEST-02**: Maintainer can run a focused large-list responsiveness test that fails when modal, detail, or menu open timing exceeds the chosen smoke budget.
 - [ ] **TEST-03**: Maintainer can run online/offline comparison checks with GitHub requests stubbed or controlled.
 - [ ] **TEST-04**: Existing build and relevant regression checks pass after responsiveness changes, or failures are documented with exact blockers.
 
 ### Future Product Foundation
 
-- [ ] **UX-01**: Maintainer has a measured responsiveness baseline that future rich feature, UI, and UX work can use as a guardrail.
+- [x] **UX-01**: Maintainer has a measured responsiveness baseline that future rich feature, UI, and UX work can use as a guardrail.
 - [ ] **UX-02**: User-facing performance fixes preserve current information density and daily cooking/shopping workflows unless a later UI/UX phase explicitly changes them.
 
 ## v2 Requirements
@@ -76,8 +76,8 @@ Which phases cover which v1 requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| PERF-01 | Phase 1 | Pending |
-| PERF-02 | Phase 1 | Pending |
+| PERF-01 | Phase 1 | Complete |
+| PERF-02 | Phase 1 | Complete |
 | PERF-03 | Phase 3 | Pending |
 | LIST-01 | Phase 2 | Pending |
 | LIST-02 | Phase 2 | Pending |
@@ -87,14 +87,15 @@ Which phases cover which v1 requirements. Updated during roadmap creation.
 | NET-02 | Phase 3 | Pending |
 | NET-03 | Phase 3 | Pending |
 | NET-04 | Phase 3 | Pending |
-| TEST-01 | Phase 1 | Pending |
+| TEST-01 | Phase 1 | Complete |
 | TEST-02 | Phase 2 | Pending |
 | TEST-03 | Phase 3 | Pending |
 | TEST-04 | Phase 5 | Pending |
-| UX-01 | Phase 1 | Pending |
+| UX-01 | Phase 1 | Complete |
 | UX-02 | Phase 4 | Pending |
 
 **Coverage:**
+
 - v1 requirements: 17 total
 - Mapped to phases: 17
 - Unmapped: 0
