@@ -47,6 +47,11 @@
     "start": "node ./node_modules/@craco/craco/dist/bin/craco start",
     "build": "node ./node_modules/@craco/craco/dist/bin/craco build GENERATE_SOURCEMAP=false",
     "test": "react-scripts test",
+    "test:e2e": "playwright test",
+    "test:e2e:report": "playwright show-report",
+    "test:e2e:performance": "playwright test tests/e2e/performance-regression.spec.ts",
+    "test:e2e:performance:baseline": "node tests/e2e/runPerformanceCommand.cjs baseline",
+    "test:e2e:performance:diagnostic": "node tests/e2e/runPerformanceCommand.cjs diagnostic",
     "eject": "react-scripts eject"
   },
   "eslintConfig": {
@@ -68,6 +73,7 @@
     ]
   },
   "devDependencies": {
+    "@playwright/test": "^1.60.0",
     "@types/lodash": "^4.17.0"
   }
 }
