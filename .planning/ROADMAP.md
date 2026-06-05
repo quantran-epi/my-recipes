@@ -14,7 +14,7 @@ The first milestone establishes a responsiveness foundation for the existing My 
 Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 1: Measurement and Performance Harness** - Make large-list and online/offline responsiveness reproducible and measurable. (completed 2026-06-05)
-- [ ] **Phase 2: Large-List Interaction Hot Paths** - Remove visible freezes from common virtualized-list interactions.
+- [x] **Phase 2: Large-List Interaction Hot Paths** - Remove visible freezes from common virtualized-list interactions. (completed 2026-06-05)
 - [ ] **Phase 3: Online and Offline Cost Isolation** - Control sync, image, service-worker, and network work so online mode stays responsive.
 - [ ] **Phase 4: Navigation and App-Shell Responsiveness** - Keep drawers, navigation, and detail-route transitions responsive from large-list screens.
 - [ ] **Phase 5: Release Gate and Product Guardrails** - Ship the responsiveness foundation with verification evidence and future-work guardrails.
@@ -69,7 +69,7 @@ Plans:
   4. Closed modal bodies and inactive heavy content stay unmounted until the user requests them.
   5. Focused performance tests fail when modal, detail, or menu open timing exceeds the chosen budget.
 
-**Plans:** 2/3 plans executed
+**Plans:** 3/3 plans complete
 Plans:
 **Wave 1**
 
@@ -81,7 +81,7 @@ Plans:
 
 **Wave 3** *(blocked on Wave 2 completion)*
 
-- [ ] 02-03: Extend large-list interaction timing tests for modal, menu, search, filter, and scroll behavior.
+- [x] 02-03: Extend large-list interaction timing tests for modal, menu, search, filter, and scroll behavior.
 
 ### Phase 3: Online and Offline Cost Isolation
 
@@ -159,7 +159,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Measurement and Performance Harness | 3/3 | Complete    | 2026-06-05 |
-| 2. Large-List Interaction Hot Paths | 2/3 | In Progress |  |
+| 2. Large-List Interaction Hot Paths | 3/3 | Complete    | 2026-06-05 |
 | 3. Online and Offline Cost Isolation | 0/3 | Not started | - |
 | 4. Navigation and App-Shell Responsiveness | 0/2 | Not started | - |
 | 5. Release Gate and Product Guardrails | 0/2 | Not started | - |

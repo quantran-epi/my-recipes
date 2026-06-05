@@ -1,19 +1,19 @@
 ---
 gsd_state_version: 1.0
-status: executing
+status: ready_for_next_phase
 current_milestone: v1.0
 current_milestone_name: Responsiveness Foundation
-current_phase: 2
-current_phase_name: Large-List Interaction Hot Paths
-stopped_at: Completed 02-02-PLAN.md
-last_updated: "2026-06-05T12:17:48.000Z"
-last_activity: 2026-06-05 - Phase 2 Plan 02-02 executed; Wave 3 ready
+current_phase: 3
+current_phase_name: Online and Offline Cost Isolation
+stopped_at: Completed 02-03-PLAN.md
+last_updated: "2026-06-05T13:28:09.000Z"
+last_activity: 2026-06-05 - Phase 2 completed; Phase 3 ready
 progress:
   total_phases: 5
-  completed_phases: 1
+  completed_phases: 2
   total_plans: 13
-  completed_plans: 5
-  percent: 38
+  completed_plans: 6
+  percent: 46
 ---
 
 # Project State
@@ -23,39 +23,39 @@ progress:
 See: .planning/PROJECT.md (updated 2026-06-05)
 
 **Core value:** Users can manage cooking, ingredients, inventory, meal plans, and shopping smoothly in one local-first app without the interface getting in their way.
-**Current focus:** Phase 2 - Large-List Interaction Hot Paths
+**Current focus:** Phase 3 - Online and Offline Cost Isolation
 
 ## Current Position
 
-Phase: 2 of 5 (large list interaction hot paths)
-Plan: 02-01 and 02-02 complete; 02-03 remaining
-Status: Executing Phase 2
-Last activity: 2026-06-05 - Phase 2 Plan 02-02 executed; Wave 3 ready
+Phase: 3 of 5 (online and offline cost isolation)
+Plan: Phase 2 complete; Phase 3 not planned yet in `.planning/phases/`
+Status: Ready for Phase 3
+Last activity: 2026-06-05 - Phase 2 completed; Phase 3 ready
 
-Progress: [████░░░░░░] 38%
+Progress: [█████░░░░░] 46%
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 5
-- Average duration: 54m
-- Total execution time: 4h 30m
+- Total plans completed: 6
+- Average duration: 57m
+- Total execution time: 5h 40m
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 1. Measurement and Performance Harness | 3/3 | 4h 10m | 1h 23m |
-| 2. Large-List Interaction Hot Paths | 2/3 | 33m | 16m |
+| 2. Large-List Interaction Hot Paths | 3/3 | 1h 43m | 34m |
 | 3. Online and Offline Cost Isolation | 0/3 | - | - |
 | 4. Navigation and App-Shell Responsiveness | 0/2 | - | - |
 | 5. Release Gate and Product Guardrails | 0/2 | - | - |
 
 **Recent Trend:**
 
-- Last 5 plans: 01-01, 01-02, 01-03, 02-01, 02-02
-- Trend: Phase 2 now covers all primary large-list screens. Latest daily gate passed with search reset shell-visible at 26 ms for dishes, 29 ms for ingredients, and 29 ms for shopping lists; modal/menu timings remain above the 100 ms ideal warning target but inside practical Phase 2 budgets.
+- Last 5 plans: 01-02, 01-03, 02-01, 02-02, 02-03
+- Trend: Phase 2 completed with a strict daily large-list gate across dish, ingredient, and shopping-list screens. Latest daily gate passed 5/5 with search reset shell-visible at 28 ms for dishes, 22 ms for ingredients, and 32 ms for shopping lists; modal/menu timings remain above the 100 ms ideal warning target but inside practical Phase 2 budgets.
 
 ## Accumulated Context
 
@@ -71,14 +71,15 @@ Recent decisions affecting current work:
 
 ### Pending Todos
 
-- Execute Phase 2 Plan 02-03 to finish strict cross-list performance gates and docs.
+- Start Phase 3 planning/discussion for online/offline, GitHub sync, image, service-worker, and network cost isolation.
 
 ### Blockers/Concerns
 
 - Unit tests currently fail resolving `@store/Store` from CRA Jest alias configuration.
 - Playwright managed Chromium is not downloaded locally; use `E2E_BROWSER_CHANNEL=chrome` or install Playwright browsers for full e2e runs.
 - CRA dev server cannot bind a port inside the sandbox; full Playwright runs require an unsandboxed local server.
-- Phase 1 stress baseline confirms the current large-list issue: `dish-search-reset` was recorded at 13,432 ms shell-visible and 18,129 ms content-ready in `test-results/performance/perf-00-baseline-stress-online-normal.json`.
+- Phase 1 stress baseline confirms the original large-list issue: `dish-search-reset` was recorded at 13,432 ms shell-visible and 18,129 ms content-ready in `test-results/performance/perf-00-baseline-stress-online-normal.json`.
+- Phase 2 daily strict gate passes, but the Phase 2 stress baseline attempt still timed out after 90s while waiting for `dish-search-input`; keep stress completion as a diagnostic follow-up.
 - Existing working tree has unrelated dirt: `node_modules/.yarn-integrity`, `.codegraph/`, and codebase mapper `.out` marker files.
 
 ## Deferred Items
@@ -94,6 +95,6 @@ Items acknowledged and carried forward from project initialization:
 
 ## Session Continuity
 
-Last session: 2026-06-05T12:17:48.000Z
-Stopped at: Completed 02-02-PLAN.md
-Resume file: .planning/phases/02-large-list-interaction-hot-paths/02-03-PLAN.md
+Last session: 2026-06-05T13:28:09.000Z
+Stopped at: Completed 02-03-PLAN.md
+Resume file: Phase 3 discussion/planning not yet created

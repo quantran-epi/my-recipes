@@ -15,9 +15,9 @@ Requirements for the first milestone: stabilize large-list and online/offline re
 
 ### Large-List Responsiveness
 
-- [ ] **LIST-01**: User can open add, edit, detail, inventory, cooking, and shopping-list modals from large virtualized lists without an obvious pre-open UI freeze.
-- [ ] **LIST-02**: User can interact with row menus and row actions in ingredient, dish, and shopping-list screens without list-wide rerender pauses.
-- [ ] **LIST-03**: User can search, filter, and reset large virtualized lists while preserving row spacing, scroll behavior, and touch/desktop interaction quality.
+- [x] **LIST-01**: User can open add, edit, detail, inventory, cooking, and shopping-list modals from large virtualized lists without an obvious pre-open UI freeze.
+- [x] **LIST-02**: User can interact with row menus and row actions in ingredient, dish, and shopping-list screens without list-wide rerender pauses.
+- [x] **LIST-03**: User can search, filter, and reset large virtualized lists while preserving row spacing, scroll behavior, and touch/desktop interaction quality.
 - [ ] **LIST-04**: User can navigate from large-list screens to detail routes with responsive loading feedback and no stale blocked drawer state.
 
 ### Online And Offline Behavior
@@ -30,7 +30,7 @@ Requirements for the first milestone: stabilize large-list and online/offline re
 ### Regression Coverage
 
 - [x] **TEST-01**: Maintainer can run repo-local performance regression checks through package scripts, without relying on globally installed Playwright tooling.
-- [ ] **TEST-02**: Maintainer can run a focused large-list responsiveness test that fails when modal, detail, or menu open timing exceeds the chosen smoke budget.
+- [x] **TEST-02**: Maintainer can run a focused large-list responsiveness test that fails when modal, detail, or menu open timing exceeds the chosen smoke budget.
 - [ ] **TEST-03**: Maintainer can run online/offline comparison checks with GitHub requests stubbed or controlled.
 - [ ] **TEST-04**: Existing build and relevant regression checks pass after responsiveness changes, or failures are documented with exact blockers.
 
@@ -79,16 +79,16 @@ Which phases cover which v1 requirements. Updated during roadmap creation.
 | PERF-01 | Phase 1 | Complete |
 | PERF-02 | Phase 1 | Complete |
 | PERF-03 | Phase 3 | Pending |
-| LIST-01 | Phase 2 | Pending |
-| LIST-02 | Phase 2 | Pending |
-| LIST-03 | Phase 2 | Pending |
+| LIST-01 | Phase 2 | Complete |
+| LIST-02 | Phase 2 | Complete |
+| LIST-03 | Phase 2 | Complete |
 | LIST-04 | Phase 4 | Pending |
 | NET-01 | Phase 3 | Pending |
 | NET-02 | Phase 3 | Pending |
 | NET-03 | Phase 3 | Pending |
 | NET-04 | Phase 3 | Pending |
 | TEST-01 | Phase 1 | Complete |
-| TEST-02 | Phase 2 | Pending |
+| TEST-02 | Phase 2 | Complete |
 | TEST-03 | Phase 3 | Pending |
 | TEST-04 | Phase 5 | Pending |
 | UX-01 | Phase 1 | Complete |
@@ -102,4 +102,4 @@ Which phases cover which v1 requirements. Updated during roadmap creation.
 
 ---
 *Requirements defined: 2026-06-05*
-*Last updated: 2026-06-05 after roadmap creation*
+*Last updated: 2026-06-05 after Phase 2 completion*
