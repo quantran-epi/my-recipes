@@ -1,7 +1,13 @@
 import type { Page } from '@playwright/test';
+import { applyPerformanceNetworkMode, type PerformanceNetworkOptions } from './performanceNetwork';
+import { createPerformanceSeed, type PerformanceDatasetName } from './performanceSeed';
 import { createRegressionSeed } from './testData';
 
 type PersistSlices = Record<string, unknown>;
+
+export type SeedAppOptions = PerformanceNetworkOptions & {
+  dataset?: PerformanceDatasetName;
+};
 
 const persistRoot = (slices: PersistSlices): string => {
   return JSON.stringify({
@@ -10,12 +16,10 @@ const persistRoot = (slices: PersistSlices): string => {
   });
 };
 
-export const seedApp = async (page: Page) => {
-  const seed = createRegressionSeed();
+export const seedApp = async (page: Page, options: SeedAppOptions = {}) => {
+  const seed = options.dataset ? createPerformanceSeed(options.dataset) : createRegressionSeed();
 
-  await page.route('https://raw.githubusercontent.com/**', async route => {
-    await route.fulfill({ status: 404, contentType: 'text/plain', body: '' });
-  });
+  await applyPerformanceNetworkMode(page, options);
 
   await page.addInitScript(({ shared, personal }) => {
     localStorage.clear();
