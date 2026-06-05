@@ -4,74 +4,75 @@ Date: 2026-06-05
 
 ## Summary
 
-The performance plan did improve the app in the areas it was designed to cover: heavy render work, selector lookup cost, lazy modal/tab bodies, route feedback, image budget, scheduled calculations, and performance smoke tests.
+The original performance plan improved CPU, selector, hidden-render, image, route-feedback, and scheduled-calculation costs. It was useful, but it was not broad enough to explain or prevent the remaining large-list problems.
 
-However, the plan was not good enough for the regressions reported after completion. It did not explicitly audit fixed-height virtualized list layout, scroll gesture intent, or first-scroll behavior. Those are perceived-performance and interaction-quality problems, not only CPU/network problems.
+The reported dish and ingredient list issues were mostly virtualization and interaction-quality failures: row measurement, local page size, gesture intent, and per-row modal ownership. Those are performance problems because they directly affect perceived responsiveness, but they are not solved by calculation scheduling alone.
 
 ## Reported Problems
 
-- List UI looked broken because list items were condensed and not separated correctly.
-- Scrolling through a list could accidentally open a detail or inventory modal.
-- On first opening a list, scrolling sometimes did not work until repeated attempts.
-- Large dish and ingredient lists still made modal/sidebar opening feel a bit slow.
+- Dish list first-to-second row gap was larger than later row gaps.
+- Ingredient rows could be clipped when wrapped badges or cards needed more vertical space.
+- Scrolling over list rows could accidentally open detail or inventory modals.
+- First scroll after opening a list sometimes felt unreliable.
+- Large dish and ingredient lists still made sidebar or modal interactions feel slow.
 
-## Why The Problems Survived The Original Plan
+## Why Problems Still Existed
 
-1. The plan optimized heavy work, but did not require visual layout acceptance checks.
+1. The first plan was CPU-heavy-work focused.
 
-   The list screens were converted to fixed-height virtualization. Fixed-height virtualization is fast, but it is fragile: if `rowHeight` is too small or row content is rendered directly into the absolute row container without a stable inner frame, cards can appear compressed or overlap. The previous plan had no automated or manual requirement to verify row separation after virtualization.
+   It removed hidden work and repeated calculations, but it did not require dynamic row measurement or visual spacing assertions after list virtualization. A fixed or underestimated row height can make a fast list look broken.
 
-2. The plan did not distinguish scroll/drag intent from click intent.
+2. The first plan did not include local list paging.
 
-   Row actions still used normal click handlers. During wheel/touch/pointer scrolling, a browser can still dispatch a click at the end of a gesture. Without drag-click suppression around the row, scroll intent could become an accidental modal open.
+   Virtualization limits DOM nodes, but the screen can still prepare props, summaries, row metadata, and measurements for a large filtered result. Paging the local filtered array keeps first paint and early interaction bounded.
 
-3. The plan did not audit first-scroll interference.
+3. The first plan did not define scroll intent as an acceptance criterion.
 
-   Dish, ingredient, and shopping-list screens reset the virtual list to the top whenever filters/search changed. That effect also ran on initial mount, which could fight the first user scroll right after the page opened.
+   Touch and pointer gestures can end with a click event. Without a row-level guard, a scroll gesture over a button can become an accidental modal open.
 
-4. The plan reduced hidden heavy work, but did not fully reduce visible-card rerender churn.
+4. The first plan did not reduce row-owned modal state enough.
 
-   Opening a modal or sidebar changes React state while a large list is visible. Even when hidden modal bodies are lazy, visible rich row cards can still rerender. Memoizing the heavy card components and stabilizing virtual-list props reduces that extra work.
+   If every visible ingredient row owns inventory modal state and modal JSX, opening unrelated UI still carries extra row work. Moving inventory modal ownership to the parent gives the list one modal path instead of many row-owned modal paths.
 
-## Was The Performance Plan Not Good Enough?
+## Was The Plan Good Enough?
 
-Yes, for this class of bug it was not good enough.
+No, not for overall perceived performance.
 
-It was a useful CPU/network/lazy-render plan, but it was incomplete as a user-perceived performance plan. It treated performance mostly as main-thread cost, hidden work, request count, and modal shell latency. It should also have treated layout stability, scroll intent, and touch/wheel behavior as acceptance criteria for any list virtualization work.
+It was good for CPU, selector, hidden work, and network budgets. It was incomplete for virtualized list layout, dynamic row height, local paging, scroll gesture safety, and modal/sidebar responsiveness while large lists are visible.
 
-## Fixes Implemented
+## Updated Plan
 
-- Added `src/Components/List/VirtualListRowFrame.tsx` and exported it from `src/Components/List/index.ts`.
-- Wrapped dish, ingredient, and shopping-list virtual rows in the shared row frame.
-- Increased fixed row heights for dish, ingredient, and shopping-list list rows.
-- Added pointer/touch drag detection to suppress accidental click events after scroll gestures.
-- Added `touchAction: "pan-y"` and `overscrollBehavior: "contain"` to list rows and stable virtual-list styles.
-- Skipped initial mount scroll reset on dish, ingredient, and shopping-list list screens.
-- Memoized heavy dish, ingredient, and shopping-list row item components.
-- Added focused Playwright regression coverage for row spacing, first scroll, drag-scroll suppression, and intentional modal opening.
+The performance plan now includes `PERF-08: Dynamic Virtualized List Paging And Interaction Guard` in `docs/performance-audit-plan.md`.
 
-## Plan Update
+That item requires future list work to verify:
 
-`docs/performance-audit-plan.md` now includes `PERF-08: Virtualized List Interaction And Layout Guard`.
+- Dynamic row height measurement for rich dish and ingredient cards.
+- Consistent row spacing, including the first-to-second dish gap.
+- No clipping for ingredient cards with wrapped content.
+- Local incremental paging over large filtered arrays.
+- Drag-scroll suppression so scroll gestures do not open modals.
+- Normal intentional clicks still opening the expected modal/action.
+- Parent-owned modal state when row-owned modal state would multiply list work.
+- Focused Playwright coverage for spacing, clipping, paging, drag intent, and smoke timing.
 
-That item makes these checks explicit for future work:
+## Implemented Fixes
 
-- Fixed-height virtualized rich rows must have adequate row height and a stable row frame.
-- List rows must be visually separated and not clipped or overlapped.
-- First scroll after opening a list must work immediately.
-- Dragging or scrolling over a row action must not open a modal.
-- A normal intentional click must still open the expected action.
-- Large visible row cards should avoid unnecessary rerenders when overlay/sidebar state changes.
+- Added dynamic mode to `src/Components/List/VirtualListRowFrame.tsx`.
+- Added `src/Hooks/usePagedVirtualItems.ts` and exported it from `src/Hooks/index.ts`.
+- Updated dish and ingredient lists to use `react-window` dynamic row heights.
+- Added local incremental paging for filtered dish and ingredient arrays.
+- Added lightweight loaded-count status chips while more local items remain.
+- Moved ingredient inventory modal state from each row to `IngredientListScreen`.
+- Removed the stale row-owned inventory modal block.
+- Expanded e2e fixture ingredients to 52 rows while preserving shopping-list cost totals.
+- Extended `tests/e2e/performance-regression.spec.ts` for dish gaps, ingredient clipping, paging, drag-scroll suppression, and intentional modal opening.
 
 ## Verification
 
 - Build: `npm.cmd run build` passed with the existing lint/dependency warning set.
-- E2E: `$env:E2E_PORT='5000'; npx.cmd playwright test tests/e2e/performance-regression.spec.ts` passed 3 tests.
-- Visual evidence inspected:
-  - `test-results/performance/ingredient-list-visual.png`
-  - `test-results/performance/dish-list-visual.png`
-  - `test-results/performance/shopping-list-visual.png`
+- Performance e2e: `$env:E2E_PORT='5000'; npx.cmd playwright test tests/e2e/performance-regression.spec.ts --reporter=list` passed 4/4.
+- Fixture e2e: `$env:E2E_PORT='5000'; npx.cmd playwright test tests/e2e/shopping-list.spec.ts -g "shows separate remaining-cart" --reporter=list` passed 1/1.
 
 ## Residual Risk
 
-The automated test currently exercises seeded regression data, not every possible production-size dataset. The updated plan keeps `PERF-08` as a standing audit gate so future virtualized list changes must include layout and gesture validation, not only timing checks.
+The checks use deterministic seeded data, not every production-sized dataset or device class. `PERF-08` should remain a required audit gate for future virtualized list, row-action, modal, and local paging changes.

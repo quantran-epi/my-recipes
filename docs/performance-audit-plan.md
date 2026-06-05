@@ -400,45 +400,48 @@ Notes:
 - The repo's `.env` pins CRA to `PORT=5000`, so the verified PERF-07 Playwright commands used `E2E_PORT=5000` to reuse the reachable dev server.
 - The explicit `PERF-00` baseline test remains opt-in; the new PERF-07 regression spec runs in the standard suite.
 
-### PERF-08: Virtualized List Interaction And Layout Guard
+### PERF-08: Dynamic Virtualized List Paging And Interaction Guard
 
 Status: Audited
 
 Purpose:
-- Cover the class of regressions that remained after the original performance plan: virtualized row spacing, scroll intent handling, first-scroll behavior, and visible-card rerender churn while overlays open.
+- Cover the class of regressions that remained after the original performance plan: virtualized row spacing, dynamic card height, scroll intent handling, first-scroll behavior, local list paging, and visible-card/modal rerender churn while overlays open.
 
 Implementation:
-- Add a shared virtual row frame that applies stable row box sizing, padding, overflow control, mobile scroll hints, and drag-click suppression for pointer and touch gestures.
-- Increase fixed row heights for dish, ingredient, and shopping-list virtualized rows so rich cards have enough reserved space and do not visually collapse into neighboring rows.
-- Skip initial mount scroll-reset effects so opening a list does not fight the user's first wheel/touch scroll.
-- Keep virtual-list style objects stable and reduce overscan on large list screens to lower extra card work.
-- Memoize heavy dish, ingredient, and shopping-list row card components so unrelated overlay/sidebar state does not rerender visible cards unnecessarily.
-- Add nonvisual `data-testid` hooks for virtual lists and row cards to support focused regression tests.
-- Extend `tests/e2e/performance-regression.spec.ts` with checks for row spacing, immediate scrolling, drag-scroll suppression, and normal modal opening after an intentional click.
+- Extend the shared `VirtualListRowFrame` with dynamic-row mode so measured rows keep stable box sizing, consistent padding, visible overflow for measurement, mobile scroll hints, and drag-click suppression for pointer and touch gestures.
+- Add `usePagedVirtualItems` for client-side incremental paging over already-filtered local arrays so large lists do not mount every matching item at first paint.
+- Switch dish and ingredient lists from fixed row-height assumptions to `react-window` dynamic row-height measurement with sensible default heights.
+- Load more local dish/ingredient rows near the end of the visible page and show a lightweight `Đã tải x/y` status chip while more rows remain.
+- Keep dish and ingredient virtual-list style objects stable and reduce overscan to lower extra rich-card work.
+- Move ingredient inventory modal ownership to the ingredient list screen so each row no longer owns inventory modal state or an inventory modal subtree.
+- Expand deterministic e2e seed data to expose local paging without changing shopping-list cost totals.
+- Extend `tests/e2e/performance-regression.spec.ts` with checks for dish gap consistency, ingredient dynamic height/clipping, local paging to the last seeded ingredient, drag-scroll suppression, and normal modal opening after an intentional click.
 
 Acceptance Criteria:
-- Dish, ingredient, and shopping-list rows are visually separated and not clipped or overlapped in representative desktop/mobile-sized viewports.
-- The first wheel/touch scroll after opening a large list moves the list without requiring repeated attempts.
+- Dish and ingredient rows are visually separated, including the first-to-second dish gap.
+- Ingredient rows with wrapped badges/content are measured dynamically and are not clipped in representative mobile-sized viewports.
+- Large local dish and ingredient lists initially render a bounded page and incrementally expose more rows during scroll.
 - Dragging or scrolling over a row action does not open a detail or inventory modal by accident.
 - A normal intentional click still opens the expected modal or row action.
-- Opening sidebar or modal chrome while a large list is visible does not force avoidable rerender work across all visible rich cards.
+- Opening modal chrome while a large list is visible avoids per-row inventory modal work and does not mount hidden row-owned modal bodies.
 - Build and focused performance regression tests pass.
 
 Audit Checklist:
-- Static inspection checks: confirm every fixed-height virtualized rich row uses `VirtualListRowFrame`, has adequate `rowHeight`, and avoids recreating unstable list style objects during unrelated state changes.
-- Automated test checks: run the focused Playwright performance regression suite and confirm it covers row spacing, scroll behavior, drag-click suppression, and intentional modal opening.
-- Manual browser checks if needed: visually inspect dish, ingredient, and shopping-list screens after build with representative seeded data; confirm list rows are separated and scrolling feels immediate.
+- Static inspection checks: confirm dynamic virtualized rich rows use `VirtualListRowFrame layout="dynamic"`, dynamic row-height measurement, stable list styles, bounded page counts, and parent-owned modal state where row-owned modal state would multiply work.
+- Automated test checks: run the focused Playwright performance regression suite and confirm it covers row spacing, clipping, local paging, drag-click suppression, and intentional modal opening.
+- Manual browser checks if needed: visually inspect dish and ingredient screens after build with representative seeded data; confirm rows are separated, wrapped cards are not clipped, scrolling feels immediate, and modal/sidebar interactions do not visibly stall.
 
 Test Evidence:
 - 2026-06-05 build command: `npm.cmd run build`.
 - 2026-06-05 build result: passed with the existing lint/dependency warning set.
-- 2026-06-05 e2e command: `$env:E2E_PORT='5000'; npx.cmd playwright test tests/e2e/performance-regression.spec.ts`.
-- 2026-06-05 e2e result: passed 3 Playwright tests, including the new virtualized ingredient row spacing and drag-scroll intent test.
-- 2026-06-05 visual evidence: inspected screenshots at `test-results/performance/ingredient-list-visual.png`, `test-results/performance/dish-list-visual.png`, and `test-results/performance/shopping-list-visual.png`; rows were separated and not clipped or overlapping.
+- 2026-06-05 e2e command: `$env:E2E_PORT='5000'; npx.cmd playwright test tests/e2e/performance-regression.spec.ts --reporter=list`.
+- 2026-06-05 e2e result: passed 4 Playwright tests covering dish gap consistency, ingredient dynamic row spacing/clipping/paging, drag-scroll intent, lazy tab/modal mounting, and route/modal smoke budgets.
+- 2026-06-05 fixture regression command: `$env:E2E_PORT='5000'; npx.cmd playwright test tests/e2e/shopping-list.spec.ts -g "shows separate remaining-cart" --reporter=list`.
+- 2026-06-05 fixture regression result: passed 1 Playwright test confirming the expanded ingredient seed did not change shopping-list remaining-cart and bought expense totals.
 
 Notes:
-- The original plan was not broad enough for this regression class. It targeted heavy calculations, hidden work, image budgets, and modal lazy mounting, but it did not require visual layout assertions or gesture-intent checks after list virtualization.
-- This item should remain in the plan as a required audit gate whenever fixed-height virtualization, row actions, or list scroll reset behavior changes.
+- The original plan was not broad enough for this regression class. It targeted heavy calculations, hidden work, image budgets, and modal lazy mounting, but it did not require dynamic virtualization layout assertions, local paging assertions, or gesture-intent checks.
+- This item should remain in the plan as a required audit gate whenever virtualized list measurement, row actions, list paging, or row-owned modal state changes.
 
 ## Audit Log
 
@@ -453,4 +456,4 @@ Notes:
 | 2026-06-04 | PERF-05 | Static navigation audit; `npm run build`; `$env:E2E_PORT='3032'; npx.cmd playwright test --output D:\tmp\my-recipes-e2e-perf05-artifacts` | Centralized sidebar/bottom-tab route feedback, removed sidebar navigation delay, transition-wrapped high-traffic dashboard/search/list/detail navigation, and verified build plus e2e. | `src/Routing/MasterPage.tsx`; `src/Modules/Home/Screens/Dashboard.screen.tsx`; `src/Modules/Home/Screens/GlobalSearch.screen.tsx`; `playwright-report/index.html`; `test-results/e2e-results.json`; `D:\tmp\my-recipes-e2e-perf05-artifacts` | Deploy `PERF-05`, then continue with `PERF-06` heavy calculation scheduling. |
 | 2026-06-04 | PERF-06 | CodeGraph static audit; focused diff review; `npm run build`; `$env:E2E_PORT='3032'; npx.cmd playwright test --output D:\tmp\my-recipes-e2e-perf06-artifacts` | Added shared scheduled calculation hook, moved dashboard/suggester/planner/cost-tab heavy calculations out of urgent render paths, added pending-safe UI states, and verified build plus e2e. | `src/Hooks/useScheduledCalculation.ts`; `src/Modules/DishSuggester/Screens/DishSuggester.screen.tsx`; `src/Modules/Dishes/Screens/DishesManageIngredient/DishExpensePlanner.widget.tsx`; `playwright-report/index.html`; `test-results/e2e-results.json`; `D:\tmp\my-recipes-e2e-perf06-artifacts` | Deploy `PERF-06`, then continue with `PERF-07` performance regression suite. |
 | 2026-06-04 | PERF-07 | `$env:E2E_PORT='5000'; npx.cmd playwright test tests/e2e/performance-regression.spec.ts --output D:\tmp\my-recipes-e2e-perf07-artifacts`; `$env:E2E_PORT='5000'; npx.cmd playwright test --output D:\tmp\my-recipes-e2e-perf07-full-artifacts` | Added normal-suite performance regression tests for lazy tab/modal mounting, route/modal smoke budgets, route request/image budget, and hidden dish-image requests; targeted PERF-07 passed 2 tests; full suite passed 11 and skipped 1 explicit baseline. | `tests/e2e/performance-regression.spec.ts`; `test-results/performance/perf-07-regression.json`; `playwright-report/index.html`; `test-results/e2e-results.json`; `D:\tmp\my-recipes-e2e-perf07-artifacts`; `D:\tmp\my-recipes-e2e-perf07-full-artifacts` | Deploy `PERF-07`; performance plan implementation is complete. |
-| 2026-06-05 | PERF-08 | `npm.cmd run build`; `$env:E2E_PORT='5000'; npx.cmd playwright test tests/e2e/performance-regression.spec.ts`; visual screenshot inspection | Added virtual row frame, increased row heights, guarded drag-scroll clicks, skipped initial scroll reset, memoized rich list cards, and verified row spacing plus scroll intent. | `src/Components/List/VirtualListRowFrame.tsx`; `tests/e2e/performance-regression.spec.ts`; `test-results/performance/ingredient-list-visual.png`; `test-results/performance/dish-list-visual.png`; `test-results/performance/shopping-list-visual.png` | Keep `PERF-08` as the regression gate for future virtualized list work. |
+| 2026-06-05 | PERF-08 | `npm.cmd run build`; `$env:E2E_PORT='5000'; npx.cmd playwright test tests/e2e/performance-regression.spec.ts --reporter=list`; `$env:E2E_PORT='5000'; npx.cmd playwright test tests/e2e/shopping-list.spec.ts -g "shows separate remaining-cart" --reporter=list` | Added dynamic virtual row framing, local list paging, dynamic row-height measurement, parent-owned ingredient inventory modal state, expanded paging fixture data, and verified row spacing, clipping, paging, drag-scroll intent, and fixture totals. | `src/Components/List/VirtualListRowFrame.tsx`; `src/Hooks/usePagedVirtualItems.ts`; `src/Modules/Dishes/Screens/DishesList.screen.tsx`; `src/Modules/Ingredient/Screens/IngredientList.screen.tsx`; `tests/e2e/performance-regression.spec.ts`; `tests/e2e/fixtures/testData.ts` | Keep `PERF-08` as the regression gate for future virtualized list measurement, paging, and row action work. |

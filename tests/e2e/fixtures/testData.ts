@@ -60,6 +60,7 @@ export const TEST_IDS = {
     sauce: 'ing-sauce',
     expired: 'ing-expired',
     scrollLast: 'ing-scroll-12',
+    pagedLast: 'ing-scroll-52',
   },
   dishes: {
     comGa: 'dish-com-ga',
@@ -84,7 +85,7 @@ const todayAtNoon = (offsetDays = 0): string => {
 const massConversions = { g: 1, kg: 1000 } as const;
 const volumeConversions = { ml: 1 } as const;
 
-const scrollIngredients: TestIngredient[] = Array.from({ length: 12 }, (_, index) => {
+const scrollIngredients: TestIngredient[] = Array.from({ length: 52 }, (_, index) => {
   const number = String(index + 1).padStart(2, '0');
   return {
     id: `ing-scroll-${number}`,
@@ -177,7 +178,9 @@ const dishIngredient = (
   required = true,
 ): TestDishIngredient => ({ ingredientId, amount, unit, dishesId: dishId, required });
 
-const scrollDishIngredients = scrollIngredients.map(item =>
+const checklistScrollIngredients = scrollIngredients.slice(0, 12);
+
+const scrollDishIngredients = checklistScrollIngredients.map(item =>
   dishIngredient(TEST_IDS.dishes.comGa, item.id, '1', 'g', false),
 );
 
@@ -267,7 +270,7 @@ const group = (
   boughtUnit,
 });
 
-const scrollShoppingGroups = scrollIngredients.map(item => group(
+const scrollShoppingGroups = checklistScrollIngredients.map(item => group(
   item.id,
   [amountForGroup(item.id, TEST_IDS.dishes.comGa, 'Com ga regression', '1', 'g', true, false)],
   true,
