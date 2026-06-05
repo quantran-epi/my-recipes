@@ -1,9 +1,9 @@
 ---
 phase: 03
 slug: online-and-offline-cost-isolation
-status: draft
-nyquist_compliant: false
-wave_0_complete: false
+status: planned
+nyquist_compliant: true
+wave_0_complete: true
 created: 2026-06-05
 ---
 
@@ -38,19 +38,26 @@ created: 2026-06-05
 
 | Task ID | Plan | Wave | Requirement | Threat Ref | Secure Behavior | Test Type | Automated Command | File Exists | Status |
 |---------|------|------|-------------|------------|-----------------|-----------|-------------------|-------------|--------|
-| 03-01-* | 03-01 | 1 | NET-01, NET-02 | T-03-sync-startup | Background sync must not block first usable list/app shell; no secrets exposed. | e2e/perf | Phase 3 startup/list interaction check plus daily Phase 2 gate | pending plan | pending |
-| 03-02-* | 03-02 | 2 | NET-03, NET-04 | T-03-sync-image | Sync prompt and image work must be progressive, controlled, and non-destructive. | e2e/perf | Phase 3 sync prompt/image check plus daily Phase 2 gate | pending plan | pending |
-| 03-03-* | 03-03 | 3 | PERF-03, TEST-03 | T-03-network-harness | GitHub and image requests must be stubbed/controlled unless explicitly diagnostic. | e2e/perf | Phase 3 online/offline comparison command | pending plan | pending |
+| 03-01-task-1 | 03-01 | 1 | NET-01, NET-02 | T-03-sync-startup | Background sync must not start before app/list usability and quiet-window scheduling. | build | `npm run build` | `.planning/phases/03-online-and-offline-cost-isolation/03-01-PLAN.md` | planned |
+| 03-01-task-2 | 03-01 | 1 | PERF-03, TEST-03 | T-03-network-harness | Due/fresh/offline sync states and GitHub manifest fixtures are deterministic and secret-free. | e2e/list | `npm run test:e2e:performance -- --list` | `.planning/phases/03-online-and-offline-cost-isolation/03-01-PLAN.md` | planned |
+| 03-01-task-3 | 03-01 | 1 | NET-01, NET-02, PERF-03 | T-03-sync-startup | Pending startup sync must not break Phase 2 list hot-path budgets. | e2e/perf | `E2E_BROWSER_CHANNEL=chrome PERF_DATASET=daily PERF_NETWORK_MODE=online-normal npm run test:e2e:performance` | `.planning/phases/03-online-and-offline-cost-isolation/03-01-PLAN.md` | planned |
+| 03-02-task-1 | 03-02 | 2 | NET-04 | T-03-sync-image | Sync modal shell must render from manifest data while full shared data and warnings load progressively. | build | `npm run build` | `.planning/phases/03-online-and-offline-cost-isolation/03-02-PLAN.md` | planned |
+| 03-02-task-2 | 03-02 | 2 | NET-03, NET-04 | T-03-sync-image | Selective-sync versions are preserved and dish list images stay fallback-first and dimension-stable. | build | `npm run build` | `.planning/phases/03-online-and-offline-cost-isolation/03-02-PLAN.md` | planned |
+| 03-02-task-3 | 03-02 | 2 | NET-03, NET-04, PERF-03, TEST-03 | T-03-sync-image | Progressive sync prompt and image isolation are proven under controlled network/image modes. | e2e/perf | `E2E_BROWSER_CHANNEL=chrome PERF_DATASET=daily PERF_NETWORK_MODE=online-normal npm run test:e2e:performance` | `.planning/phases/03-online-and-offline-cost-isolation/03-02-PLAN.md` | planned |
+| 03-03-task-1 | 03-03 | 3 | PERF-03, TEST-03 | T-03-network-harness | Maintainers have a repo-local Phase 3 comparison command. | e2e/list | `npm run test:e2e:performance:phase3 -- --list` | `.planning/phases/03-online-and-offline-cost-isolation/03-03-PLAN.md` | planned |
+| 03-03-task-2 | 03-03 | 3 | PERF-03, NET-01, NET-02, NET-03, NET-04, TEST-03 | T-03-network-harness | Online/offline/GitHub/image comparison evidence is written with diagnostics and Phase 2 budgets. | e2e/perf | `E2E_BROWSER_CHANNEL=chrome npm run test:e2e:performance:phase3` | `.planning/phases/03-online-and-offline-cost-isolation/03-03-PLAN.md` | planned |
+| 03-03-task-3 | 03-03 | 3 | PERF-03, TEST-03 | T-03-network-harness | Docs explain strict Phase 3 checks and optional service-worker diagnostics. | docs/grep | `rg -n "Phase 3|test:e2e:performance:phase3|online-normal|browser-offline|mocked-slow-network|100 ms|service-worker" docs/performance-audit-plan.md docs/automated-regression-test-plan.md` | `.planning/phases/03-online-and-offline-cost-isolation/03-03-PLAN.md` | planned |
 
-*Status: pending until PLAN.md task IDs are created.*
+*Status: planned after PLAN.md task IDs were created.*
 
 ---
 
 ## Wave 0 Requirements
 
 - Existing Playwright infrastructure is present in `package.json`, `playwright.config.ts`, `tests/e2e/fixtures/performanceNetwork.ts`, `tests/e2e/fixtures/seedApp.ts`, and `tests/e2e/fixtures/performanceReport.ts`.
-- Planner must add any missing Phase 3 comparison command or narrow test hook before marking `TEST-03` covered.
-- Planner must keep service-worker production diagnostics optional, not part of the strict gate.
+- Plan 03-01 creates the deterministic startup sync fixture path before prompt/image checks depend on it.
+- Plan 03-03 creates the Phase 3 comparison command before marking `TEST-03` covered.
+- Service-worker production diagnostics remain optional, not part of the strict gate.
 
 ---
 
@@ -65,11 +72,11 @@ created: 2026-06-05
 
 ## Validation Sign-Off
 
-- [ ] All tasks have `<automated>` verify commands or an explicit manual-only justification.
-- [ ] Sampling continuity: no three consecutive task commits without either `npm run build`, the daily performance gate, or the Phase 3 comparison command.
-- [ ] Phase 3 comparison evidence covers `online-normal`, `browser-offline`, and slow/blocked GitHub/image modes.
-- [ ] Service-worker production behavior remains optional diagnostic evidence.
-- [ ] Feedback latency for strict gates stays under 180 seconds where possible.
-- [ ] Set `nyquist_compliant: true` only after generated plans map concrete task IDs to this validation strategy.
+- [x] All tasks have `<automated>` verify commands or an explicit manual-only justification.
+- [x] Sampling continuity: no three consecutive task commits without either `npm run build`, the daily performance gate, or the Phase 3 comparison command.
+- [x] Phase 3 comparison evidence covers `online-normal`, `browser-offline`, and slow/blocked GitHub/image modes.
+- [x] Service-worker production behavior remains optional diagnostic evidence.
+- [x] Feedback latency for strict gates stays under 180 seconds where possible.
+- [x] Set `nyquist_compliant: true` only after generated plans map concrete task IDs to this validation strategy.
 
-**Approval:** pending
+**Approval:** planned 2026-06-05

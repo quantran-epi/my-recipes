@@ -99,13 +99,27 @@ Plans:
   4. Shared-data sync prompts can appear without heavy fetch or impact-analysis work blocking the app shell.
   5. Maintainer can run online/offline comparison checks with GitHub requests stubbed, controlled, or clearly measured.
 
-**Plans:** 3 plans
+**Plans:** 3 plans planned
 
 Plans:
 
-- [ ] 03-01: Instrument and isolate startup shared-sync and service-worker effects.
-- [ ] 03-02: Control dish image request/decode behavior on list and detail surfaces.
-- [ ] 03-03: Add online/offline comparison checks with deterministic GitHub request handling.
+**Wave 1**
+
+- [ ] 03-01: Isolate startup shared-sync checks from first usable list interactions.
+
+**Wave 2** *(blocked on Wave 1 completion)*
+
+- [ ] 03-02: Make sync prompts progressive and dish images fallback-first on list rows.
+
+**Wave 3** *(blocked on Wave 2 completion)*
+
+- [ ] 03-03: Add the online/offline comparison gate with deterministic GitHub and image handling.
+
+Cross-cutting constraints:
+
+- Preserve Phase 2 practical budgets while keeping 100 ms shell-visible as warning evidence.
+- Keep strict checks service-worker-free; production service-worker behavior is optional diagnostic evidence only.
+- Preserve local-first shared/personal data behavior, GitHub shared sync, and dish row imagery.
 
 ### Phase 4: Navigation and App-Shell Responsiveness
 
@@ -160,7 +174,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5
 |-------|----------------|--------|-----------|
 | 1. Measurement and Performance Harness | 3/3 | Complete    | 2026-06-05 |
 | 2. Large-List Interaction Hot Paths | 3/3 | Complete    | 2026-06-05 |
-| 3. Online and Offline Cost Isolation | 0/3 | Not started | - |
+| 3. Online and Offline Cost Isolation | 0/3 | Planned     | - |
 | 4. Navigation and App-Shell Responsiveness | 0/2 | Not started | - |
 | 5. Release Gate and Product Guardrails | 0/2 | Not started | - |
 

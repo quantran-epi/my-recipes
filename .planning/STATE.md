@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: Ready for Phase 3
-stopped_at: Phase 3 UI-SPEC approved
-last_updated: "2026-06-05T15:35:57.775Z"
-last_activity: 2026-06-05 - Phase 2 completed; Phase 3 ready
+status: Ready to execute Phase 3
+stopped_at: Phase 3 planned
+last_updated: "2026-06-05T15:47:34.138Z"
+last_activity: 2026-06-05 - Phase 3 planned with 3 waves
 progress:
   total_phases: 5
   completed_phases: 2
-  total_plans: 6
+  total_plans: 9
   completed_plans: 6
   percent: 40
 ---
@@ -26,9 +26,9 @@ See: .planning/PROJECT.md (updated 2026-06-05)
 ## Current Position
 
 Phase: 3 of 5 (online and offline cost isolation)
-Plan: Phase 2 complete; Phase 3 not planned yet in `.planning/phases/`
-Status: Ready for Phase 3
-Last activity: 2026-06-05 - Phase 2 completed; Phase 3 ready
+Plan: Phase 3 has 3 planned waves: startup sync isolation, sync prompt/image isolation, and online/offline comparison gate
+Status: Ready to execute Phase 3
+Last activity: 2026-06-05 - Phase 3 planned with 3 waves
 
 Progress: [█████░░░░░] 46%
 
@@ -46,7 +46,7 @@ Progress: [█████░░░░░] 46%
 |-------|-------|-------|----------|
 | 1. Measurement and Performance Harness | 3/3 | 4h 10m | 1h 23m |
 | 2. Large-List Interaction Hot Paths | 3/3 | 1h 43m | 34m |
-| 3. Online and Offline Cost Isolation | 0/3 | - | - |
+| 3. Online and Offline Cost Isolation | 0/3 planned | - | - |
 | 4. Navigation and App-Shell Responsiveness | 0/2 | - | - |
 | 5. Release Gate and Product Guardrails | 0/2 | - | - |
 
@@ -69,7 +69,9 @@ Recent decisions affecting current work:
 
 ### Pending Todos
 
-- Start Phase 3 planning/discussion for online/offline, GitHub sync, image, service-worker, and network cost isolation.
+- Execute Phase 3 Plan 03-01 for startup shared-sync isolation.
+- Execute Phase 3 Plan 03-02 for progressive sync prompt and dish image workload isolation.
+- Execute Phase 3 Plan 03-03 for online/offline comparison evidence and docs.
 
 ### Blockers/Concerns
 
@@ -94,5 +96,5 @@ Items acknowledged and carried forward from project initialization:
 ## Session Continuity
 
 Last session: 2026-06-05T15:35:57.755Z
-Stopped at: Phase 3 UI-SPEC approved
-Resume file: .planning/phases/03-online-and-offline-cost-isolation/03-UI-SPEC.md
+Stopped at: Phase 3 planned
+Resume file: .planning/phases/03-online-and-offline-cost-isolation/03-01-PLAN.md
