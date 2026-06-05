@@ -144,7 +144,8 @@ export const IngredientListScreen = () => {
     const normalizedSearch = searchText.trim().toLowerCase();
 
     const _onSearchChange = useMemo(() => debounce((event: React.ChangeEvent<HTMLInputElement>) => {
-        setSearchText(event.target.value);
+        const nextValue = event.target.value;
+        React.startTransition(() => setSearchText(nextValue));
     }, 350), []);
 
     useEffect(() => () => _onSearchChange.cancel(), [_onSearchChange]);
@@ -153,16 +154,21 @@ export const IngredientListScreen = () => {
         setShowScrollTop(current => current === nextVisible ? current : nextVisible);
     }, []);
 
+    const _setActiveStockFilter = useCallback((nextFilter: IngredientStockFilter) => {
+        React.startTransition(() => setActiveStockFilter(nextFilter));
+    }, []);
+
+    const _resetActiveCategory = useCallback(() => {
+        React.startTransition(() => setActiveCategory(null));
+    }, []);
+
+    const _toggleActiveCategory = useCallback((category: string) => {
+        React.startTransition(() => setActiveCategory(current => current === category ? null : category));
+    }, []);
+
     const _onListScroll = useCallback((event: React.UIEvent<HTMLElement>) => {
         _setScrollTopVisible(event.currentTarget.scrollTop > 180);
     }, [_setScrollTopVisible]);
-
-    const stockSnapshots = useMemo(() => {
-        return ingredients.reduce((result, ingredient) => {
-            result[ingredient.id] = getIngredientStockSnapshot(ingredient, inventoryItems);
-            return result;
-        }, {} as Record<string, IngredientStockSnapshot>);
-    }, [ingredients, inventoryItems]);
 
     const toggleUseFirst = useToggle({ defaultValue: false });
     const toggleStats = useToggle({ defaultValue: false });
@@ -185,13 +191,15 @@ export const IngredientListScreen = () => {
             return result;
         }, {} as Record<IngredientStockFilter, number>);
         const categoryCounts: Record<string, number> = { __all: 0 };
+        const stockSnapshots: Record<string, IngredientStockSnapshot> = {};
         const categorySet = new Set(availableCategories);
         const filtered: Ingredient[] = [];
 
         ingredients.forEach(ingredient => {
             const matchesSearch = ingredientMatchesSearch(ingredient, normalizedSearch);
             if (!matchesSearch) return;
-            const stock = stockSnapshots[ingredient.id];
+            const stock = getIngredientStockSnapshot(ingredient, inventoryItems);
+            stockSnapshots[ingredient.id] = stock;
 
             if (ingredientMatchesCategory(ingredient, activeCategory)) {
                 INGREDIENT_STOCK_FILTERS.forEach(item => {
@@ -217,12 +225,13 @@ export const IngredientListScreen = () => {
 
         return {
             filteredIngredients: sortBy(filtered, "name"),
+            stockSnapshots,
             stockCounts,
             categoryCounts,
         };
-    }, [ingredients, stockSnapshots, normalizedSearch, activeCategory, activeStockFilter, availableCategories]);
+    }, [ingredients, inventoryItems, normalizedSearch, activeCategory, activeStockFilter, availableCategories]);
 
-    const { filteredIngredients, stockCounts, categoryCounts } = filterData;
+    const { filteredIngredients, stockSnapshots, stockCounts, categoryCounts } = filterData;
     const pagedIngredientsResetKey = `${activeStockFilter}|${activeCategory ?? "all"}|${normalizedSearch}`;
     const {
         visibleItems: visibleIngredients,
@@ -232,6 +241,13 @@ export const IngredientListScreen = () => {
         loadMore: loadMoreIngredients,
     } = usePagedVirtualItems({ items: filteredIngredients, resetKey: pagedIngredientsResetKey });
     const rowHeight = useDynamicRowHeight({ defaultRowHeight: INGREDIENT_ROW_DEFAULT_HEIGHT, key: pagedIngredientsResetKey });
+    const visibleStockSnapshots = useMemo(() => {
+        return visibleIngredients.reduce((result, ingredient) => {
+            const snapshot = stockSnapshots[ingredient.id];
+            if (snapshot) result[ingredient.id] = snapshot;
+            return result;
+        }, {} as Record<string, IngredientStockSnapshot>);
+    }, [visibleIngredients, stockSnapshots]);
 
     const _onAdd = () => {
         toggleAddModal.show();
@@ -251,12 +267,12 @@ export const IngredientListScreen = () => {
 
     const ingredientRowProps = useMemo(() => ({
         items: visibleIngredients,
-        stockSnapshots,
+        stockSnapshots: visibleStockSnapshots,
         onDelete: _onDelete,
         isAdmin,
         onSuggest: _onSuggest,
         onOpenInventory: _onOpenInventory,
-    }), [visibleIngredients, stockSnapshots, _onDelete, isAdmin, _onSuggest, _onOpenInventory]);
+    }), [visibleIngredients, visibleStockSnapshots, _onDelete, isAdmin, _onSuggest, _onOpenInventory]);
 
     const _scrollToTop = useCallback(() => {
         const scrolled = scrollVirtualListToTop(listRef.current);
@@ -293,18 +309,18 @@ export const IngredientListScreen = () => {
             </Stack.Compact>
             <div style={filterRowStyle}>
                 {INGREDIENT_STOCK_FILTERS.map(item => (
-                    <button key={item.value} type="button" data-testid={`ingredient-filter-${item.value}`} onClick={() => setActiveStockFilter(item.value)} style={filterChipStyle(activeStockFilter === item.value)}>
+                    <button key={item.value} type="button" data-testid={`ingredient-filter-${item.value}`} onClick={() => _setActiveStockFilter(item.value)} style={filterChipStyle(activeStockFilter === item.value)}>
                         {item.label} ({stockCounts[item.value] ?? 0})
                     </button>
                 ))}
             </div>
             {availableCategories.length > 0 && (
                 <div style={filterRowStyle}>
-                    <button type="button" data-testid="ingredient-category-filter-reset" onClick={() => setActiveCategory(null)} style={filterChipStyle(activeCategory === null)}>
+                    <button type="button" data-testid="ingredient-category-filter-reset" onClick={_resetActiveCategory} style={filterChipStyle(activeCategory === null)}>
                         Tất cả nhóm ({categoryCounts.__all ?? 0})
                     </button>
                     {availableCategories.map(category => (
-                        <button key={category} type="button" onClick={() => setActiveCategory(activeCategory === category ? null : category)} style={filterChipStyle(activeCategory === category)}>
+                        <button key={category} type="button" onClick={() => _toggleActiveCategory(category)} style={filterChipStyle(activeCategory === category)}>
                             {category} ({categoryCounts[category] ?? 0})
                         </button>
                     ))}
@@ -448,6 +464,7 @@ const IngredientItemComponent: React.FunctionComponent<IngredientItemProps> = (p
                     <div style={{ display: "grid", gridTemplateColumns: "minmax(120px, 0.92fr) minmax(0, 1.08fr)", gap: 8, alignItems: "stretch" }}>
                         <button
                             type="button"
+                            data-testid={`ingredient-inventory-button-${props.item.id}`}
                             onClick={() => props.onOpenInventory(props.item)}
                             style={{
                                 border: `1px solid ${inventoryStatus.border}`,

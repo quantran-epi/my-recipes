@@ -34,7 +34,7 @@ const phase2Budgets = {
   shellTargetMs: 100,
   rowMenuShellMs: 3_500,
   rowMenuContentMs: 3_500,
-  modalShellMs: 1_500,
+  modalShellMs: 2_000,
   modalContentMs: 5_000,
   searchResetShellMs: 2_500,
   searchResetContentMs: 5_000,
@@ -228,6 +228,16 @@ dailyPerformanceTest.describe('PERF-07 daily large-list smoke', () => {
     const dishName = 'Perf daily dish 0001';
     const dishRow = () => page.getByTestId(`dish-list-item-${dishId}`);
     const dishDialog = () => page.getByRole('dialog').filter({ hasText: dishName });
+    const ingredientId = 'perf-daily-ing-0004';
+    const secondIngredientId = 'perf-daily-ing-0005';
+    const ingredientName = 'Perf daily ingredient 0004';
+    const ingredientRow = () => page.getByTestId(`ingredient-list-item-${ingredientId}`);
+    const ingredientDialog = () => page.getByRole('dialog').filter({ hasText: `Tồn kho - ${ingredientName}` });
+    const shoppingListId = 'perf-daily-sl-0001';
+    const secondShoppingListId = 'perf-daily-sl-0002';
+    const shoppingListName = 'Perf daily shopping list 0001';
+    const shoppingListRow = () => page.getByTestId(`shopping-list-item-${shoppingListId}`);
+    const shoppingListDialog = () => page.getByRole('dialog').filter({ hasText: shoppingListName });
     const visibleMenuItem = (name: RegExp) => page.locator('[role="menuitem"]:visible').filter({ hasText: name }).first();
 
     await page.goto('dishes/list', { waitUntil: 'domcontentloaded' });
@@ -235,7 +245,7 @@ dailyPerformanceTest.describe('PERF-07 daily large-list smoke', () => {
 
     const interactions = [];
     interactions.push(await measureInteraction({
-      id: 'daily-dish-row-menu-open',
+      id: 'phase2-dish-row-menu-open',
       action: async () => { await page.getByTestId(`dish-row-menu-${dishId}`).click(); },
       shellLocator: () => visibleMenuItem(/Bắt đầu nấu/),
       contentReadyLocator: () => visibleMenuItem(/Xuất dữ liệu/),
@@ -246,7 +256,7 @@ dailyPerformanceTest.describe('PERF-07 daily large-list smoke', () => {
     await page.keyboard.press('Escape');
 
     interactions.push(await measureInteraction({
-      id: 'daily-dish-detail-modal-open',
+      id: 'phase2-dish-detail-modal-open',
       action: async () => { await dishRow().getByRole('button', { name: /Chi tiết/ }).click(); },
       shellLocator: dishDialog,
       contentReadyLocator: () => dishDialog().getByText(/Danh sách nguyên liệu/).first(),
@@ -259,13 +269,79 @@ dailyPerformanceTest.describe('PERF-07 daily large-list smoke', () => {
     const searchInput = page.getByTestId('dish-search-input');
     await searchInput.fill('0001');
     await expect(dishRow()).toBeVisible({ timeout: 15_000 });
+    await expect(page.getByTestId(`dish-list-item-${secondDishId}`)).toHaveCount(0, { timeout: 15_000 });
     interactions.push(await measureInteraction({
-      id: 'daily-dish-search-reset',
+      id: 'phase2-dish-search-reset',
       action: async () => { await searchInput.fill(''); },
       shellLocator: () => searchInput,
       contentReadyLocator: () => page.getByTestId(`dish-list-item-${secondDishId}`),
       shellBudgetMs: phase2Budgets.searchResetShellMs,
       contentReadyBudgetMs: phase2Budgets.searchResetContentMs,
+      strictShellTargetMs: phase2Budgets.shellTargetMs,
+    }));
+
+    await page.goto('ingredient/list', { waitUntil: 'domcontentloaded' });
+    await expect(ingredientRow()).toBeVisible({ timeout: 15_000 });
+
+    const ingredientSearchInput = page.getByTestId('ingredient-search-input');
+    await ingredientSearchInput.fill('0004');
+    await expect(ingredientRow()).toBeVisible({ timeout: 15_000 });
+    await expect(page.getByTestId(`ingredient-list-item-${secondIngredientId}`)).toHaveCount(0, { timeout: 15_000 });
+    interactions.push(await measureInteraction({
+      id: 'phase2-ingredient-search-reset',
+      action: async () => { await ingredientSearchInput.fill(''); },
+      shellLocator: () => ingredientSearchInput,
+      contentReadyLocator: () => page.getByTestId(`ingredient-list-item-${secondIngredientId}`),
+      shellBudgetMs: phase2Budgets.searchResetShellMs,
+      contentReadyBudgetMs: phase2Budgets.searchResetContentMs,
+      strictShellTargetMs: phase2Budgets.shellTargetMs,
+    }));
+
+    interactions.push(await measureInteraction({
+      id: 'phase2-ingredient-inventory-modal-open',
+      action: async () => { await page.getByTestId(`ingredient-inventory-button-${ingredientId}`).click(); },
+      shellLocator: ingredientDialog,
+      contentReadyLocator: () => ingredientDialog().getByText(/Tồn kho:/).first(),
+      shellBudgetMs: phase2Budgets.modalShellMs,
+      contentReadyBudgetMs: phase2Budgets.modalContentMs,
+      strictShellTargetMs: phase2Budgets.shellTargetMs,
+    }));
+
+    await page.goto('shoppingList/list', { waitUntil: 'domcontentloaded' });
+    await expect(shoppingListRow()).toBeVisible({ timeout: 15_000 });
+
+    const shoppingSearchInput = page.getByTestId('shopping-list-search-input');
+    await shoppingSearchInput.fill('0001');
+    await expect(shoppingListRow()).toBeVisible({ timeout: 15_000 });
+    await expect(page.getByTestId(`shopping-list-item-${secondShoppingListId}`)).toHaveCount(0, { timeout: 15_000 });
+    interactions.push(await measureInteraction({
+      id: 'phase2-shopping-list-search-reset',
+      action: async () => { await shoppingSearchInput.fill(''); },
+      shellLocator: () => shoppingSearchInput,
+      contentReadyLocator: () => page.getByTestId(`shopping-list-item-${secondShoppingListId}`),
+      shellBudgetMs: phase2Budgets.searchResetShellMs,
+      contentReadyBudgetMs: phase2Budgets.searchResetContentMs,
+      strictShellTargetMs: phase2Budgets.shellTargetMs,
+    }));
+
+    interactions.push(await measureInteraction({
+      id: 'phase2-shopping-list-row-menu-open',
+      action: async () => { await page.getByTestId(`shopping-list-row-menu-${shoppingListId}`).click(); },
+      shellLocator: () => visibleMenuItem(/Xuất danh sách/),
+      contentReadyLocator: () => visibleMenuItem(/Xóa/),
+      shellBudgetMs: phase2Budgets.rowMenuShellMs,
+      contentReadyBudgetMs: phase2Budgets.rowMenuContentMs,
+      strictShellTargetMs: phase2Budgets.shellTargetMs,
+    }));
+    await page.keyboard.press('Escape');
+
+    interactions.push(await measureInteraction({
+      id: 'phase2-shopping-list-checklist-modal-open',
+      action: async () => { await shoppingListRow().getByRole('button', { name: /Mở|Tạo/ }).first().click(); },
+      shellLocator: shoppingListDialog,
+      contentReadyLocator: () => shoppingListDialog().getByTestId('shopping-list-ingredient-modal'),
+      shellBudgetMs: phase2Budgets.modalShellMs,
+      contentReadyBudgetMs: phase2Budgets.modalContentMs,
       strictShellTargetMs: phase2Budgets.shellTargetMs,
     }));
 

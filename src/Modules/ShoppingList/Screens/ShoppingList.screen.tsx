@@ -12,7 +12,7 @@ import { useMessage } from "@components/Message";
 import { useModal } from "@components/Modal/ModalProvider";
 import { Tooltip } from "@components/Tootip";
 import { Typography } from "@components/Typography";
-import { useScreenTitle, useToggle } from "@hooks";
+import { usePagedVirtualItems, useScreenTitle, useToggle } from "@hooks";
 import { Dishes } from "@store/Models/Dishes";
 import { Ingredient } from "@store/Models/Ingredient";
 import { ScheduledMeal } from "@store/Models/ScheduledMeal";
@@ -24,7 +24,7 @@ import moment from "moment";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { List as VirtualList, type ListImperativeAPI, type RowComponentProps } from "react-window";
+import { List as VirtualList, useDynamicRowHeight, type ListImperativeAPI, type RowComponentProps } from "react-window";
 import ShoppinglistIcon from "../../../../assets/icons/shoppingList.png";
 import { ShoppingListAddWidget } from "./ShoppingListAdd.widget";
 import { ShoppingListExportWidget } from "./ShoppingListExport.widget";
@@ -47,6 +47,7 @@ const SHOPPING_LIST_STATUS_FILTERS: { value: ShoppingListStatusFilter; label: st
 ];
 
 const SHOPPING_LIST_ROW_HEIGHT = 186;
+const SHOPPING_LIST_LOAD_MORE_THRESHOLD = 8;
 
 const filterRowStyle: React.CSSProperties = {
     display: "flex",
@@ -102,7 +103,7 @@ type ShoppingListRowProps = {
 
 const ShoppingListRow = ({ index, style, items, allDishes, allScheduledMeals, allIngredients, onDelete }: RowComponentProps<ShoppingListRowProps>) => {
     if (!items[index]) return null;
-    return <VirtualListRowFrame style={style}>
+    return <VirtualListRowFrame style={style} layout="dynamic">
         <ShoppingListItem item={items[index]} allDishes={allDishes} allScheduledMeals={allScheduledMeals} allIngredients={allIngredients} onDelete={onDelete} />
     </VirtualListRowFrame>;
 };
@@ -119,7 +120,6 @@ export const ShoppingListScreen = () => {
     const { } = useScreenTitle({ value: "Lịch mua sắm", deps: [] });
     const [searchText, setSearchText] = useState("");
     const [activeStatus, setActiveStatus] = useState<ShoppingListStatusFilter>("all");
-    const rowHeight = SHOPPING_LIST_ROW_HEIGHT;
     const virtualListStyle = useMemo<React.CSSProperties>(() => ({
         height: "100%",
         overscrollBehavior: "contain",
@@ -131,7 +131,8 @@ export const ShoppingListScreen = () => {
     const normalizedSearch = searchText.trim().toLowerCase();
 
     const _onSearchChange = useMemo(() => debounce((event: React.ChangeEvent<HTMLInputElement>) => {
-        setSearchText(event.target.value);
+        const nextValue = event.target.value;
+        React.startTransition(() => setSearchText(nextValue));
     }, 350), []);
 
     useEffect(() => () => _onSearchChange.cancel(), [_onSearchChange]);
@@ -140,12 +141,12 @@ export const ShoppingListScreen = () => {
         setShowScrollTop(current => current === nextVisible ? current : nextVisible);
     }, []);
 
+    const _setActiveStatus = useCallback((nextStatus: ShoppingListStatusFilter) => {
+        React.startTransition(() => setActiveStatus(nextStatus));
+    }, []);
+
     const _onListScroll = useCallback((event: React.UIEvent<HTMLElement>) => {
         _setScrollTopVisible(event.currentTarget.scrollTop > 180);
-    }, [_setScrollTopVisible]);
-
-    const _onRowsRendered = useCallback((visibleRows: { startIndex: number }) => {
-        _setScrollTopVisible(visibleRows.startIndex > 1);
     }, [_setScrollTopVisible]);
 
     const filterData = useMemo(() => {
@@ -169,6 +170,15 @@ export const ShoppingListScreen = () => {
         };
     }, [shoppingLists, normalizedSearch, activeStatus]);
     const { filteredShoppingLists, statusCounts } = filterData;
+    const pagedShoppingListsResetKey = `${activeStatus}|${normalizedSearch}`;
+    const {
+        visibleItems: visibleShoppingLists,
+        loadedCount: loadedShoppingListCount,
+        totalCount: totalShoppingListCount,
+        hasMore: hasMoreShoppingLists,
+        loadMore: loadMoreShoppingLists,
+    } = usePagedVirtualItems({ items: filteredShoppingLists, resetKey: pagedShoppingListsResetKey });
+    const rowHeight = useDynamicRowHeight({ defaultRowHeight: SHOPPING_LIST_ROW_HEIGHT, key: pagedShoppingListsResetKey });
     const [selectedDate, setSelectedDate] = useState<Date>();
 
     const _onAdd = () => {
@@ -180,12 +190,12 @@ export const ShoppingListScreen = () => {
     }, [dispatch]);
 
     const shoppingListRowProps = useMemo(() => ({
-        items: filteredShoppingLists,
+        items: visibleShoppingLists,
         allDishes: dishes,
         allScheduledMeals: scheduledMeals,
         allIngredients: ingredients,
         onDelete: _onDelete,
-    }), [filteredShoppingLists, dishes, scheduledMeals, ingredients, _onDelete]);
+    }), [visibleShoppingLists, dishes, scheduledMeals, ingredients, _onDelete]);
 
     const _onShowCalendar = () => {
         toggleCalendarModal.show();
@@ -201,6 +211,13 @@ export const ShoppingListScreen = () => {
         if (scrolled) setShowScrollTop(false);
         return scrolled;
     }, []);
+
+    const _onRowsRendered = useCallback((visibleRows: { startIndex: number; stopIndex: number }) => {
+        _setScrollTopVisible(visibleRows.startIndex > 1);
+        if (hasMoreShoppingLists && visibleRows.stopIndex >= Math.max(0, loadedShoppingListCount - SHOPPING_LIST_LOAD_MORE_THRESHOLD)) {
+            loadMoreShoppingLists();
+        }
+    }, [_setScrollTopVisible, hasMoreShoppingLists, loadedShoppingListCount, loadMoreShoppingLists]);
 
     useEffect(() => {
         if (!didMountScrollRef.current) {
@@ -219,7 +236,7 @@ export const ShoppingListScreen = () => {
             </Stack.Compact>
             <div style={filterRowStyle}>
                 {SHOPPING_LIST_STATUS_FILTERS.map(item => (
-                    <button key={item.value} type="button" data-testid={`shopping-list-filter-${item.value}`} onClick={() => setActiveStatus(item.value)} style={filterChipStyle(activeStatus === item.value)}>
+                    <button key={item.value} type="button" data-testid={`shopping-list-filter-${item.value}`} onClick={() => _setActiveStatus(item.value)} style={filterChipStyle(activeStatus === item.value)}>
                         {item.label} ({statusCounts[item.value] ?? 0})
                     </button>
                 ))}
@@ -228,7 +245,7 @@ export const ShoppingListScreen = () => {
                 <VirtualList
                     listRef={listRef}
                     rowComponent={ShoppingListRow}
-                    rowCount={filteredShoppingLists.length}
+                    rowCount={visibleShoppingLists.length}
                     rowHeight={rowHeight}
                     overscanCount={1}
                     onScroll={_onListScroll}
@@ -237,7 +254,10 @@ export const ShoppingListScreen = () => {
                     style={virtualListStyle}
                     data-testid="shopping-list-virtual-list"
                 />
-                <VirtualListScrollTopButton listRef={listRef} rowCount={filteredShoppingLists.length} visible={showScrollTop} />
+                {hasMoreShoppingLists && <div data-testid="shopping-list-list-page-status" style={{ position: "absolute", left: "50%", bottom: 10, transform: "translateX(-50%)", padding: "4px 10px", borderRadius: 999, background: "rgba(255,255,255,0.94)", border: "1px solid #f0f0f0", boxShadow: "0 4px 14px rgba(0,0,0,0.08)", fontSize: 12, color: "#595959", pointerEvents: "none" }}>
+                    Đã tải {loadedShoppingListCount}/{totalShoppingListCount}
+                </div>}
+                <VirtualListScrollTopButton listRef={listRef} rowCount={visibleShoppingLists.length} visible={showScrollTop} />
             </div>
         </div>
         <Modal open={toggleAddModal.value} title={<Space>
@@ -303,8 +323,13 @@ const ShoppingListItemComponent: React.FunctionComponent<ShoppingListItemProps> 
             _onShow();
             return;
         }
-        _onGenerate();
         _onShow();
+        const schedule = window.requestAnimationFrame ?? ((callback: FrameRequestCallback) => window.setTimeout(callback, 0) as unknown as number);
+        schedule(() => {
+            schedule(() => {
+                React.startTransition(() => _onGenerate());
+            });
+        });
     }
 
     const _isAllIngredientDone = () => {
@@ -456,25 +481,31 @@ const ShoppingListItemComponent: React.FunctionComponent<ShoppingListItemProps> 
             <Button onClick={toggleIngredient.hide}>Đóng</Button>
             <Button type="primary" icon={<EditOutlined />} onClick={_onOpenDetailPage}>Mở trang chi tiết</Button>
         </Space>} afterOpenChange={() => toggleLoading.hide()}>
-            <ShoppingListDetailWidget shoppingList={props.item} />
+            <DeferredModalContent active={toggleIngredient.value} minHeight={220}>
+                <Box data-testid="shopping-list-ingredient-modal" style={{ maxHeight: 550, overflowY: "auto" }}>
+                    <ShoppingListDetailWidget shoppingList={props.item} />
+                </Box>
+            </DeferredModalContent>
         </Modal>}
         {toggleAddMoreDishes.value && <Modal style={{ top: 50 }} open={toggleAddMoreDishes.value} title={<Space>
             <Image src={ShoppinglistIcon} preview={false} width={24} style={{ marginBottom: 3 }} />
             Sửa món ăn
         </Space>} destroyOnClose={true} onCancel={toggleAddMoreDishes.hide} footer={null}>
-            <Box style={{ maxHeight: 550, overflowY: "auto" }}>
-                <ShoppingListAddMoreDishesWidget shoppingList={props.item} onDone={() => {
-                    toggleAddMoreDishes.hide();
-                    modal.confirm({
-                        content: "Tải lại danh sách nguyên liệu?",
-                        okText: "Đồng ý",
-                        cancelText: "Hủy",
-                        onOk: () => {
-                            _onGenerate();
-                        }
-                    })
-                }} />
-            </Box>
+            <DeferredModalContent active={toggleAddMoreDishes.value} minHeight={220}>
+                <Box data-testid="shopping-list-add-dishes-modal" style={{ maxHeight: 550, overflowY: "auto" }}>
+                    <ShoppingListAddMoreDishesWidget shoppingList={props.item} onDone={() => {
+                        toggleAddMoreDishes.hide();
+                        modal.confirm({
+                            content: "Tải lại danh sách nguyên liệu?",
+                            okText: "Đồng ý",
+                            cancelText: "Hủy",
+                            onOk: () => {
+                                _onGenerate();
+                            }
+                        })
+                    }} />
+                </Box>
+            </DeferredModalContent>
         </Modal>}
         {toggleEditModal.value && <Modal open={toggleEditModal.value} title={
             <Space>
@@ -482,7 +513,11 @@ const ShoppingListItemComponent: React.FunctionComponent<ShoppingListItemProps> 
                 Sửa lịch mua sắm
             </Space>
         } destroyOnClose={true} onCancel={toggleEditModal.hide} footer={null}>
-            <ShoppingListEditWidget item={props.item} onDone={toggleEditModal.hide} />
+            <DeferredModalContent active={toggleEditModal.value} minHeight={180}>
+                <div data-testid="shopping-list-edit-modal">
+                    <ShoppingListEditWidget item={props.item} onDone={toggleEditModal.hide} />
+                </div>
+            </DeferredModalContent>
         </Modal>}
         {toggleExport.value && <ShoppingListExportWidget shoppingList={props.item} allIngredients={props.allIngredients} open={toggleExport.value} onClose={toggleExport.hide} />}
         {toggleDeleteConfirm.value && <Modal
