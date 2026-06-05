@@ -1,0 +1,120 @@
+# Large List Modal And Sidebar Performance Note
+
+Date: 2026-06-06
+
+## Short Answer
+
+The large list pages are faster than the original baseline, especially for search reset, row rendering, online/offline behavior, and image/network isolation. However, opening a modal or sidebar from a large list can still hang a little because that work still runs on the browser's main UI thread.
+
+In simple words: the app now avoids loading too many rows and avoids letting network/image work block the list, but the browser still has to pause briefly to build the modal or drawer, prepare its animation, and sometimes finish list calculations before it can show the overlay.
+
+## Why It Still Hangs A Little
+
+1. The list pages use virtualization and paged loading, but they still do some whole-list calculations.
+
+   The Dishes, Ingredients, and Shopping List screens all use `usePagedVirtualItems`. That means they only pass a smaller loaded slice into the virtual list, starting with 40 items and loading more as the user scrolls.
+
+   That helps a lot because the app does not render every row at once. But it does not remove every cost. The screens still calculate filtered arrays, sorted arrays, counts, stock snapshots, tags, and status totals across the full data set when search/filter/data changes.
+
+2. Modal and drawer opening still happens on the same browser thread as the list.
+
+   When you tap a row action, modal button, or sidebar button, React and Ant Design still need to mount an overlay shell, mask, focus handling, scroll lock, and animation. If the large list just scrolled, filtered, loaded another page, or recalculated row data, the overlay click can wait behind that work for a short time.
+
+3. Some modal content is intentionally deferred.
+
+   The app uses `DeferredModalContent`, which waits about two animation frames before mounting heavy modal bodies. This is good because the modal shell can show before the heavy content loads. Visually, though, you may still notice a short spinner or content delay after the modal appears.
+
+4. The sidebar drawer rebuilds a lot of UI each time it opens.
+
+   The sidebar uses Ant Design `Drawer` with `destroyOnClose`. That means its body is destroyed when closed and rebuilt when opened. It contains navigation icons/images, sync controls, backup controls, admin controls, cooking history entry points, and guide entry points. Rebuilding that drawer from a large list can still cost time.
+
+5. The current automated numbers prove this is improved but not instant.
+
+   Phase 3 passed the practical performance gate, but the ideal target is still 100 ms for a shell to appear. Some overlays are still above that ideal:
+
+   | Check | Latest online shell timing |
+   |---|---:|
+   | Dish row menu open | 880 ms |
+   | Shopping-list row menu open | 625 ms |
+   | Ingredient inventory modal open | 1541 ms |
+   | Dish search reset shell | 27 ms |
+   | Ingredient search reset shell | 40 ms |
+   | Shopping-list search reset shell | 29 ms |
+
+   This means search/filter reset is now visibly fast, but overlay opening still has remaining work to improve.
+
+## What Was Already Improved
+
+1. Large lists use virtualized rendering plus paged load-more.
+
+   Confirmed pages:
+
+   - `src/Modules/Dishes/Screens/DishesList.screen.tsx`
+   - `src/Modules/Ingredient/Screens/IngredientList.screen.tsx`
+   - `src/Modules/ShoppingList/Screens/ShoppingList.screen.tsx`
+
+   Each page uses `usePagedVirtualItems`, passes only `visibleItems` into the virtual list, and calls `loadMore...()` from `onRowsRendered` when the scroll position reaches the loaded edge.
+
+2. Online mode should no longer feel much worse than offline mode.
+
+   Phase 3 moved startup shared-data sync checks away from the first interaction path. The app now waits before checking GitHub shared data, waits for a quiet interaction window, and uses idle scheduling when available.
+
+3. Dish list images are less likely to block the list.
+
+   Dish list images now use a list surface with stable dimensions and fallback-first behavior. Detail modals still keep the richer image behavior.
+
+4. Shared sync prompt work is progressive.
+
+   The sync modal can show the basic prompt first, then fetch full shared data and compute heavier impact warnings after the shell is already visible.
+
+5. The comparison gate passed online, offline, and slow network modes.
+
+   Latest Phase 3 evidence files:
+
+   - `test-results/performance/perf-08-phase3-daily-online-normal.md`
+   - `test-results/performance/perf-08-phase3-daily-browser-offline.md`
+   - `test-results/performance/perf-08-phase3-daily-mocked-slow-network.md`
+
+## What You Can Check By Eye
+
+Use a large Dishes, Ingredients, or Shopping List page.
+
+1. Scroll a long list.
+
+   Expected: the app should not draw every item at once. You should see rows continue to appear as you scroll. When more rows are available, the small loaded-count pill can show progress like loaded count over total count.
+
+2. Search, then clear the search.
+
+   Expected: the first visible response should be quick. The list content may still settle after that, but the app should not freeze like the original large-list problem.
+
+3. Compare online and offline behavior.
+
+   Expected: opening the app with internet should not feel much slower than opening it with no internet. Offline should still show local data. Online sync work should not steal the first interaction as much as before.
+
+4. Look at dish list images.
+
+   Expected: rows should keep stable image size. You should see fallback image behavior quickly instead of rows waiting for slow images or jumping layout.
+
+5. Open a row menu or modal.
+
+   Expected: it should be better than before, but it may still have a small pause. If a modal opens with a spinner first, that is the current deferred-content behavior. The remaining goal is to make the shell itself closer to instant.
+
+6. Open the sidebar drawer from a large list.
+
+   Expected: it may still pause a little. This is a known remaining issue because the drawer is rebuilt when opened and competes with list-screen work on the main thread.
+
+7. If a shared sync prompt appears.
+
+   Expected: the prompt shell and update list should appear before all detailed sync-impact work is finished. The final sync button should wait until required data is ready.
+
+## What This Means For The Next Fix
+
+The remaining modal/sidebar hang is not mainly a pagination problem anymore. Pagination and virtualization already help. The next performance work should focus on app-shell and overlay responsiveness:
+
+- Keep the sidebar drawer mounted or split its heavy sections so opening the shell is cheaper.
+- Pre-render or memoize stable drawer/menu content.
+- Reduce whole-list recalculation when only opening overlays.
+- Keep modal shells extremely light and move detail body work after the first paint.
+- Continue measuring shell-visible timing separately from content-ready timing.
+
+This matches the current Phase 4 direction: Navigation and App-Shell Responsiveness.
