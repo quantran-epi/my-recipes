@@ -11,7 +11,7 @@ Requirements for the first milestone: stabilize large-list and online/offline re
 
 - [x] **PERF-01**: Maintainer can reproduce large-list scenarios for ingredients, dishes, and shopping lists with deterministic seeded data.
 - [x] **PERF-02**: Maintainer can measure time-to-visible for modals, drawers, detail views, row menus, and navigation from large-list screens.
-- [ ] **PERF-03**: Maintainer can compare online and offline runs to identify whether sync, image loading, service worker, or network work affects perceived responsiveness.
+- [x] **PERF-03**: Maintainer can compare online and offline runs to identify whether sync, image loading, service worker, or network work affects perceived responsiveness.
 
 ### Large-List Responsiveness
 
@@ -22,16 +22,16 @@ Requirements for the first milestone: stabilize large-list and online/offline re
 
 ### Online And Offline Behavior
 
-- [ ] **NET-01**: User can open the app online without startup shared-data checks delaying normal list interactions.
-- [ ] **NET-02**: User can continue using local-first data offline with no behavior regression from performance changes.
-- [ ] **NET-03**: User can load dish rows with images without network or image decode work causing visible list interaction lag.
-- [ ] **NET-04**: User can receive shared-data sync prompts without heavy impact analysis or fetch work blocking the app shell.
+- [x] **NET-01**: User can open the app online without startup shared-data checks delaying normal list interactions.
+- [x] **NET-02**: User can continue using local-first data offline with no behavior regression from performance changes.
+- [x] **NET-03**: User can load dish rows with images without network or image decode work causing visible list interaction lag.
+- [x] **NET-04**: User can receive shared-data sync prompts without heavy impact analysis or fetch work blocking the app shell.
 
 ### Regression Coverage
 
 - [x] **TEST-01**: Maintainer can run repo-local performance regression checks through package scripts, without relying on globally installed Playwright tooling.
 - [x] **TEST-02**: Maintainer can run a focused large-list responsiveness test that fails when modal, detail, or menu open timing exceeds the chosen smoke budget.
-- [ ] **TEST-03**: Maintainer can run online/offline comparison checks with GitHub requests stubbed or controlled.
+- [x] **TEST-03**: Maintainer can run online/offline comparison checks with GitHub requests stubbed or controlled.
 - [ ] **TEST-04**: Existing build and relevant regression checks pass after responsiveness changes, or failures are documented with exact blockers.
 
 ### Future Product Foundation
@@ -78,18 +78,18 @@ Which phases cover which v1 requirements. Updated during roadmap creation.
 |-------------|-------|--------|
 | PERF-01 | Phase 1 | Complete |
 | PERF-02 | Phase 1 | Complete |
-| PERF-03 | Phase 3 | Pending |
+| PERF-03 | Phase 3 | Complete |
 | LIST-01 | Phase 2 | Complete |
 | LIST-02 | Phase 2 | Complete |
 | LIST-03 | Phase 2 | Complete |
 | LIST-04 | Phase 4 | Pending |
-| NET-01 | Phase 3 | Pending |
-| NET-02 | Phase 3 | Pending |
-| NET-03 | Phase 3 | Pending |
-| NET-04 | Phase 3 | Pending |
+| NET-01 | Phase 3 | Complete |
+| NET-02 | Phase 3 | Complete |
+| NET-03 | Phase 3 | Complete |
+| NET-04 | Phase 3 | Complete |
 | TEST-01 | Phase 1 | Complete |
 | TEST-02 | Phase 2 | Complete |
-| TEST-03 | Phase 3 | Pending |
+| TEST-03 | Phase 3 | Complete |
 | TEST-04 | Phase 5 | Pending |
 | UX-01 | Phase 1 | Complete |
 | UX-02 | Phase 4 | Pending |
@@ -102,4 +102,4 @@ Which phases cover which v1 requirements. Updated during roadmap creation.
 
 ---
 *Requirements defined: 2026-06-05*
-*Last updated: 2026-06-05 after Phase 2 completion*
+*Last updated: 2026-06-05 after Phase 3 completion*

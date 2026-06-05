@@ -15,7 +15,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 1: Measurement and Performance Harness** - Make large-list and online/offline responsiveness reproducible and measurable. (completed 2026-06-05)
 - [x] **Phase 2: Large-List Interaction Hot Paths** - Remove visible freezes from common virtualized-list interactions. (completed 2026-06-05)
-- [ ] **Phase 3: Online and Offline Cost Isolation** - Control sync, image, service-worker, and network work so online mode stays responsive.
+- [x] **Phase 3: Online and Offline Cost Isolation** - Control sync, image, service-worker, and network work so online mode stays responsive. (completed 2026-06-05)
 - [ ] **Phase 4: Navigation and App-Shell Responsiveness** - Keep drawers, navigation, and detail-route transitions responsive from large-list screens.
 - [ ] **Phase 5: Release Gate and Product Guardrails** - Ship the responsiveness foundation with verification evidence and future-work guardrails.
 
@@ -99,7 +99,7 @@ Plans:
   4. Shared-data sync prompts can appear without heavy fetch or impact-analysis work blocking the app shell.
   5. Maintainer can run online/offline comparison checks with GitHub requests stubbed, controlled, or clearly measured.
 
-**Plans:** 2/3 plans executed
+**Plans:** 3/3 plans complete
 
 Plans:
 
@@ -113,7 +113,7 @@ Plans:
 
 **Wave 3** *(blocked on Wave 2 completion)*
 
-- [ ] 03-03: Add the online/offline comparison gate with deterministic GitHub and image handling.
+- [x] 03-03: Add the online/offline comparison gate with deterministic GitHub and image handling.
 
 Cross-cutting constraints:
 
@@ -174,7 +174,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5
 |-------|----------------|--------|-----------|
 | 1. Measurement and Performance Harness | 3/3 | Complete    | 2026-06-05 |
 | 2. Large-List Interaction Hot Paths | 3/3 | Complete    | 2026-06-05 |
-| 3. Online and Offline Cost Isolation | 2/3 | In Progress|  |
+| 3. Online and Offline Cost Isolation | 3/3 | Complete   | 2026-06-05 |
 | 4. Navigation and App-Shell Responsiveness | 0/2 | Not started | - |
 | 5. Release Gate and Product Guardrails | 0/2 | Not started | - |
 
