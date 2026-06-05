@@ -103,15 +103,15 @@ export const applyPerformanceNetworkMode = async (
     delayedImageRequestCount: 0,
   };
 
-  if (networkMode === 'browser-offline') {
-    await page.addInitScript(() => {
-      Object.defineProperty(window.navigator, 'onLine', {
-        configurable: true,
-        get: () => false,
-      });
-      window.addEventListener('DOMContentLoaded', () => window.dispatchEvent(new Event('offline')), { once: true });
+  await page.addInitScript(({ online }) => {
+    Object.defineProperty(window.navigator, 'onLine', {
+      configurable: true,
+      get: () => online,
     });
-  }
+    window.addEventListener('DOMContentLoaded', () => {
+      window.dispatchEvent(new Event(online ? 'online' : 'offline'));
+    }, { once: true });
+  }, { online: networkMode !== 'browser-offline' });
 
   await page.route('**/*', async route => {
     const request = route.request();

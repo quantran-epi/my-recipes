@@ -52,6 +52,7 @@
     "test:e2e:performance": "playwright test tests/e2e/performance-regression.spec.ts",
     "test:e2e:performance:baseline": "node tests/e2e/runPerformanceCommand.cjs baseline",
     "test:e2e:performance:diagnostic": "node tests/e2e/runPerformanceCommand.cjs diagnostic",
+    "test:e2e:performance:phase3": "node tests/e2e/runPerformanceCommand.cjs phase3",
     "eject": "react-scripts eject"
   },
   "eslintConfig": {

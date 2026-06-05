@@ -69,6 +69,47 @@ Latest Phase 2 daily evidence is written to `test-results/performance/perf-07-da
 
 Phase 2 intentionally keeps online/offline comparison, GitHub sync isolation, service-worker effects, and image/network cost isolation out of the strict gate. Those remain Phase 3 work so the large-list rendering fixes stay separable from network behavior.
 
+## Phase 3 Online/Offline Cost Isolation Gates
+
+Phase 3 adds a strict comparison gate for online sync, offline local-first behavior, mocked slow GitHub checks, and slow/blocked image behavior. The gate reuses the Phase 2 large-list hot paths so online/offline work is compared against the same user-visible actions: dish search reset, dish row menu open, ingredient search reset, ingredient inventory modal open, shopping-list search reset, and shopping-list row menu open.
+
+Strict Phase 3 comparison command:
+
+```bash
+E2E_BROWSER_CHANNEL=chrome npm run test:e2e:performance:phase3
+```
+
+By default this runs the deterministic daily dataset across these modes:
+
+| Mode | Image mode | Purpose |
+|---|---|---|
+| `online-normal` | `fast` | Online app behavior with controlled GitHub Raw shared-manifest requests. |
+| `browser-offline` | `blocked` | Local-first behavior with external HTTP blocked and `navigator.onLine === false`. |
+| `mocked-slow-network` | `slow` | Online behavior with delayed GitHub shared-manifest checks and delayed image requests. |
+
+The default evidence files are written under `test-results/performance/`:
+
+- `perf-08-phase3-daily-online-normal.json` and `.md`
+- `perf-08-phase3-daily-browser-offline.json` and `.md`
+- `perf-08-phase3-daily-mocked-slow-network.json` and `.md`
+
+Each JSON file includes `networkMode`, `imageMode`, interaction timings, warnings, resource summary, and diagnostics for GitHub Raw, shared-manifest, shared-data, image, blocked-image, and delayed-image request counts.
+
+Phase 3 keeps the same practical strict budgets as Phase 2:
+
+| Interaction family | Shell-visible budget | Content-ready budget |
+|---|---:|---:|
+| Search/filter reset | 2,500 ms | 5,000 ms |
+| Row menu/action open | 3,500 ms | 3,500 ms |
+| Modal/detail open | 2,000 ms | 5,000 ms |
+| Ideal shell-visible target | 100 ms | n/a |
+
+The 100 ms shell-visible target remains warning evidence only for Phase 3. A run fails only when it exceeds the practical Phase 2 budgets above.
+
+Latest Phase 3 comparison evidence from 2026-06-05 passed all three modes. Online-normal recorded dish search reset shell 27 ms, ingredient search reset shell 40 ms, shopping-list search reset shell 29 ms, ingredient inventory modal shell 1,541 ms, shopping-list row menu shell 625 ms, and dish row menu shell 880 ms. Mocked slow network still stayed inside practical budgets while recording `githubDelayMs: 2500`, `imageDelayMs: 2500`, 3 shared-manifest requests, and 1 delayed image request.
+
+Production service-worker behavior remains optional diagnostic evidence only. The strict Phase 3 checks intentionally use the existing `seedApp` cleanup path to unregister service workers and clear caches so service-worker state does not hide or create list-interaction regressions. If a production/service-worker check is needed, record it separately as diagnostic evidence and do not treat it as the strict Phase 3 gate.
+
 ## How To Use This File
 
 - To implement one item, prompt: `implement PERF-01`.

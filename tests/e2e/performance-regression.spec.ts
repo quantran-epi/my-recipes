@@ -1,6 +1,7 @@
 import { expect, test as base, type Page } from '@playwright/test';
 import { seedApp } from './fixtures/seedApp';
-import { createPerformanceSeed } from './fixtures/performanceSeed';
+import { createPerformanceSeed, type PerformanceDatasetName } from './fixtures/performanceSeed';
+import type { PerformanceImageMode, PerformanceNetworkMode } from './fixtures/performanceNetwork';
 import {
   collectInteractionWarnings,
   measureInteraction,
@@ -49,8 +50,25 @@ const expectPageStatusDoesNotBlockActions = async (page: Page, testId: string) =
 };
 
 const shoppingListDetailPath = `shoppingList/detail?shoppingList=${TEST_IDS.shoppingLists.regression}`;
+const isPhase3ComparisonRun = process.env.PERF_PHASE3_COMPARE === '1';
+const PHASE3_NETWORK_MODES: PerformanceNetworkMode[] = ['online-normal', 'browser-offline', 'mocked-slow-network'];
+
+const parsePhase3NetworkModes = (): PerformanceNetworkMode[] => {
+  const raw = process.env.PERF_NETWORK_MODE;
+  if (!raw) return PHASE3_NETWORK_MODES;
+  return raw.split(',').map(item => item.trim()).filter(Boolean) as PerformanceNetworkMode[];
+};
+
+const phase3ImageModeFor = (networkMode: PerformanceNetworkMode): PerformanceImageMode => {
+  if (process.env.PERF_IMAGE_MODE) return process.env.PERF_IMAGE_MODE as PerformanceImageMode;
+  if (networkMode === 'browser-offline') return 'blocked';
+  if (networkMode === 'mocked-slow-network') return 'slow';
+  return 'fast';
+};
 
 test.describe('PERF-07 performance regressions', () => {
+  test.skip(isPhase3ComparisonRun, 'Phase 3 comparison command runs phase3-comparison tests only.');
+
   test('keeps dynamic dish row gaps consistent from the first item onward', async ({ page }) => {
     await page.goto('dishes/list');
     const list = page.getByTestId('dish-virtual-list');
@@ -230,6 +248,8 @@ test.describe('PERF-07 performance regressions', () => {
 });
 
 dailyPerformanceTest.describe('PERF-07 daily large-list smoke', () => {
+  dailyPerformanceTest.skip(isPhase3ComparisonRun, 'Phase 3 comparison command runs phase3-comparison tests only.');
+
   dailyPerformanceTest('captures required large-list interaction timings', async ({ page }, testInfo) => {
     const dishId = 'perf-daily-dish-0001';
     const secondDishId = 'perf-daily-dish-0002';
@@ -374,6 +394,8 @@ dailyPerformanceTest.describe('PERF-07 daily large-list smoke', () => {
 });
 
 base.describe('PERF-08 phase3 startup sync isolation', () => {
+  base.skip(isPhase3ComparisonRun, 'Phase 3 comparison command runs phase3-comparison tests only.');
+
   base('keeps due-sync startup list interactions inside Phase 2 budgets', async ({ page }, testInfo) => {
     const appliedNetwork = await seedApp(page, {
       dataset: 'daily',
@@ -478,6 +500,8 @@ base.describe('PERF-08 phase3 startup sync isolation', () => {
 });
 
 base.describe('PERF-09 phase3 sync prompt and dish image isolation', () => {
+  base.skip(isPhase3ComparisonRun, 'Phase 3 comparison command runs phase3-comparison tests only.');
+
   base('renders sync manifest rows before delayed shared data and preserves selective versions', async ({ page }) => {
     const seed = createPerformanceSeed('daily');
     const ingredientId = 'perf-daily-ing-0004';
@@ -608,4 +632,153 @@ base.describe('PERF-09 phase3 sync prompt and dish image isolation', () => {
       notes: ['Phase 3 image isolation keeps the dish list row image box stable while slow external image work is pending.'],
     }, 'perf-09-phase3-sync-prompt-image');
   });
+});
+
+base.describe('phase3-comparison online/offline cost isolation', () => {
+  base.skip(!isPhase3ComparisonRun, 'Run with npm run test:e2e:performance:phase3.');
+
+  for (const networkMode of parsePhase3NetworkModes()) {
+    const imageMode = phase3ImageModeFor(networkMode);
+
+    base(`phase3-comparison ${networkMode} keeps large-list hot paths inside Phase 2 budgets`, async ({ page }, testInfo) => {
+      base.setTimeout(90_000);
+      const dataset = (process.env.PERF_DATASET ?? 'daily') as PerformanceDatasetName;
+      const githubDelayMs = networkMode === 'mocked-slow-network' ? 2500 : 0;
+      const imageDelayMs = imageMode === 'slow' ? 2500 : 0;
+      const appliedNetwork = await seedApp(page, {
+        dataset,
+        networkMode,
+        imageMode,
+        syncCheckState: 'due',
+        githubDelayMs,
+        imageDelayMs,
+        sharedManifest: {
+          ingredientsVersion: 'e2e',
+          dishesVersion: 'e2e',
+          ingredientChanges: [],
+          dishChanges: [],
+        },
+      });
+
+      const dishId = `perf-${dataset}-dish-0001`;
+      const secondDishId = `perf-${dataset}-dish-0002`;
+      const ingredientId = `perf-${dataset}-ing-0004`;
+      const secondIngredientId = `perf-${dataset}-ing-0005`;
+      const ingredientName = `Perf ${dataset} ingredient 0004`;
+      const shoppingListId = `perf-${dataset}-sl-0001`;
+      const secondShoppingListId = `perf-${dataset}-sl-0002`;
+      const dishRow = () => page.getByTestId(`dish-list-item-${dishId}`);
+      const ingredientRow = () => page.getByTestId(`ingredient-list-item-${ingredientId}`);
+      const ingredientDialog = () => page.getByRole('dialog').filter({ hasText: `Tồn kho - ${ingredientName}` });
+      const shoppingListRow = () => page.getByTestId(`shopping-list-item-${shoppingListId}`);
+      const visibleMenuItem = (name: RegExp) => page.locator('[role="menuitem"]:visible').filter({ hasText: name }).first();
+      const interactions = [];
+
+      await page.goto('dishes/list', { waitUntil: 'domcontentloaded' });
+      await expect(dishRow()).toBeVisible({ timeout: 15_000 });
+      await page.waitForTimeout(1700);
+      await page.evaluate(() => performance.clearResourceTimings());
+
+      interactions.push(await measureInteraction({
+        id: `phase3-comparison-${networkMode}-dish-row-menu-open`,
+        action: async () => { await page.getByTestId(`dish-row-menu-${dishId}`).click(); },
+        shellLocator: () => visibleMenuItem(/Bắt đầu nấu/),
+        contentReadyLocator: () => visibleMenuItem(/Xuất dữ liệu/),
+        shellBudgetMs: phase2Budgets.rowMenuShellMs,
+        contentReadyBudgetMs: phase2Budgets.rowMenuContentMs,
+        strictShellTargetMs: phase2Budgets.shellTargetMs,
+      }));
+      await page.keyboard.press('Escape');
+
+      const dishSearchInput = page.getByTestId('dish-search-input');
+      await dishSearchInput.fill('0001');
+      await expect(dishRow()).toBeVisible({ timeout: 15_000 });
+      await expect(page.getByTestId(`dish-list-item-${secondDishId}`)).toHaveCount(0, { timeout: 15_000 });
+      interactions.push(await measureInteraction({
+        id: `phase3-comparison-${networkMode}-dish-search-reset`,
+        action: async () => { await dishSearchInput.fill(''); },
+        shellLocator: () => dishSearchInput,
+        contentReadyLocator: () => page.getByTestId(`dish-list-item-${secondDishId}`),
+        shellBudgetMs: phase2Budgets.searchResetShellMs,
+        contentReadyBudgetMs: phase2Budgets.searchResetContentMs,
+        strictShellTargetMs: phase2Budgets.shellTargetMs,
+      }));
+
+      await page.goto('ingredient/list', { waitUntil: 'domcontentloaded' });
+      await expect(ingredientRow()).toBeVisible({ timeout: 15_000 });
+      const ingredientSearchInput = page.getByTestId('ingredient-search-input');
+      await ingredientSearchInput.fill('0004');
+      await expect(ingredientRow()).toBeVisible({ timeout: 15_000 });
+      await expect(page.getByTestId(`ingredient-list-item-${secondIngredientId}`)).toHaveCount(0, { timeout: 15_000 });
+      interactions.push(await measureInteraction({
+        id: `phase3-comparison-${networkMode}-ingredient-search-reset`,
+        action: async () => { await ingredientSearchInput.fill(''); },
+        shellLocator: () => ingredientSearchInput,
+        contentReadyLocator: () => page.getByTestId(`ingredient-list-item-${secondIngredientId}`),
+        shellBudgetMs: phase2Budgets.searchResetShellMs,
+        contentReadyBudgetMs: phase2Budgets.searchResetContentMs,
+        strictShellTargetMs: phase2Budgets.shellTargetMs,
+      }));
+
+      interactions.push(await measureInteraction({
+        id: `phase3-comparison-${networkMode}-ingredient-inventory-modal-open`,
+        action: async () => { await page.getByTestId(`ingredient-inventory-button-${ingredientId}`).click(); },
+        shellLocator: ingredientDialog,
+        contentReadyLocator: () => ingredientDialog().getByText(/Tồn kho:/).first(),
+        shellBudgetMs: phase2Budgets.modalShellMs,
+        contentReadyBudgetMs: phase2Budgets.modalContentMs,
+        strictShellTargetMs: phase2Budgets.shellTargetMs,
+      }));
+
+      await page.goto('shoppingList/list', { waitUntil: 'domcontentloaded' });
+      await expect(shoppingListRow()).toBeVisible({ timeout: 15_000 });
+      const shoppingSearchInput = page.getByTestId('shopping-list-search-input');
+      await shoppingSearchInput.fill('0001');
+      await expect(shoppingListRow()).toBeVisible({ timeout: 15_000 });
+      await expect(page.getByTestId(`shopping-list-item-${secondShoppingListId}`)).toHaveCount(0, { timeout: 15_000 });
+      interactions.push(await measureInteraction({
+        id: `phase3-comparison-${networkMode}-shopping-list-search-reset`,
+        action: async () => { await shoppingSearchInput.fill(''); },
+        shellLocator: () => shoppingSearchInput,
+        contentReadyLocator: () => page.getByTestId(`shopping-list-item-${secondShoppingListId}`),
+        shellBudgetMs: phase2Budgets.searchResetShellMs,
+        contentReadyBudgetMs: phase2Budgets.searchResetContentMs,
+        strictShellTargetMs: phase2Budgets.shellTargetMs,
+      }));
+
+      interactions.push(await measureInteraction({
+        id: `phase3-comparison-${networkMode}-shopping-list-row-menu-open`,
+        action: async () => { await page.getByTestId(`shopping-list-row-menu-${shoppingListId}`).click(); },
+        shellLocator: () => visibleMenuItem(/Xuất danh sách/),
+        contentReadyLocator: () => visibleMenuItem(/Xóa/),
+        shellBudgetMs: phase2Budgets.rowMenuShellMs,
+        contentReadyBudgetMs: phase2Budgets.rowMenuContentMs,
+        strictShellTargetMs: phase2Budgets.shellTargetMs,
+      }));
+
+      const warnings = collectInteractionWarnings(interactions);
+      await writePerformanceEvidence(testInfo, {
+        capturedAt: new Date().toISOString(),
+        command: 'E2E_BROWSER_CHANNEL=chrome npm run test:e2e:performance:phase3',
+        browserName: testInfo.project.name,
+        dataset,
+        networkMode: appliedNetwork.networkMode,
+        imageMode: appliedNetwork.imageMode,
+        budgets: { ...budgets, ...phase2Budgets },
+        interactions,
+        warnings,
+        resources: await summarizeResources(page),
+        diagnostics: {
+          navigatorOnLine: await page.evaluate(() => navigator.onLine),
+          githubDelayMs: appliedNetwork.githubDelayMs,
+          imageDelayMs: appliedNetwork.imageDelayMs,
+          network: appliedNetwork.diagnostics,
+        },
+        notes: [
+          'Phase 3 comparison reuses Phase 2 practical budgets; strict 100 ms shell target misses warn only.',
+          'Strict comparison runs unregister service workers through seedApp; production service-worker behavior remains optional diagnostic evidence.',
+        ],
+      }, `perf-08-phase3-${dataset}-${networkMode}`);
+    });
+  }
 });
