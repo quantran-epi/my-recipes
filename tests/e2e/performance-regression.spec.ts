@@ -61,6 +61,62 @@ const summarizeResources = async (page: Page): Promise<ResourceSummary> => {
 };
 
 test.describe('PERF-07 performance regressions', () => {
+  test('keeps virtualized ingredient rows spaced and treats drag as scroll intent', async ({ page }) => {
+    await page.goto('ingredient/list');
+    const list = page.getByTestId('ingredient-virtual-list');
+    await expect(list).toBeVisible();
+
+    const rowFrames = list.locator('[data-virtual-list-row-frame="true"]');
+    await expect(rowFrames.first()).toBeVisible();
+    await expect(rowFrames.nth(1)).toBeVisible();
+
+    const firstBox = await rowFrames.nth(0).boundingBox();
+    const secondBox = await rowFrames.nth(1).boundingBox();
+    if (!firstBox || !secondBox) throw new Error('Virtualized rows were not measurable.');
+    expect(firstBox.height).toBeGreaterThan(130);
+    expect(secondBox.y - firstBox.y).toBeGreaterThan(120);
+
+    const listBox = await list.boundingBox();
+    if (!listBox) throw new Error('Ingredient virtual list was not measurable.');
+    await page.mouse.move(listBox.x + listBox.width / 2, listBox.y + listBox.height / 2);
+    await page.mouse.wheel(0, 1600);
+    const lastIngredient = page.getByTestId(`ingredient-list-item-${TEST_IDS.ingredients.scrollLast}`);
+    await expect(lastIngredient).toBeVisible();
+
+    const inventoryButton = lastIngredient.locator('button').filter({ hasText: /Tồn kho khả dụng/ }).first();
+    await expect(inventoryButton).toBeVisible();
+    await inventoryButton.evaluate((button) => {
+      const rect = button.getBoundingClientRect();
+      const x = rect.left + rect.width / 2;
+      const y = rect.top + rect.height / 2;
+      const pointerBase: PointerEventInit = {
+        bubbles: true,
+        cancelable: true,
+        composed: true,
+        clientX: x,
+        clientY: y,
+        pointerId: 1,
+        pointerType: 'touch',
+        isPrimary: true,
+      };
+
+      button.dispatchEvent(new PointerEvent('pointerdown', pointerBase));
+      button.dispatchEvent(new PointerEvent('pointermove', { ...pointerBase, clientY: y - 48 }));
+      button.dispatchEvent(new PointerEvent('pointerup', { ...pointerBase, clientY: y - 48 }));
+      button.dispatchEvent(new MouseEvent('click', {
+        bubbles: true,
+        cancelable: true,
+        composed: true,
+        clientX: x,
+        clientY: y - 48,
+      }));
+    });
+    await expect(page.getByRole('dialog')).toHaveCount(0);
+
+    await inventoryButton.click();
+    await expect(page.getByRole('dialog')).toBeVisible();
+  });
+
   test('keeps inactive heavy tabs and closed modal bodies unmounted', async ({ page }) => {
     await page.goto(shoppingListDetailPath);
     await expect(page.getByRole('heading', { name: 'Regression shopping list' })).toBeVisible();

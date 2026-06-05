@@ -4,7 +4,7 @@ import { Input } from "@components/Form/Input";
 import { Image } from "@components/Image";
 import { Space } from "@components/Layout/Space";
 import { Stack } from "@components/Layout/Stack";
-import { scrollVirtualListToTop, VirtualListScrollTopButton } from "@components/List";
+import { scrollVirtualListToTop, VirtualListRowFrame, VirtualListScrollTopButton } from "@components/List";
 import { DeferredModalContent, Modal } from "@components/Modal";
 import { Popconfirm } from "@components/Popconfirm";
 import { Tooltip } from "@components/Tootip";
@@ -41,7 +41,7 @@ const INGREDIENT_STOCK_FILTERS: { value: IngredientStockFilter; label: string }[
     { value: "always_available", label: "Luôn có" },
 ];
 
-const INGREDIENT_ROW_HEIGHT = 132;
+const INGREDIENT_ROW_HEIGHT = 152;
 
 const filterRowStyle: React.CSSProperties = {
     display: "flex",
@@ -115,7 +115,9 @@ type IngredientRowProps = {
 
 const IngredientRow = ({ index, style, items, stockSnapshots, onDelete, isAdmin, onSuggest }: RowComponentProps<IngredientRowProps>) => {
     if (!items[index]) return null;
-    return <div style={style}><IngredientItem item={items[index]} stockSnapshot={stockSnapshots[items[index].id]} onDelete={onDelete} isAdmin={isAdmin} onSuggest={onSuggest} /></div>;
+    return <VirtualListRowFrame style={style}>
+        <IngredientItem item={items[index]} stockSnapshot={stockSnapshots[items[index].id]} onDelete={onDelete} isAdmin={isAdmin} onSuggest={onSuggest} />
+    </VirtualListRowFrame>;
 };
 
 export const IngredientListScreen = () => {
@@ -128,7 +130,13 @@ export const IngredientListScreen = () => {
     const [activeCategory, setActiveCategory] = useState<string | null>(null);
     const inventoryItems = useSelector(selectInventory);
     const rowHeight = INGREDIENT_ROW_HEIGHT;
+    const virtualListStyle = useMemo<React.CSSProperties>(() => ({
+        height: "100%",
+        overscrollBehavior: "contain",
+        WebkitOverflowScrolling: "touch",
+    }), []);
     const listRef = useRef<ListImperativeAPI | null>(null);
+    const didMountScrollRef = useRef(false);
     const [showScrollTop, setShowScrollTop] = useState(false);
     const { isAdmin } = useAdminMode();
     const normalizedSearch = searchText.trim().toLowerCase();
@@ -241,6 +249,10 @@ export const IngredientListScreen = () => {
     }, []);
 
     useEffect(() => {
+        if (!didMountScrollRef.current) {
+            didMountScrollRef.current = true;
+            return;
+        }
         _scrollToTop();
     }, [_scrollToTop, activeStockFilter, activeCategory, searchText]);
 
@@ -281,10 +293,12 @@ export const IngredientListScreen = () => {
                     rowComponent={IngredientRow}
                     rowCount={filteredIngredients.length}
                     rowHeight={rowHeight}
+                    overscanCount={1}
                     onScroll={_onListScroll}
                     onRowsRendered={_onRowsRendered}
                     rowProps={ingredientRowProps}
-                    style={{ height: "100%" }}
+                    style={virtualListStyle}
+                    data-testid="ingredient-virtual-list"
                 />
                 <VirtualListScrollTopButton listRef={listRef} rowCount={filteredIngredients.length} visible={showScrollTop} />
             </div>
@@ -326,7 +340,7 @@ type IngredientItemProps = {
     onSuggest: (ids: string[]) => void;
 }
 
-export const IngredientItem: React.FunctionComponent<IngredientItemProps> = (props) => {
+const IngredientItemComponent: React.FunctionComponent<IngredientItemProps> = (props) => {
     const toggleEdit = useToggle({ defaultValue: false });
     const toggleInventory = useToggle({ defaultValue: false });
 
@@ -352,7 +366,7 @@ export const IngredientItem: React.FunctionComponent<IngredientItemProps> = (pro
     const railColor = expiryBadge && nearestExpiry?.daysLeft <= 3 ? expiryBadge.color : inventoryStatus.color;
 
     return <React.Fragment>
-        <div style={{ padding: "6px 0 8px", boxSizing: "border-box" }}>
+        <div data-testid={`ingredient-list-item-${props.item.id}`} style={{ padding: "6px 0 8px", boxSizing: "border-box" }}>
             <div style={{
                 display: "grid",
                 gridTemplateColumns: "5px minmax(0, 1fr)",
@@ -459,4 +473,6 @@ export const IngredientItem: React.FunctionComponent<IngredientItemProps> = (pro
         </Modal>}
     </React.Fragment>
 }
+
+export const IngredientItem = React.memo(IngredientItemComponent);
 

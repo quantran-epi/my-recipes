@@ -6,7 +6,7 @@ import { Image } from "@components/Image";
 import { Box } from "@components/Layout/Box";
 import { Space } from "@components/Layout/Space";
 import { Stack } from "@components/Layout/Stack";
-import { List, scrollVirtualListToTop, VirtualListScrollTopButton } from "@components/List";
+import { List, scrollVirtualListToTop, VirtualListRowFrame, VirtualListScrollTopButton } from "@components/List";
 import { useMessage } from "@components/Message";
 import { DeferredModalContent, Modal } from "@components/Modal";
 import { Popover } from "@components/Popover";
@@ -113,7 +113,7 @@ const EMPTY_DISH_SUMMARY: DishListItemSummary = {
     includedDishCount: 0,
 };
 
-const DISH_ROW_HEIGHT = 204;
+const DISH_ROW_HEIGHT = 226;
 
 const DISH_DURATION_LABELS: Record<keyof DishDuration, string> = {
     unfreeze: 'Rã đông',
@@ -196,7 +196,9 @@ const buildDishListSummaries = (allDishes: Dishes[], visibleDishes: Dishes[] = a
 const DishRow = ({ index, style, items, allDishes, allIngredients, summaries, onDelete, onDuplicate, isAdmin }: RowComponentProps<DishRowProps>) => {
     if (!items[index]) return null;
     const item = items[index];
-    return <div style={style}><DishesItem item={item} allDishes={allDishes} allIngredients={allIngredients} summary={summaries[item.id] ?? EMPTY_DISH_SUMMARY} onDelete={onDelete} onDuplicate={onDuplicate} isAdmin={isAdmin} /></div>;
+    return <VirtualListRowFrame style={style}>
+        <DishesItem item={item} allDishes={allDishes} allIngredients={allIngredients} summary={summaries[item.id] ?? EMPTY_DISH_SUMMARY} onDelete={onDelete} onDuplicate={onDuplicate} isAdmin={isAdmin} />
+    </VirtualListRowFrame>;
 };
 
 export const DishesListScreen = () => {
@@ -209,7 +211,13 @@ export const DishesListScreen = () => {
     const dispatch = useDispatch();
     const { } = useScreenTitle({ value: "Món ăn", deps: [] });
     const rowHeight = DISH_ROW_HEIGHT;
+    const virtualListStyle = useMemo<React.CSSProperties>(() => ({
+        height: "100%",
+        overscrollBehavior: "contain",
+        WebkitOverflowScrolling: "touch",
+    }), []);
     const listRef = useRef<ListImperativeAPI | null>(null);
+    const didMountScrollRef = useRef(false);
     const [showScrollTop, setShowScrollTop] = useState(false);
     const { isAdmin } = useAdminMode();
     const normalizedSearch = searchText.trim().toLowerCase();
@@ -310,6 +318,10 @@ export const DishesListScreen = () => {
     }, []);
 
     useEffect(() => {
+        if (!didMountScrollRef.current) {
+            didMountScrollRef.current = true;
+            return;
+        }
         _scrollToTop();
     }, [_scrollToTop, activeStatus, activeTag, searchText]);
 
@@ -348,7 +360,8 @@ export const DishesListScreen = () => {
                     onScroll={_onListScroll}
                     onRowsRendered={_onRowsRendered}
                     rowProps={dishRowProps}
-                    style={{ height: "100%" }}
+                    style={virtualListStyle}
+                    data-testid="dish-virtual-list"
                 />
                 <VirtualListScrollTopButton listRef={listRef} rowCount={filteredDishes.length} visible={showScrollTop} />
             </div>
@@ -379,7 +392,7 @@ type DishesItemProps = {
 moment.relativeTimeRounding((v) => parseFloat(v.toFixed(1)));
 moment.relativeTimeThreshold('m', 60);
 
-export const DishesItem: React.FunctionComponent<DishesItemProps> = (props) => {
+const DishesItemComponent: React.FunctionComponent<DishesItemProps> = (props) => {
     const toggleEdit = useToggle({ defaultValue: false });
     const toggleDishesDetail = useToggle();
     const toggleCooking = useToggle();
@@ -450,7 +463,7 @@ export const DishesItem: React.FunctionComponent<DishesItemProps> = (props) => {
     const baseServings = props.item.baseServings ?? 2;
 
     return <React.Fragment>
-        <div style={{ padding: "6px 0 8px", boxSizing: "border-box" }}>
+        <div data-testid={`dish-list-item-${props.item.id}`} style={{ padding: "6px 0 8px", boxSizing: "border-box" }}>
             <Box style={{
                 display: "grid",
                 gridTemplateColumns: "88px minmax(0, 1fr)",
@@ -643,3 +656,5 @@ export const DishesItem: React.FunctionComponent<DishesItemProps> = (props) => {
         </Modal>}
     </React.Fragment>
 }
+
+export const DishesItem = React.memo(DishesItemComponent);

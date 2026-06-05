@@ -4,7 +4,7 @@ import { Dropdown } from "@components/Dropdown";
 import { Input } from "@components/Form/Input";
 import { Image } from "@components/Image";
 import { Box } from "@components/Layout/Box";
-import { scrollVirtualListToTop, VirtualListScrollTopButton } from "@components/List";
+import { scrollVirtualListToTop, VirtualListRowFrame, VirtualListScrollTopButton } from "@components/List";
 import { Space } from "@components/Layout/Space";
 import { Stack } from "@components/Layout/Stack";
 import { DeferredModalContent, Modal } from "@components/Modal";
@@ -46,7 +46,7 @@ const SHOPPING_LIST_STATUS_FILTERS: { value: ShoppingListStatusFilter; label: st
     { value: "empty_checklist", label: "Chưa checklist" },
 ];
 
-const SHOPPING_LIST_ROW_HEIGHT = 164;
+const SHOPPING_LIST_ROW_HEIGHT = 186;
 
 const filterRowStyle: React.CSSProperties = {
     display: "flex",
@@ -102,7 +102,9 @@ type ShoppingListRowProps = {
 
 const ShoppingListRow = ({ index, style, items, allDishes, allScheduledMeals, allIngredients, onDelete }: RowComponentProps<ShoppingListRowProps>) => {
     if (!items[index]) return null;
-    return <div style={style}><ShoppingListItem item={items[index]} allDishes={allDishes} allScheduledMeals={allScheduledMeals} allIngredients={allIngredients} onDelete={onDelete} /></div>;
+    return <VirtualListRowFrame style={style}>
+        <ShoppingListItem item={items[index]} allDishes={allDishes} allScheduledMeals={allScheduledMeals} allIngredients={allIngredients} onDelete={onDelete} />
+    </VirtualListRowFrame>;
 };
 
 export const ShoppingListScreen = () => {
@@ -118,7 +120,13 @@ export const ShoppingListScreen = () => {
     const [searchText, setSearchText] = useState("");
     const [activeStatus, setActiveStatus] = useState<ShoppingListStatusFilter>("all");
     const rowHeight = SHOPPING_LIST_ROW_HEIGHT;
+    const virtualListStyle = useMemo<React.CSSProperties>(() => ({
+        height: "100%",
+        overscrollBehavior: "contain",
+        WebkitOverflowScrolling: "touch",
+    }), []);
     const listRef = useRef<ListImperativeAPI | null>(null);
+    const didMountScrollRef = useRef(false);
     const [showScrollTop, setShowScrollTop] = useState(false);
     const normalizedSearch = searchText.trim().toLowerCase();
 
@@ -195,6 +203,10 @@ export const ShoppingListScreen = () => {
     }, []);
 
     useEffect(() => {
+        if (!didMountScrollRef.current) {
+            didMountScrollRef.current = true;
+            return;
+        }
         _scrollToTop();
     }, [_scrollToTop, activeStatus, searchText]);
 
@@ -218,10 +230,12 @@ export const ShoppingListScreen = () => {
                     rowComponent={ShoppingListRow}
                     rowCount={filteredShoppingLists.length}
                     rowHeight={rowHeight}
+                    overscanCount={1}
                     onScroll={_onListScroll}
                     onRowsRendered={_onRowsRendered}
                     rowProps={shoppingListRowProps}
-                    style={{ height: "100%" }}
+                    style={virtualListStyle}
+                    data-testid="shopping-list-virtual-list"
                 />
                 <VirtualListScrollTopButton listRef={listRef} rowCount={filteredShoppingLists.length} visible={showScrollTop} />
             </div>
@@ -260,7 +274,7 @@ type ShoppingListItemProps = {
     onDelete: (item: ShoppingList) => void;
 }
 
-export const ShoppingListItem: React.FunctionComponent<ShoppingListItemProps> = (props) => {
+const ShoppingListItemComponent: React.FunctionComponent<ShoppingListItemProps> = (props) => {
     const toggleIngredient = useToggle({ defaultValue: false });
     const toggleAddMoreDishes = useToggle({ defaultValue: false });
     const navigate = useNavigate();
@@ -355,7 +369,7 @@ export const ShoppingListItem: React.FunctionComponent<ShoppingListItemProps> = 
     const completedLabel = props.item.completedAt ? moment(props.item.completedAt).format("DD/MM/YY") : null;
 
     return <React.Fragment>
-        <div style={{ padding: "6px 0 8px", boxSizing: "border-box" }}>
+        <div data-testid={`shopping-list-item-${props.item.id}`} style={{ padding: "6px 0 8px", boxSizing: "border-box" }}>
             <div style={{
                 display: "grid",
                 gridTemplateColumns: "5px minmax(0, 1fr)",
@@ -485,3 +499,5 @@ export const ShoppingListItem: React.FunctionComponent<ShoppingListItemProps> = 
         </Modal>}
     </React.Fragment >
 }
+
+export const ShoppingListItem = React.memo(ShoppingListItemComponent);

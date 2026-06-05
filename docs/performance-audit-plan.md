@@ -11,6 +11,7 @@ Default performance targets:
 - Modal shells open before expensive modal body work starts.
 - Image and network requests stay within a visible budget for the current route.
 - Hidden tabs, panels, overlays, and closed dialogs do not perform heavy calculations or mount expensive trees.
+- Virtualized list rows preserve visual spacing, allow immediate first scroll, and do not turn drag-scroll gestures into accidental row actions.
 
 ## How To Use This File
 
@@ -372,6 +373,46 @@ Notes:
 - The repo's `.env` pins CRA to `PORT=5000`, so the verified PERF-07 Playwright commands used `E2E_PORT=5000` to reuse the reachable dev server.
 - The explicit `PERF-00` baseline test remains opt-in; the new PERF-07 regression spec runs in the standard suite.
 
+### PERF-08: Virtualized List Interaction And Layout Guard
+
+Status: Audited
+
+Purpose:
+- Cover the class of regressions that remained after the original performance plan: virtualized row spacing, scroll intent handling, first-scroll behavior, and visible-card rerender churn while overlays open.
+
+Implementation:
+- Add a shared virtual row frame that applies stable row box sizing, padding, overflow control, mobile scroll hints, and drag-click suppression for pointer and touch gestures.
+- Increase fixed row heights for dish, ingredient, and shopping-list virtualized rows so rich cards have enough reserved space and do not visually collapse into neighboring rows.
+- Skip initial mount scroll-reset effects so opening a list does not fight the user's first wheel/touch scroll.
+- Keep virtual-list style objects stable and reduce overscan on large list screens to lower extra card work.
+- Memoize heavy dish, ingredient, and shopping-list row card components so unrelated overlay/sidebar state does not rerender visible cards unnecessarily.
+- Add nonvisual `data-testid` hooks for virtual lists and row cards to support focused regression tests.
+- Extend `tests/e2e/performance-regression.spec.ts` with checks for row spacing, immediate scrolling, drag-scroll suppression, and normal modal opening after an intentional click.
+
+Acceptance Criteria:
+- Dish, ingredient, and shopping-list rows are visually separated and not clipped or overlapped in representative desktop/mobile-sized viewports.
+- The first wheel/touch scroll after opening a large list moves the list without requiring repeated attempts.
+- Dragging or scrolling over a row action does not open a detail or inventory modal by accident.
+- A normal intentional click still opens the expected modal or row action.
+- Opening sidebar or modal chrome while a large list is visible does not force avoidable rerender work across all visible rich cards.
+- Build and focused performance regression tests pass.
+
+Audit Checklist:
+- Static inspection checks: confirm every fixed-height virtualized rich row uses `VirtualListRowFrame`, has adequate `rowHeight`, and avoids recreating unstable list style objects during unrelated state changes.
+- Automated test checks: run the focused Playwright performance regression suite and confirm it covers row spacing, scroll behavior, drag-click suppression, and intentional modal opening.
+- Manual browser checks if needed: visually inspect dish, ingredient, and shopping-list screens after build with representative seeded data; confirm list rows are separated and scrolling feels immediate.
+
+Test Evidence:
+- 2026-06-05 build command: `npm.cmd run build`.
+- 2026-06-05 build result: passed with the existing lint/dependency warning set.
+- 2026-06-05 e2e command: `$env:E2E_PORT='5000'; npx.cmd playwright test tests/e2e/performance-regression.spec.ts`.
+- 2026-06-05 e2e result: passed 3 Playwright tests, including the new virtualized ingredient row spacing and drag-scroll intent test.
+- 2026-06-05 visual evidence: inspected screenshots at `test-results/performance/ingredient-list-visual.png`, `test-results/performance/dish-list-visual.png`, and `test-results/performance/shopping-list-visual.png`; rows were separated and not clipped or overlapping.
+
+Notes:
+- The original plan was not broad enough for this regression class. It targeted heavy calculations, hidden work, image budgets, and modal lazy mounting, but it did not require visual layout assertions or gesture-intent checks after list virtualization.
+- This item should remain in the plan as a required audit gate whenever fixed-height virtualization, row actions, or list scroll reset behavior changes.
+
 ## Audit Log
 
 | Date | Step ID | Command/test run | Result | Evidence path | Follow-up |
@@ -385,3 +426,4 @@ Notes:
 | 2026-06-04 | PERF-05 | Static navigation audit; `npm run build`; `$env:E2E_PORT='3032'; npx.cmd playwright test --output D:\tmp\my-recipes-e2e-perf05-artifacts` | Centralized sidebar/bottom-tab route feedback, removed sidebar navigation delay, transition-wrapped high-traffic dashboard/search/list/detail navigation, and verified build plus e2e. | `src/Routing/MasterPage.tsx`; `src/Modules/Home/Screens/Dashboard.screen.tsx`; `src/Modules/Home/Screens/GlobalSearch.screen.tsx`; `playwright-report/index.html`; `test-results/e2e-results.json`; `D:\tmp\my-recipes-e2e-perf05-artifacts` | Deploy `PERF-05`, then continue with `PERF-06` heavy calculation scheduling. |
 | 2026-06-04 | PERF-06 | CodeGraph static audit; focused diff review; `npm run build`; `$env:E2E_PORT='3032'; npx.cmd playwright test --output D:\tmp\my-recipes-e2e-perf06-artifacts` | Added shared scheduled calculation hook, moved dashboard/suggester/planner/cost-tab heavy calculations out of urgent render paths, added pending-safe UI states, and verified build plus e2e. | `src/Hooks/useScheduledCalculation.ts`; `src/Modules/DishSuggester/Screens/DishSuggester.screen.tsx`; `src/Modules/Dishes/Screens/DishesManageIngredient/DishExpensePlanner.widget.tsx`; `playwright-report/index.html`; `test-results/e2e-results.json`; `D:\tmp\my-recipes-e2e-perf06-artifacts` | Deploy `PERF-06`, then continue with `PERF-07` performance regression suite. |
 | 2026-06-04 | PERF-07 | `$env:E2E_PORT='5000'; npx.cmd playwright test tests/e2e/performance-regression.spec.ts --output D:\tmp\my-recipes-e2e-perf07-artifacts`; `$env:E2E_PORT='5000'; npx.cmd playwright test --output D:\tmp\my-recipes-e2e-perf07-full-artifacts` | Added normal-suite performance regression tests for lazy tab/modal mounting, route/modal smoke budgets, route request/image budget, and hidden dish-image requests; targeted PERF-07 passed 2 tests; full suite passed 11 and skipped 1 explicit baseline. | `tests/e2e/performance-regression.spec.ts`; `test-results/performance/perf-07-regression.json`; `playwright-report/index.html`; `test-results/e2e-results.json`; `D:\tmp\my-recipes-e2e-perf07-artifacts`; `D:\tmp\my-recipes-e2e-perf07-full-artifacts` | Deploy `PERF-07`; performance plan implementation is complete. |
+| 2026-06-05 | PERF-08 | `npm.cmd run build`; `$env:E2E_PORT='5000'; npx.cmd playwright test tests/e2e/performance-regression.spec.ts`; visual screenshot inspection | Added virtual row frame, increased row heights, guarded drag-scroll clicks, skipped initial scroll reset, memoized rich list cards, and verified row spacing plus scroll intent. | `src/Components/List/VirtualListRowFrame.tsx`; `tests/e2e/performance-regression.spec.ts`; `test-results/performance/ingredient-list-visual.png`; `test-results/performance/dish-list-visual.png`; `test-results/performance/shopping-list-visual.png` | Keep `PERF-08` as the regression gate for future virtualized list work. |
