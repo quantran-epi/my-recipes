@@ -1,4 +1,4 @@
-import { expect, test as base } from '@playwright/test';
+import { expect, test as base, type Page } from '@playwright/test';
 import { seedApp } from './fixtures/seedApp';
 import {
   collectInteractionWarnings,
@@ -38,6 +38,13 @@ const phase2Budgets = {
   modalContentMs: 5_000,
   searchResetShellMs: 2_500,
   searchResetContentMs: 5_000,
+};
+
+const expectPageStatusDoesNotBlockActions = async (page: Page, testId: string) => {
+  const pointerEvents = await page.getByTestId(testId).evaluateAll(elements =>
+    elements.map(element => window.getComputedStyle(element).pointerEvents),
+  );
+  if (pointerEvents.length > 0) expect(pointerEvents.every(value => value === 'none')).toBeTruthy();
 };
 
 const shoppingListDetailPath = `shoppingList/detail?shoppingList=${TEST_IDS.shoppingLists.regression}`;
@@ -242,6 +249,7 @@ dailyPerformanceTest.describe('PERF-07 daily large-list smoke', () => {
 
     await page.goto('dishes/list', { waitUntil: 'domcontentloaded' });
     await expect(dishRow()).toBeVisible({ timeout: 15_000 });
+    await expectPageStatusDoesNotBlockActions(page, 'dish-list-page-status');
 
     const interactions = [];
     interactions.push(await measureInteraction({
@@ -282,6 +290,7 @@ dailyPerformanceTest.describe('PERF-07 daily large-list smoke', () => {
 
     await page.goto('ingredient/list', { waitUntil: 'domcontentloaded' });
     await expect(ingredientRow()).toBeVisible({ timeout: 15_000 });
+    await expectPageStatusDoesNotBlockActions(page, 'ingredient-list-page-status');
 
     const ingredientSearchInput = page.getByTestId('ingredient-search-input');
     await ingredientSearchInput.fill('0004');
@@ -309,6 +318,7 @@ dailyPerformanceTest.describe('PERF-07 daily large-list smoke', () => {
 
     await page.goto('shoppingList/list', { waitUntil: 'domcontentloaded' });
     await expect(shoppingListRow()).toBeVisible({ timeout: 15_000 });
+    await expectPageStatusDoesNotBlockActions(page, 'shopping-list-list-page-status');
 
     const shoppingSearchInput = page.getByTestId('shopping-list-search-input');
     await shoppingSearchInput.fill('0001');
@@ -357,7 +367,7 @@ dailyPerformanceTest.describe('PERF-07 daily large-list smoke', () => {
       interactions,
       warnings,
       resources: await summarizeResources(page),
-      notes: ['Daily large-list regression smoke uses generous budgets; strict shell target misses warn only.'],
+      notes: ['Daily large-list regression smoke enforces practical Phase 2 budgets; strict 100 ms shell target misses warn only.'],
     }, 'perf-07-daily-large-list');
   });
 });
