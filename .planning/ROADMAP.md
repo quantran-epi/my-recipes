@@ -69,11 +69,11 @@ Plans:
   4. Closed modal bodies and inactive heavy content stay unmounted until the user requests them.
   5. Focused performance tests fail when modal, detail, or menu open timing exceeds the chosen budget.
 
-**Plans:** 3 plans
+**Plans:** 1/3 plans executed
 Plans:
 **Wave 1**
 
-- [ ] 02-01: Profile and reduce list row rerender triggers and heavy row props.
+- [x] 02-01: Profile and reduce list row rerender triggers and heavy row props.
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
@@ -159,7 +159,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Measurement and Performance Harness | 3/3 | Complete    | 2026-06-05 |
-| 2. Large-List Interaction Hot Paths | 0/3 | Not started | - |
+| 2. Large-List Interaction Hot Paths | 0/3 | Planned    |  |
 | 3. Online and Offline Cost Isolation | 0/3 | Not started | - |
 | 4. Navigation and App-Shell Responsiveness | 0/2 | Not started | - |
 | 5. Release Gate and Product Guardrails | 0/2 | Not started | - |
