@@ -99,7 +99,7 @@ Plans:
   4. Shared-data sync prompts can appear without heavy fetch or impact-analysis work blocking the app shell.
   5. Maintainer can run online/offline comparison checks with GitHub requests stubbed, controlled, or clearly measured.
 
-**Plans:** 1/3 plans executed
+**Plans:** 2/3 plans executed
 
 Plans:
 
@@ -109,7 +109,7 @@ Plans:
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
-- [ ] 03-02: Make sync prompts progressive and dish images fallback-first on list rows.
+- [x] 03-02: Make sync prompts progressive and dish images fallback-first on list rows.
 
 **Wave 3** *(blocked on Wave 2 completion)*
 
@@ -174,7 +174,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5
 |-------|----------------|--------|-----------|
 | 1. Measurement and Performance Harness | 3/3 | Complete    | 2026-06-05 |
 | 2. Large-List Interaction Hot Paths | 3/3 | Complete    | 2026-06-05 |
-| 3. Online and Offline Cost Isolation | 1/3 | In Progress|  |
+| 3. Online and Offline Cost Isolation | 2/3 | In Progress|  |
 | 4. Navigation and App-Shell Responsiveness | 0/2 | Not started | - |
 | 5. Release Gate and Product Guardrails | 0/2 | Not started | - |
 
