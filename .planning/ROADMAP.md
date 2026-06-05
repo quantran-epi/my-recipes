@@ -70,11 +70,17 @@ Plans:
   5. Focused performance tests fail when modal, detail, or menu open timing exceeds the chosen budget.
 
 **Plans:** 3 plans
-
 Plans:
+**Wave 1**
 
 - [ ] 02-01: Profile and reduce list row rerender triggers and heavy row props.
+
+**Wave 2** *(blocked on Wave 1 completion)*
+
 - [ ] 02-02: Defer or split expensive modal/detail work so shells open promptly.
+
+**Wave 3** *(blocked on Wave 2 completion)*
+
 - [ ] 02-03: Extend large-list interaction timing tests for modal, menu, search, filter, and scroll behavior.
 
 ### Phase 3: Online and Offline Cost Isolation
