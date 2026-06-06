@@ -1,5 +1,6 @@
 import { DeleteOutlined, EditOutlined, PlusOutlined, DatabaseOutlined, FireOutlined, BarChartOutlined } from "@ant-design/icons";
 import { Button } from "@components/Button";
+import { FastModalShell } from "@components/FastOverlay";
 import { Input } from "@components/Form/Input";
 import { Image } from "@components/Image";
 import { Space } from "@components/Layout/Space";
@@ -371,16 +372,16 @@ export const IngredientListScreen = () => {
                 initialIngredientIds={suggestIds}
             />
         </React.Suspense>}
-        {inventoryIngredient && <Modal open={Boolean(inventoryIngredient)} title={
+        {inventoryIngredient && <FastModalShell open={Boolean(inventoryIngredient)} title={
             <Space>
                 <DatabaseOutlined />
                 Tồn kho - {inventoryIngredient.name}
             </Space>
-        } destroyOnClose={true} onCancel={_onCloseInventory} footer={null}>
+        } onClose={_onCloseInventory} footer={null}>
             <DeferredModalContent active={Boolean(inventoryIngredient)} minHeight={180}>
                 <IngredientInventoryWidget item={inventoryIngredient} onDone={_onCloseInventory} onSuggest={_onSuggest} />
             </DeferredModalContent>
-        </Modal>}
+        </FastModalShell>}
     </React.Fragment>
 }
 

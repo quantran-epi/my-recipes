@@ -1,0 +1,241 @@
+import { CloseOutlined } from "@ant-design/icons";
+import React from "react";
+import { createPortal } from "react-dom";
+
+type FastOverlaySize = number | string;
+
+type FastOverlayBaseProps = {
+    open: boolean;
+    title: React.ReactNode;
+    onClose: () => void;
+    children?: React.ReactNode;
+    zIndex?: number;
+    maskClosable?: boolean;
+    "data-testid"?: string;
+};
+
+type FastModalShellProps = FastOverlayBaseProps & {
+    footer?: React.ReactNode;
+    width?: FastOverlaySize;
+    style?: React.CSSProperties;
+    afterOpenChange?: (open: boolean) => void;
+};
+
+type FastDrawerShellProps = FastOverlayBaseProps & {
+    width?: FastOverlaySize;
+};
+
+const toCssSize = (value: FastOverlaySize | undefined, fallback: string): string => {
+    if (typeof value === "number") return `${value}px`;
+    return value ?? fallback;
+};
+
+const getOffset = (value: React.CSSProperties["top"], fallback: number): string => {
+    if (typeof value === "number") return `${value}px`;
+    if (typeof value === "string") return value;
+    return `${fallback}px`;
+};
+
+const useBodyScrollLock = (locked: boolean) => {
+    React.useEffect(() => {
+        if (!locked) return;
+        const previousOverflow = document.body.style.overflow;
+        document.body.style.overflow = "hidden";
+        return () => {
+            document.body.style.overflow = previousOverflow;
+        };
+    }, [locked]);
+};
+
+const useEscapeClose = (open: boolean, onClose: () => void) => {
+    React.useEffect(() => {
+        if (!open) return;
+        const onKeyDown = (event: KeyboardEvent) => {
+            if (event.key === "Escape") onClose();
+        };
+        window.addEventListener("keydown", onKeyDown);
+        return () => window.removeEventListener("keydown", onKeyDown);
+    }, [onClose, open]);
+};
+
+const overlayMotionStyles = <style>{`
+@keyframes my-recipes-fast-overlay-fade-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes my-recipes-fast-modal-in { from { opacity: 0; transform: translateY(6px) scale(0.985); } to { opacity: 1; transform: translateY(0) scale(1); } }
+@keyframes my-recipes-fast-drawer-in { from { opacity: 0.98; transform: translateX(-10px); } to { opacity: 1; transform: translateX(0); } }
+@media (prefers-reduced-motion: reduce) {
+  .my-recipes-fast-overlay,
+  .my-recipes-fast-overlay * { animation-duration: 1ms !important; transition-duration: 1ms !important; }
+}
+`}</style>;
+
+const closeButtonStyle: React.CSSProperties = {
+    width: 34,
+    height: 34,
+    display: "inline-flex",
+    alignItems: "center",
+    justifyContent: "center",
+    border: "1px solid #edf0f5",
+    borderRadius: 10,
+    background: "#fff",
+    color: "#4b5d6f",
+    cursor: "pointer",
+    flexShrink: 0,
+};
+
+const shellTitleStyle: React.CSSProperties = {
+    minWidth: 0,
+    display: "flex",
+    alignItems: "center",
+    gap: 8,
+    fontWeight: 650,
+    color: "#182536",
+};
+
+export const FastModalShell: React.FunctionComponent<FastModalShellProps> = ({
+    open,
+    title,
+    onClose,
+    children,
+    footer,
+    width,
+    zIndex = 1200,
+    style,
+    maskClosable = true,
+    afterOpenChange,
+    "data-testid": testId,
+}) => {
+    useBodyScrollLock(open);
+    useEscapeClose(open, onClose);
+
+    React.useEffect(() => {
+        if (!open || !afterOpenChange) return;
+        const frame = window.requestAnimationFrame(() => afterOpenChange(true));
+        return () => window.cancelAnimationFrame(frame);
+    }, [afterOpenChange, open]);
+
+    if (!open) return null;
+
+    const top = getOffset(style?.top, 52);
+    const panelWidth = toCssSize(width, "min(680px, calc(100vw - 28px))");
+
+    return createPortal(
+        <div
+            className="my-recipes-fast-overlay"
+            style={{
+                position: "fixed",
+                inset: 0,
+                zIndex,
+                display: "flex",
+                alignItems: "flex-start",
+                justifyContent: "center",
+                padding: `${top} 14px 18px`,
+                background: "rgba(16, 24, 40, 0.36)",
+                animation: "my-recipes-fast-overlay-fade-in 80ms ease-out both",
+            }}
+            onMouseDown={(event) => {
+                if (maskClosable && event.target === event.currentTarget) onClose();
+            }}
+        >
+            {overlayMotionStyles}
+            <section
+                role="dialog"
+                aria-modal="true"
+                data-testid={testId}
+                style={{
+                    width: panelWidth,
+                    maxWidth: "100%",
+                    maxHeight: `calc(100vh - ${top} - 18px)`,
+                    display: "flex",
+                    flexDirection: "column",
+                    overflow: "hidden",
+                    border: "1px solid rgba(232, 237, 245, 0.96)",
+                    borderRadius: 14,
+                    background: "#fff",
+                    boxShadow: "0 18px 54px rgba(15, 23, 42, 0.24)",
+                    animation: "my-recipes-fast-modal-in 90ms ease-out both",
+                    ...style,
+                    top: undefined,
+                }}
+                onMouseDown={(event) => event.stopPropagation()}
+            >
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, padding: "14px 16px 12px", borderBottom: "1px solid #f0f2f5" }}>
+                    <div style={shellTitleStyle}>{title}</div>
+                    <button type="button" aria-label="Thoát" onClick={onClose} style={closeButtonStyle}>
+                        <CloseOutlined />
+                    </button>
+                </div>
+                <div style={{ minHeight: 0, overflowY: "auto", padding: 16 }}>
+                    {children}
+                </div>
+                {footer && <div style={{ display: "flex", justifyContent: "flex-end", padding: "10px 16px 14px", borderTop: "1px solid #f0f2f5", background: "#fbfcfe" }}>
+                    {footer}
+                </div>}
+            </section>
+        </div>,
+        document.body,
+    );
+};
+
+export const FastDrawerShell: React.FunctionComponent<FastDrawerShellProps> = ({
+    open,
+    title,
+    onClose,
+    children,
+    width,
+    zIndex = 1150,
+    maskClosable = true,
+    "data-testid": testId,
+}) => {
+    useBodyScrollLock(open);
+    useEscapeClose(open, onClose);
+
+    if (!open) return null;
+
+    return createPortal(
+        <div
+            className="my-recipes-fast-overlay"
+            style={{
+                position: "fixed",
+                inset: 0,
+                zIndex,
+                background: "rgba(16, 24, 40, 0.30)",
+                animation: "my-recipes-fast-overlay-fade-in 70ms ease-out both",
+            }}
+            onMouseDown={(event) => {
+                if (maskClosable && event.target === event.currentTarget) onClose();
+            }}
+        >
+            {overlayMotionStyles}
+            <aside
+                role="dialog"
+                aria-modal="true"
+                data-testid={testId}
+                style={{
+                    width: toCssSize(width, "min(360px, calc(100vw - 38px))"),
+                    maxWidth: "calc(100vw - 38px)",
+                    height: "100%",
+                    display: "flex",
+                    flexDirection: "column",
+                    overflow: "hidden",
+                    borderRight: "1px solid rgba(232, 237, 245, 0.96)",
+                    borderRadius: "0 18px 18px 0",
+                    background: "#fff",
+                    boxShadow: "16px 0 48px rgba(15, 23, 42, 0.22)",
+                    animation: "my-recipes-fast-drawer-in 90ms ease-out both",
+                }}
+                onMouseDown={(event) => event.stopPropagation()}
+            >
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, padding: "14px 14px 12px 16px", borderBottom: "1px solid #f0f2f5" }}>
+                    <div style={shellTitleStyle}>{title}</div>
+                    <button type="button" aria-label="Ẩn menu" onClick={onClose} style={closeButtonStyle}>
+                        <CloseOutlined />
+                    </button>
+                </div>
+                <div style={{ flex: 1, minHeight: 0, overflowY: "auto", display: "flex", flexDirection: "column" }}>
+                    {children}
+                </div>
+            </aside>
+        </div>,
+        document.body,
+    );
+};

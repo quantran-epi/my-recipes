@@ -1,6 +1,7 @@
 import { CalendarOutlined, CheckCircleOutlined, DeleteOutlined, EditOutlined, ExclamationCircleOutlined, FileTextOutlined, HolderOutlined, LoadingOutlined, MonitorOutlined, OrderedListOutlined, PlusOutlined, ReloadOutlined } from "@ant-design/icons";
 import { Button } from "@components/Button";
 import { Dropdown } from "@components/Dropdown";
+import { FastModalShell } from "@components/FastOverlay";
 import { Input } from "@components/Form/Input";
 import { Image } from "@components/Image";
 import { Box } from "@components/Layout/Box";
@@ -474,19 +475,19 @@ const ShoppingListItemComponent: React.FunctionComponent<ShoppingListItemProps> 
                 </div>
             </div>
         </div>
-        {toggleIngredient.value && <Modal style={{ top: 50 }} open={toggleIngredient.value} title={<Space>
+        {toggleIngredient.value && <FastModalShell style={{ top: 50 }} open={toggleIngredient.value} title={<Space>
             <Image src={ShoppinglistIcon} preview={false} width={24} style={{ marginBottom: 3 }} />
             {props.item.name}
-        </Space>} destroyOnClose={true} onCancel={toggleIngredient.hide} footer={<Space>
+        </Space>} onClose={toggleIngredient.hide} footer={<Space>
             <Button onClick={toggleIngredient.hide}>Đóng</Button>
             <Button type="primary" icon={<EditOutlined />} onClick={_onOpenDetailPage}>Mở trang chi tiết</Button>
-        </Space>} afterOpenChange={() => toggleLoading.hide()}>
+        </Space>} afterOpenChange={toggleLoading.hide}>
             <DeferredModalContent active={toggleIngredient.value} minHeight={220}>
                 <Box data-testid="shopping-list-ingredient-modal" style={{ maxHeight: 550, overflowY: "auto" }}>
                     <ShoppingListDetailWidget shoppingList={props.item} />
                 </Box>
             </DeferredModalContent>
-        </Modal>}
+        </FastModalShell>}
         {toggleAddMoreDishes.value && <Modal style={{ top: 50 }} open={toggleAddMoreDishes.value} title={<Space>
             <Image src={ShoppinglistIcon} preview={false} width={24} style={{ marginBottom: 3 }} />
             Sửa món ăn

@@ -1,6 +1,7 @@
 import { CheckCircleOutlined, ClockCircleOutlined, CopyOutlined, DeleteOutlined, EditOutlined, ExclamationCircleOutlined, FileTextOutlined, HolderOutlined, PlusOutlined, FireOutlined } from "@ant-design/icons";
 import { Button } from "@components/Button";
 import { Dropdown } from "@components/Dropdown";
+import { FastModalShell } from "@components/FastOverlay";
 import { Input } from "@components/Form/Input";
 import { Image } from "@components/Image";
 import { Box } from "@components/Layout/Box";
@@ -623,12 +624,12 @@ const DishesItemComponent: React.FunctionComponent<DishesItemProps> = (props) =>
                 </div>
             </Box>
         </div>
-        {toggleDishesDetail.value && <Modal style={{ top: 50 }} open={toggleDishesDetail.value} title={
+        {toggleDishesDetail.value && <FastModalShell style={{ top: 50 }} open={toggleDishesDetail.value} title={
             <Space>
                 <Image src={NoodlesIcon} preview={false} width={24} style={{ marginBottom: 3 }} />
                 {props.item.name}
             </Space>
-        } destroyOnClose={true} onCancel={toggleDishesDetail.hide} footer={<Space>
+        } onClose={toggleDishesDetail.hide} footer={<Space>
             <Button onClick={toggleDishesDetail.hide}>Đóng</Button>
             <Button type="primary" icon={<EditOutlined />} onClick={_onOpenDetailPage}>Mở trang chi tiết</Button>
         </Space>}>
@@ -637,7 +638,7 @@ const DishesItemComponent: React.FunctionComponent<DishesItemProps> = (props) =>
                     <DishesDetailWidget dish={props.item} />
                 </DeferredModalContent>
             </Box>
-        </Modal>}
+        </FastModalShell>}
         {toggleEdit.value && <Modal open={toggleEdit.value} title={
             <Space>
                 <Image src={NoodlesIcon} preview={false} width={24} style={{ marginBottom: 3 }} />

@@ -2,6 +2,7 @@ import { CloudDownloadOutlined, CloudUploadOutlined, ExportOutlined, HistoryOutl
 import { ObjectPropertyHelper } from "@common/Helpers/ObjectProperty";
 import { SharedSyncModal } from "@components/AppInitializer/SharedSyncModal";
 import { Button } from "@components/Button";
+import { FastDrawerShell } from "@components/FastOverlay";
 import { TextArea } from "@components/Form/Input";
 import { Image } from "@components/Image";
 import { Box } from "@components/Layout/Box";
@@ -23,7 +24,7 @@ import { GistBackupWidget } from "@components/GistBackupWidget";
 import { UserGuideScreen } from "@modules/Home/Screens/UserGuide.screen";
 import { GlobalSearchScreen } from "@modules/Home/Screens/GlobalSearch.screen";
 import { selectCookingSessions, selectCurrentFeatureName, selectDishesById } from "@store/Selectors";
-import { Drawer, Flex, Input as AntInput, Layout, Divider } from "antd";
+import { Flex, Input as AntInput, Layout, Divider } from "antd";
 import React, { useState } from "react";
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 import { useSelector } from "react-redux";
@@ -256,8 +257,7 @@ const SidebarDrawer = () => {
     return (
         <React.Fragment>
             <Button type="primary" data-testid="sidebar-drawer-button" onClick={showDrawer} icon={<MenuOutlined />} />
-            <Drawer
-                placement="left"
+            <FastDrawerShell
                 title={
                     <Flex align="center" gap={10}>
                         <Image src={LogoIcon} width={32} loading="eager" alt="My Recipes" />
@@ -267,8 +267,7 @@ const SidebarDrawer = () => {
                 onClose={onClose}
                 open={open}
                 data-testid="sidebar-drawer"
-                destroyOnClose
-                styles={{ body: { padding: 0, display: "flex", flexDirection: "column", height: "100%", overflowY: "auto" } }}
+                width="min(360px, calc(100vw - 38px))"
             >
                 {/* ── Navigation ── */}
                 <div data-testid="sidebar-drawer-primary-nav">
@@ -389,7 +388,7 @@ const SidebarDrawer = () => {
                     </React.Fragment>}
 
                 </Box>
-            </Drawer>
+            </FastDrawerShell>
             <Modal
                 title="Nhập mã PIN"
                 open={pinModalOpen}
