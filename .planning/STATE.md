@@ -4,8 +4,8 @@ milestone: v1.0
 milestone_name: milestone
 status: ready
 stopped_at: Completed 04-02-PLAN.md
-last_updated: "2026-06-06T03:17:37.096Z"
-last_activity: 2026-06-06 -- Phase 04 completed; ready for Phase 05 release gate
+last_updated: "2026-06-06T06:14:04.032Z"
+last_activity: 2026-06-06 -- Completed quick task 260606-idq: manual-only shared-data sync checks
 progress:
   total_phases: 5
   completed_phases: 4
@@ -28,7 +28,7 @@ See: .planning/PROJECT.md (updated 2026-06-05)
 Phase: 5 (release-gate-and-product-guardrails) — READY
 Plan: Not started
 Status: Phase 04 complete; ready for Phase 05
-Last activity: 2026-06-06 -- Phase 04 completed; ready for Phase 05 release gate
+Last activity: 2026-06-06 -- Completed quick task 260606-idq: manual-only shared-data sync checks
 
 Progress: [████████░░] 80%
 
@@ -36,6 +36,7 @@ Progress: [████████░░] 80%
 
 | Date | Task | Artifact |
 |------|------|----------|
+| 2026-06-06 | Disable automatic remote shared-data checks and make shared sync manual-only | `.planning/quick/260606-idq-disable-automatic-remote-shared-data-che/260606-idq-SUMMARY.md` |
 | 2026-06-06 | Document remaining large-list modal/sidebar pause reason and visual performance checks | `docs/large-list-modal-sidebar-performance-note.md` |
 
 ## Performance Metrics
