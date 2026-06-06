@@ -142,7 +142,7 @@ export const MasterPage = () => {
                     <Stack>
                         <SidebarDrawer />
                         <Tooltip title={currentFeatureName}>
-                            <Typography.Paragraph style={{ fontFamily: "kanit", fontSize: 24, fontWeight: "500", marginBottom: 0, width: 230 }} ellipsis>{currentFeatureName}</Typography.Paragraph>
+                            <Typography.Paragraph style={{ fontSize: 24, fontWeight: "500", marginBottom: 0, width: 230 }} ellipsis>{currentFeatureName}</Typography.Paragraph>
                         </Tooltip>
                     </Stack>
                     <Stack align="center" gap={4}>
@@ -222,9 +222,15 @@ const SidebarDrawer = () => {
             setPinModalOpen(false);
             setPin("");
             setPinError("");
+            window.location.reload();
         } else {
             setPinError("Sai mã PIN");
         }
+    };
+
+    const onLock = () => {
+        lock();
+        window.location.reload();
     };
 
     const onImportCloud = async () => {
@@ -261,7 +267,7 @@ const SidebarDrawer = () => {
                 title={
                     <Flex align="center" gap={10}>
                         <Image src={LogoIcon} width={32} loading="eager" alt="My Recipes" />
-                        <Typography.Text style={{ fontFamily: "kanit", fontSize: 22, fontWeight: 600 }}>My Recipes</Typography.Text>
+                        <Typography.Text style={{ fontSize: 22, fontWeight: 600 }}>My Recipes</Typography.Text>
                     </Flex>
                 }
                 onClose={onClose}
@@ -367,7 +373,7 @@ const SidebarDrawer = () => {
                                         <LockOutlined style={{ color: "#52c41a" }} />
                                         <Typography.Text style={{ fontSize: 13, color: "#52c41a", fontWeight: 500 }}>Đang ở chế độ Admin</Typography.Text>
                                     </Flex>
-                                    <Button size="small" type="text" danger onClick={lock}>Khoá</Button>
+                                    <Button size="small" type="text" danger onClick={onLock}>Khoá</Button>
                                 </Flex>
                                 <Typography.Text type="secondary" style={{ fontSize: 11, paddingLeft: 2 }}>
                                     Nhấn "Khoá" để thoát chế độ admin và ẩn các công cụ quản trị.
@@ -460,19 +466,30 @@ const CookingPill = () => {
         {/* ── Floating pill ── */}
         <div
             onClick={_onPillClick}
+            onKeyDown={(event) => {
+                if (event.key === "Enter" || event.key === " ") {
+                    event.preventDefault();
+                    _onPillClick();
+                }
+            }}
+            role="button"
+            tabIndex={0}
+            data-testid="active-cooking-floating-button"
             style={{
                 position: 'fixed',
-                bottom: 70,
+                bottom: 76,
                 left: '50%',
                 transform: 'translateX(-50%)',
-                background: 'linear-gradient(135deg, #fa8c16, #d46b08)',
+                background: 'linear-gradient(135deg, #1f1f1f 0%, #3b2a1d 48%, #d46b08 100%)',
                 color: '#fff',
-                borderRadius: 24,
-                padding: '8px 20px',
+                borderRadius: 999,
+                padding: '9px 16px 9px 10px',
                 display: 'flex',
                 alignItems: 'center',
-                gap: 8,
-                boxShadow: '0 4px 16px rgba(250,140,22,0.5)',
+                gap: 10,
+                minHeight: 52,
+                border: '1px solid rgba(255,255,255,0.72)',
+                boxShadow: '0 10px 28px rgba(31,31,31,0.26), 0 0 0 4px rgba(250,140,22,0.16)',
                 cursor: 'pointer',
                 zIndex: 1000,
                 userSelect: 'none',
@@ -480,28 +497,43 @@ const CookingPill = () => {
                 maxWidth: 'calc(100vw - 32px)',
             }}
         >
-            <FireOutlined style={{ fontSize: 16, flexShrink: 0 }} />
+            <span style={{
+                width: 36,
+                height: 36,
+                borderRadius: "50%",
+                background: "rgba(255,255,255,0.18)",
+                display: "inline-flex",
+                alignItems: "center",
+                justifyContent: "center",
+                boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.24)",
+                flexShrink: 0,
+            }}>
+                <FireOutlined style={{ fontSize: 18 }} />
+            </span>
             <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
-                <span style={{ fontSize: 13, fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                <span style={{ fontSize: 11, fontWeight: 750, letterSpacing: 0, opacity: 0.86, lineHeight: "14px" }}>
+                    Đang nấu
+                </span>
+                <span style={{ fontSize: 14, fontWeight: 700, overflow: 'hidden', textOverflow: 'ellipsis', lineHeight: "18px" }}>
                     {activeSessions.length > 1
                         ? `${activeSessions.length} món đang nấu`
                         : displaySession.dishName}
                 </span>
                 {activeSessions.length === 1 && displaySession.steps?.length > 0 && (
-                    <span style={{ fontSize: 11, opacity: 0.85 }}>
+                    <span style={{ fontSize: 11, opacity: 0.88, lineHeight: "15px" }}>
                         Bước {(displaySession.currentStepIndex ?? 0) + 1}/{displaySession.steps.length}
                         {displaySession.steps[displaySession.currentStepIndex ?? 0]
-                            ? ` — ${displaySession.steps[displaySession.currentStepIndex ?? 0].length > 30
+                            ? ` - ${displaySession.steps[displaySession.currentStepIndex ?? 0].length > 30
                                 ? displaySession.steps[displaySession.currentStepIndex ?? 0].slice(0, 30) + "…"
                                 : displaySession.steps[displaySession.currentStepIndex ?? 0]}`
                             : ""}
                     </span>
                 )}
                 {activeSessions.length === 1 && !displaySession.steps?.length && (
-                    <span style={{ fontSize: 11, opacity: 0.85 }}>Nhấn để hoàn thành</span>
+                    <span style={{ fontSize: 11, opacity: 0.88, lineHeight: "15px" }}>Nhấn để hoàn thành</span>
                 )}
                 {activeSessions.length > 1 && (
-                    <span style={{ fontSize: 11, opacity: 0.85 }}>Nhấn để chuyển món</span>
+                    <span style={{ fontSize: 11, opacity: 0.88, lineHeight: "15px" }}>Nhấn để chuyển món</span>
                 )}
             </div>
         </div>

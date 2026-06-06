@@ -15,6 +15,7 @@ function App() {
         colorPrimary: "rgb(245, 130, 32)",
         colorLink: "#3d4195",
         colorBorderSecondary: "#d9d9d9",
+        fontFamily: "system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
         fontSize: 18,
         zIndexPopupBase: 4000,
       },
