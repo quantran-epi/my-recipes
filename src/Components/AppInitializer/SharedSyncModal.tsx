@@ -51,7 +51,7 @@ const scheduleAfterPaint = (callback: () => void) => {
     };
 };
 
-const deriveSnapshotChanges = <T extends { id: string; name: string }>(
+export const deriveSnapshotChanges = <T extends { id: string; name: string }>(
     remoteItems: T[],
     localItems: T[],
     manifestChanges: SharedItemChange[],
@@ -59,7 +59,24 @@ const deriveSnapshotChanges = <T extends { id: string; name: string }>(
 ): SharedItemChange[] => {
     const localById = new Map(localItems.map(item => [item.id, item]));
     const remoteById = new Map(remoteItems.map(item => [item.id, item]));
-    const changesById = new Map(manifestChanges.map(item => [item.id, item]));
+    const changesById = new Map<string, SharedItemChange>();
+
+    manifestChanges.forEach(change => {
+        const remoteItem = remoteById.get(change.id);
+        const localItem = localById.get(change.id);
+
+        if (!localItem && remoteItem) {
+            changesById.set(change.id, { id: change.id, name: change.name, action: "added" });
+            return;
+        }
+
+        if (!remoteItem && localItem) {
+            changesById.set(change.id, { id: change.id, name: change.name, action: "removed" });
+            return;
+        }
+
+        changesById.set(change.id, change);
+    });
 
     remoteItems.forEach(item => {
         if (changesById.has(item.id)) return;
