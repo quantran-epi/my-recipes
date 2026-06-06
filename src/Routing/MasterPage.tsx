@@ -591,17 +591,8 @@ const BottomTabNavigator = () => {
     const theme = useTheme();
     const toggleSuggester = useToggle();
     const { navigateWithFeedback } = useAppShellNavigation();
-
-    const _buttonStyles = (): React.CSSProperties => {
-        return {
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "center",
-            height: 64,
-            width: 90
-        }
-    }
+    const dishesRoute = RootRoutes.AuthorizedRoutes.DishesRoutes.List();
+    const shoppingRoute = RootRoutes.AuthorizedRoutes.ShoppingListRoutes.List();
 
     const _containerStyles = (): React.CSSProperties => {
         return {
@@ -610,19 +601,82 @@ const BottomTabNavigator = () => {
             left: 0,
             right: 0,
             width: "100%",
-            backgroundColor: "#fff",
-            height: 80,
-            borderTop: "0.5px solid " + theme.token.colorBorder,
+            minHeight: 86,
+            padding: "8px 16px calc(8px + env(safe-area-inset-bottom))",
             zIndex: 900,
             touchAction: "manipulation",
+            pointerEvents: "none",
         }
     }
 
-    const _textStyles = (route: string): React.CSSProperties => {
+    const _dockStyles = (): React.CSSProperties => {
         return {
-            color: route === location.pathname ? theme.token.colorPrimary : undefined,
-            fontWeight: route === location.pathname ? "bold" : undefined,
-            fontSize: 16
+            width: "min(420px, calc(100vw - 24px))",
+            height: 70,
+            margin: "0 auto",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            gap: 8,
+            padding: "8px 10px",
+            border: "1px solid rgba(22, 119, 255, 0.12)",
+            borderRadius: 28,
+            background: "rgba(255, 255, 255, 0.94)",
+            boxShadow: "0 12px 34px rgba(35, 52, 92, 0.18)",
+            backdropFilter: "blur(12px)",
+            pointerEvents: "auto",
+        }
+    }
+
+    const _buttonStyles = (active: boolean): React.CSSProperties => {
+        return {
+            flex: "1 1 0",
+            minWidth: 0,
+            height: 54,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            borderRadius: 20,
+            background: active ? "linear-gradient(135deg, #e6f4ff, #f6ffed)" : "transparent",
+            boxShadow: active ? "inset 0 0 0 1px rgba(22, 119, 255, 0.12)" : undefined,
+            color: active ? theme.token.colorPrimary : "#5f6f82",
+        }
+    }
+
+    const _suggesterButtonStyles = (): React.CSSProperties => {
+        return {
+            width: 96,
+            height: 58,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            borderRadius: 22,
+            background: "linear-gradient(135deg, #1677ff, #52c41a)",
+            color: "#fff",
+            boxShadow: "0 12px 24px rgba(22, 119, 255, 0.28)",
+            transform: "translateY(-8px)",
+        }
+    }
+
+    const _labelStyles = (active: boolean): React.CSSProperties => {
+        return {
+            display: "block",
+            color: active ? theme.token.colorPrimary : "#4b5d6f",
+            fontWeight: active ? 700 : 600,
+            fontSize: 13,
+            lineHeight: "17px",
+            whiteSpace: "nowrap",
+        }
+    }
+
+    const _suggesterLabelStyles = (): React.CSSProperties => {
+        return {
+            display: "block",
+            color: "#fff",
+            fontWeight: 750,
+            fontSize: 13,
+            lineHeight: "17px",
+            whiteSpace: "nowrap",
         }
     }
 
@@ -632,17 +686,40 @@ const BottomTabNavigator = () => {
     }
 
     return <>
-	        <Stack justify="space-evenly" style={_containerStyles()}>
-            <Button type="text" style={_buttonStyles()} icon={<Image src={DishesIcon} preview={false} width={28} style={{ marginLeft: 2 }} />} onClick={() => onNavigate(RootRoutes.AuthorizedRoutes.DishesRoutes.List())}>
-                <Typography.Text style={_textStyles(RootRoutes.AuthorizedRoutes.DishesRoutes.List())}>Món ăn</Typography.Text>
-            </Button>
-            <Button type="text" style={_buttonStyles()} icon={<Image src={ShoppingListIcon} preview={false} width={28} style={{ marginLeft: 3 }} />} onClick={() => onNavigate(RootRoutes.AuthorizedRoutes.ShoppingListRoutes.List())}>
-                <Typography.Text style={_textStyles(RootRoutes.AuthorizedRoutes.ShoppingListRoutes.List())}>Mua sắm</Typography.Text>
-            </Button>
-            <Button type="text" style={{ ..._buttonStyles(), color: theme.token.colorPrimary }} icon={<Image src={SuggesterIcon} preview={false} width={28} style={{ marginLeft: 2 }} />} onClick={toggleSuggester.show}>
-                <Typography.Text style={{ fontSize: 16 }}>Nấu gì?</Typography.Text>
-            </Button>
-        </Stack>
+        <div style={_containerStyles()} data-testid="bottom-tab-navigator">
+            <div style={_dockStyles()}>
+                <Button
+                    type="text"
+                    aria-label="Món ăn"
+                    data-testid="bottom-tab-dishes"
+                    style={_buttonStyles(location.pathname === dishesRoute)}
+                    icon={<Image src={DishesIcon} preview={false} width={25} style={{ marginLeft: 2 }} alt="" />}
+                    onClick={() => onNavigate(dishesRoute)}
+                >
+                    <Typography.Text style={_labelStyles(location.pathname === dishesRoute)}>Món ăn</Typography.Text>
+                </Button>
+                <Button
+                    type="text"
+                    aria-label="Nấu gì?"
+                    data-testid="bottom-tab-suggester"
+                    style={_suggesterButtonStyles()}
+                    icon={<Image src={SuggesterIcon} preview={false} width={27} style={{ marginLeft: 2 }} alt="" />}
+                    onClick={toggleSuggester.show}
+                >
+                    <Typography.Text style={_suggesterLabelStyles()}>Nấu gì?</Typography.Text>
+                </Button>
+                <Button
+                    type="text"
+                    aria-label="Mua sắm"
+                    data-testid="bottom-tab-shopping-list"
+                    style={_buttonStyles(location.pathname === shoppingRoute)}
+                    icon={<Image src={ShoppingListIcon} preview={false} width={25} style={{ marginLeft: 3 }} alt="" />}
+                    onClick={() => onNavigate(shoppingRoute)}
+                >
+                    <Typography.Text style={_labelStyles(location.pathname === shoppingRoute)}>Mua sắm</Typography.Text>
+                </Button>
+            </div>
+        </div>
         {toggleSuggester.value && <DishSuggesterScreen open={toggleSuggester.value} onClose={toggleSuggester.hide} />}
     </>
 }
