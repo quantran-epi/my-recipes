@@ -137,10 +137,13 @@ Cross-cutting constraints:
   4. Navigation timing remains within the chosen smoke budget after list and online/offline fixes.
 
 **Plans:** 2 plans
-
 Plans:
+**Wave 1**
 
 - [ ] 04-01: Stabilize drawer, route transition, and app-shell loading feedback paths.
+
+**Wave 2** *(blocked on Wave 1 completion)*
+
 - [ ] 04-02: Verify UX preservation across daily list, modal, and navigation workflows.
 
 ### Phase 5: Release Gate and Product Guardrails
