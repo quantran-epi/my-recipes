@@ -16,7 +16,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 1: Measurement and Performance Harness** - Make large-list and online/offline responsiveness reproducible and measurable. (completed 2026-06-05)
 - [x] **Phase 2: Large-List Interaction Hot Paths** - Remove visible freezes from common virtualized-list interactions. (completed 2026-06-05)
 - [x] **Phase 3: Online and Offline Cost Isolation** - Control sync, image, service-worker, and network work so online mode stays responsive. (completed 2026-06-05)
-- [ ] **Phase 4: Navigation and App-Shell Responsiveness** - Keep drawers, navigation, and detail-route transitions responsive from large-list screens.
+- [x] **Phase 4: Navigation and App-Shell Responsiveness** - Keep drawers, navigation, and detail-route transitions responsive from large-list screens. (completed 2026-06-06)
 - [ ] **Phase 5: Release Gate and Product Guardrails** - Ship the responsiveness foundation with verification evidence and future-work guardrails.
 
 ## Phase Details
@@ -136,7 +136,7 @@ Cross-cutting constraints:
   3. User-facing fixes preserve current information density and daily cooking/shopping workflows.
   4. Navigation timing remains within the chosen smoke budget after list and online/offline fixes.
 
-**Plans:** 1/2 plans executed
+**Plans:** 2/2 plans complete
 Plans:
 **Wave 1**
 
@@ -144,7 +144,7 @@ Plans:
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
-- [ ] 04-02: Verify UX preservation across daily list, modal, and navigation workflows.
+- [x] 04-02: Verify UX preservation across daily list, modal, and navigation workflows.
 
 ### Phase 5: Release Gate and Product Guardrails
 
@@ -178,7 +178,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5
 | 1. Measurement and Performance Harness | 3/3 | Complete    | 2026-06-05 |
 | 2. Large-List Interaction Hot Paths | 3/3 | Complete    | 2026-06-05 |
 | 3. Online and Offline Cost Isolation | 3/3 | Complete   | 2026-06-05 |
-| 4. Navigation and App-Shell Responsiveness | 1/2 | In Progress|  |
+| 4. Navigation and App-Shell Responsiveness | 2/2 | Complete    | 2026-06-06 |
 | 5. Release Gate and Product Guardrails | 0/2 | Not started | - |
 
 **Coverage:**

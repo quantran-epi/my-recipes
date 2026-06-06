@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: executing
-stopped_at: Completed 04-01-PLAN.md
-last_updated: "2026-06-06T01:38:15.000Z"
-last_activity: 2026-06-06 -- Phase 04 execution started
+status: ready
+stopped_at: Completed 04-02-PLAN.md
+last_updated: "2026-06-06T03:17:37.096Z"
+last_activity: 2026-06-06 -- Phase 04 completed; ready for Phase 05 release gate
 progress:
   total_phases: 5
-  completed_phases: 3
+  completed_phases: 4
   total_plans: 11
-  completed_plans: 10
-  percent: 60
+  completed_plans: 11
+  percent: 80
 ---
 
 # Project State
@@ -21,16 +21,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-06-05)
 
 **Core value:** Users can manage cooking, ingredients, inventory, meal plans, and shopping smoothly in one local-first app without the interface getting in their way.
-**Current focus:** Phase 04 — navigation-and-app-shell-responsiveness
+**Current focus:** Phase 05 — release-gate-and-product-guardrails
 
 ## Current Position
 
-Phase: 04 (navigation-and-app-shell-responsiveness) — EXECUTING
-Plan: 2 of 2
-Status: Ready to execute
-Last activity: 2026-06-06 -- Phase 04 execution started
+Phase: 5 (release-gate-and-product-guardrails) — READY
+Plan: Not started
+Status: Phase 04 complete; ready for Phase 05
+Last activity: 2026-06-06 -- Phase 04 completed; ready for Phase 05 release gate
 
-Progress: [██████░░░░] 60%
+Progress: [████████░░] 80%
 
 ## Quick Tasks Completed
 
@@ -42,7 +42,7 @@ Progress: [██████░░░░] 60%
 
 **Velocity:**
 
-- Total plans completed: 9
+- Total plans completed: 11
 - Average duration: 57m
 - Total execution time: 5h 40m
 
@@ -53,15 +53,16 @@ Progress: [██████░░░░] 60%
 | 1. Measurement and Performance Harness | 3/3 | 4h 10m | 1h 23m |
 | 2. Large-List Interaction Hot Paths | 3/3 | 1h 43m | 34m |
 | 3. Online and Offline Cost Isolation | 3/3 | not separately tracked | - |
-| 4. Navigation and App-Shell Responsiveness | 0/2 | - | - |
+| 4. Navigation and App-Shell Responsiveness | 2/2 | 1h 44m | 52m |
 | 5. Release Gate and Product Guardrails | 0/2 | - | - |
 
 **Recent Trend:**
 
-- Last 5 plans: 02-02, 02-03, 03-01, 03-02, 03-03
-- Trend: Phase 3 completed with controlled online/offline evidence. Latest Phase 3 comparison gate passed online-normal, browser-offline, and mocked-slow-network modes; search resets stayed under 60 ms shell-visible, row menus stayed under 900 ms shell-visible except inventory modal shell around 1.5-1.6s, all inside Phase 2 practical budgets.
+- Last 5 plans: 03-01, 03-02, 03-03, 04-01, 04-02
+- Trend: Phase 4 completed with drawer shell-first rendering and app-shell navigation evidence. Latest PERF-10 passed the full performance command with drawer shell at 430 ms and route destination content under 5,000 ms, while route-feedback shell timings remain warning evidence above 1,000 ms on several route paths.
 
 | Phase 04 P01 | 24m | 3 tasks | 5 files |
+| Phase 04 P02 | 1h 20m | 3 tasks | 7 files |
 
 ## Accumulated Context
 
@@ -77,8 +78,8 @@ Recent decisions affecting current work:
 
 ### Pending Todos
 
-- Execute Phase 4 Plan 04-01 for drawer, route transition, and app-shell loading feedback paths.
-- Execute Phase 4 Plan 04-02 for UX preservation across daily list, modal, and navigation workflows.
+- Execute Phase 5 Plan 05-01 for final build, regression, and performance verification gates.
+- Execute Phase 5 Plan 05-02 for release documentation and future-work guardrails.
 
 ### Blockers/Concerns
 
@@ -88,6 +89,7 @@ Recent decisions affecting current work:
 - Phase 1 stress baseline confirms the original large-list issue: `dish-search-reset` was recorded at 13,432 ms shell-visible and 18,129 ms content-ready in `test-results/performance/perf-00-baseline-stress-online-normal.json`.
 - Phase 2 daily strict gate passes, but the Phase 2 stress baseline attempt still timed out after 90s while waiting for `dish-search-input`; keep stress completion as a diagnostic follow-up.
 - Existing working tree has unrelated dirt: `node_modules/.yarn-integrity`, `.codegraph/`, and codebase mapper `.out` marker files.
+- Phase 4 PERF-10 passes, but route-feedback shell timings still exceed the 1,000 ms warning target on drawer, bottom-tab, global-search, and detail-route navigation.
 
 ## Deferred Items
 
