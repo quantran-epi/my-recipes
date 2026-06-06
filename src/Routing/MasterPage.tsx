@@ -609,47 +609,30 @@ const BottomTabNavigator = () => {
             left: 0,
             right: 0,
             width: "100%",
-            minHeight: 98,
-            padding: "12px 14px calc(12px + env(safe-area-inset-bottom))",
+            minHeight: 88,
+            padding: "8px 16px calc(8px + env(safe-area-inset-bottom))",
             zIndex: 900,
             touchAction: "manipulation",
             pointerEvents: "none",
-            background: "linear-gradient(180deg, rgba(255,255,255,0), rgba(248,251,255,0.92))",
         }
     }
 
     const _dockStyles = (): React.CSSProperties => {
         return {
-            position: "relative",
-            width: "min(428px, calc(100vw - 22px))",
-            height: 76,
+            width: "min(420px, calc(100vw - 24px))",
+            height: 70,
             margin: "0 auto",
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
-            gap: 10,
+            gap: 8,
             padding: "8px 10px",
-            border: "1px solid rgba(28, 47, 76, 0.12)",
-            borderRadius: 30,
-            background: "linear-gradient(180deg, rgba(255,255,255,0.97), rgba(246,250,255,0.94))",
-            boxShadow: "0 16px 38px rgba(31, 46, 76, 0.18), inset 0 1px 0 rgba(255,255,255,0.9)",
-            backdropFilter: "blur(14px)",
+            border: "1px solid rgba(22, 119, 255, 0.14)",
+            borderRadius: 28,
+            background: "rgba(255, 255, 255, 0.95)",
+            boxShadow: "0 12px 34px rgba(35, 52, 92, 0.18)",
+            backdropFilter: "blur(12px)",
             pointerEvents: "auto",
-            overflow: "visible",
-        }
-    }
-
-    const _dockAccentStyles = (): React.CSSProperties => {
-        return {
-            position: "absolute",
-            top: 6,
-            left: "50%",
-            width: 46,
-            height: 3,
-            borderRadius: 99,
-            background: "linear-gradient(90deg, rgba(22,119,255,0.16), rgba(82,196,26,0.22), rgba(250,140,22,0.16))",
-            transform: "translateX(-50%)",
-            pointerEvents: "none",
         }
     }
 
@@ -657,90 +640,37 @@ const BottomTabNavigator = () => {
         return {
             flex: "1 1 0",
             minWidth: 0,
-            height: 60,
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            padding: "6px 8px",
+            height: 54,
             border: active ? "1px solid rgba(22, 119, 255, 0.16)" : "1px solid transparent",
-            borderRadius: 22,
-            background: active ? "linear-gradient(180deg, #ffffff, #edf7ff)" : "transparent",
-            boxShadow: active ? "0 8px 18px rgba(22, 119, 255, 0.10), inset 0 0 0 1px rgba(255,255,255,0.8)" : undefined,
+            borderRadius: 20,
+            background: active ? "linear-gradient(135deg, #e6f4ff, #f6ffed)" : "transparent",
+            boxShadow: active ? "0 6px 14px rgba(22, 119, 255, 0.10), inset 0 0 0 1px rgba(255,255,255,0.72)" : undefined,
             color: active ? theme.token.colorPrimary : "#5f6f82",
             transition: "background 160ms ease, box-shadow 160ms ease, color 160ms ease",
         }
     }
 
-    const _tabContentStyles = (): React.CSSProperties => {
-        return {
-            width: "100%",
-            minWidth: 0,
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "center",
-            gap: 3,
-        }
-    }
-
-    const _tabIconFrameStyles = (active: boolean): React.CSSProperties => {
-        return {
-            width: 30,
-            height: 30,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            borderRadius: 12,
-            background: active ? "rgba(22, 119, 255, 0.10)" : "rgba(31, 46, 76, 0.05)",
-            boxShadow: active ? "inset 0 0 0 1px rgba(22,119,255,0.10)" : undefined,
-            flexShrink: 0,
-        }
-    }
-
-    const _activeIndicatorStyles = (active: boolean): React.CSSProperties => {
-        return {
-            width: active ? 20 : 4,
-            height: 3,
-            borderRadius: 99,
-            background: active ? "linear-gradient(90deg, #1677ff, #52c41a)" : "transparent",
-            opacity: active ? 1 : 0,
-            transition: "width 160ms ease, opacity 160ms ease",
-        }
-    }
-
     const _suggesterButtonStyles = (active: boolean): React.CSSProperties => {
         return {
-            width: 106,
-            height: 66,
+            width: 96,
+            height: 58,
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            padding: "7px 10px",
-            border: "1px solid rgba(255,255,255,0.72)",
-            borderRadius: 24,
+            border: "1px solid rgba(255,255,255,0.58)",
+            borderRadius: 22,
             background: active
-                ? "linear-gradient(135deg, #0f62fe, #1f9d63)"
-                : "linear-gradient(135deg, #1677ff, #3dbb7c)",
+                ? "linear-gradient(135deg, #0958d9, #389e0d)"
+                : "linear-gradient(135deg, #1677ff, #52c41a)",
             color: "#fff",
             boxShadow: active
-                ? "0 16px 28px rgba(22, 119, 255, 0.34), 0 0 0 6px rgba(22, 119, 255, 0.08)"
-                : "0 14px 26px rgba(22, 119, 255, 0.28), 0 0 0 5px rgba(82, 196, 26, 0.08)",
-            transform: "translateY(-12px)",
+                ? "0 14px 28px rgba(22, 119, 255, 0.32), 0 0 0 5px rgba(22, 119, 255, 0.08)"
+                : "0 12px 24px rgba(22, 119, 255, 0.28)",
+            transform: "translateY(-8px)",
             transition: "box-shadow 160ms ease, background 160ms ease",
-        }
-    }
-
-    const _suggesterIconFrameStyles = (): React.CSSProperties => {
-        return {
-            width: 34,
-            height: 34,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            borderRadius: 14,
-            background: "rgba(255,255,255,0.20)",
-            boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.28)",
-            flexShrink: 0,
         }
     }
 
@@ -749,12 +679,9 @@ const BottomTabNavigator = () => {
             display: "block",
             color: active ? theme.token.colorPrimary : "#4b5d6f",
             fontWeight: active ? 700 : 600,
-            fontSize: 12,
-            lineHeight: "15px",
+            fontSize: 13,
+            lineHeight: "17px",
             whiteSpace: "nowrap",
-            maxWidth: "100%",
-            overflow: "hidden",
-            textOverflow: "ellipsis",
         }
     }
 
@@ -764,9 +691,8 @@ const BottomTabNavigator = () => {
             color: "#fff",
             fontWeight: 750,
             fontSize: 13,
-            lineHeight: "15px",
+            lineHeight: "17px",
             whiteSpace: "nowrap",
-            textShadow: "0 1px 2px rgba(0,0,0,0.16)",
         }
     }
 
@@ -775,55 +701,38 @@ const BottomTabNavigator = () => {
         navigateWithFeedback(href);
     }
 
-    const renderSideTab = (params: { label: string; icon: string; active: boolean }) => (
-        <span style={_tabContentStyles()}>
-            <span style={_tabIconFrameStyles(params.active)}>
-                <Image src={params.icon} preview={false} width={24} alt="" />
-            </span>
-            <Typography.Text style={_labelStyles(params.active)}>{params.label}</Typography.Text>
-            <span style={_activeIndicatorStyles(params.active)} />
-        </span>
-    );
-
-    const renderSuggesterTab = () => (
-        <span style={_tabContentStyles()}>
-            <span style={_suggesterIconFrameStyles()}>
-                <Image src={SuggesterIcon} preview={false} width={27} alt="" />
-            </span>
-            <Typography.Text style={_suggesterLabelStyles()}>Nấu gì?</Typography.Text>
-        </span>
-    );
-
     return <>
         <div style={_containerStyles()} data-testid="bottom-tab-navigator">
             <div style={_dockStyles()}>
-                <span style={_dockAccentStyles()} />
                 <Button
                     type="text"
                     aria-label="Món ăn"
                     data-testid="bottom-tab-dishes"
                     style={_buttonStyles(dishesActive)}
+                    icon={<Image src={DishesIcon} preview={false} width={25} style={{ marginLeft: 2 }} alt="" />}
                     onClick={() => onNavigate(dishesRoute)}
                 >
-                    {renderSideTab({ label: "Món ăn", icon: DishesIcon, active: dishesActive })}
+                    <Typography.Text style={_labelStyles(dishesActive)}>Món ăn</Typography.Text>
                 </Button>
                 <Button
                     type="text"
                     aria-label="Nấu gì?"
                     data-testid="bottom-tab-suggester"
                     style={_suggesterButtonStyles(toggleSuggester.value)}
+                    icon={<Image src={SuggesterIcon} preview={false} width={27} style={{ marginLeft: 2 }} alt="" />}
                     onClick={toggleSuggester.show}
                 >
-                    {renderSuggesterTab()}
+                    <Typography.Text style={_suggesterLabelStyles()}>Nấu gì?</Typography.Text>
                 </Button>
                 <Button
                     type="text"
                     aria-label="Mua sắm"
                     data-testid="bottom-tab-shopping-list"
                     style={_buttonStyles(shoppingActive)}
+                    icon={<Image src={ShoppingListIcon} preview={false} width={25} style={{ marginLeft: 3 }} alt="" />}
                     onClick={() => onNavigate(shoppingRoute)}
                 >
-                    {renderSideTab({ label: "Mua sắm", icon: ShoppingListIcon, active: shoppingActive })}
+                    <Typography.Text style={_labelStyles(shoppingActive)}>Mua sắm</Typography.Text>
                 </Button>
             </div>
         </div>
