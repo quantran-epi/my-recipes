@@ -1,6 +1,6 @@
 /**
  * SharedSyncModal — lets the user selectively sync individual ingredients/dishes
- * from the shared-data.json snapshot. Shows impact warnings for removed/modified items.
+ * from split shared snapshots. Shows impact warnings for removed/modified items.
  */
 import React, { useEffect, useMemo, useState } from "react";
 import { Badge, Checkbox, Divider, Flex, Spin, Tag, Typography } from "antd";
@@ -12,13 +12,10 @@ import { useDispatch, useSelector } from "react-redux";
 import { addIngredient, editIngredient, removeIngredient } from "@store/Reducers/IngredientReducer";
 import { addDishes, editDishes, removeDishes } from "@store/Reducers/DishesReducer";
 import { selectDishes, selectIngredients, selectScheduledMeals, selectShoppingLists } from "@store/Selectors";
-import { SharedData, SharedItemChange, SharedManifest } from "../../Hooks/useSharedPublish";
+import { getSharedDishesUrl, getSharedIngredientsUrl, SharedData, SharedItemChange, SharedManifest } from "../../Hooks/useSharedPublish";
 import { SyncedVersions } from "../../Hooks/useSharedDataSync";
 import { Ingredient } from "@store/Models/Ingredient";
 import { Dishes } from "@store/Models/Dishes";
-
-const SHARED_DATA_URL =
-    "https://raw.githubusercontent.com/quantran-epi/my-recipes/refs/heads/main/docs/shared-data.json";
 
 interface Props {
     open: boolean;
@@ -107,22 +104,27 @@ export const SharedSyncModal: React.FC<Props> = ({
 
     const [isFetching, setIsFetching] = useState(false);
     const [fetchError, setFetchError] = useState<string | null>(null);
-    const [sharedData, setSharedData] = useState<SharedData | null>(null);
+    const [sharedData, setSharedData] = useState<Partial<SharedData>>({});
     const [impactStatus, setImpactStatus] = useState<ImpactStatus>("ready");
     const [dishImpacts, setDishImpacts] = useState<Record<string, string[]>>({});
 
     const [selectedIngredients, setSelectedIngredients] = useState<Set<string>>(new Set());
     const [selectedDishes, setSelectedDishes] = useState<Set<string>>(new Set());
+    const shouldFetchIngredients = force || hasIngredientChanges || (manifest.ingredientChanges?.length ?? 0) > 0;
+    const shouldFetchDishes = force || hasDishChanges || (manifest.dishChanges?.length ?? 0) > 0;
+    const requiredPartsLoaded =
+        (!shouldFetchIngredients || !!sharedData.ingredients) &&
+        (!shouldFetchDishes || !!sharedData.dishes);
 
     const ingredientChanges = useMemo(() => {
-        if (!sharedData) return manifest.ingredientChanges;
+        if (!sharedData.ingredients) return manifest.ingredientChanges;
         return deriveSnapshotChanges(sharedData.ingredients, existingIngredients, manifest.ingredientChanges, force);
-    }, [sharedData, existingIngredients, manifest.ingredientChanges, force]);
+    }, [sharedData.ingredients, existingIngredients, manifest.ingredientChanges, force]);
 
     const dishChanges = useMemo(() => {
-        if (!sharedData) return manifest.dishChanges;
+        if (!sharedData.dishes) return manifest.dishChanges;
         return deriveSnapshotChanges(sharedData.dishes, existingDishes, manifest.dishChanges, force);
-    }, [sharedData, existingDishes, manifest.dishChanges, force]);
+    }, [sharedData.dishes, existingDishes, manifest.dishChanges, force]);
 
     const hasIngredientRows = ingredientChanges.length > 0;
     const hasDishRows = dishChanges.length > 0;
@@ -139,30 +141,34 @@ export const SharedSyncModal: React.FC<Props> = ({
         ));
     }, [open, ingredientChanges, dishChanges]);
 
-    // Fetch shared-data.json after the manifest-driven modal shell has painted.
+    // Fetch only the split data parts needed by this sync after the modal shell has painted.
     useEffect(() => {
         if (!open) return;
         let cancelled = false;
         let cancelSchedule: (() => void) | null = null;
 
         setFetchError(null);
-        setSharedData(null);
+        setSharedData({});
         setIsFetching(false);
 
         cancelSchedule = scheduleAfterPaint(() => {
             if (cancelled) return;
+            if (!shouldFetchIngredients && !shouldFetchDishes) return;
             setIsFetching(true);
-            fetch(SHARED_DATA_URL + "?t=" + Date.now())
-                .then(r => {
-                    if (!r.ok) throw new Error(`HTTP ${r.status}`);
-                    return r.text();
-                })
-                .then(text => {
-                    if (!text || !text.trim()) throw new Error("Dữ liệu chia sẻ trống");
-                    return JSON.parse(text) as SharedData;
-                })
-                .then(data => {
-                    if (!cancelled) setSharedData(data);
+            const fetchPart = async <T,>(url: string): Promise<T> => {
+                const res = await fetch(url + "?t=" + Date.now());
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                const text = await res.text();
+                if (!text || !text.trim()) throw new Error("Dữ liệu chia sẻ trống");
+                return JSON.parse(text) as T;
+            };
+
+            Promise.all([
+                shouldFetchIngredients ? fetchPart<Ingredient[]>(getSharedIngredientsUrl()) : Promise.resolve(undefined),
+                shouldFetchDishes ? fetchPart<Dishes[]>(getSharedDishesUrl()) : Promise.resolve(undefined),
+            ])
+                .then(([ingredients, dishes]) => {
+                    if (!cancelled) setSharedData({ ingredients, dishes });
                 })
                 .catch(e => {
                     if (!cancelled) setFetchError(e?.message ?? "Lỗi không xác định");
@@ -176,7 +182,7 @@ export const SharedSyncModal: React.FC<Props> = ({
             cancelled = true;
             cancelSchedule?.();
         };
-    }, [open]);
+    }, [open, shouldFetchIngredients, shouldFetchDishes]);
 
     // Impact analysis is scheduled so warnings can fill in after selectable rows appear.
     useEffect(() => {
@@ -238,7 +244,7 @@ export const SharedSyncModal: React.FC<Props> = ({
     };
 
     const handleSync = () => {
-        if (!sharedData) return;
+        if (!requiredPartsLoaded) return;
 
         // ── Ingredients ──────────────────────────────────────────────────────
         ingredientChanges
@@ -247,7 +253,7 @@ export const SharedSyncModal: React.FC<Props> = ({
                 if (c.action === "removed") {
                     dispatch(removeIngredient([c.id]));
                 } else {
-                    const item = sharedData.ingredients.find((i: Ingredient) => i.id === c.id);
+                    const item = sharedData.ingredients?.find((i: Ingredient) => i.id === c.id);
                     if (!item) return;
                     const exists = existingIngredients.some(i => i.id === c.id);
                     exists ? dispatch(editIngredient(item)) : dispatch(addIngredient(item));
@@ -261,7 +267,7 @@ export const SharedSyncModal: React.FC<Props> = ({
                 if (c.action === "removed") {
                     dispatch(removeDishes([c.id]));
                 } else {
-                    const item = sharedData.dishes.find((d: Dishes) => d.id === c.id);
+                    const item = sharedData.dishes?.find((d: Dishes) => d.id === c.id);
                     if (!item) return;
                     const exists = existingDishes.some(d => d.id === c.id);
                     exists ? dispatch(editDishes(item)) : dispatch(addDishes(item));
@@ -308,7 +314,7 @@ export const SharedSyncModal: React.FC<Props> = ({
                     <Button
                         type="primary"
                         loading={isFetching}
-                        disabled={totalSelected === 0 || sharedData === null || isFetching || !!fetchError}
+                        disabled={totalSelected === 0 || !requiredPartsLoaded || isFetching || !!fetchError}
                         onClick={confirmSync}
                     >
                         Đồng bộ {totalSelected > 0 ? `(${totalSelected})` : ""}

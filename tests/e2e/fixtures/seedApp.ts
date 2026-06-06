@@ -26,33 +26,63 @@ export const seedApp = async (page: Page, options: SeedAppOptions = {}) => {
 
   const networkMode = await applyPerformanceNetworkMode(page, options);
 
-  await page.addInitScript(({ shared, personal, syncCheckState, syncCheckIntervalMs }) => {
+  await page.goto('/');
+  await page.evaluate(async ({ shared, personal, syncCheckState, syncCheckIntervalMs }) => {
+    const openAppDb = () => new Promise<IDBDatabase>((resolve, reject) => {
+      const request = indexedDB.open('my-recipes', 1);
+      request.onupgradeneeded = () => {
+        const db = request.result;
+        if (!db.objectStoreNames.contains('app_storage')) db.createObjectStore('app_storage');
+        if (!db.objectStoreNames.contains('local-forage-detect-blob-support')) db.createObjectStore('local-forage-detect-blob-support');
+      };
+      request.onerror = () => reject(request.error);
+      request.onsuccess = () => resolve(request.result);
+    });
+
+    const setIndexedDbItems = async (items: Record<string, string>) => {
+      const db = await openAppDb();
+      await new Promise<void>((resolve, reject) => {
+        const tx = db.transaction('app_storage', 'readwrite');
+        const store = tx.objectStore('app_storage');
+        store.clear();
+        Object.entries(items).forEach(([key, value]) => store.put(value, key));
+        tx.onerror = () => reject(tx.error);
+        tx.oncomplete = () => resolve();
+      });
+      db.close();
+    };
+
     localStorage.clear();
     sessionStorage.clear();
 
-    localStorage.setItem('persist:shared', JSON.stringify({
+    const sharedPersist = JSON.stringify({
       ingredient: JSON.stringify(shared.ingredient),
       dishes: JSON.stringify(shared.dishes),
       _persist: JSON.stringify({ version: -1, rehydrated: true }),
-    }));
+    });
 
-    localStorage.setItem('persist:personal', JSON.stringify({
+    const personalPersist = JSON.stringify({
       appContext: JSON.stringify(personal.appContext),
       inventory: JSON.stringify(personal.inventory),
       shoppingList: JSON.stringify(personal.shoppingList),
       scheduledMeal: JSON.stringify(personal.scheduledMeal),
       cookingSession: JSON.stringify(personal.cookingSession),
       _persist: JSON.stringify({ version: -1, rehydrated: true }),
-    }));
+    });
 
+    let lastChecked: string | null = null;
     if (syncCheckState === 'fresh') {
-      localStorage.setItem('shared_last_checked', Date.now().toString());
+      lastChecked = Date.now().toString();
     } else if (syncCheckState === 'due') {
-      localStorage.setItem('shared_last_checked', String(Date.now() - syncCheckIntervalMs - 1000));
-    } else {
-      localStorage.removeItem('shared_last_checked');
+      lastChecked = String(Date.now() - syncCheckIntervalMs - 1000);
     }
-    localStorage.setItem('shared_synced_versions', JSON.stringify({ ingredientsVersion: 'e2e', dishesVersion: 'e2e' }));
+
+    await setIndexedDbItems({
+      'persist:shared': sharedPersist,
+      'persist:personal': personalPersist,
+      ...(lastChecked ? { shared_last_checked: lastChecked } : {}),
+      shared_synced_versions: JSON.stringify({ ingredientsVersion: 'e2e', dishesVersion: 'e2e' }),
+    });
 
     void navigator.serviceWorker?.getRegistrations?.().then(registrations => {
       registrations.forEach(registration => void registration.unregister());
@@ -61,6 +91,8 @@ export const seedApp = async (page: Page, options: SeedAppOptions = {}) => {
       keys.forEach(key => void caches.delete(key));
     });
   }, { ...seed, syncCheckState, syncCheckIntervalMs: SYNC_CHECK_INTERVAL_MS });
+
+  await page.goto('about:blank');
 
   return networkMode;
 };

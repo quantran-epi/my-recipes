@@ -2,7 +2,7 @@
 
 ## Summary
 
-Build local image storage as a browser-only, local-first feature. Dish images move out of Redux/localStorage and into IndexedDB, while Redux stores lightweight image references. Add a manual full-backup workflow that exports and restores app data plus images as a ZIP file, with optional GitHub upload and restore.
+Build local image storage as a browser-only, local-first feature. Dish images move out of Redux persisted app state and into IndexedDB blob storage, while Redux stores lightweight image references. Add a manual full-backup workflow that exports and restores app data plus images as a ZIP file, with optional GitHub upload and restore.
 
 This is a future implementation plan. The existing Gist backup remains unchanged as the lightweight personal-data backup.
 
@@ -11,7 +11,7 @@ This is a future implementation plan. The existing Gist backup remains unchanged
 - Scope v1 to dish images only.
 - Store uploaded images compressed and resized before saving.
 - Keep remote image URL support for existing and future dishes.
-- Do not store image blobs or base64 data URLs in Redux/localStorage.
+- Do not store image blobs or base64 data URLs in Redux persisted app state.
 - Manual full backup supports export ZIP to device, upload ZIP to GitHub, restore from ZIP file, and restore from GitHub backup.
 - GitHub backup keeps one latest ZIP and overwrites it each time.
 - GitHub upload uses the existing browser GitHub Contents API/admin token style, not a browser `git push`.
@@ -31,8 +31,8 @@ This is a future implementation plan. The existing Gist backup remains unchanged
 ## ZIP Contents
 
 - `manifest.json`: backup version, created time, app name, and counts.
-- `persist-shared.json`: current `persist:shared` payload.
-- `persist-personal.json`: current `persist:personal` payload.
+- `persist-shared.json`: current IndexedDB-backed `persist:shared` payload.
+- `persist-personal.json`: current IndexedDB-backed `persist:personal` payload.
 - `images/dish-images/<id>`: compressed dish image blobs.
 - `images/index.json`: image id, mime type, size, and original dish references.
 
@@ -45,7 +45,7 @@ This is a future implementation plan. The existing Gist backup remains unchanged
 
 ## Test Plan
 
-- Upload a dish image and confirm localStorage size does not grow by the full image size.
+- Upload a dish image and confirm Redux persisted app state size does not grow by the full image size.
 - Confirm dish images still render in list/detail/edit flows after refresh and offline.
 - Confirm existing remote image URLs still render.
 - Confirm existing base64 dish images migrate and still display.
@@ -55,7 +55,7 @@ This is a future implementation plan. The existing Gist backup remains unchanged
 
 ## Acceptance Criteria
 
-- Large image uploads no longer bloat Redux/localStorage.
+- Large image uploads no longer bloat Redux persisted app state.
 - Full backup preserves dishes, personal state, and local images.
 - Restore from device ZIP and GitHub ZIP both recover dish images.
 - The app remains browser-only and local-first.

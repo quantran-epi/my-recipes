@@ -1,6 +1,6 @@
 # Automated Regression Test Plan
 
-This file tracks the repeatable regression suite for the recipe app. The automated suite uses Playwright, starts the app with npm, seeds deterministic Redux Persist localStorage data, and writes reports to `playwright-report` plus `test-results/e2e-results.json`. On Windows it defaults to the installed Microsoft Edge browser so the suite can run even when the organization blocks Playwright browser downloads.
+This file tracks the repeatable regression suite for the recipe app. The automated suite uses Playwright, starts the app with npm, seeds deterministic Redux Persist IndexedDB data, and writes reports to `playwright-report` plus `test-results/e2e-results.json`. On Windows it defaults to the installed Microsoft Edge browser so the suite can run even when the organization blocks Playwright browser downloads.
 
 Run all automated tests:
 

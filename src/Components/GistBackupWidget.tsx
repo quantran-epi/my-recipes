@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Collapse, Flex, Typography } from "antd";
 import { CloudDownloadOutlined, CloudUploadOutlined, DatabaseOutlined, GithubOutlined, ReloadOutlined } from "@ant-design/icons";
 import { Button } from "@components/Button";
@@ -6,6 +6,7 @@ import { useMessage } from "@components/Message";
 import { useModal } from "@components/Modal/ModalProvider";
 import { useGistBackup } from "@hooks";
 import { Input as AntInput } from "antd";
+import { getStorageString } from "@common/Storage/AppStorage";
 
 const PERSIST_PERSONAL_KEY = "persist:personal";
 const PERSIST_SHARED_KEY = "persist:shared";
@@ -19,9 +20,13 @@ type LocalDataSize = {
 
 const byteSize = (value: string | null): number => new Blob([value ?? ""]).size;
 
-const readLocalDataSize = (): LocalDataSize => {
-    const personal = byteSize(localStorage.getItem(PERSIST_PERSONAL_KEY));
-    const shared = byteSize(localStorage.getItem(PERSIST_SHARED_KEY));
+const readLocalDataSize = async (): Promise<LocalDataSize> => {
+    const [personalRaw, sharedRaw] = await Promise.all([
+        getStorageString(PERSIST_PERSONAL_KEY),
+        getStorageString(PERSIST_SHARED_KEY),
+    ]);
+    const personal = byteSize(personalRaw);
+    const shared = byteSize(sharedRaw);
     return { personal, shared, total: personal + shared };
 };
 
@@ -46,15 +51,24 @@ export const GistBackupWidget: React.FC = () => {
 
     const [localGistId, setLocalGistId] = useState(gistId);
     const [localToken, setLocalToken] = useState(gistToken);
-    const [localDataSize, setLocalDataSize] = useState<LocalDataSize>(() => readLocalDataSize());
+    const [localDataSize, setLocalDataSize] = useState<LocalDataSize>({ personal: 0, shared: 0, total: 0 });
 
-    const _refreshDataSize = () => {
-        setLocalDataSize(readLocalDataSize());
+    useEffect(() => {
+        setLocalGistId(gistId);
+        setLocalToken(gistToken);
+    }, [gistId, gistToken]);
+
+    const _refreshDataSize = async () => {
+        setLocalDataSize(await readLocalDataSize());
     };
 
-    const _onSave = () => {
-        setGistId(localGistId.trim());
-        setGistToken(localToken.trim());
+    useEffect(() => {
+        _refreshDataSize();
+    }, []);
+
+    const _onSave = async () => {
+        await setGistId(localGistId.trim());
+        await setGistToken(localToken.trim());
         message.success("Đã lưu cấu hình sao lưu");
         _refreshDataSize();
     };

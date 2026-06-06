@@ -1,13 +1,12 @@
 /**
  * useSharedDataSync — manual shared data update checks.
- * Fetches shared-manifest.json only when the user asks to sync, compares
- * per-item version stamps stored locally, and surfaces pending changes.
+ * Fetches the split shared manifest only when the user asks to sync, compares
+ * per-part version stamps stored locally, and surfaces pending changes.
  */
 import { useState } from "react";
-import { SharedManifest } from "./useSharedPublish";
+import { getStorageJson, setStorageJson, setStorageString } from "@common/Storage/AppStorage";
+import { normalizeSharedManifest, SHARED_MANIFEST_URL, SharedManifest } from "./useSharedPublish";
 
-const MANIFEST_URL =
-    "https://raw.githubusercontent.com/quantran-epi/my-recipes/refs/heads/main/docs/shared-manifest.json";
 const LAST_CHECK_KEY = "shared_last_checked";
 const SYNCED_VERSIONS_KEY = "shared_synced_versions";
 
@@ -32,19 +31,15 @@ export interface UseSharedDataSyncResult {
     isSyncChecking: boolean;
     checkNow: (options?: CheckSharedDataUpdatesOptions) => Promise<PendingSync | null>;
     dismissSync: () => void;
-    markSynced: (versions: SyncedVersions) => void;
+    markSynced: (versions: SyncedVersions) => Promise<void>;
 }
 
-export const getSyncedVersions = (): SyncedVersions => {
-    try {
-        const raw = localStorage.getItem(SYNCED_VERSIONS_KEY);
-        if (raw) return JSON.parse(raw);
-    } catch { }
-    return { ingredientsVersion: "", dishesVersion: "" };
+export const getSyncedVersions = (): Promise<SyncedVersions> => {
+    return getStorageJson<SyncedVersions>(SYNCED_VERSIONS_KEY, { ingredientsVersion: "", dishesVersion: "" });
 };
 
-export const saveSyncedVersions = (v: SyncedVersions) => {
-    localStorage.setItem(SYNCED_VERSIONS_KEY, JSON.stringify(v));
+export const saveSyncedVersions = (v: SyncedVersions): Promise<void> => {
+    return setStorageJson(SYNCED_VERSIONS_KEY, v);
 };
 
 export const checkSharedDataUpdates = async (options?: CheckSharedDataUpdatesOptions): Promise<PendingSync | null> => {
@@ -52,32 +47,34 @@ export const checkSharedDataUpdates = async (options?: CheckSharedDataUpdatesOpt
         throw new Error("Không có mạng");
     }
 
-    const res = await fetch(MANIFEST_URL + "?t=" + Date.now());
+    const res = await fetch(SHARED_MANIFEST_URL + "?t=" + Date.now());
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
     const text = await res.text();
     if (!text || !text.trim()) throw new Error("Manifest dữ liệu chia sẻ trống");
 
-    const manifest: SharedManifest = JSON.parse(text);
-    if (!manifest || (!manifest.ingredientsVersion && !manifest.dishesVersion)) {
+    const manifest = normalizeSharedManifest(JSON.parse(text));
+    if (!manifest.parts.ingredients.version && !manifest.parts.dishes.version) {
         throw new Error("Manifest dữ liệu chia sẻ không hợp lệ");
     }
 
-    localStorage.setItem(LAST_CHECK_KEY, Date.now().toString());
+    await setStorageString(LAST_CHECK_KEY, Date.now().toString());
 
-    const synced = getSyncedVersions();
-    const ingredientChanges = manifest.ingredientChanges ?? [];
-    const dishChanges = manifest.dishChanges ?? [];
+    const synced = await getSyncedVersions();
+    const ingredientChanges = manifest.ingredientChanges ?? manifest.parts.ingredients.changes ?? [];
+    const dishChanges = manifest.dishChanges ?? manifest.parts.dishes.changes ?? [];
 
-    const hasIngredientChanges =
+    const hasIngredientChanges = Boolean(
         !!manifest.ingredientsVersion &&
         manifest.ingredientsVersion !== synced.ingredientsVersion &&
-        ingredientChanges.length > 0;
+        (ingredientChanges.length > 0 || options?.force)
+    );
 
-    const hasDishChanges =
+    const hasDishChanges = Boolean(
         !!manifest.dishesVersion &&
         manifest.dishesVersion !== synced.dishesVersion &&
-        dishChanges.length > 0;
+        (dishChanges.length > 0 || options?.force)
+    );
 
     if (!hasIngredientChanges && !hasDishChanges && !options?.force) return null;
 
@@ -110,9 +107,9 @@ export const useSharedDataSync = (): UseSharedDataSyncResult => {
 
     const dismissSync = () => setPendingSync(null);
 
-    const markSynced = (versions: SyncedVersions) => {
-        const current = getSyncedVersions();
-        saveSyncedVersions({
+    const markSynced = async (versions: SyncedVersions) => {
+        const current = await getSyncedVersions();
+        await saveSyncedVersions({
             ingredientsVersion: versions.ingredientsVersion || current.ingredientsVersion,
             dishesVersion: versions.dishesVersion || current.dishesVersion,
         });

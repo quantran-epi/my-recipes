@@ -1,0 +1,3827 @@
+[
+  {
+    "id": "Đậu phụQdYQjd3uDU",
+    "name": "Đậu phụ",
+    "category": "Khác",
+    "shelfLife": "short",
+    "preservationCondition": "fridge",
+    "baseUnit": "g",
+    "inventoryUnits": [
+      "g",
+      "kg"
+    ],
+    "recipeUnitConversions": {
+      "g": 1,
+      "kg": 1000
+    },
+    "priceEstimate": {
+      "min": 15000,
+      "max": 30000,
+      "amount": 1,
+      "unit": "kg",
+      "currency": "VND"
+    }
+  },
+  {
+    "id": "Đậu nontHeqcHqWEy",
+    "name": "Đậu non",
+    "category": "Khác",
+    "shelfLife": "short",
+    "preservationCondition": "fridge",
+    "baseUnit": "g",
+    "inventoryUnits": [
+      "g",
+      "kg"
+    ],
+    "recipeUnitConversions": {
+      "g": 1,
+      "kg": 1000
+    },
+    "priceEstimate": {
+      "min": 18000,
+      "max": 35000,
+      "amount": 1,
+      "unit": "kg",
+      "currency": "VND"
+    }
+  },
+  {
+    "id": "Hành láZtNmZbNswb",
+    "name": "Hành lá",
+    "category": "Gia vị",
+    "shelfLife": "very_short",
+    "preservationCondition": "fridge",
+    "baseUnit": "g",
+    "inventoryUnits": [
+      "g",
+      "kg"
+    ],
+    "recipeUnitConversions": {
+      "g": 1,
+      "kg": 1000
+    },
+    "priceEstimate": {
+      "min": 50000,
+      "max": 100000,
+      "amount": 1,
+      "unit": "kg",
+      "currency": "VND"
+    }
+  },
+  {
+    "id": "Hành tímYvb82U-VOH",
+    "name": "Hành tím",
+    "category": "Gia vị",
+    "shelfLife": "long",
+    "preservationCondition": "cool_dry",
+    "baseUnit": "g",
+    "inventoryUnits": [
+      "g",
+      "kg",
+      "nhánh"
+    ],
+    "recipeUnitConversions": {
+      "g": 1,
+      "kg": 1000,
+      "nhánh": 10
+    },
+    "priceEstimate": {
+      "min": 40000,
+      "max": 80000,
+      "amount": 1,
+      "unit": "kg",
+      "currency": "VND"
+    }
+  },
+  {
+    "id": "Mùi tàuUQolO_X6zd",
+    "name": "Mùi tàu",
+    "category": "Gia vị",
+    "shelfLife": "very_short",
+    "preservationCondition": "fridge",
+    "baseUnit": "g",
+    "inventoryUnits": [
+      "g",
+      "kg"
+    ],
+    "recipeUnitConversions": {
+      "g": 1,
+      "kg": 1000
+    },
+    "priceEstimate": {
+      "min": 60000,
+      "max": 120000,
+      "amount": 1,
+      "unit": "kg",
+      "currency": "VND"
+    }
+  },
+  {
+    "id": "Mùi tajayFO1gKOJ",
+    "name": "Mùi ta",
+    "category": "Gia vị",
+    "shelfLife": "very_short",
+    "preservationCondition": "fridge",
+    "baseUnit": "g",
+    "inventoryUnits": [
+      "g",
+      "kg"
+    ],
+    "recipeUnitConversions": {
+      "g": 1,
+      "kg": 1000
+    },
+    "priceEstimate": {
+      "min": 60000,
+      "max": 120000,
+      "amount": 1,
+      "unit": "kg",
+      "currency": "VND"
+    }
+  },
+  {
+    "id": "Kinh giới90WanixOVC",
+    "name": "Kinh giới",
+    "category": "Gia vị",
+    "shelfLife": "very_short",
+    "preservationCondition": "fridge",
+    "baseUnit": "g",
+    "inventoryUnits": [
+      "g",
+      "kg"
+    ],
+    "recipeUnitConversions": {
+      "g": 1,
+      "kg": 1000
+    },
+    "priceEstimate": {
+      "min": 60000,
+      "max": 120000,
+      "amount": 1,
+      "unit": "kg",
+      "currency": "VND"
+    }
+  },
+  {
+    "id": "Tía tôiZc3rSS3Pf",
+    "name": "Tía tô",
+    "category": "Gia vị",
+    "shelfLife": "very_short",
+    "preservationCondition": "fridge",
+    "baseUnit": "g",
+    "inventoryUnits": [
+      "g",
+      "kg"
+    ],
+    "recipeUnitConversions": {
+      "g": 1,
+      "kg": 1000
+    },
+    "priceEstimate": {
+      "min": 60000,
+      "max": 120000,
+      "amount": 1,
+      "unit": "kg",
+      "currency": "VND"
+    }
+  },
+  {
+    "id": "Thìa là2Y2R1GD_jq",
+    "name": "Thìa là",
+    "category": "Gia vị",
+    "shelfLife": "very_short",
+    "preservationCondition": "fridge",
+    "baseUnit": "g",
+    "inventoryUnits": [
+      "g",
+      "kg"
+    ],
+    "recipeUnitConversions": {
+      "g": 1,
+      "kg": 1000
+    },
+    "priceEstimate": {
+      "min": 60000,
+      "max": 120000,
+      "amount": 1,
+      "unit": "kg",
+      "currency": "VND"
+    }
+  },
+  {
+    "id": "Lá lốtE7OA57EkX-",
+    "name": "Lá lốt",
+    "category": "Rau củ",
+    "shelfLife": "very_short",
+    "preservationCondition": "fridge",
+    "baseUnit": "lá",
+    "inventoryUnits": [
+      "lá"
+    ],
+    "recipeUnitConversions": {
+      "lá": 1
+    },
+    "priceEstimate": {
+      "min": 300,
+      "max": 1000,
+      "amount": 1,
+      "unit": "lá",
+      "currency": "VND"
+    }
+  },
+  {
+    "id": "Tỏi3NILO1jEd0",
+    "name": "Tỏi",
+    "category": "Gia vị",
+    "shelfLife": "long",
+    "preservationCondition": "cool_dry",
+    "baseUnit": "g",
+    "inventoryUnits": [
+      "g",
+      "kg",
+      "nhánh",
+      "củ"
+    ],
+    "recipeUnitConversions": {
+      "g": 1,
+      "kg": 1000,
+      "nhánh": 5,
+      "củ": 40
+    },
+    "priceEstimate": {
+      "min": 50000,
+      "max": 120000,
+      "amount": 1,
+      "unit": "kg",
+      "currency": "VND"
+    }
+  },
+  {
+    "id": "Hành tâyPsERexf4zd",
+    "name": "Hành tây",
+    "category": "Rau củ",
+    "shelfLife": "long",
+    "preservationCondition": "cool_dry",
+    "baseUnit": "g",
+    "inventoryUnits": [
+      "g",
+      "kg",
+      "củ"
+    ],
+    "recipeUnitConversions": {
+      "g": 1,
+      "kg": 1000,
+      "củ": 150
+    },
+    "priceEstimate": {
+      "min": 20000,
+      "max": 40000,
+      "amount": 1,
+      "unit": "kg",
+      "currency": "VND"
+    }
+  },
+  {
+    "id": "Xà láchGY5tn2xg5J",
+    "name": "Xà lách",
+    "category": "Rau củ",
+    "shelfLife": "very_short",
+    "preservationCondition": "fridge",
+    "baseUnit": "g",
+    "inventoryUnits": [
+      "g",
+      "kg",
+      "lá"
+    ],
+    "recipeUnitConversions": {
+      "g": 1,
+      "kg": 1000,
+      "lá": 10
+    },
+    "priceEstimate": {
+      "min": 40000,
+      "max": 80000,
+      "amount": 1,
+      "unit": "kg",
+      "currency": "VND"
+    }
+  },
+  {
+    "id": "Dưa chuộtiww2N4-K0c",
+    "name": "Dưa chuột",
+    "category": "Rau củ",
+    "shelfLife": "short",
+    "preservationCondition": "fridge",
+    "baseUnit": "g",
+    "inventoryUnits": [
+      "g",
+      "kg",
+      "quả"
+    ],
+    "recipeUnitConversions": {
+      "g": 1,
+      "kg": 1000,
+      "quả": 150
+    },
+    "priceEstimate": {
+      "min": 20000,
+      "max": 40000,
+      "amount": 1,
+      "unit": "kg",
+      "currency": "VND"
+    }
+  },
+  {
+    "id": "Trứng gà72vN9igVwa",
+    "name": "Trứng gà",
+    "category": "Sữa & trứng",
+    "shelfLife": "medium",
+    "preservationCondition": "fridge",
+    "baseUnit": "quả",
+    "inventoryUnits": [
+      "quả"
+    ],
+    "recipeUnitConversions": {
+      "quả": 1
+    },
+    "priceEstimate": {
+      "min": 2500,
+      "max": 4500,
+      "amount": 1,
+      "unit": "quả",
+      "currency": "VND"
+    }
+  },
+  {
+    "id": "Trứng vịt59-1eAcjqZ",
+    "name": "Trứng vịt",
+    "category": "Sữa & trứng",
+    "shelfLife": "medium",
+    "preservationCondition": "fridge",
+    "baseUnit": "quả",
+    "inventoryUnits": [
+      "quả"
+    ],
+    "recipeUnitConversions": {
+      "quả": 1
+    },
+    "priceEstimate": {
+      "min": 4000,
+      "max": 6500,
+      "amount": 1,
+      "unit": "quả",
+      "currency": "VND"
+    }
+  },
+  {
+    "id": "Trứng cáNtiSxACUNP",
+    "name": "Trứng cá",
+    "category": "Sữa & trứng",
+    "shelfLife": "very_short",
+    "preservationCondition": "freezer",
+    "baseUnit": "g",
+    "inventoryUnits": [
+      "g",
+      "kg"
+    ],
+    "recipeUnitConversions": {
+      "g": 1,
+      "kg": 1000
+    },
+    "priceEstimate": {
+      "min": 250000,
+      "max": 450000,
+      "amount": 1,
+      "unit": "kg",
+      "currency": "VND"
+    }
+  },
+  {
+    "id": "Thịt heo nạc vaiVXHDweEHeG",
+    "name": "Thịt heo nạc vai",
+    "category": "Thịt",
+    "shelfLife": "short",
+    "preservationCondition": "freezer",
+    "baseUnit": "g",
+    "inventoryUnits": [
+      "g",
+      "kg"
+    ],
+    "recipeUnitConversions": {
+      "g": 1,
+      "kg": 1000
+    },
+    "priceEstimate": {
+      "min": 120000,
+      "max": 180000,
+      "amount": 1,
+      "unit": "kg",
+      "currency": "VND"
+    }
+  },
+  {
+    "id": "Thịt heo ba chỉtn-meEAQZu",
+    "name": "Thịt heo ba chỉ",
+    "category": "Thịt",
+    "shelfLife": "short",
+    "preservationCondition": "freezer",
+    "baseUnit": "g",
+    "inventoryUnits": [
+      "g",
+      "kg"
+    ],
+    "recipeUnitConversions": {
+      "g": 1,
+      "kg": 1000
+    },
+    "priceEstimate": {
+      "min": 130000,
+      "max": 200000,
+      "amount": 1,
+      "unit": "kg",
+      "currency": "VND"
+    }
+  },
+  {
+    "id": "Sườn heo nonlic0JR5JmA",
+    "name": "Sườn heo non",
+    "category": "Thịt",
+    "shelfLife": "short",
+    "preservationCondition": "freezer",
+    "baseUnit": "g",
+    "inventoryUnits": [
+      "g",
+      "kg"
+    ],
+    "recipeUnitConversions": {
+      "g": 1,
+      "kg": 1000
+    },
+    "priceEstimate": {
+      "min": 150000,
+      "max": 230000,
+      "amount": 1,
+      "unit": "kg",
+      "currency": "VND"
+    }
+  },
+  {
+    "id": "Sườn heo già2aDAA9ooHw",
+    "name": "Sườn heo già",
+    "category": "Thịt",
+    "shelfLife": "short",
+    "preservationCondition": "freezer",
+    "baseUnit": "g",
+    "inventoryUnits": [
+      "g",
+      "kg"
+    ],
+    "recipeUnitConversions": {
+      "g": 1,
+      "kg": 1000
+    },
+    "priceEstimate": {
+      "min": 90000,
+      "max": 150000,
+      "amount": 1,
+      "unit": "kg",
+      "currency": "VND"
+    }
+  },
+  {
+    "id": "Mỡ heo tảng0WU-I2Ixi4",
+    "name": "Mỡ heo tảng",
+    "category": "Thịt",
+    "shelfLife": "long",
+    "preservationCondition": "fridge",
+    "baseUnit": "g",
+    "inventoryUnits": [
+      "g",
+      "kg"
+    ],
+    "recipeUnitConversions": {
+      "g": 1,
+      "kg": 1000
+    },
+    "priceEstimate": {
+      "min": 35000,
+      "max": 70000,
+      "amount": 1,
+      "unit": "kg",
+      "currency": "VND"
+    }
+  },
+  {
+    "id": "Mỡ heo lỏngd_H3wfitXK",
+    "name": "Mỡ heo lỏng",
+    "category": "Thịt",
+    "shelfLife": "long",
+    "preservationCondition": "fridge",
+    "baseUnit": "ml",
+    "inventoryUnits": [
+      "ml",
+      "lít"
+    ],
+    "recipeUnitConversions": {
+      "ml": 1,
+      "lít": 1000
+    },
+    "priceEstimate": {
+      "min": 40000,
+      "max": 80000,
+      "amount": 1,
+      "unit": "lít",
+      "currency": "VND"
+    }
+  },
+  {
+    "id": "Gan heo2X9fQYeB8e",
+    "name": "Gan heo",
+    "category": "Thịt",
+    "shelfLife": "very_short",
+    "preservationCondition": "freezer",
+    "baseUnit": "g",
+    "inventoryUnits": [
+      "g",
+      "kg"
+    ],
+    "recipeUnitConversions": {
+      "g": 1,
+      "kg": 1000
+    },
+    "priceEstimate": {
+      "min": 70000,
+      "max": 120000,
+      "amount": 1,
+      "unit": "kg",
+      "currency": "VND"
+    }
+  },
+  {
+    "id": "Tim heoCWf5HOGp1L",
+    "name": "Tim heo",
+    "category": "Thịt",
+    "shelfLife": "very_short",
+    "preservationCondition": "freezer",
+    "baseUnit": "g",
+    "inventoryUnits": [
+      "g",
+      "kg"
+    ],
+    "recipeUnitConversions": {
+      "g": 1,
+      "kg": 1000
+    },
+    "priceEstimate": {
+      "min": 90000,
+      "max": 160000,
+      "amount": 1,
+      "unit": "kg",
+      "currency": "VND"
+    }
+  },
+  {
+    "id": "Cật heoIFzsT44y8n",
+    "name": "Cật heo",
+    "category": "Thịt",
+    "shelfLife": "very_short",
+    "preservationCondition": "freezer",
+    "baseUnit": "g",
+    "inventoryUnits": [
+      "g",
+      "kg"
+    ],
+    "recipeUnitConversions": {
+      "g": 1,
+      "kg": 1000
+    },
+    "priceEstimate": {
+      "min": 90000,
+      "max": 160000,
+      "amount": 1,
+      "unit": "kg",
+      "currency": "VND"
+    }
+  },
+  {
+    "id": "Thịt bò nạmJ1_LlvskPv",
+    "name": "Thịt bò nạm",
+    "category": "Hải sản",
+    "shelfLife": "short",
+    "preservationCondition": "freezer",
+    "baseUnit": "g",
+    "inventoryUnits": [
+      "g",
+      "kg"
+    ],
+    "recipeUnitConversions": {
+      "g": 1,
+      "kg": 1000
+    },
+    "priceEstimate": {
+      "min": 180000,
+      "max": 300000,
+      "amount": 1,
+      "unit": "kg",
+      "currency": "VND"
+    }
+  },
+  {
+    "id": "Thịt bò gầuxg6qB7XSss",
+    "name": "Thịt bò gầu",
+    "category": "Thịt",
+    "shelfLife": "short",
+    "preservationCondition": "freezer",
+    "baseUnit": "g",
+    "inventoryUnits": [
+      "g",
+      "kg"
+    ],
+    "recipeUnitConversions": {
+      "g": 1,
+      "kg": 1000
+    },
+    "priceEstimate": {
+      "min": 180000,
+      "max": 300000,
+      "amount": 1,
+      "unit": "kg",
+      "currency": "VND"
+    }
+  },
+  {
+    "id": "Sườn bòsZCwrc2GVy",
+    "name": "Sườn bò",
+    "category": "Thịt",
+    "shelfLife": "short",
+    "preservationCondition": "freezer",
+    "baseUnit": "g",
+    "inventoryUnits": [
+      "g",
+      "kg"
+    ],
+    "recipeUnitConversions": {
+      "g": 1,
+      "kg": 1000
+    },
+    "priceEstimate": {
+      "min": 180000,
+      "max": 320000,
+      "amount": 1,
+      "unit": "kg",
+      "currency": "VND"
+    }
+  },
+  {
+    "id": "Thịt bò thănDyzpaj8qvS",
+    "name": "Thịt bò thăn",
+    "category": "Thịt",
+    "shelfLife": "short",
+    "preservationCondition": "freezer",
+    "baseUnit": "g",
+    "inventoryUnits": [
+      "g",
+      "kg"
+    ],
+    "recipeUnitConversions": {
+      "g": 1,
+      "kg": 1000
+    },
+    "priceEstimate": {
+      "min": 250000,
+      "max": 450000,
+      "amount": 1,
+      "unit": "kg",
+      "currency": "VND"
+    }
+  },
+  {
+    "id": "Bụng cáYEwaP8LSBh",
+    "baseUnit": "g",
+    "inventoryUnits": [
+      "g",
+      "kg"
+    ],
+    "recipeUnitConversions": {
+      "g": 1,
+      "kg": 1000
+    },
+    "priceEstimate": {
+      "min": 100000,
+      "max": 180000,
+      "amount": 1,
+      "unit": "kg",
+      "currency": "VND"
+    },
+    "name": "Bụng cá",
+    "category": "Hải sản",
+    "shelfLife": "very_short",
+    "preservationCondition": "freezer",
+    "alwaysAvailable": false
+  },
+  {
+    "id": "Đuôi cáTG7XKl6Ss9",
+    "name": "Đuôi cá",
+    "category": "Hải sản",
+    "shelfLife": "very_short",
+    "preservationCondition": "freezer",
+    "baseUnit": "g",
+    "inventoryUnits": [
+      "g",
+      "kg"
+    ],
+    "recipeUnitConversions": {
+      "g": 1,
+      "kg": 1000
+    },
+    "priceEstimate": {
+      "min": 50000,
+      "max": 120000,
+      "amount": 1,
+      "unit": "kg",
+      "currency": "VND"
+    }
+  },
+  {
+    "id": "Đầu cáZC-K1PBaKf",
+    "name": "Đầu cá",
+    "category": "Hải sản",
+    "shelfLife": "very_short",
+    "preservationCondition": "freezer",
+    "baseUnit": "g",
+    "inventoryUnits": [
+      "g",
+      "kg"
+    ],
+    "recipeUnitConversions": {
+      "g": 1,
+      "kg": 1000
+    },
+    "priceEstimate": {
+      "min": 50000,
+      "max": 120000,
+      "amount": 1,
+      "unit": "kg",
+      "currency": "VND"
+    }
+  },
+  {
+    "id": "Thịt gà đùi0vjCseh7j1",
+    "name": "Thịt gà đùi",
+    "category": "Thịt",
+    "shelfLife": "short",
+    "preservationCondition": "freezer",
+    "baseUnit": "g",
+    "inventoryUnits": [
+      "g",
+      "kg"
+    ],
+    "recipeUnitConversions": {
+      "g": 1,
+      "kg": 1000
+    },
+    "priceEstimate": {
+      "min": 80000,
+      "max": 140000,
+      "amount": 1,
+      "unit": "kg",
+      "currency": "VND"
+    }
+  },
+  {
+    "id": "Thịt gà cánhugfciVhuZy",
+    "name": "Thịt gà cánh",
+    "category": "Thịt",
+    "shelfLife": "short",
+    "preservationCondition": "freezer",
+    "baseUnit": "g",
+    "inventoryUnits": [
+      "g",
+      "kg"
+    ],
+    "recipeUnitConversions": {
+      "g": 1,
+      "kg": 1000
+    },
+    "priceEstimate": {
+      "min": 80000,
+      "max": 140000,
+      "amount": 1,
+      "unit": "kg",
+      "currency": "VND"
+    }
+  },
+  {
+    "id": "Xương gàRn56emeuiJ",
+    "name": "Xương gà",
+    "category": "Thịt",
+    "shelfLife": "short",
+    "preservationCondition": "freezer",
+    "baseUnit": "g",
+    "inventoryUnits": [
+      "g",
+      "kg"
+    ],
+    "recipeUnitConversions": {
+      "g": 1,
+      "kg": 1000
+    },
+    "priceEstimate": {
+      "min": 30000,
+      "max": 60000,
+      "amount": 1,
+      "unit": "kg",
+      "currency": "VND"
+    }
+  },
+  {
+    "id": "Thịt gà ứcirYK34PGfJ",
+    "name": "Thịt gà ức",
+    "category": "Thịt",
+    "shelfLife": "short",
+    "preservationCondition": "freezer",
+    "baseUnit": "g",
+    "inventoryUnits": [
+      "g",
+      "kg"
+    ],
+    "recipeUnitConversions": {
+      "g": 1,
+      "kg": 1000
+    },
+    "priceEstimate": {
+      "min": 80000,
+      "max": 140000,
+      "amount": 1,
+      "unit": "kg",
+      "currency": "VND"
+    }
+  },
+  {
+    "id": "Thịt heo xayTtz3UMTzNU",
+    "name": "Thịt heo xay",
+    "category": "Thịt",
+    "shelfLife": "short",
+    "preservationCondition": "freezer",
+    "baseUnit": "g",
+    "inventoryUnits": [
+      "g",
+      "kg"
+    ],
+    "recipeUnitConversions": {
+      "g": 1,
+      "kg": 1000
+    },
+    "priceEstimate": {
+      "min": 100000,
+      "max": 160000,
+      "amount": 1,
+      "unit": "kg",
+      "currency": "VND"
+    }
+  },
+  {
+    "id": "Thịt vịtVdTLg_qlzR",
+    "name": "Thịt vịt",
+    "category": "Thịt",
+    "shelfLife": "short",
+    "preservationCondition": "freezer",
+    "baseUnit": "g",
+    "inventoryUnits": [
+      "g",
+      "kg"
+    ],
+    "recipeUnitConversions": {
+      "g": 1,
+      "kg": 1000
+    },
+    "priceEstimate": {
+      "min": 100000,
+      "max": 170000,
+      "amount": 1,
+      "unit": "kg",
+      "currency": "VND"
+    }
+  },
+  {
+    "id": "Cà tímIfuFxVXDBv",
+    "name": "Cà tím",
+    "category": "Rau củ",
+    "shelfLife": "medium",
+    "preservationCondition": "fridge",
+    "baseUnit": "g",
+    "inventoryUnits": [
+      "g",
+      "kg",
+      "quả"
+    ],
+    "recipeUnitConversions": {
+      "g": 1,
+      "kg": 1000,
+      "quả": 250
+    },
+    "priceEstimate": {
+      "min": 20000,
+      "max": 40000,
+      "amount": 1,
+      "unit": "kg",
+      "currency": "VND"
+    }
+  },
+  {
+    "id": "Xương ống heos9WjV1vL1p",
+    "name": "Xương ống heo",
+    "category": "Thịt",
+    "shelfLife": "short",
+    "preservationCondition": "freezer",
+    "baseUnit": "g",
+    "inventoryUnits": [
+      "g",
+      "kg"
+    ],
+    "recipeUnitConversions": {
+      "g": 1,
+      "kg": 1000
+    },
+    "priceEstimate": {
+      "min": 60000,
+      "max": 110000,
+      "amount": 1,
+      "unit": "kg",
+      "currency": "VND"
+    }
+  },
+  {
+    "id": "Đường trắngDH_YV6vOlJ",
+    "name": "Đường trắng",
+    "category": "Gia vị",
+    "shelfLife": "very_long",
+    "preservationCondition": "cool_dry",
+    "baseUnit": "g",
+    "inventoryUnits": [
+      "g",
+      "kg"
+    ],
+    "recipeUnitConversions": {
+      "g": 1,
+      "kg": 1000,
+      "thìa": 12.5
+    },
+    "priceEstimate": {
+      "min": 20000,
+      "max": 45000,
+      "amount": 1,
+      "unit": "kg",
+      "currency": "VND"
+    }
+  },
+  {
+    "id": "Đường phènCgPf36wjMX",
+    "name": "Đường phèn",
+    "category": "Gia vị",
+    "shelfLife": "very_long",
+    "preservationCondition": "cool_dry",
+    "baseUnit": "g",
+    "inventoryUnits": [
+      "g",
+      "kg"
+    ],
+    "recipeUnitConversions": {
+      "g": 1,
+      "kg": 1000,
+      "thìa": 12
+    },
+    "priceEstimate": {
+      "min": 25000,
+      "max": 60000,
+      "amount": 1,
+      "unit": "kg",
+      "currency": "VND"
+    }
+  },
+  {
+    "id": "Muối iotmxmFIcYWUb",
+    "name": "Muối iot",
+    "category": "Gia vị",
+    "shelfLife": "very_long",
+    "preservationCondition": "cool_dry",
+    "baseUnit": "g",
+    "inventoryUnits": [
+      "g",
+      "kg"
+    ],
+    "recipeUnitConversions": {
+      "g": 1,
+      "kg": 1000,
+      "thìa": 5
+    },
+    "priceEstimate": {
+      "min": 5000,
+      "max": 15000,
+      "amount": 1,
+      "unit": "kg",
+      "currency": "VND"
+    }
+  },
+  {
+    "id": "Muối trắngrOsVaI3tKv",
+    "name": "Muối trắng",
+    "category": "Gia vị",
+    "shelfLife": "very_long",
+    "preservationCondition": "cool_dry",
+    "baseUnit": "g",
+    "inventoryUnits": [
+      "g",
+      "kg"
+    ],
+    "recipeUnitConversions": {
+      "g": 1,
+      "kg": 1000
+    },
+    "priceEstimate": {
+      "min": 5000,
+      "max": 15000,
+      "amount": 1,
+      "unit": "kg",
+      "currency": "VND"
+    }
+  },
+  {
+    "id": "Nước mắm9koIj5Fz3a",
+    "name": "Nước mắm",
+    "category": "Gia vị",
+    "shelfLife": "very_long",
+    "preservationCondition": "cool_dry",
+    "baseUnit": "ml",
+    "inventoryUnits": [
+      "ml",
+      "lít"
+    ],
+    "recipeUnitConversions": {
+      "ml": 1,
+      "lít": 1000,
+      "thìa": 15
+    },
+    "priceEstimate": {
+      "min": 40000,
+      "max": 90000,
+      "amount": 1,
+      "unit": "lít",
+      "currency": "VND"
+    }
+  },
+  {
+    "id": "Xì dầuJhjF6UAtE7",
+    "name": "Xì dầu",
+    "category": "Gia vị",
+    "shelfLife": "very_long",
+    "preservationCondition": "cool_dry",
+    "baseUnit": "ml",
+    "inventoryUnits": [
+      "ml",
+      "lít"
+    ],
+    "recipeUnitConversions": {
+      "ml": 1,
+      "lít": 1000,
+      "thìa": 15
+    },
+    "priceEstimate": {
+      "min": 30000,
+      "max": 70000,
+      "amount": 1,
+      "unit": "lít",
+      "currency": "VND"
+    }
+  },
+  {
+    "id": "Mật ongOr177EkX2-",
+    "name": "Mật ong",
+    "category": "Gia vị",
+    "shelfLife": "very_long",
+    "preservationCondition": "cool_dry",
+    "baseUnit": "ml",
+    "inventoryUnits": [
+      "ml",
+      "lít"
+    ],
+    "recipeUnitConversions": {
+      "ml": 1,
+      "lít": 1000,
+      "thìa": 15
+    },
+    "priceEstimate": {
+      "min": 120000,
+      "max": 250000,
+      "amount": 1,
+      "unit": "lít",
+      "currency": "VND"
+    }
+  },
+  {
+    "id": "Hạt tiêu4eEOesKltQ",
+    "name": "Hạt tiêu",
+    "category": "Gia vị",
+    "shelfLife": "very_long",
+    "preservationCondition": "cool_dry",
+    "baseUnit": "g",
+    "inventoryUnits": [
+      "g",
+      "kg"
+    ],
+    "recipeUnitConversions": {
+      "g": 1,
+      "kg": 1000,
+      "thìa": 2.5
+    },
+    "priceEstimate": {
+      "min": 180000,
+      "max": 350000,
+      "amount": 1,
+      "unit": "kg",
+      "currency": "VND"
+    }
+  },
+  {
+    "id": "Dầu ănb13XIYIrDh",
+    "name": "Dầu ăn",
+    "category": "Gia vị",
+    "shelfLife": "very_long",
+    "preservationCondition": "cool_dry",
+    "baseUnit": "ml",
+    "inventoryUnits": [
+      "ml",
+      "lít"
+    ],
+    "recipeUnitConversions": {
+      "ml": 1,
+      "lít": 1000,
+      "thìa": 15
+    },
+    "priceEstimate": {
+      "min": 35000,
+      "max": 70000,
+      "amount": 1,
+      "unit": "lít",
+      "currency": "VND"
+    }
+  },
+  {
+    "id": "Bột điềuNNx_gW88pY",
+    "name": "Bột điều",
+    "category": "Khác",
+    "shelfLife": "very_long",
+    "preservationCondition": "cool_dry",
+    "baseUnit": "g",
+    "inventoryUnits": [
+      "g",
+      "kg"
+    ],
+    "recipeUnitConversions": {
+      "g": 1,
+      "kg": 1000,
+      "thìa": 5
+    },
+    "priceEstimate": {
+      "min": 120000,
+      "max": 250000,
+      "amount": 1,
+      "unit": "kg",
+      "currency": "VND"
+    }
+  },
+  {
+    "id": "Chanh2c6lpZSaM4",
+    "name": "Chanh",
+    "category": "Gia vị",
+    "shelfLife": "medium",
+    "preservationCondition": "fridge",
+    "baseUnit": "ml",
+    "inventoryUnits": [
+      "ml",
+      "lít",
+      "quả"
+    ],
+    "recipeUnitConversions": {
+      "ml": 1,
+      "lít": 1000,
+      "quả": 30
+    },
+    "priceEstimate": {
+      "min": 2000,
+      "max": 5000,
+      "amount": 1,
+      "unit": "quả",
+      "currency": "VND"
+    }
+  },
+  {
+    "id": "Quất1tbPuuy1rb",
+    "name": "Quất",
+    "category": "Gia vị",
+    "shelfLife": "medium",
+    "preservationCondition": "fridge",
+    "baseUnit": "quả",
+    "inventoryUnits": [
+      "quả"
+    ],
+    "recipeUnitConversions": {
+      "quả": 1
+    },
+    "priceEstimate": {
+      "min": 500,
+      "max": 1500,
+      "amount": 1,
+      "unit": "quả",
+      "currency": "VND"
+    }
+  },
+  {
+    "id": "Giò lụa9aRWcTrL67",
+    "name": "Giò lụa",
+    "category": "Đồ hộp",
+    "shelfLife": "short",
+    "preservationCondition": "fridge",
+    "baseUnit": "g",
+    "inventoryUnits": [
+      "g",
+      "kg"
+    ],
+    "recipeUnitConversions": {
+      "g": 1,
+      "kg": 1000
+    },
+    "priceEstimate": {
+      "min": 160000,
+      "max": 250000,
+      "amount": 1,
+      "unit": "kg",
+      "currency": "VND"
+    }
+  },
+  {
+    "id": "Chả mỡGr-Mw11ezE",
+    "name": "Chả mỡ",
+    "category": "Đồ hộp",
+    "shelfLife": "short",
+    "preservationCondition": "fridge",
+    "baseUnit": "g",
+    "inventoryUnits": [
+      "g",
+      "kg"
+    ],
+    "recipeUnitConversions": {
+      "g": 1,
+      "kg": 1000
+    },
+    "priceEstimate": {
+      "min": 160000,
+      "max": 260000,
+      "amount": 1,
+      "unit": "kg",
+      "currency": "VND"
+    }
+  },
+  {
+    "id": "Mọc bò0l6Y3y4t0R",
+    "name": "Mọc bò",
+    "category": "Đồ hộp",
+    "shelfLife": "short",
+    "preservationCondition": "fridge",
+    "baseUnit": "g",
+    "inventoryUnits": [
+      "g",
+      "kg"
+    ],
+    "recipeUnitConversions": {
+      "g": 1,
+      "kg": 1000
+    },
+    "priceEstimate": {
+      "min": 180000,
+      "max": 280000,
+      "amount": 1,
+      "unit": "kg",
+      "currency": "VND"
+    }
+  },
+  {
+    "id": "Cua đồng_ZT1s1jy48",
+    "name": "Cua đồng",
+    "category": "Hải sản",
+    "shelfLife": "very_short",
+    "preservationCondition": "freezer",
+    "baseUnit": "g",
+    "inventoryUnits": [
+      "g",
+      "kg"
+    ],
+    "recipeUnitConversions": {
+      "g": 1,
+      "kg": 1000
+    },
+    "priceEstimate": {
+      "min": 80000,
+      "max": 140000,
+      "amount": 1,
+      "unit": "kg",
+      "currency": "VND"
+    }
+  },
+  {
+    "id": "Cà chuaZP4MdEXiO_",
+    "name": "Cà chua",
+    "category": "Rau củ",
+    "shelfLife": "medium",
+    "preservationCondition": "fridge",
+    "baseUnit": "g",
+    "inventoryUnits": [
+      "g",
+      "kg",
+      "quả"
+    ],
+    "recipeUnitConversions": {
+      "g": 1,
+      "kg": 1000,
+      "quả": 100
+    },
+    "priceEstimate": {
+      "min": 25000,
+      "max": 50000,
+      "amount": 1,
+      "unit": "kg",
+      "currency": "VND"
+    }
+  },
+  {
+    "id": "Bơ lạtbK-8VT5e-z",
+    "name": "Bơ lạt",
+    "category": "Gia vị",
+    "shelfLife": "medium",
+    "preservationCondition": "fridge",
+    "baseUnit": "g",
+    "inventoryUnits": [
+      "g",
+      "kg"
+    ],
+    "recipeUnitConversions": {
+      "g": 1,
+      "kg": 1000
+    },
+    "priceEstimate": {
+      "min": 180000,
+      "max": 320000,
+      "amount": 1,
+      "unit": "kg",
+      "currency": "VND"
+    }
+  },
+  {
+    "id": "Ớt đỏ cay4cIqrjz_8U",
+    "name": "Ớt đỏ cay",
+    "category": "Rau củ",
+    "shelfLife": "medium",
+    "preservationCondition": "fridge",
+    "baseUnit": "g",
+    "inventoryUnits": [
+      "g",
+      "kg",
+      "quả"
+    ],
+    "recipeUnitConversions": {
+      "g": 1,
+      "kg": 1000,
+      "quả": 10
+    },
+    "priceEstimate": {
+      "min": 40000,
+      "max": 90000,
+      "amount": 1,
+      "unit": "kg",
+      "currency": "VND"
+    }
+  },
+  {
+    "id": "Ớt chuông đỏOH3gtce7jk",
+    "name": "Ớt chuông đỏ",
+    "category": "Rau củ",
+    "shelfLife": "short",
+    "preservationCondition": "fridge",
+    "baseUnit": "g",
+    "inventoryUnits": [
+      "g",
+      "kg",
+      "quả"
+    ],
+    "recipeUnitConversions": {
+      "g": 1,
+      "kg": 1000,
+      "quả": 150
+    },
+    "priceEstimate": {
+      "min": 60000,
+      "max": 100000,
+      "amount": 1,
+      "unit": "kg",
+      "currency": "VND"
+    }
+  },
+  {
+    "id": "Ớt chuông xanh1o16kbL30u",
+    "name": "Ớt chuông xanh",
+    "category": "Rau củ",
+    "shelfLife": "short",
+    "preservationCondition": "fridge",
+    "baseUnit": "g",
+    "inventoryUnits": [
+      "g",
+      "kg"
+    ],
+    "recipeUnitConversions": {
+      "g": 1,
+      "kg": 1000
+    },
+    "priceEstimate": {
+      "min": 60000,
+      "max": 100000,
+      "amount": 1,
+      "unit": "kg",
+      "currency": "VND"
+    }
+  },
+  {
+    "id": "Ớt chuông vàngFLYc7PslEU",
+    "name": "Ớt chuông vàng",
+    "category": "Rau củ",
+    "shelfLife": "short",
+    "preservationCondition": "fridge",
+    "baseUnit": "g",
+    "inventoryUnits": [
+      "g",
+      "kg"
+    ],
+    "recipeUnitConversions": {
+      "g": 1,
+      "kg": 1000
+    },
+    "priceEstimate": {
+      "min": 60000,
+      "max": 100000,
+      "amount": 1,
+      "unit": "kg",
+      "currency": "VND"
+    }
+  },
+  {
+    "id": "Ớt xanh cayXUZVWVDT_Y",
+    "name": "Ớt xanh cay",
+    "category": "Rau củ",
+    "shelfLife": "medium",
+    "preservationCondition": "fridge",
+    "baseUnit": "g",
+    "inventoryUnits": [
+      "g",
+      "kg"
+    ],
+    "recipeUnitConversions": {
+      "g": 1,
+      "kg": 1000
+    },
+    "priceEstimate": {
+      "min": 40000,
+      "max": 90000,
+      "amount": 1,
+      "unit": "kg",
+      "currency": "VND"
+    }
+  },
+  {
+    "id": "Tương ớt1mzBq-weXz",
+    "name": "Tương ớt",
+    "category": "Gia vị",
+    "shelfLife": "very_long",
+    "preservationCondition": "cool_dry",
+    "baseUnit": "ml",
+    "inventoryUnits": [
+      "ml",
+      "lít"
+    ],
+    "recipeUnitConversions": {
+      "ml": 1,
+      "lít": 1000,
+      "thìa": 15
+    },
+    "priceEstimate": {
+      "min": 30000,
+      "max": 70000,
+      "amount": 1,
+      "unit": "lít",
+      "currency": "VND"
+    }
+  },
+  {
+    "id": "Tương càiHkFzpVbMI",
+    "name": "Tương cà",
+    "category": "Gia vị",
+    "shelfLife": "very_long",
+    "preservationCondition": "cool_dry",
+    "baseUnit": "ml",
+    "inventoryUnits": [
+      "ml",
+      "lít"
+    ],
+    "recipeUnitConversions": {
+      "ml": 1,
+      "lít": 1000,
+      "thìa": 15
+    },
+    "priceEstimate": {
+      "min": 30000,
+      "max": 70000,
+      "amount": 1,
+      "unit": "lít",
+      "currency": "VND"
+    }
+  },
+  {
+    "id": "Ngải cứutipq4kHmOB",
+    "name": "Ngải cứu",
+    "category": "Rau củ",
+    "shelfLife": "very_short",
+    "preservationCondition": "fridge",
+    "baseUnit": "g",
+    "inventoryUnits": [
+      "g",
+      "kg"
+    ],
+    "recipeUnitConversions": {
+      "g": 1,
+      "kg": 1000
+    },
+    "priceEstimate": {
+      "min": 30000,
+      "max": 60000,
+      "amount": 1,
+      "unit": "kg",
+      "currency": "VND"
+    }
+  },
+  {
+    "id": "Hạt senAdqkHmtif3",
+    "name": "Hạt sen",
+    "category": "Rau củ",
+    "shelfLife": "short",
+    "preservationCondition": "fridge",
+    "baseUnit": "g",
+    "inventoryUnits": [
+      "g",
+      "kg"
+    ],
+    "recipeUnitConversions": {
+      "g": 1,
+      "kg": 1000
+    },
+    "priceEstimate": {
+      "min": 100000,
+      "max": 180000,
+      "amount": 1,
+      "unit": "kg",
+      "currency": "VND"
+    }
+  },
+  {
+    "id": "Gừngc-VE7hkDli",
+    "name": "Gừng",
+    "category": "Gia vị",
+    "shelfLife": "long",
+    "preservationCondition": "cool_dry",
+    "baseUnit": "g",
+    "inventoryUnits": [
+      "g",
+      "kg",
+      "củ",
+      "nhánh"
+    ],
+    "recipeUnitConversions": {
+      "g": 1,
+      "kg": 1000,
+      "củ": 50,
+      "nhánh": 10
+    },
+    "priceEstimate": {
+      "min": 40000,
+      "max": 90000,
+      "amount": 1,
+      "unit": "kg",
+      "currency": "VND"
+    }
+  },
+  {
+    "id": "Kỷ tửE9xT5QTAhj",
+    "name": "Kỷ tử",
+    "category": "Gia vị",
+    "shelfLife": "very_long",
+    "preservationCondition": "cool_dry",
+    "baseUnit": "g",
+    "inventoryUnits": [
+      "g",
+      "kg"
+    ],
+    "recipeUnitConversions": {
+      "g": 1,
+      "kg": 1000
+    },
+    "priceEstimate": {
+      "min": 250000,
+      "max": 500000,
+      "amount": 1,
+      "unit": "kg",
+      "currency": "VND"
+    }
+  },
+  {
+    "id": "Táo đỏqFV1jSTBGd",
+    "name": "Táo đỏ",
+    "category": "Gia vị",
+    "shelfLife": "very_long",
+    "preservationCondition": "cool_dry",
+    "baseUnit": "quả",
+    "inventoryUnits": [
+      "quả"
+    ],
+    "recipeUnitConversions": {
+      "quả": 1
+    },
+    "priceEstimate": {
+      "min": 1000,
+      "max": 3000,
+      "amount": 1,
+      "unit": "quả",
+      "currency": "VND"
+    }
+  },
+  {
+    "id": "TáođenTRNPr0KCC-",
+    "name": "Táo đen",
+    "category": "Gia vị",
+    "shelfLife": "very_long",
+    "preservationCondition": "cool_dry",
+    "baseUnit": "quả",
+    "inventoryUnits": [
+      "quả"
+    ],
+    "recipeUnitConversions": {
+      "quả": 1
+    },
+    "priceEstimate": {
+      "min": 1000,
+      "max": 3000,
+      "amount": 1,
+      "unit": "quả",
+      "currency": "VND"
+    }
+  },
+  {
+    "id": "DấmwpjvOTf7hW",
+    "name": "Dấm",
+    "category": "Gia vị",
+    "shelfLife": "very_long",
+    "preservationCondition": "cool_dry",
+    "baseUnit": "ml",
+    "inventoryUnits": [
+      "ml",
+      "lít"
+    ],
+    "recipeUnitConversions": {
+      "ml": 1,
+      "lít": 1000,
+      "thìa": 15
+    },
+    "priceEstimate": {
+      "min": 15000,
+      "max": 40000,
+      "amount": 1,
+      "unit": "lít",
+      "currency": "VND"
+    }
+  },
+  {
+    "id": "Phở khô2CgiH-Mb0I",
+    "name": "Phở khô",
+    "category": "Tinh bột",
+    "shelfLife": "very_long",
+    "preservationCondition": "cool_dry",
+    "baseUnit": "g",
+    "inventoryUnits": [
+      "g",
+      "kg"
+    ],
+    "recipeUnitConversions": {
+      "g": 1,
+      "kg": 1000
+    },
+    "priceEstimate": {
+      "min": 30000,
+      "max": 70000,
+      "amount": 1,
+      "unit": "kg",
+      "currency": "VND"
+    }
+  },
+  {
+    "id": "Bún khôK-nYu2l5_h",
+    "name": "Bún khô",
+    "category": "Tinh bột",
+    "shelfLife": "very_long",
+    "preservationCondition": "cool_dry",
+    "baseUnit": "g",
+    "inventoryUnits": [
+      "g",
+      "kg"
+    ],
+    "recipeUnitConversions": {
+      "g": 1,
+      "kg": 1000
+    },
+    "priceEstimate": {
+      "min": 30000,
+      "max": 70000,
+      "amount": 1,
+      "unit": "kg",
+      "currency": "VND"
+    }
+  },
+  {
+    "id": "SảN-nr3-BboO",
+    "name": "Sả",
+    "category": "Gia vị",
+    "shelfLife": "medium",
+    "preservationCondition": "fridge",
+    "baseUnit": "g",
+    "inventoryUnits": [
+      "g",
+      "kg",
+      "củ"
+    ],
+    "recipeUnitConversions": {
+      "g": 1,
+      "kg": 1000,
+      "củ": 20
+    },
+    "priceEstimate": {
+      "min": 30000,
+      "max": 60000,
+      "amount": 1,
+      "unit": "kg",
+      "currency": "VND"
+    }
+  },
+  {
+    "id": "QuếpC5s9J3cnj",
+    "name": "Quế",
+    "category": "Gia vị",
+    "shelfLife": "very_long",
+    "preservationCondition": "cool_dry",
+    "baseUnit": "thanh",
+    "inventoryUnits": [
+      "thanh"
+    ],
+    "recipeUnitConversions": {
+      "thanh": 1
+    },
+    "priceEstimate": {
+      "min": 2000,
+      "max": 6000,
+      "amount": 1,
+      "unit": "thanh",
+      "currency": "VND"
+    }
+  },
+  {
+    "id": "Thảo quảkXyurFzxSF",
+    "name": "Thảo quả",
+    "category": "Gia vị",
+    "shelfLife": "very_long",
+    "preservationCondition": "cool_dry",
+    "baseUnit": "quả",
+    "inventoryUnits": [
+      "quả"
+    ],
+    "recipeUnitConversions": {
+      "quả": 1
+    },
+    "priceEstimate": {
+      "min": 3000,
+      "max": 8000,
+      "amount": 1,
+      "unit": "quả",
+      "currency": "VND"
+    }
+  },
+  {
+    "id": "Hoa hồiFHXr32fLXp",
+    "name": "Hoa hồi",
+    "category": "Gia vị",
+    "shelfLife": "very_long",
+    "preservationCondition": "cool_dry",
+    "baseUnit": "chiếc",
+    "inventoryUnits": [
+      "chiếc"
+    ],
+    "recipeUnitConversions": {
+      "chiếc": 1
+    },
+    "priceEstimate": {
+      "min": 1000,
+      "max": 3000,
+      "amount": 1,
+      "unit": "chiếc",
+      "currency": "VND"
+    }
+  },
+  {
+    "id": "Thịt bò bắpTmUfLzE2tl",
+    "name": "Thịt bò bắp",
+    "category": "Thịt",
+    "shelfLife": "short",
+    "preservationCondition": "freezer",
+    "baseUnit": "g",
+    "inventoryUnits": [
+      "g",
+      "kg"
+    ],
+    "recipeUnitConversions": {
+      "g": 1,
+      "kg": 1000
+    },
+    "priceEstimate": {
+      "min": 180000,
+      "max": 300000,
+      "amount": 1,
+      "unit": "kg",
+      "currency": "VND"
+    }
+  },
+  {
+    "id": "Giá đỗLaF0woHgwA",
+    "name": "Giá đỗ",
+    "category": "Rau củ",
+    "shelfLife": "very_short",
+    "preservationCondition": "fridge",
+    "baseUnit": "g",
+    "inventoryUnits": [
+      "g",
+      "kg"
+    ],
+    "recipeUnitConversions": {
+      "g": 1,
+      "kg": 1000
+    },
+    "priceEstimate": {
+      "min": 20000,
+      "max": 50000,
+      "amount": 1,
+      "unit": "kg",
+      "currency": "VND"
+    }
+  },
+  {
+    "id": "Húng quếSnTL9FBfY0",
+    "name": "Húng quế",
+    "category": "Gia vị",
+    "shelfLife": "very_short",
+    "preservationCondition": "fridge",
+    "baseUnit": "g",
+    "inventoryUnits": [
+      "g",
+      "kg"
+    ],
+    "recipeUnitConversions": {
+      "g": 1,
+      "kg": 1000
+    },
+    "priceEstimate": {
+      "min": 60000,
+      "max": 120000,
+      "amount": 1,
+      "unit": "kg",
+      "currency": "VND"
+    }
+  },
+  {
+    "id": "Hoa chuốiTvAka0CYhm",
+    "name": "Hoa chuối",
+    "category": "Rau củ",
+    "shelfLife": "very_short",
+    "preservationCondition": "fridge",
+    "baseUnit": "g",
+    "inventoryUnits": [
+      "g",
+      "kg"
+    ],
+    "recipeUnitConversions": {
+      "g": 1,
+      "kg": 1000
+    },
+    "priceEstimate": {
+      "min": 25000,
+      "max": 50000,
+      "amount": 1,
+      "unit": "kg",
+      "currency": "VND"
+    }
+  },
+  {
+    "id": "Tiết bòfJRNveQPQa",
+    "name": "Tiết bò",
+    "category": "Thịt",
+    "shelfLife": "very_short",
+    "preservationCondition": "fridge",
+    "baseUnit": "g",
+    "inventoryUnits": [
+      "g",
+      "kg"
+    ],
+    "recipeUnitConversions": {
+      "g": 1,
+      "kg": 1000
+    },
+    "priceEstimate": {
+      "min": 20000,
+      "max": 50000,
+      "amount": 1,
+      "unit": "kg",
+      "currency": "VND"
+    }
+  },
+  {
+    "id": "Tiết lợn_KUqzKbZRf",
+    "name": "Tiết lợn",
+    "category": "Thịt",
+    "shelfLife": "very_short",
+    "preservationCondition": "fridge",
+    "baseUnit": "g",
+    "inventoryUnits": [
+      "g",
+      "kg"
+    ],
+    "recipeUnitConversions": {
+      "g": 1,
+      "kg": 1000
+    },
+    "priceEstimate": {
+      "min": 20000,
+      "max": 50000,
+      "amount": 1,
+      "unit": "kg",
+      "currency": "VND"
+    }
+  },
+  {
+    "id": "Chả cuaZmSmfXObKL",
+    "name": "Chả cua",
+    "category": "Đồ hộp",
+    "shelfLife": "short",
+    "preservationCondition": "fridge",
+    "baseUnit": "g",
+    "inventoryUnits": [
+      "g",
+      "kg"
+    ],
+    "recipeUnitConversions": {
+      "g": 1,
+      "kg": 1000
+    },
+    "priceEstimate": {
+      "min": 180000,
+      "max": 300000,
+      "amount": 1,
+      "unit": "kg",
+      "currency": "VND"
+    }
+  },
+  {
+    "id": "Mắm ruốc4d_D077Cg6",
+    "name": "Mắm ruốc",
+    "category": "Gia vị",
+    "shelfLife": "very_long",
+    "preservationCondition": "cool_dry",
+    "baseUnit": "g",
+    "inventoryUnits": [
+      "g",
+      "kg"
+    ],
+    "recipeUnitConversions": {
+      "g": 1,
+      "kg": 1000,
+      "thìa": 15
+    },
+    "priceEstimate": {
+      "min": 60000,
+      "max": 140000,
+      "amount": 1,
+      "unit": "kg",
+      "currency": "VND"
+    }
+  },
+  {
+    "id": "Mắm tépFPEkwDw6dm",
+    "name": "Mắm tép",
+    "category": "Gia vị",
+    "shelfLife": "very_long",
+    "preservationCondition": "cool_dry",
+    "baseUnit": "g",
+    "inventoryUnits": [
+      "g",
+      "kg"
+    ],
+    "recipeUnitConversions": {
+      "g": 1,
+      "kg": 1000
+    },
+    "priceEstimate": {
+      "min": 60000,
+      "max": 140000,
+      "amount": 1,
+      "unit": "kg",
+      "currency": "VND"
+    }
+  },
+  {
+    "id": "DứaGu02Q4sahX",
+    "name": "Dứa",
+    "category": "Rau củ",
+    "shelfLife": "medium",
+    "preservationCondition": "fridge",
+    "baseUnit": "g",
+    "inventoryUnits": [
+      "g",
+      "kg",
+      "quả"
+    ],
+    "recipeUnitConversions": {
+      "g": 1,
+      "kg": 1000,
+      "quả": 800
+    },
+    "priceEstimate": {
+      "min": 20000,
+      "max": 35000,
+      "amount": 1,
+      "unit": "kg",
+      "currency": "VND"
+    }
+  },
+  {
+    "id": "Sữa đặckKXUK_y9VF",
+    "name": "Sữa đặc",
+    "category": "Sữa & trứng",
+    "shelfLife": "very_long",
+    "preservationCondition": "cool_dry",
+    "baseUnit": "ml",
+    "inventoryUnits": [
+      "ml",
+      "lít"
+    ],
+    "recipeUnitConversions": {
+      "ml": 1,
+      "lít": 1000,
+      "thìa": 15
+    },
+    "priceEstimate": {
+      "min": 60000,
+      "max": 90000,
+      "amount": 1,
+      "unit": "lít",
+      "currency": "VND"
+    }
+  },
+  {
+    "id": "Ngũ vị hươngL2e0rt-Wrb",
+    "name": "Ngũ vị hương",
+    "category": "Gia vị",
+    "shelfLife": "very_long",
+    "preservationCondition": "cool_dry",
+    "baseUnit": "g",
+    "inventoryUnits": [
+      "g",
+      "kg"
+    ],
+    "recipeUnitConversions": {
+      "g": 1,
+      "kg": 1000,
+      "thìa": 5
+    },
+    "priceEstimate": {
+      "min": 250000,
+      "max": 500000,
+      "amount": 1,
+      "unit": "kg",
+      "currency": "VND"
+    }
+  },
+  {
+    "id": "Rau cảiiFdmSyx5A0",
+    "name": "Rau cải ngồng",
+    "category": "Rau củ",
+    "shelfLife": "very_short",
+    "preservationCondition": "fridge",
+    "baseUnit": "g",
+    "inventoryUnits": [
+      "g",
+      "kg"
+    ],
+    "recipeUnitConversions": {
+      "g": 1,
+      "kg": 1000
+    },
+    "priceEstimate": {
+      "min": 25000,
+      "max": 60000,
+      "amount": 1,
+      "unit": "kg",
+      "currency": "VND"
+    }
+  },
+  {
+    "id": "Rau ngót5vruLe8l5U",
+    "name": "Rau ngót",
+    "category": "Rau củ",
+    "shelfLife": "very_short",
+    "preservationCondition": "fridge",
+    "baseUnit": "g",
+    "inventoryUnits": [
+      "g",
+      "kg"
+    ],
+    "recipeUnitConversions": {
+      "g": 1,
+      "kg": 1000
+    },
+    "priceEstimate": {
+      "min": 25000,
+      "max": 60000,
+      "amount": 1,
+      "unit": "kg",
+      "currency": "VND"
+    }
+  },
+  {
+    "id": "Cá rô đồngt2S76dzM1q",
+    "name": "Cá rô đồng",
+    "category": "Hải sản",
+    "shelfLife": "very_short",
+    "preservationCondition": "freezer",
+    "baseUnit": "g",
+    "inventoryUnits": [
+      "g",
+      "kg"
+    ],
+    "recipeUnitConversions": {
+      "g": 1,
+      "kg": 1000
+    },
+    "priceEstimate": {
+      "min": 100000,
+      "max": 180000,
+      "amount": 1,
+      "unit": "kg",
+      "currency": "VND"
+    }
+  },
+  {
+    "id": "Cá rô phisWoe0YXYMA",
+    "name": "Cá rô phi",
+    "category": "Hải sản",
+    "shelfLife": "very_short",
+    "preservationCondition": "freezer",
+    "baseUnit": "g",
+    "inventoryUnits": [
+      "g",
+      "kg"
+    ],
+    "recipeUnitConversions": {
+      "g": 1,
+      "kg": 1000
+    },
+    "priceEstimate": {
+      "min": 50000,
+      "max": 90000,
+      "amount": 1,
+      "unit": "kg",
+      "currency": "VND"
+    }
+  },
+  {
+    "id": "Rượu vangGKL1_2rRy_",
+    "name": "Rượu vang",
+    "category": "Gia vị",
+    "shelfLife": "very_long",
+    "preservationCondition": "cool_dry",
+    "baseUnit": "ml",
+    "inventoryUnits": [
+      "ml",
+      "lít"
+    ],
+    "recipeUnitConversions": {
+      "ml": 1,
+      "lít": 1000
+    },
+    "priceEstimate": {
+      "min": 180000,
+      "max": 400000,
+      "amount": 1,
+      "unit": "lít",
+      "currency": "VND"
+    }
+  },
+  {
+    "id": "XoàiZenHCISCaR",
+    "name": "Xoài",
+    "category": "Rau củ",
+    "shelfLife": "medium",
+    "preservationCondition": "fridge",
+    "baseUnit": "g",
+    "inventoryUnits": [
+      "g",
+      "kg",
+      "quả"
+    ],
+    "recipeUnitConversions": {
+      "g": 1,
+      "kg": 1000,
+      "quả": 300
+    },
+    "priceEstimate": {
+      "min": 30000,
+      "max": 60000,
+      "amount": 1,
+      "unit": "kg",
+      "currency": "VND"
+    }
+  },
+  {
+    "id": "Lá nem cuốnhi2Vczb6dt",
+    "name": "Lá nem cuốn",
+    "category": "Khác",
+    "shelfLife": "long",
+    "preservationCondition": "cool_dry",
+    "baseUnit": "lá",
+    "inventoryUnits": [
+      "lá"
+    ],
+    "recipeUnitConversions": {
+      "lá": 1
+    },
+    "priceEstimate": {
+      "min": 500,
+      "max": 1500,
+      "amount": 1,
+      "unit": "lá",
+      "currency": "VND"
+    }
+  },
+  {
+    "id": "Lá nem ránYsP2p9gQpD",
+    "name": "Lá nem rán",
+    "category": "Khác",
+    "shelfLife": "long",
+    "preservationCondition": "cool_dry",
+    "baseUnit": "lá",
+    "inventoryUnits": [
+      "lá"
+    ],
+    "recipeUnitConversions": {
+      "lá": 1
+    },
+    "priceEstimate": {
+      "min": 500,
+      "max": 1500,
+      "amount": 1,
+      "unit": "lá",
+      "currency": "VND"
+    }
+  },
+  {
+    "id": "Xúc xíchv-K-3pPXWH",
+    "name": "Xúc xích",
+    "category": "Đồ hộp",
+    "shelfLife": "long",
+    "preservationCondition": "fridge",
+    "baseUnit": "chiếc",
+    "inventoryUnits": [
+      "chiếc"
+    ],
+    "recipeUnitConversions": {
+      "chiếc": 1
+    },
+    "priceEstimate": {
+      "min": 5000,
+      "max": 15000,
+      "amount": 1,
+      "unit": "chiếc",
+      "currency": "VND"
+    }
+  },
+  {
+    "id": "Rau rămUSdFLbxJzV",
+    "name": "Rau răm",
+    "category": "Gia vị",
+    "shelfLife": "very_short",
+    "preservationCondition": "fridge",
+    "baseUnit": "g",
+    "inventoryUnits": [
+      "g",
+      "kg"
+    ],
+    "recipeUnitConversions": {
+      "g": 1,
+      "kg": 1000
+    },
+    "priceEstimate": {
+      "min": 60000,
+      "max": 120000,
+      "amount": 1,
+      "unit": "kg",
+      "currency": "VND"
+    }
+  },
+  {
+    "id": "Đậu bắpaLBLtkkAtg",
+    "name": "Đậu bắp",
+    "category": "Rau củ",
+    "shelfLife": "short",
+    "preservationCondition": "fridge",
+    "baseUnit": "g",
+    "inventoryUnits": [
+      "g",
+      "kg"
+    ],
+    "recipeUnitConversions": {
+      "g": 1,
+      "kg": 1000
+    },
+    "priceEstimate": {
+      "min": 25000,
+      "max": 50000,
+      "amount": 1,
+      "unit": "kg",
+      "currency": "VND"
+    }
+  },
+  {
+    "id": "Nấm kim châmmlA63sS5ey",
+    "name": "Nấm kim châm",
+    "category": "Rau củ",
+    "shelfLife": "short",
+    "preservationCondition": "fridge",
+    "baseUnit": "g",
+    "inventoryUnits": [
+      "g",
+      "kg"
+    ],
+    "recipeUnitConversions": {
+      "g": 1,
+      "kg": 1000
+    },
+    "priceEstimate": {
+      "min": 40000,
+      "max": 80000,
+      "amount": 1,
+      "unit": "kg",
+      "currency": "VND"
+    }
+  },
+  {
+    "id": "Nấm đùi gàOxusi8DbqC",
+    "name": "Nấm đùi gà",
+    "category": "Rau củ",
+    "shelfLife": "short",
+    "preservationCondition": "fridge",
+    "baseUnit": "g",
+    "inventoryUnits": [
+      "g",
+      "kg"
+    ],
+    "recipeUnitConversions": {
+      "g": 1,
+      "kg": 1000
+    },
+    "priceEstimate": {
+      "min": 70000,
+      "max": 120000,
+      "amount": 1,
+      "unit": "kg",
+      "currency": "VND"
+    }
+  },
+  {
+    "id": "Nấm hải sảnqTCA-l7FSn",
+    "name": "Nấm hải sản",
+    "category": "Rau củ",
+    "shelfLife": "short",
+    "preservationCondition": "fridge",
+    "baseUnit": "g",
+    "inventoryUnits": [
+      "g",
+      "kg"
+    ],
+    "recipeUnitConversions": {
+      "g": 1,
+      "kg": 1000
+    },
+    "priceEstimate": {
+      "min": 80000,
+      "max": 150000,
+      "amount": 1,
+      "unit": "kg",
+      "currency": "VND"
+    }
+  },
+  {
+    "id": "Bí đỏdfZiGA8n81",
+    "name": "Bí đỏ",
+    "category": "Rau củ",
+    "shelfLife": "long",
+    "preservationCondition": "cool_dry",
+    "baseUnit": "g",
+    "inventoryUnits": [
+      "g",
+      "kg"
+    ],
+    "recipeUnitConversions": {
+      "g": 1,
+      "kg": 1000
+    },
+    "priceEstimate": {
+      "min": 15000,
+      "max": 35000,
+      "amount": 1,
+      "unit": "kg",
+      "currency": "VND"
+    }
+  },
+  {
+    "id": "Bí đaovRa5fhBI4Z",
+    "name": "Bí đao",
+    "category": "Rau củ",
+    "shelfLife": "medium",
+    "preservationCondition": "cool_dry",
+    "baseUnit": "g",
+    "inventoryUnits": [
+      "g",
+      "kg"
+    ],
+    "recipeUnitConversions": {
+      "g": 1,
+      "kg": 1000
+    },
+    "priceEstimate": {
+      "min": 15000,
+      "max": 35000,
+      "amount": 1,
+      "unit": "kg",
+      "currency": "VND"
+    }
+  },
+  {
+    "id": "Gạo nếpEjVT24T5Uq",
+    "name": "Gạo nếp",
+    "category": "Tinh bột",
+    "shelfLife": "very_long",
+    "preservationCondition": "cool_dry",
+    "baseUnit": "g",
+    "inventoryUnits": [
+      "g",
+      "kg"
+    ],
+    "recipeUnitConversions": {
+      "g": 1,
+      "kg": 1000
+    },
+    "priceEstimate": {
+      "min": 25000,
+      "max": 50000,
+      "amount": 1,
+      "unit": "kg",
+      "currency": "VND"
+    }
+  },
+  {
+    "id": "Gạo tẻC_vFfi5R77",
+    "name": "Gạo tẻ",
+    "category": "Tinh bột",
+    "shelfLife": "very_long",
+    "preservationCondition": "cool_dry",
+    "baseUnit": "g",
+    "inventoryUnits": [
+      "g",
+      "kg"
+    ],
+    "recipeUnitConversions": {
+      "g": 1,
+      "kg": 1000
+    },
+    "priceEstimate": {
+      "min": 18000,
+      "max": 35000,
+      "amount": 1,
+      "unit": "kg",
+      "currency": "VND"
+    }
+  },
+  {
+    "id": "Cá chépdGCZp0Kz0l",
+    "name": "Cá chép",
+    "category": "Hải sản",
+    "shelfLife": "very_short",
+    "preservationCondition": "freezer",
+    "baseUnit": "g",
+    "inventoryUnits": [
+      "g",
+      "kg"
+    ],
+    "recipeUnitConversions": {
+      "g": 1,
+      "kg": 1000
+    },
+    "priceEstimate": {
+      "min": 70000,
+      "max": 130000,
+      "amount": 1,
+      "unit": "kg",
+      "currency": "VND"
+    }
+  },
+  {
+    "id": "MiếnObDS-xNaoB",
+    "name": "Miến",
+    "category": "Tinh bột",
+    "shelfLife": "very_long",
+    "preservationCondition": "cool_dry",
+    "baseUnit": "g",
+    "inventoryUnits": [
+      "g",
+      "kg"
+    ],
+    "recipeUnitConversions": {
+      "g": 1,
+      "kg": 1000
+    },
+    "priceEstimate": {
+      "min": 30000,
+      "max": 70000,
+      "amount": 1,
+      "unit": "kg",
+      "currency": "VND"
+    }
+  },
+  {
+    "id": "Mộc nhĩzQ75NeGAeu",
+    "name": "Mộc nhĩ",
+    "category": "Rau củ",
+    "shelfLife": "very_long",
+    "preservationCondition": "cool_dry",
+    "baseUnit": "g",
+    "inventoryUnits": [
+      "g",
+      "kg"
+    ],
+    "recipeUnitConversions": {
+      "g": 1,
+      "kg": 1000
+    },
+    "priceEstimate": {
+      "min": 180000,
+      "max": 350000,
+      "amount": 1,
+      "unit": "kg",
+      "currency": "VND"
+    }
+  },
+  {
+    "id": "Nấm hươngF3SfMXRu9p",
+    "name": "Nấm hương",
+    "category": "Rau củ",
+    "shelfLife": "very_long",
+    "preservationCondition": "cool_dry",
+    "baseUnit": "g",
+    "inventoryUnits": [
+      "g",
+      "kg"
+    ],
+    "recipeUnitConversions": {
+      "g": 1,
+      "kg": 1000
+    },
+    "priceEstimate": {
+      "min": 250000,
+      "max": 500000,
+      "amount": 1,
+      "unit": "kg",
+      "currency": "VND"
+    }
+  },
+  {
+    "id": "Cà rốtGB2tp6fqpw",
+    "name": "Cà rốt",
+    "category": "Rau củ",
+    "shelfLife": "long",
+    "preservationCondition": "fridge",
+    "baseUnit": "g",
+    "inventoryUnits": [
+      "g",
+      "kg"
+    ],
+    "recipeUnitConversions": {
+      "g": 1,
+      "kg": 1000
+    },
+    "priceEstimate": {
+      "min": 15000,
+      "max": 30000,
+      "amount": 1,
+      "unit": "kg",
+      "currency": "VND"
+    }
+  },
+  {
+    "id": "Dọc mùng-Ykee9LwhY",
+    "name": "Dọc mùng",
+    "category": "Rau củ",
+    "shelfLife": "very_short",
+    "preservationCondition": "fridge",
+    "baseUnit": "g",
+    "inventoryUnits": [
+      "g",
+      "kg"
+    ],
+    "recipeUnitConversions": {
+      "g": 1,
+      "kg": 1000
+    },
+    "priceEstimate": {
+      "min": 20000,
+      "max": 40000,
+      "amount": 1,
+      "unit": "kg",
+      "currency": "VND"
+    }
+  },
+  {
+    "id": "Lá dongmBYN9i2dtX",
+    "name": "Lá dong",
+    "category": "Khác",
+    "shelfLife": "short",
+    "preservationCondition": "fridge",
+    "baseUnit": "lá",
+    "inventoryUnits": [
+      "lá"
+    ],
+    "recipeUnitConversions": {
+      "lá": 1
+    },
+    "priceEstimate": {
+      "min": 5000,
+      "max": 15000,
+      "amount": 1,
+      "unit": "lá",
+      "currency": "VND"
+    }
+  },
+  {
+    "id": "Lá chuốiQ8n4MaNj6n",
+    "name": "Lá chuối",
+    "category": "Khác",
+    "shelfLife": "short",
+    "preservationCondition": "fridge",
+    "baseUnit": "lá",
+    "inventoryUnits": [
+      "lá"
+    ],
+    "recipeUnitConversions": {
+      "lá": 1
+    },
+    "priceEstimate": {
+      "min": 3000,
+      "max": 8000,
+      "amount": 1,
+      "unit": "lá",
+      "currency": "VND"
+    }
+  },
+  {
+    "id": "Bột gạo tẻOiZgdglJUz",
+    "name": "Bột gạo tẻ",
+    "category": "Tinh bột",
+    "shelfLife": "very_long",
+    "preservationCondition": "cool_dry",
+    "baseUnit": "g",
+    "inventoryUnits": [
+      "g",
+      "kg"
+    ],
+    "recipeUnitConversions": {
+      "g": 1,
+      "kg": 1000
+    },
+    "priceEstimate": {
+      "min": 20000,
+      "max": 50000,
+      "amount": 1,
+      "unit": "kg",
+      "currency": "VND"
+    }
+  },
+  {
+    "id": "Bột gạo nếpJnLKNIfFnn",
+    "name": "Bột gạo nếp",
+    "category": "Tinh bột",
+    "shelfLife": "very_long",
+    "preservationCondition": "cool_dry",
+    "baseUnit": "g",
+    "inventoryUnits": [
+      "g",
+      "kg"
+    ],
+    "recipeUnitConversions": {
+      "g": 1,
+      "kg": 1000
+    },
+    "priceEstimate": {
+      "min": 20000,
+      "max": 50000,
+      "amount": 1,
+      "unit": "kg",
+      "currency": "VND"
+    }
+  },
+  {
+    "id": "Bột mìpg1-aZIoDs",
+    "name": "Bột mì",
+    "category": "Tinh bột",
+    "shelfLife": "very_long",
+    "preservationCondition": "cool_dry",
+    "baseUnit": "g",
+    "inventoryUnits": [
+      "g",
+      "kg"
+    ],
+    "recipeUnitConversions": {
+      "g": 1,
+      "kg": 1000
+    },
+    "priceEstimate": {
+      "min": 20000,
+      "max": 50000,
+      "amount": 1,
+      "unit": "kg",
+      "currency": "VND"
+    }
+  },
+  {
+    "id": "Bột năngho3LUqgeAO",
+    "name": "Bột năng",
+    "category": "Tinh bột",
+    "shelfLife": "very_long",
+    "preservationCondition": "cool_dry",
+    "baseUnit": "g",
+    "inventoryUnits": [
+      "g",
+      "kg"
+    ],
+    "recipeUnitConversions": {
+      "g": 1,
+      "kg": 1000
+    },
+    "priceEstimate": {
+      "min": 25000,
+      "max": 60000,
+      "amount": 1,
+      "unit": "kg",
+      "currency": "VND"
+    }
+  },
+  {
+    "id": "Men nởiej8VSL_mG",
+    "name": "Men nở",
+    "category": "Khác",
+    "shelfLife": "very_long",
+    "preservationCondition": "cool_dry",
+    "baseUnit": "g",
+    "inventoryUnits": [
+      "g",
+      "kg"
+    ],
+    "recipeUnitConversions": {
+      "g": 1,
+      "kg": 1000
+    },
+    "priceEstimate": {
+      "min": 100000,
+      "max": 220000,
+      "amount": 1,
+      "unit": "kg",
+      "currency": "VND"
+    }
+  },
+  {
+    "id": "Nước9jnS_eO8Cv",
+    "name": "Nước",
+    "category": "Khác",
+    "shelfLife": "very_long",
+    "preservationCondition": "room_temperature",
+    "alwaysAvailable": true,
+    "baseUnit": "ml",
+    "inventoryUnits": [
+      "ml",
+      "lít"
+    ],
+    "recipeUnitConversions": {
+      "ml": 1,
+      "lít": 1000,
+      "g": 1
+    },
+    "priceEstimate": {
+      "min": 1000,
+      "max": 3000,
+      "amount": 1,
+      "unit": "lít",
+      "currency": "VND"
+    }
+  },
+  {
+    "id": "Tôm sú4vHhSAcJTQ",
+    "name": "Tôm sú",
+    "category": "Hải sản",
+    "shelfLife": "very_short",
+    "preservationCondition": "freezer",
+    "baseUnit": "g",
+    "inventoryUnits": [
+      "g",
+      "kg"
+    ],
+    "recipeUnitConversions": {
+      "g": 1,
+      "kg": 1000
+    },
+    "priceEstimate": {
+      "min": 220000,
+      "max": 350000,
+      "amount": 1,
+      "unit": "kg",
+      "currency": "VND"
+    }
+  },
+  {
+    "id": "TépQ19gfL2cl1",
+    "name": "Tép",
+    "category": "Hải sản",
+    "shelfLife": "very_short",
+    "preservationCondition": "freezer",
+    "baseUnit": "g",
+    "inventoryUnits": [
+      "g",
+      "kg"
+    ],
+    "recipeUnitConversions": {
+      "g": 1,
+      "kg": 1000
+    },
+    "priceEstimate": {
+      "min": 80000,
+      "max": 150000,
+      "amount": 1,
+      "unit": "kg",
+      "currency": "VND"
+    }
+  },
+  {
+    "id": "Tôm nhỏWyLLGEkqA0",
+    "name": "Tôm nhỏ",
+    "category": "Hải sản",
+    "shelfLife": "very_short",
+    "preservationCondition": "freezer",
+    "baseUnit": "g",
+    "inventoryUnits": [
+      "g",
+      "kg"
+    ],
+    "recipeUnitConversions": {
+      "g": 1,
+      "kg": 1000
+    },
+    "priceEstimate": {
+      "min": 120000,
+      "max": 220000,
+      "amount": 1,
+      "unit": "kg",
+      "currency": "VND"
+    }
+  },
+  {
+    "id": "Sữa tươi không đườngHqQaWllTs2",
+    "name": "Sữa tươi không đường",
+    "category": "Sữa & trứng",
+    "shelfLife": "short",
+    "preservationCondition": "fridge",
+    "baseUnit": "ml",
+    "inventoryUnits": [
+      "ml",
+      "lít"
+    ],
+    "recipeUnitConversions": {
+      "ml": 1,
+      "lít": 1000
+    },
+    "priceEstimate": {
+      "min": 30000,
+      "max": 50000,
+      "amount": 1,
+      "unit": "lít",
+      "currency": "VND"
+    }
+  },
+  {
+    "id": "Vừng đenriz3jbwY9w",
+    "name": "Vừng đen",
+    "category": "Gia vị",
+    "shelfLife": "very_long",
+    "preservationCondition": "cool_dry",
+    "baseUnit": "g",
+    "inventoryUnits": [
+      "g",
+      "kg"
+    ],
+    "recipeUnitConversions": {
+      "g": 1,
+      "kg": 1000
+    },
+    "priceEstimate": {
+      "min": 80000,
+      "max": 160000,
+      "amount": 1,
+      "unit": "kg",
+      "currency": "VND"
+    }
+  },
+  {
+    "id": "Vừng trắng2HuELM4uwT",
+    "name": "Vừng trắng",
+    "category": "Gia vị",
+    "shelfLife": "very_long",
+    "preservationCondition": "cool_dry",
+    "baseUnit": "g",
+    "inventoryUnits": [
+      "g",
+      "kg"
+    ],
+    "recipeUnitConversions": {
+      "g": 1,
+      "kg": 1000
+    },
+    "priceEstimate": {
+      "min": 80000,
+      "max": 160000,
+      "amount": 1,
+      "unit": "kg",
+      "currency": "VND"
+    }
+  },
+  {
+    "id": "Đậu xanhnIxKmFNrRM",
+    "name": "Đậu xanh",
+    "category": "Khác",
+    "shelfLife": "very_long",
+    "preservationCondition": "cool_dry",
+    "baseUnit": "g",
+    "inventoryUnits": [
+      "g",
+      "kg"
+    ],
+    "recipeUnitConversions": {
+      "g": 1,
+      "kg": 1000
+    },
+    "priceEstimate": {
+      "min": 40000,
+      "max": 80000,
+      "amount": 1,
+      "unit": "kg",
+      "currency": "VND"
+    }
+  },
+  {
+    "id": "Đậu đỏ26Kvs2YJnx",
+    "name": "Đậu đỏ",
+    "category": "Khác",
+    "shelfLife": "very_long",
+    "preservationCondition": "cool_dry",
+    "baseUnit": "g",
+    "inventoryUnits": [
+      "g",
+      "kg"
+    ],
+    "recipeUnitConversions": {
+      "g": 1,
+      "kg": 1000
+    },
+    "priceEstimate": {
+      "min": 40000,
+      "max": 80000,
+      "amount": 1,
+      "unit": "kg",
+      "currency": "VND"
+    }
+  },
+  {
+    "id": "Đậu đenzQGtWTgGky",
+    "name": "Đậu đen",
+    "category": "Khác",
+    "shelfLife": "very_long",
+    "preservationCondition": "cool_dry",
+    "baseUnit": "g",
+    "inventoryUnits": [
+      "g",
+      "kg"
+    ],
+    "recipeUnitConversions": {
+      "g": 1,
+      "kg": 1000
+    },
+    "priceEstimate": {
+      "min": 40000,
+      "max": 80000,
+      "amount": 1,
+      "unit": "kg",
+      "currency": "VND"
+    }
+  },
+  {
+    "id": "Đậu nànhj17It1Wlhn",
+    "name": "Đậu nành",
+    "category": "Khác",
+    "shelfLife": "very_long",
+    "preservationCondition": "cool_dry",
+    "baseUnit": "g",
+    "inventoryUnits": [
+      "g",
+      "kg"
+    ],
+    "recipeUnitConversions": {
+      "g": 1,
+      "kg": 1000
+    },
+    "priceEstimate": {
+      "min": 30000,
+      "max": 70000,
+      "amount": 1,
+      "unit": "kg",
+      "currency": "VND"
+    }
+  },
+  {
+    "id": "Đậu que51Zk81TOZu",
+    "name": "Đậu que",
+    "category": "Rau củ",
+    "shelfLife": "short",
+    "preservationCondition": "fridge",
+    "baseUnit": "g",
+    "inventoryUnits": [
+      "g",
+      "kg"
+    ],
+    "recipeUnitConversions": {
+      "g": 1,
+      "kg": 1000
+    },
+    "priceEstimate": {
+      "min": 30000,
+      "max": 60000,
+      "amount": 1,
+      "unit": "kg",
+      "currency": "VND"
+    }
+  },
+  {
+    "id": "Khoai tâylAyMsTv486",
+    "name": "Khoai tây",
+    "category": "Tinh bột",
+    "shelfLife": "long",
+    "preservationCondition": "cool_dry",
+    "baseUnit": "g",
+    "inventoryUnits": [
+      "g",
+      "kg"
+    ],
+    "recipeUnitConversions": {
+      "g": 1,
+      "kg": 1000
+    },
+    "priceEstimate": {
+      "min": 15000,
+      "max": 30000,
+      "amount": 1,
+      "unit": "kg",
+      "currency": "VND"
+    }
+  },
+  {
+    "id": "Khoai langqUx7MJBv9X",
+    "name": "Khoai lang",
+    "category": "Tinh bột",
+    "shelfLife": "long",
+    "preservationCondition": "cool_dry",
+    "baseUnit": "g",
+    "inventoryUnits": [
+      "g",
+      "kg",
+      "củ"
+    ],
+    "recipeUnitConversions": {
+      "g": 1,
+      "kg": 1000,
+      "củ": 200
+    },
+    "priceEstimate": {
+      "min": 20000,
+      "max": 40000,
+      "amount": 1,
+      "unit": "kg",
+      "currency": "VND"
+    }
+  },
+  {
+    "id": "Nước dừaaW0TqQ5HKb",
+    "name": "Nước dừa",
+    "category": "Khác",
+    "shelfLife": "short",
+    "preservationCondition": "fridge",
+    "baseUnit": "ml",
+    "inventoryUnits": [
+      "ml",
+      "lít"
+    ],
+    "recipeUnitConversions": {
+      "ml": 1,
+      "lít": 1000
+    },
+    "priceEstimate": {
+      "min": 10000,
+      "max": 25000,
+      "amount": 1,
+      "unit": "lít",
+      "currency": "VND"
+    }
+  },
+  {
+    "id": "Dừa nạoqQdzvpztgD",
+    "name": "Dừa nạo",
+    "category": "Rau củ",
+    "shelfLife": "short",
+    "preservationCondition": "fridge",
+    "baseUnit": "g",
+    "inventoryUnits": [
+      "g",
+      "kg"
+    ],
+    "recipeUnitConversions": {
+      "g": 1,
+      "kg": 1000
+    },
+    "priceEstimate": {
+      "min": 40000,
+      "max": 80000,
+      "amount": 1,
+      "unit": "kg",
+      "currency": "VND"
+    }
+  },
+  {
+    "id": "Lá chanhiB3cqNxKdQ",
+    "name": "Lá chanh",
+    "category": "Gia vị",
+    "shelfLife": "very_short",
+    "preservationCondition": "fridge",
+    "baseUnit": "lá",
+    "inventoryUnits": [
+      "lá"
+    ],
+    "recipeUnitConversions": {
+      "lá": 1
+    },
+    "priceEstimate": {
+      "min": 200,
+      "max": 700,
+      "amount": 1,
+      "unit": "lá",
+      "currency": "VND"
+    }
+  },
+  {
+    "id": "Trứng cútj_0gniwu4w",
+    "name": "Trứng cút",
+    "category": "Sữa & trứng",
+    "shelfLife": "medium",
+    "preservationCondition": "fridge",
+    "baseUnit": "quả",
+    "inventoryUnits": [
+      "quả"
+    ],
+    "recipeUnitConversions": {
+      "quả": 1
+    },
+    "priceEstimate": {
+      "min": 800,
+      "max": 1500,
+      "amount": 1,
+      "unit": "quả",
+      "currency": "VND"
+    }
+  },
+  {
+    "id": "Mực ốngLunhJeJvsh",
+    "name": "Mực ống",
+    "category": "Hải sản",
+    "shelfLife": "very_short",
+    "preservationCondition": "freezer",
+    "baseUnit": "g",
+    "inventoryUnits": [
+      "g",
+      "kg"
+    ],
+    "recipeUnitConversions": {
+      "g": 1,
+      "kg": 1000
+    },
+    "priceEstimate": {
+      "min": 160000,
+      "max": 260000,
+      "amount": 1,
+      "unit": "kg",
+      "currency": "VND"
+    }
+  },
+  {
+    "id": "Rau cần tây4JcCvsR3IE",
+    "name": "Rau cần tây",
+    "category": "Rau củ",
+    "shelfLife": "very_short",
+    "preservationCondition": "fridge",
+    "baseUnit": "g",
+    "inventoryUnits": [
+      "g",
+      "kg"
+    ],
+    "recipeUnitConversions": {
+      "g": 1,
+      "kg": 1000
+    },
+    "priceEstimate": {
+      "min": 30000,
+      "max": 70000,
+      "amount": 1,
+      "unit": "kg",
+      "currency": "VND"
+    }
+  },
+  {
+    "id": "Rau cần talpL5fenu9D",
+    "name": "Rau cần ta",
+    "category": "Rau củ",
+    "shelfLife": "very_short",
+    "preservationCondition": "fridge",
+    "baseUnit": "g",
+    "inventoryUnits": [
+      "g",
+      "kg"
+    ],
+    "recipeUnitConversions": {
+      "g": 1,
+      "kg": 1000
+    },
+    "priceEstimate": {
+      "min": 30000,
+      "max": 70000,
+      "amount": 1,
+      "unit": "kg",
+      "currency": "VND"
+    }
+  },
+  {
+    "id": "Rau bíywN7JoWrKo",
+    "name": "Rau bí",
+    "category": "Rau củ",
+    "shelfLife": "very_short",
+    "preservationCondition": "fridge",
+    "baseUnit": "g",
+    "inventoryUnits": [
+      "g",
+      "kg"
+    ],
+    "recipeUnitConversions": {
+      "g": 1,
+      "kg": 1000
+    },
+    "priceEstimate": {
+      "min": 25000,
+      "max": 60000,
+      "amount": 1,
+      "unit": "kg",
+      "currency": "VND"
+    }
+  },
+  {
+    "id": "Rau đay-OjyFKet0H",
+    "name": "Rau đay",
+    "category": "Rau củ",
+    "shelfLife": "very_short",
+    "preservationCondition": "fridge",
+    "baseUnit": "g",
+    "inventoryUnits": [
+      "g",
+      "kg"
+    ],
+    "recipeUnitConversions": {
+      "g": 1,
+      "kg": 1000
+    },
+    "priceEstimate": {
+      "min": 25000,
+      "max": 60000,
+      "amount": 1,
+      "unit": "kg",
+      "currency": "VND"
+    }
+  },
+  {
+    "id": "MướpUs4jbq5bn0",
+    "name": "Mướp",
+    "category": "Rau củ",
+    "shelfLife": "short",
+    "preservationCondition": "fridge",
+    "baseUnit": "g",
+    "inventoryUnits": [
+      "g",
+      "kg"
+    ],
+    "recipeUnitConversions": {
+      "g": 1,
+      "kg": 1000
+    },
+    "priceEstimate": {
+      "min": 20000,
+      "max": 40000,
+      "amount": 1,
+      "unit": "kg",
+      "currency": "VND"
+    }
+  },
+  {
+    "id": "Rau mồng tơiMCVFPgFWtb",
+    "name": "Rau mồng tơi",
+    "category": "Rau củ",
+    "shelfLife": "very_short",
+    "preservationCondition": "fridge",
+    "baseUnit": "g",
+    "inventoryUnits": [
+      "g",
+      "kg"
+    ],
+    "recipeUnitConversions": {
+      "g": 1,
+      "kg": 1000
+    },
+    "priceEstimate": {
+      "min": 25000,
+      "max": 60000,
+      "amount": 1,
+      "unit": "kg",
+      "currency": "VND"
+    }
+  },
+  {
+    "id": "Cốt dừa0fULSP8Mc7",
+    "name": "Cốt dừa",
+    "category": "Gia vị",
+    "shelfLife": "short",
+    "preservationCondition": "fridge",
+    "baseUnit": "ml",
+    "inventoryUnits": [
+      "ml",
+      "lít"
+    ],
+    "recipeUnitConversions": {
+      "ml": 1,
+      "lít": 1000,
+      "thìa": 15
+    },
+    "priceEstimate": {
+      "min": 50000,
+      "max": 100000,
+      "amount": 1,
+      "unit": "lít",
+      "currency": "VND"
+    }
+  },
+  {
+    "id": "Tóp mỡU2aR7-xY4p",
+    "name": "Tóp mỡ",
+    "category": "Thịt",
+    "shelfLife": "long",
+    "preservationCondition": "cool_dry",
+    "baseUnit": "g",
+    "inventoryUnits": [
+      "g",
+      "kg"
+    ],
+    "recipeUnitConversions": {
+      "g": 1,
+      "kg": 1000
+    },
+    "priceEstimate": {
+      "min": 150000,
+      "max": 250000,
+      "amount": 1,
+      "unit": "kg",
+      "currency": "VND"
+    }
+  },
+  {
+    "id": "Rễ ngòfxPj2T9HiF",
+    "name": "Rễ ngò",
+    "category": "Gia vị",
+    "shelfLife": "short",
+    "preservationCondition": "fridge",
+    "baseUnit": "chiếc",
+    "inventoryUnits": [
+      "chiếc"
+    ],
+    "recipeUnitConversions": {
+      "chiếc": 1
+    },
+    "priceEstimate": {
+      "min": 1000,
+      "max": 3000,
+      "amount": 1,
+      "unit": "chiếc",
+      "currency": "VND"
+    }
+  },
+  {
+    "id": "Củ cảikk2MGWKOnc",
+    "name": "Củ cải",
+    "category": "Rau củ",
+    "shelfLife": "long",
+    "preservationCondition": "fridge",
+    "baseUnit": "g",
+    "inventoryUnits": [
+      "g",
+      "kg",
+      "củ"
+    ],
+    "recipeUnitConversions": {
+      "g": 1,
+      "kg": 1000,
+      "củ": 300
+    },
+    "priceEstimate": {
+      "min": 15000,
+      "max": 30000,
+      "amount": 1,
+      "unit": "kg",
+      "currency": "VND"
+    }
+  },
+  {
+    "id": "Đậu phộnggq3Fe10jOx",
+    "name": "Đậu phộng",
+    "category": "Khác",
+    "shelfLife": "very_long",
+    "preservationCondition": "cool_dry",
+    "baseUnit": "g",
+    "inventoryUnits": [
+      "g",
+      "kg"
+    ],
+    "recipeUnitConversions": {
+      "g": 1,
+      "kg": 1000
+    },
+    "priceEstimate": {
+      "min": 50000,
+      "max": 90000,
+      "amount": 1,
+      "unit": "kg",
+      "currency": "VND"
+    }
+  },
+  {
+    "id": "Tương đen (Tương ngọt)7RPgXnGGi2",
+    "name": "Tương đen (Tương ngọt)",
+    "category": "Gia vị",
+    "shelfLife": "very_long",
+    "preservationCondition": "cool_dry",
+    "baseUnit": "ml",
+    "inventoryUnits": [
+      "ml",
+      "lít"
+    ],
+    "recipeUnitConversions": {
+      "ml": 1,
+      "lít": 1000,
+      "thìa": 15
+    },
+    "priceEstimate": {
+      "min": 40000,
+      "max": 80000,
+      "amount": 1,
+      "unit": "lít",
+      "currency": "VND"
+    }
+  },
+  {
+    "id": "Tỏi tâyI-jCssQy3V",
+    "name": "Tỏi tây",
+    "category": "Gia vị",
+    "shelfLife": "medium",
+    "preservationCondition": "fridge",
+    "baseUnit": "g",
+    "inventoryUnits": [
+      "g",
+      "kg",
+      "củ"
+    ],
+    "recipeUnitConversions": {
+      "g": 1,
+      "kg": 1000,
+      "củ": 150
+    },
+    "priceEstimate": {
+      "min": 50000,
+      "max": 100000,
+      "amount": 1,
+      "unit": "kg",
+      "currency": "VND"
+    }
+  },
+  {
+    "id": "Nước màumi1ObkFY7D",
+    "name": "Nước màu",
+    "category": "Gia vị",
+    "shelfLife": "very_long",
+    "preservationCondition": "cool_dry",
+    "baseUnit": "ml",
+    "inventoryUnits": [
+      "ml",
+      "lít"
+    ],
+    "recipeUnitConversions": {
+      "ml": 1,
+      "lít": 1000
+    },
+    "priceEstimate": {
+      "min": 50000,
+      "max": 100000,
+      "amount": 1,
+      "unit": "lít",
+      "currency": "VND"
+    }
+  },
+  {
+    "id": "Đường vàngNlPTxVKgvv",
+    "name": "Đường vàng",
+    "category": "Gia vị",
+    "shelfLife": "very_long",
+    "preservationCondition": "cool_dry",
+    "baseUnit": "g",
+    "inventoryUnits": [
+      "g",
+      "kg"
+    ],
+    "recipeUnitConversions": {
+      "g": 1,
+      "kg": 1000
+    },
+    "priceEstimate": {
+      "min": 25000,
+      "max": 60000,
+      "amount": 1,
+      "unit": "kg",
+      "currency": "VND"
+    }
+  },
+  {
+    "id": "NghệvGpWT6hE_4",
+    "name": "Nghệ",
+    "category": "Gia vị",
+    "shelfLife": "long",
+    "preservationCondition": "cool_dry",
+    "baseUnit": "g",
+    "inventoryUnits": [
+      "g",
+      "kg",
+      "củ"
+    ],
+    "recipeUnitConversions": {
+      "g": 1,
+      "kg": 1000,
+      "củ": 20
+    },
+    "priceEstimate": {
+      "min": 40000,
+      "max": 90000,
+      "amount": 1,
+      "unit": "kg",
+      "currency": "VND"
+    }
+  },
+  {
+    "id": "Quả sấuCYO1R7pm-6",
+    "name": "Quả sấu",
+    "category": "Gia vị",
+    "shelfLife": "medium",
+    "preservationCondition": "fridge",
+    "baseUnit": "g",
+    "inventoryUnits": [
+      "g",
+      "kg",
+      "quả"
+    ],
+    "recipeUnitConversions": {
+      "g": 1,
+      "kg": 1000,
+      "quả": 10
+    },
+    "priceEstimate": {
+      "min": 60000,
+      "max": 120000,
+      "amount": 1,
+      "unit": "kg",
+      "currency": "VND"
+    }
+  },
+  {
+    "id": "Mía câyHeGHZwD6T2",
+    "name": "Mía cây",
+    "category": "Rau củ",
+    "shelfLife": "medium",
+    "preservationCondition": "cool_dry",
+    "baseUnit": "g",
+    "inventoryUnits": [
+      "g",
+      "kg"
+    ],
+    "recipeUnitConversions": {
+      "g": 1,
+      "kg": 1000
+    },
+    "priceEstimate": {
+      "min": 15000,
+      "max": 30000,
+      "amount": 1,
+      "unit": "kg",
+      "currency": "VND"
+    }
+  },
+  {
+    "id": "Dưa cảiBOMOcKVr8B",
+    "name": "Dưa cải",
+    "category": "Rau củ",
+    "shelfLife": "short",
+    "preservationCondition": "fridge",
+    "baseUnit": "g",
+    "inventoryUnits": [
+      "g",
+      "kg"
+    ],
+    "recipeUnitConversions": {
+      "g": 1,
+      "kg": 1000
+    },
+    "priceEstimate": {
+      "min": 25000,
+      "max": 50000,
+      "amount": 1,
+      "unit": "kg",
+      "currency": "VND"
+    }
+  },
+  {
+    "id": "Rau cải canhE6FrtMfNND",
+    "name": "Rau cải canh",
+    "category": "Rau củ",
+    "shelfLife": "very_short",
+    "preservationCondition": "fridge",
+    "baseUnit": "g",
+    "inventoryUnits": [
+      "g",
+      "kg"
+    ],
+    "recipeUnitConversions": {
+      "g": 1,
+      "kg": 1000
+    },
+    "priceEstimate": {
+      "min": 25000,
+      "max": 60000,
+      "amount": 1,
+      "unit": "kg",
+      "currency": "VND"
+    }
+  },
+  {
+    "id": "Rau cải thìaTCzhEhy6rE",
+    "name": "Rau cải thìa",
+    "category": "Rau củ",
+    "shelfLife": "very_short",
+    "preservationCondition": "fridge",
+    "baseUnit": "g",
+    "inventoryUnits": [
+      "g",
+      "kg"
+    ],
+    "recipeUnitConversions": {
+      "g": 1,
+      "kg": 1000
+    },
+    "priceEstimate": {
+      "min": 25000,
+      "max": 60000,
+      "amount": 1,
+      "unit": "kg",
+      "currency": "VND"
+    }
+  },
+  {
+    "id": "Rau cải chípDjFZcdqEQz",
+    "name": "Rau cải chíp",
+    "category": "Rau củ",
+    "shelfLife": "very_short",
+    "preservationCondition": "fridge",
+    "baseUnit": "g",
+    "inventoryUnits": [
+      "g",
+      "kg"
+    ],
+    "recipeUnitConversions": {
+      "g": 1,
+      "kg": 1000
+    },
+    "priceEstimate": {
+      "min": 25000,
+      "max": 60000,
+      "amount": 1,
+      "unit": "kg",
+      "currency": "VND"
+    }
+  },
+  {
+    "id": "Đu đủAMID8jvebp",
+    "name": "Đu đủ",
+    "category": "Rau củ",
+    "shelfLife": "medium",
+    "preservationCondition": "fridge",
+    "baseUnit": "g",
+    "inventoryUnits": [
+      "g",
+      "kg"
+    ],
+    "recipeUnitConversions": {
+      "g": 1,
+      "kg": 1000
+    },
+    "priceEstimate": {
+      "min": 15000,
+      "max": 30000,
+      "amount": 1,
+      "unit": "kg",
+      "currency": "VND"
+    }
+  },
+  {
+    "id": "Khoai mon-shared-20260601",
+    "name": "Khoai môn",
+    "category": "Tinh bột",
+    "shelfLife": "long",
+    "preservationCondition": "cool_dry",
+    "baseUnit": "g",
+    "inventoryUnits": [
+      "g",
+      "kg",
+      "củ"
+    ],
+    "recipeUnitConversions": {
+      "g": 1,
+      "kg": 1000,
+      "củ": 350
+    },
+    "priceEstimate": {
+      "min": 25000,
+      "max": 45000,
+      "amount": 1,
+      "unit": "kg",
+      "currency": "VND"
+    }
+  }
+]

@@ -1,5 +1,6 @@
 import { CloudDownloadOutlined, CloudUploadOutlined, ExportOutlined, HistoryOutlined, ImportOutlined, LockOutlined, MenuOutlined, UnlockOutlined, FireOutlined, QuestionCircleOutlined, SearchOutlined, LoadingOutlined } from "@ant-design/icons";
 import { ObjectPropertyHelper } from "@common/Helpers/ObjectProperty";
+import { getStorageString, setStorageString } from "@common/Storage/AppStorage";
 import { SharedSyncModal } from "@components/AppInitializer/SharedSyncModal";
 import { Button } from "@components/Button";
 import { FastDrawerShell } from "@components/FastOverlay";
@@ -237,8 +238,8 @@ const SidebarDrawer = () => {
         navigateWithFeedback(href, () => setOpen(false));
     }
 
-    const onUnlock = () => {
-        if (tryUnlock(pin)) {
+    const onUnlock = async () => {
+        if (await tryUnlock(pin)) {
             setPinModalOpen(false);
             setPin("");
             setPinError("");
@@ -248,8 +249,8 @@ const SidebarDrawer = () => {
         }
     };
 
-    const onLock = () => {
-        lock();
+    const onLock = async () => {
+        await lock();
         window.location.reload();
     };
 
@@ -266,18 +267,18 @@ const SidebarDrawer = () => {
         }
     };
 
-    const onSharedSyncDone = (synced: SyncedVersions) => {
-        markSynced(synced);
+    const onSharedSyncDone = async (synced: SyncedVersions) => {
+        await markSynced(synced);
         message.success("Đồng bộ dữ liệu dùng chung thành công");
     };
 
-    const onSavePublishToken = () => {
-        setGithubToken(publishTokenInput);
+    const onSavePublishToken = async () => {
+        await setGithubToken(publishTokenInput);
         message.success("Đã lưu GitHub token xuất bản trên thiết bị này");
     };
 
-    const onClearPublishToken = () => {
-        clearGithubToken();
+    const onClearPublishToken = async () => {
+        await clearGithubToken();
         setPublishTokenInput("");
         message.success("Đã xoá GitHub token xuất bản trên thiết bị này");
     };
@@ -289,7 +290,7 @@ const SidebarDrawer = () => {
     const onPublishSharedData = () => {
         modal.confirm({
             title: "Xác nhận xuất bản dữ liệu dùng chung",
-            content: "Thao tác này sẽ ghi shared-data.json và shared-manifest.json lên GitHub để các thiết bị khác đồng bộ. Bạn có chắc muốn xuất bản dữ liệu hiện tại?",
+            content: "Thao tác này sẽ ghi các file dữ liệu dùng chung đã tách nhỏ lên GitHub để các thiết bị khác đồng bộ. Bạn có chắc muốn xuất bản dữ liệu hiện tại?",
             okText: "Xuất bản",
             cancelText: "Hủy",
             centered: true,
@@ -859,11 +860,16 @@ export const DataBackup = ({ onImportCloud }: { onImportCloud?: () => Promise<vo
     const message = useMessage();
     const toggleImportingCloud = useToggle();
 
-    // Restore personal data from data.txt (base64-encoded persist:personal)
-    const _restorePersonalFromText = (text: string) => {
+    // Restore personal data from a raw or base64-encoded persisted personal root.
+    const _restorePersonalFromText = async (text: string) => {
         try {
-            const decoded = decodeURIComponent(escape(atob(text.trim())));
-            localStorage.setItem("persist:personal", decoded);
+            const trimmed = text.trim();
+            let decoded = trimmed;
+            try {
+                decoded = decodeURIComponent(escape(atob(trimmed)));
+            } catch { }
+            JSON.parse(decoded);
+            await setStorageString("persist:personal", decoded);
             message.success("Khôi phục thành công! Đang tải lại...");
             setTimeout(() => window.location.reload(), 1200);
         } catch (ex) {
@@ -879,7 +885,7 @@ export const DataBackup = ({ onImportCloud }: { onImportCloud?: () => Promise<vo
                 "https://raw.githubusercontent.com/quantran-epi/my-recipes/refs/heads/main/docs/data.txt?t=" + Date.now()
             );
             const text = await res.text();
-            _restorePersonalFromText(text);
+            await _restorePersonalFromText(text);
         } catch (ex: any) {
             message.error("Import thất bại: " + ex?.message);
         } finally {
@@ -899,8 +905,8 @@ export const DataBackup = ({ onImportCloud }: { onImportCloud?: () => Promise<vo
 
     return <React.Fragment>
         <Space>
-            <Button size="small" icon={<ExportOutlined />} onClick={() => {
-                setExportedData(localStorage.getItem("persist:personal") ?? "");
+            <Button size="small" icon={<ExportOutlined />} onClick={async () => {
+                setExportedData(await getStorageString("persist:personal") ?? "");
                 toggleShowData.show();
             }}>Export</Button>
 
@@ -909,7 +915,7 @@ export const DataBackup = ({ onImportCloud }: { onImportCloud?: () => Promise<vo
             <Button size="small" loading={toggleImportingCloud.value} icon={<CloudDownloadOutlined />} onClick={_onImportCloud}>Import cloud</Button>
         </Space>
 
-        <Modal title="Export — persist:personal" open={toggleShowData.value} onCancel={toggleShowData.hide} footer={null}>
+        <Modal title="Export — dữ liệu cá nhân" open={toggleShowData.value} onCancel={toggleShowData.hide} footer={null}>
             <DeferredModalContent active={toggleShowData.value} minHeight={320}>
                 {toggleShowData.value ? <React.Fragment>
                     <Box style={{ height: 300, overflowY: "auto", wordBreak: "break-all", fontSize: 12 }}>
@@ -923,7 +929,7 @@ export const DataBackup = ({ onImportCloud }: { onImportCloud?: () => Promise<vo
             </DeferredModalContent>
         </Modal>
 
-        <Modal title="Import — persist:personal" open={toggleImportData.value} onCancel={toggleImportData.hide} footer={null}>
+        <Modal title="Import — dữ liệu cá nhân" open={toggleImportData.value} onCancel={toggleImportData.hide} footer={null}>
             <DeferredModalContent active={toggleImportData.value} minHeight={240}>
                 {toggleImportData.value ? <React.Fragment>
                     <SmartForm {...importDataForm.defaultProps}>

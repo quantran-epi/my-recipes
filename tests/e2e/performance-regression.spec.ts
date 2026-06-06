@@ -569,9 +569,26 @@ base.describe('PERF-09 phase3 manual sync prompt and dish image isolation', () =
 
     await expect(syncButton).toBeEnabled({ timeout: 8_000 });
     await syncButton.click();
+    const confirmDialog = page.getByRole('dialog').filter({ hasText: 'Xác nhận đồng bộ dữ liệu dùng chung' });
+    await expect(confirmDialog).toBeVisible({ timeout: 5_000 });
+    await confirmDialog.getByRole('button', { name: 'Đồng bộ' }).click();
     await expect(title).toHaveCount(0, { timeout: 5_000 });
 
-    const syncedVersions = await page.evaluate(() => JSON.parse(localStorage.getItem('shared_synced_versions') ?? '{}'));
+    const syncedVersions = await page.evaluate(async () => {
+      const db = await new Promise<IDBDatabase>((resolve, reject) => {
+        const request = indexedDB.open('my-recipes', 1);
+        request.onerror = () => reject(request.error);
+        request.onsuccess = () => resolve(request.result);
+      });
+      const raw = await new Promise<string | null>((resolve, reject) => {
+        const tx = db.transaction('app_storage', 'readonly');
+        const request = tx.objectStore('app_storage').get('shared_synced_versions');
+        request.onerror = () => reject(request.error);
+        request.onsuccess = () => resolve(typeof request.result === 'string' ? request.result : null);
+      });
+      db.close();
+      return JSON.parse(raw ?? '{}');
+    });
     expect(syncedVersions.ingredientsVersion).toBe('phase3-ingredients-v2');
     expect(syncedVersions.dishesVersion).toBe('e2e');
     expect(appliedNetwork.diagnostics.sharedManifestRequestCount).toBeGreaterThanOrEqual(1);

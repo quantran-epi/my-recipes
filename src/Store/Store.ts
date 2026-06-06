@@ -1,6 +1,6 @@
 import { combineReducers, configureStore } from "@reduxjs/toolkit";
-import storage from 'redux-persist/lib/storage';
 import { persistReducer, persistStore } from 'redux-persist';
+import { reduxPersistIndexedDbStorage } from "@common/Storage/AppStorage";
 import IngredientReducer from "./Reducers/IngredientReducer";
 import AppContextReducer from "./Reducers/AppContextReducer";
 import DishesReducer from "./Reducers/DishesReducer";
@@ -26,12 +26,12 @@ const personalReducer = combineReducers({
 
 const sharedPersistConfig = {
     key: 'shared',
-    storage,
+    storage: reduxPersistIndexedDbStorage,
 };
 
 const personalPersistConfig = {
     key: 'personal',
-    storage,
+    storage: reduxPersistIndexedDbStorage,
 };
 
 const rootReducer = combineReducers({

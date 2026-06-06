@@ -1,0 +1,40 @@
+{
+  "schemaVersion": 2,
+  "updatedAt": "2026-06-02T13:39:18.210Z",
+  "parts": {
+    "ingredients": {
+      "key": "ingredients",
+      "path": "docs/sync/shared/ingredients.json",
+      "version": "2026-06-06T12:13:59.624Z",
+      "hash": "b56670594e084a2aafe9d40d68d977f9938afcfaa2fd402fc01977bc73984855",
+      "count": 165,
+      "updatedAt": "2026-06-06T12:13:59.624Z",
+      "changes": [
+        {
+          "id": "Bụng cáYEwaP8LSBh",
+          "name": "Bụng cá",
+          "action": "modified"
+        }
+      ]
+    },
+    "dishes": {
+      "key": "dishes",
+      "path": "docs/sync/shared/dishes.json",
+      "version": "2026-06-02T13:39:18.210Z",
+      "hash": "34a2a013c86c6b94327d68c4f2614c4d98b1371f2fe824f09379715d00bd318e",
+      "count": 98,
+      "updatedAt": "2026-06-02T13:39:18.210Z",
+      "changes": []
+    }
+  },
+  "ingredientsVersion": "2026-06-06T12:13:59.624Z",
+  "dishesVersion": "2026-06-02T13:39:18.210Z",
+  "ingredientChanges": [
+    {
+      "id": "Bụng cáYEwaP8LSBh",
+      "name": "Bụng cá",
+      "action": "modified"
+    }
+  ],
+  "dishChanges": []
+}

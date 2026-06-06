@@ -45,7 +45,7 @@ const isGitHubRawUrl = (url: string) => url.startsWith('https://raw.githubuserco
 
 const isSharedManifestUrl = (url: string) => {
   try {
-    return new URL(url).pathname.endsWith('/docs/shared-manifest.json');
+    return new URL(url).pathname.endsWith('/docs/sync/shared/manifest.json');
   } catch {
     return false;
   }
@@ -53,7 +53,25 @@ const isSharedManifestUrl = (url: string) => {
 
 const isSharedDataUrl = (url: string) => {
   try {
-    return new URL(url).pathname.endsWith('/docs/shared-data.json');
+    const pathname = new URL(url).pathname;
+    return pathname.endsWith('/docs/sync/shared/ingredients.json')
+      || pathname.endsWith('/docs/sync/shared/dishes.json');
+  } catch {
+    return false;
+  }
+};
+
+const isSharedIngredientsUrl = (url: string) => {
+  try {
+    return new URL(url).pathname.endsWith('/docs/sync/shared/ingredients.json');
+  } catch {
+    return false;
+  }
+};
+
+const isSharedDishesUrl = (url: string) => {
+  try {
+    return new URL(url).pathname.endsWith('/docs/sync/shared/dishes.json');
   } catch {
     return false;
   }
@@ -133,8 +151,12 @@ export const applyPerformanceNetworkMode = async (
         await route.fulfill({ status: githubStatus, contentType: 'application/json', body: JSON.stringify(options.sharedManifest) });
         return;
       }
-      if (isSharedDataUrl(url) && options.sharedData !== undefined) {
-        await route.fulfill({ status: githubStatus, contentType: 'application/json', body: JSON.stringify(options.sharedData) });
+      if (isSharedIngredientsUrl(url) && options.sharedData !== undefined) {
+        await route.fulfill({ status: githubStatus, contentType: 'application/json', body: JSON.stringify((options.sharedData as any).ingredients ?? []) });
+        return;
+      }
+      if (isSharedDishesUrl(url) && options.sharedData !== undefined) {
+        await route.fulfill({ status: githubStatus, contentType: 'application/json', body: JSON.stringify((options.sharedData as any).dishes ?? []) });
         return;
       }
       await route.fulfill({ status: 404, contentType: 'text/plain', body: '' });
