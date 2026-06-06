@@ -5,7 +5,7 @@ import { Modal } from "@components/Modal";
 import { Typography } from "@components/Typography";
 import { IngredientUnitHelper } from "@common/Helpers/IngredientUnitHelper";
 import { selectCookingSessions, selectDishesById, selectIngredientsById, selectShoppingLists } from "@store/Selectors";
-import { DatePicker, Divider, Empty, Progress, Table } from "antd";
+import { DatePicker, Empty, Table } from "antd";
 import dayjs, { Dayjs } from "dayjs";
 import React, { useMemo, useState } from "react";
 import { useSelector } from "react-redux";
@@ -23,6 +23,13 @@ type StatRow = {
     cooked: number;
     unit: string;
 }
+
+const formatStatAmount = (value: number): string => {
+    return (Math.round(value * 10) / 10).toLocaleString("vi-VN", {
+        minimumFractionDigits: 1,
+        maximumFractionDigits: 1,
+    });
+};
 
 export const IngredientStatsWidget: React.FC<IngredientStatsWidgetProps> = ({ open, onClose }) => {
     const [range, setRange] = useState<[Dayjs, Dayjs] | null>([
@@ -145,7 +152,7 @@ export const IngredientStatsWidget: React.FC<IngredientStatsWidgetProps> = ({ op
             align: "right" as const,
             render: (v: number, row: StatRow) => (
                 <Typography.Text style={{ color: "#1677ff", fontWeight: 600 }}>
-                    {v > 0 ? `${v} ${row.unit}` : "—"}
+                    {v > 0 ? `${formatStatAmount(v)} ${row.unit}` : "—"}
                 </Typography.Text>
             ),
         },
@@ -156,7 +163,7 @@ export const IngredientStatsWidget: React.FC<IngredientStatsWidgetProps> = ({ op
             align: "right" as const,
             render: (v: number, row: StatRow) => (
                 <Typography.Text style={{ color: "#52c41a", fontWeight: 600 }}>
-                    {v > 0 ? `${v} ${row.unit}` : "—"}
+                    {v > 0 ? `${formatStatAmount(v)} ${row.unit}` : "—"}
                 </Typography.Text>
             ),
         },

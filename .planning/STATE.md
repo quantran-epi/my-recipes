@@ -4,8 +4,8 @@ milestone: v1.0
 milestone_name: milestone
 status: ready
 stopped_at: Completed 04-02-PLAN.md
-last_updated: "2026-06-06T14:07:43Z"
-last_activity: 2026-06-06 -- Completed quick task 260606-fss: fix first shared sync labels
+last_updated: "2026-06-06T14:36:25Z"
+last_activity: 2026-06-06 -- Completed quick task 260606-hse: house nav, personal auto sync, bottom tab and stats polish
 progress:
   total_phases: 5
   completed_phases: 4
@@ -28,7 +28,7 @@ See: .planning/PROJECT.md (updated 2026-06-05)
 Phase: 5 (release-gate-and-product-guardrails) — READY
 Plan: Not started
 Status: Phase 04 complete; ready for Phase 05
-Last activity: 2026-06-06 -- Completed quick task 260606-fss: fix first shared sync labels
+Last activity: 2026-06-06 -- Completed quick task 260606-hse: house nav, personal auto sync, bottom tab and stats polish
 
 Progress: [████████░░] 80%
 
@@ -36,6 +36,7 @@ Progress: [████████░░] 80%
 
 | Date | Task | Artifact |
 |------|------|----------|
+| 2026-06-06 | House nav, personal auto sync, bottom tab, and stats polish | `.planning/quick/260606-hse-house-nav-personal-autosync-tab-polish/260606-hse-SUMMARY.md` |
 | 2026-06-06 | Fix first shared sync labels | `.planning/quick/260606-fss-fix-first-sync-labels/260606-fss-SUMMARY.md` |
 | 2026-06-06 | IndexedDB storage and split sync | `.planning/quick/260606-idb-indexeddb-split-sync/260606-idb-SUMMARY.md` |
 | 2026-06-06 | Confirm sync/publish actions and test tokens | `.planning/quick/260606-cnf-confirm-and-test-sync-config/260606-cnf-SUMMARY.md` |

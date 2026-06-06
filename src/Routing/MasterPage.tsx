@@ -32,6 +32,7 @@ import { CopyToClipboard } from 'react-copy-to-clipboard';
 import { useSelector } from "react-redux";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import LogoIcon from "../../assets/icons/logo.png";
+import HouseIcon from "../../assets/icons/house.png";
 import MealsIcon from "../../assets/icons/meals.png";
 import DishesIcon from "../../assets/icons/noodles.png";
 import ShoppingListIcon from "../../assets/icons/shoppingList.png";
@@ -128,7 +129,7 @@ export const MasterPage = () => {
             case "Lịch mua sắm": return ShoppingListIcon;
             case "Nguyên liệu": return IngredientIcon;
             case "Kế hoạch chi phí": return BudgetIcon;
-            case 'Tổng quan': return LogoIcon;
+            case 'Tổng quan': return HouseIcon;
             default: return null;
         }
     }
@@ -307,7 +308,7 @@ const SidebarDrawer = () => {
             : "Chưa có token xuất bản. Token chỉ lưu trong trình duyệt của thiết bị này.";
 
     const sidebarNavItems = [
-        { key: 'dashboard', href: RootRoutes.AuthorizedRoutes.Root(), icon: LogoIcon, label: 'Tổng quan' },
+        { key: 'dashboard', href: RootRoutes.AuthorizedRoutes.Root(), icon: HouseIcon, label: 'Tổng quan' },
         { key: 'ingredients', href: RootRoutes.AuthorizedRoutes.IngredientRoutes.List(), icon: IngredientIcon, label: 'Nguyên liệu' },
         { key: 'dishes', href: RootRoutes.AuthorizedRoutes.DishesRoutes.List(), icon: DishesIcon, label: 'Món ăn' },
         { key: 'expensePlanner', href: RootRoutes.AuthorizedRoutes.ExpensePlanner(), icon: BudgetIcon, label: 'Kế hoạch chi phí' },
@@ -708,7 +709,6 @@ const CookingPill = () => {
 
 const BottomTabNavigator = () => {
     const location = useLocation();
-    const theme = useTheme();
     const toggleSuggester = useToggle();
     const { navigateWithFeedback } = useAppShellNavigation();
     const dishesRoute = RootRoutes.AuthorizedRoutes.DishesRoutes.List();
@@ -741,10 +741,10 @@ const BottomTabNavigator = () => {
             justifyContent: "space-between",
             gap: 8,
             padding: "8px 10px",
-            border: "1px solid rgba(22, 119, 255, 0.14)",
+            border: "1px solid rgba(245, 130, 32, 0.30)",
             borderRadius: 28,
-            background: "rgba(255, 255, 255, 0.95)",
-            boxShadow: "0 12px 34px rgba(35, 52, 92, 0.18)",
+            background: "rgba(17, 24, 39, 0.88)",
+            boxShadow: "0 16px 38px rgba(15, 23, 42, 0.28), 0 0 0 1px rgba(255,255,255,0.18)",
             backdropFilter: "blur(12px)",
             pointerEvents: "auto",
         }
@@ -758,12 +758,14 @@ const BottomTabNavigator = () => {
             alignItems: "center",
             justifyContent: "center",
             height: 54,
-            border: active ? "1px solid rgba(22, 119, 255, 0.16)" : "1px solid transparent",
+            border: active ? "1px solid rgba(255,255,255,0.70)" : "1px solid rgba(255,255,255,0.08)",
             borderRadius: 20,
-            background: active ? "linear-gradient(135deg, #e6f4ff, #f6ffed)" : "transparent",
-            boxShadow: active ? "0 6px 14px rgba(22, 119, 255, 0.10), inset 0 0 0 1px rgba(255,255,255,0.72)" : undefined,
-            color: active ? theme.token.colorPrimary : "#5f6f82",
-            transition: "background 160ms ease, box-shadow 160ms ease, color 160ms ease",
+            background: active ? "linear-gradient(135deg, #f58220 0%, #52c41a 100%)" : "rgba(255,255,255,0.08)",
+            boxShadow: active
+                ? "0 10px 22px rgba(245, 130, 32, 0.30), inset 0 0 0 1px rgba(255,255,255,0.24)"
+                : undefined,
+            color: "#fff",
+            transition: "background 160ms ease, box-shadow 160ms ease, color 160ms ease, transform 160ms ease",
         }
     }
 
@@ -777,20 +779,20 @@ const BottomTabNavigator = () => {
             border: "1px solid rgba(255,255,255,0.58)",
             borderRadius: 20,
             background: active
-                ? "linear-gradient(135deg, #0958d9, #389e0d)"
-                : "linear-gradient(135deg, #1677ff, #52c41a)",
+                ? "linear-gradient(135deg, #0f172a 0%, #f58220 52%, #52c41a 100%)"
+                : "linear-gradient(135deg, #1f2937 0%, #f58220 55%, #52c41a 100%)",
             color: "#fff",
             boxShadow: active
-                ? "0 14px 28px rgba(22, 119, 255, 0.32), 0 0 0 5px rgba(22, 119, 255, 0.08)"
-                : "0 12px 24px rgba(22, 119, 255, 0.28)",
-            transition: "box-shadow 160ms ease, background 160ms ease",
+                ? "0 18px 34px rgba(245, 130, 32, 0.35), 0 0 0 5px rgba(82, 196, 26, 0.12)"
+                : "0 16px 32px rgba(31, 41, 55, 0.24), 0 0 0 4px rgba(245, 130, 32, 0.10)",
+            transition: "box-shadow 160ms ease, background 160ms ease, transform 160ms ease",
         }
     }
 
     const _labelStyles = (active: boolean): React.CSSProperties => {
         return {
             display: "block",
-            color: active ? theme.token.colorPrimary : "#4b5d6f",
+            color: active ? "#fff" : "rgba(255,255,255,0.88)",
             fontWeight: active ? 700 : 600,
             fontSize: 13,
             lineHeight: "17px",
