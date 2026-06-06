@@ -11,6 +11,8 @@ type FastOverlayBaseProps = {
     children?: React.ReactNode;
     zIndex?: number;
     maskClosable?: boolean;
+    closable?: boolean;
+    keyboard?: boolean;
     "data-testid"?: string;
 };
 
@@ -40,6 +42,7 @@ const overlayMotionEase = "cubic-bezier(0.16, 1, 0.3, 1)";
 const backdropInAnimation = `my-recipes-fast-overlay-fade-in 120ms ${overlayMotionEase} both`;
 const modalInAnimation = `my-recipes-fast-modal-in 150ms ${overlayMotionEase} both`;
 const drawerInAnimation = `my-recipes-fast-drawer-in 150ms ${overlayMotionEase} both`;
+let overlayStackIndex = 0;
 
 const useBodyScrollLock = (locked: boolean) => {
     React.useEffect(() => {
@@ -61,6 +64,19 @@ const useEscapeClose = (open: boolean, onClose: () => void) => {
         window.addEventListener("keydown", onKeyDown);
         return () => window.removeEventListener("keydown", onKeyDown);
     }, [onClose, open]);
+};
+
+const useResolvedOverlayZIndex = (open: boolean, explicitZIndex: number | undefined, baseZIndex: number) => {
+    const autoZIndex = React.useRef<number>();
+
+    if (!open) {
+        autoZIndex.current = undefined;
+    } else if (explicitZIndex === undefined && autoZIndex.current === undefined) {
+        autoZIndex.current = baseZIndex + overlayStackIndex * 20;
+        overlayStackIndex += 1;
+    }
+
+    return explicitZIndex ?? autoZIndex.current ?? baseZIndex;
 };
 
 const overlayMotionStyles = <style>{`
@@ -103,14 +119,17 @@ export const FastModalShell: React.FunctionComponent<FastModalShellProps> = ({
     children,
     footer,
     width,
-    zIndex = 1200,
+    zIndex,
     style,
     maskClosable = true,
+    closable = true,
+    keyboard = true,
     afterOpenChange,
     "data-testid": testId,
 }) => {
     useBodyScrollLock(open);
-    useEscapeClose(open, onClose);
+    useEscapeClose(open && keyboard, onClose);
+    const resolvedZIndex = useResolvedOverlayZIndex(open, zIndex, 1200);
 
     React.useEffect(() => {
         if (!open || !afterOpenChange) return;
@@ -129,7 +148,7 @@ export const FastModalShell: React.FunctionComponent<FastModalShellProps> = ({
             style={{
                 position: "fixed",
                 inset: 0,
-                zIndex,
+                zIndex: resolvedZIndex,
                 display: "flex",
                 alignItems: "flex-start",
                 justifyContent: "center",
@@ -168,9 +187,9 @@ export const FastModalShell: React.FunctionComponent<FastModalShellProps> = ({
             >
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, padding: "14px 16px 12px", borderBottom: "1px solid #f0f2f5" }}>
                     <div style={shellTitleStyle}>{title}</div>
-                    <button type="button" aria-label="Thoát" onClick={onClose} style={closeButtonStyle}>
+                    {closable && <button type="button" aria-label="Thoát" onClick={onClose} style={closeButtonStyle}>
                         <CloseOutlined />
-                    </button>
+                    </button>}
                 </div>
                 <div style={{ minHeight: 0, overflowY: "auto", padding: 16 }}>
                     {children}
@@ -190,12 +209,15 @@ export const FastDrawerShell: React.FunctionComponent<FastDrawerShellProps> = ({
     onClose,
     children,
     width,
-    zIndex = 1150,
+    zIndex,
     maskClosable = true,
+    closable = true,
+    keyboard = true,
     "data-testid": testId,
 }) => {
     useBodyScrollLock(open);
-    useEscapeClose(open, onClose);
+    useEscapeClose(open && keyboard, onClose);
+    const resolvedZIndex = useResolvedOverlayZIndex(open, zIndex, 1150);
 
     if (!open) return null;
 
@@ -205,7 +227,7 @@ export const FastDrawerShell: React.FunctionComponent<FastDrawerShellProps> = ({
             style={{
                 position: "fixed",
                 inset: 0,
-                zIndex,
+                zIndex: resolvedZIndex,
                 background: "rgba(16, 24, 40, 0.30)",
                 animation: backdropInAnimation,
                 willChange: "opacity",
@@ -238,9 +260,9 @@ export const FastDrawerShell: React.FunctionComponent<FastDrawerShellProps> = ({
             >
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, padding: "14px 14px 12px 16px", borderBottom: "1px solid #f0f2f5" }}>
                     <div style={shellTitleStyle}>{title}</div>
-                    <button type="button" aria-label="Ẩn menu" onClick={onClose} style={closeButtonStyle}>
+                    {closable && <button type="button" aria-label="Ẩn menu" onClick={onClose} style={closeButtonStyle}>
                         <CloseOutlined />
-                    </button>
+                    </button>}
                 </div>
                 <div style={{ flex: 1, minHeight: 0, overflowY: "auto", display: "flex", flexDirection: "column" }}>
                     {children}
