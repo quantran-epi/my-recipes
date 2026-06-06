@@ -18,7 +18,7 @@ This phase should not redesign the app shell, remove drawer tools, replace list 
 ### App-Shell Route Feedback
 
 - `src/Routing/MasterPage.tsx` already has `useRouteLoadingFeedback(pathname)`, which tracks a pending route, shows a compact overlay, waits for the route path to match, then clears after two `requestAnimationFrame` callbacks plus an 80 ms timer.
-- The feedback overlay already uses the desired small app-shell copy: `Dang mo trang` / `Chuan bi du lieu hien thi` in source-visible Vietnamese text.
+- The feedback overlay already uses the desired small app-shell copy: `Đang mở trang` / `Chuẩn bị dữ liệu hiển thị`.
 - `SidebarDrawer` and `BottomTabNavigator` each create their own `useRouteLoadingFeedback` instance, so pending navigation state is duplicated instead of shared across the shell.
 - The hook currently does not expose a duplicate-destination guard. It can be started again for the same destination while the previous navigation is still settling.
 - The fallback timeout is 1200 ms. This protects against stuck overlays, but route completion should still be primarily path-change-plus-paint based.
