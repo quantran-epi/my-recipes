@@ -227,10 +227,30 @@ export const DishSuggesterScreen: React.FC<DishSuggesterScreenProps> = ({ open, 
         justifyContent: "center",
     };
 
+    const selectedCountStyle = (count: number): React.CSSProperties => ({
+        minWidth: 28,
+        textAlign: "right",
+        color: count > 0 ? "#1677ff" : "#8c8c8c",
+        fontSize: 13,
+        fontWeight: 700,
+        lineHeight: "40px",
+        whiteSpace: "nowrap",
+    });
+
+    const footerRowStyle: React.CSSProperties = {
+        width: "100%",
+        marginTop: 12,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: mode !== "inventory" ? "space-between" : "flex-end",
+        gap: 12,
+    };
+
     const ResultsActions = ({ dishIds, pending = false }: { dishIds: string[]; pending?: boolean }) => {
         const disabled = pending || dishIds.length === 0;
 
-        return <Stack gap={8} align="center" style={{ marginLeft: "auto" }}>
+        return <Stack gap={8} align="center" style={{ marginLeft: "auto", flexShrink: 0 }}>
+            <Typography.Text data-testid="dish-suggester-selected-count" style={selectedCountStyle(dishIds.length)}>({dishIds.length})</Typography.Text>
             <Tooltip title={`Tạo lịch mua (${dishIds.length})`}>
                 <span>
                     <Button
@@ -295,14 +315,14 @@ export const DishSuggesterScreen: React.FC<DishSuggesterScreenProps> = ({ open, 
                     )}
                 </Box>
             )}
-            <Stack justify="space-between" style={{ marginTop: 12 }}>
+            <div style={footerRowStyle}>
                 {mode !== "inventory" && (
                     <Button onClick={_onBack} icon={<LeftOutlined />} style={{ borderRadius: 20 }}>
                         Quay lại
                     </Button>
                 )}
                 <ResultsActions dishIds={dishIds} pending={pending} />
-            </Stack>
+            </div>
         </>
     );
 

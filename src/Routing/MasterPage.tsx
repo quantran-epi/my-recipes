@@ -655,12 +655,12 @@ const BottomTabNavigator = () => {
     const _suggesterButtonStyles = (active: boolean): React.CSSProperties => {
         return {
             width: 96,
-            height: 58,
+            height: 54,
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
             border: "1px solid rgba(255,255,255,0.58)",
-            borderRadius: 22,
+            borderRadius: 20,
             background: active
                 ? "linear-gradient(135deg, #0958d9, #389e0d)"
                 : "linear-gradient(135deg, #1677ff, #52c41a)",
@@ -668,7 +668,6 @@ const BottomTabNavigator = () => {
             boxShadow: active
                 ? "0 14px 28px rgba(22, 119, 255, 0.32), 0 0 0 5px rgba(22, 119, 255, 0.08)"
                 : "0 12px 24px rgba(22, 119, 255, 0.28)",
-            transform: "translateY(-8px)",
             transition: "box-shadow 160ms ease, background 160ms ease",
         }
     }

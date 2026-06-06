@@ -10,8 +10,10 @@ test.describe('Dish suggestor', () => {
     await expect(page.getByText('Nấu gì hôm nay?')).toBeVisible();
 
     await page.getByRole('button', { name: /Tủ lạnh/ }).click();
-    await expect(page.getByText('Com ga regression')).toBeVisible({ timeout: 10_000 });
-    await page.getByTestId(`dish-suggestion-item-${TEST_IDS.dishes.comGa}`).click();
+    const suggestionItem = page.getByTestId(`dish-suggestion-item-${TEST_IDS.dishes.comGa}`);
+    await expect(suggestionItem).toBeVisible({ timeout: 10_000 });
+    await suggestionItem.click();
+    await expect(page.getByTestId('dish-suggester-selected-count')).toHaveText('(1)');
 
     const expenseButton = page.getByTestId('dish-suggester-expense-planner-button');
     await expect(expenseButton).toBeEnabled();
