@@ -189,7 +189,16 @@ const SidebarDrawer = () => {
     const [pin, setPin] = useState("");
     const [pinError, setPinError] = useState("");
     const { isAdmin, tryUnlock, lock } = useAdminMode();
-    const { publishSharedData, isPublishing, lastPublishAt } = useSharedPublish();
+    const {
+        publishSharedData,
+        isPublishing,
+        lastPublishAt,
+        githubToken,
+        setGithubToken,
+        clearGithubToken,
+        hasGithubToken,
+        githubTokenSource,
+    } = useSharedPublish();
     const { pendingSync, isSyncChecking, checkNow, dismissSync, markSynced } = useSharedDataSync();
     const message = useMessage();
     const toggleHistory = useToggle();
@@ -197,6 +206,11 @@ const SidebarDrawer = () => {
     const { navigateWithFeedback } = useAppShellNavigation();
     const toolsReady = useDeferredDrawerTools(open);
     const location = useLocation();
+    const [publishTokenInput, setPublishTokenInput] = useState(githubToken);
+
+    React.useEffect(() => {
+        setPublishTokenInput(githubToken);
+    }, [githubToken]);
 
     const showDrawer = () => {
         setOpen(true);
@@ -250,6 +264,24 @@ const SidebarDrawer = () => {
         markSynced(synced);
         message.success("Đồng bộ dữ liệu dùng chung thành công");
     };
+
+    const onSavePublishToken = () => {
+        setGithubToken(publishTokenInput);
+        message.success("Đã lưu GitHub token xuất bản trên thiết bị này");
+    };
+
+    const onClearPublishToken = () => {
+        clearGithubToken();
+        setPublishTokenInput("");
+        message.success("Đã xoá GitHub token xuất bản trên thiết bị này");
+    };
+
+    const publishTokenSaved = publishTokenInput.trim() === githubToken;
+    const publishTokenStatusText = githubTokenSource === "local"
+        ? "Đang dùng token lưu trên thiết bị này."
+        : githubTokenSource === "build"
+            ? "Đang dùng token cấu hình sẵn. Bạn có thể nhập token khác để ghi đè trên thiết bị này."
+            : "Chưa có token xuất bản. Token chỉ lưu trong trình duyệt của thiết bị này.";
 
     const sidebarNavItems = [
         { key: 'dashboard', href: RootRoutes.AuthorizedRoutes.Root(), icon: LogoIcon, label: 'Tổng quan' },
@@ -317,9 +349,33 @@ const SidebarDrawer = () => {
                         <>
                             <Divider orientation="left" style={{ fontSize: 12, color: "#888", marginTop: 20, marginBottom: 12 }}>Quản trị</Divider>
                             <Flex vertical gap={4}>
+                                <div style={{ border: "1px solid #f0f0f0", borderRadius: 8, padding: "8px 10px", background: "#fafafa", marginBottom: 6 }}>
+                                    <Flex vertical gap={6}>
+                                        <Typography.Text strong style={{ fontSize: 12 }}>GitHub token xuất bản</Typography.Text>
+                                        <AntInput.Password
+                                            size="small"
+                                            autoComplete="off"
+                                            placeholder="Token có quyền ghi repo contents"
+                                            value={publishTokenInput}
+                                            onChange={e => setPublishTokenInput(e.target.value)}
+                                        />
+                                        <Flex gap={6}>
+                                            <Button size="small" type="dashed" disabled={publishTokenSaved} onClick={onSavePublishToken} block>
+                                                Lưu token
+                                            </Button>
+                                            <Button size="small" type="text" disabled={!githubToken} onClick={onClearPublishToken} block>
+                                                Xoá
+                                            </Button>
+                                        </Flex>
+                                        <Typography.Text type="secondary" style={{ fontSize: 11, lineHeight: "16px" }}>
+                                            {publishTokenStatusText}
+                                        </Typography.Text>
+                                    </Flex>
+                                </div>
                                 <Button
                                     icon={<CloudUploadOutlined />}
                                     loading={isPublishing}
+                                    disabled={!hasGithubToken}
                                     onClick={publishSharedData}
                                     block
                                     style={{ color: "#52c41a", borderColor: "#52c41a" }}

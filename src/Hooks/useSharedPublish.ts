@@ -16,6 +16,7 @@ const REPO_OWNER = "quantran-epi";
 const REPO_NAME = "my-recipes";
 const SHARED_DATA_PATH = "docs/shared-data.json";
 const SHARED_MANIFEST_PATH = "docs/shared-manifest.json";
+const PUBLISH_TOKEN_KEY = "shared_publish_github_token";
 
 const _dt = (encoded: string): string => {
     const k = "myrecipes";
@@ -26,7 +27,7 @@ const _dt = (encoded: string): string => {
     return out;
 };
 
-const GITHUB_TOKEN = _dt(process.env.REACT_APP_GH_TOKEN || "");
+const BUILD_GITHUB_TOKEN = _dt(process.env.REACT_APP_GH_TOKEN || "");
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -117,6 +118,11 @@ export interface UseSharedPublishResult {
     publishSharedData: () => Promise<void>;
     isPublishing: boolean;
     lastPublishAt: string | null;
+    githubToken: string;
+    setGithubToken: (token: string) => void;
+    clearGithubToken: () => void;
+    hasGithubToken: boolean;
+    githubTokenSource: "local" | "build" | "none";
 }
 
 export const useSharedPublish = (): UseSharedPublishResult => {
@@ -124,15 +130,34 @@ export const useSharedPublish = (): UseSharedPublishResult => {
     const [lastPublishAt, setLastPublishAt] = useState<string | null>(
         () => localStorage.getItem(LAST_PUBLISH_KEY)
     );
+    const [githubToken, setGithubTokenState] = useState<string>(
+        () => localStorage.getItem(PUBLISH_TOKEN_KEY) ?? ""
+    );
     const ingredients = useSelector(selectIngredients);
     const dishes = useSelector(selectDishes);
+    const localGithubToken = githubToken.trim();
+    const publishGithubToken = localGithubToken || BUILD_GITHUB_TOKEN;
+    const githubTokenSource = localGithubToken ? "local" : BUILD_GITHUB_TOKEN ? "build" : "none";
+    const hasGithubToken = githubTokenSource !== "none";
+
+    const setGithubToken = (token: string) => {
+        const normalizedToken = token.trim();
+        if (normalizedToken) {
+            localStorage.setItem(PUBLISH_TOKEN_KEY, normalizedToken);
+        } else {
+            localStorage.removeItem(PUBLISH_TOKEN_KEY);
+        }
+        setGithubTokenState(normalizedToken);
+    };
+
+    const clearGithubToken = () => setGithubToken("");
 
     const publishSharedData = async (): Promise<void> => {
         if (!navigator.onLine) {
             message.warning({ content: "Không có mạng — Không thể xuất bản", duration: 3 });
             return;
         }
-        if (!GITHUB_TOKEN) {
+        if (!publishGithubToken) {
             message.error("GitHub token chưa được cấu hình");
             return;
         }
@@ -144,8 +169,8 @@ export const useSharedPublish = (): UseSharedPublishResult => {
         try {
             // 1. Fetch existing shared data to compute diffs
             const [existingDataFile, existingManifestFile] = await Promise.all([
-                getFileSha(SHARED_DATA_PATH, GITHUB_TOKEN),
-                getFileSha(SHARED_MANIFEST_PATH, GITHUB_TOKEN),
+                getFileSha(SHARED_DATA_PATH, publishGithubToken),
+                getFileSha(SHARED_MANIFEST_PATH, publishGithubToken),
             ]);
 
             const prevData: SharedData = existingDataFile
@@ -177,14 +202,14 @@ export const useSharedPublish = (): UseSharedPublishResult => {
             const commitMsg = `Publish shared data ${now}`;
             await pushFile(
                 SHARED_DATA_PATH,
-                GITHUB_TOKEN,
+                publishGithubToken,
                 existingDataFile?.sha ?? null,
                 JSON.stringify(newData, null, 2),
                 commitMsg
             );
             await pushFile(
                 SHARED_MANIFEST_PATH,
-                GITHUB_TOKEN,
+                publishGithubToken,
                 existingManifestFile?.sha ?? null,
                 JSON.stringify(newManifest, null, 2),
                 commitMsg
@@ -216,5 +241,14 @@ export const useSharedPublish = (): UseSharedPublishResult => {
         }
     };
 
-    return { publishSharedData, isPublishing, lastPublishAt };
+    return {
+        publishSharedData,
+        isPublishing,
+        lastPublishAt,
+        githubToken,
+        setGithubToken,
+        clearGithubToken,
+        hasGithubToken,
+        githubTokenSource,
+    };
 };
