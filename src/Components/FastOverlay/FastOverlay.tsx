@@ -36,6 +36,11 @@ const getOffset = (value: React.CSSProperties["top"], fallback: number): string 
     return `${fallback}px`;
 };
 
+const overlayMotionEase = "cubic-bezier(0.16, 1, 0.3, 1)";
+const backdropInAnimation = `my-recipes-fast-overlay-fade-in 120ms ${overlayMotionEase} both`;
+const modalInAnimation = `my-recipes-fast-modal-in 150ms ${overlayMotionEase} both`;
+const drawerInAnimation = `my-recipes-fast-drawer-in 150ms ${overlayMotionEase} both`;
+
 const useBodyScrollLock = (locked: boolean) => {
     React.useEffect(() => {
         if (!locked) return;
@@ -60,8 +65,8 @@ const useEscapeClose = (open: boolean, onClose: () => void) => {
 
 const overlayMotionStyles = <style>{`
 @keyframes my-recipes-fast-overlay-fade-in { from { opacity: 0; } to { opacity: 1; } }
-@keyframes my-recipes-fast-modal-in { from { opacity: 0; transform: translateY(6px) scale(0.985); } to { opacity: 1; transform: translateY(0) scale(1); } }
-@keyframes my-recipes-fast-drawer-in { from { opacity: 0.98; transform: translateX(-10px); } to { opacity: 1; transform: translateX(0); } }
+@keyframes my-recipes-fast-modal-in { from { opacity: 0; transform: translate3d(0, 8px, 0) scale(0.986); } to { opacity: 1; transform: translate3d(0, 0, 0) scale(1); } }
+@keyframes my-recipes-fast-drawer-in { from { opacity: 0.96; transform: translate3d(-14px, 0, 0); } to { opacity: 1; transform: translate3d(0, 0, 0); } }
 @media (prefers-reduced-motion: reduce) {
   .my-recipes-fast-overlay,
   .my-recipes-fast-overlay * { animation-duration: 1ms !important; transition-duration: 1ms !important; }
@@ -130,7 +135,8 @@ export const FastModalShell: React.FunctionComponent<FastModalShellProps> = ({
                 justifyContent: "center",
                 padding: `${top} 14px 18px`,
                 background: "rgba(16, 24, 40, 0.36)",
-                animation: "my-recipes-fast-overlay-fade-in 80ms ease-out both",
+                animation: backdropInAnimation,
+                willChange: "opacity",
             }}
             onMouseDown={(event) => {
                 if (maskClosable && event.target === event.currentTarget) onClose();
@@ -152,7 +158,9 @@ export const FastModalShell: React.FunctionComponent<FastModalShellProps> = ({
                     borderRadius: 14,
                     background: "#fff",
                     boxShadow: "0 18px 54px rgba(15, 23, 42, 0.24)",
-                    animation: "my-recipes-fast-modal-in 90ms ease-out both",
+                    animation: modalInAnimation,
+                    transformOrigin: "top center",
+                    willChange: "opacity, transform",
                     ...style,
                     top: undefined,
                 }}
@@ -199,7 +207,8 @@ export const FastDrawerShell: React.FunctionComponent<FastDrawerShellProps> = ({
                 inset: 0,
                 zIndex,
                 background: "rgba(16, 24, 40, 0.30)",
-                animation: "my-recipes-fast-overlay-fade-in 70ms ease-out both",
+                animation: backdropInAnimation,
+                willChange: "opacity",
             }}
             onMouseDown={(event) => {
                 if (maskClosable && event.target === event.currentTarget) onClose();
@@ -221,7 +230,9 @@ export const FastDrawerShell: React.FunctionComponent<FastDrawerShellProps> = ({
                     borderRadius: "0 18px 18px 0",
                     background: "#fff",
                     boxShadow: "16px 0 48px rgba(15, 23, 42, 0.22)",
-                    animation: "my-recipes-fast-drawer-in 90ms ease-out both",
+                    animation: drawerInAnimation,
+                    transformOrigin: "left center",
+                    willChange: "opacity, transform",
                 }}
                 onMouseDown={(event) => event.stopPropagation()}
             >
