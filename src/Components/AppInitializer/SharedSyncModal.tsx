@@ -6,6 +6,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { Badge, Checkbox, Divider, Flex, Spin, Tag, Typography } from "antd";
 import { CloudDownloadOutlined, InfoCircleOutlined, WarningOutlined } from "@ant-design/icons";
 import { Modal } from "@components/Modal";
+import { useModal } from "@components/Modal/ModalProvider";
 import { Button } from "@components/Button";
 import { useDispatch, useSelector } from "react-redux";
 import { addIngredient, editIngredient, removeIngredient } from "@store/Reducers/IngredientReducer";
@@ -39,6 +40,7 @@ const actionLabel = (action: SharedItemChange["action"]) => {
 const defaultChecked = (action: SharedItemChange["action"]) => action !== "removed";
 
 type ImpactStatus = "pending" | "ready";
+const APP_CONFIRM_Z_INDEX = 5200;
 
 const scheduleAfterPaint = (callback: () => void) => {
     let timerHandle: number | null = null;
@@ -97,6 +99,7 @@ export const SharedSyncModal: React.FC<Props> = ({
     onCancel,
 }) => {
     const dispatch = useDispatch();
+    const modal = useModal();
     const existingIngredients = useSelector(selectIngredients);
     const existingDishes = useSelector(selectDishes);
     const shoppingLists = useSelector(selectShoppingLists);
@@ -274,6 +277,18 @@ export const SharedSyncModal: React.FC<Props> = ({
         });
     };
 
+    const confirmSync = () => {
+        modal.confirm({
+            title: "Xác nhận đồng bộ dữ liệu dùng chung",
+            content: `Thao tác này sẽ cập nhật ${selectedIngredients.size} nguyên liệu và ${selectedDishes.size} món ăn đã chọn trên thiết bị này. Bạn có chắc muốn đồng bộ?`,
+            okText: "Đồng bộ",
+            cancelText: "Hủy",
+            centered: true,
+            zIndex: APP_CONFIRM_Z_INDEX,
+            onOk: handleSync,
+        });
+    };
+
     const totalSelected = selectedIngredients.size + selectedDishes.size;
 
     return (
@@ -294,7 +309,7 @@ export const SharedSyncModal: React.FC<Props> = ({
                         type="primary"
                         loading={isFetching}
                         disabled={totalSelected === 0 || sharedData === null || isFetching || !!fetchError}
-                        onClick={handleSync}
+                        onClick={confirmSync}
                     >
                         Đồng bộ {totalSelected > 0 ? `(${totalSelected})` : ""}
                     </Button>

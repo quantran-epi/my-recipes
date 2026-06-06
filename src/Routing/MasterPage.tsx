@@ -12,6 +12,7 @@ import { Space } from "@components/Layout/Space";
 import { Stack } from "@components/Layout/Stack";
 import { useMessage } from "@components/Message";
 import { DeferredModalContent, Modal } from "@components/Modal";
+import { useModal } from "@components/Modal/ModalProvider";
 import { SmartForm, useSmartForm } from "@components/SmartForm";
 import { Tooltip } from "@components/Tootip";
 import { Typography } from "@components/Typography";
@@ -54,6 +55,8 @@ const drawerToolsPlaceholderStyle: React.CSSProperties = {
 const sidebarNavListStyle: React.CSSProperties = {
     padding: "8px 4px",
 };
+
+const APP_CONFIRM_Z_INDEX = 5200;
 
 const sidebarNavButtonStyle = (active: boolean): React.CSSProperties => ({
     width: "100%",
@@ -198,9 +201,12 @@ const SidebarDrawer = () => {
         clearGithubToken,
         hasGithubToken,
         githubTokenSource,
+        testGithubToken,
+        isTestingGithubToken,
     } = useSharedPublish();
     const { pendingSync, isSyncChecking, checkNow, dismissSync, markSynced } = useSharedDataSync();
     const message = useMessage();
+    const modal = useModal();
     const toggleHistory = useToggle();
     const toggleGuide = useToggle();
     const { navigateWithFeedback } = useAppShellNavigation();
@@ -274,6 +280,22 @@ const SidebarDrawer = () => {
         clearGithubToken();
         setPublishTokenInput("");
         message.success("Đã xoá GitHub token xuất bản trên thiết bị này");
+    };
+
+    const onTestPublishToken = () => {
+        testGithubToken(publishTokenInput);
+    };
+
+    const onPublishSharedData = () => {
+        modal.confirm({
+            title: "Xác nhận xuất bản dữ liệu dùng chung",
+            content: "Thao tác này sẽ ghi shared-data.json và shared-manifest.json lên GitHub để các thiết bị khác đồng bộ. Bạn có chắc muốn xuất bản dữ liệu hiện tại?",
+            okText: "Xuất bản",
+            cancelText: "Hủy",
+            centered: true,
+            zIndex: APP_CONFIRM_Z_INDEX,
+            onOk: publishSharedData,
+        });
     };
 
     const publishTokenSaved = publishTokenInput.trim() === githubToken;
@@ -363,6 +385,9 @@ const SidebarDrawer = () => {
                                             <Button size="small" type="dashed" disabled={publishTokenSaved} onClick={onSavePublishToken} block>
                                                 Lưu token
                                             </Button>
+                                            <Button size="small" loading={isTestingGithubToken} disabled={!publishTokenInput.trim() && !hasGithubToken} onClick={onTestPublishToken} block>
+                                                Kiểm tra
+                                            </Button>
                                             <Button size="small" type="text" disabled={!githubToken} onClick={onClearPublishToken} block>
                                                 Xoá
                                             </Button>
@@ -376,7 +401,7 @@ const SidebarDrawer = () => {
                                     icon={<CloudUploadOutlined />}
                                     loading={isPublishing}
                                     disabled={!hasGithubToken}
-                                    onClick={publishSharedData}
+                                    onClick={onPublishSharedData}
                                     block
                                     style={{ color: "#52c41a", borderColor: "#52c41a" }}
                                 >

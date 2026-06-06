@@ -14,7 +14,7 @@ const LAST_BACKUP_KEY = "personal_last_backup_at";
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
-const getGistFile = async (gistId: string, token: string): Promise<{ content: string; } | null> => {
+const getGist = async (gistId: string, token: string): Promise<any> => {
     const res = await fetch(`https://api.github.com/gists/${gistId}`, {
         headers: {
             Authorization: `Bearer ${token}`,
@@ -22,8 +22,22 @@ const getGistFile = async (gistId: string, token: string): Promise<{ content: st
         },
     });
     if (!res.ok) throw new Error(`Không thể đọc Gist: ${res.status} ${res.statusText}`);
-    const json = await res.json();
-    const file = json.files?.[GIST_FILE_NAME];
+    return res.json();
+};
+
+const getGithubUser = async (token: string): Promise<any> => {
+    const res = await fetch("https://api.github.com/user", {
+        headers: {
+            Authorization: `Bearer ${token}`,
+            Accept: "application/vnd.github+json",
+        },
+    });
+    if (!res.ok) throw new Error(`Token GitHub không hợp lệ: ${res.status} ${res.statusText}`);
+    return res.json();
+};
+
+const readGistBackupFile = async (gistJson: any): Promise<{ content: string; } | null> => {
+    const file = gistJson.files?.[GIST_FILE_NAME];
     if (!file) return null;
     // Gist API may truncate large files — use raw_url if needed
     if (file.truncated) {
@@ -32,6 +46,11 @@ const getGistFile = async (gistId: string, token: string): Promise<{ content: st
         return { content: await rawRes.text() };
     }
     return { content: file.content };
+};
+
+const getGistFile = async (gistId: string, token: string): Promise<{ content: string; } | null> => {
+    const json = await getGist(gistId, token);
+    return readGistBackupFile(json);
 };
 
 const patchGist = async (gistId: string, token: string, content: string): Promise<void> => {
@@ -61,8 +80,10 @@ export interface UseGistBackupResult {
     setGistToken: (token: string) => void;
     pushPersonalData: () => Promise<void>;
     pullPersonalData: () => Promise<void>;
+    testGistConfig: (config?: { gistId?: string; gistToken?: string }) => Promise<void>;
     isPushing: boolean;
     isPulling: boolean;
+    isTesting: boolean;
     lastBackupAt: string | null;
 }
 
@@ -71,6 +92,7 @@ export const useGistBackup = (): UseGistBackupResult => {
     const [gistToken, setGistTokenState] = useState(() => localStorage.getItem(GIST_TOKEN_KEY) ?? "");
     const [isPushing, setIsPushing] = useState(false);
     const [isPulling, setIsPulling] = useState(false);
+    const [isTesting, setIsTesting] = useState(false);
     const [lastBackupAt, setLastBackupAt] = useState<string | null>(
         () => localStorage.getItem(LAST_BACKUP_KEY)
     );
@@ -142,11 +164,55 @@ export const useGistBackup = (): UseGistBackupResult => {
         }
     };
 
+    const testGistConfig = async (config?: { gistId?: string; gistToken?: string }): Promise<void> => {
+        const targetGistId = (config?.gistId ?? gistId).trim();
+        const targetToken = (config?.gistToken ?? gistToken).trim();
+        if (!targetGistId || !targetToken) {
+            message.warning("Vui lòng nhập Gist ID và GitHub Token");
+            return;
+        }
+        if (!navigator.onLine) {
+            message.warning("Không có mạng");
+            return;
+        }
+
+        setIsTesting(true);
+        const key = "gist-config-test";
+        message.loading({ content: "Đang kiểm tra cấu hình Gist...", key, duration: 0 });
+
+        try {
+            const [gistJson, userJson] = await Promise.all([
+                getGist(targetGistId, targetToken),
+                getGithubUser(targetToken),
+            ]);
+            const ownerLogin = gistJson.owner?.login;
+            if (ownerLogin && userJson.login && ownerLogin !== userJson.login) {
+                throw new Error(`Gist thuộc tài khoản ${ownerLogin}, không phải ${userJson.login}`);
+            }
+
+            const file = await readGistBackupFile(gistJson);
+            if (file) JSON.parse(file.content);
+
+            message.success({
+                content: file
+                    ? "Cấu hình Gist hợp lệ và file sao lưu đọc được"
+                    : "Cấu hình Gist hợp lệ. Chưa có file sao lưu, lần sao lưu đầu tiên sẽ tạo file mới.",
+                key,
+                duration: 4,
+            });
+        } catch (err: any) {
+            message.error({ content: "Kiểm tra Gist thất bại: " + err?.message, key, duration: 6 });
+        } finally {
+            setIsTesting(false);
+        }
+    };
+
     return {
         gistId, gistToken,
         setGistId, setGistToken,
         pushPersonalData, pullPersonalData,
-        isPushing, isPulling,
+        testGistConfig,
+        isPushing, isPulling, isTesting,
         lastBackupAt,
     };
 };

@@ -123,6 +123,8 @@ export interface UseSharedPublishResult {
     clearGithubToken: () => void;
     hasGithubToken: boolean;
     githubTokenSource: "local" | "build" | "none";
+    testGithubToken: (token?: string) => Promise<void>;
+    isTestingGithubToken: boolean;
 }
 
 export const useSharedPublish = (): UseSharedPublishResult => {
@@ -130,6 +132,7 @@ export const useSharedPublish = (): UseSharedPublishResult => {
     const [lastPublishAt, setLastPublishAt] = useState<string | null>(
         () => localStorage.getItem(LAST_PUBLISH_KEY)
     );
+    const [isTestingGithubToken, setIsTestingGithubToken] = useState(false);
     const [githubToken, setGithubTokenState] = useState<string>(
         () => localStorage.getItem(PUBLISH_TOKEN_KEY) ?? ""
     );
@@ -151,6 +154,48 @@ export const useSharedPublish = (): UseSharedPublishResult => {
     };
 
     const clearGithubToken = () => setGithubToken("");
+
+    const testGithubToken = async (token?: string): Promise<void> => {
+        const tokenToTest = token?.trim() || publishGithubToken;
+        if (!navigator.onLine) {
+            message.warning("Không có mạng");
+            return;
+        }
+        if (!tokenToTest) {
+            message.warning("Vui lòng nhập GitHub token");
+            return;
+        }
+
+        setIsTestingGithubToken(true);
+        const key = "publish-token-test";
+        message.loading({ content: "Đang kiểm tra GitHub token...", key, duration: 0 });
+        const headers = { Authorization: `Bearer ${tokenToTest}`, Accept: "application/vnd.github+json" };
+
+        try {
+            const [userRes, repoRes] = await Promise.all([
+                fetch("https://api.github.com/user", { headers }),
+                fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}`, { headers }),
+            ]);
+            if (!userRes.ok) throw new Error(`Token không hợp lệ hoặc không đăng nhập được GitHub: HTTP ${userRes.status}`);
+            if (!repoRes.ok) throw new Error(`Token không đọc được repo ${REPO_OWNER}/${REPO_NAME}: HTTP ${repoRes.status}`);
+
+            const repoJson = await repoRes.json();
+            const permissions = repoJson.permissions ?? {};
+            const canPush = Boolean(permissions.push || permissions.admin || permissions.maintain);
+            if (!canPush) throw new Error("Tài khoản/token không có quyền ghi repo này");
+
+            await Promise.all([
+                getFileSha(SHARED_DATA_PATH, tokenToTest),
+                getFileSha(SHARED_MANIFEST_PATH, tokenToTest),
+            ]);
+
+            message.success({ content: "GitHub token hợp lệ cho repo và có quyền ghi", key, duration: 4 });
+        } catch (err: any) {
+            message.error({ content: "Kiểm tra token thất bại: " + err?.message, key, duration: 6 });
+        } finally {
+            setIsTestingGithubToken(false);
+        }
+    };
 
     const publishSharedData = async (): Promise<void> => {
         if (!navigator.onLine) {
@@ -250,5 +295,7 @@ export const useSharedPublish = (): UseSharedPublishResult => {
         clearGithubToken,
         hasGithubToken,
         githubTokenSource,
+        testGithubToken,
+        isTestingGithubToken,
     };
 };

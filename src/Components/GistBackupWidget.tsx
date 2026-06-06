@@ -3,11 +3,13 @@ import { Collapse, Flex, Typography } from "antd";
 import { CloudDownloadOutlined, CloudUploadOutlined, DatabaseOutlined, GithubOutlined, ReloadOutlined } from "@ant-design/icons";
 import { Button } from "@components/Button";
 import { useMessage } from "@components/Message";
+import { useModal } from "@components/Modal/ModalProvider";
 import { useGistBackup } from "@hooks";
 import { Input as AntInput } from "antd";
 
 const PERSIST_PERSONAL_KEY = "persist:personal";
 const PERSIST_SHARED_KEY = "persist:shared";
+const APP_CONFIRM_Z_INDEX = 5200;
 
 type LocalDataSize = {
     personal: number;
@@ -32,11 +34,13 @@ const formatBytes = (bytes: number): string => {
 
 export const GistBackupWidget: React.FC = () => {
     const message = useMessage();
+    const modal = useModal();
     const {
         gistId, gistToken,
         setGistId, setGistToken,
         pushPersonalData, pullPersonalData,
-        isPushing, isPulling,
+        testGistConfig,
+        isPushing, isPulling, isTesting,
         lastBackupAt,
     } = useGistBackup();
 
@@ -53,6 +57,34 @@ export const GistBackupWidget: React.FC = () => {
         setGistToken(localToken.trim());
         message.success("Đã lưu cấu hình sao lưu");
         _refreshDataSize();
+    };
+
+    const _onTestConfig = () => {
+        testGistConfig({ gistId: localGistId.trim(), gistToken: localToken.trim() });
+    };
+
+    const _onConfirmPush = () => {
+        modal.confirm({
+            title: "Xác nhận sao lưu cá nhân",
+            content: "Thao tác này sẽ ghi dữ liệu cá nhân hiện tại lên Gist và có thể ghi đè file sao lưu trước đó. Bạn có chắc muốn sao lưu?",
+            okText: "Sao lưu",
+            cancelText: "Hủy",
+            centered: true,
+            zIndex: APP_CONFIRM_Z_INDEX,
+            onOk: pushPersonalData,
+        });
+    };
+
+    const _onConfirmPull = () => {
+        modal.confirm({
+            title: "Xác nhận khôi phục cá nhân",
+            content: "Thao tác này sẽ ghi đè dữ liệu cá nhân trên thiết bị này bằng dữ liệu từ Gist và tải lại app. Bạn có chắc muốn khôi phục?",
+            okText: "Khôi phục",
+            cancelText: "Hủy",
+            centered: true,
+            zIndex: APP_CONFIRM_Z_INDEX,
+            onOk: pullPersonalData,
+        });
     };
 
     const isSaved = localGistId.trim() === gistId && localToken.trim() === gistToken;
@@ -105,13 +137,22 @@ export const GistBackupWidget: React.FC = () => {
                                 Lưu cấu hình
                             </Button>
                         )}
+                        <Button
+                            size="small"
+                            loading={isTesting}
+                            disabled={!localGistId.trim() || !localToken.trim()}
+                            onClick={_onTestConfig}
+                            block
+                        >
+                            Kiểm tra cấu hình
+                        </Button>
                         <Flex gap={8}>
                             <Button
                                 size="small"
                                 icon={<CloudUploadOutlined />}
                                 loading={isPushing}
                                 disabled={!gistId || !gistToken}
-                                onClick={pushPersonalData}
+                                onClick={_onConfirmPush}
                                 block
                             >
                                 Sao lưu
@@ -121,7 +162,7 @@ export const GistBackupWidget: React.FC = () => {
                                 icon={<CloudDownloadOutlined />}
                                 loading={isPulling}
                                 disabled={!gistId || !gistToken}
-                                onClick={pullPersonalData}
+                                onClick={_onConfirmPull}
                                 block
                             >
                                 Khôi phục
