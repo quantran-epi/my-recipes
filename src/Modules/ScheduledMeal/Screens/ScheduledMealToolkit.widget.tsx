@@ -42,7 +42,6 @@ const quickNavDescriptionCss = `
     overflow: visible;
 }
 .quick-nav-float .ant-float-btn:not(.ant-float-btn-group-trigger) {
-    position: relative;
     overflow: visible;
 }
 .quick-nav-float .ant-float-btn:not(.ant-float-btn-group-trigger) .ant-float-btn-description {
