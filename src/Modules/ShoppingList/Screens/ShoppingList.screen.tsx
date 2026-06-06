@@ -280,9 +280,7 @@ export const ShoppingListScreen = () => {
             Lịch mua sắm
         </Space>} destroyOnClose={true} onCancel={toggleCalendarModal.hide} footer={null}>
             <DeferredModalContent active={toggleCalendarModal.value} minHeight={220}>
-                <Box style={{ maxHeight: 550, overflowY: "auto" }}>
-                    <ShoppingListCalendarWidget onAdd={_onAddWithDate} />
-                </Box>
+                <ShoppingListCalendarWidget onAdd={_onAddWithDate} />
             </DeferredModalContent>
         </Modal>
     </React.Fragment>

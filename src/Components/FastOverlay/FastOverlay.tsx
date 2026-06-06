@@ -20,6 +20,7 @@ type FastModalShellProps = FastOverlayBaseProps & {
     footer?: React.ReactNode;
     width?: FastOverlaySize;
     style?: React.CSSProperties;
+    bodyStyle?: React.CSSProperties;
     afterOpenChange?: (open: boolean) => void;
 };
 
@@ -121,6 +122,7 @@ export const FastModalShell: React.FunctionComponent<FastModalShellProps> = ({
     width,
     zIndex,
     style,
+    bodyStyle,
     maskClosable = true,
     closable = true,
     keyboard = true,
@@ -191,7 +193,7 @@ export const FastModalShell: React.FunctionComponent<FastModalShellProps> = ({
                         <CloseOutlined />
                     </button>}
                 </div>
-                <div style={{ minHeight: 0, overflowY: "auto", padding: 16 }}>
+                <div style={{ minHeight: 0, overflowY: "auto", padding: 16, ...bodyStyle }}>
                     {children}
                 </div>
                 {footer && <div style={{ display: "flex", justifyContent: "flex-end", padding: "10px 16px 14px", borderTop: "1px solid #f0f2f5", background: "#fbfcfe" }}>

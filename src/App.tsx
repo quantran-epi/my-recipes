@@ -15,7 +15,16 @@ function App() {
         colorPrimary: "rgb(245, 130, 32)",
         colorLink: "#3d4195",
         colorBorderSecondary: "#d9d9d9",
-        fontSize: 18
+        fontSize: 18,
+        zIndexPopupBase: 4000,
+      },
+      components: {
+        DatePicker: { zIndexPopup: 4200 },
+        Dropdown: { zIndexPopup: 4200 },
+        Menu: { zIndexPopup: 4200 },
+        Popover: { zIndexPopup: 4200 },
+        Select: { zIndexPopup: 4200 },
+        Tooltip: { zIndexPopup: 4200 },
       },
     }}>
 

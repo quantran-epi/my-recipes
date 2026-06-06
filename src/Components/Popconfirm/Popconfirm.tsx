@@ -4,6 +4,8 @@ import { Popconfirm as AntPopconfirm, PopconfirmProps as AntPopconfirmProps } fr
 interface IPopconfirmProps extends AntPopconfirmProps {
 }
 
+const APP_POPUP_Z_INDEX = 4200;
+
 export const Popconfirm: FunctionComponent<IPopconfirmProps> = (props) => {
-    return <AntPopconfirm {...props} cancelText={props.cancelText || "Hủy"} okText={props.okText || "Đồng ý"} />
+    return <AntPopconfirm {...props} zIndex={props.zIndex ?? APP_POPUP_Z_INDEX} cancelText={props.cancelText || "Hủy"} okText={props.okText || "Đồng ý"} />
 }

@@ -44,3 +44,28 @@
 .ant-list-pagination {
   margin-inline: -5px;
 }
+
+.ant-popover,
+.ant-tooltip,
+.ant-dropdown,
+.ant-select-dropdown,
+.ant-picker-dropdown {
+  z-index: 4200 !important;
+}
+
+@media (max-width: 640px) {
+  .ant-picker-dropdown {
+    left: 8px !important;
+    right: 8px !important;
+    max-width: calc(100vw - 16px);
+  }
+
+  .ant-picker-dropdown .ant-picker-panel-container {
+    max-width: calc(100vw - 16px);
+    overflow-x: auto;
+  }
+
+  .ant-picker-dropdown .ant-picker-panels {
+    width: max-content;
+  }
+}
