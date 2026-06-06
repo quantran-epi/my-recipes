@@ -698,10 +698,6 @@
     },
     {
       "id": "Bụng cáYEwaP8LSBh",
-      "name": "Bụng cá",
-      "category": "Thịt",
-      "shelfLife": "very_short",
-      "preservationCondition": "freezer",
       "baseUnit": "g",
       "inventoryUnits": [
         "g",
@@ -717,7 +713,12 @@
         "amount": 1,
         "unit": "kg",
         "currency": "VND"
-      }
+      },
+      "name": "Bụng cá",
+      "category": "Hải sản",
+      "shelfLife": "very_short",
+      "preservationCondition": "freezer",
+      "alwaysAvailable": false
     },
     {
       "id": "Đuôi cáTG7XKl6Ss9",
