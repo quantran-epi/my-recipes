@@ -136,11 +136,11 @@ Cross-cutting constraints:
   3. User-facing fixes preserve current information density and daily cooking/shopping workflows.
   4. Navigation timing remains within the chosen smoke budget after list and online/offline fixes.
 
-**Plans:** 2 plans
+**Plans:** 1/2 plans executed
 Plans:
 **Wave 1**
 
-- [ ] 04-01: Stabilize drawer, route transition, and app-shell loading feedback paths.
+- [x] 04-01: Stabilize drawer, route transition, and app-shell loading feedback paths.
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
@@ -178,7 +178,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5
 | 1. Measurement and Performance Harness | 3/3 | Complete    | 2026-06-05 |
 | 2. Large-List Interaction Hot Paths | 3/3 | Complete    | 2026-06-05 |
 | 3. Online and Offline Cost Isolation | 3/3 | Complete   | 2026-06-05 |
-| 4. Navigation and App-Shell Responsiveness | 0/2 | Not started | - |
+| 4. Navigation and App-Shell Responsiveness | 1/2 | In Progress|  |
 | 5. Release Gate and Product Guardrails | 0/2 | Not started | - |
 
 **Coverage:**

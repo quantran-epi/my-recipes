@@ -18,7 +18,7 @@ Requirements for the first milestone: stabilize large-list and online/offline re
 - [x] **LIST-01**: User can open add, edit, detail, inventory, cooking, and shopping-list modals from large virtualized lists without an obvious pre-open UI freeze.
 - [x] **LIST-02**: User can interact with row menus and row actions in ingredient, dish, and shopping-list screens without list-wide rerender pauses.
 - [x] **LIST-03**: User can search, filter, and reset large virtualized lists while preserving row spacing, scroll behavior, and touch/desktop interaction quality.
-- [ ] **LIST-04**: User can navigate from large-list screens to detail routes with responsive loading feedback and no stale blocked drawer state.
+- [x] **LIST-04**: User can navigate from large-list screens to detail routes with responsive loading feedback and no stale blocked drawer state.
 
 ### Online And Offline Behavior
 
@@ -37,7 +37,7 @@ Requirements for the first milestone: stabilize large-list and online/offline re
 ### Future Product Foundation
 
 - [x] **UX-01**: Maintainer has a measured responsiveness baseline that future rich feature, UI, and UX work can use as a guardrail.
-- [ ] **UX-02**: User-facing performance fixes preserve current information density and daily cooking/shopping workflows unless a later UI/UX phase explicitly changes them.
+- [x] **UX-02**: User-facing performance fixes preserve current information density and daily cooking/shopping workflows unless a later UI/UX phase explicitly changes them.
 
 ## v2 Requirements
 
@@ -82,7 +82,7 @@ Which phases cover which v1 requirements. Updated during roadmap creation.
 | LIST-01 | Phase 2 | Complete |
 | LIST-02 | Phase 2 | Complete |
 | LIST-03 | Phase 2 | Complete |
-| LIST-04 | Phase 4 | Pending |
+| LIST-04 | Phase 4 | Complete |
 | NET-01 | Phase 3 | Complete |
 | NET-02 | Phase 3 | Complete |
 | NET-03 | Phase 3 | Complete |
@@ -92,7 +92,7 @@ Which phases cover which v1 requirements. Updated during roadmap creation.
 | TEST-03 | Phase 3 | Complete |
 | TEST-04 | Phase 5 | Pending |
 | UX-01 | Phase 1 | Complete |
-| UX-02 | Phase 4 | Pending |
+| UX-02 | Phase 4 | Complete |
 
 **Coverage:**
 
