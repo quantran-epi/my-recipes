@@ -30,7 +30,7 @@ const GITHUB_TOKEN = _dt(process.env.REACT_APP_GH_TOKEN || "");
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
-export type SharedChangeAction = "added" | "modified" | "removed";
+export type SharedChangeAction = "added" | "modified" | "removed" | "sync";
 
 export interface SharedItemChange {
     id: string;

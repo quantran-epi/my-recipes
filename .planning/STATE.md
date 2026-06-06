@@ -4,8 +4,8 @@ milestone: v1.0
 milestone_name: milestone
 status: ready
 stopped_at: Completed 04-02-PLAN.md
-last_updated: "2026-06-06T10:39:43Z"
-last_activity: 2026-06-06 -- Completed quick task 260606-rbi: UI/font/admin polish and image backup plan deploy
+last_updated: "2026-06-06T11:01:52Z"
+last_activity: 2026-06-06 -- Fixed shared-data manual sync to derive ingredients/dishes from snapshot and support force sync
 progress:
   total_phases: 5
   completed_phases: 4
@@ -28,7 +28,7 @@ See: .planning/PROJECT.md (updated 2026-06-05)
 Phase: 5 (release-gate-and-product-guardrails) — READY
 Plan: Not started
 Status: Phase 04 complete; ready for Phase 05
-Last activity: 2026-06-06 -- Completed quick task 260606-rbi: UI/font/admin polish and image backup plan deploy
+Last activity: 2026-06-06 -- Fixed shared-data manual sync to derive ingredients/dishes from snapshot and support force sync
 
 Progress: [████████░░] 80%
 

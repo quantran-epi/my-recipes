@@ -2,7 +2,7 @@
  * SharedSyncModal — lets the user selectively sync individual ingredients/dishes
  * from the shared-data.json snapshot. Shows impact warnings for removed/modified items.
  */
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Badge, Checkbox, Divider, Flex, Spin, Tag, Typography } from "antd";
 import { CloudDownloadOutlined, InfoCircleOutlined, WarningOutlined } from "@ant-design/icons";
 import { Modal } from "@components/Modal";
@@ -24,6 +24,7 @@ interface Props {
     manifest: SharedManifest;
     hasIngredientChanges: boolean;
     hasDishChanges: boolean;
+    force?: boolean;
     onDone: (synced: SyncedVersions) => void;
     onCancel: () => void;
 }
@@ -31,7 +32,8 @@ interface Props {
 const actionLabel = (action: SharedItemChange["action"]) => {
     if (action === "added") return <Tag color="green">Mới</Tag>;
     if (action === "modified") return <Tag color="blue">Thay đổi</Tag>;
-    return <Tag color="red">Đã xoá</Tag>;
+    if (action === "removed") return <Tag color="red">Đã xoá</Tag>;
+    return <Tag color="geekblue">Đồng bộ</Tag>;
 };
 
 const defaultChecked = (action: SharedItemChange["action"]) => action !== "removed";
@@ -50,11 +52,47 @@ const scheduleAfterPaint = (callback: () => void) => {
     };
 };
 
+const deriveSnapshotChanges = <T extends { id: string; name: string }>(
+    remoteItems: T[],
+    localItems: T[],
+    manifestChanges: SharedItemChange[],
+    force?: boolean,
+): SharedItemChange[] => {
+    const localById = new Map(localItems.map(item => [item.id, item]));
+    const remoteById = new Map(remoteItems.map(item => [item.id, item]));
+    const changesById = new Map(manifestChanges.map(item => [item.id, item]));
+
+    remoteItems.forEach(item => {
+        if (changesById.has(item.id)) return;
+        const localItem = localById.get(item.id);
+        if (!localItem) {
+            changesById.set(item.id, { id: item.id, name: item.name, action: "added" });
+            return;
+        }
+        if (JSON.stringify(localItem) !== JSON.stringify(item)) {
+            changesById.set(item.id, { id: item.id, name: item.name, action: "modified" });
+        }
+    });
+
+    localItems.forEach(item => {
+        if (remoteById.has(item.id) || changesById.has(item.id)) return;
+        changesById.set(item.id, { id: item.id, name: item.name, action: "removed" });
+    });
+
+    const changes = Array.from(changesById.values());
+    if (force && changes.length === 0) {
+        return remoteItems.map(item => ({ id: item.id, name: item.name, action: "sync" }));
+    }
+
+    return changes;
+};
+
 export const SharedSyncModal: React.FC<Props> = ({
     open,
     manifest,
     hasIngredientChanges,
     hasDishChanges,
+    force,
     onDone,
     onCancel,
 }) => {
@@ -73,16 +111,30 @@ export const SharedSyncModal: React.FC<Props> = ({
     const [selectedIngredients, setSelectedIngredients] = useState<Set<string>>(new Set());
     const [selectedDishes, setSelectedDishes] = useState<Set<string>>(new Set());
 
+    const ingredientChanges = useMemo(() => {
+        if (!sharedData) return manifest.ingredientChanges;
+        return deriveSnapshotChanges(sharedData.ingredients, existingIngredients, manifest.ingredientChanges, force);
+    }, [sharedData, existingIngredients, manifest.ingredientChanges, force]);
+
+    const dishChanges = useMemo(() => {
+        if (!sharedData) return manifest.dishChanges;
+        return deriveSnapshotChanges(sharedData.dishes, existingDishes, manifest.dishChanges, force);
+    }, [sharedData, existingDishes, manifest.dishChanges, force]);
+
+    const hasIngredientRows = ingredientChanges.length > 0;
+    const hasDishRows = dishChanges.length > 0;
+    const hasManifestChanges = hasIngredientChanges || hasDishChanges;
+
     // Initialise checkboxes from manifest defaults
     useEffect(() => {
         if (!open) return;
         setSelectedIngredients(new Set(
-            manifest.ingredientChanges.filter(c => defaultChecked(c.action)).map(c => c.id)
+            ingredientChanges.filter(c => defaultChecked(c.action)).map(c => c.id)
         ));
         setSelectedDishes(new Set(
-            manifest.dishChanges.filter(c => defaultChecked(c.action)).map(c => c.id)
+            dishChanges.filter(c => defaultChecked(c.action)).map(c => c.id)
         ));
-    }, [open, manifest]);
+    }, [open, ingredientChanges, dishChanges]);
 
     // Fetch shared-data.json after the manifest-driven modal shell has painted.
     useEffect(() => {
@@ -126,7 +178,7 @@ export const SharedSyncModal: React.FC<Props> = ({
     // Impact analysis is scheduled so warnings can fill in after selectable rows appear.
     useEffect(() => {
         if (!open) return;
-        const impactCandidates = manifest.dishChanges.filter(c => c.action === "removed" || c.action === "modified");
+        const impactCandidates = dishChanges.filter(c => c.action === "removed" || c.action === "modified");
         if (impactCandidates.length === 0) {
             setDishImpacts({});
             setImpactStatus("ready");
@@ -164,7 +216,7 @@ export const SharedSyncModal: React.FC<Props> = ({
             cancelled = true;
             cancelSchedule();
         };
-    }, [open, manifest, shoppingLists, scheduledMeals]);
+    }, [open, dishChanges, shoppingLists, scheduledMeals]);
 
     const toggleIngredient = (id: string, checked: boolean) => {
         setSelectedIngredients(prev => {
@@ -186,7 +238,7 @@ export const SharedSyncModal: React.FC<Props> = ({
         if (!sharedData) return;
 
         // ── Ingredients ──────────────────────────────────────────────────────
-        manifest.ingredientChanges
+        ingredientChanges
             .filter(c => selectedIngredients.has(c.id))
             .forEach(c => {
                 if (c.action === "removed") {
@@ -200,7 +252,7 @@ export const SharedSyncModal: React.FC<Props> = ({
             });
 
         // ── Dishes ───────────────────────────────────────────────────────────
-        manifest.dishChanges
+        dishChanges
             .filter(c => selectedDishes.has(c.id))
             .forEach(c => {
                 if (c.action === "removed") {
@@ -213,8 +265,8 @@ export const SharedSyncModal: React.FC<Props> = ({
                 }
             });
 
-        const syncedIngredients = manifest.ingredientChanges.some(c => selectedIngredients.has(c.id));
-        const syncedDishes = manifest.dishChanges.some(c => selectedDishes.has(c.id));
+        const syncedIngredients = ingredientChanges.some(c => selectedIngredients.has(c.id));
+        const syncedDishes = dishChanges.some(c => selectedDishes.has(c.id));
 
         onDone({
             ingredientsVersion: syncedIngredients ? manifest.ingredientsVersion : "",
@@ -230,7 +282,7 @@ export const SharedSyncModal: React.FC<Props> = ({
             title={
                 <Flex align="center" gap={8}>
                     <CloudDownloadOutlined style={{ color: "#1677ff", fontSize: 18 }} />
-                    <span>Có dữ liệu dùng chung mới</span>
+                    <span>{hasManifestChanges ? "Có dữ liệu dùng chung mới" : "Đồng bộ dữ liệu dùng chung"}</span>
                 </Flex>
             }
             onCancel={onCancel}
@@ -251,7 +303,9 @@ export const SharedSyncModal: React.FC<Props> = ({
             width={520}
         >
             <Typography.Text type="secondary" style={{ fontSize: 13 }}>
-                Chọn những mục bạn muốn cập nhật vào thiết bị này:
+                {hasManifestChanges
+                    ? "Chọn những mục bạn muốn cập nhật vào thiết bị này:"
+                    : "Không có thay đổi mới trong manifest. Bạn vẫn có thể ép đồng bộ dữ liệu từ bản dùng chung:"}
             </Typography.Text>
 
             {isFetching && (
@@ -267,14 +321,14 @@ export const SharedSyncModal: React.FC<Props> = ({
             )}
 
             {/* ── Ingredients ──────────────────────────────────────── */}
-            {hasIngredientChanges && (
+            {hasIngredientRows && (
                 <>
                     <Divider orientation="left" style={{ marginTop: 16, marginBottom: 8 }}>
                         <Typography.Text strong>Nguyên liệu</Typography.Text>
-                        <Badge count={manifest.ingredientChanges.length} style={{ marginLeft: 8, backgroundColor: "#1677ff" }} />
+                        <Badge count={ingredientChanges.length} style={{ marginLeft: 8, backgroundColor: "#1677ff" }} />
                     </Divider>
                     <Flex vertical gap={6}>
-                        {manifest.ingredientChanges.map(c => (
+                        {ingredientChanges.map(c => (
                             <Flex key={c.id} data-testid={`shared-sync-ingredient-${c.id}`} align="center" gap={8}>
                                 <Checkbox
                                     data-testid={`shared-sync-ingredient-checkbox-${c.id}`}
@@ -290,11 +344,11 @@ export const SharedSyncModal: React.FC<Props> = ({
             )}
 
             {/* ── Dishes ───────────────────────────────────────────── */}
-            {hasDishChanges && (
+            {hasDishRows && (
                 <>
                     <Divider orientation="left" style={{ marginTop: 16, marginBottom: 8 }}>
                         <Typography.Text strong>Món ăn</Typography.Text>
-                        <Badge count={manifest.dishChanges.length} style={{ marginLeft: 8, backgroundColor: "#1677ff" }} />
+                        <Badge count={dishChanges.length} style={{ marginLeft: 8, backgroundColor: "#1677ff" }} />
                     </Divider>
                     {impactStatus === "pending" && (
                         <Flex align="center" gap={8} style={{ marginBottom: 8 }}>
@@ -303,7 +357,7 @@ export const SharedSyncModal: React.FC<Props> = ({
                         </Flex>
                     )}
                     <Flex vertical gap={6}>
-                        {manifest.dishChanges.map(c => (
+                        {dishChanges.map(c => (
                             <Flex key={c.id} data-testid={`shared-sync-dish-${c.id}`} vertical gap={4}>
                                 <Flex align="center" gap={8}>
                                     <Checkbox
@@ -327,6 +381,11 @@ export const SharedSyncModal: React.FC<Props> = ({
                         ))}
                     </Flex>
                 </>
+            )}
+            {!isFetching && sharedData && !hasIngredientRows && !hasDishRows && (
+                <Typography.Text type="secondary" style={{ display: "block", marginTop: 12, fontSize: 12 }}>
+                    Không có mục dùng chung nào để đồng bộ.
+                </Typography.Text>
             )}
         </Modal>
     );

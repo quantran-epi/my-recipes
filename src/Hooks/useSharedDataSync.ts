@@ -20,12 +20,17 @@ export interface PendingSync {
     manifest: SharedManifest;
     hasIngredientChanges: boolean;
     hasDishChanges: boolean;
+    force?: boolean;
+}
+
+export type CheckSharedDataUpdatesOptions = {
+    force?: boolean;
 }
 
 export interface UseSharedDataSyncResult {
     pendingSync: PendingSync | null;
     isSyncChecking: boolean;
-    checkNow: () => Promise<PendingSync | null>;
+    checkNow: (options?: CheckSharedDataUpdatesOptions) => Promise<PendingSync | null>;
     dismissSync: () => void;
     markSynced: (versions: SyncedVersions) => void;
 }
@@ -42,7 +47,7 @@ export const saveSyncedVersions = (v: SyncedVersions) => {
     localStorage.setItem(SYNCED_VERSIONS_KEY, JSON.stringify(v));
 };
 
-export const checkSharedDataUpdates = async (): Promise<PendingSync | null> => {
+export const checkSharedDataUpdates = async (options?: CheckSharedDataUpdatesOptions): Promise<PendingSync | null> => {
     if (!navigator.onLine) {
         throw new Error("Không có mạng");
     }
@@ -74,7 +79,7 @@ export const checkSharedDataUpdates = async (): Promise<PendingSync | null> => {
         manifest.dishesVersion !== synced.dishesVersion &&
         dishChanges.length > 0;
 
-    if (!hasIngredientChanges && !hasDishChanges) return null;
+    if (!hasIngredientChanges && !hasDishChanges && !options?.force) return null;
 
     return {
         manifest: {
@@ -84,6 +89,7 @@ export const checkSharedDataUpdates = async (): Promise<PendingSync | null> => {
         },
         hasIngredientChanges,
         hasDishChanges,
+        force: options?.force,
     };
 };
 
@@ -91,10 +97,10 @@ export const useSharedDataSync = (): UseSharedDataSyncResult => {
     const [pendingSync, setPendingSync] = useState<PendingSync | null>(null);
     const [isSyncChecking, setIsSyncChecking] = useState(false);
 
-    const checkNow = async () => {
+    const checkNow = async (options?: CheckSharedDataUpdatesOptions) => {
         setIsSyncChecking(true);
         try {
-            const nextPendingSync = await checkSharedDataUpdates();
+            const nextPendingSync = await checkSharedDataUpdates(options);
             setPendingSync(nextPendingSync);
             return nextPendingSync;
         } finally {

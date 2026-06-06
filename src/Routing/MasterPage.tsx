@@ -235,7 +235,7 @@ const SidebarDrawer = () => {
 
     const onImportCloud = async () => {
         try {
-            const nextPendingSync = await checkNow();
+            const nextPendingSync = await checkNow({ force: true });
             if (nextPendingSync) {
                 setOpen(false);
             } else {
@@ -421,6 +421,7 @@ const SidebarDrawer = () => {
                     manifest={pendingSync.manifest}
                     hasIngredientChanges={pendingSync.hasIngredientChanges}
                     hasDishChanges={pendingSync.hasDishChanges}
+                    force={pendingSync.force}
                     onDone={onSharedSyncDone}
                     onCancel={dismissSync}
                 />
