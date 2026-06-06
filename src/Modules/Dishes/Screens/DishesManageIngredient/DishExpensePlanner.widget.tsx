@@ -44,6 +44,7 @@ type PreviewDish = {
 
 type DishExpensePlannerWidgetProps = {
     initialDish?: Dishes;
+    initialDishes?: Dishes[];
     initialTargetServings?: number;
     allowDishSelection?: boolean;
     onOpenFullPlanner?: () => void;
@@ -84,12 +85,25 @@ const createPlannerDish = (dish: Dishes, targetServings?: number): PlannerDish =
     servings: DishServingHelper.getTargetServings(dish, targetServings),
 });
 
-const findPlannerDish = (dishId: string, dishById: Map<string, Dishes>, fallbackDish?: Dishes): Dishes | undefined => {
-    return dishById.get(dishId) ?? (fallbackDish?.id === dishId ? fallbackDish : undefined);
+const createPlannerDishes = (dishes: Dishes[], targetServings?: number): PlannerDish[] => {
+    const seen = new Set<string>();
+    const applyTargetServings = dishes.length === 1;
+    return dishes.reduce((result, dish) => {
+        if (seen.has(dish.id)) return result;
+        seen.add(dish.id);
+        result.push(createPlannerDish(dish, applyTargetServings ? targetServings : undefined));
+        return result;
+    }, [] as PlannerDish[]);
 };
 
-const getSeedKey = (dish?: Dishes, targetServings?: number): string => {
-    return dish ? `${dish.id}:${DishServingHelper.getTargetServings(dish, targetServings)}` : "";
+const findPlannerDish = (dishId: string, dishById: Map<string, Dishes>, fallbackDishes: Dishes[] = []): Dishes | undefined => {
+    return dishById.get(dishId) ?? fallbackDishes.find(dish => dish.id === dishId);
+};
+
+const getSeedKey = (dishes: Dishes[], targetServings?: number): string => {
+    if (dishes.length === 0) return "";
+    const applyTargetServings = dishes.length === 1;
+    return dishes.map(dish => `${dish.id}:${DishServingHelper.getTargetServings(dish, applyTargetServings ? targetServings : undefined)}`).join("|");
 };
 
 const getPlannerRowBackground = (row: IngredientNeedEstimateRow): string => {
@@ -152,6 +166,7 @@ const IngredientCoverageRow: React.FunctionComponent<{ row: IngredientNeedEstima
 
 export const DishExpensePlannerWidget: React.FunctionComponent<DishExpensePlannerWidgetProps> = ({
     initialDish,
+    initialDishes,
     initialTargetServings,
     allowDishSelection = true,
     onOpenFullPlanner,
@@ -161,8 +176,12 @@ export const DishExpensePlannerWidget: React.FunctionComponent<DishExpensePlanne
     const dishById = useSelector(selectDishesById);
     const ingredients = useSelector(selectIngredients);
     const inventoryItems = useSelector(selectInventory);
-    const [plannerDishes, setPlannerDishes] = useState<PlannerDish[]>(() => initialDish ? [createPlannerDish(initialDish, initialTargetServings)] : []);
-    const [appliedSeedKey, setAppliedSeedKey] = useState(() => getSeedKey(initialDish, initialTargetServings));
+    const seedDishes = useMemo(() => {
+        if (initialDishes && initialDishes.length > 0) return initialDishes;
+        return initialDish ? [initialDish] : [];
+    }, [initialDish, initialDishes]);
+    const [plannerDishes, setPlannerDishes] = useState<PlannerDish[]>(() => createPlannerDishes(seedDishes, initialTargetServings));
+    const [appliedSeedKey, setAppliedSeedKey] = useState(() => getSeedKey(seedDishes, initialTargetServings));
     const [dishToAdd, setDishToAdd] = useState<string>();
     const [dishSearch, setDishSearch] = useState("");
     const [dishSelectKey, setDishSelectKey] = useState(0);
@@ -170,18 +189,18 @@ export const DishExpensePlannerWidget: React.FunctionComponent<DishExpensePlanne
     const [createShoppingListOpen, setCreateShoppingListOpen] = useState(false);
     const navigate = useNavigate();
     useEffect(() => {
-        const nextSeedKey = getSeedKey(initialDish, initialTargetServings);
-        if (!initialDish || !nextSeedKey || appliedSeedKey === nextSeedKey) return;
-        setPlannerDishes([createPlannerDish(initialDish, initialTargetServings)]);
+        const nextSeedKey = getSeedKey(seedDishes, initialTargetServings);
+        if (!nextSeedKey || appliedSeedKey === nextSeedKey) return;
+        setPlannerDishes(createPlannerDishes(seedDishes, initialTargetServings));
         setAppliedSeedKey(nextSeedKey);
-    }, [initialDish, initialTargetServings, appliedSeedKey]);
+    }, [seedDishes, initialTargetServings, appliedSeedKey]);
 
     const selectedDishIds = useMemo(() => new Set(plannerDishes.map(item => item.dishId)), [plannerDishes]);
 
     const selectedDishDetails = useMemo<PlannerDishDetail[]>(() => {
         return plannerDishes
             .map(item => {
-                const selectedDish = findPlannerDish(item.dishId, dishById, initialDish);
+                const selectedDish = findPlannerDish(item.dishId, dishById, seedDishes);
                 if (!selectedDish) return null;
                 const baseServings = DishServingHelper.getBaseServings(selectedDish);
                 return {
@@ -191,7 +210,7 @@ export const DishExpensePlannerWidget: React.FunctionComponent<DishExpensePlanne
                 };
             })
             .filter(Boolean) as PlannerDishDetail[];
-    }, [plannerDishes, dishById, initialDish]);
+    }, [plannerDishes, dishById, seedDishes]);
 
     const shoppingListDishIds = useMemo(() => selectedDishDetails.map(item => item.dish.id), [selectedDishDetails]);
     const shoppingListDishServings = useMemo(() => selectedDishDetails.reduce((result, item) => {
@@ -252,7 +271,7 @@ export const DishExpensePlannerWidget: React.FunctionComponent<DishExpensePlanne
     };
 
     const _onServingChange = (dishId: string, value: number) => {
-        const selectedDish = findPlannerDish(dishId, dishById, initialDish);
+        const selectedDish = findPlannerDish(dishId, dishById, seedDishes);
         const baseServings = DishServingHelper.getBaseServings(selectedDish);
         setPlannerDishes(current => current.map(item => item.dishId === dishId
             ? { ...item, servings: DishServingHelper.normalizeTargetServings(value, baseServings) }

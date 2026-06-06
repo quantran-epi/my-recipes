@@ -1,4 +1,4 @@
-import { BulbOutlined, ClockCircleOutlined, LeftOutlined, ShoppingCartOutlined, ThunderboltOutlined } from "@ant-design/icons";
+import { BulbOutlined, CalculatorOutlined, ClockCircleOutlined, LeftOutlined, ShoppingCartOutlined, ThunderboltOutlined } from "@ant-design/icons";
 import { Button } from "@components/Button";
 import { Image } from "@components/Image";
 import { Box } from "@components/Layout/Box";
@@ -6,6 +6,7 @@ import { Space } from "@components/Layout/Space";
 import { Stack } from "@components/Layout/Stack";
 import { DeferredModalContent, Modal } from "@components/Modal";
 import { Tag } from "@components/Tag";
+import { Tooltip } from "@components/Tootip";
 import { Typography } from "@components/Typography";
 import { useScheduledCalculation, useToggle } from "@hooks";
 import { DishScorer, ScoredDish, ScoredDishGroup } from "../Helpers/DishScorer";
@@ -209,6 +210,55 @@ export const DishSuggesterScreen: React.FC<DishSuggesterScreenProps> = ({ open, 
 
     const _missingIngredientName = (id: string) => ingredientsById.get(id)?.name ?? id;
 
+    const _onOpenExpensePlanner = (dishIds: string[]) => {
+        if (dishIds.length === 0) return;
+        navigate(RootRoutes.AuthorizedRoutes.ExpensePlanner(dishIds));
+        _onClose();
+    };
+
+    const actionButtonStyle: React.CSSProperties = {
+        width: 40,
+        height: 40,
+        minWidth: 40,
+        paddingInline: 0,
+        borderRadius: 14,
+        display: "inline-flex",
+        alignItems: "center",
+        justifyContent: "center",
+    };
+
+    const ResultsActions = ({ dishIds, pending = false }: { dishIds: string[]; pending?: boolean }) => {
+        const disabled = pending || dishIds.length === 0;
+
+        return <Stack gap={8} align="center" style={{ marginLeft: "auto" }}>
+            <Tooltip title={`Tạo lịch mua (${dishIds.length})`}>
+                <span>
+                    <Button
+                        type="primary"
+                        disabled={disabled}
+                        aria-label={`Tạo lịch mua cho ${dishIds.length} món`}
+                        data-testid="dish-suggester-create-shopping-list-button"
+                        icon={<ShoppingCartOutlined />}
+                        onClick={toggleShoppingListAdd.show}
+                        style={actionButtonStyle}
+                    />
+                </span>
+            </Tooltip>
+            <Tooltip title={`Kế hoạch chi phí (${dishIds.length})`}>
+                <span>
+                    <Button
+                        disabled={disabled}
+                        aria-label={`Mở kế hoạch chi phí cho ${dishIds.length} món`}
+                        data-testid="dish-suggester-expense-planner-button"
+                        icon={<CalculatorOutlined />}
+                        onClick={() => _onOpenExpensePlanner(dishIds)}
+                        style={actionButtonStyle}
+                    />
+                </span>
+            </Tooltip>
+        </Stack>;
+    };
+
     const ResultsFooter = ({ dishIds, pending = false }: { dishIds: string[]; pending?: boolean }) => (
         <>
             {dishIds.length > 0 && (
@@ -251,15 +301,7 @@ export const DishSuggesterScreen: React.FC<DishSuggesterScreenProps> = ({ open, 
                         Quay lại
                     </Button>
                 )}
-                <Button
-                    type="primary"
-                    disabled={pending || dishIds.length === 0}
-                    icon={<ShoppingCartOutlined />}
-                    onClick={toggleShoppingListAdd.show}
-                    style={{ borderRadius: 20, paddingInline: 20, marginLeft: "auto" }}
-                >
-                    Tạo giỏ hàng ({dishIds.length})
-                </Button>
+                <ResultsActions dishIds={dishIds} pending={pending} />
             </Stack>
         </>
     );
@@ -625,15 +667,7 @@ export const DishSuggesterScreen: React.FC<DishSuggesterScreenProps> = ({ open, 
                         <Button onClick={_onBack} icon={<LeftOutlined />} style={{ borderRadius: 20 }}>
                             Quay lại
                         </Button>
-                        <Button
-                            type="primary"
-                            disabled={durationPending || selectedDishIds.length === 0}
-                            icon={<ShoppingCartOutlined />}
-                            onClick={toggleShoppingListAdd.show}
-                            style={{ borderRadius: 20, paddingInline: 20 }}
-                        >
-                            Tạo giỏ hàng ({selectedDishIds.length})
-                        </Button>
+                        <ResultsActions dishIds={selectedDishIds} pending={durationPending} />
                     </Stack>
                 </>
             )}

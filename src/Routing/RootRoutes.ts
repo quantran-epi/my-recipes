@@ -4,7 +4,13 @@ import ShoppingListRoutes from '@modules/ShoppingList/Routing/ShoppingListRouteC
 import ScheduledMealRoutes from '@modules/ScheduledMeal/Routing/ScheduledMealRouteConfig';
 import { RouteHelpers } from '@common/Helpers/RouteHelper';
 
-const ExpensePlanner = (dishId?: string, targetServings?: number) => {
+const ExpensePlanner = (dishId?: string | string[], targetServings?: number) => {
+    if (Array.isArray(dishId)) {
+        const dishIds = dishId.filter(Boolean);
+        if (dishIds.length === 0) return RouteHelpers.CreateRoute('/expense-planner');
+        return RouteHelpers.CreateRoute('/expense-planner', [], { dishes: dishIds.join(',') });
+    }
+
     if (!dishId) return RouteHelpers.CreateRoute('/expense-planner');
     return RouteHelpers.CreateRoute('/expense-planner', [], {
         dish: dishId,

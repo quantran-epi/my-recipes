@@ -45,6 +45,7 @@ export const DishSuggestionItem: React.FC<DishSuggestionItemProps> = ({ scored, 
 
     return (
         <div
+            data-testid={`dish-suggestion-item-${scored.dish.id}`}
             style={{
                 borderRadius: 10,
                 border: `1.5px solid ${selected ? "#52c41a" : "#ebebeb"}`,

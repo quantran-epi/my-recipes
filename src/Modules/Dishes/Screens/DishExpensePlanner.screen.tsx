@@ -14,8 +14,16 @@ export const DishExpensePlannerScreen = () => {
     const dishesById = useSelector(selectDishesById);
     const [searchParams] = useSearchParams();
     const initialDishId = searchParams.get("dish") ?? undefined;
+    const initialDishIdsParam = searchParams.get("dishes") ?? "";
+    const initialDishIds = React.useMemo(() => initialDishIdsParam
+        .split(",")
+        .map(item => item.trim())
+        .filter(Boolean), [initialDishIdsParam]);
     const initialTargetServings = Number(searchParams.get("servings"));
     const initialDish = initialDishId ? dishesById.get(initialDishId) : undefined;
+    const initialDishes = React.useMemo(() => initialDishIds
+        .map(id => dishesById.get(id))
+        .filter((dish): dish is NonNullable<typeof dish> => Boolean(dish)), [dishesById, initialDishIds]);
     const normalizedInitialServings = isFinite(initialTargetServings) && initialTargetServings > 0 ? initialTargetServings : undefined;
 
     return <div data-testid="expense-planner-screen" style={{ display: "flex", flexDirection: "column", gap: 12, paddingBottom: 20 }}>
@@ -40,6 +48,7 @@ export const DishExpensePlannerScreen = () => {
 
         <DishExpensePlannerWidget
             initialDish={initialDish}
+            initialDishes={initialDishes}
             initialTargetServings={normalizedInitialServings}
             allowDishSelection
         />
