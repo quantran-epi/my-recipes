@@ -1,14 +1,13 @@
-import { CloudDownloadOutlined, CloudUploadOutlined, ExportOutlined, HistoryOutlined, ImportOutlined, LockOutlined, MenuOutlined, UnlockOutlined, FireOutlined, SettingOutlined, QuestionCircleOutlined, SearchOutlined, LoadingOutlined } from "@ant-design/icons";
+import { CloudDownloadOutlined, CloudUploadOutlined, ExportOutlined, HistoryOutlined, ImportOutlined, LockOutlined, MenuOutlined, UnlockOutlined, FireOutlined, QuestionCircleOutlined, SearchOutlined, LoadingOutlined } from "@ant-design/icons";
 import { ObjectPropertyHelper } from "@common/Helpers/ObjectProperty";
 import { Button } from "@components/Button";
-import { TextArea, Input } from "@components/Form/Input";
+import { TextArea } from "@components/Form/Input";
 import { Image } from "@components/Image";
 import { Box } from "@components/Layout/Box";
 import { Content } from "@components/Layout/Content";
 import { Header } from "@components/Layout/Header";
 import { Space } from "@components/Layout/Space";
 import { Stack } from "@components/Layout/Stack";
-import { Menu } from "@components/Menu";
 import { useMessage } from "@components/Message";
 import { DeferredModalContent, Modal } from "@components/Modal";
 import { SmartForm, useSmartForm } from "@components/SmartForm";
@@ -24,8 +23,6 @@ import { UserGuideScreen } from "@modules/Home/Screens/UserGuide.screen";
 import { GlobalSearchScreen } from "@modules/Home/Screens/GlobalSearch.screen";
 import { addDishes, resetDishes } from "@store/Reducers/DishesReducer";
 import { addIngredient, resetIngredient } from "@store/Reducers/IngredientReducer";
-import { addScheduledMeal, resetScheduleMeals } from "@store/Reducers/ScheduledMealReducer";
-import { addShoppingList, resetShoppingList } from "@store/Reducers/ShoppingListReducer";
 import { selectCookingSessions, selectCurrentFeatureName, selectDishesById } from "@store/Selectors";
 import { Drawer, Flex, Input as AntInput, Layout, Divider } from "antd";
 import React, { useState } from "react";
@@ -46,62 +43,6 @@ const layoutStyles: React.CSSProperties = {
     height: "100%"
 }
 
-const sidebarTransitionOverlayStyle: React.CSSProperties = {
-    position: "fixed",
-    top: 60,
-    left: 0,
-    right: 0,
-    bottom: 80,
-    zIndex: 850,
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    background: "linear-gradient(180deg, rgba(255,255,255,0.9), rgba(244,248,255,0.86))",
-    backdropFilter: "blur(6px)",
-    pointerEvents: "auto",
-};
-
-const sidebarTransitionContentStyle: React.CSSProperties = {
-    display: "flex",
-    alignItems: "center",
-    gap: 12,
-    minWidth: 190,
-    padding: "13px 16px",
-    borderRadius: 18,
-    border: "1px solid rgba(22,119,255,0.14)",
-    background: "rgba(255,255,255,0.96)",
-    boxShadow: "0 18px 42px rgba(15,35,80,0.14)",
-    color: "#12355f",
-};
-
-const sidebarTransitionIconStyle: React.CSSProperties = {
-    width: 36,
-    height: 36,
-    borderRadius: 14,
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    background: "linear-gradient(135deg, #e6f4ff, #f6ffed)",
-    color: "#1677ff",
-    fontSize: 18,
-    boxShadow: "inset 0 0 0 1px rgba(22,119,255,0.08)",
-};
-
-const sidebarTransitionTextStyle: React.CSSProperties = {
-    display: "block",
-    color: "#102a43",
-    fontSize: 13,
-    fontWeight: 700,
-    lineHeight: "18px",
-};
-
-const sidebarTransitionHintStyle: React.CSSProperties = {
-    display: "block",
-    color: "#6b7c93",
-    fontSize: 11,
-    lineHeight: "15px",
-};
-
 const drawerToolsPlaceholderStyle: React.CSSProperties = {
     minHeight: 48,
     display: "flex",
@@ -109,6 +50,28 @@ const drawerToolsPlaceholderStyle: React.CSSProperties = {
     justifyContent: "center",
     color: "#8c8c8c",
 };
+
+const sidebarNavListStyle: React.CSSProperties = {
+    padding: "8px 4px",
+};
+
+const sidebarNavButtonStyle = (active: boolean): React.CSSProperties => ({
+    width: "100%",
+    minHeight: 48,
+    display: "flex",
+    alignItems: "center",
+    gap: 10,
+    padding: "9px 12px",
+    border: 0,
+    borderRadius: 8,
+    background: active ? "#f0f5ff" : "transparent",
+    color: active ? "#1677ff" : "#1f1f1f",
+    font: "inherit",
+    fontSize: 16,
+    fontWeight: active ? 650 : 500,
+    textAlign: "left",
+    cursor: "pointer",
+});
 
 const useDeferredDrawerTools = (open: boolean) => {
     const [ready, setReady] = React.useState(false);
@@ -213,17 +176,6 @@ export const MasterPage = () => {
                 )}
                 <Outlet />
             </Content>
-            {appShellNavigation.isRouteFeedbackActive && (
-                <div data-testid="app-route-feedback" style={sidebarTransitionOverlayStyle}>
-                    <div style={sidebarTransitionContentStyle}>
-                        <div style={sidebarTransitionIconStyle}><LoadingOutlined /></div>
-                        <div>
-                            <span style={sidebarTransitionTextStyle}>Đang mở trang</span>
-                            <span style={sidebarTransitionHintStyle}>Chuẩn bị dữ liệu hiển thị</span>
-                        </div>
-                    </div>
-                </div>
-            )}
             <BottomTabNavigator />
             <CookingPill />
             {toggleSearch.value && <GlobalSearchScreen open={toggleSearch.value} onClose={toggleSearch.hide} onNavigate={appShellNavigation.navigateWithFeedback} />}
@@ -243,8 +195,9 @@ const SidebarDrawer = () => {
     const message = useMessage();
     const toggleHistory = useToggle();
     const toggleGuide = useToggle();
-    const { navigateWithFeedback } = useAppShellNavigation();
+    const { navigateWithFeedback, startRouteFeedback } = useAppShellNavigation();
     const toolsReady = useDeferredDrawerTools(open);
+    const location = useLocation();
 
     const showDrawer = () => {
         setOpen(true);
@@ -295,6 +248,15 @@ const SidebarDrawer = () => {
         }
     };
 
+    const sidebarNavItems = [
+        { key: 'dashboard', href: RootRoutes.AuthorizedRoutes.Root(), icon: LogoIcon, label: 'Tổng quan' },
+        { key: 'ingredients', href: RootRoutes.AuthorizedRoutes.IngredientRoutes.List(), icon: IngredientIcon, label: 'Nguyên liệu' },
+        { key: 'dishes', href: RootRoutes.AuthorizedRoutes.DishesRoutes.List(), icon: DishesIcon, label: 'Món ăn' },
+        { key: 'expensePlanner', href: RootRoutes.AuthorizedRoutes.ExpensePlanner(), icon: BudgetIcon, label: 'Kế hoạch chi phí' },
+        { key: 'shoppingList', href: RootRoutes.AuthorizedRoutes.ShoppingListRoutes.List(), icon: ShoppingListIcon, label: 'Lịch mua sắm' },
+        { key: 'meals', href: RootRoutes.AuthorizedRoutes.ScheduledMealRoutes.List(), icon: MealsIcon, label: 'Thực đơn' },
+    ];
+
     return (
         <React.Fragment>
             <Button type="primary" data-testid="sidebar-drawer-button" onClick={showDrawer} icon={<MenuOutlined />} />
@@ -314,47 +276,23 @@ const SidebarDrawer = () => {
             >
                 {/* ── Navigation ── */}
                 <div data-testid="sidebar-drawer-primary-nav">
-                    <Menu
-                        style={{ borderInlineEnd: "none" }}
-                        items={[
-                            {
-                                key: 'dashboard', label: <Flex align="center" gap={10}>
-                                    <Image src={LogoIcon} width={24} alt="" />
-                                    <span>Tổng quan</span>
-                                </Flex>, onClick: () => onNavigate(RootRoutes.AuthorizedRoutes.Root())
-                            },
-                            {
-                                key: "ingredients", label: <Flex align="center" gap={10}>
-                                    <Image src={IngredientIcon} width={24} alt="" />
-                                    <span>Nguyên liệu</span>
-                                </Flex>, onClick: () => onNavigate(RootRoutes.AuthorizedRoutes.IngredientRoutes.List())
-                            },
-                            {
-                                key: "dishes", label: <Flex align="center" gap={10}>
-                                    <Image src={DishesIcon} width={24} alt="" />
-                                    <span>Món ăn</span>
-                                </Flex>, onClick: () => onNavigate(RootRoutes.AuthorizedRoutes.DishesRoutes.List())
-                            },
-                            {
-                                key: "expensePlanner", label: <Flex align="center" gap={10}>
-                                    <Image src={BudgetIcon} width={24} alt="" />
-                                    <span>Kế hoạch chi phí</span>
-                                </Flex>, onClick: () => onNavigate(RootRoutes.AuthorizedRoutes.ExpensePlanner())
-                            },
-                            {
-                                key: "shoppingList", label: <Flex align="center" gap={10}>
-                                    <Image src={ShoppingListIcon} width={24} alt="" />
-                                    <span>Lịch mua sắm</span>
-                                </Flex>, onClick: () => onNavigate(RootRoutes.AuthorizedRoutes.ShoppingListRoutes.List())
-                            },
-                            {
-                                key: "meals", label: <Flex align="center" gap={10}>
-                                    <Image src={MealsIcon} width={24} alt="" />
-                                    <span>Thực đơn</span>
-                                </Flex>, onClick: () => onNavigate(RootRoutes.AuthorizedRoutes.ScheduledMealRoutes.List())
-                            }
-                        ]}
-                    />
+                    <div style={sidebarNavListStyle}>
+                        {sidebarNavItems.map(item => (
+                            <button
+                                key={item.key}
+                                type="button"
+                                data-testid={`sidebar-nav-${item.key}`}
+                                style={sidebarNavButtonStyle(location.pathname === item.href)}
+                                onPointerDown={() => {
+                                    if (location.pathname !== item.href) startRouteFeedback(item.href);
+                                }}
+                                onClick={() => onNavigate(item.href)}
+                            >
+                                <Image src={item.icon} width={24} alt="" />
+                                <span>{item.label}</span>
+                            </button>
+                        ))}
+                    </div>
                 </div>
 
                 <Box data-testid="sidebar-drawer-tools" style={{ padding: "0 16px 24px" }}>

@@ -56,6 +56,14 @@ Phase 3 evidence is written to:
 
 Each evidence file includes `networkMode`, `imageMode`, interaction timings, warnings, resource summary, and diagnostics for GitHub Raw/shared-manifest/shared-data/image request counts. Strict Phase 3 checks unregister service workers and clear caches through `seedApp`; production service-worker behavior is optional diagnostic evidence only and is not part of the strict gate.
 
+Run the Phase 4 app-shell/navigation responsiveness gate:
+
+```bash
+E2E_BROWSER_CHANNEL=chrome PERF_DATASET=daily PERF_NETWORK_MODE=online-normal npm run test:e2e:performance
+```
+
+The Phase 4 gate adds drawer shell, drawer route navigation, bottom-tab navigation, global-search navigation, and large-list detail-route navigation measurements. Practical budgets are drawer shell `1000 ms`, route feedback `1000 ms`, and route content-ready `5000 ms`; drawer shell is enforced, while route-feedback and route content-ready timings are recorded as warning evidence for follow-up. Latest PERF-10 output keeps route content under `5000 ms` but still records route-feedback shell misses above `1000 ms`. The `100 ms` shell target remains warning/ideal evidence. Evidence is written to `test-results/performance/perf-10-phase4-app-shell-navigation.json` and `.md`.
+
 Capture Phase 1 performance baseline evidence:
 
 ```bash
@@ -110,6 +118,7 @@ Important seeded entities:
 | PERF-LIST-001 | Phase 2 large-list responsiveness | `tests/e2e/performance-regression.spec.ts` - `captures required large-list interaction timings` | Daily performance seed, GitHub Raw stubbed unless `PERF_REAL_NETWORK=1` | Open dish, ingredient, and shopping-list screens; measure search reset, modal/detail open, and row-menu/action open | `perf-daily-*` generated IDs | Each interaction records separate shell/content timing and stays inside Phase 2 practical budgets; 100 ms shell misses are warnings | Automated |
 | PERF-LIST-002 | Virtualized row stability | `tests/e2e/performance-regression.spec.ts` row spacing and drag-scroll tests | Regression seed plus large paged ingredient rows | Inspect row gaps, dynamic row frames, page-status pills, drag over row action, then click intentionally | `ing-chicken`, `ing-paged-last`, `perf-daily-*` generated IDs | Rows do not overlap or clip, page-status pills have `pointer-events: none`, drag does not open a modal, and intentional click still opens one | Automated |
 | PERF-NET-001 | Phase 3 online/offline cost isolation | `tests/e2e/performance-regression.spec.ts` - `phase3-comparison online/offline cost isolation` | Daily performance seed, GitHub Raw and image behavior controlled by `performanceNetwork` | Run `E2E_BROWSER_CHANNEL=chrome npm run test:e2e:performance:phase3` across `online-normal`, `browser-offline`, and `mocked-slow-network` | `perf-daily-*` generated IDs | Dish, ingredient, and shopping-list hot paths stay inside Phase 2 practical budgets; evidence records network mode, image mode, resources, and GitHub/image diagnostics | Automated |
+| PERF-SHELL-001 | Phase 4 app-shell navigation responsiveness | `tests/e2e/performance-regression.spec.ts` - `PERF-10 phase4 app-shell navigation responsiveness`; `tests/e2e/app-shell-navigation.spec.ts` | Daily performance seed and drawer/search/detail hooks from Phase 4 | Open drawer from a large dish list, navigate through drawer and bottom tab, navigate through global search, and open dish detail route from a large list modal | `perf-daily-*` generated IDs | Drawer shell appears before tools, route feedback appears quickly and clears, drawer tools remain available, and timing evidence is written to `perf-10-phase4-app-shell-navigation` | Automated |
 | ING-001 | Ingredient detail and inventory status | Backlog | Ingredient detail data seeded | Open ingredient detail, inspect preservation, expiry, unit rules, price range | `ing-chicken`, `ing-water` | Detail shows unit constraints, always available flag, preservation/expiry fields, price range | Planned |
 | INV-001 | Inventory batch expiry and discard | Backlog | Expired and non-expired batches seeded | Open inventory modal/detail, inspect expired batch, discard expired batch with confirmation | `ing-expired` | Expired batch is marked expired, unusable for suggestions, can be discarded after confirmation | Planned |
 | COOK-001 | Cooking session completion | Backlog | Dish has steps and inventory | Start cooking, advance steps, finish cooking | `dish-com-ga` | Cooking session progresses step by step and deducts usable inventory on finish | Planned |

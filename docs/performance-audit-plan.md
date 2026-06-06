@@ -110,6 +110,38 @@ Latest Phase 3 comparison evidence from 2026-06-05 passed all three modes. Onlin
 
 Production service-worker behavior remains optional diagnostic evidence only. The strict Phase 3 checks intentionally use the existing `seedApp` cleanup path to unregister service workers and clear caches so service-worker state does not hide or create list-interaction regressions. If a production/service-worker check is needed, record it separately as diagnostic evidence and do not treat it as the strict Phase 3 gate.
 
+## Phase 4 App-Shell Navigation Gates
+
+Phase 4 measures whether the app shell acknowledges navigation quickly from large-list screens. The gate covers drawer shell open, drawer route navigation, bottom-tab navigation, global-search navigation, and dish list detail-route navigation.
+
+Strict Phase 4 daily command:
+
+```bash
+E2E_BROWSER_CHANNEL=chrome PERF_DATASET=daily PERF_NETWORK_MODE=online-normal npm run test:e2e:performance
+```
+
+Phase 4 evidence is written to:
+
+- `test-results/performance/perf-10-phase4-app-shell-navigation.json`
+- `test-results/performance/perf-10-phase4-app-shell-navigation.md`
+
+Phase 4 practical budgets are defined in `tests/e2e/performance-regression.spec.ts` as `phase4Budgets`. The drawer shell open budget is enforced in the current gate. Route-feedback and route destination content-ready timings are recorded as warning evidence; the latest run keeps destination content under `5000 ms`, while route-feedback shell timings still exceed the `1000 ms` feedback target on some navigation paths.
+
+| Interaction family | Shell-visible budget | Content-ready budget | Notes |
+|---|---:|---:|---|
+| Drawer shell open | 1000 ms | 5000 ms | Enforced. Primary route links should appear first; deferred tools may finish after the shell. |
+| Route destination content-ready | warning evidence | 5000 ms | Warning evidence for drawer navigation, bottom tabs, global search, and list detail routes; latest PERF-10 output records any overage for follow-up. |
+| Route feedback shell | 1000 ms | n/a | Warning evidence for now. Latest PERF-10 route-feedback shell timings still exceed this on some paths, so this remains the next tightening target. |
+| Ideal shell-visible target | 100 ms | n/a | Remains warning/ideal evidence so visible slowdowns are easy to notice without failing practical smoke budgets. |
+
+What a non-technical user can check by eye after Phase 4:
+
+- The drawer shell appears quickly from a large list, with route links visible before drawer tools.
+- Route feedback appears right away after drawer, tab, search, or detail-route navigation.
+- Tapping the same pending destination repeatedly should not stack work or leave the app blocked.
+- Sync, Gist backup, cooking history, user guide, and admin account controls still appear after the drawer settles.
+- Existing cooking, shopping, and global-search workflows still work; Phase 4 should not make the UI simpler by removing tools.
+
 ## How To Use This File
 
 - To implement one item, prompt: `implement PERF-01`.

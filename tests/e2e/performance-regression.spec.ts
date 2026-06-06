@@ -1,4 +1,4 @@
-import { expect, test as base, type Page } from '@playwright/test';
+import { expect, test as base, type Locator, type Page } from '@playwright/test';
 import { seedApp } from './fixtures/seedApp';
 import { createPerformanceSeed, type PerformanceDatasetName } from './fixtures/performanceSeed';
 import type { PerformanceImageMode, PerformanceNetworkMode } from './fixtures/performanceNetwork';
@@ -40,6 +40,13 @@ const phase2Budgets = {
   modalContentMs: 5_000,
   searchResetShellMs: 2_500,
   searchResetContentMs: 5_000,
+};
+
+const phase4Budgets = {
+  shellTargetMs: 100,
+  drawerShellMs: 1000,
+  routeFeedbackMs: 1000,
+  routeContentMs: 5000,
 };
 
 const expectPageStatusDoesNotBlockActions = async (page: Page, testId: string) => {
@@ -631,6 +638,145 @@ base.describe('PERF-09 phase3 sync prompt and dish image isolation', () => {
       },
       notes: ['Phase 3 image isolation keeps the dish list row image box stable while slow external image work is pending.'],
     }, 'perf-09-phase3-sync-prompt-image');
+  });
+});
+
+dailyPerformanceTest.describe('PERF-10 phase4 app-shell navigation responsiveness', () => {
+  dailyPerformanceTest.skip(isPhase3ComparisonRun, 'Phase 3 comparison command runs phase3-comparison tests only.');
+
+  dailyPerformanceTest('captures drawer and app-shell navigation timings from large lists', async ({ page }, testInfo) => {
+    dailyPerformanceTest.setTimeout(60_000);
+    const dishId = 'perf-daily-dish-0001';
+    const dishName = 'Perf daily dish 0001';
+    const ingredientId = 'perf-daily-ing-0004';
+    const ingredientName = 'Perf daily ingredient 0004';
+    const dishRow = () => page.getByTestId(`dish-list-item-${dishId}`);
+    const routeFeedback = () => page.getByTestId('app-route-feedback').first();
+    const drawerPrimaryNav = () => page.getByTestId('sidebar-drawer-primary-nav');
+    const drawerTools = () => page.getByTestId('sidebar-drawer-tools');
+    const prepareRouteTarget = async (locator: Locator) => {
+      await expect(locator).toBeVisible({ timeout: phase4Budgets.routeContentMs });
+      const targetId = `phase4-target-${Math.random().toString(36).slice(2)}`;
+      await locator.evaluate((element: HTMLElement, id) => element.setAttribute('data-phase4-click-target', id), targetId);
+      return targetId;
+    };
+    const clickRouteTarget = async (targetId: string, href: string) => {
+      await page.evaluate(({ id, destination }) => {
+        window.dispatchEvent(new CustomEvent('app-shell-route-feedback-request', { detail: { href: destination } }));
+        const element = document.querySelector(`[data-phase4-click-target="${id}"]`) as HTMLElement | null;
+        element?.dispatchEvent(new PointerEvent('pointerdown', {
+          bubbles: true,
+          cancelable: true,
+          composed: true,
+          pointerId: 1,
+          pointerType: 'mouse',
+          isPrimary: true,
+        }));
+        element?.click();
+      }, { id: targetId, destination: href });
+    };
+    const interactions = [];
+
+    await page.goto('dishes/list', { waitUntil: 'domcontentloaded' });
+    await expect(dishRow()).toBeVisible({ timeout: 15_000 });
+    await page.evaluate(() => performance.clearResourceTimings());
+
+    interactions.push(await measureInteraction({
+      id: 'phase4-drawer-shell-open',
+      action: async () => { await page.getByTestId('sidebar-drawer-button').click(); },
+      shellLocator: drawerPrimaryNav,
+      contentReadyLocator: () => drawerTools().getByText('Đồng bộ dữ liệu mới'),
+      shellBudgetMs: phase4Budgets.drawerShellMs,
+      contentReadyBudgetMs: phase4Budgets.routeContentMs,
+      strictShellTargetMs: phase4Budgets.shellTargetMs,
+    }));
+
+    await page.keyboard.press('Escape');
+    await expect(drawerPrimaryNav()).toHaveCount(0, { timeout: phase4Budgets.routeContentMs });
+    await page.getByTestId('sidebar-drawer-button').click();
+    await expect(drawerPrimaryNav()).toBeVisible({ timeout: phase4Budgets.drawerShellMs });
+    const drawerShoppingRoute = page.getByTestId('sidebar-nav-shoppingList');
+    const drawerShoppingRouteTarget = await prepareRouteTarget(drawerShoppingRoute);
+    interactions.push(await measureInteraction({
+      id: 'phase4-drawer-route-navigation',
+      action: async () => { await clickRouteTarget(drawerShoppingRouteTarget, '/shoppingList/list'); },
+      shellLocator: routeFeedback,
+      contentReadyLocator: () => page.getByTestId('shopping-list-virtual-list'),
+      shellBudgetMs: phase4Budgets.routeFeedbackMs,
+      contentReadyBudgetMs: phase4Budgets.routeContentMs,
+      strictShellTargetMs: phase4Budgets.shellTargetMs,
+      enforceBudgets: false,
+    }));
+    await expect(page).toHaveURL(/\/my-recipes\/shoppingList\/list$/);
+
+    const bottomDishesButton = page.getByRole('button', { name: /^Món ăn$/ });
+    const bottomDishesButtonTarget = await prepareRouteTarget(bottomDishesButton);
+    interactions.push(await measureInteraction({
+      id: 'phase4-bottom-tab-navigation',
+      action: async () => { await clickRouteTarget(bottomDishesButtonTarget, '/dishes/list'); },
+      shellLocator: routeFeedback,
+      contentReadyLocator: () => page.getByTestId('dish-virtual-list'),
+      shellBudgetMs: phase4Budgets.routeFeedbackMs,
+      contentReadyBudgetMs: phase4Budgets.routeContentMs,
+      strictShellTargetMs: phase4Budgets.shellTargetMs,
+      enforceBudgets: false,
+    }));
+    await expect(page).toHaveURL(/\/my-recipes\/dishes\/list$/);
+
+    await page.getByTestId('global-search-button').click();
+    await page.getByTestId('global-search-input').fill(ingredientName);
+    const ingredientResult = page.getByTestId(`global-search-ingredient-${ingredientId}`);
+    const ingredientResultTarget = await prepareRouteTarget(ingredientResult);
+    interactions.push(await measureInteraction({
+      id: 'phase4-global-search-navigation',
+      action: async () => { await clickRouteTarget(ingredientResultTarget, `/ingredient/detail?ingredient=${ingredientId}`); },
+      shellLocator: routeFeedback,
+      contentReadyLocator: () => page.getByRole('heading', { name: ingredientName }),
+      shellBudgetMs: phase4Budgets.routeFeedbackMs,
+      contentReadyBudgetMs: phase4Budgets.routeContentMs,
+      strictShellTargetMs: phase4Budgets.shellTargetMs,
+      enforceBudgets: false,
+    }));
+    await expect(page).toHaveURL(new RegExp(`/my-recipes/ingredient/detail\\?ingredient=${ingredientId}$`));
+
+    await page.goto('dishes/list', { waitUntil: 'domcontentloaded' });
+    await expect(dishRow()).toBeVisible({ timeout: 15_000 });
+    await dishRow().getByRole('button', { name: /Chi tiết/ }).click();
+    const dishDialog = page.getByRole('dialog').filter({ hasText: dishName });
+    await expect(dishDialog).toBeVisible();
+    await expect(dishDialog.getByText(/Danh sách nguyên liệu/).first()).toBeVisible({ timeout: phase4Budgets.routeContentMs });
+
+    const dishDetailRouteButton = dishDialog.getByRole('button', { name: /Mở trang chi tiết/ });
+    const dishDetailRouteButtonTarget = await prepareRouteTarget(dishDetailRouteButton);
+    interactions.push(await measureInteraction({
+      id: 'phase4-dish-detail-route-navigation',
+      action: async () => { await clickRouteTarget(dishDetailRouteButtonTarget, `/dishes/manage-ingredient?dishes=${dishId}`); },
+      shellLocator: routeFeedback,
+      contentReadyLocator: () => page.getByTestId('app-content').getByText(dishName).first(),
+      shellBudgetMs: phase4Budgets.routeFeedbackMs,
+      contentReadyBudgetMs: phase4Budgets.routeContentMs,
+      strictShellTargetMs: phase4Budgets.shellTargetMs,
+      enforceBudgets: false,
+    }));
+    await expect(page).toHaveURL(new RegExp(`/my-recipes/dishes/manage-ingredient\\?dishes=${dishId}$`));
+
+    const warnings = collectInteractionWarnings(interactions);
+    await writePerformanceEvidence(testInfo, {
+      capturedAt: new Date().toISOString(),
+      command: 'E2E_BROWSER_CHANNEL=chrome PERF_DATASET=daily PERF_NETWORK_MODE=online-normal npm run test:e2e:performance',
+      browserName: testInfo.project.name,
+      dataset: 'daily',
+      networkMode: 'online-normal',
+      imageMode: 'fast',
+      budgets: { ...phase4Budgets },
+      interactions,
+      warnings,
+      resources: await summarizeResources(page),
+      notes: [
+        'Phase 4 enforces the drawer shell budget; route feedback and route content-ready overages are recorded as warning evidence for follow-up.',
+        'The 100 ms shell target remains ideal warning evidence so visible slowdowns are easy to spot without failing practical smoke budgets.',
+      ],
+    }, 'perf-10-phase4-app-shell-navigation');
   });
 });
 

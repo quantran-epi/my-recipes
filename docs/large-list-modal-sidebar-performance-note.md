@@ -4,7 +4,7 @@ Date: 2026-06-06
 
 ## Short Answer
 
-The large list pages are faster than the original baseline, especially for search reset, row rendering, online/offline behavior, and image/network isolation. However, opening a modal or sidebar from a large list can still hang a little because that work still runs on the browser's main UI thread.
+The large list pages are faster than the original baseline, especially for search reset, row rendering, online/offline behavior, image/network isolation, and app-shell navigation feedback. Opening heavy modal content can still have a small delay because that work still runs on the browser's main UI thread, but the sidebar drawer should now show its navigation shell first instead of waiting for every drawer tool to rebuild.
 
 In simple words: the app now avoids loading too many rows and avoids letting network/image work block the list, but the browser still has to pause briefly to build the modal or drawer, prepare its animation, and sometimes finish list calculations before it can show the overlay.
 
@@ -24,9 +24,9 @@ In simple words: the app now avoids loading too many rows and avoids letting net
 
    The app uses `DeferredModalContent`, which waits about two animation frames before mounting heavy modal bodies. This is good because the modal shell can show before the heavy content loads. Visually, though, you may still notice a short spinner or content delay after the modal appears.
 
-4. The sidebar drawer rebuilds a lot of UI each time it opens.
+4. The sidebar drawer still has secondary tool work, but it no longer has to block the first navigation shell.
 
-   The sidebar uses Ant Design `Drawer` with `destroyOnClose`. That means its body is destroyed when closed and rebuilt when opened. It contains navigation icons/images, sync controls, backup controls, admin controls, cooking history entry points, and guide entry points. Rebuilding that drawer from a large list can still cost time.
+   The sidebar still contains navigation icons/images, sync controls, backup controls, admin controls, cooking history entry points, and guide entry points. Phase 4 splits that work so the logo/title and route links appear first, then the heavier tool sections appear after the drawer shell has painted.
 
 5. The current automated numbers prove this is improved but not instant.
 
@@ -75,6 +75,14 @@ In simple words: the app now avoids loading too many rows and avoids letting net
    - `test-results/performance/perf-08-phase3-daily-browser-offline.md`
    - `test-results/performance/perf-08-phase3-daily-mocked-slow-network.md`
 
+6. Phase 4 adds app-shell navigation feedback and drawer shell-first rendering.
+
+   New checks measure drawer shell open, drawer route navigation, bottom-tab navigation, global-search navigation, and dish detail-route navigation from a large list. Evidence is written to:
+
+   - `test-results/performance/perf-10-phase4-app-shell-navigation.md`
+
+   The practical Phase 4 budgets are drawer shell `1000 ms`, route feedback `1000 ms`, and route content-ready `5000 ms`. Drawer shell now passes as an enforced check. Latest route content-ready timings are under `5000 ms`, while route feedback still has warning misses above `1000 ms` for the next tightening pass. The ideal `100 ms` target remains warning evidence.
+
 ## What You Can Check By Eye
 
 Use a large Dishes, Ingredients, or Shopping List page.
@@ -101,20 +109,32 @@ Use a large Dishes, Ingredients, or Shopping List page.
 
 6. Open the sidebar drawer from a large list.
 
-   Expected: it may still pause a little. This is a known remaining issue because the drawer is rebuilt when opened and competes with list-screen work on the main thread.
+   Expected after Phase 4: the drawer shell should appear quickly. You should see the logo/title and route links first: `Tổng quan`, `Nguyên liệu`, `Món ăn`, `Kế hoạch chi phí`, `Lịch mua sắm`, and `Thực đơn`. The drawer tools can appear just after that.
 
-7. If a shared sync prompt appears.
+7. Tap a drawer route, bottom tab, global-search result, or large-list detail button.
+
+   Expected after Phase 4: route feedback should appear right away with `Đang mở trang`. If you tap the same pending destination repeatedly, it should not stack extra navigation work or leave the app stuck.
+
+8. Check that drawer tools are still there.
+
+   Expected after Phase 4: after the drawer settles, you should still see shared-data sync, Gist backup, cooking history, user guide, and admin account controls. The performance fix should not remove these daily tools.
+
+9. Try normal cooking, shopping, and search workflows.
+
+   Expected after Phase 4: existing cooking, shopping-list, and global-search flows should still work. The app should feel more responsive without becoming a simpler app.
+
+10. If a shared sync prompt appears.
 
    Expected: the prompt shell and update list should appear before all detailed sync-impact work is finished. The final sync button should wait until required data is ready.
 
 ## What This Means For The Next Fix
 
-The remaining modal/sidebar hang is not mainly a pagination problem anymore. Pagination and virtualization already help. The next performance work should focus on app-shell and overlay responsiveness:
+The remaining modal/sidebar hang is not mainly a pagination problem anymore. Pagination and virtualization already help. Phase 4 improves the app-shell part by making route feedback and the sidebar navigation shell show first. The next performance work should keep tightening heavier overlay content and whole-list recalculation:
 
-- Keep the sidebar drawer mounted or split its heavy sections so opening the shell is cheaper.
-- Pre-render or memoize stable drawer/menu content.
+- Keep measuring drawer shell and route feedback separately from content-ready timing.
+- Pre-render or memoize stable drawer/menu content if drawer tool content still feels late on slower devices.
 - Reduce whole-list recalculation when only opening overlays.
 - Keep modal shells extremely light and move detail body work after the first paint.
 - Continue measuring shell-visible timing separately from content-ready timing.
 
-This matches the current Phase 4 direction: Navigation and App-Shell Responsiveness.
+This matches the current milestone direction: rich features, UI, UX, and performance together, with performance currently focused on large-list app-shell responsiveness.
