@@ -13,6 +13,7 @@ import { Popover } from "@components/Popover";
 import { Tag } from "@components/Tag";
 import { Typography } from "@components/Typography";
 import { useScreenTitle, useToggle, useAdminMode, usePagedVirtualItems } from "@hooks";
+import { useAppShellNavigation } from "@routing/AppShellNavigationContext";
 import { DISH_TAGS, DishDuration, Dishes } from "@store/Models/Dishes";
 import { Ingredient } from "@store/Models/Ingredient";
 import { DishesDurationEditParams, duplicateDish, removeDishes, updateDishDuration } from "@store/Reducers/DishesReducer";
@@ -21,7 +22,6 @@ import { RootRoutes } from "@routing/RootRoutes";
 import { debounce, sortBy } from "lodash";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
 import { List as VirtualList, useDynamicRowHeight, type ListImperativeAPI, type RowComponentProps } from "react-window";
 import Clock2Icon from "../../../../assets/icons/clock (2).png";
 import NoodlesIcon from "../../../../assets/icons/noodles.png";
@@ -428,15 +428,14 @@ const DishesItemComponent: React.FunctionComponent<DishesItemProps> = (props) =>
     const [durationOpen, setDurationOpen] = useState(false);
     const message = useMessage();
     const dispatch = useDispatch();
-    const navigate = useNavigate();
+    const { navigateWithFeedback } = useAppShellNavigation();
     const dishes = props.allDishes;
     const ingredients = props.allIngredients;
 
     const _onEdit = () => toggleEdit.show();
     const _onEditDuration = () => toggleEditDuration.show();
     const _onOpenDetailPage = () => {
-        toggleDishesDetail.hide();
-        React.startTransition(() => navigate(RootRoutes.AuthorizedRoutes.DishesRoutes.ManageIngredient(props.item.id)));
+        navigateWithFeedback(RootRoutes.AuthorizedRoutes.DishesRoutes.ManageIngredient(props.item.id), toggleDishesDetail.hide);
     }
 
     const _sumDuration = () => {

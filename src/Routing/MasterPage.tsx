@@ -30,7 +30,6 @@ import { selectCookingSessions, selectCurrentFeatureName, selectDishesById } fro
 import { Drawer, Flex, Input as AntInput, Layout, Divider } from "antd";
 import React, { useState } from "react";
 import { CopyToClipboard } from 'react-copy-to-clipboard';
-import { flushSync } from "react-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import LogoIcon from "../../assets/icons/logo.png";
@@ -40,6 +39,7 @@ import ShoppingListIcon from "../../assets/icons/shoppingList.png";
 import IngredientIcon from "../../assets/icons/vegetable.png";
 import SuggesterIcon from "../../assets/icons/cooking.png";
 import BudgetIcon from "../../assets/icons/budget.png";
+import { AppShellNavigationProvider, useAppShellNavigation, useAppShellNavigationController } from "./AppShellNavigationContext";
 import { RootRoutes } from "./RootRoutes";
 
 const layoutStyles: React.CSSProperties = {
@@ -102,75 +102,41 @@ const sidebarTransitionHintStyle: React.CSSProperties = {
     lineHeight: "15px",
 };
 
-const useRouteLoadingFeedback = (pathname: string) => {
-    const [routeLoading, setRouteLoading] = useState(false);
-    const loadingTimerRef = React.useRef<number | null>(null);
-    const loadingFrameRef = React.useRef<number | null>(null);
-    const loadingFallbackTimerRef = React.useRef<number | null>(null);
-    const pendingRouteRef = React.useRef<string | null>(null);
+const drawerToolsPlaceholderStyle: React.CSSProperties = {
+    minHeight: 48,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    color: "#8c8c8c",
+};
 
-    const clearLoadingTimer = React.useCallback(() => {
-        if (loadingTimerRef.current !== null) {
-            window.clearTimeout(loadingTimerRef.current);
-            loadingTimerRef.current = null;
-        }
+const useDeferredDrawerTools = (open: boolean) => {
+    const [ready, setReady] = React.useState(false);
+    const frameRefs = React.useRef<number[]>([]);
+
+    const clearFrames = React.useCallback(() => {
+        frameRefs.current.forEach(frame => window.cancelAnimationFrame(frame));
+        frameRefs.current = [];
     }, []);
-
-    const clearLoadingFrame = React.useCallback(() => {
-        if (loadingFrameRef.current !== null) {
-            window.cancelAnimationFrame(loadingFrameRef.current);
-            loadingFrameRef.current = null;
-        }
-    }, []);
-
-    const clearLoadingFallbackTimer = React.useCallback(() => {
-        if (loadingFallbackTimerRef.current !== null) {
-            window.clearTimeout(loadingFallbackTimerRef.current);
-            loadingFallbackTimerRef.current = null;
-        }
-    }, []);
-
-    const finishRouteLoading = React.useCallback(() => {
-        pendingRouteRef.current = null;
-        clearLoadingTimer();
-        clearLoadingFrame();
-        clearLoadingFallbackTimer();
-        setRouteLoading(false);
-    }, [clearLoadingFallbackTimer, clearLoadingFrame, clearLoadingTimer]);
-
-    const startRouteLoading = React.useCallback((href: string) => {
-        clearLoadingTimer();
-        clearLoadingFrame();
-        clearLoadingFallbackTimer();
-        pendingRouteRef.current = href;
-        setRouteLoading(true);
-        loadingFallbackTimerRef.current = window.setTimeout(finishRouteLoading, 1200);
-    }, [clearLoadingFallbackTimer, clearLoadingFrame, clearLoadingTimer, finishRouteLoading]);
 
     React.useEffect(() => {
-        return () => {
-            clearLoadingTimer();
-            clearLoadingFrame();
-            clearLoadingFallbackTimer();
-        };
-    }, [clearLoadingFallbackTimer, clearLoadingFrame, clearLoadingTimer]);
+        clearFrames();
+        setReady(false);
+        if (!open) return;
 
-    React.useEffect(() => {
-        if (!routeLoading) return;
-        const pendingRoute = pendingRouteRef.current;
-        if (pendingRoute && pathname !== pendingRoute) return;
-
-        clearLoadingTimer();
-        clearLoadingFrame();
-        loadingFrameRef.current = window.requestAnimationFrame(() => {
-            loadingFrameRef.current = window.requestAnimationFrame(() => {
-                loadingFrameRef.current = null;
-                loadingTimerRef.current = window.setTimeout(finishRouteLoading, 80);
+        const firstFrame = window.requestAnimationFrame(() => {
+            const secondFrame = window.requestAnimationFrame(() => {
+                frameRefs.current = [];
+                setReady(true);
             });
+            frameRefs.current.push(secondFrame);
         });
-    }, [clearLoadingFrame, clearLoadingTimer, finishRouteLoading, pathname, routeLoading]);
+        frameRefs.current.push(firstFrame);
 
-    return { routeLoading, startRouteLoading };
+        return clearFrames;
+    }, [clearFrames, open]);
+
+    return ready;
 };
 
 export const MasterPage = () => {
@@ -178,6 +144,8 @@ export const MasterPage = () => {
     const currentFeatureName = useSelector(selectCurrentFeatureName);    const { isOnline } = useOnlineStatus();
     const toggleSearch = useToggle();
     const location = useLocation();
+    const navigate = useNavigate();
+    const appShellNavigation = useAppShellNavigationController(location.pathname, navigate);
 
     React.useEffect(() => {
         const content = document.getElementById("app-content");
@@ -198,56 +166,69 @@ export const MasterPage = () => {
         }
     }
 
-    return <Layout style={layoutStyles}>
-        <Header style={{
-            height: 60,
-            lineHeight: "60px",
-            paddingInline: 10,
-            backgroundColor: "#fff",
-            borderBottom: "0.5px solid " + theme.token.colorBorder
-        }}>
-            <Stack justify="space-between" align="center">
-                <Stack>
-                    <SidebarDrawer />
-                    <Tooltip title={currentFeatureName}>
-                        <Typography.Paragraph style={{ fontFamily: "kanit", fontSize: 24, fontWeight: "500", marginBottom: 0, width: 230 }} ellipsis>{currentFeatureName}</Typography.Paragraph>
-                    </Tooltip>
+    return <AppShellNavigationProvider value={appShellNavigation}>
+        <Layout style={layoutStyles}>
+            <Header style={{
+                height: 60,
+                lineHeight: "60px",
+                paddingInline: 10,
+                backgroundColor: "#fff",
+                borderBottom: "0.5px solid " + theme.token.colorBorder
+            }}>
+                <Stack justify="space-between" align="center">
+                    <Stack>
+                        <SidebarDrawer />
+                        <Tooltip title={currentFeatureName}>
+                            <Typography.Paragraph style={{ fontFamily: "kanit", fontSize: 24, fontWeight: "500", marginBottom: 0, width: 230 }} ellipsis>{currentFeatureName}</Typography.Paragraph>
+                        </Tooltip>
+                    </Stack>
+                    <Stack align="center" gap={4}>
+                        <Button
+                            type="text"
+                            aria-label="Tìm kiếm toàn cục"
+                            data-testid="global-search-button"
+                            icon={<SearchOutlined style={{ fontSize: 20 }} />}
+                            onClick={toggleSearch.show}
+                            style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                        />
+                        {_featureIcon() && <Image src={_featureIcon()} width={36} loading="eager" alt={currentFeatureName} style={{ marginBottom: 5 }} />}
+                    </Stack>
                 </Stack>
-                <Stack align="center" gap={4}>
-                    <Button
-                        type="text"
-                        aria-label="Tìm kiếm toàn cục"
-                        data-testid="global-search-button"
-                        icon={<SearchOutlined style={{ fontSize: 20 }} />}
-                        onClick={toggleSearch.show}
-                        style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-                    />
-                    {_featureIcon() && <Image src={_featureIcon()} width={36} loading="eager" alt={currentFeatureName} style={{ marginBottom: 5 }} />}
-                </Stack>
-            </Stack>
-        </Header>
-        <Content>
-            {!isOnline && (
-                <div style={{
-                    background: '#fffbe6',
-                    borderBottom: '1px solid #ffe58f',
-                    padding: '6px 16px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 8,
-                    fontSize: 13,
-                    color: '#7c6000',
-                }}>
-                    <span>📴</span>
-                    <span>Không có mạng — Dữ liệu vẫn được lưu cục bộ</span>
+            </Header>
+            <Content>
+                {!isOnline && (
+                    <div style={{
+                        background: '#fffbe6',
+                        borderBottom: '1px solid #ffe58f',
+                        padding: '6px 16px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 8,
+                        fontSize: 13,
+                        color: '#7c6000',
+                    }}>
+                        <span>📴</span>
+                        <span>Không có mạng — Dữ liệu vẫn được lưu cục bộ</span>
+                    </div>
+                )}
+                <Outlet />
+            </Content>
+            {appShellNavigation.isRouteFeedbackActive && (
+                <div data-testid="app-route-feedback" style={sidebarTransitionOverlayStyle}>
+                    <div style={sidebarTransitionContentStyle}>
+                        <div style={sidebarTransitionIconStyle}><LoadingOutlined /></div>
+                        <div>
+                            <span style={sidebarTransitionTextStyle}>Đang mở trang</span>
+                            <span style={sidebarTransitionHintStyle}>Chuẩn bị dữ liệu hiển thị</span>
+                        </div>
+                    </div>
                 </div>
             )}
-            <Outlet />
-        </Content>
-        <BottomTabNavigator />
-        <CookingPill />
-        {toggleSearch.value && <GlobalSearchScreen open={toggleSearch.value} onClose={toggleSearch.hide} />}
-    </Layout>
+            <BottomTabNavigator />
+            <CookingPill />
+            {toggleSearch.value && <GlobalSearchScreen open={toggleSearch.value} onClose={toggleSearch.hide} onNavigate={appShellNavigation.navigateWithFeedback} />}
+        </Layout>
+    </AppShellNavigationProvider>
 }
 
 const SidebarDrawer = () => {
@@ -258,33 +239,30 @@ const SidebarDrawer = () => {
     const [isImporting, setIsImporting] = useState(false);
     const { isAdmin, tryUnlock, lock } = useAdminMode();
     const { publishSharedData, isPublishing, lastPublishAt } = useSharedPublish();
-    const navigate = useNavigate();
-    const location = useLocation();
     const dispatch = useDispatch();
     const message = useMessage();
     const toggleHistory = useToggle();
     const toggleGuide = useToggle();
-    const { routeLoading, startRouteLoading } = useRouteLoadingFeedback(location.pathname);
+    const { navigateWithFeedback } = useAppShellNavigation();
+    const toolsReady = useDeferredDrawerTools(open);
 
     const showDrawer = () => {
         setOpen(true);
     };
 
+    const resetPinState = () => {
+        setPin("");
+        setPinError("");
+    };
+
     const onClose = () => {
         setOpen(false);
+        setPinModalOpen(false);
+        resetPinState();
     };
 
     const onNavigate = (href: string) => {
-        if (location.pathname === href) {
-            flushSync(() => setOpen(false));
-            return;
-        }
-
-        flushSync(() => {
-            setOpen(false);
-            startRouteLoading(href);
-        });
-        React.startTransition(() => navigate(href));
+        navigateWithFeedback(href, () => setOpen(false));
     }
 
     const onUnlock = () => {
@@ -320,17 +298,6 @@ const SidebarDrawer = () => {
     return (
         <React.Fragment>
             <Button type="primary" data-testid="sidebar-drawer-button" onClick={showDrawer} icon={<MenuOutlined />} />
-            {routeLoading && (
-                <div style={sidebarTransitionOverlayStyle}>
-                    <div style={sidebarTransitionContentStyle}>
-                        <div style={sidebarTransitionIconStyle}><LoadingOutlined /></div>
-                        <div>
-                            <span style={sidebarTransitionTextStyle}>Đang mở trang</span>
-                            <span style={sidebarTransitionHintStyle}>Chuẩn bị dữ liệu hiển thị</span>
-                        </div>
-                    </div>
-                </div>
-            )}
             <Drawer
                 placement="left"
                 title={
@@ -346,49 +313,52 @@ const SidebarDrawer = () => {
                 styles={{ body: { padding: 0, display: "flex", flexDirection: "column", height: "100%", overflowY: "auto" } }}
             >
                 {/* ── Navigation ── */}
-                <Menu
-                    style={{ borderInlineEnd: "none" }}
-                    items={[
-                        {
-                            key: 'dashboard', label: <Flex align="center" gap={10}>
-                                <Image src={LogoIcon} width={24} alt="" />
-                                <span>Tổng quan</span>
-                            </Flex>, onClick: () => onNavigate(RootRoutes.AuthorizedRoutes.Root())
-                        },
-                        {
-                            key: "ingredients", label: <Flex align="center" gap={10}>
-                                <Image src={IngredientIcon} width={24} alt="" />
-                                <span>Nguyên liệu</span>
-                            </Flex>, onClick: () => onNavigate(RootRoutes.AuthorizedRoutes.IngredientRoutes.List())
-                        },
-                        {
-                            key: "dishes", label: <Flex align="center" gap={10}>
-                                <Image src={DishesIcon} width={24} alt="" />
-                                <span>Món ăn</span>
-                            </Flex>, onClick: () => onNavigate(RootRoutes.AuthorizedRoutes.DishesRoutes.List())
-                        },
-                        {
-                            key: "expensePlanner", label: <Flex align="center" gap={10}>
-                                <Image src={BudgetIcon} width={24} alt="" />
-                                <span>Kế hoạch chi phí</span>
-                            </Flex>, onClick: () => onNavigate(RootRoutes.AuthorizedRoutes.ExpensePlanner())
-                        },
-                        {
-                            key: "shoppingList", label: <Flex align="center" gap={10}>
-                                <Image src={ShoppingListIcon} width={24} alt="" />
-                                <span>Lịch mua sắm</span>
-                            </Flex>, onClick: () => onNavigate(RootRoutes.AuthorizedRoutes.ShoppingListRoutes.List())
-                        },
-                        {
-                            key: "meals", label: <Flex align="center" gap={10}>
-                                <Image src={MealsIcon} width={24} alt="" />
-                                <span>Thực đơn</span>
-                            </Flex>, onClick: () => onNavigate(RootRoutes.AuthorizedRoutes.ScheduledMealRoutes.List())
-                        }
-                    ]}
-                />
+                <div data-testid="sidebar-drawer-primary-nav">
+                    <Menu
+                        style={{ borderInlineEnd: "none" }}
+                        items={[
+                            {
+                                key: 'dashboard', label: <Flex align="center" gap={10}>
+                                    <Image src={LogoIcon} width={24} alt="" />
+                                    <span>Tổng quan</span>
+                                </Flex>, onClick: () => onNavigate(RootRoutes.AuthorizedRoutes.Root())
+                            },
+                            {
+                                key: "ingredients", label: <Flex align="center" gap={10}>
+                                    <Image src={IngredientIcon} width={24} alt="" />
+                                    <span>Nguyên liệu</span>
+                                </Flex>, onClick: () => onNavigate(RootRoutes.AuthorizedRoutes.IngredientRoutes.List())
+                            },
+                            {
+                                key: "dishes", label: <Flex align="center" gap={10}>
+                                    <Image src={DishesIcon} width={24} alt="" />
+                                    <span>Món ăn</span>
+                                </Flex>, onClick: () => onNavigate(RootRoutes.AuthorizedRoutes.DishesRoutes.List())
+                            },
+                            {
+                                key: "expensePlanner", label: <Flex align="center" gap={10}>
+                                    <Image src={BudgetIcon} width={24} alt="" />
+                                    <span>Kế hoạch chi phí</span>
+                                </Flex>, onClick: () => onNavigate(RootRoutes.AuthorizedRoutes.ExpensePlanner())
+                            },
+                            {
+                                key: "shoppingList", label: <Flex align="center" gap={10}>
+                                    <Image src={ShoppingListIcon} width={24} alt="" />
+                                    <span>Lịch mua sắm</span>
+                                </Flex>, onClick: () => onNavigate(RootRoutes.AuthorizedRoutes.ShoppingListRoutes.List())
+                            },
+                            {
+                                key: "meals", label: <Flex align="center" gap={10}>
+                                    <Image src={MealsIcon} width={24} alt="" />
+                                    <span>Thực đơn</span>
+                                </Flex>, onClick: () => onNavigate(RootRoutes.AuthorizedRoutes.ScheduledMealRoutes.List())
+                            }
+                        ]}
+                    />
+                </div>
 
-                <Box style={{ padding: "0 16px 24px" }}>
+                <Box data-testid="sidebar-drawer-tools" style={{ padding: "0 16px 24px" }}>
+                    {!toolsReady ? <div style={drawerToolsPlaceholderStyle}><LoadingOutlined /></div> : <React.Fragment>
 
                     {/* ── Sync shared data ── */}
                     <Divider orientation="left" style={{ fontSize: 12, color: "#888", marginTop: 16, marginBottom: 12 }}>Dữ liệu dùng chung</Divider>
@@ -484,6 +454,8 @@ const SidebarDrawer = () => {
                             </>
                         )}
                     </Flex>
+
+                    </React.Fragment>}
 
                 </Box>
             </Drawer>
@@ -680,11 +652,10 @@ const CookingPill = () => {
 };
 
 const BottomTabNavigator = () => {
-    const navigate = useNavigate();
     const location = useLocation();
     const theme = useTheme();
     const toggleSuggester = useToggle();
-    const { routeLoading, startRouteLoading } = useRouteLoadingFeedback(location.pathname);
+    const { navigateWithFeedback } = useAppShellNavigation();
 
     const _buttonStyles = (): React.CSSProperties => {
         return {
@@ -722,22 +693,10 @@ const BottomTabNavigator = () => {
 
     const onNavigate = (href: string) => {
         if (location.pathname === href) return;
-        flushSync(() => startRouteLoading(href));
-        React.startTransition(() => navigate(href));
+        navigateWithFeedback(href);
     }
 
     return <>
-        {routeLoading && (
-            <div style={sidebarTransitionOverlayStyle}>
-                <div style={sidebarTransitionContentStyle}>
-                    <div style={sidebarTransitionIconStyle}><LoadingOutlined /></div>
-                    <div>
-                        <span style={sidebarTransitionTextStyle}>Đang mở trang</span>
-                        <span style={sidebarTransitionHintStyle}>Chuẩn bị dữ liệu hiển thị</span>
-                    </div>
-                </div>
-            </div>
-        )}
 	        <Stack justify="space-evenly" style={_containerStyles()}>
             <Button type="text" style={_buttonStyles()} icon={<Image src={DishesIcon} preview={false} width={28} style={{ marginLeft: 2 }} />} onClick={() => onNavigate(RootRoutes.AuthorizedRoutes.DishesRoutes.List())}>
                 <Typography.Text style={_textStyles(RootRoutes.AuthorizedRoutes.DishesRoutes.List())}>Món ăn</Typography.Text>

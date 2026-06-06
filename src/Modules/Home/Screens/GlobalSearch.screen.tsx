@@ -58,9 +58,10 @@ type ListResult = {
 type GlobalSearchScreenProps = {
     open: boolean;
     onClose: () => void;
+    onNavigate?: (path: string, beforeNavigate?: () => void) => void;
 };
 
-export const GlobalSearchScreen: React.FC<GlobalSearchScreenProps> = ({ open, onClose }) => {
+export const GlobalSearchScreen: React.FC<GlobalSearchScreenProps> = ({ open, onClose, onNavigate }) => {
     const navigate = useNavigate();
     const [query, setQuery] = useState('');
     const [debouncedQ, setDebouncedQ] = useState('');
@@ -135,6 +136,11 @@ export const GlobalSearchScreen: React.FC<GlobalSearchScreenProps> = ({ open, on
 
     const _navigate = (path: string) => {
         _commit();
+        if (onNavigate) {
+            onNavigate(path, onClose);
+            return;
+        }
+
         onClose();
         React.startTransition(() => navigate(path));
     };

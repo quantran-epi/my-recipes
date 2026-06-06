@@ -13,6 +13,7 @@ import { useModal } from "@components/Modal/ModalProvider";
 import { Tooltip } from "@components/Tootip";
 import { Typography } from "@components/Typography";
 import { usePagedVirtualItems, useScreenTitle, useToggle } from "@hooks";
+import { useAppShellNavigation } from "@routing/AppShellNavigationContext";
 import { Dishes } from "@store/Models/Dishes";
 import { Ingredient } from "@store/Models/Ingredient";
 import { ScheduledMeal } from "@store/Models/ScheduledMeal";
@@ -297,7 +298,7 @@ type ShoppingListItemProps = {
 const ShoppingListItemComponent: React.FunctionComponent<ShoppingListItemProps> = (props) => {
     const toggleIngredient = useToggle({ defaultValue: false });
     const toggleAddMoreDishes = useToggle({ defaultValue: false });
-    const navigate = useNavigate();
+    const { navigateWithFeedback } = useAppShellNavigation();
     const dispatch = useDispatch();
     const message = useMessage();
     const modal = useModal();
@@ -342,8 +343,7 @@ const ShoppingListItemComponent: React.FunctionComponent<ShoppingListItemProps> 
     }
 
     const _onOpenDetailPage = () => {
-        toggleIngredient.hide();
-        React.startTransition(() => navigate(RootRoutes.AuthorizedRoutes.ShoppingListRoutes.Detail(props.item.id)));
+        navigateWithFeedback(RootRoutes.AuthorizedRoutes.ShoppingListRoutes.Detail(props.item.id), toggleIngredient.hide);
     }
 
     const _onAddMoreDishes = () => {
