@@ -76,11 +76,11 @@ const showRouteFeedbackElement = () => {
     overlay.setAttribute("aria-live", "polite");
     assignStyle(overlay, {
         position: "fixed",
-        top: "60px",
+        top: "0",
         left: "0",
         right: "0",
-        bottom: "80px",
-        zIndex: "1200",
+        bottom: "0",
+        zIndex: "880",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
@@ -171,7 +171,6 @@ export const useAppShellNavigationController = (pathname: string, navigate: Navi
     const [isRouteFeedbackActive, setIsRouteFeedbackActive] = React.useState(false);
     const [pendingDestination, setPendingDestination] = React.useState<string | null>(null);
     const pendingDestinationRef = React.useRef<string | null>(null);
-    const pendingPathRef = React.useRef<string | null>(null);
     const pathnameRef = React.useRef(pathname);
     const routeFeedbackActiveRef = React.useRef(false);
     const routeFeedbackStartedAtRef = React.useRef(0);
@@ -180,6 +179,9 @@ export const useAppShellNavigationController = (pathname: string, navigate: Navi
     const fallbackTimerRef = React.useRef<number | null>(null);
     const scheduledNavigationTimerRef = React.useRef<number | null>(null);
     const issuedDestinationRef = React.useRef<string | null>(null);
+    const settlingPathRef = React.useRef<string | null>(null);
+    const queuedDestinationRef = React.useRef<string | null>(null);
+    const finishRouteFeedbackRef = React.useRef<() => void>(() => undefined);
 
     React.useEffect(() => {
         pathnameRef.current = pathname;
@@ -192,7 +194,6 @@ export const useAppShellNavigationController = (pathname: string, navigate: Navi
 
     const setPendingRoute = React.useCallback((href: string | null) => {
         pendingDestinationRef.current = href;
-        pendingPathRef.current = href ? pathOnly(href) : null;
         setPendingDestination(href);
     }, []);
 
@@ -224,19 +225,30 @@ export const useAppShellNavigationController = (pathname: string, navigate: Navi
         }
     }, []);
 
-    const finishRouteFeedback = React.useCallback(() => {
-        setPendingRoute(null);
-        issuedDestinationRef.current = null;
-        clearCleanupTimer();
-        clearCleanupFrame();
+    const startFallbackTimer = React.useCallback(() => {
         clearFallbackTimer();
-        removeRouteFeedbackElement();
-        setRouteFeedbackActive(false);
-    }, [clearCleanupFrame, clearCleanupTimer, clearFallbackTimer, setPendingRoute, setRouteFeedbackActive]);
+        fallbackTimerRef.current = window.setTimeout(() => {
+            finishRouteFeedbackRef.current();
+        }, ROUTE_FEEDBACK_FALLBACK_MS);
+    }, [clearFallbackTimer]);
 
-    const startRouteFeedback = React.useCallback((href: string) => {
-        if (routeFeedbackActiveRef.current && pendingDestinationRef.current === href) return false;
+    const scheduleNavigation = React.useCallback((href: string, delayMs = ROUTE_FEEDBACK_PRE_NAVIGATION_MS) => {
+        clearScheduledNavigationTimer();
+        issuedDestinationRef.current = href;
+        settlingPathRef.current = pathOnly(href);
 
+        if (delayMs <= 0) {
+            React.startTransition(() => navigate(href));
+            return;
+        }
+
+        scheduledNavigationTimerRef.current = window.setTimeout(() => {
+            scheduledNavigationTimerRef.current = null;
+            React.startTransition(() => navigate(href));
+        }, delayMs);
+    }, [clearScheduledNavigationTimer, navigate]);
+
+    const activateRouteFeedback = React.useCallback((href: string) => {
         clearCleanupTimer();
         clearCleanupFrame();
         clearFallbackTimer();
@@ -244,30 +256,105 @@ export const useAppShellNavigationController = (pathname: string, navigate: Navi
         routeFeedbackStartedAtRef.current = Date.now();
         showRouteFeedbackElement();
         setRouteFeedbackActive(true);
-        fallbackTimerRef.current = window.setTimeout(finishRouteFeedback, ROUTE_FEEDBACK_FALLBACK_MS);
+    }, [clearCleanupFrame, clearCleanupTimer, clearFallbackTimer, setPendingRoute, setRouteFeedbackActive]);
+
+    const finishRouteFeedback = React.useCallback(() => {
+        const queuedDestination = queuedDestinationRef.current;
+        queuedDestinationRef.current = null;
+
+        clearCleanupTimer();
+        clearCleanupFrame();
+        clearFallbackTimer();
+
+        if (queuedDestination && pathnameRef.current !== pathOnly(queuedDestination)) {
+            activateRouteFeedback(queuedDestination);
+            startFallbackTimer();
+            scheduleNavigation(queuedDestination, 0);
+            return;
+        }
+
+        settlingPathRef.current = null;
+        setPendingRoute(null);
+        issuedDestinationRef.current = null;
+        removeRouteFeedbackElement();
+        setRouteFeedbackActive(false);
+    }, [activateRouteFeedback, clearCleanupFrame, clearCleanupTimer, clearFallbackTimer, scheduleNavigation, setPendingRoute, setRouteFeedbackActive, startFallbackTimer]);
+
+    finishRouteFeedbackRef.current = finishRouteFeedback;
+
+    const startRouteFeedback = React.useCallback((href: string) => {
+        if (routeFeedbackActiveRef.current && pendingDestinationRef.current === href) return false;
+
+        settlingPathRef.current = pathOnly(href);
+        activateRouteFeedback(href);
+        startFallbackTimer();
         return true;
-    }, [clearCleanupFrame, clearCleanupTimer, clearFallbackTimer, finishRouteFeedback, setPendingRoute, setRouteFeedbackActive]);
+    }, [activateRouteFeedback, startFallbackTimer]);
 
     const navigateWithFeedback = React.useCallback((href: string, beforeNavigate?: BeforeNavigate) => {
-        if (routeFeedbackActiveRef.current && pendingDestinationRef.current === href && issuedDestinationRef.current === href) return false;
+        const nextPath = pathOnly(href);
+        const currentPath = pathnameRef.current;
+        const scheduledNavigationPending = scheduledNavigationTimerRef.current !== null;
+        const issuedRouteStillSettling = Boolean(
+            issuedDestinationRef.current &&
+            settlingPathRef.current &&
+            currentPath !== settlingPathRef.current,
+        );
 
-        if (pathnameRef.current === pathOnly(href)) {
+        const runBeforeNavigate = () => {
+            if (beforeNavigate) beforeNavigate();
+        };
+
+        const runBeforeNavigateAndActivateFeedback = () => {
+            flushSync(() => {
+                runBeforeNavigate();
+                activateRouteFeedback(href);
+            });
+            startFallbackTimer();
+        };
+
+        if (currentPath === nextPath) {
+            if (!routeFeedbackActiveRef.current) {
+                if (beforeNavigate) flushSync(beforeNavigate);
+                return false;
+            }
+
+            if (scheduledNavigationPending) {
+                if (beforeNavigate) flushSync(beforeNavigate);
+                queuedDestinationRef.current = null;
+                issuedDestinationRef.current = null;
+                settlingPathRef.current = null;
+                clearScheduledNavigationTimer();
+                finishRouteFeedbackRef.current();
+                return true;
+            }
+
+            if (issuedRouteStillSettling) {
+                queuedDestinationRef.current = href;
+                runBeforeNavigateAndActivateFeedback();
+                return true;
+            }
+
             if (beforeNavigate) flushSync(beforeNavigate);
             return false;
         }
 
-        flushSync(() => {
-            if (beforeNavigate) beforeNavigate();
-            startRouteFeedback(href);
-        });
-        issuedDestinationRef.current = href;
-        clearScheduledNavigationTimer();
-        scheduledNavigationTimerRef.current = window.setTimeout(() => {
-            scheduledNavigationTimerRef.current = null;
-            React.startTransition(() => navigate(href));
-        }, ROUTE_FEEDBACK_PRE_NAVIGATION_MS);
+        if (routeFeedbackActiveRef.current && pendingDestinationRef.current === href && issuedDestinationRef.current === href) {
+            if (beforeNavigate) flushSync(beforeNavigate);
+            return false;
+        }
+
+        runBeforeNavigateAndActivateFeedback();
+
+        if (scheduledNavigationPending || !issuedRouteStillSettling) {
+            queuedDestinationRef.current = null;
+            scheduleNavigation(href);
+        } else {
+            queuedDestinationRef.current = href;
+        }
+
         return true;
-    }, [clearScheduledNavigationTimer, navigate, startRouteFeedback]);
+    }, [activateRouteFeedback, clearScheduledNavigationTimer, scheduleNavigation, startFallbackTimer]);
 
     React.useEffect(() => {
         const onRouteFeedbackRequest = (event: Event) => {
@@ -285,13 +372,15 @@ export const useAppShellNavigationController = (pathname: string, navigate: Navi
             clearCleanupFrame();
             clearFallbackTimer();
             clearScheduledNavigationTimer();
+            queuedDestinationRef.current = null;
+            settlingPathRef.current = null;
         };
     }, [clearCleanupFrame, clearCleanupTimer, clearFallbackTimer, clearScheduledNavigationTimer]);
 
     React.useEffect(() => {
         if (!isRouteFeedbackActive) return;
-        const pendingPath = pendingPathRef.current;
-        if (pendingPath && pathname !== pendingPath) return;
+        const settlingPath = settlingPathRef.current;
+        if (settlingPath && pathname !== settlingPath) return;
 
         clearCleanupTimer();
         clearCleanupFrame();

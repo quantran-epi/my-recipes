@@ -710,11 +710,17 @@ const CookingPill = () => {
 const BottomTabNavigator = () => {
     const location = useLocation();
     const toggleSuggester = useToggle();
-    const { navigateWithFeedback } = useAppShellNavigation();
+    const { navigateWithFeedback, isRouteFeedbackActive, pendingDestination } = useAppShellNavigation();
     const dishesRoute = RootRoutes.AuthorizedRoutes.DishesRoutes.List();
+    const mealsRoute = RootRoutes.AuthorizedRoutes.ScheduledMealRoutes.List();
     const shoppingRoute = RootRoutes.AuthorizedRoutes.ShoppingListRoutes.List();
-    const dishesActive = location.pathname === dishesRoute;
-    const shoppingActive = location.pathname === shoppingRoute;
+    const budgetRoute = RootRoutes.AuthorizedRoutes.ExpensePlanner();
+    const pendingRoute = isRouteFeedbackActive ? pendingDestination : null;
+    const isRouteActive = (href: string) => location.pathname === href || pendingRoute === href;
+    const dishesActive = isRouteActive(dishesRoute);
+    const mealsActive = isRouteActive(mealsRoute);
+    const shoppingActive = isRouteActive(shoppingRoute);
+    const budgetActive = isRouteActive(budgetRoute);
 
     const _containerStyles = (): React.CSSProperties => {
         return {
@@ -724,7 +730,9 @@ const BottomTabNavigator = () => {
             right: 0,
             width: "100%",
             minHeight: 88,
-            padding: "8px 16px calc(8px + env(safe-area-inset-bottom))",
+            padding: "16px 10px calc(8px + env(safe-area-inset-bottom))",
+            boxSizing: "border-box",
+            overflow: "visible",
             zIndex: 900,
             touchAction: "manipulation",
             pointerEvents: "none",
@@ -733,122 +741,224 @@ const BottomTabNavigator = () => {
 
     const _dockStyles = (): React.CSSProperties => {
         return {
-            width: "min(420px, calc(100vw - 24px))",
-            height: 70,
+            position: "relative",
+            width: "min(392px, calc(100vw - 24px))",
+            height: 64,
             margin: "0 auto",
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
-            gap: 8,
-            padding: "8px 10px",
-            border: "1px solid rgba(245, 130, 32, 0.30)",
-            borderRadius: 28,
-            background: "rgba(17, 24, 39, 0.88)",
-            boxShadow: "0 16px 38px rgba(15, 23, 42, 0.28), 0 0 0 1px rgba(255,255,255,0.18)",
-            backdropFilter: "blur(12px)",
+            gap: 0,
+            padding: "6px 8px",
+            boxSizing: "border-box",
+            border: "1px solid rgba(226, 232, 240, 0.96)",
+            borderRadius: 20,
+            background: "#ffffff",
+            boxShadow: "0 14px 34px rgba(15, 23, 42, 0.14), 0 5px 12px rgba(15, 23, 42, 0.07)",
             pointerEvents: "auto",
+            overflow: "visible",
         }
     }
 
     const _buttonStyles = (active: boolean): React.CSSProperties => {
         return {
             flex: "1 1 0",
+            position: "relative",
+            zIndex: 1,
             minWidth: 0,
+            maxWidth: 62,
             display: "flex",
+            flexDirection: "column",
             alignItems: "center",
             justifyContent: "center",
-            height: 54,
-            border: active ? "1px solid rgba(255,255,255,0.70)" : "1px solid rgba(255,255,255,0.08)",
-            borderRadius: 20,
-            background: active ? "linear-gradient(135deg, #f58220 0%, #52c41a 100%)" : "rgba(255,255,255,0.08)",
-            boxShadow: active
-                ? "0 10px 22px rgba(245, 130, 32, 0.30), inset 0 0 0 1px rgba(255,255,255,0.24)"
-                : undefined,
-            color: "#fff",
-            transition: "background 160ms ease, box-shadow 160ms ease, color 160ms ease, transform 160ms ease",
+            gap: 2,
+            height: 52,
+            border: 0,
+            borderRadius: 14,
+            background: active ? "rgba(245, 130, 32, 0.10)" : "transparent",
+            color: active ? "#1f2937" : "#6b7280",
+            cursor: "pointer",
+            font: "inherit",
+            padding: "4px 2px 3px",
+            boxSizing: "border-box",
+            transition: "color 160ms ease, transform 160ms ease",
         }
     }
 
-    const _suggesterButtonStyles = (active: boolean): React.CSSProperties => {
+    const _suggesterButtonStyles = (): React.CSSProperties => {
         return {
-            width: 96,
-            height: 54,
+            width: 74,
+            height: 82,
+            position: "relative",
+            zIndex: 3,
             display: "flex",
+            flexDirection: "column",
             alignItems: "center",
             justifyContent: "center",
-            border: "1px solid rgba(255,255,255,0.58)",
+            gap: 3,
+            border: 0,
             borderRadius: 20,
+            background: "transparent",
+            color: "#1f2937",
+            cursor: "pointer",
+            font: "inherit",
+            padding: 0,
+            boxSizing: "border-box",
+            transform: "translateY(-15px)",
+            transition: "transform 160ms ease",
+        }
+    }
+
+    const _sideIconShellStyles = (active: boolean): React.CSSProperties => {
+        return {
+            width: 26,
+            height: 26,
+            display: "inline-flex",
+            alignItems: "center",
+            justifyContent: "center",
+            borderRadius: 10,
+            background: active ? "rgba(245, 130, 32, 0.12)" : "transparent",
+            flexShrink: 0,
+        }
+    }
+
+    const _centerBumpStyles = (): React.CSSProperties => {
+        return {
+            position: "absolute",
+            zIndex: 1,
+            top: -24,
+            left: "50%",
+            width: 76,
+            height: 76,
+            borderRadius: "50%",
+            transform: "translateX(-50%)",
+            background: "#ffffff",
+            pointerEvents: "none",
+        }
+    }
+
+    const _centerIconShellStyles = (active: boolean): React.CSSProperties => {
+        return {
+            position: "relative",
+            zIndex: 2,
+            width: 54,
+            height: 54,
+            display: "inline-flex",
+            alignItems: "center",
+            justifyContent: "center",
+            borderRadius: "50%",
+            border: "5px solid #ffffff",
             background: active
-                ? "linear-gradient(135deg, #0f172a 0%, #f58220 52%, #52c41a 100%)"
-                : "linear-gradient(135deg, #1f2937 0%, #f58220 55%, #52c41a 100%)",
-            color: "#fff",
+                ? "linear-gradient(135deg, #0395ff 0%, #10b6ff 100%)"
+                : "linear-gradient(135deg, #0aa7ff 0%, #1db7ff 100%)",
             boxShadow: active
-                ? "0 18px 34px rgba(245, 130, 32, 0.35), 0 0 0 5px rgba(82, 196, 26, 0.12)"
-                : "0 16px 32px rgba(31, 41, 55, 0.24), 0 0 0 4px rgba(245, 130, 32, 0.10)",
-            transition: "box-shadow 160ms ease, background 160ms ease, transform 160ms ease",
+                ? "0 10px 20px rgba(0, 153, 255, 0.32)"
+                : "0 8px 18px rgba(0, 153, 255, 0.28)",
+            boxSizing: "border-box",
+            flexShrink: 0,
         }
     }
 
     const _labelStyles = (active: boolean): React.CSSProperties => {
         return {
             display: "block",
-            color: active ? "#fff" : "rgba(255,255,255,0.88)",
-            fontWeight: active ? 700 : 600,
-            fontSize: 13,
-            lineHeight: "17px",
+            color: active ? "#1f2937" : "#6b7280",
+            fontWeight: active ? 650 : 500,
+            fontSize: 10,
+            lineHeight: "13px",
             whiteSpace: "nowrap",
+            maxWidth: "100%",
+            overflow: "hidden",
+            textOverflow: "ellipsis",
         }
     }
 
-    const _suggesterLabelStyles = (): React.CSSProperties => {
+    const _centerLabelStyles = (): React.CSSProperties => {
         return {
             display: "block",
-            color: "#fff",
-            fontWeight: 750,
-            fontSize: 13,
-            lineHeight: "17px",
+            color: "#1f2937",
+            fontWeight: 650,
+            fontSize: 10,
+            lineHeight: "13px",
             whiteSpace: "nowrap",
+            marginTop: 0,
         }
     }
 
     const onNavigate = (href: string) => {
-        if (location.pathname === href) return;
+        if (location.pathname === href && !isRouteFeedbackActive) return;
         navigateWithFeedback(href);
     }
 
     return <>
         <div style={_containerStyles()} data-testid="bottom-tab-navigator">
             <div style={_dockStyles()}>
-                <Button
-                    type="text"
+                <div style={_centerBumpStyles()} />
+                <button
+                    type="button"
+                    aria-pressed={dishesActive}
                     aria-label="Món ăn"
                     data-testid="bottom-tab-dishes"
                     style={_buttonStyles(dishesActive)}
-                    icon={<Image src={DishesIcon} preview={false} width={25} style={{ marginLeft: 2 }} alt="" />}
                     onClick={() => onNavigate(dishesRoute)}
                 >
+                    <span style={_sideIconShellStyles(dishesActive)}>
+                        <Image src={DishesIcon} preview={false} width={21} alt="" />
+                    </span>
                     <Typography.Text style={_labelStyles(dishesActive)}>Món ăn</Typography.Text>
-                </Button>
-                <Button
-                    type="text"
+                </button>
+                <button
+                    type="button"
+                    aria-pressed={mealsActive}
+                    aria-label="Thực đơn"
+                    data-testid="bottom-tab-scheduled-meals"
+                    style={_buttonStyles(mealsActive)}
+                    onClick={() => onNavigate(mealsRoute)}
+                >
+                    <span style={_sideIconShellStyles(mealsActive)}>
+                        <Image src={MealsIcon} preview={false} width={21} alt="" />
+                    </span>
+                    <Typography.Text style={_labelStyles(mealsActive)}>Thực đơn</Typography.Text>
+                </button>
+                <button
+                    type="button"
+                    aria-pressed={toggleSuggester.value}
                     aria-label="Nấu gì?"
                     data-testid="bottom-tab-suggester"
-                    style={_suggesterButtonStyles(toggleSuggester.value)}
-                    icon={<Image src={SuggesterIcon} preview={false} width={27} style={{ marginLeft: 2 }} alt="" />}
+                    style={_suggesterButtonStyles()}
                     onClick={toggleSuggester.show}
                 >
-                    <Typography.Text style={_suggesterLabelStyles()}>Nấu gì?</Typography.Text>
-                </Button>
-                <Button
-                    type="text"
+                    <span style={_centerIconShellStyles(toggleSuggester.value)}>
+                        <Image src={SuggesterIcon} preview={false} width={27} alt="" />
+                    </span>
+                    <Typography.Text style={_centerLabelStyles()}>Nấu gì?</Typography.Text>
+                </button>
+                <button
+                    type="button"
+                    aria-pressed={shoppingActive}
                     aria-label="Mua sắm"
                     data-testid="bottom-tab-shopping-list"
                     style={_buttonStyles(shoppingActive)}
-                    icon={<Image src={ShoppingListIcon} preview={false} width={25} style={{ marginLeft: 3 }} alt="" />}
                     onClick={() => onNavigate(shoppingRoute)}
                 >
+                    <span style={_sideIconShellStyles(shoppingActive)}>
+                        <Image src={ShoppingListIcon} preview={false} width={21} alt="" />
+                    </span>
                     <Typography.Text style={_labelStyles(shoppingActive)}>Mua sắm</Typography.Text>
-                </Button>
+                </button>
+                <button
+                    type="button"
+                    aria-pressed={budgetActive}
+                    aria-label="Chi phí"
+                    data-testid="bottom-tab-expense-planner"
+                    style={_buttonStyles(budgetActive)}
+                    onClick={() => onNavigate(budgetRoute)}
+                >
+                    <span style={_sideIconShellStyles(budgetActive)}>
+                        <Image src={BudgetIcon} preview={false} width={21} alt="" />
+                    </span>
+                    <Typography.Text style={_labelStyles(budgetActive)}>Chi phí</Typography.Text>
+                </button>
             </div>
         </div>
         {toggleSuggester.value && <DishSuggesterScreen open={toggleSuggester.value} onClose={toggleSuggester.hide} />}
