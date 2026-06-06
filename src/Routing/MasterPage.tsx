@@ -195,7 +195,7 @@ const SidebarDrawer = () => {
     const message = useMessage();
     const toggleHistory = useToggle();
     const toggleGuide = useToggle();
-    const { navigateWithFeedback, startRouteFeedback } = useAppShellNavigation();
+    const { navigateWithFeedback } = useAppShellNavigation();
     const toolsReady = useDeferredDrawerTools(open);
     const location = useLocation();
 
@@ -283,9 +283,6 @@ const SidebarDrawer = () => {
                                 type="button"
                                 data-testid={`sidebar-nav-${item.key}`}
                                 style={sidebarNavButtonStyle(location.pathname === item.href)}
-                                onPointerDown={() => {
-                                    if (location.pathname !== item.href) startRouteFeedback(item.href);
-                                }}
                                 onClick={() => onNavigate(item.href)}
                             >
                                 <Image src={item.icon} width={24} alt="" />

@@ -256,12 +256,14 @@ export const useAppShellNavigationController = (pathname: string, navigate: Navi
             return false;
         }
 
-        flushSync(() => startRouteFeedback(href));
+        flushSync(() => {
+            if (beforeNavigate) beforeNavigate();
+            startRouteFeedback(href);
+        });
         issuedDestinationRef.current = href;
         clearScheduledNavigationTimer();
         scheduledNavigationTimerRef.current = window.setTimeout(() => {
             scheduledNavigationTimerRef.current = null;
-            if (beforeNavigate) flushSync(beforeNavigate);
             React.startTransition(() => navigate(href));
         }, ROUTE_FEEDBACK_PRE_NAVIGATION_MS);
         return true;
