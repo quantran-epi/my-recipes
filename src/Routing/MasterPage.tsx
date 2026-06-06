@@ -1,5 +1,6 @@
 import { CloudDownloadOutlined, CloudUploadOutlined, ExportOutlined, HistoryOutlined, ImportOutlined, LockOutlined, MenuOutlined, UnlockOutlined, FireOutlined, QuestionCircleOutlined, SearchOutlined, LoadingOutlined } from "@ant-design/icons";
 import { ObjectPropertyHelper } from "@common/Helpers/ObjectProperty";
+import { SharedSyncModal } from "@components/AppInitializer/SharedSyncModal";
 import { Button } from "@components/Button";
 import { TextArea } from "@components/Form/Input";
 import { Image } from "@components/Image";
@@ -13,7 +14,7 @@ import { DeferredModalContent, Modal } from "@components/Modal";
 import { SmartForm, useSmartForm } from "@components/SmartForm";
 import { Tooltip } from "@components/Tootip";
 import { Typography } from "@components/Typography";
-import { useAdminMode, useTheme, useToggle, useOnlineStatus, useSharedPublish } from "@hooks";
+import { useAdminMode, useTheme, useToggle, useOnlineStatus, useSharedPublish, useSharedDataSync, type SyncedVersions } from "@hooks";
 import { ScheduledMealToolkitWidget } from "@modules/ScheduledMeal/Screens/ScheduledMealToolkit.widget";
 import { DishSuggesterScreen } from "@modules/DishSuggester/Screens/DishSuggester.screen";
 import { CookingSessionWidget } from "@modules/Dishes/Screens/CookingSession.widget";
@@ -21,13 +22,11 @@ import { CookingHistoryWidget } from "@modules/Dishes/Screens/CookingHistory.wid
 import { GistBackupWidget } from "@components/GistBackupWidget";
 import { UserGuideScreen } from "@modules/Home/Screens/UserGuide.screen";
 import { GlobalSearchScreen } from "@modules/Home/Screens/GlobalSearch.screen";
-import { addDishes, resetDishes } from "@store/Reducers/DishesReducer";
-import { addIngredient, resetIngredient } from "@store/Reducers/IngredientReducer";
 import { selectCookingSessions, selectCurrentFeatureName, selectDishesById } from "@store/Selectors";
 import { Drawer, Flex, Input as AntInput, Layout, Divider } from "antd";
 import React, { useState } from "react";
 import { CopyToClipboard } from 'react-copy-to-clipboard';
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import LogoIcon from "../../assets/icons/logo.png";
 import MealsIcon from "../../assets/icons/meals.png";
@@ -188,10 +187,9 @@ const SidebarDrawer = () => {
     const [pinModalOpen, setPinModalOpen] = useState(false);
     const [pin, setPin] = useState("");
     const [pinError, setPinError] = useState("");
-    const [isImporting, setIsImporting] = useState(false);
     const { isAdmin, tryUnlock, lock } = useAdminMode();
     const { publishSharedData, isPublishing, lastPublishAt } = useSharedPublish();
-    const dispatch = useDispatch();
+    const { pendingSync, isSyncChecking, checkNow, dismissSync, markSynced } = useSharedDataSync();
     const message = useMessage();
     const toggleHistory = useToggle();
     const toggleGuide = useToggle();
@@ -229,23 +227,21 @@ const SidebarDrawer = () => {
     };
 
     const onImportCloud = async () => {
-        setIsImporting(true);
         try {
-            const res = await fetch("https://raw.githubusercontent.com/quantran-epi/my-recipes/refs/heads/main/docs/shared-data.json?t=" + Date.now());
-            if (!res.ok) throw new Error(`HTTP ${res.status}`);
-            const text = await res.text();
-            if (!text || !text.trim()) throw new Error("Dữ liệu chia sẻ trống");
-            const data = JSON.parse(text);
-            dispatch(resetIngredient());
-            dispatch(resetDishes());
-            (data.ingredients ?? []).forEach(ingre => dispatch(addIngredient(ingre)));
-            (data.dishes ?? []).forEach(dish => dispatch(addDishes(dish)));
-            message.success("Đồng bộ dữ liệu dùng chung thành công");
+            const nextPendingSync = await checkNow();
+            if (nextPendingSync) {
+                setOpen(false);
+            } else {
+                message.success("Dữ liệu dùng chung đã mới nhất");
+            }
         } catch (ex: any) {
             message.error("Đồng bộ thất bại: " + ex?.message);
-        } finally {
-            setIsImporting(false);
         }
+    };
+
+    const onSharedSyncDone = (synced: SyncedVersions) => {
+        markSynced(synced);
+        message.success("Đồng bộ dữ liệu dùng chung thành công");
     };
 
     const sidebarNavItems = [
@@ -300,7 +296,7 @@ const SidebarDrawer = () => {
                     <Flex vertical gap={4}>
                         <Button
                             icon={<CloudDownloadOutlined />}
-                            loading={isImporting}
+                            loading={isSyncChecking}
                             block
                             onClick={onImportCloud}
                         >
@@ -414,6 +410,16 @@ const SidebarDrawer = () => {
                 </Flex>
             </Modal>
             <ScheduledMealToolkitWidget onNavigate={onNavigate} />
+            {pendingSync && (
+                <SharedSyncModal
+                    open={true}
+                    manifest={pendingSync.manifest}
+                    hasIngredientChanges={pendingSync.hasIngredientChanges}
+                    hasDishChanges={pendingSync.hasDishChanges}
+                    onDone={onSharedSyncDone}
+                    onCancel={dismissSync}
+                />
+            )}
             {toggleHistory.value && <CookingHistoryWidget open={toggleHistory.value} onClose={toggleHistory.hide} />}
             {toggleGuide.value && <UserGuideScreen open={toggleGuide.value} onClose={toggleGuide.hide} />}
         </React.Fragment>

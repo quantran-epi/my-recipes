@@ -400,10 +400,10 @@ dailyPerformanceTest.describe('PERF-07 daily large-list smoke', () => {
   });
 });
 
-base.describe('PERF-08 phase3 startup sync isolation', () => {
+base.describe('PERF-08 phase3 manual sync isolation', () => {
   base.skip(isPhase3ComparisonRun, 'Phase 3 comparison command runs phase3-comparison tests only.');
 
-  base('keeps due-sync startup list interactions inside Phase 2 budgets', async ({ page }, testInfo) => {
+  base('keeps due-sync list interactions inside Phase 2 budgets without startup remote checks', async ({ page }, testInfo) => {
     const appliedNetwork = await seedApp(page, {
       dataset: 'daily',
       networkMode: 'online-normal',
@@ -430,6 +430,8 @@ base.describe('PERF-08 phase3 startup sync isolation', () => {
     await page.goto('dishes/list', { waitUntil: 'domcontentloaded' });
     await expect(dishRow()).toBeVisible({ timeout: 15_000 });
     await page.waitForTimeout(1700);
+    await expect(page.getByText('Có dữ liệu dùng chung mới')).toHaveCount(0);
+    expect(appliedNetwork.diagnostics.sharedManifestRequestCount).toBe(0);
     await page.evaluate(() => performance.clearResourceTimings());
 
     const interactions = [];
@@ -487,8 +489,8 @@ base.describe('PERF-08 phase3 startup sync isolation', () => {
         githubDelayMs: appliedNetwork.githubDelayMs,
         network: appliedNetwork.diagnostics,
       },
-      notes: ['Phase 3 startup sync test seeds due shared sync and keeps GitHub Raw controlled without PERF_REAL_NETWORK=1.'],
-    }, 'perf-08-phase3-startup-sync');
+      notes: ['Manual sync isolation test seeds due shared sync and verifies no GitHub Raw manifest request runs on list startup.'],
+    }, 'perf-08-phase3-manual-sync');
   });
 
   base('keeps offline local-first lists usable without sync UI', async ({ page }) => {
@@ -506,10 +508,10 @@ base.describe('PERF-08 phase3 startup sync isolation', () => {
   });
 });
 
-base.describe('PERF-09 phase3 sync prompt and dish image isolation', () => {
+base.describe('PERF-09 phase3 manual sync prompt and dish image isolation', () => {
   base.skip(isPhase3ComparisonRun, 'Phase 3 comparison command runs phase3-comparison tests only.');
 
-  base('renders sync manifest rows before delayed shared data and preserves selective versions', async ({ page }) => {
+  base('opens manual sync manifest rows before delayed shared data and preserves selective versions', async ({ page }) => {
     const seed = createPerformanceSeed('daily');
     const ingredientId = 'perf-daily-ing-0004';
     const dishId = 'perf-daily-dish-0001';
@@ -539,15 +541,23 @@ base.describe('PERF-09 phase3 sync prompt and dish image isolation', () => {
 
     await page.goto('dishes/list', { waitUntil: 'domcontentloaded' });
     await expect(page.getByTestId(`dish-list-item-${dishId}`)).toBeVisible({ timeout: 15_000 });
+    await expect(page.getByText('Có dữ liệu dùng chung mới')).toHaveCount(0);
+    expect(appliedNetwork.diagnostics.sharedManifestRequestCount).toBe(0);
+
+    await page.getByTestId('sidebar-drawer-button').click();
+    const tools = page.getByTestId('sidebar-drawer-tools');
+    await expect(tools).toContainText('Đồng bộ dữ liệu mới', { timeout: 5_000 });
+    await tools.getByRole('button', { name: /Đồng bộ dữ liệu mới/ }).click();
 
     const title = page.getByText('Có dữ liệu dùng chung mới');
     await expect(title).toBeVisible({ timeout: 8_000 });
-    await expect(page.getByText('Chọn những mục bạn muốn cập nhật vào thiết bị này:')).toBeVisible();
-    await expect(page.getByTestId(`shared-sync-ingredient-${ingredientId}`)).toContainText('Perf daily ingredient 0004');
-    await expect(page.getByTestId(`shared-sync-dish-${dishId}`)).toContainText('Perf daily dish 0001');
-    await expect(page.getByText('Đang tải dữ liệu...')).toBeVisible({ timeout: 2_000 });
+    const dialog = page.getByRole('dialog').filter({ hasText: 'Có dữ liệu dùng chung mới' });
+    await expect(dialog.getByText('Chọn những mục bạn muốn cập nhật vào thiết bị này:')).toBeVisible();
+    await expect(dialog.getByTestId(`shared-sync-ingredient-${ingredientId}`)).toContainText('Perf daily ingredient 0004');
+    await expect(dialog.getByTestId(`shared-sync-dish-${dishId}`)).toContainText('Perf daily dish 0001');
+    await expect(dialog.getByText('Đang tải dữ liệu...')).toBeVisible({ timeout: 2_000 });
 
-    const syncButton = page.getByRole('button', { name: /Đồng bộ/ });
+    const syncButton = dialog.getByRole('button', { name: /Đồng bộ/ });
     await expect(syncButton).toBeDisabled();
     await expect(page.getByRole('button', { name: 'Để sau' })).toBeEnabled();
 
