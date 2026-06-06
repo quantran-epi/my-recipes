@@ -4,8 +4,8 @@ milestone: v1.0
 milestone_name: milestone
 status: ready
 stopped_at: Completed 04-02-PLAN.md
-last_updated: "2026-06-06T08:39:39Z"
-last_activity: 2026-06-06 -- Completed quick task 260606-nzc: replace app modals with fast modal shell
+last_updated: "2026-06-06T09:07:05Z"
+last_activity: 2026-06-06 -- Completed quick task 260606-q7v: popup z-index and modal overflow fixes
 progress:
   total_phases: 5
   completed_phases: 4
@@ -28,7 +28,7 @@ See: .planning/PROJECT.md (updated 2026-06-05)
 Phase: 5 (release-gate-and-product-guardrails) — READY
 Plan: Not started
 Status: Phase 04 complete; ready for Phase 05
-Last activity: 2026-06-06 -- Completed quick task 260606-nzc: replace app modals with fast modal shell
+Last activity: 2026-06-06 -- Completed quick task 260606-q7v: popup z-index and modal overflow fixes
 
 Progress: [████████░░] 80%
 
@@ -36,6 +36,7 @@ Progress: [████████░░] 80%
 
 | Date | Task | Artifact |
 |------|------|----------|
+| 2026-06-06 | Fix popup z-index and modal overflow after fast modal replacement | `.planning/quick/260606-q7v-fix-popup-zindex-and-modal-overflow/260606-q7v-SUMMARY.md` |
 | 2026-06-06 | Replace app declarative modals with fast modal shell | `.planning/quick/260606-nzc-replace-app-modals-with-fast-modal/260606-nzc-SUMMARY.md` |
 | 2026-06-06 | Smooth fast modal and drawer shell entrance animation | `.planning/quick/260606-mot-smooth-fast-overlay-animation/260606-mot-SUMMARY.md` |
 | 2026-06-06 | Align Dish Suggestor footer actions and bottom tab center button | `.planning/quick/260606-lab-suggestor-footer-and-bottom-tab-align/260606-lab-SUMMARY.md` |
