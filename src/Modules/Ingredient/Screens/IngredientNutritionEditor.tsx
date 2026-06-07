@@ -88,9 +88,16 @@ export const IngredientNutritionEditor: React.FC<IngredientNutritionEditorProps>
                 {_renderMetric("Đạm", "protein", "g")}
                 {_renderMetric("Tinh bột", "carbs", "g")}
                 {_renderMetric("Chất béo", "fat", "g")}
+                {_renderMetric("Béo bão hòa", "saturatedFat", "g")}
+                {_renderMetric("Cholesterol", "cholesterol", "mg", 1)}
                 {_renderMetric("Chất xơ", "fiber", "g")}
                 {_renderMetric("Đường", "sugar", "g")}
                 {_renderMetric("Natri", "sodium", "mg", 1)}
+                {_renderMetric("Kali", "potassium", "mg", 1)}
+                {_renderMetric("Canxi", "calcium", "mg", 1)}
+                {_renderMetric("Sắt", "iron", "mg")}
+                {_renderMetric("Vitamin A", "vitaminA", "µg", 1)}
+                {_renderMetric("Vitamin C", "vitaminC", "mg")}
             </div>
         </Stack>
     </div>;

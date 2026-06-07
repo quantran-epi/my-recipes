@@ -1,14 +1,14 @@
 {
   "schemaVersion": 2,
-  "updatedAt": "2026-06-07T14:07:07.200Z",
+  "updatedAt": "2026-06-07T14:30:00.000Z",
   "parts": {
     "ingredients": {
       "key": "ingredients",
       "path": "docs/sync/shared/ingredients.json",
-      "version": "2026-06-07T14:07:07.200Z",
-      "hash": "09f1bec7b3f1fb595ef2d16a58e4118ce094f8d4e0a704d9251fa190f5785820",
+      "version": "2026-06-07T14:30:00.000Z",
+      "hash": "1aa729e49bdeab76dbda77d3e256ddaef10735e088d36c4120ccf34b37b15ab3",
       "count": 165,
-      "updatedAt": "2026-06-07T14:07:07.200Z",
+      "updatedAt": "2026-06-07T14:30:00.000Z",
       "changes": [
         {
           "id": "Đậu phụQdYQjd3uDU",
@@ -1328,7 +1328,7 @@
       ]
     }
   },
-  "ingredientsVersion": "2026-06-07T14:07:07.200Z",
+  "ingredientsVersion": "2026-06-07T14:30:00.000Z",
   "dishesVersion": "2026-06-07T13:50:13.291Z",
   "ingredientChanges": [
     {

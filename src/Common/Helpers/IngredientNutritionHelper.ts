@@ -1,14 +1,23 @@
 import { Ingredient, IngredientNutritionInfo, IngredientUnit } from "@store/Models/Ingredient";
 import { IngredientUnitHelper } from "./IngredientUnitHelper";
 
-const nutritionKeys: Array<keyof Pick<IngredientNutritionInfo, "calories" | "protein" | "carbs" | "fat" | "fiber" | "sugar" | "sodium">> = [
+const nutritionKeys: Array<keyof Pick<IngredientNutritionInfo,
+    "calories" | "protein" | "carbs" | "fat" | "saturatedFat" | "cholesterol" | "fiber" | "sugar" | "sodium" | "potassium" | "calcium" | "iron" | "vitaminA" | "vitaminC"
+>> = [
     "calories",
     "protein",
     "carbs",
     "fat",
+    "saturatedFat",
+    "cholesterol",
     "fiber",
     "sugar",
     "sodium",
+    "potassium",
+    "calcium",
+    "iron",
+    "vitaminA",
+    "vitaminC",
 ];
 
 const normalizeNumber = (value: unknown): number | undefined => {
@@ -32,9 +41,17 @@ export const IngredientNutritionHelper = {
             protein: normalizeNumber(value?.protein),
             carbs: normalizeNumber(value?.carbs),
             fat: normalizeNumber(value?.fat),
+            saturatedFat: normalizeNumber(value?.saturatedFat),
+            cholesterol: normalizeNumber(value?.cholesterol),
             fiber: normalizeNumber(value?.fiber),
             sugar: normalizeNumber(value?.sugar),
             sodium: normalizeNumber(value?.sodium),
+            potassium: normalizeNumber(value?.potassium),
+            calcium: normalizeNumber(value?.calcium),
+            iron: normalizeNumber(value?.iron),
+            vitaminA: normalizeNumber(value?.vitaminA),
+            vitaminC: normalizeNumber(value?.vitaminC),
+            sources: value?.sources,
         };
     },
     validateNutrition(value?: Partial<IngredientNutritionInfo> | null): string | null {
@@ -58,6 +75,12 @@ export const IngredientNutritionHelper = {
     formatCalories(value?: number): string {
         if (value === undefined || value === null || !Number.isFinite(value)) return "-";
         return `${IngredientUnitHelper.formatAmount(value)} kcal`;
+    },
+    confidenceLabel(value?: string): string {
+        if (value === "exact") return "Khớp trực tiếp";
+        if (value === "similar") return "Món tương đương";
+        if (value === "category") return "Ước tính theo nhóm";
+        return "Tham khảo";
     },
     getNutrition(ingredient?: Ingredient | null): IngredientNutritionInfo | undefined {
         return IngredientNutritionHelper.normalizeNutrition(ingredient?.nutrition, IngredientUnitHelper.getBaseUnit(ingredient));

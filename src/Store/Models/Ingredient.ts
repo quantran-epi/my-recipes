@@ -20,11 +20,28 @@ export type IngredientNutritionInfo = {
     protein?: number;
     carbs?: number;
     fat?: number;
+    saturatedFat?: number;
+    cholesterol?: number;
     fiber?: number;
     sugar?: number;
     sodium?: number;
+    potassium?: number;
+    calcium?: number;
+    iron?: number;
+    vitaminA?: number;
+    vitaminC?: number;
     amount: number;
     unit: IngredientUnit;
+    sources?: IngredientNutritionSource[];
+}
+
+export type IngredientNutritionSource = {
+    name: string;
+    url: string;
+    matchedName?: string;
+    sourceFoodId?: string;
+    confidence?: "exact" | "similar" | "category";
+    note?: string;
 }
 
 export const INGREDIENT_SHELF_LIFE_OPTIONS: { value: IngredientShelfLife; label: string; description: string; color: string; emoji: string }[] = [

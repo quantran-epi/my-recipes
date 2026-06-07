@@ -29,6 +29,7 @@ import { IngredientEditWidget } from "./IngredientEdit.widget";
 import { IngredientInventoryWidget } from "./IngredientInventory.widget";
 import { UseFirstWidget } from "./UseFirst.widget";
 import { IngredientStatsWidget } from "./IngredientStats.widget";
+import { IngredientNutritionDetail } from "./IngredientNutritionDetail.widget";
 
 const LazyDishSuggesterScreen = React.lazy(() => import("@modules/DishSuggester/Screens/DishSuggester.screen").then(module => ({
     default: module.DishSuggesterScreen,
@@ -425,6 +426,7 @@ type IngredientItemProps = {
 
 const IngredientItemComponent: React.FunctionComponent<IngredientItemProps> = (props) => {
     const toggleEdit = useToggle({ defaultValue: false });
+    const toggleNutrition = useToggle({ defaultValue: false });
 
     const totalAmt = props.stockSnapshot?.usableAmount ?? 0;
     const inventoryUnit = IngredientUnitHelper.getBaseUnit(props.item);
@@ -525,12 +527,18 @@ const IngredientItemComponent: React.FunctionComponent<IngredientItemProps> = (p
                         </div>
 
                         {nutrition && <div style={{ minWidth: 0, display: "flex", flexDirection: "column", justifyContent: "center", gap: 4, border: "1px solid rgba(116,54,220,0.12)", borderRadius: 8, background: "#fbf9ff", padding: "7px 9px" }}>
-                            <Typography.Text type="secondary" style={{ fontSize: 11, lineHeight: "14px" }}>Dinh dưỡng</Typography.Text>
+                            <Stack justify="space-between" align="center" gap={6}>
+                                <Typography.Text type="secondary" style={{ fontSize: 11, lineHeight: "14px" }}>Dinh dưỡng</Typography.Text>
+                                <Button type="text" icon={<BarChartOutlined />} aria-label="Xem chi tiết dinh dưỡng" onClick={toggleNutrition.show} style={{ width: 26, height: 24, paddingInline: 0 }} />
+                            </Stack>
                             <Typography.Text strong style={{ color: "#7436dc", fontSize: 13, lineHeight: "18px", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
                                 {IngredientNutritionHelper.formatCalories(nutrition.calories)}
                             </Typography.Text>
                             <Typography.Text type="secondary" style={{ fontSize: 11, lineHeight: "14px", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
-                                Đạm {IngredientNutritionHelper.formatMacro(nutrition.protein)} / {IngredientNutritionHelper.formatBasis(nutrition)}
+                                Đạm {IngredientNutritionHelper.formatMacro(nutrition.protein)} · Béo {IngredientNutritionHelper.formatMacro(nutrition.fat)}
+                            </Typography.Text>
+                            <Typography.Text type="secondary" style={{ fontSize: 11, lineHeight: "14px", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                                Mỗi {IngredientNutritionHelper.formatBasis(nutrition)}
                             </Typography.Text>
                         </div>}
                     </div>
@@ -551,6 +559,17 @@ const IngredientItemComponent: React.FunctionComponent<IngredientItemProps> = (p
         } destroyOnClose={true} onCancel={toggleEdit.hide} footer={null}>
             <DeferredModalContent active={toggleEdit.value}>
                 <IngredientEditWidget item={props.item} onDone={() => toggleEdit.hide()} />
+            </DeferredModalContent>
+        </Modal>}
+
+        {toggleNutrition.value && <Modal width={640} open={toggleNutrition.value} title={
+            <Space>
+                <BarChartOutlined />
+                Dinh dưỡng - {props.item.name}
+            </Space>
+        } destroyOnClose={true} onCancel={toggleNutrition.hide} footer={<Button onClick={toggleNutrition.hide}>Đóng</Button>}>
+            <DeferredModalContent active={toggleNutrition.value} minHeight={180}>
+                <IngredientNutritionDetail ingredient={props.item} />
             </DeferredModalContent>
         </Modal>}
 
