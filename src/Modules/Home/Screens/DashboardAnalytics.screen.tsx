@@ -1,4 +1,4 @@
-import { BarChartOutlined, CalendarOutlined, CheckCircleOutlined, ClockCircleOutlined, DollarCircleOutlined, FireOutlined, ShoppingCartOutlined, TagsOutlined, WarningOutlined } from '@ant-design/icons';
+import { BarChartOutlined, CalendarOutlined, CheckCircleOutlined, ClockCircleOutlined, DollarCircleOutlined, FireOutlined, QuestionCircleOutlined, ShoppingCartOutlined, TagsOutlined, WarningOutlined } from '@ant-design/icons';
 import { CostEstimateHelper, CostEstimateSummary } from '@common/Helpers/CostEstimateHelper';
 import { IngredientPriceHelper } from '@common/Helpers/IngredientPriceHelper';
 import { IngredientUnitHelper } from '@common/Helpers/IngredientUnitHelper';
@@ -146,16 +146,44 @@ const analyticsCss = `
 }
 `;
 
-const SectionCard: React.FunctionComponent<{ title: string; subtitle: string; icon: React.ReactNode; tone: string; children: React.ReactNode }> = ({ title, subtitle, icon, tone, children }) => {
+const SectionCard: React.FunctionComponent<{ title: string; subtitle: string; helpText: string; icon: React.ReactNode; tone: string; children: React.ReactNode }> = ({ title, subtitle, helpText, icon, tone, children }) => {
+    const [showHelp, setShowHelp] = React.useState(false);
+
     return <section className='analytics-section-card' style={{ border: '1px solid rgba(116,54,220,0.10)', borderRadius: 8, background: '#fff', boxShadow: '0 10px 28px rgba(74,48,130,0.09)', overflow: 'hidden' }}>
         <div style={{ padding: 12 }}>
-            <Stack align='flex-start' gap={9} style={{ marginBottom: 12 }}>
-                <span style={{ width: 36, height: 36, borderRadius: 8, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', color: tone, background: `${tone}14`, border: `1px solid ${tone}24`, flexShrink: 0 }}>{icon}</span>
-                <div style={{ minWidth: 0 }}>
-                    <Typography.Text strong style={{ display: 'block', fontSize: 17, lineHeight: '22px', color: '#111827' }}>{title}</Typography.Text>
-                    <Typography.Text type='secondary' style={{ display: 'block', fontSize: 12, lineHeight: '16px', marginTop: 2 }}>{subtitle}</Typography.Text>
-                </div>
+            <Stack justify='space-between' align='flex-start' gap={8} style={{ marginBottom: 12 }}>
+                <Stack align='flex-start' gap={9} style={{ minWidth: 0 }}>
+                    <span style={{ width: 36, height: 36, borderRadius: 8, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', color: tone, background: `${tone}14`, border: `1px solid ${tone}24`, flexShrink: 0 }}>{icon}</span>
+                    <div style={{ minWidth: 0 }}>
+                        <Typography.Text strong style={{ display: 'block', fontSize: 17, lineHeight: '22px', color: '#111827' }}>{title}</Typography.Text>
+                        <Typography.Text type='secondary' style={{ display: 'block', fontSize: 12, lineHeight: '16px', marginTop: 2 }}>{subtitle}</Typography.Text>
+                    </div>
+                </Stack>
+                <button
+                    type='button'
+                    aria-label={`Mô tả ${title}`}
+                    aria-expanded={showHelp}
+                    onClick={() => setShowHelp(value => !value)}
+                    style={{
+                        width: 32,
+                        height: 32,
+                        borderRadius: 999,
+                        border: `1px solid ${tone}2e`,
+                        background: showHelp ? `${tone}16` : '#fff',
+                        color: tone,
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        cursor: 'pointer',
+                        flexShrink: 0,
+                    }}
+                >
+                    <QuestionCircleOutlined />
+                </button>
             </Stack>
+            {showHelp && <Box style={{ marginBottom: 12, padding: '9px 10px', borderRadius: 8, border: `1px solid ${tone}24`, background: `${tone}0d` }}>
+                <Typography.Text style={{ display: 'block', color: '#2f2545', fontSize: 12, lineHeight: '17px' }}>{helpText}</Typography.Text>
+            </Box>}
             {children}
         </div>
     </section>;
@@ -304,7 +332,7 @@ export const DashboardAnalyticsScreen = () => {
                 </div>
                 <Stack align='center' gap={6} style={{ flexShrink: 0 }}>
                     <span style={{ borderRadius: 999, padding: '5px 10px', background: 'rgba(255,255,255,0.16)', border: '1px solid rgba(255,255,255,0.22)', color: '#fff', fontSize: 11, fontWeight: 750, whiteSpace: 'nowrap' }}>{formatHeaderDateLabel()}</span>
-                    <Button size='small' onClick={() => openRoute(RootRoutes.AuthorizedRoutes.Root())} style={{ borderRadius: 999, background: '#fff', borderColor: '#fff', color: '#5e2bbf', fontWeight: 750 }}>Tổng quan</Button>
+                    <Button onClick={() => openRoute(RootRoutes.AuthorizedRoutes.Root())} style={{ borderRadius: 999, background: '#fff', borderColor: '#fff', color: '#5e2bbf', fontWeight: 750, display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>Tổng quan</Button>
                 </Stack>
             </Stack>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(156px, 1fr))', gap: 8 }}>
@@ -316,7 +344,7 @@ export const DashboardAnalyticsScreen = () => {
         </Box>
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 12 }}>
-            <SectionCard title='Kế hoạch 7 ngày' subtitle='Thực đơn và danh sách mua sắm sắp tới.' icon={<BarChartOutlined />} tone='#7436dc'>
+            <SectionCard title='Kế hoạch 7 ngày' subtitle='Thực đơn và danh sách mua sắm sắp tới.' helpText='Dùng để nhìn nhanh tuần tới có ngày nào nhiều việc bếp: cột tím là thực đơn, cột xanh là danh sách mua sắm. Ngày cột cao hơn cần chuẩn bị nhiều hơn.' icon={<BarChartOutlined />} tone='#7436dc'>
                 <div style={{ display: 'grid', gridTemplateColumns: `repeat(${weekOverview.length}, minmax(0, 1fr))`, gap: 8, alignItems: 'end', minHeight: 156 }}>
                     {weekOverview.map(item => {
                         const total = item.mealCount + item.shoppingCount;
@@ -341,7 +369,7 @@ export const DashboardAnalyticsScreen = () => {
                 </Stack>
             </SectionCard>
 
-            <SectionCard title='Nhịp bữa ăn' subtitle='Các món đã lên lịch trong 14 ngày tới.' icon={<ClockCircleOutlined />} tone='#1677ff'>
+            <SectionCard title='Nhịp bữa ăn' subtitle='Các món đã lên lịch trong 14 ngày tới.' helpText='Dùng để xem bữa sáng, trưa hay tối đang được lên lịch nhiều nhất, giúp cân bằng kế hoạch nấu ăn và tránh dồn quá nhiều món vào một khung bữa.' icon={<ClockCircleOutlined />} tone='#1677ff'>
                 <Stack direction='column' align='stretch' gap={11}>
                     <HorizontalBar label='Bữa sáng' value={mealSlotCounts.breakfast} max={mealSlotMax} color='#48a6ff' detail={`${mealSlotCounts.breakfast} món`} />
                     <HorizontalBar label='Bữa trưa' value={mealSlotCounts.lunch} max={mealSlotMax} color='#8f46f7' detail={`${mealSlotCounts.lunch} món`} />
@@ -351,7 +379,7 @@ export const DashboardAnalyticsScreen = () => {
         </div>
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 12 }}>
-            <SectionCard title='Sức khoẻ tồn kho' subtitle={`${stockedIngredientCount} nguyên liệu đang có lô trong kho.`} icon={<WarningOutlined />} tone='#fa8c16'>
+            <SectionCard title='Sức khoẻ tồn kho' subtitle={`${stockedIngredientCount} nguyên liệu đang có lô trong kho.`} helpText='Dùng để biết nhóm nguyên liệu nào có nhiều dữ liệu nhất và trong mỗi nhóm đang có bao nhiêu nguyên liệu còn sẵn trong kho.' icon={<WarningOutlined />} tone='#fa8c16'>
                 {inventoryByCategory.length === 0 ? <EmptyAnalytics text='Chưa có dữ liệu nguyên liệu để phân tích kho.' /> : <Stack direction='column' align='stretch' gap={10}>
                     {inventoryByCategory.map((item, index) => <HorizontalBar
                         key={item.category}
@@ -364,7 +392,7 @@ export const DashboardAnalyticsScreen = () => {
                 </Stack>}
             </SectionCard>
 
-            <SectionCard title='Nguyên liệu khẩn cấp' subtitle='Các lô hết hạn hoặc còn tối đa 3 ngày.' icon={<WarningOutlined />} tone={urgentExpiredCount > 0 ? '#cf1322' : '#fa8c16'}>
+            <SectionCard title='Nguyên liệu khẩn cấp' subtitle='Các lô hết hạn hoặc còn tối đa 3 ngày.' helpText='Dùng để ưu tiên xử lý nguyên liệu sắp hết hạn hoặc đã quá hạn, từ đó quyết định nên nấu món nào trước hoặc bỏ lô nào khỏi kho.' icon={<WarningOutlined />} tone={urgentExpiredCount > 0 ? '#cf1322' : '#fa8c16'}>
                 {urgentInventory.length === 0 ? <EmptyAnalytics text='Không có nguyên liệu sắp hết hạn.' /> : <Stack direction='column' align='stretch' gap={8}>
                     {urgentInventory.slice(0, 6).map(item => {
                         const badge = InventoryHelper.expiryBadge(item.daysLeft);
@@ -384,14 +412,14 @@ export const DashboardAnalyticsScreen = () => {
         </div>
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 12 }}>
-            <SectionCard title='Chi phí mua sắm' subtitle='Ước tính các danh sách đang mở, ưu tiên theo ngày.' icon={<DollarCircleOutlined />} tone='#0958d9'>
+            <SectionCard title='Chi phí mua sắm' subtitle='Ước tính các danh sách đang mở, ưu tiên theo ngày.' helpText='Dùng để xem danh sách mua sắm nào có chi phí dự kiến cao hơn và tiến độ mua của từng danh sách, giúp ưu tiên ngân sách trước khi đi chợ.' icon={<DollarCircleOutlined />} tone='#0958d9'>
                 {expensiveMetricsPending ? <EmptyAnalytics text='Đang tính chi phí mua sắm...' /> : shoppingCosts.length === 0 ? <EmptyAnalytics text='Không có danh sách mua sắm đang mở.' /> : <Stack direction='column' align='stretch' gap={10}>
                     {shoppingCosts.map(item => <HorizontalBar key={item.id} label={truncateName(item.name, 26)} value={item.value} max={shoppingCostMax} color='#0958d9' detail={`${item.costLabel} · ${item.progress}%`} />)}
                     <Button onClick={() => openRoute(RootRoutes.AuthorizedRoutes.ShoppingListRoutes.List())} style={{ borderRadius: 999, color: '#0958d9', borderColor: 'rgba(9,88,217,0.30)', fontWeight: 700 }}>Mở mua sắm</Button>
                 </Stack>}
             </SectionCard>
 
-            <SectionCard title='Tình trạng món ăn' subtitle='Độ hoàn thiện và nhóm món đang nổi bật.' icon={<TagsOutlined />} tone='#389e0d'>
+            <SectionCard title='Tình trạng món ăn' subtitle='Độ hoàn thiện và nhóm món đang nổi bật.' helpText='Dùng để theo dõi tỷ lệ món đã hoàn thiện thông tin và nhóm tag món ăn đang nhiều nhất, giúp biết phần dữ liệu món nào cần bổ sung.' icon={<TagsOutlined />} tone='#389e0d'>
                 <div style={{ display: 'grid', gridTemplateColumns: '112px minmax(0, 1fr)', gap: 14, alignItems: 'center' }}>
                     <div style={{ width: 112, height: 112, borderRadius: '50%', background: `conic-gradient(#389e0d 0 ${dishCompletePercent}%, #f0edf8 ${dishCompletePercent}% 100%)`, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 10px 22px rgba(56,158,13,0.14)' }}>
                         <div style={{ width: 72, height: 72, borderRadius: '50%', background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column' }}>
@@ -410,7 +438,7 @@ export const DashboardAnalyticsScreen = () => {
             </SectionCard>
         </div>
 
-        <SectionCard title='Gợi ý từ dữ liệu hiện tại' subtitle='Món phù hợp với tồn kho và nguyên liệu cần dùng sớm.' icon={<FireOutlined />} tone='#389e0d'>
+        <SectionCard title='Gợi ý từ dữ liệu hiện tại' subtitle='Món phù hợp với tồn kho và nguyên liệu cần dùng sớm.' helpText='Dùng để chọn món nên nấu dựa trên nguyên liệu đang có, nguyên liệu thiếu và mức độ khớp với tồn kho hiện tại.' icon={<FireOutlined />} tone='#389e0d'>
             {expensiveMetricsPending ? <EmptyAnalytics text='Đang tính gợi ý món...' /> : suggestions.length === 0 ? <EmptyAnalytics text='Chưa có đủ dữ liệu để gợi ý món.' /> : <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(190px, 1fr))', gap: 8 }}>
                 {suggestions.map(item => {
                     const matchPercent = Math.round(item.score * 100);

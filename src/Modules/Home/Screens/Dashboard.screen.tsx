@@ -322,7 +322,7 @@ const DashboardHero: React.FunctionComponent<{
                         {activeMetric.detailItems.length > 0 ? activeMetric.detailItems.slice(0, 3).join(' · ') : activeMetric.emptyText}
                     </Typography.Text>
                 </div>
-                <Button size='small' onClick={activeMetric.onOpen} style={{ flexShrink: 0, borderRadius: 999, color: activeMetric.tone, borderColor: `${activeMetric.tone}55`, fontWeight: 700 }}>
+                <Button onClick={activeMetric.onOpen} style={{ flexShrink: 0, borderRadius: 999, color: activeMetric.tone, borderColor: `${activeMetric.tone}55`, fontWeight: 700, display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                     {activeMetric.actionLabel}
                 </Button>
             </Stack>
