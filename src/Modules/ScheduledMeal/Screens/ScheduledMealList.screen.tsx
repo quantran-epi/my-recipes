@@ -80,6 +80,21 @@ const topToolCardStyle: React.CSSProperties = {
     boxShadow: "0 2px 8px rgba(0,0,0,0.04)",
 };
 
+const topActionRowStyle: React.CSSProperties = {
+    display: "grid",
+    gridTemplateColumns: "minmax(0, 1fr) minmax(0, 1fr)",
+    gap: 8,
+    alignItems: "center",
+};
+
+const topActionButtonStyle: React.CSSProperties = {
+    width: "100%",
+    minWidth: 0,
+    overflow: "hidden",
+    textOverflow: "ellipsis",
+    whiteSpace: "nowrap",
+};
+
 // ─── Main screen ─────────────────────────────────────────────────────────────
 export const ScheduledMealListScreen = () => {
     const [selectedDate, setSelectedDate] = useState<Date>(new Date());
@@ -187,14 +202,16 @@ export const ScheduledMealListScreen = () => {
         <React.Fragment>
             <Box style={{ padding: "8px 12px 0", marginBottom: 8 }}>
                 <Box style={topToolCardStyle}>
-                    <Stack justify="flex-end" wrap="wrap" gap={8}>
-                        <Button icon={<CalendarOutlined />} onClick={_onOpenTemplateApply}>
+                    <div style={topActionRowStyle}>
+                        <Button icon={<CalendarOutlined />} onClick={_onOpenTemplateApply} style={topActionButtonStyle}>
                             Tạo từ mẫu
                         </Button>
-                        <Button icon={<ShoppingCartOutlined />} onClick={_onOpenRangeShopping}>
-                            Giỏ hàng theo khoảng ngày
-                        </Button>
-                    </Stack>
+                        <Tooltip title="Giỏ hàng theo khoảng ngày">
+                            <Button icon={<ShoppingCartOutlined />} onClick={_onOpenRangeShopping} style={topActionButtonStyle}>
+                                Giỏ theo ngày
+                            </Button>
+                        </Tooltip>
+                    </div>
                 </Box>
             </Box>
 

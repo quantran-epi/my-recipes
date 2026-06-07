@@ -2,7 +2,9 @@ import { CalendarOutlined, CheckCircleOutlined, DeleteOutlined, EditOutlined, Ex
 import { Button } from "@components/Button";
 import { Dropdown } from "@components/Dropdown";
 import { FastModalShell } from "@components/FastOverlay";
+import { DatePicker } from "@components/Form/DatePicker";
 import { Input } from "@components/Form/Input";
+import { Option, Select } from "@components/Form/Select";
 import { Image } from "@components/Image";
 import { Box } from "@components/Layout/Box";
 import { scrollVirtualListToTop, VirtualListRowFrame, VirtualListScrollTopButton } from "@components/List";
@@ -19,9 +21,12 @@ import { Dishes } from "@store/Models/Dishes";
 import { Ingredient } from "@store/Models/Ingredient";
 import { ScheduledMeal } from "@store/Models/ScheduledMeal";
 import { ShoppingList } from "@store/Models/ShoppingList";
-import { generateIngredient, removeShoppingList } from "@store/Reducers/ShoppingListReducer";
-import { selectDishes, selectIngredients, selectScheduledMeals, selectShoppingLists } from "@store/Selectors";
+import { rememberShoppingListName, ShoppingListTemplate } from "@store/Reducers/AppContextReducer";
+import { addShoppingList, generateIngredient, removeShoppingList } from "@store/Reducers/ShoppingListReducer";
+import { selectDishes, selectIngredients, selectInventory, selectInventoryHealthConfig, selectScheduledMeals, selectShoppingLists, selectShoppingListTemplates } from "@store/Selectors";
+import { nanoid } from "@reduxjs/toolkit";
 import { debounce, orderBy } from "lodash";
+import dayjs, { Dayjs } from "dayjs";
 import moment from "moment";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -36,6 +41,7 @@ import { ShoppingListDetailWidget } from "./ShoppingListDetail.widget";
 import { ShoppingListEditWidget } from "./ShoppingListEdit.widget";
 import { DateHelpers } from "@common/Helpers/DateHelper";
 import { RootRoutes } from "@routing/RootRoutes";
+import { normalizeDishServings } from "./DishServingSelector.widget";
 
 type ShoppingListStatusFilter = "all" | "buying" | "overdue" | "checklist_done" | "completed" | "empty_checklist";
 
@@ -134,6 +140,9 @@ export const ShoppingListScreen = () => {
     const dishes = useSelector(selectDishes);
     const scheduledMeals = useSelector(selectScheduledMeals);
     const ingredients = useSelector(selectIngredients);
+    const inventory = useSelector(selectInventory);
+    const inventoryConfig = useSelector(selectInventoryHealthConfig);
+    const shoppingListTemplates = useSelector(selectShoppingListTemplates);
     const toggleCalendarModal = useToggle({ defaultValue: false });
     const toggleAddModal = useToggle({ defaultValue: false });
     const dispatch = useDispatch();
@@ -141,6 +150,9 @@ export const ShoppingListScreen = () => {
     const { } = useScreenTitle({ value: "Lịch mua sắm", deps: [] });
     const [searchText, setSearchText] = useState("");
     const [activeStatus, setActiveStatus] = useState<ShoppingListStatusFilter>("all");
+    const [templateApplyOpen, setTemplateApplyOpen] = useState(false);
+    const [selectedTemplateId, setSelectedTemplateId] = useState<string | undefined>();
+    const [templateApplyDate, setTemplateApplyDate] = useState<Dayjs>(dayjs().startOf("day"));
     const virtualListStyle = useMemo<React.CSSProperties>(() => ({
         height: "100%",
         overscrollBehavior: "contain",
@@ -201,6 +213,9 @@ export const ShoppingListScreen = () => {
     } = usePagedVirtualItems({ items: filteredShoppingLists, resetKey: pagedShoppingListsResetKey });
     const rowHeight = useDynamicRowHeight({ defaultRowHeight: SHOPPING_LIST_ROW_HEIGHT, key: pagedShoppingListsResetKey });
     const [selectedDate, setSelectedDate] = useState<Date>();
+    const selectedTemplate = useMemo<ShoppingListTemplate | undefined>(() => {
+        return shoppingListTemplates.find(template => template.id === selectedTemplateId) ?? shoppingListTemplates[0];
+    }, [shoppingListTemplates, selectedTemplateId]);
 
     const _onAdd = () => {
         toggleAddModal.show();
@@ -220,6 +235,45 @@ export const ShoppingListScreen = () => {
 
     const _onShowCalendar = () => {
         toggleCalendarModal.show();
+    }
+
+    const _onOpenTemplateApply = () => {
+        setSelectedTemplateId(undefined);
+        setTemplateApplyDate(dayjs().startOf("day"));
+        setTemplateApplyOpen(true);
+    }
+
+    const _applyShoppingListTemplate = () => {
+        if (!selectedTemplate) return;
+        const normalizedServings = normalizeDishServings(selectedTemplate.dishes, dishes, selectedTemplate.dishServings ?? {});
+        const shoppingList: ShoppingList = {
+            id: `${selectedTemplate.name}${nanoid(10)}`,
+            name: `${selectedTemplate.name} - ${templateApplyDate.format("DD/MM")}`,
+            dishes: selectedTemplate.dishes,
+            dishServings: normalizedServings,
+            ingredients: [],
+            scheduledMeals: [],
+            createdDate: new Date(),
+            plannedDate: templateApplyDate.toDate(),
+            completedAt: undefined,
+            completionImports: undefined,
+        };
+
+        dispatch(addShoppingList(shoppingList));
+        dispatch(rememberShoppingListName(shoppingList.name));
+        dispatch(generateIngredient({
+            shoppingListId: shoppingList.id,
+            allDishes: dishes,
+            allScheduledMeals: scheduledMeals,
+            allIngredients: ingredients,
+            inventory,
+            inventoryConfig,
+            alreadyHaveIngredientIds: [],
+            autoMarkCoveredByInventory: true,
+            dishServings: normalizedServings,
+        }));
+        setTemplateApplyOpen(false);
+        navigate(RootRoutes.AuthorizedRoutes.ShoppingListRoutes.Detail(shoppingList.id));
     }
 
     const _onAddWithDate = (date: Date) => {
@@ -254,6 +308,9 @@ export const ShoppingListScreen = () => {
                 <Stack.Compact style={searchControlRowStyle}>
                     <Input allowClear data-testid="shopping-list-search-input" placeholder="Tìm kiếm" onChange={_onSearchChange} style={searchInputStyle} />
                     <Button onClick={_onAdd} icon={<PlusOutlined />} />
+                    <Tooltip title="Tạo từ mẫu">
+                        <Button onClick={_onOpenTemplateApply} icon={<FileTextOutlined />} />
+                    </Tooltip>
                     <Button onClick={_onShowCalendar} icon={<CalendarOutlined />} />
                 </Stack.Compact>
                 <div style={filterRowStyle}>
@@ -302,6 +359,44 @@ export const ShoppingListScreen = () => {
         </Space>} destroyOnClose={true} onCancel={toggleCalendarModal.hide} footer={null}>
             <DeferredModalContent active={toggleCalendarModal.value} minHeight={220}>
                 <ShoppingListCalendarWidget onAdd={_onAddWithDate} />
+            </DeferredModalContent>
+        </Modal>
+
+        <Modal
+            open={templateApplyOpen}
+            title={<Space><FileTextOutlined />Tạo lịch mua từ mẫu</Space>}
+            onCancel={() => setTemplateApplyOpen(false)}
+            onOk={_applyShoppingListTemplate}
+            okText="Tạo lịch mua"
+            cancelText="Hủy"
+            okButtonProps={{ disabled: shoppingListTemplates.length === 0 }}
+            destroyOnClose
+        >
+            <DeferredModalContent active={templateApplyOpen} minHeight={150}>
+                <Stack direction="column" align="stretch" gap={10}>
+                    <div>
+                        <Typography.Text strong style={{ display: "block", fontSize: 12, marginBottom: 5 }}>Mẫu mua sắm</Typography.Text>
+                        <Select
+                            value={selectedTemplate?.id}
+                            onChange={setSelectedTemplateId}
+                            placeholder="Chọn mẫu mua sắm"
+                            disabled={shoppingListTemplates.length === 0}
+                            style={{ width: "100%" }}
+                        >
+                            {shoppingListTemplates.map(template => <Option key={template.id} value={template.id}>{template.name}</Option>)}
+                        </Select>
+                        {shoppingListTemplates.length === 0 && <Typography.Text type="secondary" style={{ display: "block", fontSize: 12, marginTop: 6 }}>
+                            Chưa có mẫu mua sắm. Vào trang Mẫu dùng lại để tạo mẫu trước.
+                        </Typography.Text>}
+                    </div>
+                    <div>
+                        <Typography.Text strong style={{ display: "block", fontSize: 12, marginBottom: 5 }}>Ngày mua</Typography.Text>
+                        <DatePicker value={templateApplyDate} onChange={value => value && setTemplateApplyDate(value)} format="DD/MM/YYYY" style={{ width: "100%" }} />
+                    </div>
+                    {selectedTemplate && <Typography.Text type="secondary" style={{ fontSize: 12, lineHeight: "17px" }}>
+                        Mẫu này có {selectedTemplate.dishes.length} món. App sẽ tạo checklist nguyên liệu ngay sau khi tạo lịch mua.
+                    </Typography.Text>}
+                </Stack>
             </DeferredModalContent>
         </Modal>
     </React.Fragment>

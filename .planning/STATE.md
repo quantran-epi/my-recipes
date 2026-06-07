@@ -4,8 +4,8 @@ milestone: v1.0
 milestone_name: milestone
 status: ready
 stopped_at: Completed 04-02-PLAN.md
-last_updated: "2026-06-07T13:16:50Z"
-last_activity: 2026-06-07 -- Completed quick task 260607-tcm: template creator modals
+last_updated: "2026-06-07T13:24:52Z"
+last_activity: 2026-06-07 -- Completed quick task 260607-tpe: template preview, edit, and shopping apply
 progress:
   total_phases: 5
   completed_phases: 4
@@ -28,7 +28,7 @@ See: .planning/PROJECT.md (updated 2026-06-05)
 Phase: 5 (release-gate-and-product-guardrails) — READY
 Plan: Not started
 Status: Phase 04 complete; ready for Phase 05
-Last activity: 2026-06-07 -- Completed quick task 260607-tcm: template creator modals
+Last activity: 2026-06-07 -- Completed quick task 260607-tpe: template preview, edit, and shopping apply
 
 Progress: [████████░░] 80%
 
@@ -36,6 +36,7 @@ Progress: [████████░░] 80%
 
 | Date | Task | Artifact |
 |------|------|----------|
+| 2026-06-07 | Template preview, edit, and shopping apply | `.planning/quick/260607-tpe-template-preview-edit-apply/260607-tpe-SUMMARY.md` |
 | 2026-06-07 | Template creator modals | `.planning/quick/260607-tcm-template-creator-modals/260607-tcm-SUMMARY.md` |
 | 2026-06-07 | Calendar and template workflow update | `.planning/quick/260607-ctw-calendar-template-workflows/260607-ctw-SUMMARY.md` |
 | 2026-06-06 | House nav, personal auto sync, bottom tab, and stats polish | `.planning/quick/260606-hse-house-nav-personal-autosync-tab-polish/260606-hse-SUMMARY.md` |
