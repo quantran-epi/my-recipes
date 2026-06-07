@@ -97,6 +97,7 @@ const fieldGridStyle: React.CSSProperties = {
 };
 
 const templateCardStyle: React.CSSProperties = {
+    position: 'relative',
     border: '1px solid rgba(116,54,220,0.12)',
     borderLeft: '3px solid #7436dc',
     borderRadius: 8,
@@ -106,16 +107,15 @@ const templateCardStyle: React.CSSProperties = {
 };
 
 const templateCardInnerStyle: React.CSSProperties = {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
+    display: 'grid',
+    gridTemplateColumns: 'minmax(0, 1fr) auto',
+    alignItems: 'end',
     gap: 10,
-    flexWrap: 'wrap',
 };
 
 const templateContentStyle: React.CSSProperties = {
-    minWidth: 210,
-    flex: '1 1 260px',
+    minWidth: 0,
+    paddingRight: 38,
 };
 
 const templateUpdatedTextStyle: React.CSSProperties = {
@@ -128,15 +128,16 @@ const templateUpdatedTextStyle: React.CSSProperties = {
 
 const templateActionsStyle: React.CSSProperties = {
     display: 'flex',
-    flexDirection: 'column',
-    gap: 8,
-    justifyContent: 'space-between',
+    justifyContent: 'flex-end',
     alignItems: 'flex-end',
-    flex: '0 1 auto',
-    minHeight: 66,
+    paddingTop: 34,
 };
 
 const templateMenuButtonStyle: React.CSSProperties = {
+    position: 'absolute',
+    top: 8,
+    right: 8,
+    zIndex: 1,
     width: 32,
     paddingInline: 0,
     border: '1px solid rgba(116,54,220,0.12)',
