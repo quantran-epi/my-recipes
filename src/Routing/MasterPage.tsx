@@ -163,13 +163,10 @@ export const MasterPage = () => {
                 <Stack justify="space-between" align="center" gap={10} style={{ height: "100%" }}>
                     <Stack align="center" gap={9} style={{ minWidth: 0 }}>
                         <SidebarDrawer buttonStyle={headerActionButtonStyle} />
-                        <span style={{ width: 38, height: 38, borderRadius: "50%", background: "rgba(255,255,255,0.18)", border: "1px solid rgba(255,255,255,0.28)", display: "inline-flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                            <Image src={LogoIcon} width={25} loading="eager" alt="My Recipes" />
-                        </span>
                         <div style={{ minWidth: 0 }}>
                             <Typography.Text style={{ display: "block", color: "rgba(255,255,255,0.82)", fontSize: 11, lineHeight: "14px", fontWeight: 650 }}>My Recipes</Typography.Text>
                             <Tooltip title={currentFeatureName}>
-                                <Typography.Paragraph style={{ fontSize: 19, lineHeight: "23px", fontWeight: 750, marginBottom: 0, maxWidth: 160, color: "#fff" }} ellipsis>{currentFeatureName}</Typography.Paragraph>
+                                <Typography.Paragraph style={{ fontSize: 19, lineHeight: "23px", fontWeight: 750, marginBottom: 0, maxWidth: 210, color: "#fff" }} ellipsis>{currentFeatureName}</Typography.Paragraph>
                             </Tooltip>
                         </div>
                     </Stack>
