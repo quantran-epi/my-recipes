@@ -1,6 +1,6 @@
 import {
     CalendarOutlined, CopyOutlined, DeleteOutlined, EditOutlined,
-    HolderOutlined, PlusOutlined, ShoppingCartOutlined
+    HolderOutlined, LeftOutlined, PlusOutlined, RightOutlined, ShoppingCartOutlined
 } from "@ant-design/icons";
 import { Badge } from "@components/Badge";
 import { Button } from "@components/Button";
@@ -11,7 +11,7 @@ import { DeferredModalContent, Modal } from "@components/Modal";
 import { useMessage } from "@components/Message";
 import { Tooltip } from "@components/Tootip";
 import { Typography } from "@components/Typography";
-import { useScreenTitle, useTheme, useToggle } from "@hooks";
+import { useScreenTitle, useToggle } from "@hooks";
 import { ScheduledMeal } from "@store/Models/ScheduledMeal";
 import { rememberScheduledMealName, WeeklyMealTemplate } from "@store/Reducers/AppContextReducer";
 import { addScheduledMeal, removeScheduledMeal, toggleSelectedMeals } from "@store/Reducers/ScheduledMealReducer";
@@ -90,14 +90,54 @@ const topActionRowStyle: React.CSSProperties = {
 const topActionButtonStyle: React.CSSProperties = {
     width: "100%",
     minWidth: 0,
-    overflow: "hidden",
-    textOverflow: "ellipsis",
     whiteSpace: "nowrap",
+    display: "inline-flex",
+    alignItems: "center",
+    justifyContent: "center",
+    fontWeight: 700,
 };
+
+const dayNavigatorCardStyle: React.CSSProperties = {
+    display: "grid",
+    gridTemplateColumns: "42px minmax(0, 1fr) 42px",
+    gap: 8,
+    alignItems: "center",
+    border: "1px solid rgba(116,54,220,0.10)",
+    borderRadius: 8,
+    background: "linear-gradient(135deg, #ffffff 0%, #fbf9ff 100%)",
+    padding: 10,
+    boxShadow: "0 10px 28px rgba(74,48,130,0.09)",
+};
+
+const dayArrowButtonStyle: React.CSSProperties = {
+    width: 42,
+    height: 42,
+    paddingInline: 0,
+    borderRadius: 8,
+    color: "#7436dc",
+    borderColor: "rgba(116,54,220,0.18)",
+    background: "#fff",
+    boxShadow: "0 8px 18px rgba(74,48,130,0.09)",
+};
+
+const scheduledMealCss = `
+.scheduled-meal-card {
+    transition: border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
+}
+.scheduled-meal-card:hover {
+    border-color: rgba(116,54,220,0.20);
+    box-shadow: 0 14px 34px rgba(74,48,130,0.13);
+}
+.scheduled-meal-day-arrow:hover {
+    border-color: rgba(116,54,220,0.30) !important;
+    transform: translateY(-1px);
+}
+`;
 
 // ─── Main screen ─────────────────────────────────────────────────────────────
 export const ScheduledMealListScreen = () => {
-    const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+    const [selectedDate, setSelectedDate] = useState<Date>(() => dayjs().startOf("day").toDate());
+    const [calendarVisible, setCalendarVisible] = useState(false);
     const [rangePickerOpen, setRangePickerOpen] = useState(false);
     const [selectedRange, setSelectedRange] = useState<[Dayjs, Dayjs] | null>(null);
     const [shoppingRangeMealIds, setShoppingRangeMealIds] = useState<string[]>([]);
@@ -114,7 +154,7 @@ export const ScheduledMealListScreen = () => {
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const message = useMessage();
-    const { } = useScreenTitle({ value: "Thực đơn", deps: [] });
+    useScreenTitle({ value: "Thực đơn", deps: [] });
     const toggleAddModal = useToggle({ defaultValue: false });
 
     const scheduledMealsByDate = useMemo(() => {
@@ -128,6 +168,7 @@ export const ScheduledMealListScreen = () => {
     const scheduledMealDateKeys = useMemo(() => new Set(Object.keys(scheduledMealsByDate)), [scheduledMealsByDate]);
     const _onSelect = (d, selectInfo?: SelectInfo) => {
         setSelectedDate(d.toDate());
+        setCalendarVisible(false);
     };
 
     const _cellRender = (d, info) => {
@@ -147,6 +188,12 @@ export const ScheduledMealListScreen = () => {
         );
 
     const _onOpenRangeShopping = () => setRangePickerOpen(true);
+
+    const _changeSelectedDay = (amount: number) => {
+        setSelectedDate(current => dayjs(current).add(amount, "day").startOf("day").toDate());
+    };
+
+    const _goToday = () => setSelectedDate(dayjs().startOf("day").toDate());
 
     const _onOpenTemplateApply = () => {
         setTemplateApplyMode('day');
@@ -200,15 +247,16 @@ export const ScheduledMealListScreen = () => {
 
     return (
         <React.Fragment>
+            <style>{scheduledMealCss}</style>
             <Box style={{ padding: "8px 12px 0", marginBottom: 8 }}>
                 <Box style={topToolCardStyle}>
                     <div style={topActionRowStyle}>
                         <Button icon={<CalendarOutlined />} onClick={_onOpenTemplateApply} style={topActionButtonStyle}>
-                            Tạo từ mẫu
+                            Từ mẫu
                         </Button>
-                        <Tooltip title="Giỏ hàng theo khoảng ngày">
+                        <Tooltip title="Tạo danh sách mua theo khoảng ngày">
                             <Button icon={<ShoppingCartOutlined />} onClick={_onOpenRangeShopping} style={topActionButtonStyle}>
-                                Giỏ theo ngày
+                                Tạo giỏ
                             </Button>
                         </Tooltip>
                     </div>
@@ -216,10 +264,44 @@ export const ScheduledMealListScreen = () => {
             </Box>
 
             <Box style={{ padding: "0 12px" }}>
-                <Box style={{ border: "1px solid #f0f0f0", borderRadius: 8, background: "#fff", padding: 8 }}>
-                    <Calendar fullscreen={false} onSelect={_onSelect} cellRender={_cellRender} />
+                <Box style={dayNavigatorCardStyle}>
+                    <Button
+                        aria-label="Ngày trước"
+                        className="scheduled-meal-day-arrow"
+                        icon={<LeftOutlined />}
+                        onClick={() => _changeSelectedDay(-1)}
+                        style={dayArrowButtonStyle}
+                    />
+                    <div style={{ minWidth: 0, textAlign: "center" }}>
+                        <Typography.Text strong style={{ display: "block", color: "#111827", fontSize: 18, lineHeight: "24px", overflowWrap: "anywhere" }}>
+                            {moment(selectedDate).format("dddd, DD/MM/YYYY")}
+                        </Typography.Text>
+                        <Space size={5} wrap style={{ justifyContent: "center", marginTop: 4 }}>
+                            <span style={{ padding: "1px 8px", borderRadius: 999, background: selectedDayStatus.background, color: selectedDayStatus.color, border: `1px solid ${selectedDayStatus.border}`, fontSize: 11, lineHeight: "18px", fontWeight: 700 }}>{selectedDayStatus.label}</span>
+                            <Typography.Text type="secondary" style={{ fontSize: 12 }}>{mealsToday.length} thực đơn</Typography.Text>
+                        </Space>
+                        <Space size={6} wrap style={{ justifyContent: "center", marginTop: 8 }}>
+                            <Button onClick={() => setCalendarVisible(value => !value)} icon={<CalendarOutlined />} style={{ borderRadius: 999, fontWeight: 650 }}>
+                                {calendarVisible ? "Ẩn lịch" : "Chọn ngày"}
+                            </Button>
+                            {!dayjs(selectedDate).isSame(dayjs(), "day") && <Button onClick={_goToday} style={{ borderRadius: 999, fontWeight: 650 }}>Hôm nay</Button>}
+                        </Space>
+                    </div>
+                    <Button
+                        aria-label="Ngày sau"
+                        className="scheduled-meal-day-arrow"
+                        icon={<RightOutlined />}
+                        onClick={() => _changeSelectedDay(1)}
+                        style={dayArrowButtonStyle}
+                    />
                 </Box>
             </Box>
+
+            {calendarVisible && <Box style={{ padding: "8px 12px 0" }}>
+                <Box style={{ border: "1px solid rgba(116,54,220,0.10)", borderRadius: 8, background: "#fff", padding: 8, boxShadow: "0 8px 22px rgba(74,48,130,0.08)" }}>
+                    <Calendar fullscreen={false} value={dayjs(selectedDate)} onSelect={_onSelect} cellRender={_cellRender} />
+                </Box>
+            </Box>}
 
             <Box style={{ padding: "10px 12px 0" }}>
                 <Box style={{
@@ -227,19 +309,19 @@ export const ScheduledMealListScreen = () => {
                     gridTemplateColumns: "minmax(0, 1fr) auto",
                     gap: 8,
                     alignItems: "center",
-                    border: "1px solid #f0f0f0",
+                    border: "1px solid rgba(116,54,220,0.10)",
                     borderRadius: 8,
                     background: "#fff",
-                    padding: 10,
+                    padding: "11px 12px",
+                    boxShadow: "0 8px 22px rgba(74,48,130,0.07)",
                 }}>
                     <div style={{ minWidth: 0 }}>
-                        <Typography.Text strong style={{ display: "block", fontSize: 15, lineHeight: "20px", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
-                            {moment(selectedDate).format("dddd, DD/MM/YYYY")}
+                        <Typography.Text strong style={{ display: "block", color: "#111827", fontSize: 16, lineHeight: "21px", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                            Thực đơn trong ngày
                         </Typography.Text>
-                        <Space size={5} wrap>
-                            <span style={{ padding: "1px 7px", borderRadius: 999, background: selectedDayStatus.background, color: selectedDayStatus.color, border: `1px solid ${selectedDayStatus.border}`, fontSize: 11, lineHeight: "18px", fontWeight: 650 }}>{selectedDayStatus.label}</span>
-                            <Typography.Text type="secondary" style={{ fontSize: 12 }}>{mealsToday.length} thực đơn</Typography.Text>
-                        </Space>
+                        <Typography.Text type="secondary" style={{ display: "block", fontSize: 12, lineHeight: "17px", marginTop: 2 }}>
+                            {moment(selectedDate).format("DD/MM/YYYY")} · {mealsToday.length} thực đơn
+                        </Typography.Text>
                     </div>
                     <Button onClick={toggleAddModal.show} icon={<PlusOutlined />}>Thêm</Button>
                 </Box>
@@ -404,7 +486,6 @@ export const ScheduledMealItem = ({ item, selected, dishNameById, onDelete }: { 
     const toggleDeleteConfirm = useToggle({ defaultValue: false });
     const [copyDate, setCopyDate] = useState<Dayjs | null>(null);
     const dispatch = useDispatch();
-    const theme = useTheme();
 
     const _dishName = (id: string) => dishNameById.get(id) ?? id;
     const _dishLabel = (id: string) => {
@@ -476,25 +557,26 @@ export const ScheduledMealItem = ({ item, selected, dishNameById, onDelete }: { 
 
     return (
         <React.Fragment>
-            <Box style={{
-                display: "grid",
-                gridTemplateColumns: "5px minmax(0, 1fr)",
+            <Box className="scheduled-meal-card" style={{
                 borderRadius: 8,
-                border: `1px solid ${selected ? "#1677ff" : theme.token.colorBorder}`,
+                border: `1px solid ${selected ? "rgba(22,119,255,0.42)" : "rgba(116,54,220,0.10)"}`,
                 background: selected ? "#f0f7ff" : "#fff",
-                marginBottom: 8,
-                transition: "all 0.15s",
+                marginBottom: 10,
                 overflow: "hidden",
-                boxShadow: "0 2px 8px rgba(0,0,0,0.04)",
+                boxShadow: "0 10px 28px rgba(74,48,130,0.10)",
             }}>
-                <div style={{ background: railColor }} />
-                <div style={{ padding: 10, minWidth: 0, display: "flex", flexDirection: "column", gap: 9 }}>
+                <div style={{ display: "grid", gridTemplateColumns: "5px minmax(0, 1fr)", background: `linear-gradient(90deg, ${railColor}14 0%, rgba(255,255,255,0.96) 74%)`, borderBottom: "1px solid rgba(116,54,220,0.09)" }}>
+                    <div style={{ background: railColor }} />
+                    <div style={{ padding: "12px 12px 10px", minWidth: 0 }}>
                     <div style={{ display: "grid", gridTemplateColumns: "minmax(0, 1fr) auto", gap: 8, alignItems: "start" }}>
                         <Stack gap={7} align="flex-start" style={{ minWidth: 0 }}>
                             <Checkbox checked={selected} onChange={_onToggleSelect} style={{ marginTop: 2, marginRight: 0 }} />
+                            <span style={{ width: 38, height: 38, borderRadius: 8, display: "inline-flex", alignItems: "center", justifyContent: "center", background: `${railColor}16`, border: `1px solid ${railColor}28`, flexShrink: 0 }}>
+                                <Image src={MealsIcon} preview={false} width={23} style={{ marginBottom: 2 }} />
+                            </span>
                             <div style={{ minWidth: 0 }}>
                                 <Tooltip title={item.name}>
-                                    <Typography.Paragraph style={{ marginBottom: 2, fontWeight: 650, lineHeight: "21px" }} ellipsis={{ rows: 2 }}>
+                                    <Typography.Paragraph style={{ marginBottom: 2, color: "#111827", fontWeight: 800, lineHeight: "22px", fontSize: 15.5 }} ellipsis={{ rows: 2 }}>
                                         {item.name}
                                     </Typography.Paragraph>
                                 </Tooltip>
@@ -522,7 +604,10 @@ export const ScheduledMealItem = ({ item, selected, dishNameById, onDelete }: { 
                             </Dropdown>
                         </Stack>
                     </div>
+                    </div>
+                </div>
 
+                <div style={{ padding: 10, minWidth: 0, display: "flex", flexDirection: "column", gap: 9 }}>
                     <div style={{ display: "grid", gridTemplateColumns: "minmax(0, 1fr)", gap: 7 }}>
                         {mealGroups.map(group => <MealRow key={group.label} icon={group.icon} label={group.label} dishIds={group.dishIds} color={group.color} background={group.background} border={group.border} />)}
                     </div>
