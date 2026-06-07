@@ -1,6 +1,7 @@
-import { BarChartOutlined, DeleteOutlined, EditOutlined, PlusOutlined, ReloadOutlined } from '@ant-design/icons';
+import { DeleteOutlined, EditOutlined, PlusOutlined, ReloadOutlined } from '@ant-design/icons';
 import { NutritionGoalHelper } from '@common/Helpers/NutritionGoalHelper';
 import { Button } from '@components/Button';
+import { Image } from '@components/Image';
 import { Box } from '@components/Layout/Box';
 import { Stack } from '@components/Layout/Stack';
 import { useMessage } from '@components/Message';
@@ -15,6 +16,7 @@ import { selectNutritionGoals } from '@store/Selectors';
 import { Input, InputNumber, Select } from 'antd';
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import NutritionPlanIcon from '../../../../assets/icons/nutrition-plan.png';
 
 const goalColors = ['#7436dc', '#1677ff', '#389e0d', '#d48806', '#cf1322', '#13a8a8'];
 
@@ -60,7 +62,7 @@ export const NutritionGoalsScreen = () => {
     const [editorOpen, setEditorOpen] = React.useState(false);
     const [editingGoal, setEditingGoal] = React.useState<NutritionGoal | null>(null);
     const [draftGoal, setDraftGoal] = React.useState<NutritionGoal>(createDraftGoal);
-    useScreenTitle({ value: 'Mục tiêu DD', deps: [] });
+    useScreenTitle({ value: 'Dinh dưỡng', deps: [] });
 
     const openCreate = () => {
         setDraftGoal(createDraftGoal());
@@ -155,7 +157,7 @@ export const NutritionGoalsScreen = () => {
             <Stack justify='space-between' align='flex-start' gap={12}>
                 <div style={{ minWidth: 0 }}>
                     <Typography.Text style={{ display: 'block', color: 'rgba(255,255,255,0.82)', fontSize: 12, lineHeight: '16px', fontWeight: 650 }}>My Recipes</Typography.Text>
-                    <Typography.Text strong style={{ display: 'block', color: '#fff', fontSize: 22, lineHeight: '28px' }}>Mục tiêu dinh dưỡng</Typography.Text>
+                    <Typography.Text strong style={{ display: 'block', color: '#fff', fontSize: 22, lineHeight: '28px' }}>Dinh dưỡng</Typography.Text>
                     <Typography.Text style={{ display: 'block', color: 'rgba(255,255,255,0.78)', fontSize: 12, lineHeight: '17px', marginTop: 4 }}>Tạo các bộ tiêu chí để gợi ý món ăn theo kcal, đạm, chất béo, chất xơ và vi chất.</Typography.Text>
                 </div>
                 {isAdmin && <Stack gap={8} wrap='wrap' style={{ flexShrink: 0 }}>
@@ -174,7 +176,7 @@ export const NutritionGoalsScreen = () => {
                 <Box key={goal.id} style={{ border: `1px solid ${goal.color ?? '#7436dc'}22`, borderRadius: 8, background: '#fff', padding: 12, boxShadow: '0 10px 24px rgba(74,48,130,0.08)', minWidth: 0 }}>
                     <Stack justify='space-between' align='flex-start' gap={8} style={{ marginBottom: 8 }}>
                         <Stack align='flex-start' gap={9} style={{ minWidth: 0 }}>
-                            <span style={{ width: 36, height: 36, borderRadius: 8, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', color: goal.color ?? '#7436dc', background: `${goal.color ?? '#7436dc'}14`, border: `1px solid ${goal.color ?? '#7436dc'}24`, flexShrink: 0 }}><BarChartOutlined /></span>
+                            <span style={{ width: 36, height: 36, borderRadius: 8, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', color: goal.color ?? '#7436dc', background: `${goal.color ?? '#7436dc'}14`, border: `1px solid ${goal.color ?? '#7436dc'}24`, flexShrink: 0 }}><Image src={NutritionPlanIcon} preview={false} width={24} alt="" /></span>
                             <div style={{ minWidth: 0 }}>
                                 <Typography.Text strong style={{ display: 'block', fontSize: 16, lineHeight: '21px', color: '#111827', overflowWrap: 'anywhere' }}>{goal.name}</Typography.Text>
                                 {goal.description && <Typography.Text type='secondary' style={{ display: 'block', fontSize: 12, lineHeight: '16px', marginTop: 2 }}>{goal.description}</Typography.Text>}

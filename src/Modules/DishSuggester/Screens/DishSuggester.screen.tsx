@@ -23,6 +23,7 @@ import { DishImageWidget } from "@modules/Dishes/Screens/DishesManageIngredient/
 import { ShoppingListAddWidget } from "@modules/ShoppingList/Screens/ShoppingListAdd.widget";
 import ShoppingListIcon from "../../../../assets/icons/shoppingList.png";
 import NoodlesIcon from "../../../../assets/icons/noodles.png";
+import DietIcon from "../../../../assets/icons/diet.png";
 import { Dishes } from "@store/Models/Dishes";
 import { InventoryHelper } from "@common/Helpers/InventoryHelper";
 import { IngredientUnitHelper } from "@common/Helpers/IngredientUnitHelper";
@@ -410,7 +411,7 @@ export const DishSuggesterScreen: React.FC<DishSuggesterScreenProps> = ({ open, 
                 { key: "ingredients" as Mode, label: "Nguyên liệu", icon: <BulbOutlined /> },
                 { key: "inventory" as Mode, label: "Tủ lạnh", icon: <ThunderboltOutlined /> },
                 { key: "duration" as Mode, label: "Thời gian", icon: <ClockCircleOutlined /> },
-                { key: "nutrition" as Mode, label: "Dinh dưỡng", icon: <BarChartOutlined /> },
+                { key: "nutrition" as Mode, label: "Dinh dưỡng", icon: <Image src={DietIcon} preview={false} width={18} alt="" /> },
             ]).map(tab => (
                 <button
                     key={tab.key}
