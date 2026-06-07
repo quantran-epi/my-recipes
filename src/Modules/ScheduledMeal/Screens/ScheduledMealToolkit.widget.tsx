@@ -17,6 +17,7 @@ import IngredientIcon from "../../../../assets/icons/vegetable.png";
 import MealsIcon from "../../../../assets/icons/meals.png";
 import BudgetIcon from "../../../../assets/icons/budget.png";
 import HouseIcon from "../../../../assets/icons/house.png";
+import AnalysisIcon from "../../../../assets/icons/analysis.png";
 import { Space } from "@components/Layout/Space";
 import { Image } from "@components/Image";
 import { Popconfirm } from "@components/Popconfirm";
@@ -119,6 +120,7 @@ export const ScheduledMealToolkitWidget: React.FC<ScheduledMealToolkitWidgetProp
             </Popconfirm>}
             {selectedMeals.length > 0 && <FloatButton description="Tạo lịch mua" tooltip={`Tạo lịch mua sắm (${selectedMeals.length})`} icon={<Image preview={false} src={ShoppingListAddIcon} width={20} style={floatIconStyle} />} onClick={_onOpenAddShoppingList} />}
             <FloatButton description="Tổng quan" tooltip="Tổng quan" icon={<Image preview={false} src={HouseIcon} width={20} style={floatIconStyle} />} onClick={() => _navigate(RootRoutes.AuthorizedRoutes.Root())} />
+            <FloatButton description="Phân tích" tooltip="Phân tích dữ liệu" icon={<Image preview={false} src={AnalysisIcon} width={20} style={floatIconStyle} />} onClick={() => _navigate(RootRoutes.AuthorizedRoutes.Analytics())} />
             <FloatButton description="Món ăn" tooltip="Món ăn" icon={<Image preview={false} src={DishesIcon} width={20} style={floatIconStyle} />} onClick={() => _navigate(RootRoutes.AuthorizedRoutes.DishesRoutes.List())} />
             <FloatButton description="Nguyên liệu" tooltip="Nguyên liệu" icon={<Image preview={false} src={IngredientIcon} width={20} style={floatIconStyle} />} onClick={() => _navigate(RootRoutes.AuthorizedRoutes.IngredientRoutes.List())} />
             <FloatButton description="Mua sắm" tooltip="Mua sắm" icon={<Image preview={false} src={ShoppinglistIcon} width={20} style={floatIconStyle} />} onClick={() => _navigate(RootRoutes.AuthorizedRoutes.ShoppingListRoutes.List())} />

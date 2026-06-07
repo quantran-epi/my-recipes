@@ -20,6 +20,7 @@ const ExpensePlanner = (dishId?: string | string[], targetServings?: number) => 
 
 const AuthorizedRoutes = {
     Root: () => "/",
+    Analytics: () => RouteHelpers.CreateRoute('/analytics'),
     ExpensePlanner,
     IngredientRoutes,
     DishesRoutes,

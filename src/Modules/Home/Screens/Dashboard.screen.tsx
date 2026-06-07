@@ -1,4 +1,4 @@
-import { CalendarOutlined, CheckCircleOutlined, ClockCircleOutlined, DollarCircleOutlined, FireOutlined, RightOutlined, ShoppingCartOutlined, WarningOutlined } from '@ant-design/icons';
+import { BarChartOutlined, CalendarOutlined, CheckCircleOutlined, ClockCircleOutlined, DollarCircleOutlined, FireOutlined, RightOutlined, ShoppingCartOutlined, WarningOutlined } from '@ant-design/icons';
 import { CostEstimateHelper, CostEstimateSummary } from '@common/Helpers/CostEstimateHelper';
 import { IngredientPriceHelper } from '@common/Helpers/IngredientPriceHelper';
 import { IngredientUnitHelper } from '@common/Helpers/IngredientUnitHelper';
@@ -32,6 +32,12 @@ type UrgentInventoryItem = {
 }
 
 const today = () => moment().startOf('day');
+
+const formatHeaderDateLabel = (value = new Date()): string => {
+    const day = String(value.getDate()).padStart(2, '0');
+    const month = String(value.getMonth() + 1).padStart(2, '0');
+    return `${day}, ${month} ${value.getFullYear()}`;
+}
 
 const isSameDay = (value?: Date | string | null): boolean => {
     return Boolean(value) && moment(value).isSame(today(), 'day');
@@ -205,19 +211,29 @@ const createEmptyDashboardExpensiveMetrics = (): DashboardExpensiveMetrics => ({
 });
 
 type DashboardHeroMetric = {
+    key: string;
     label: string;
     value: string | number;
     detail: string;
     tone: string;
+    detailTitle: string;
+    detailItems: string[];
+    emptyText: string;
+    actionLabel: string;
+    onOpen: () => void;
 }
 
 const DashboardHero: React.FunctionComponent<{
     item: PriorityAction;
-    monthLabel: string;
+    dateLabel: string;
     mainValue: number;
     mainLabel: string;
     metrics: DashboardHeroMetric[];
-}> = ({ item, monthLabel, mainValue, mainLabel, metrics }) => {
+    onAnalyticsOpen: () => void;
+}> = ({ item, dateLabel, mainValue, mainLabel, metrics, onAnalyticsOpen }) => {
+    const [activeMetricKey, setActiveMetricKey] = React.useState(metrics[0]?.key ?? '');
+    const activeMetric = metrics.find(metric => metric.key === activeMetricKey) ?? metrics[0];
+
     return <Box style={{
         borderRadius: 8,
         padding: 14,
@@ -234,7 +250,29 @@ const DashboardHero: React.FunctionComponent<{
                 <Typography.Text style={{ display: 'block', color: 'rgba(255,255,255,0.82)', fontSize: 12, lineHeight: '16px', fontWeight: 650 }}>My Recipes</Typography.Text>
                 <Typography.Text strong style={{ display: 'block', color: '#fff', fontSize: 16, lineHeight: '21px' }}>Tổng quan bếp hôm nay</Typography.Text>
             </div>
-            <span style={{ borderRadius: 999, padding: '5px 10px', background: 'rgba(255,255,255,0.16)', border: '1px solid rgba(255,255,255,0.22)', color: '#fff', fontSize: 11, fontWeight: 750, whiteSpace: 'nowrap' }}>{monthLabel}</span>
+            <Stack align='center' gap={6} style={{ flexShrink: 0 }}>
+                <span style={{ borderRadius: 999, padding: '5px 10px', background: 'rgba(255,255,255,0.16)', border: '1px solid rgba(255,255,255,0.22)', color: '#fff', fontSize: 11, fontWeight: 750, whiteSpace: 'nowrap' }}>{dateLabel}</span>
+                <button
+                    type='button'
+                    aria-label='Mở phân tích dữ liệu'
+                    onClick={onAnalyticsOpen}
+                    style={{
+                        width: 32,
+                        height: 32,
+                        borderRadius: 999,
+                        border: '1px solid rgba(255,255,255,0.24)',
+                        background: 'rgba(255,255,255,0.18)',
+                        color: '#fff',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        cursor: 'pointer',
+                        boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.16)',
+                    }}
+                >
+                    <BarChartOutlined />
+                </button>
+            </Stack>
         </Stack>
         <div style={{ position: 'relative', display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) auto', gap: 10, alignItems: 'end', marginBottom: 12 }}>
             <div style={{ minWidth: 0 }}>
@@ -252,12 +290,43 @@ const DashboardHero: React.FunctionComponent<{
             {item.tags && <Stack wrap='wrap' gap={5} style={{ marginTop: 8 }}>{item.tags}</Stack>}
         </Box>
         <div style={{ position: 'relative', display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 8 }}>
-            {metrics.map(metric => <div key={metric.label} style={{ minWidth: 0, borderRadius: 8, background: '#fff', padding: '9px 8px', boxShadow: '0 8px 18px rgba(34,17,83,0.16)' }}>
+            {metrics.map(metric => {
+                const active = activeMetric?.key === metric.key;
+                return <button
+                    key={metric.key}
+                    type='button'
+                    aria-expanded={active}
+                    onClick={() => setActiveMetricKey(metric.key)}
+                    style={{
+                        minWidth: 0,
+                        border: active ? `1px solid ${metric.tone}` : '1px solid transparent',
+                        borderRadius: 8,
+                        background: '#fff',
+                        padding: '9px 8px',
+                        boxShadow: active ? '0 10px 22px rgba(34,17,83,0.20)' : '0 8px 18px rgba(34,17,83,0.16)',
+                        textAlign: 'left',
+                        cursor: 'pointer',
+                    }}
+                >
                 <Typography.Text strong style={{ display: 'block', color: metric.tone, fontSize: 16, lineHeight: '20px' }}>{metric.value}</Typography.Text>
                 <Typography.Text style={{ display: 'block', color: '#111827', fontSize: 11, fontWeight: 750, lineHeight: '15px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{metric.label}</Typography.Text>
                 <Typography.Text type='secondary' style={{ display: 'block', fontSize: 10, lineHeight: '13px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{metric.detail}</Typography.Text>
-            </div>)}
+                </button>
+            })}
         </div>
+        {activeMetric && <Box style={{ position: 'relative', marginTop: 8, borderRadius: 8, padding: 10, background: 'rgba(255,255,255,0.96)', border: '1px solid rgba(255,255,255,0.78)', boxShadow: '0 10px 22px rgba(34,17,83,0.12)' }}>
+            <Stack justify='space-between' align='flex-start' gap={8}>
+                <div style={{ minWidth: 0 }}>
+                    <Typography.Text strong style={{ display: 'block', color: activeMetric.tone, fontSize: 13, lineHeight: '18px' }}>{activeMetric.detailTitle}</Typography.Text>
+                    <Typography.Text type='secondary' style={{ display: 'block', fontSize: 11, lineHeight: '15px' }}>
+                        {activeMetric.detailItems.length > 0 ? activeMetric.detailItems.slice(0, 3).join(' · ') : activeMetric.emptyText}
+                    </Typography.Text>
+                </div>
+                <Button size='small' onClick={activeMetric.onOpen} style={{ flexShrink: 0, borderRadius: 999, color: activeMetric.tone, borderColor: `${activeMetric.tone}55`, fontWeight: 700 }}>
+                    {activeMetric.actionLabel}
+                </Button>
+            </Stack>
+        </Box>}
     </Box>;
 }
 
@@ -521,22 +590,58 @@ export const DashboardScreen = () => {
                             tone: '#389e0d',
                             onOpen: () => openRoute(RootRoutes.AuthorizedRoutes.DishesRoutes.List()),
                         };
-    const monthLabel = new Date().toLocaleDateString('vi-VN', { month: 'short', year: 'numeric' });
+    const dateLabel = formatHeaderDateLabel();
     const todayActionCount = todayMeals.length + todayShoppingLists.length + activeSessions.length + urgentInventory.length;
     const heroMetrics: DashboardHeroMetric[] = [
-        { label: 'Thực đơn', value: todayMeals.length, detail: `${todayDishCount} món`, tone: '#7436dc' },
-        { label: 'Mua sắm', value: todayShoppingLists.length, detail: `${openShoppingLists.length} đang mở`, tone: '#0958d9' },
-        { label: 'Kho', value: urgentInventory.length, detail: `${expiredCount} quá hạn`, tone: expiredCount > 0 ? '#cf1322' : '#fa8c16' },
+        {
+            key: 'meals',
+            label: 'Thực đơn',
+            value: todayMeals.length,
+            detail: `${todayDishCount} món`,
+            tone: '#7436dc',
+            detailTitle: 'Thực đơn hôm nay',
+            detailItems: todayMeals.map(meal => `${meal.name}: ${Object.values(meal.meals).flat().length} món`),
+            emptyText: 'Chưa có thực đơn nào cho hôm nay.',
+            actionLabel: 'Mở thực đơn',
+            onOpen: () => openRoute(RootRoutes.AuthorizedRoutes.ScheduledMealRoutes.List()),
+        },
+        {
+            key: 'shopping',
+            label: 'Mua sắm',
+            value: todayShoppingLists.length,
+            detail: `${openShoppingLists.length} đang mở`,
+            tone: '#0958d9',
+            detailTitle: 'Mua sắm cần theo dõi',
+            detailItems: todayShoppingLists.length > 0
+                ? todayShoppingLists.map(list => `${list.name}: ${getProgress(list).done}/${getProgress(list).total}`)
+                : openShoppingLists.slice(0, 3).map(list => `${list.name}: đang mở`),
+            emptyText: 'Không có danh sách mua sắm đang mở.',
+            actionLabel: 'Mở mua sắm',
+            onOpen: () => openRoute(RootRoutes.AuthorizedRoutes.ShoppingListRoutes.List()),
+        },
+        {
+            key: 'inventory',
+            label: 'Kho',
+            value: urgentInventory.length,
+            detail: `${expiredCount} quá hạn`,
+            tone: expiredCount > 0 ? '#cf1322' : '#fa8c16',
+            detailTitle: 'Nguyên liệu cần chú ý',
+            detailItems: urgentInventory.slice(0, 3).map(item => `${item.ingredientName}: hạn ${item.expiresAtLabel}`),
+            emptyText: 'Không có nguyên liệu hết hạn hoặc sắp hết hạn trong 3 ngày.',
+            actionLabel: 'Mở kho',
+            onOpen: () => openRoute(RootRoutes.AuthorizedRoutes.IngredientRoutes.List()),
+        },
     ];
 
     return <Box data-testid="dashboard" style={{ display: 'flex', flexDirection: 'column', gap: 12, padding: '0 0 14px', maxWidth: 760, margin: '0 auto' }}>
         <style>{dashboardCss}</style>
         <DashboardHero
             item={priorityAction}
-            monthLabel={monthLabel}
+            dateLabel={dateLabel}
             mainValue={todayActionCount}
             mainLabel='việc cần nhìn trong hôm nay'
             metrics={heroMetrics}
+            onAnalyticsOpen={() => openRoute(RootRoutes.AuthorizedRoutes.Analytics())}
         />
 
         <WeeklyOverviewCard items={weekOverview} />

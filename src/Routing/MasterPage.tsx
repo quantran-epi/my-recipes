@@ -39,6 +39,7 @@ import ShoppingListIcon from "../../assets/icons/shoppingList.png";
 import IngredientIcon from "../../assets/icons/vegetable.png";
 import SuggesterIcon from "../../assets/icons/cooking.png";
 import BudgetIcon from "../../assets/icons/budget.png";
+import AnalysisIcon from "../../assets/icons/analysis.png";
 import { AppShellNavigationProvider, useAppShellNavigation, useAppShellNavigationController } from "./AppShellNavigationContext";
 import { RootRoutes } from "./RootRoutes";
 
@@ -73,7 +74,12 @@ const headerActionButtonStyle: React.CSSProperties = {
     boxShadow: "inset 0 1px 0 rgba(255,255,255,0.18)",
 };
 
-const getMonthLabel = () => new Date().toLocaleDateString("vi-VN", { month: "short", year: "numeric" });
+const getHeaderDateLabel = () => {
+    const date = new Date();
+    const day = String(date.getDate()).padStart(2, "0");
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    return `${day}, ${month} ${date.getFullYear()}`;
+};
 
 const sidebarNavButtonStyle = (active: boolean): React.CSSProperties => ({
     width: "100%",
@@ -144,6 +150,7 @@ export const MasterPage = () => {
             case "Lịch mua sắm": return ShoppingListIcon;
             case "Nguyên liệu": return IngredientIcon;
             case "Kế hoạch chi phí": return BudgetIcon;
+            case "Phân tích": return AnalysisIcon;
             case 'Tổng quan': return HouseIcon;
             default: return null;
         }
@@ -173,7 +180,7 @@ export const MasterPage = () => {
                     </Stack>
                     <Stack align="center" gap={6} style={{ flexShrink: 0 }}>
                         <span style={{ borderRadius: 999, padding: "5px 9px", background: "rgba(255,255,255,0.16)", border: "1px solid rgba(255,255,255,0.22)", color: "#fff", fontSize: 11, fontWeight: 700, whiteSpace: "nowrap" }}>
-                            {getMonthLabel()}
+                            {getHeaderDateLabel()}
                         </span>
                         <Button
                             type="text"
@@ -335,6 +342,7 @@ const SidebarDrawer = ({ buttonStyle }: { buttonStyle?: React.CSSProperties }) =
 
     const sidebarNavItems = [
         { key: 'dashboard', href: RootRoutes.AuthorizedRoutes.Root(), icon: HouseIcon, label: 'Tổng quan' },
+        { key: 'analytics', href: RootRoutes.AuthorizedRoutes.Analytics(), icon: AnalysisIcon, label: 'Phân tích' },
         { key: 'ingredients', href: RootRoutes.AuthorizedRoutes.IngredientRoutes.List(), icon: IngredientIcon, label: 'Nguyên liệu' },
         { key: 'dishes', href: RootRoutes.AuthorizedRoutes.DishesRoutes.List(), icon: DishesIcon, label: 'Món ăn' },
         { key: 'expensePlanner', href: RootRoutes.AuthorizedRoutes.ExpensePlanner(), icon: BudgetIcon, label: 'Kế hoạch chi phí' },

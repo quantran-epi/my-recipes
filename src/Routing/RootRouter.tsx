@@ -13,6 +13,7 @@ import { ShoppingListRouter } from "@modules/ShoppingList/Routing/ShoppingListRo
 import { ShoppingListDetailScreen } from "@modules/ShoppingList/Screens/ShoppingListDetail.screen";
 import { ShoppingListScreen } from "@modules/ShoppingList/Screens/ShoppingList.screen";
 import { DashboardScreen } from "@modules/Home/Screens/Dashboard.screen";
+import { DashboardAnalyticsScreen } from "@modules/Home/Screens/DashboardAnalytics.screen";
 import { ScheduledMealRouter } from "@modules/ScheduledMeal/Routing/ScheduledMealRouter";
 import { ScheduledMealListScreen } from "@modules/ScheduledMeal/Screens/ScheduledMealList.screen";
 import { DishExpensePlannerScreen } from "@modules/Dishes/Screens/DishExpensePlanner.screen";
@@ -22,6 +23,7 @@ export const RootRouter = () => {
         <Routes>
             <Route path={RootRoutes.AuthorizedRoutes.Root()} element={<MasterPage />}>
                 <Route index element={<DashboardScreen />} />
+                <Route path={RootRoutes.AuthorizedRoutes.Analytics()} element={<DashboardAnalyticsScreen />} />
                 <Route path={RootRoutes.AuthorizedRoutes.ExpensePlanner()} element={<DishExpensePlannerScreen />} />
                 <Route path={RootRoutes.AuthorizedRoutes.IngredientRoutes.Root()} element={<IngredientRouter />}>
                     <Route path={RootRoutes.AuthorizedRoutes.IngredientRoutes.List()} element={<IngredientListScreen />} />
