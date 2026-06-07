@@ -1,5 +1,7 @@
 import { BarChartOutlined, CalendarOutlined, CheckCircleOutlined, ClockCircleOutlined, DollarCircleOutlined, FireOutlined, QuestionCircleOutlined, ShoppingCartOutlined, TagsOutlined, WarningOutlined } from '@ant-design/icons';
 import { CostEstimateHelper, CostEstimateSummary } from '@common/Helpers/CostEstimateHelper';
+import { DishNutritionHelper, DishNutritionSummary } from '@common/Helpers/DishNutritionHelper';
+import { IngredientNutritionHelper } from '@common/Helpers/IngredientNutritionHelper';
 import { IngredientPriceHelper } from '@common/Helpers/IngredientPriceHelper';
 import { IngredientUnitHelper } from '@common/Helpers/IngredientUnitHelper';
 import { InventoryHelper } from '@common/Helpers/InventoryHelper';
@@ -12,6 +14,7 @@ import { Typography } from '@components/Typography';
 import { useScheduledCalculation, useScreenTitle } from '@hooks';
 import { DishScorer, ScoredDish } from '@modules/DishSuggester/Helpers/DishScorer';
 import { RootRoutes } from '@routing/RootRoutes';
+import { Dishes } from '@store/Models/Dishes';
 import { Ingredient, IngredientInventory, IngredientUnit, InventoryBatch } from '@store/Models/Ingredient';
 import { InventoryHealthConfig } from '@store/Models/SharedConfig';
 import { ShoppingList, ShoppingListIngredientGroup } from '@store/Models/ShoppingList';
@@ -38,10 +41,40 @@ type ShoppingCostRow = {
     value: number;
 }
 
+type NutritionDishRow = {
+    id: string;
+    name: string;
+    calories: number;
+    protein: number;
+    carbs: number;
+    fat: number;
+    fiber: number;
+    coveragePercent: number;
+    summary: DishNutritionSummary;
+}
+
+type NutritionAnalytics = {
+    dishScopeCount: number;
+    dishWithNutritionCount: number;
+    dishCoveragePercent: number;
+    ingredientWithNutritionCount: number;
+    ingredientCoveragePercent: number;
+    sourceCount: number;
+    averageCalories: number;
+    averageProtein: number;
+    averageCarbs: number;
+    averageFat: number;
+    averageFiber: number;
+    topProtein: NutritionDishRow[];
+    topFiber: NutritionDishRow[];
+    lightCalories: NutritionDishRow[];
+}
+
 type AnalyticsExpensiveMetrics = {
     shoppingCosts: ShoppingCostRow[];
     totalOpenShoppingCost: CostEstimateSummary;
     suggestions: ScoredDish[];
+    nutrition: NutritionAnalytics;
 }
 
 const today = () => moment().startOf('day');
@@ -64,6 +97,73 @@ const formatCostSummary = (summary: CostEstimateSummary): string => {
     if (!CostEstimateHelper.hasAny(summary)) return '0đ';
     if (!CostEstimateHelper.hasPrice(summary)) return 'Chưa có giá';
     return IngredientPriceHelper.formatRange(summary);
+}
+
+const createEmptyNutritionAnalytics = (): NutritionAnalytics => ({
+    dishScopeCount: 0,
+    dishWithNutritionCount: 0,
+    dishCoveragePercent: 0,
+    ingredientWithNutritionCount: 0,
+    ingredientCoveragePercent: 0,
+    sourceCount: 0,
+    averageCalories: 0,
+    averageProtein: 0,
+    averageCarbs: 0,
+    averageFat: 0,
+    averageFiber: 0,
+    topProtein: [],
+    topFiber: [],
+    lightCalories: [],
+});
+
+const average = (rows: NutritionDishRow[], pick: (row: NutritionDishRow) => number): number => {
+    if (rows.length === 0) return 0;
+    return DishNutritionHelper.roundOne(rows.reduce((sum, row) => sum + pick(row), 0) / rows.length);
+}
+
+const buildNutritionAnalytics = (dishes: Dishes[], ingredients: Ingredient[], ingredientsById: Map<string, Ingredient>): NutritionAnalytics => {
+    const scopedDishes = dishes.filter(item => item.isCompleted);
+    const dishScope = scopedDishes.length > 0 ? scopedDishes : dishes;
+    const sourceNames = new Set<string>();
+    const ingredientWithNutritionCount = ingredients.filter(ingredient => {
+        const nutrition = IngredientNutritionHelper.getNutrition(ingredient);
+        nutrition?.sources?.forEach(source => sourceNames.add(source.name));
+        return Boolean(nutrition);
+    }).length;
+    const rows = dishScope
+        .map(dish => {
+            const summary = DishNutritionHelper.calculateDishNutrition(dish, dishes, ingredientsById);
+            if (!summary.hasNutrition) return null;
+            return {
+                id: dish.id,
+                name: dish.name,
+                calories: summary.perServing.calories ?? 0,
+                protein: summary.perServing.protein ?? 0,
+                carbs: summary.perServing.carbs ?? 0,
+                fat: summary.perServing.fat ?? 0,
+                fiber: summary.perServing.fiber ?? 0,
+                coveragePercent: summary.coveragePercent,
+                summary,
+            } as NutritionDishRow;
+        })
+        .filter((item): item is NutritionDishRow => item !== null);
+
+    return {
+        dishScopeCount: dishScope.length,
+        dishWithNutritionCount: rows.length,
+        dishCoveragePercent: dishScope.length > 0 ? Math.round(rows.length / dishScope.length * 100) : 0,
+        ingredientWithNutritionCount,
+        ingredientCoveragePercent: ingredients.length > 0 ? Math.round(ingredientWithNutritionCount / ingredients.length * 100) : 0,
+        sourceCount: sourceNames.size,
+        averageCalories: average(rows, row => row.calories),
+        averageProtein: average(rows, row => row.protein),
+        averageCarbs: average(rows, row => row.carbs),
+        averageFat: average(rows, row => row.fat),
+        averageFiber: average(rows, row => row.fiber),
+        topProtein: [...rows].sort((a, b) => b.protein - a.protein).slice(0, 5),
+        topFiber: [...rows].sort((a, b) => b.fiber - a.fiber).slice(0, 5),
+        lightCalories: [...rows].filter(row => row.calories > 0).sort((a, b) => a.calories - b.calories).slice(0, 5),
+    };
 }
 
 const getIngredientById = (ingredientsById: Map<string, Ingredient>, id: string): Ingredient | undefined => {
@@ -138,6 +238,7 @@ const createEmptyAnalyticsExpensiveMetrics = (): AnalyticsExpensiveMetrics => ({
     shoppingCosts: [],
     totalOpenShoppingCost: CostEstimateHelper.emptySummary(),
     suggestions: [],
+    nutrition: createEmptyNutritionAnalytics(),
 });
 
 const analyticsCss = `
@@ -308,12 +409,13 @@ export const DashboardAnalyticsScreen = () => {
             shoppingCosts,
             totalOpenShoppingCost,
             suggestions: DishScorer.scoreWithInventory(dishes, inventoryItems, dishes, ingredients, inventoryConfig).slice(0, 5),
+            nutrition: buildNutritionAnalytics(dishes, ingredients, ingredientsById),
         };
     }, [dishes, ingredients, ingredientsById, inventoryItems, inventoryConfig, openShoppingLists]);
     const { value: expensiveMetrics, pending: expensiveMetricsPending } = useScheduledCalculation(calculateExpensiveMetrics, {
         initialValue: createEmptyAnalyticsExpensiveMetrics,
     });
-    const { shoppingCosts, totalOpenShoppingCost, suggestions } = expensiveMetrics;
+    const { shoppingCosts, totalOpenShoppingCost, suggestions, nutrition } = expensiveMetrics;
 
     const todayDishCount = todayMeals.reduce((sum, meal) => sum + Object.values(meal.meals).flat().length, 0);
     const completedDishes = dishes.filter(item => item.isCompleted).length;
@@ -325,6 +427,32 @@ export const DashboardAnalyticsScreen = () => {
     const categoryMax = Math.max(1, ...inventoryByCategory.map(item => item.total));
     const tagMax = Math.max(1, ...dishTagRows.map(item => item.count));
     const shoppingCostMax = Math.max(1, ...shoppingCosts.map(item => item.value));
+    const topProteinMax = Math.max(1, ...nutrition.topProtein.map(item => item.protein));
+    const topFiberMax = Math.max(1, ...nutrition.topFiber.map(item => item.fiber));
+    const lightCalorieMax = Math.max(1, ...nutrition.lightCalories.map(item => item.calories));
+
+    const NutritionRankGroup = ({ title, rows, tone, max, format, barValue }: { title: string; rows: NutritionDishRow[]; tone: string; max: number; format: (row: NutritionDishRow) => string; barValue: (row: NutritionDishRow) => number }) => {
+        return <div style={{ minWidth: 0 }}>
+            <Typography.Text strong style={{ display: 'block', color: '#111827', fontSize: 13, lineHeight: '17px', marginBottom: 8 }}>{title}</Typography.Text>
+            <Stack direction='column' align='stretch' gap={8}>
+                {rows.map(row => {
+                    const width = Math.max(5, Math.round(barValue(row) / Math.max(1, max) * 100));
+                    return <button key={`${title}-${row.id}`} type='button' onClick={() => openRoute(RootRoutes.AuthorizedRoutes.DishesRoutes.ManageIngredient(row.id))} style={{ border: '1px solid rgba(116,54,220,0.10)', borderRadius: 8, background: '#fff', padding: '9px 10px', textAlign: 'left', cursor: 'pointer', boxShadow: '0 6px 16px rgba(74,48,130,0.06)' }}>
+                        <Stack justify='space-between' gap={8} align='flex-start'>
+                            <div style={{ minWidth: 0 }}>
+                                <Typography.Text strong style={{ display: 'block', color: '#111827', fontSize: 12, lineHeight: '16px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{row.name}</Typography.Text>
+                                <Typography.Text type='secondary' style={{ display: 'block', fontSize: 10, lineHeight: '14px', marginTop: 2 }}>{row.coveragePercent}% dữ liệu</Typography.Text>
+                            </div>
+                            <span style={{ borderRadius: 999, padding: '2px 8px', background: `${tone}14`, color: tone, fontSize: 11, lineHeight: '16px', fontWeight: 800, whiteSpace: 'nowrap' }}>{format(row)}</span>
+                        </Stack>
+                        <div style={{ height: 6, borderRadius: 999, background: '#f0edf8', overflow: 'hidden', marginTop: 8 }}>
+                            <div style={{ height: '100%', width: `${width}%`, borderRadius: 999, background: tone, boxShadow: `0 6px 14px ${tone}33` }} />
+                        </div>
+                    </button>;
+                })}
+            </Stack>
+        </div>;
+    };
 
     return <Box data-testid='dashboard-analytics' style={{ display: 'flex', flexDirection: 'column', gap: 12, padding: '0 0 14px', maxWidth: 980, margin: '0 auto' }}>
         <style>{analyticsCss}</style>
@@ -440,6 +568,42 @@ export const DashboardAnalyticsScreen = () => {
                 <Stack direction='column' align='stretch' gap={8} style={{ marginTop: 14 }}>
                     {dishTagRows.length === 0 ? <Typography.Text type='secondary' style={{ fontSize: 12 }}>Chưa có tag món ăn để phân tích.</Typography.Text> : dishTagRows.map((item, index) => <HorizontalBar key={item.tag} label={item.tag} value={item.count} max={tagMax} color={['#7436dc', '#48a6ff', '#52c41a', '#fa8c16', '#eb2f96', '#13c2c2', '#fadb14', '#722ed1'][index % 8]} detail={`${item.count} món`} />)}
                 </Stack>
+            </SectionCard>
+        </div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 12 }}>
+            <SectionCard title='Dinh dưỡng món ăn' subtitle={`${nutrition.dishWithNutritionCount}/${nutrition.dishScopeCount} món tính được dinh dưỡng.`} helpText='Dùng để biết dữ liệu món ăn đã đủ để phân tích dinh dưỡng chưa và khẩu phần trung bình đang nhiều năng lượng, đạm, béo hay chất xơ.' icon={<BarChartOutlined />} tone='#7436dc'>
+                {expensiveMetricsPending ? <EmptyAnalytics text='Đang tính dữ liệu dinh dưỡng...' /> : nutrition.dishWithNutritionCount === 0 ? <EmptyAnalytics text='Chưa có món nào đủ dữ liệu dinh dưỡng để phân tích.' /> : <>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(118px, 1fr))', gap: 8, marginBottom: 12 }}>
+                        <div style={{ borderRadius: 8, background: '#fbf9ff', border: '1px solid #ece5ff', padding: 10 }}>
+                            <Typography.Text strong style={{ display: 'block', color: '#7436dc', fontSize: 20, lineHeight: '24px' }}>{nutrition.dishCoveragePercent}%</Typography.Text>
+                            <Typography.Text type='secondary' style={{ display: 'block', fontSize: 11, lineHeight: '15px' }}>món có dinh dưỡng</Typography.Text>
+                        </div>
+                        <div style={{ borderRadius: 8, background: '#f6ffed', border: '1px solid #d9f7be', padding: 10 }}>
+                            <Typography.Text strong style={{ display: 'block', color: '#389e0d', fontSize: 20, lineHeight: '24px' }}>{nutrition.ingredientCoveragePercent}%</Typography.Text>
+                            <Typography.Text type='secondary' style={{ display: 'block', fontSize: 11, lineHeight: '15px' }}>nguyên liệu có dữ liệu</Typography.Text>
+                        </div>
+                        <div style={{ borderRadius: 8, background: '#e6f4ff', border: '1px solid #bae0ff', padding: 10 }}>
+                            <Typography.Text strong style={{ display: 'block', color: '#0958d9', fontSize: 20, lineHeight: '24px' }}>{nutrition.sourceCount}</Typography.Text>
+                            <Typography.Text type='secondary' style={{ display: 'block', fontSize: 11, lineHeight: '15px' }}>nguồn tham chiếu</Typography.Text>
+                        </div>
+                    </div>
+                    <Stack direction='column' align='stretch' gap={10}>
+                        <HorizontalBar label='Kcal trung bình' value={nutrition.averageCalories} max={800} color='#7436dc' detail={DishNutritionHelper.formatCalories(nutrition.averageCalories)} />
+                        <HorizontalBar label='Đạm trung bình' value={nutrition.averageProtein} max={36} color='#1677ff' detail={DishNutritionHelper.formatGram(nutrition.averageProtein)} />
+                        <HorizontalBar label='Tinh bột trung bình' value={nutrition.averageCarbs} max={80} color='#fa8c16' detail={DishNutritionHelper.formatGram(nutrition.averageCarbs)} />
+                        <HorizontalBar label='Béo trung bình' value={nutrition.averageFat} max={42} color='#d46b08' detail={DishNutritionHelper.formatGram(nutrition.averageFat)} />
+                        <HorizontalBar label='Chất xơ trung bình' value={nutrition.averageFiber} max={12} color='#389e0d' detail={DishNutritionHelper.formatGram(nutrition.averageFiber)} />
+                    </Stack>
+                </>}
+            </SectionCard>
+
+            <SectionCard title='Xếp hạng dinh dưỡng' subtitle='Các món nổi bật theo mục tiêu ăn uống.' helpText='Dùng để chọn nhanh món giàu đạm, nhiều chất xơ hoặc nhẹ năng lượng hơn khi lập thực đơn hay cần gợi ý nấu ăn.' icon={<FireOutlined />} tone='#d48806'>
+                {expensiveMetricsPending ? <EmptyAnalytics text='Đang xếp hạng món theo dinh dưỡng...' /> : nutrition.dishWithNutritionCount === 0 ? <EmptyAnalytics text='Chưa có đủ dữ liệu để xếp hạng dinh dưỡng.' /> : <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(190px, 1fr))', gap: 10 }}>
+                    {nutrition.topProtein.length > 0 && <NutritionRankGroup title='Giàu đạm' rows={nutrition.topProtein} tone='#1677ff' max={topProteinMax} format={row => DishNutritionHelper.formatGram(row.protein)} barValue={row => row.protein} />}
+                    {nutrition.topFiber.length > 0 && <NutritionRankGroup title='Nhiều chất xơ' rows={nutrition.topFiber} tone='#389e0d' max={topFiberMax} format={row => DishNutritionHelper.formatGram(row.fiber)} barValue={row => row.fiber} />}
+                    {nutrition.lightCalories.length > 0 && <NutritionRankGroup title='Nhẹ kcal' rows={nutrition.lightCalories} tone='#7436dc' max={lightCalorieMax} format={row => DishNutritionHelper.formatCalories(row.calories)} barValue={row => Math.max(1, lightCalorieMax - row.calories + 1)} />}
+                </div>}
             </SectionCard>
         </div>
 

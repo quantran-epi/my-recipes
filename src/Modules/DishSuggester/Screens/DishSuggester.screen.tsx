@@ -1,4 +1,5 @@
-import { BulbOutlined, CalculatorOutlined, ClockCircleOutlined, LeftOutlined, ShoppingCartOutlined, ThunderboltOutlined } from "@ant-design/icons";
+import { BarChartOutlined, BulbOutlined, CalculatorOutlined, ClockCircleOutlined, LeftOutlined, ShoppingCartOutlined, ThunderboltOutlined } from "@ant-design/icons";
+import { DishNutritionHelper, DishNutritionSummary } from "@common/Helpers/DishNutritionHelper";
 import { Button } from "@components/Button";
 import { Image } from "@components/Image";
 import { Box } from "@components/Layout/Box";
@@ -11,12 +12,13 @@ import { Typography } from "@components/Typography";
 import { useScheduledCalculation, useToggle } from "@hooks";
 import { DishScorer, ScoredDish, ScoredDishGroup } from "../Helpers/DishScorer";
 import { selectDishes, selectIngredients, selectIngredientsById, selectInventory, selectInventoryHealthConfig } from "@store/Selectors";
-import { InputNumber, Input, Select, Spin } from "antd";
+import { InputNumber, Select, Spin } from "antd";
 import React, { useMemo, useState } from "react";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { IngredientPickerWidget } from "./IngredientPicker.widget";
 import { DishSuggestionList } from "./DishSuggestionList.widget";
+import { DishImageWidget } from "@modules/Dishes/Screens/DishesManageIngredient/DishImage.widget";
 import { ShoppingListAddWidget } from "@modules/ShoppingList/Screens/ShoppingListAdd.widget";
 import ShoppingListIcon from "../../../../assets/icons/shoppingList.png";
 import NoodlesIcon from "../../../../assets/icons/noodles.png";
@@ -26,7 +28,16 @@ import { IngredientUnitHelper } from "@common/Helpers/IngredientUnitHelper";
 import { Collapse } from "antd";
 import { RootRoutes } from "@routing/RootRoutes";
 
-type Mode = "ingredients" | "inventory" | "duration";
+type Mode = "ingredients" | "inventory" | "duration" | "nutrition";
+type NutritionGoal = "balanced" | "high_protein" | "low_calorie" | "low_fat" | "high_fiber";
+
+type NutritionSuggestion = {
+    dish: Dishes;
+    nutrition: DishNutritionSummary;
+    score: number;
+    reason: string;
+    tone: string;
+}
 
 type DishSuggesterScreenProps = {
     open: boolean;
@@ -50,6 +61,10 @@ type DurationDishCalculation = {
     dishes: Dishes[];
 }
 
+type NutritionDishCalculation = {
+    suggestions: NutritionSuggestion[];
+}
+
 const createEmptyDishSuggestionCalculation = (): DishSuggestionCalculation => ({
     scored: [],
     groups: [],
@@ -58,6 +73,58 @@ const createEmptyDishSuggestionCalculation = (): DishSuggestionCalculation => ({
 const createEmptyDurationDishCalculation = (): DurationDishCalculation => ({
     dishes: [],
 });
+
+const createEmptyNutritionDishCalculation = (): NutritionDishCalculation => ({
+    suggestions: [],
+});
+
+const nutritionGoalOptions: { key: NutritionGoal; label: string; description: string; tone: string }[] = [
+    { key: "balanced", label: "Cân bằng", description: "Kcal vừa phải, đạm và chất xơ ổn", tone: "#7436dc" },
+    { key: "high_protein", label: "Giàu đạm", description: "Ưu tiên món nhiều protein", tone: "#1677ff" },
+    { key: "low_calorie", label: "Nhẹ kcal", description: "Ưu tiên món ít năng lượng hơn", tone: "#389e0d" },
+    { key: "low_fat", label: "Ít béo", description: "Ưu tiên chất béo thấp", tone: "#13a8a8" },
+    { key: "high_fiber", label: "Nhiều xơ", description: "Ưu tiên rau củ và chất xơ", tone: "#d48806" },
+];
+
+const clamp = (value: number, min = 0, max = 1) => Math.min(max, Math.max(min, value));
+
+const getNutritionGoal = (goal: NutritionGoal) => nutritionGoalOptions.find(item => item.key === goal) ?? nutritionGoalOptions[0];
+
+const scoreNutritionSuggestion = (summary: DishNutritionSummary, goal: NutritionGoal): number => {
+    if (!summary.hasNutrition) return 0;
+    const calories = summary.perServing.calories ?? 0;
+    const protein = summary.perServing.protein ?? 0;
+    const fat = summary.perServing.fat ?? 0;
+    const saturatedFat = summary.perServing.saturatedFat ?? 0;
+    const fiber = summary.perServing.fiber ?? 0;
+    const coverage = summary.coveragePercent / 100;
+    const proteinDensity = calories > 0 ? protein / calories * 100 : 0;
+
+    if (goal === "high_protein") {
+        return clamp(clamp(protein / 28) * 0.55 + clamp(proteinDensity / 7) * 0.25 + coverage * 0.2);
+    }
+    if (goal === "low_calorie") {
+        return clamp(clamp((650 - calories) / 450) * 0.58 + clamp(protein / 18) * 0.22 + clamp(fiber / 6) * 0.12 + coverage * 0.08);
+    }
+    if (goal === "low_fat") {
+        return clamp(clamp((24 - fat) / 24) * 0.58 + clamp((8 - saturatedFat) / 8) * 0.16 + clamp(protein / 18) * 0.14 + coverage * 0.12);
+    }
+    if (goal === "high_fiber") {
+        return clamp(clamp(fiber / 8) * 0.62 + clamp((700 - calories) / 520) * 0.16 + clamp(protein / 18) * 0.1 + coverage * 0.12);
+    }
+
+    const calorieScore = calories > 0 ? 1 - clamp(Math.abs(calories - 520) / 520) : 0.35;
+    const fatScore = fat > 0 ? 1 - clamp(Math.max(0, fat - 26) / 26) : 0.6;
+    return clamp(calorieScore * 0.26 + clamp(protein / 24) * 0.28 + fatScore * 0.15 + clamp(fiber / 7) * 0.18 + coverage * 0.13);
+};
+
+const getNutritionReason = (summary: DishNutritionSummary, goal: NutritionGoal): string => {
+    if (goal === "high_protein") return `${DishNutritionHelper.formatGram(summary.perServing.protein)} đạm / khẩu phần`;
+    if (goal === "low_calorie") return `${DishNutritionHelper.formatCalories(summary.perServing.calories)} / khẩu phần`;
+    if (goal === "low_fat") return `${DishNutritionHelper.formatGram(summary.perServing.fat)} chất béo / khẩu phần`;
+    if (goal === "high_fiber") return `${DishNutritionHelper.formatGram(summary.perServing.fiber)} chất xơ / khẩu phần`;
+    return `${DishNutritionHelper.formatCalories(summary.perServing.calories)} · ${DishNutritionHelper.formatGram(summary.perServing.protein)} đạm`;
+};
 
 const PendingCalculationBox: React.FunctionComponent<{ text: string }> = ({ text }) => {
     return <Box style={{ minHeight: 120, display: "flex", alignItems: "center", justifyContent: "center", textAlign: "center" }}>
@@ -99,6 +166,7 @@ export const DishSuggesterScreen: React.FC<DishSuggesterScreenProps> = ({ open, 
     const [maxMinutes, setMaxMinutes] = useState<number>(30);
     const [fridgeSearchIds, setFridgeSearchIds] = useState<string[]>([]);
     const [durationSearchIds, setDurationSearchIds] = useState<string[]>([]);
+    const [nutritionGoal, setNutritionGoal] = useState<NutritionGoal>("balanced");
 
     const inventoryIngredientIds = useMemo(() => {
         if (!open) return [];
@@ -167,6 +235,35 @@ export const DishSuggesterScreen: React.FC<DishSuggesterScreenProps> = ({ open, 
             )
         );
     }, [durationFiltered, durationSearchIds]);
+
+    const calculateNutritionSuggestions = React.useCallback((): NutritionDishCalculation => {
+        const goal = getNutritionGoal(nutritionGoal);
+        const suggestions = dishes
+            .map(dish => {
+                const nutrition = DishNutritionHelper.calculateDishNutrition(dish, dishes, ingredientsById);
+                const score = scoreNutritionSuggestion(nutrition, nutritionGoal);
+                if (score <= 0) return null;
+                return {
+                    dish,
+                    nutrition,
+                    score,
+                    reason: getNutritionReason(nutrition, nutritionGoal),
+                    tone: goal.tone,
+                } as NutritionSuggestion;
+            })
+            .filter((item): item is NutritionSuggestion => item !== null)
+            .sort((a, b) => {
+                if (b.score !== a.score) return b.score - a.score;
+                return (b.nutrition.coveragePercent - a.nutrition.coveragePercent);
+            })
+            .slice(0, 40);
+        return { suggestions };
+    }, [dishes, ingredientsById, nutritionGoal]);
+    const { value: nutritionCalculation, pending: nutritionPending } = useScheduledCalculation(calculateNutritionSuggestions, {
+        enabled: open && mode === "nutrition" && step === 1,
+        initialValue: createEmptyNutritionDishCalculation,
+    });
+    const nutritionSuggestions = nutritionCalculation.suggestions;
 
     const selectedScored = useMemo(() => {
         const source = mode === "inventory" ? inventoryScored : ingredientScored;
@@ -330,7 +427,7 @@ export const DishSuggesterScreen: React.FC<DishSuggesterScreenProps> = ({ open, 
     const ModeTabs = () => (
         <div style={{
             display: "grid",
-            gridTemplateColumns: "1fr 1fr 1fr",
+            gridTemplateColumns: "repeat(4, minmax(0, 1fr))",
             gap: 6,
             marginBottom: 16,
         }}>
@@ -338,6 +435,7 @@ export const DishSuggesterScreen: React.FC<DishSuggesterScreenProps> = ({ open, 
                 { key: "ingredients" as Mode, label: "Nguyên liệu", icon: <BulbOutlined /> },
                 { key: "inventory" as Mode, label: "Tủ lạnh", icon: <ThunderboltOutlined /> },
                 { key: "duration" as Mode, label: "Thời gian", icon: <ClockCircleOutlined /> },
+                { key: "nutrition" as Mode, label: "Dinh dưỡng", icon: <BarChartOutlined /> },
             ]).map(tab => (
                 <button
                     key={tab.key}
@@ -368,6 +466,123 @@ export const DishSuggesterScreen: React.FC<DishSuggesterScreenProps> = ({ open, 
             ))}
         </div>
     );
+
+    const NutritionMetric = ({ label, value, tone }: { label: string; value: string; tone: string }) => (
+        <div style={{ minWidth: 0 }}>
+            <Typography.Text strong style={{ display: "block", color: tone, fontSize: 13, lineHeight: "17px" }}>{value}</Typography.Text>
+            <Typography.Text type="secondary" style={{ display: "block", fontSize: 10, lineHeight: "13px", whiteSpace: "nowrap" }}>{label}</Typography.Text>
+        </div>
+    );
+
+    const NutritionGoalPicker = () => (
+        <Box style={{ padding: 12, borderRadius: 8, background: "#fbf9ff", border: "1px solid #ece5ff", marginBottom: 14 }}>
+            <Typography.Text strong style={{ display: "block", marginBottom: 9 }}>Chọn mục tiêu dinh dưỡng</Typography.Text>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(138px, 1fr))", gap: 8 }}>
+                {nutritionGoalOptions.map(goal => {
+                    const active = nutritionGoal === goal.key;
+                    return <button
+                        key={goal.key}
+                        type="button"
+                        onClick={() => setNutritionGoal(goal.key)}
+                        style={{
+                            border: active ? `2px solid ${goal.tone}` : "1px solid #e8e2f7",
+                            background: active ? `${goal.tone}12` : "#fff",
+                            borderRadius: 8,
+                            padding: "10px 11px",
+                            cursor: "pointer",
+                            textAlign: "left",
+                            minWidth: 0,
+                        }}
+                    >
+                        <Stack gap={7} align="flex-start">
+                            <span style={{ width: 9, height: 9, borderRadius: 99, background: goal.tone, marginTop: 5, flexShrink: 0 }} />
+                            <div style={{ minWidth: 0 }}>
+                                <Typography.Text strong style={{ display: "block", color: active ? goal.tone : "#111827", fontSize: 13, lineHeight: "17px" }}>{goal.label}</Typography.Text>
+                                <Typography.Text type="secondary" style={{ display: "block", fontSize: 11, lineHeight: "15px" }}>{goal.description}</Typography.Text>
+                            </div>
+                        </Stack>
+                    </button>;
+                })}
+            </div>
+        </Box>
+    );
+
+    const NutritionSuggestionList = () => {
+        const goal = getNutritionGoal(nutritionGoal);
+        return <>
+            <Stack align="center" gap={8} style={{ marginBottom: 10 }}>
+                <BarChartOutlined style={{ color: goal.tone }} />
+                <Typography.Text type="secondary" style={{ fontSize: 12, flex: 1 }}>
+                    Gợi ý theo mục tiêu <strong style={{ color: goal.tone }}>{goal.label}</strong>
+                </Typography.Text>
+            </Stack>
+            <Select
+                value={nutritionGoal}
+                onChange={setNutritionGoal}
+                style={{ width: "100%", marginBottom: 10 }}
+                options={nutritionGoalOptions.map(item => ({ value: item.key, label: `${item.label} - ${item.description}` }))}
+            />
+            <Box style={{ maxHeight: 430, overflowY: "auto", paddingRight: 2 }}>
+                {nutritionSuggestions.map(item => {
+                    const selected = selectedDishIds.includes(item.dish.id);
+                    const pct = Math.round(item.score * 100);
+                    const coverageTone = item.nutrition.coveragePercent >= 80 ? "#389e0d" : item.nutrition.coveragePercent >= 50 ? "#d48806" : "#cf1322";
+                    return <div
+                        key={item.dish.id}
+                        data-testid={`nutrition-suggestion-item-${item.dish.id}`}
+                        onClick={() => _toggleDish(item.dish.id)}
+                        style={{
+                            borderRadius: 10,
+                            border: `1.5px solid ${selected ? "#52c41a" : "#ebe4f8"}`,
+                            background: selected ? "#f6ffed" : "#fff",
+                            marginBottom: 8,
+                            padding: 11,
+                            cursor: "pointer",
+                            boxShadow: "0 8px 18px rgba(74,48,130,0.06)",
+                        }}
+                    >
+                        <Stack gap={10} align="flex-start">
+                            <div style={{
+                                width: 22,
+                                height: 22,
+                                borderRadius: "50%",
+                                border: `2px solid ${selected ? "#52c41a" : "#d9d9d9"}`,
+                                background: selected ? "#52c41a" : "transparent",
+                                color: "#fff",
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                flexShrink: 0,
+                                marginTop: 9,
+                                fontSize: 12,
+                                fontWeight: 800,
+                            }}>{selected ? "✓" : ""}</div>
+                            <DishImageWidget src={item.dish.image} width={44} height={44} borderRadius={7} fallbackIconSize={24} showBrokenLabel={false} style={{ flexShrink: 0, marginTop: 1 }} />
+                            <Box style={{ minWidth: 0, flex: 1 }}>
+                                <div style={{ display: "grid", gridTemplateColumns: "minmax(0, 1fr) auto", gap: 8, alignItems: "start" }}>
+                                    <Typography.Text strong style={{ display: "block", color: "#111827", fontSize: 14, lineHeight: "18px", overflowWrap: "anywhere" }}>{item.dish.name}</Typography.Text>
+                                    <span style={{ padding: "2px 8px", borderRadius: 999, background: `${item.tone}16`, color: item.tone, fontSize: 12, lineHeight: "18px", fontWeight: 800, whiteSpace: "nowrap" }}>{pct}%</span>
+                                </div>
+                                <Typography.Text type="secondary" style={{ display: "block", fontSize: 11, lineHeight: "15px", marginTop: 2 }}>{item.reason}</Typography.Text>
+                                <div style={{ display: "grid", gridTemplateColumns: "repeat(5, minmax(0, 1fr))", gap: 8, marginTop: 9 }}>
+                                    <NutritionMetric label="kcal" value={DishNutritionHelper.formatCalories(item.nutrition.perServing.calories)} tone="#7436dc" />
+                                    <NutritionMetric label="đạm" value={DishNutritionHelper.formatGram(item.nutrition.perServing.protein)} tone="#1677ff" />
+                                    <NutritionMetric label="béo" value={DishNutritionHelper.formatGram(item.nutrition.perServing.fat)} tone="#d46b08" />
+                                    <NutritionMetric label="xơ" value={DishNutritionHelper.formatGram(item.nutrition.perServing.fiber)} tone="#389e0d" />
+                                    <NutritionMetric label="dữ liệu" value={`${item.nutrition.coveragePercent}%`} tone={coverageTone} />
+                                </div>
+                                {(item.nutrition.missingNutritionIngredientIds.length > 0 || item.nutrition.missingConversionIngredientIds.length > 0) && (
+                                    <Typography.Text type="secondary" style={{ display: "block", fontSize: 10, lineHeight: "14px", marginTop: 8 }}>
+                                        Thiếu dữ liệu/quy đổi cho {item.nutrition.missingNutritionIngredientIds.length + item.nutrition.missingConversionIngredientIds.length} nguyên liệu.
+                                    </Typography.Text>
+                                )}
+                            </Box>
+                        </Stack>
+                    </div>;
+                })}
+            </Box>
+        </>;
+    };
 
     return <>
         <Modal
@@ -689,6 +904,42 @@ export const DishSuggesterScreen: React.FC<DishSuggesterScreenProps> = ({ open, 
                             Quay lại
                         </Button>
                         <ResultsActions dishIds={selectedDishIds} pending={durationPending} />
+                    </Stack>
+                </>
+            )}
+
+            {/* ── Mode: nutrition ── */}
+            {mode === "nutrition" && step === 0 && (
+                <>
+                    <NutritionGoalPicker />
+                    <Stack justify="flex-end">
+                        <Button
+                            type="primary"
+                            icon={<BarChartOutlined />}
+                            onClick={_onNext}
+                            style={{ borderRadius: 20, paddingInline: 20 }}
+                        >
+                            Gợi ý theo dinh dưỡng
+                        </Button>
+                    </Stack>
+                </>
+            )}
+
+            {mode === "nutrition" && step === 1 && (
+                <>
+                    {nutritionPending
+                        ? <PendingCalculationBox text="Đang tính gợi ý dinh dưỡng..." />
+                        : nutritionSuggestions.length === 0
+                        ? <Box style={{ textAlign: "center", padding: "32px 0" }}>
+                            <Typography.Text type="secondary">Chưa có đủ dữ liệu dinh dưỡng để gợi ý món</Typography.Text>
+                        </Box>
+                        : <NutritionSuggestionList />
+                    }
+                    <Stack justify="space-between" style={{ marginTop: 12 }}>
+                        <Button onClick={_onBack} icon={<LeftOutlined />} style={{ borderRadius: 20 }}>
+                            Quay lại
+                        </Button>
+                        <ResultsActions dishIds={selectedDishIds} pending={nutritionPending} />
                     </Stack>
                 </>
             )}

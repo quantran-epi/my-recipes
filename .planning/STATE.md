@@ -5,7 +5,7 @@ milestone_name: milestone
 status: ready
 stopped_at: Completed 04-02-PLAN.md
 last_updated: "2026-06-07T13:31:52Z"
-last_activity: 2026-06-07 -- Completed quick task 260607-tdc: template date text and card polish
+last_activity: 2026-06-07 -- Completed quick task 260607-ubg: nutrition suggestor and analytics
 progress:
   total_phases: 5
   completed_phases: 4
@@ -28,7 +28,7 @@ See: .planning/PROJECT.md (updated 2026-06-05)
 Phase: 5 (release-gate-and-product-guardrails) — READY
 Plan: Not started
 Status: Phase 04 complete; ready for Phase 05
-Last activity: 2026-06-07 -- Completed quick task 260607-tdc: template date text and card polish
+Last activity: 2026-06-07 -- Completed quick task 260607-ubg: nutrition suggestor and analytics
 
 Progress: [████████░░] 80%
 
@@ -36,6 +36,7 @@ Progress: [████████░░] 80%
 
 | Date | Task | Artifact |
 |------|------|----------|
+| 2026-06-07 | Nutrition suggestor and analytics | `.planning/quick/260607-ubg-add-nutrition-based-dish-suggestion-mode/260607-ubg-SUMMARY.md` |
 | 2026-06-07 | Template date text and card polish | `.planning/quick/260607-tdc-template-date-card-polish/260607-tdc-SUMMARY.md` |
 | 2026-06-07 | Template preview, edit, and shopping apply | `.planning/quick/260607-tpe-template-preview-edit-apply/260607-tpe-SUMMARY.md` |
 | 2026-06-07 | Template creator modals | `.planning/quick/260607-tcm-template-creator-modals/260607-tcm-SUMMARY.md` |
