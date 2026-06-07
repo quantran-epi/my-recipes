@@ -132,10 +132,6 @@ const dashboardCss = `
     box-shadow: 0 10px 24px rgba(74, 48, 130, 0.10);
     transform: translateY(-1px);
 }
-.dashboard-focus-card:hover {
-    border-color: rgba(116,54,220,0.20);
-    box-shadow: 0 12px 26px rgba(74, 48, 130, 0.12);
-}
 `;
 
 const Section: React.FunctionComponent<{ title: string; subtitle?: string; action?: React.ReactNode; children: React.ReactNode; icon?: React.ReactNode; tone?: string }> = ({ title, subtitle, action, children, icon, tone = '#1677ff' }) => {
@@ -306,37 +302,6 @@ const WeeklyOverviewCard: React.FunctionComponent<{ items: WeekOverviewItem[] }>
             })}
         </div>
     </Box>;
-}
-
-const DashboardFocusCard: React.FunctionComponent<{
-    icon: React.ReactNode;
-    title: string;
-    value: string | number;
-    detail: string;
-    tone: string;
-    onOpen: () => void;
-}> = ({ icon, title, value, detail, tone, onOpen }) => {
-    return <button type='button' className='dashboard-focus-card' onClick={onOpen} style={{
-        width: '100%',
-        minHeight: 86,
-        border: '1px solid rgba(116,54,220,0.10)',
-        borderRadius: 8,
-        background: '#fff',
-        padding: 11,
-        textAlign: 'left',
-        cursor: 'pointer',
-        boxShadow: '0 8px 22px rgba(74,48,130,0.08)',
-        transition: 'border-color 160ms ease, box-shadow 160ms ease',
-    }}>
-        <Stack align='flex-start' gap={9}>
-            <span style={{ width: 34, height: 34, borderRadius: 8, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', color: tone, background: `${tone}14`, flexShrink: 0 }}>{icon}</span>
-            <div style={{ minWidth: 0 }}>
-                <Typography.Text strong style={{ display: 'block', color: '#111827', fontSize: 18, lineHeight: '22px' }}>{value}</Typography.Text>
-                <Typography.Text style={{ display: 'block', color: '#374151', fontSize: 12, fontWeight: 650, lineHeight: '16px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{title}</Typography.Text>
-                <Typography.Text type='secondary' style={{ display: 'block', fontSize: 11, lineHeight: '15px', marginTop: 2, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{detail}</Typography.Text>
-            </div>
-        </Stack>
-    </button>;
 }
 
 const ActionRow: React.FunctionComponent<{
@@ -573,43 +538,6 @@ export const DashboardScreen = () => {
             mainLabel='việc cần nhìn trong hôm nay'
             metrics={heroMetrics}
         />
-
-        <Box style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(146px, 1fr))', gap: 8 }}>
-            <DashboardFocusCard
-                icon={<CalendarOutlined />}
-                title='Thực đơn hôm nay'
-                value={todayMeals.length}
-                detail={`${todayDishCount} món cần chuẩn bị`}
-                tone='#1677ff'
-                onOpen={() => openRoute(RootRoutes.AuthorizedRoutes.ScheduledMealRoutes.List())}
-            />
-            <DashboardFocusCard
-                icon={<ShoppingCartOutlined />}
-                title='Mua sắm hôm nay'
-                value={todayShoppingLists.length}
-                detail={`${openShoppingLists.length} danh sách đang mở`}
-                tone='#0958d9'
-                onOpen={() => openRoute(RootRoutes.AuthorizedRoutes.ShoppingListRoutes.List())}
-            />
-            <DashboardFocusCard
-                icon={<WarningOutlined />}
-                title='Kho cần chú ý'
-                value={urgentInventory.length}
-                detail={`${expiredCount} lô đã quá hạn`}
-                tone={expiredCount > 0 ? '#cf1322' : '#fa8c16'}
-                onOpen={() => openRoute(RootRoutes.AuthorizedRoutes.IngredientRoutes.List())}
-            />
-            <DashboardFocusCard
-                icon={<FireOutlined />}
-                title='Đang nấu'
-                value={activeSessions.length}
-                detail={activeSessions[0]?.dishName ?? 'Chưa có phiên đang nấu'}
-                tone='#fa8c16'
-                onOpen={() => openRoute(activeSessions[0]
-                    ? RootRoutes.AuthorizedRoutes.DishesRoutes.ManageIngredient(activeSessions[0].dishId)
-                    : RootRoutes.AuthorizedRoutes.DishesRoutes.List())}
-            />
-        </Box>
 
         <WeeklyOverviewCard items={weekOverview} />
 
