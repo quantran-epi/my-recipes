@@ -1,5 +1,5 @@
 import {
-    CopyOutlined, DeleteOutlined, EditOutlined,
+    CalendarOutlined, CopyOutlined, DeleteOutlined, EditOutlined,
     HolderOutlined, PlusOutlined, ShoppingCartOutlined
 } from "@ant-design/icons";
 import { Badge } from "@components/Badge";
@@ -8,14 +8,15 @@ import { Dropdown } from "@components/Dropdown";
 import { Space } from "@components/Layout/Space";
 import { Stack } from "@components/Layout/Stack";
 import { DeferredModalContent, Modal } from "@components/Modal";
+import { useMessage } from "@components/Message";
 import { Tooltip } from "@components/Tootip";
 import { Typography } from "@components/Typography";
 import { useScreenTitle, useTheme, useToggle } from "@hooks";
 import { ScheduledMeal } from "@store/Models/ScheduledMeal";
-import { rememberScheduledMealName } from "@store/Reducers/AppContextReducer";
+import { rememberScheduledMealName, WeeklyMealTemplate } from "@store/Reducers/AppContextReducer";
 import { addScheduledMeal, removeScheduledMeal, toggleSelectedMeals } from "@store/Reducers/ScheduledMealReducer";
-import { selectDishNameById, selectScheduledMeals, selectSelectedMealIds } from "@store/Selectors";
-import { Calendar, DatePicker, Tag } from "antd";
+import { selectDishNameById, selectScheduledMeals, selectSelectedMealIds, selectWeeklyMealTemplates } from "@store/Selectors";
+import { Calendar, DatePicker, Select, Tag } from "antd";
 import { SelectInfo } from "antd/es/calendar/generateCalendar";
 import dayjs, { Dayjs } from "dayjs";
 import { nanoid } from "nanoid";
@@ -65,6 +66,12 @@ const getVietnameseWeekShoppingListName = (start: Dayjs, end?: Dayjs) => {
     return `Tuần ${weekOfMonth}, ${date.format("MM/YY")}`;
 };
 
+type MealTemplateScope = 'day' | 'week';
+
+const getMondayStart = (value: Dayjs) => value.startOf("week").startOf("day");
+
+const getTemplateScope = (template: WeeklyMealTemplate): MealTemplateScope => template.scope ?? (template.days.length > 1 ? 'week' : 'day');
+
 const topToolCardStyle: React.CSSProperties = {
     background: "#fff",
     border: "1px solid #f0f0f0",
@@ -80,12 +87,18 @@ export const ScheduledMealListScreen = () => {
     const [selectedRange, setSelectedRange] = useState<[Dayjs, Dayjs] | null>(null);
     const [shoppingRangeMealIds, setShoppingRangeMealIds] = useState<string[]>([]);
     const [shoppingRangeOpen, setShoppingRangeOpen] = useState(false);
+    const [templateModalOpen, setTemplateModalOpen] = useState(false);
+    const [templateApplyMode, setTemplateApplyMode] = useState<MealTemplateScope>('day');
+    const [templateApplyWeek, setTemplateApplyWeek] = useState<Dayjs>(getMondayStart(dayjs()));
+    const [selectedTemplateId, setSelectedTemplateId] = useState<string | undefined>();
 
     const scheduledMeals = useSelector(selectScheduledMeals);
     const selectedMealIds = useSelector(selectSelectedMealIds);
     const dishNameById = useSelector(selectDishNameById);
+    const mealTemplates = useSelector(selectWeeklyMealTemplates);
     const dispatch = useDispatch();
     const navigate = useNavigate();
+    const message = useMessage();
     const { } = useScreenTitle({ value: "Thực đơn", deps: [] });
     const toggleAddModal = useToggle({ defaultValue: false });
 
@@ -120,6 +133,13 @@ export const ScheduledMealListScreen = () => {
 
     const _onOpenRangeShopping = () => setRangePickerOpen(true);
 
+    const _onOpenTemplateApply = () => {
+        setTemplateApplyMode('day');
+        setTemplateApplyWeek(getMondayStart(dayjs(selectedDate)));
+        setSelectedTemplateId(undefined);
+        setTemplateModalOpen(true);
+    };
+
     const _onRangeConfirm = () => {
         if (!selectedRange) return;
         const [start, end] = selectedRange;
@@ -136,6 +156,27 @@ export const ScheduledMealListScreen = () => {
     };
 
     const mealsToday = _findScheduledMealsByDate(selectedDate);
+    const availableTemplates = useMemo(() => mealTemplates.filter(template => getTemplateScope(template) === templateApplyMode), [mealTemplates, templateApplyMode]);
+    const selectedTemplate = availableTemplates.find(template => template.id === selectedTemplateId) ?? availableTemplates[0];
+    const _applySelectedTemplate = () => {
+        if (!selectedTemplate) return;
+        const baseDate = templateApplyMode === 'week' ? getMondayStart(templateApplyWeek) : dayjs(selectedDate).startOf('day');
+        selectedTemplate.days.forEach(day => {
+            const plannedDate = baseDate.add(templateApplyMode === 'week' ? day.offset : 0, 'day').toDate();
+            const name = `${selectedTemplate.name} - ${moment(plannedDate).format('DD/MM')}`;
+            dispatch(addScheduledMeal({
+                id: `${selectedTemplate.id}-${nanoid(8)}`,
+                name,
+                meals: day.meals,
+                dishServings: day.dishServings ?? {},
+                plannedDate,
+                createdDate: new Date(),
+            }));
+            dispatch(rememberScheduledMealName(name));
+        });
+        message.success(`Đã tạo ${selectedTemplate.days.length} thực đơn từ mẫu`);
+        setTemplateModalOpen(false);
+    };
     const selectedDayStatus = dayjs(selectedDate).isSame(dayjs(), "day")
         ? { label: "Hôm nay", color: "#1677ff", background: "#e6f4ff", border: "#91caff" }
         : dayjs(selectedDate).isBefore(dayjs(), "day")
@@ -146,7 +187,10 @@ export const ScheduledMealListScreen = () => {
         <React.Fragment>
             <Box style={{ padding: "8px 12px 0", marginBottom: 8 }}>
                 <Box style={topToolCardStyle}>
-                    <Stack justify="flex-end">
+                    <Stack justify="flex-end" wrap="wrap" gap={8}>
+                        <Button icon={<CalendarOutlined />} onClick={_onOpenTemplateApply}>
+                            Tạo từ mẫu
+                        </Button>
                         <Button icon={<ShoppingCartOutlined />} onClick={_onOpenRangeShopping}>
                             Giỏ hàng theo khoảng ngày
                         </Button>
@@ -214,6 +258,55 @@ export const ScheduledMealListScreen = () => {
 
             {/* Range picker modal */}
             <Modal
+                open={templateModalOpen}
+                title={<Space>
+                    <CalendarOutlined />
+                    Tạo thực đơn từ mẫu
+                </Space>}
+                onCancel={() => setTemplateModalOpen(false)}
+                onOk={_applySelectedTemplate}
+                okText="Tạo"
+                cancelText="Huỷ"
+                destroyOnClose
+                okButtonProps={{ disabled: availableTemplates.length === 0 }}
+            >
+                <DeferredModalContent active={templateModalOpen} minHeight={160}>
+                    <Stack direction="column" align="stretch" gap={10}>
+                        <div>
+                            <Typography.Text strong style={{ display: "block", fontSize: 12, marginBottom: 5 }}>Tạo cho</Typography.Text>
+                            <Select
+                                value={templateApplyMode}
+                                onChange={(value) => { setTemplateApplyMode(value); setSelectedTemplateId(undefined); }}
+                                style={{ width: "100%" }}
+                            >
+                                <Select.Option value="day">Một ngày</Select.Option>
+                                <Select.Option value="week">Một tuần</Select.Option>
+                            </Select>
+                        </div>
+                        {templateApplyMode === 'week' && <div>
+                            <Typography.Text strong style={{ display: "block", fontSize: 12, marginBottom: 5 }}>Tuần áp dụng</Typography.Text>
+                            <DatePicker picker="week" value={templateApplyWeek} onChange={value => value && setTemplateApplyWeek(getMondayStart(value))} format="DD/MM/YYYY" style={{ width: "100%" }} />
+                        </div>}
+                        <div>
+                            <Typography.Text strong style={{ display: "block", fontSize: 12, marginBottom: 5 }}>Mẫu</Typography.Text>
+                            <Select
+                                value={selectedTemplate?.id}
+                                onChange={setSelectedTemplateId}
+                                placeholder={templateApplyMode === 'day' ? 'Chọn mẫu ngày' : 'Chọn mẫu tuần'}
+                                style={{ width: "100%" }}
+                                disabled={availableTemplates.length === 0}
+                            >
+                                {availableTemplates.map(template => <Select.Option key={template.id} value={template.id}>{template.name}</Select.Option>)}
+                            </Select>
+                            {availableTemplates.length === 0 && <Typography.Text type="secondary" style={{ display: "block", fontSize: 12, marginTop: 6 }}>
+                                Chưa có mẫu phù hợp. Vào trang Mẫu dùng lại để tạo mẫu {templateApplyMode === 'day' ? 'ngày' : 'tuần'}.
+                            </Typography.Text>}
+                        </div>
+                    </Stack>
+                </DeferredModalContent>
+            </Modal>
+
+            <Modal
                 open={rangePickerOpen}
                 title={<Space>
                     <ShoppingCartOutlined />
@@ -235,8 +328,8 @@ export const ScheduledMealListScreen = () => {
                         onChange={(vals) => setSelectedRange(vals as [Dayjs, Dayjs] | null)}
                         presets={[
                             { label: "7 ngày tới", value: [dayjs(), dayjs().add(6, "day")] },
-                            { label: "Tuần này", value: [dayjs().startOf("week"), dayjs().endOf("week")] },
-                            { label: "Tuần tới", value: [dayjs().add(1, "week").startOf("week"), dayjs().add(1, "week").endOf("week")] },
+                            { label: "Tuần này", value: [getMondayStart(dayjs()), getMondayStart(dayjs()).add(6, "day")] },
+                            { label: "Tuần tới", value: [getMondayStart(dayjs()).add(1, "week"), getMondayStart(dayjs()).add(1, "week").add(6, "day")] },
                         ]}
                     />
                     {selectedRange && (() => {

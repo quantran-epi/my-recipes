@@ -9,7 +9,7 @@ import { Box } from '@components/Layout/Box';
 import { Stack } from '@components/Layout/Stack';
 import { Tag } from '@components/Tag';
 import { Typography } from '@components/Typography';
-import { normalizeDishServings } from '@modules/ShoppingList/Screens/DishServingSelector.widget';
+import { DishServingSelector, normalizeDishServings } from '@modules/ShoppingList/Screens/DishServingSelector.widget';
 import { nanoid } from 'nanoid';
 import { ScheduledMeal } from '@store/Models/ScheduledMeal';
 import {
@@ -19,6 +19,7 @@ import {
     upsertShoppingListTemplate,
     upsertWeeklyMealTemplate,
     WeeklyMealTemplate,
+    WeeklyMealTemplateDay,
 } from '@store/Reducers/AppContextReducer';
 import { addScheduledMeal } from '@store/Reducers/ScheduledMealReducer';
 import { addShoppingList, generateIngredient } from '@store/Reducers/ShoppingListReducer';
@@ -39,13 +40,18 @@ import React, { useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { useMessage } from '@components/Message';
+import { DeferredModalContent, Modal } from '@components/Modal';
 import { useScreenTitle } from '@hooks';
 import { RootRoutes } from '@routing/RootRoutes';
 import LayoutIcon from '../../../../assets/icons/layout.png';
+import { ScheduledMealMealPlanner } from '@modules/ScheduledMeal/Screens/ScheduledMealMealPlanner.widget';
 
 type MealKey = keyof ScheduledMeal['meals'];
 
 const mealKeys: MealKey[] = ['breakfast', 'lunch', 'dinner'];
+type MealTemplateScope = 'day' | 'week';
+type MealTemplateCreateMode = 'existing' | 'scratch';
+type ShoppingTemplateCreateMode = 'existing' | 'scratch';
 
 const emptyMeals = (): ScheduledMeal['meals'] => ({ breakfast: [], lunch: [], dinner: [] });
 
@@ -137,6 +143,26 @@ const formatWeekName = (start: Dayjs) => `${start.format('DD/MM')} - ${start.add
 
 const formatRelativeDate = (date: Date | string) => moment(date).format('DD/MM/YYYY');
 
+const getMondayStart = (value: Dayjs) => value.startOf('week').startOf('day');
+
+const getTemplateScope = (template: WeeklyMealTemplate): MealTemplateScope => template.scope ?? (template.days.length > 1 ? 'week' : 'day');
+
+const hasTemplateDayContent = (day: WeeklyMealTemplateDay) => getDishCountFromMeals(day.meals) > 0;
+
+const createEmptyTemplateDay = (offset = 0): WeeklyMealTemplateDay => ({
+    offset,
+    meals: emptyMeals(),
+    dishServings: {},
+});
+
+const createEmptyTemplateWeek = (): WeeklyMealTemplateDay[] => Array.from({ length: 7 }, (_, offset) => createEmptyTemplateDay(offset));
+
+const weekdayLabel = (offset: number) => getMondayStart(dayjs()).add(offset, 'day').format('dddd');
+
+const getDefaultMealTemplateName = (scope: MealTemplateScope, weekStart = getMondayStart(dayjs())) => (
+    scope === 'day' ? `Mẫu ngày ${dayjs().format('DD/MM')}` : `Mẫu tuần ${formatWeekName(weekStart)}`
+);
+
 const SectionTitle: React.FC<{ icon: React.ReactNode; title: string; subtitle: string }> = ({ icon, title, subtitle }) => (
     <Stack align='center' gap={9}>
         <span style={{ width: 38, height: 38, borderRadius: 8, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', color: '#7436dc', background: 'rgba(116,54,220,0.12)', flexShrink: 0, fontSize: 18 }}>{icon}</span>
@@ -161,12 +187,23 @@ export const TemplatesScreen = () => {
     const shoppingListTemplates = useSelector(selectShoppingListTemplates);
     useScreenTitle({ value: 'Mẫu dùng lại', deps: [] });
 
-    const [weekStart, setWeekStart] = useState<Dayjs>(dayjs().startOf('day'));
-    const [mealTemplateName, setMealTemplateName] = useState(`Mẫu tuần ${formatWeekName(dayjs())}`);
-    const [mealApplyStart, setMealApplyStart] = useState<Dayjs>(dayjs().startOf('day'));
+    const [mealTemplateScope, setMealTemplateScope] = useState<MealTemplateScope>('day');
+    const [mealTemplateCreateMode, setMealTemplateCreateMode] = useState<MealTemplateCreateMode>('existing');
+    const [mealTemplateName, setMealTemplateName] = useState(`Mẫu ngày ${dayjs().format('DD/MM')}`);
+    const [mealSourceMealId, setMealSourceMealId] = useState<string | undefined>();
+    const [mealSourceWeek, setMealSourceWeek] = useState<Dayjs>(getMondayStart(dayjs()));
+    const [scratchDay, setScratchDay] = useState<WeeklyMealTemplateDay>(() => createEmptyTemplateDay(0));
+    const [scratchWeek, setScratchWeek] = useState<WeeklyMealTemplateDay[]>(() => createEmptyTemplateWeek());
+    const [templateApplyTarget, setTemplateApplyTarget] = useState<WeeklyMealTemplate | null>(null);
+    const [mealApplyDate, setMealApplyDate] = useState<Dayjs>(dayjs().startOf('day'));
+    const [mealApplyWeek, setMealApplyWeek] = useState<Dayjs>(getMondayStart(dayjs()));
     const [shoppingTemplateSourceId, setShoppingTemplateSourceId] = useState<string | undefined>();
+    const [shoppingTemplateCreateMode, setShoppingTemplateCreateMode] = useState<ShoppingTemplateCreateMode>('existing');
     const [shoppingTemplateName, setShoppingTemplateName] = useState('Mẫu mua sắm hằng tuần');
+    const [shoppingTemplateDishIds, setShoppingTemplateDishIds] = useState<string[]>([]);
+    const [shoppingTemplateDishServings, setShoppingTemplateDishServings] = useState<Record<string, number>>({});
     const [shoppingApplyDate, setShoppingApplyDate] = useState<Dayjs>(dayjs().startOf('day'));
+    const [shoppingApplyTarget, setShoppingApplyTarget] = useState<ShoppingListTemplate | null>(null);
 
     const dishesById = useMemo(() => new Map(dishes.map(item => [item.id, item])), [dishes]);
     const scheduledMealsByDate = useMemo(() => scheduledMeals.reduce((result, item) => {
@@ -177,35 +214,77 @@ export const TemplatesScreen = () => {
 
     const selectedShoppingList = shoppingLists.find(item => item.id === shoppingTemplateSourceId);
 
-    const _saveWeeklyMealTemplate = () => {
-        const days = Array.from({ length: 7 }).flatMap((_, offset) => {
+    const _onMealTemplateScopeChange = (scope: MealTemplateScope) => {
+        setMealTemplateScope(scope);
+        setMealTemplateName(getDefaultMealTemplateName(scope, mealSourceWeek));
+    };
+
+    const _onMealSourceWeekChange = (value?: Dayjs | null) => {
+        if (!value) return;
+        const nextWeek = getMondayStart(value);
+        setMealSourceWeek(nextWeek);
+        if (mealTemplateScope === 'week') {
+            setMealTemplateName(getDefaultMealTemplateName('week', nextWeek));
+        }
+    };
+
+    const getWeekTemplateDaysFromSource = (weekStart: Dayjs): WeeklyMealTemplateDay[] => {
+        return Array.from({ length: 7 }).flatMap((_, offset) => {
             const date = weekStart.add(offset, 'day');
             const items = scheduledMealsByDate[date.format('YYYY-MM-DD')] ?? [];
             const merged = mergeDayMeals(items);
             if (getDishCountFromMeals(merged.meals) === 0) return [];
             return [{ offset, meals: merged.meals, dishServings: merged.dishServings }];
         });
+    };
+
+    const _saveMealTemplate = () => {
+        let days: WeeklyMealTemplateDay[] = [];
+
+        if (mealTemplateCreateMode === 'existing' && mealTemplateScope === 'day') {
+            const sourceMeal = scheduledMeals.find(item => item.id === mealSourceMealId);
+            if (!sourceMeal) {
+                message.warning('Chọn một thực đơn ngày đã tạo để lưu mẫu');
+                return;
+            }
+            days = [{ offset: 0, meals: sourceMeal.meals, dishServings: sourceMeal.dishServings ?? {} }];
+        }
+
+        if (mealTemplateCreateMode === 'existing' && mealTemplateScope === 'week') {
+            days = getWeekTemplateDaysFromSource(getMondayStart(mealSourceWeek));
+        }
+
+        if (mealTemplateCreateMode === 'scratch' && mealTemplateScope === 'day') {
+            days = hasTemplateDayContent(scratchDay) ? [{ ...scratchDay, offset: 0 }] : [];
+        }
+
+        if (mealTemplateCreateMode === 'scratch' && mealTemplateScope === 'week') {
+            days = scratchWeek.filter(hasTemplateDayContent).map(day => ({ ...day, offset: day.offset }));
+        }
 
         if (days.length === 0) {
-            message.warning('Tuần đã chọn chưa có thực đơn để lưu thành mẫu');
+            message.warning(mealTemplateScope === 'day' ? 'Mẫu ngày chưa có món ăn' : 'Mẫu tuần chưa có ngày nào có món ăn');
             return;
         }
 
         const now = new Date().toISOString();
         const template: WeeklyMealTemplate = {
             id: `meal-template-${nanoid(8)}`,
-            name: mealTemplateName.trim() || `Mẫu tuần ${formatWeekName(weekStart)}`,
+            name: mealTemplateName.trim() || getDefaultMealTemplateName(mealTemplateScope, mealSourceWeek),
+            scope: mealTemplateScope,
             days,
             createdAt: now,
             updatedAt: now,
         };
         dispatch(upsertWeeklyMealTemplate(template));
-        message.success(`Đã lưu mẫu thực đơn ${days.length} ngày`);
+        message.success(`Đã lưu mẫu ${mealTemplateScope === 'day' ? 'ngày' : 'tuần'} (${days.length} ngày có món)`);
     };
 
-    const _applyWeeklyMealTemplate = (template: WeeklyMealTemplate) => {
+    const _applyMealTemplate = (template: WeeklyMealTemplate, date: Dayjs) => {
+        const scope = getTemplateScope(template);
+        const baseDate = scope === 'week' ? getMondayStart(date) : date.startOf('day');
         template.days.forEach(day => {
-            const plannedDate = mealApplyStart.add(day.offset, 'day').toDate();
+            const plannedDate = baseDate.add(scope === 'week' ? day.offset : 0, 'day').toDate();
             const name = `${template.name} - ${moment(plannedDate).format('DD/MM')}`;
             dispatch(addScheduledMeal({
                 id: `${template.id}-${nanoid(8)}`,
@@ -218,15 +297,28 @@ export const TemplatesScreen = () => {
             dispatch(rememberScheduledMealName(name));
         });
         message.success(`Đã tạo ${template.days.length} thực đơn từ mẫu`);
+        setTemplateApplyTarget(null);
         navigate(RootRoutes.AuthorizedRoutes.ScheduledMealRoutes.List());
     };
 
     const _saveShoppingListTemplate = () => {
-        if (!selectedShoppingList) {
+        let templateDishes: string[] = [];
+        let templateServings: Record<string, number> = {};
+
+        if (shoppingTemplateCreateMode === 'existing' && !selectedShoppingList) {
             message.warning('Chọn một lịch mua sắm hiện có để lưu thành mẫu');
             return;
         }
-        if ((selectedShoppingList.dishes ?? []).length === 0) {
+
+        if (shoppingTemplateCreateMode === 'existing') {
+            templateDishes = selectedShoppingList?.dishes ?? [];
+            templateServings = selectedShoppingList?.dishServings ?? {};
+        } else {
+            templateDishes = shoppingTemplateDishIds;
+            templateServings = normalizeDishServings(shoppingTemplateDishIds, dishes, shoppingTemplateDishServings);
+        }
+
+        if (templateDishes.length === 0) {
             message.warning('Lịch mua sắm này chưa có món ăn để lưu thành mẫu');
             return;
         }
@@ -234,9 +326,10 @@ export const TemplatesScreen = () => {
         const now = new Date().toISOString();
         const template: ShoppingListTemplate = {
             id: `shopping-template-${nanoid(8)}`,
-            name: shoppingTemplateName.trim() || selectedShoppingList.name,
-            dishes: selectedShoppingList.dishes ?? [],
-            dishServings: selectedShoppingList.dishServings ?? {},
+            name: shoppingTemplateName.trim() || selectedShoppingList?.name || 'Mẫu mua sắm tự tạo',
+            source: shoppingTemplateCreateMode,
+            dishes: templateDishes,
+            dishServings: templateServings,
             createdAt: now,
             updatedAt: now,
         };
@@ -244,17 +337,17 @@ export const TemplatesScreen = () => {
         message.success('Đã lưu mẫu mua sắm');
     };
 
-    const _applyShoppingListTemplate = (template: ShoppingListTemplate) => {
+    const _applyShoppingListTemplate = (template: ShoppingListTemplate, date = shoppingApplyDate) => {
         const normalizedServings = normalizeDishServings(template.dishes, dishes, template.dishServings ?? {});
         const shoppingList = {
             id: `${template.name}${nanoid(10)}`,
-            name: `${template.name} - ${shoppingApplyDate.format('DD/MM')}`,
+            name: `${template.name} - ${date.format('DD/MM')}`,
             dishes: template.dishes,
             dishServings: normalizedServings,
             ingredients: [],
             scheduledMeals: [],
             createdDate: new Date(),
-            plannedDate: shoppingApplyDate.toDate(),
+            plannedDate: date.toDate(),
             completedAt: undefined,
             completionImports: undefined,
         };
@@ -272,8 +365,23 @@ export const TemplatesScreen = () => {
             autoMarkCoveredByInventory: true,
             dishServings: normalizedServings,
         }));
+        setShoppingApplyTarget(null);
         message.success('Đã tạo lịch mua sắm từ mẫu');
         navigate(RootRoutes.AuthorizedRoutes.ShoppingListRoutes.Detail(shoppingList.id));
+    };
+
+    const _onScratchDayChange = (meals: ScheduledMeal['meals'], dishServings: Record<string, number>) => {
+        setScratchDay({ offset: 0, meals, dishServings });
+    };
+
+    const _onScratchWeekDayChange = (offset: number, meals: ScheduledMeal['meals'], dishServings: Record<string, number>) => {
+        setScratchWeek(prev => prev.map(day => day.offset === offset ? { offset, meals, dishServings } : day));
+    };
+
+    const _onShoppingTemplateDishesChange = (ids: string[]) => {
+        const nextIds = ids ?? [];
+        setShoppingTemplateDishIds(nextIds);
+        setShoppingTemplateDishServings(prev => normalizeDishServings(nextIds, dishes, prev));
     };
 
     return <Box data-testid='templates-screen' style={pageStyle}>
@@ -284,16 +392,16 @@ export const TemplatesScreen = () => {
             <div style={bodyStyle}>
                 <div style={instructionGridStyle}>
                     <Box style={instructionCardStyle}>
-                        <Typography.Text strong style={{ display: 'block', color: '#2f2545', fontSize: 14 }}>Mẫu thực đơn theo tuần</Typography.Text>
-                        <Typography.Text style={instructionStepStyle}>1. Tạo thực đơn cho một tuần trong trang Thực đơn.</Typography.Text>
-                        <Typography.Text style={instructionStepStyle}>2. Ở đây, chọn ngày bắt đầu tuần nguồn rồi bấm Lưu mẫu tuần.</Typography.Text>
-                        <Typography.Text style={instructionStepStyle}>3. Khi cần dùng lại, chọn tuần bắt đầu mới và bấm Áp dụng trên mẫu đã lưu.</Typography.Text>
+                        <Typography.Text strong style={{ display: 'block', color: '#2f2545', fontSize: 14 }}>Mẫu thực đơn</Typography.Text>
+                        <Typography.Text style={instructionStepStyle}>1. Chọn mẫu ngày hoặc mẫu tuần.</Typography.Text>
+                        <Typography.Text style={instructionStepStyle}>2. Lưu từ thực đơn đã tạo hoặc tự thiết kế món cho từng bữa.</Typography.Text>
+                        <Typography.Text style={instructionStepStyle}>3. Bấm Áp dụng rồi chọn ngày hoặc tuần muốn tạo thực đơn.</Typography.Text>
                     </Box>
                     <Box style={instructionCardStyle}>
                         <Typography.Text strong style={{ display: 'block', color: '#2f2545', fontSize: 14 }}>Mẫu mua sắm</Typography.Text>
-                        <Typography.Text style={instructionStepStyle}>1. Tạo một lịch mua sắm nguồn có các món thường mua chung.</Typography.Text>
-                        <Typography.Text style={instructionStepStyle}>2. Chọn lịch đó ở ô Lịch mua sắm nguồn rồi bấm Lưu mẫu mua sắm.</Typography.Text>
-                        <Typography.Text style={instructionStepStyle}>3. Chọn ngày mua mới và bấm Áp dụng để tạo lịch mua sắm mới kèm checklist.</Typography.Text>
+                        <Typography.Text style={instructionStepStyle}>1. Lưu từ lịch mua sắm đã có hoặc chọn món để tạo mẫu mới.</Typography.Text>
+                        <Typography.Text style={instructionStepStyle}>2. Mẫu giữ món và khẩu phần để tạo checklist nhanh.</Typography.Text>
+                        <Typography.Text style={instructionStepStyle}>3. Bấm Áp dụng rồi chọn ngày mua mới.</Typography.Text>
                     </Box>
                 </div>
             </div>
@@ -301,47 +409,80 @@ export const TemplatesScreen = () => {
 
         <section style={sectionStyle}>
             <div style={sectionHeaderStyle}>
-                <SectionTitle icon={<CalendarOutlined />} title='Mẫu thực đơn theo tuần' subtitle='Lưu một tuần đã lên lịch và áp dụng lại cho tuần khác.' />
+                <SectionTitle icon={<CalendarOutlined />} title='Mẫu thực đơn' subtitle='Tạo mẫu ngày hoặc tuần từ lịch đã có, hoặc tự thiết kế từ đầu.' />
             </div>
             <div style={bodyStyle}>
                 <Box style={{ border: '1px solid #f0f0f0', borderRadius: 8, padding: 10, background: '#fff' }}>
-                    <div style={fieldGridStyle}>
+                    <div style={{ ...fieldGridStyle, marginBottom: 10 }}>
                         <div>
                             <Typography.Text strong style={{ display: 'block', fontSize: 12, marginBottom: 5 }}>Tên mẫu</Typography.Text>
                             <Input value={mealTemplateName} onChange={event => setMealTemplateName(event.target.value)} />
                         </div>
                         <div>
-                            <Typography.Text strong style={{ display: 'block', fontSize: 12, marginBottom: 5 }}>Ngày bắt đầu tuần nguồn</Typography.Text>
-                            <DatePicker value={weekStart} onChange={value => value && setWeekStart(value)} format='DD/MM/YYYY' style={{ width: '100%' }} />
+                            <Typography.Text strong style={{ display: 'block', fontSize: 12, marginBottom: 5 }}>Loại mẫu</Typography.Text>
+                            <Select value={mealTemplateScope} onChange={_onMealTemplateScopeChange} style={{ width: '100%' }}>
+                                <Option value='day'>Mẫu ngày</Option>
+                                <Option value='week'>Mẫu tuần</Option>
+                            </Select>
                         </div>
-                        <Button icon={<SaveOutlined />} onClick={_saveWeeklyMealTemplate}>Lưu mẫu tuần</Button>
-                    </div>
-                </Box>
-
-                <Box style={{ marginTop: 10 }}>
-                    <div style={fieldGridStyle}>
                         <div>
-                            <Typography.Text strong style={{ display: 'block', fontSize: 12, marginBottom: 5 }}>Áp dụng vào tuần bắt đầu</Typography.Text>
-                            <DatePicker value={mealApplyStart} onChange={value => value && setMealApplyStart(value)} format='DD/MM/YYYY' style={{ width: '100%' }} />
+                            <Typography.Text strong style={{ display: 'block', fontSize: 12, marginBottom: 5 }}>Cách tạo</Typography.Text>
+                            <Select value={mealTemplateCreateMode} onChange={value => setMealTemplateCreateMode(value)} style={{ width: '100%' }}>
+                                <Option value='existing'>Chọn lịch đã tạo</Option>
+                                <Option value='scratch'>Tự thiết kế</Option>
+                            </Select>
                         </div>
                     </div>
+
+                    {mealTemplateCreateMode === 'existing' && mealTemplateScope === 'day' && <div style={fieldGridStyle}>
+                        <div>
+                            <Typography.Text strong style={{ display: 'block', fontSize: 12, marginBottom: 5 }}>Thực đơn ngày nguồn</Typography.Text>
+                            <Select value={mealSourceMealId} onChange={setMealSourceMealId} placeholder='Chọn thực đơn đã tạo' showSearch style={{ width: '100%' }}>
+                                {scheduledMeals.map(item => <Option key={item.id} value={item.id}>{item.name} - {formatRelativeDate(item.plannedDate)}</Option>)}
+                            </Select>
+                        </div>
+                        <Button icon={<SaveOutlined />} onClick={_saveMealTemplate}>Lưu mẫu ngày</Button>
+                    </div>}
+
+                    {mealTemplateCreateMode === 'existing' && mealTemplateScope === 'week' && <div style={fieldGridStyle}>
+                        <div>
+                            <Typography.Text strong style={{ display: 'block', fontSize: 12, marginBottom: 5 }}>Tuần nguồn</Typography.Text>
+                            <DatePicker picker='week' value={mealSourceWeek} onChange={_onMealSourceWeekChange} format='DD/MM/YYYY' style={{ width: '100%' }} />
+                        </div>
+                        <Button icon={<SaveOutlined />} onClick={_saveMealTemplate}>Lưu mẫu tuần</Button>
+                    </div>}
+
+                    {mealTemplateCreateMode === 'scratch' && mealTemplateScope === 'day' && <Box style={{ marginTop: 10 }}>
+                        <ScheduledMealMealPlanner meals={scratchDay.meals} dishServings={scratchDay.dishServings ?? {}} dishes={dishes} onMealsChange={_onScratchDayChange} />
+                        <Stack justify='flex-end'><Button icon={<SaveOutlined />} onClick={_saveMealTemplate}>Lưu mẫu ngày</Button></Stack>
+                    </Box>}
+
+                    {mealTemplateCreateMode === 'scratch' && mealTemplateScope === 'week' && <Stack direction='column' align='stretch' gap={10} style={{ marginTop: 10 }}>
+                        {scratchWeek.map(day => <Box key={day.offset} style={{ border: '1px solid #f0f0f0', borderRadius: 0, padding: 10, background: '#fff' }}>
+                            <Typography.Text strong style={{ display: 'block', color: '#2f2545', marginBottom: 8 }}>{weekdayLabel(day.offset)}</Typography.Text>
+                            <ScheduledMealMealPlanner meals={day.meals} dishServings={day.dishServings ?? {}} dishes={dishes} onMealsChange={(meals, servings) => _onScratchWeekDayChange(day.offset, meals, servings)} />
+                        </Box>)}
+                        <Stack justify='flex-end'><Button icon={<SaveOutlined />} onClick={_saveMealTemplate}>Lưu mẫu tuần</Button></Stack>
+                    </Stack>}
                 </Box>
 
                 {weeklyMealTemplates.length === 0 ? <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description='Chưa có mẫu thực đơn' /> : <Stack direction='column' align='stretch' gap={8} style={{ marginTop: 10 }}>
                     {weeklyMealTemplates.map(template => {
                         const dishCount = template.days.reduce((sum, day) => sum + getDishCountFromMeals(day.meals), 0);
+                        const scope = getTemplateScope(template);
                         return <Box key={template.id} style={templateCardStyle}>
                             <Stack justify='space-between' align='flex-start' gap={8}>
                                 <div style={{ minWidth: 0 }}>
                                     <Typography.Text strong style={{ display: 'block', color: '#111827', fontSize: 15, lineHeight: '20px' }}>{template.name}</Typography.Text>
                                     <Stack wrap='wrap' gap={5} style={{ marginTop: 5 }}>
+                                        <Tag color={scope === 'day' ? 'green' : 'purple'} style={{ marginInlineEnd: 0 }}>{scope === 'day' ? 'Mẫu ngày' : 'Mẫu tuần'}</Tag>
                                         <Tag color='purple' style={{ marginInlineEnd: 0 }}>{template.days.length} ngày</Tag>
                                         <Tag color='blue' style={{ marginInlineEnd: 0 }}>{dishCount} món</Tag>
                                         <Tag style={{ marginInlineEnd: 0 }}>Cập nhật {formatRelativeDate(template.updatedAt)}</Tag>
                                     </Stack>
                                 </div>
                                 <Stack gap={5}>
-                                    <Button icon={<PlayCircleOutlined />} onClick={() => _applyWeeklyMealTemplate(template)}>Áp dụng</Button>
+                                    <Button icon={<PlayCircleOutlined />} onClick={() => setTemplateApplyTarget(template)}>Áp dụng</Button>
                                     <Button type='text' danger icon={<DeleteOutlined />} onClick={() => dispatch(removeWeeklyMealTemplate(template.id))} />
                                 </Stack>
                             </Stack>
@@ -357,11 +498,21 @@ export const TemplatesScreen = () => {
             </div>
             <div style={bodyStyle}>
                 <Box style={{ border: '1px solid #f0f0f0', borderRadius: 8, padding: 10, background: '#fff' }}>
-                    <div style={fieldGridStyle}>
+                    <div style={{ ...fieldGridStyle, marginBottom: 10 }}>
                         <div>
                             <Typography.Text strong style={{ display: 'block', fontSize: 12, marginBottom: 5 }}>Tên mẫu</Typography.Text>
                             <Input value={shoppingTemplateName} onChange={event => setShoppingTemplateName(event.target.value)} />
                         </div>
+                        <div>
+                            <Typography.Text strong style={{ display: 'block', fontSize: 12, marginBottom: 5 }}>Cách tạo</Typography.Text>
+                            <Select value={shoppingTemplateCreateMode} onChange={value => setShoppingTemplateCreateMode(value)} style={{ width: '100%' }}>
+                                <Option value='existing'>Chọn lịch đã tạo</Option>
+                                <Option value='scratch'>Tự chọn món</Option>
+                            </Select>
+                        </div>
+                    </div>
+
+                    {shoppingTemplateCreateMode === 'existing' && <div style={fieldGridStyle}>
                         <div>
                             <Typography.Text strong style={{ display: 'block', fontSize: 12, marginBottom: 5 }}>Lịch mua sắm nguồn</Typography.Text>
                             <Select value={shoppingTemplateSourceId} onChange={setShoppingTemplateSourceId} placeholder='Chọn lịch mua sắm' showSearch style={{ width: '100%' }}>
@@ -369,16 +520,18 @@ export const TemplatesScreen = () => {
                             </Select>
                         </div>
                         <Button icon={<SaveOutlined />} onClick={_saveShoppingListTemplate}>Lưu mẫu mua sắm</Button>
-                    </div>
-                </Box>
+                    </div>}
 
-                <Box style={{ marginTop: 10 }}>
-                    <div style={fieldGridStyle}>
-                        <div>
-                            <Typography.Text strong style={{ display: 'block', fontSize: 12, marginBottom: 5 }}>Ngày mua khi áp dụng</Typography.Text>
-                            <DatePicker value={shoppingApplyDate} onChange={value => value && setShoppingApplyDate(value)} format='DD/MM/YYYY' style={{ width: '100%' }} />
-                        </div>
-                    </div>
+                    {shoppingTemplateCreateMode === 'scratch' && <Box style={{ marginTop: 10 }}>
+                        <Typography.Text strong style={{ display: 'block', fontSize: 12, marginBottom: 5 }}>Chọn món cho mẫu</Typography.Text>
+                        <Select value={shoppingTemplateDishIds} onChange={_onShoppingTemplateDishesChange} placeholder='Chọn món ăn' mode='multiple' showSearch style={{ width: '100%' }}>
+                            {dishes.map(dish => <Option key={dish.id} value={dish.id}>{dish.name}</Option>)}
+                        </Select>
+                        <Box style={{ marginTop: 10 }}>
+                            <DishServingSelector selectedDishIds={shoppingTemplateDishIds} dishes={dishes} value={shoppingTemplateDishServings} onChange={setShoppingTemplateDishServings} />
+                        </Box>
+                        <Stack justify='flex-end'><Button icon={<SaveOutlined />} onClick={_saveShoppingListTemplate}>Lưu mẫu mua sắm</Button></Stack>
+                    </Box>}
                 </Box>
 
                 {shoppingListTemplates.length === 0 ? <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description='Chưa có mẫu mua sắm' /> : <Stack direction='column' align='stretch' gap={8} style={{ marginTop: 10 }}>
@@ -390,12 +543,13 @@ export const TemplatesScreen = () => {
                                     {template.dishes.slice(0, 4).map(id => dishesById.get(id)?.name ?? id).join(', ')}{template.dishes.length > 4 ? ` và ${template.dishes.length - 4} món khác` : ''}
                                 </Typography.Text>
                                 <Stack wrap='wrap' gap={5} style={{ marginTop: 5 }}>
+                                    <Tag color={template.source === 'scratch' ? 'green' : 'purple'} style={{ marginInlineEnd: 0 }}>{template.source === 'scratch' ? 'Tự tạo' : 'Từ lịch'}</Tag>
                                     <Tag color='blue' style={{ marginInlineEnd: 0 }}>{template.dishes.length} món</Tag>
                                     <Tag style={{ marginInlineEnd: 0 }}>Cập nhật {formatRelativeDate(template.updatedAt)}</Tag>
                                 </Stack>
                             </div>
                             <Stack gap={5}>
-                                <Button icon={<PlayCircleOutlined />} onClick={() => _applyShoppingListTemplate(template)}>Áp dụng</Button>
+                                <Button icon={<PlayCircleOutlined />} onClick={() => setShoppingApplyTarget(template)}>Áp dụng</Button>
                                 <Button type='text' danger icon={<DeleteOutlined />} onClick={() => dispatch(removeShoppingListTemplate(template.id))} />
                             </Stack>
                         </Stack>
@@ -403,5 +557,49 @@ export const TemplatesScreen = () => {
                 </Stack>}
             </div>
         </section>
+
+        <Modal
+            open={Boolean(templateApplyTarget)}
+            title={`Áp dụng ${templateApplyTarget ? (getTemplateScope(templateApplyTarget) === 'day' ? 'mẫu ngày' : 'mẫu tuần') : 'mẫu thực đơn'}`}
+            onCancel={() => setTemplateApplyTarget(null)}
+            onOk={() => templateApplyTarget && _applyMealTemplate(templateApplyTarget, getTemplateScope(templateApplyTarget) === 'week' ? mealApplyWeek : mealApplyDate)}
+            okText='Áp dụng'
+            cancelText='Hủy'
+            destroyOnClose
+        >
+            <DeferredModalContent active={Boolean(templateApplyTarget)} minHeight={96}>
+                {templateApplyTarget && <Box style={{ padding: '8px 0' }}>
+                    <Typography.Text type='secondary' style={{ display: 'block', fontSize: 12, lineHeight: '17px', marginBottom: 8 }}>
+                        {getTemplateScope(templateApplyTarget) === 'week'
+                            ? 'Chọn tuần muốn tạo thực đơn. Tuần bắt đầu từ thứ Hai.'
+                            : 'Chọn ngày muốn tạo thực đơn từ mẫu này.'}
+                    </Typography.Text>
+                    {getTemplateScope(templateApplyTarget) === 'week' ? (
+                        <DatePicker picker='week' value={mealApplyWeek} onChange={value => value && setMealApplyWeek(getMondayStart(value))} format='DD/MM/YYYY' style={{ width: '100%' }} />
+                    ) : (
+                        <DatePicker value={mealApplyDate} onChange={value => value && setMealApplyDate(value)} format='DD/MM/YYYY' style={{ width: '100%' }} />
+                    )}
+                </Box>}
+            </DeferredModalContent>
+        </Modal>
+
+        <Modal
+            open={Boolean(shoppingApplyTarget)}
+            title='Áp dụng mẫu mua sắm'
+            onCancel={() => setShoppingApplyTarget(null)}
+            onOk={() => shoppingApplyTarget && _applyShoppingListTemplate(shoppingApplyTarget, shoppingApplyDate)}
+            okText='Tạo lịch mua'
+            cancelText='Hủy'
+            destroyOnClose
+        >
+            <DeferredModalContent active={Boolean(shoppingApplyTarget)} minHeight={96}>
+                <Box style={{ padding: '8px 0' }}>
+                    <Typography.Text type='secondary' style={{ display: 'block', fontSize: 12, lineHeight: '17px', marginBottom: 8 }}>
+                        Chọn ngày mua mới. App sẽ tạo lịch mua sắm và tự sinh checklist nguyên liệu.
+                    </Typography.Text>
+                    <DatePicker value={shoppingApplyDate} onChange={value => value && setShoppingApplyDate(value)} format='DD/MM/YYYY' style={{ width: '100%' }} />
+                </Box>
+            </DeferredModalContent>
+        </Modal>
     </Box>;
 };

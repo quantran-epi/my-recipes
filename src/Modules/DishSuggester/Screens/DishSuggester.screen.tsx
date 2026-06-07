@@ -265,7 +265,7 @@ export const DishSuggesterScreen: React.FC<DishSuggesterScreenProps> = ({ open, 
                     />
                 </span>
             </Tooltip>
-            <Tooltip title={`Kế hoạch chi phí (${dishIds.length})`}>
+            <Tooltip title={`Tính chi phí (${dishIds.length})`}>
                 <span>
                     <Button
                         disabled={disabled}

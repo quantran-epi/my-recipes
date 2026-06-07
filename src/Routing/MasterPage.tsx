@@ -155,7 +155,7 @@ export const MasterPage = () => {
             case "Thực đơn": return MealsIcon;
             case "Lịch mua sắm": return ShoppingListIcon;
             case "Nguyên liệu": return IngredientIcon;
-            case "Kế hoạch chi phí": return BudgetIcon;
+            case "Tính chi phí": return BudgetIcon;
             case "Phân tích": return MonitorIcon;
             case "Mẫu dùng lại": return LayoutIcon;
             case "Sức khỏe dữ liệu": return MedicalRecordIcon;
@@ -393,7 +393,7 @@ const SidebarDrawer = ({ buttonStyle }: { buttonStyle?: React.CSSProperties }) =
         { key: 'templates', href: RootRoutes.AuthorizedRoutes.Templates(), icon: LayoutIcon, label: 'Mẫu dùng lại' },
         { key: 'ingredients', href: RootRoutes.AuthorizedRoutes.IngredientRoutes.List(), icon: IngredientIcon, label: 'Nguyên liệu' },
         { key: 'dishes', href: RootRoutes.AuthorizedRoutes.DishesRoutes.List(), icon: DishesIcon, label: 'Món ăn' },
-        { key: 'expensePlanner', href: RootRoutes.AuthorizedRoutes.ExpensePlanner(), icon: BudgetIcon, label: 'Kế hoạch chi phí' },
+        { key: 'expensePlanner', href: RootRoutes.AuthorizedRoutes.ExpensePlanner(), icon: BudgetIcon, label: 'Tính chi phí' },
         { key: 'shoppingList', href: RootRoutes.AuthorizedRoutes.ShoppingListRoutes.List(), icon: ShoppingListIcon, label: 'Lịch mua sắm' },
         { key: 'meals', href: RootRoutes.AuthorizedRoutes.ScheduledMealRoutes.List(), icon: MealsIcon, label: 'Thực đơn' },
     ];
@@ -1141,7 +1141,7 @@ const BottomTabNavigator = () => {
                 <button
                     type="button"
                     aria-pressed={budgetActive}
-                    aria-label="Chi phí"
+                    aria-label="Tính chi phí"
                     data-testid="bottom-tab-expense-planner"
                     style={_buttonStyles(budgetActive)}
                     onClick={() => onNavigate(budgetRoute)}
@@ -1149,7 +1149,7 @@ const BottomTabNavigator = () => {
                     <span style={_sideIconShellStyles(budgetActive)}>
                         <Image src={BudgetIcon} preview={false} width={21} alt="" />
                     </span>
-                    <Typography.Text style={_labelStyles(budgetActive)}>Chi phí</Typography.Text>
+                    <Typography.Text style={_labelStyles(budgetActive)}>Tính phí</Typography.Text>
                 </button>
             </div>
         </div>

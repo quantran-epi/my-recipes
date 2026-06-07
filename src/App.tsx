@@ -4,13 +4,21 @@ import { persistor, store } from '@store/Store';
 import { PersistGate } from 'redux-persist/integration/react';
 import { RootRouter } from '@routing/RootRouter';
 import { ConfigProvider } from 'antd';
+import viVN from 'antd/locale/vi_VN';
+import dayjs from 'dayjs';
+import 'dayjs/locale/vi';
+import moment from 'moment';
+import 'moment/locale/vi';
 import { MessageProvider } from '@components/Message';
 import { ModalProvider } from '@components/Modal/ModalProvider';
 import { AppInitializer } from '@components/AppInitializer/AppInitializer';
 
+dayjs.locale('vi');
+moment.locale('vi');
+
 function App() {
   return (
-    <ConfigProvider theme={{
+    <ConfigProvider locale={viVN} theme={{
       token: {
         colorPrimary: "#7436dc",
         colorPrimaryHover: "#8f46f7",

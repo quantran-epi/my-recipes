@@ -10,7 +10,7 @@ import { useSearchParams } from "react-router-dom";
 import BudgetIcon from "../../../../assets/icons/budget.png";
 
 export const DishExpensePlannerScreen = () => {
-    useScreenTitle({ value: "Kế hoạch chi phí", deps: [] });
+    useScreenTitle({ value: "Tính chi phí", deps: [] });
     const dishesById = useSelector(selectDishesById);
     const [searchParams] = useSearchParams();
     const initialDishId = searchParams.get("dish") ?? undefined;
@@ -37,7 +37,7 @@ export const DishExpensePlannerScreen = () => {
                 <Image src={BudgetIcon} preview={false} width={24} />
                 <div style={{ minWidth: 0 }}>
                     <Typography.Text strong style={{ display: "block", fontSize: 16, lineHeight: "22px" }}>
-                        Kế hoạch chi phí
+                        Tính chi phí
                     </Typography.Text>
                     <Typography.Text type="secondary" style={{ display: "block", fontSize: 12, lineHeight: "16px" }}>
                         Ước tính tiền cần mua thêm cho nhiều món theo khẩu phần và tồn kho hiện tại.

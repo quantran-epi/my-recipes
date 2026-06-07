@@ -10,6 +10,7 @@ export type WeeklyMealTemplateDay = {
 export type WeeklyMealTemplate = {
     id: string;
     name: string;
+    scope?: 'day' | 'week';
     days: WeeklyMealTemplateDay[];
     createdAt: string;
     updatedAt: string;
@@ -18,6 +19,7 @@ export type WeeklyMealTemplate = {
 export type ShoppingListTemplate = {
     id: string;
     name: string;
+    source?: 'existing' | 'scratch';
     dishes: string[];
     dishServings?: Record<string, number>;
     createdAt: string;
