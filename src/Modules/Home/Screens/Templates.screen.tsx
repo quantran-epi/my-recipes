@@ -115,7 +115,7 @@ const templateCardInnerStyle: React.CSSProperties = {
 
 const templateContentStyle: React.CSSProperties = {
     minWidth: 0,
-    paddingRight: 38,
+    paddingRight: 76,
 };
 
 const templateUpdatedTextStyle: React.CSSProperties = {
@@ -127,17 +127,17 @@ const templateUpdatedTextStyle: React.CSSProperties = {
 };
 
 const templateActionsStyle: React.CSSProperties = {
-    display: 'flex',
-    justifyContent: 'flex-end',
-    alignItems: 'flex-end',
-    paddingTop: 34,
-};
-
-const templateMenuButtonStyle: React.CSSProperties = {
     position: 'absolute',
     top: 8,
     right: 8,
     zIndex: 1,
+    display: 'flex',
+    gap: 4,
+    justifyContent: 'flex-end',
+    alignItems: 'center',
+};
+
+const templateMenuButtonStyle: React.CSSProperties = {
     width: 32,
     paddingInline: 0,
     border: '1px solid rgba(116,54,220,0.12)',
@@ -145,6 +145,8 @@ const templateMenuButtonStyle: React.CSSProperties = {
 };
 
 const templateApplyButtonStyle: React.CSSProperties = {
+    width: 32,
+    paddingInline: 0,
     borderRadius: 6,
     boxShadow: '0 5px 12px rgba(116,54,220,0.14)',
 };
@@ -527,6 +529,7 @@ export const TemplatesScreen = () => {
                                     </Stack>
                                 </div>
                                 <div style={templateActionsStyle}>
+                                    <Button type='primary' aria-label='Áp dụng mẫu thực đơn' icon={<PlayCircleOutlined />} style={templateApplyButtonStyle} onClick={() => setTemplateApplyTarget(template)} />
                                     <Dropdown menu={{
                                         items: [
                                             { label: 'Xem trước', key: 'preview', icon: <EyeOutlined /> },
@@ -542,7 +545,6 @@ export const TemplatesScreen = () => {
                                     }} placement='bottomRight' trigger={['click']}>
                                         <Button type='text' aria-label='Tùy chọn mẫu thực đơn' icon={<MoreOutlined />} style={templateMenuButtonStyle} />
                                     </Dropdown>
-                                    <Button type='primary' icon={<PlayCircleOutlined />} style={templateApplyButtonStyle} onClick={() => setTemplateApplyTarget(template)}>Áp dụng</Button>
                                 </div>
                             </div>
                         </Box>;
@@ -573,6 +575,7 @@ export const TemplatesScreen = () => {
                                 </Stack>
                             </div>
                             <div style={templateActionsStyle}>
+                                <Button type='primary' aria-label='Áp dụng mẫu mua sắm' icon={<PlayCircleOutlined />} style={templateApplyButtonStyle} onClick={() => setShoppingApplyTarget(template)} />
                                 <Dropdown menu={{
                                     items: [
                                         { label: 'Xem trước', key: 'preview', icon: <EyeOutlined /> },
@@ -588,7 +591,6 @@ export const TemplatesScreen = () => {
                                 }} placement='bottomRight' trigger={['click']}>
                                     <Button type='text' aria-label='Tùy chọn mẫu mua sắm' icon={<MoreOutlined />} style={templateMenuButtonStyle} />
                                 </Dropdown>
-                                <Button type='primary' icon={<PlayCircleOutlined />} style={templateApplyButtonStyle} onClick={() => setShoppingApplyTarget(template)}>Áp dụng</Button>
                             </div>
                         </div>
                     </Box>)}
