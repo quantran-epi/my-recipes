@@ -119,10 +119,25 @@ const buildUrgentInventory = (
     }).sort((a, b) => a.daysLeft - b.daysLeft);
 }
 
-const Section: React.FunctionComponent<{ title: string; action?: React.ReactNode; children: React.ReactNode }> = ({ title, action, children }) => {
+const dashboardCss = `
+.dashboard-action-row:hover .dashboard-action-card {
+    border-color: rgba(22,119,255,0.26);
+    box-shadow: 0 8px 22px rgba(15,23,42,0.08);
+    transform: translateY(-1px);
+}
+.dashboard-focus-card:hover {
+    border-color: rgba(22,119,255,0.28);
+    box-shadow: 0 8px 22px rgba(15,23,42,0.08);
+}
+`;
+
+const Section: React.FunctionComponent<{ title: string; subtitle?: string; action?: React.ReactNode; children: React.ReactNode }> = ({ title, subtitle, action, children }) => {
     return <section>
-        <Stack justify='space-between' align='center' style={{ marginBottom: 8 }}>
-            <Typography.Text strong style={{ fontSize: 16 }}>{title}</Typography.Text>
+        <Stack justify='space-between' align='flex-start' gap={8} style={{ marginBottom: 8 }}>
+            <div style={{ minWidth: 0 }}>
+                <Typography.Text strong style={{ display: 'block', fontSize: 16, lineHeight: '21px' }}>{title}</Typography.Text>
+                {subtitle && <Typography.Text type='secondary' style={{ display: 'block', fontSize: 12, lineHeight: '16px' }}>{subtitle}</Typography.Text>}
+            </div>
             {action}
         </Stack>
         <Stack direction='column' align='stretch' gap={8}>{children}</Stack>
@@ -135,22 +150,10 @@ const EmptySection: React.FunctionComponent<{ text: string }> = ({ text }) => {
     </Box>;
 }
 
-const StatusChip: React.FunctionComponent<{ icon: React.ReactNode; label: string; value: string | number; tone: string }> = ({ icon, label, value, tone }) => {
-    return <Box style={{ minWidth: 0, border: `1px solid ${tone}26`, background: `${tone}0f`, borderRadius: 8, padding: '8px 10px' }}>
-        <Stack align='center' gap={7} style={{ minWidth: 0 }}>
-            <span style={{ color: tone, flexShrink: 0 }}>{icon}</span>
-            <div style={{ minWidth: 0 }}>
-                <Typography.Text strong style={{ display: 'block', color: tone, lineHeight: '17px' }}>{value}</Typography.Text>
-                <Typography.Text type='secondary' style={{ display: 'block', fontSize: 11, lineHeight: '14px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{label}</Typography.Text>
-            </div>
-        </Stack>
-    </Box>;
-}
-
 const DataMetric: React.FunctionComponent<{ icon: React.ReactNode; label: string; value: string | number; detail?: React.ReactNode; tone?: string }> = ({ icon, label, value, detail, tone }) => {
-    return <Box style={{ padding: '10px 12px', border: '1px solid #f0f0f0', borderRadius: 8, background: '#fff', minWidth: 0 }}>
+    return <Box style={{ padding: '11px 12px', border: '1px solid #eef2f7', borderRadius: 8, background: '#fff', minWidth: 0, boxShadow: '0 2px 10px rgba(15,23,42,0.04)' }}>
         <Stack align='flex-start' gap={8}>
-            <span style={{ color: tone ?? '#1677ff', flexShrink: 0 }}>{icon}</span>
+            <span style={{ width: 30, height: 30, borderRadius: 8, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', color: tone ?? '#1677ff', background: `${tone ?? '#1677ff'}12`, flexShrink: 0 }}>{icon}</span>
             <div style={{ minWidth: 0 }}>
                 <Typography.Text strong style={{ display: 'block', lineHeight: '18px' }}>{value}</Typography.Text>
                 <Typography.Text type='secondary' style={{ display: 'block', fontSize: 12, lineHeight: '16px' }}>{label}</Typography.Text>
@@ -181,10 +184,10 @@ const createEmptyDashboardExpensiveMetrics = (): DashboardExpensiveMetrics => ({
 });
 
 const PriorityPanel: React.FunctionComponent<{ item: PriorityAction }> = ({ item }) => {
-    return <Box style={{ background: '#fff', border: `1px solid ${item.tone}33`, borderRadius: 8, overflow: 'hidden', boxShadow: '0 2px 10px rgba(0,0,0,0.04)' }}>
+    return <Box style={{ background: '#fff', border: `1px solid ${item.tone}33`, borderRadius: 8, overflow: 'hidden', boxShadow: '0 8px 24px rgba(15,23,42,0.08)' }}>
         <div style={{ display: 'grid', gridTemplateColumns: '5px minmax(0, 1fr)', minHeight: 92 }}>
             <div style={{ background: item.tone }} />
-            <div style={{ padding: 12, display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) auto', gap: 12, alignItems: 'center' }}>
+            <div style={{ padding: 13, display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) auto', gap: 12, alignItems: 'center', background: `linear-gradient(135deg, #fff 0%, ${item.tone}0d 100%)` }}>
                 <div style={{ minWidth: 0 }}>
                     <Typography.Text type='secondary' style={{ display: 'block', fontSize: 12, lineHeight: '16px', marginBottom: 3 }}>Cần xử lý ngay</Typography.Text>
                     <Typography.Text strong style={{ display: 'block', fontSize: 17, lineHeight: '22px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
@@ -193,10 +196,41 @@ const PriorityPanel: React.FunctionComponent<{ item: PriorityAction }> = ({ item
                     <Typography.Text type='secondary' style={{ display: 'block', fontSize: 12, lineHeight: '17px', marginTop: 3, overflowWrap: 'anywhere' }}>{item.description}</Typography.Text>
                     {item.tags && <Stack wrap='wrap' gap={5} style={{ marginTop: 8 }}>{item.tags}</Stack>}
                 </div>
-                {item.onOpen && <Button type='primary' onClick={item.onOpen}>{item.actionLabel}</Button>}
+                {item.onOpen && <Button type='primary' onClick={item.onOpen} style={{ boxShadow: `0 8px 18px ${item.tone}24` }}>{item.actionLabel}</Button>}
             </div>
         </div>
     </Box>;
+}
+
+const DashboardFocusCard: React.FunctionComponent<{
+    icon: React.ReactNode;
+    title: string;
+    value: string | number;
+    detail: string;
+    tone: string;
+    onOpen: () => void;
+}> = ({ icon, title, value, detail, tone, onOpen }) => {
+    return <button type='button' className='dashboard-focus-card' onClick={onOpen} style={{
+        width: '100%',
+        minHeight: 86,
+        border: '1px solid #eef2f7',
+        borderRadius: 8,
+        background: '#fff',
+        padding: 11,
+        textAlign: 'left',
+        cursor: 'pointer',
+        boxShadow: '0 2px 10px rgba(15,23,42,0.04)',
+        transition: 'border-color 160ms ease, box-shadow 160ms ease',
+    }}>
+        <Stack align='flex-start' gap={9}>
+            <span style={{ width: 34, height: 34, borderRadius: 10, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', color: tone, background: `${tone}14`, flexShrink: 0 }}>{icon}</span>
+            <div style={{ minWidth: 0 }}>
+                <Typography.Text strong style={{ display: 'block', color: '#111827', fontSize: 18, lineHeight: '22px' }}>{value}</Typography.Text>
+                <Typography.Text style={{ display: 'block', color: '#374151', fontSize: 12, fontWeight: 650, lineHeight: '16px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{title}</Typography.Text>
+                <Typography.Text type='secondary' style={{ display: 'block', fontSize: 11, lineHeight: '15px', marginTop: 2, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{detail}</Typography.Text>
+            </div>
+        </Stack>
+    </button>;
 }
 
 const ActionRow: React.FunctionComponent<{
@@ -209,8 +243,8 @@ const ActionRow: React.FunctionComponent<{
     tags?: React.ReactNode;
     onOpen: () => void;
 }> = ({ testId, title, description, accent, icon, right, tags, onOpen }) => {
-    return <button data-testid={testId} onClick={onOpen} style={{ width: '100%', border: 0, background: 'transparent', padding: 0, textAlign: 'left', cursor: 'pointer' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: '5px minmax(0, 1fr)', border: '1px solid #f0f0f0', borderRadius: 8, background: '#fff', overflow: 'hidden' }}>
+    return <button className='dashboard-action-row' data-testid={testId} onClick={onOpen} style={{ width: '100%', border: 0, background: 'transparent', padding: 0, textAlign: 'left', cursor: 'pointer' }}>
+        <div className='dashboard-action-card' style={{ display: 'grid', gridTemplateColumns: '5px minmax(0, 1fr)', border: '1px solid #eef2f7', borderRadius: 8, background: '#fff', overflow: 'hidden', boxShadow: '0 2px 10px rgba(15,23,42,0.04)', transition: 'border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease' }}>
             <div style={{ background: accent }} />
             <div style={{ padding: '10px 11px', minWidth: 0 }}>
                 <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) auto', gap: 8, alignItems: 'start' }}>
@@ -409,17 +443,49 @@ export const DashboardScreen = () => {
                         };
 
     return <Box data-testid="dashboard" style={{ display: 'flex', flexDirection: 'column', gap: 14, paddingBottom: 12 }}>
+        <style>{dashboardCss}</style>
         <PriorityPanel item={priorityAction} />
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(135px, 1fr))', gap: 8 }}>
-            <StatusChip icon={<CalendarOutlined />} label='món hôm nay' value={todayDishCount} tone='#1677ff' />
-            <StatusChip icon={<ShoppingCartOutlined />} label='lịch mua' value={todayShoppingLists.length} tone='#0958d9' />
-            <StatusChip icon={<WarningOutlined />} label='lô quá hạn' value={expiredCount} tone='#cf1322' />
-            <StatusChip icon={<FireOutlined />} label='đang nấu' value={activeSessions.length} tone='#fa8c16' />
-        </div>
+        <Box style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(146px, 1fr))', gap: 8 }}>
+            <DashboardFocusCard
+                icon={<CalendarOutlined />}
+                title='Thực đơn hôm nay'
+                value={todayMeals.length}
+                detail={`${todayDishCount} món cần chuẩn bị`}
+                tone='#1677ff'
+                onOpen={() => openRoute(RootRoutes.AuthorizedRoutes.ScheduledMealRoutes.List())}
+            />
+            <DashboardFocusCard
+                icon={<ShoppingCartOutlined />}
+                title='Mua sắm hôm nay'
+                value={todayShoppingLists.length}
+                detail={`${openShoppingLists.length} danh sách đang mở`}
+                tone='#0958d9'
+                onOpen={() => openRoute(RootRoutes.AuthorizedRoutes.ShoppingListRoutes.List())}
+            />
+            <DashboardFocusCard
+                icon={<WarningOutlined />}
+                title='Kho cần chú ý'
+                value={urgentInventory.length}
+                detail={`${expiredCount} lô đã quá hạn`}
+                tone={expiredCount > 0 ? '#cf1322' : '#fa8c16'}
+                onOpen={() => openRoute(RootRoutes.AuthorizedRoutes.IngredientRoutes.List())}
+            />
+            <DashboardFocusCard
+                icon={<FireOutlined />}
+                title='Đang nấu'
+                value={activeSessions.length}
+                detail={activeSessions[0]?.dishName ?? 'Chưa có phiên đang nấu'}
+                tone='#fa8c16'
+                onOpen={() => openRoute(activeSessions[0]
+                    ? RootRoutes.AuthorizedRoutes.DishesRoutes.ManageIngredient(activeSessions[0].dishId)
+                    : RootRoutes.AuthorizedRoutes.DishesRoutes.List())}
+            />
+        </Box>
 
         <Section
             title='Hôm nay'
+            subtitle='Phiên nấu, thực đơn và danh sách mua cần xem trước.'
             action={<Button type='link' onClick={() => openRoute(RootRoutes.AuthorizedRoutes.ScheduledMealRoutes.List())}>Mở thực đơn</Button>}
         >
             {activeSessions.length === 0 && todayMeals.length === 0 && todayShoppingLists.length === 0
@@ -433,6 +499,7 @@ export const DashboardScreen = () => {
 
         <Section
             title='Nguyên liệu cần dùng sớm'
+            subtitle='Ưu tiên nguyên liệu hết hạn hoặc còn tối đa 3 ngày.'
             action={<Button type='link' onClick={() => openRoute(RootRoutes.AuthorizedRoutes.IngredientRoutes.List())}>Mở kho</Button>}
         >
             {urgentInventory.length === 0
@@ -442,6 +509,7 @@ export const DashboardScreen = () => {
 
         <Section
             title='Gợi ý món nên nấu'
+            subtitle='Tính từ tồn kho hiện tại và nguyên liệu cần dùng sớm.'
             action={<Button type='link' onClick={() => openRoute(RootRoutes.AuthorizedRoutes.DishesRoutes.List())}>Mở món ăn</Button>}
         >
             {expensiveMetricsPending
@@ -453,6 +521,7 @@ export const DashboardScreen = () => {
 
         <Section
             title='Danh sách mua sắm đang mở'
+            subtitle='Theo dõi tiến độ và chi phí còn cần mua.'
             action={<Button type='link' onClick={() => openRoute(RootRoutes.AuthorizedRoutes.ShoppingListRoutes.List())}>Mở mua sắm</Button>}
         >
             {openShoppingLists.length === 0
@@ -460,7 +529,7 @@ export const DashboardScreen = () => {
                 : openShoppingLists.slice(0, 5).map(item => <ShoppingListRow key={item.id} item={item} cost={expensiveMetricsPending ? '...' : shoppingListCosts[item.id] ?? '0đ'} onOpen={() => openRoute(RootRoutes.AuthorizedRoutes.ShoppingListRoutes.Detail(item.id))} />)}
         </Section>
 
-        <Section title='Tổng quan dữ liệu'>
+        <Section title='Tổng quan dữ liệu' subtitle='Tình trạng dữ liệu chính trong app.'>
             <Box style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(190px, 1fr))', gap: 10 }}>
                 <DataMetric icon={<CheckCircleOutlined />} label='Món đã hoàn thiện' value={completedDishes.length} detail='Đã bật trạng thái hoàn thiện' tone='#389e0d' />
                 <DataMetric icon={<ClockCircleOutlined />} label='Món chưa hoàn thiện' value={incompleteDishes.length} detail={incompleteDishes.length > 0 ? `Chưa bật hoàn thiện: ${formatNamePreview(incompleteDishes.map(item => item.name), 'Không có món nào', 'món khác')}` : 'Không có món cần cập nhật'} tone='#d46b08' />
