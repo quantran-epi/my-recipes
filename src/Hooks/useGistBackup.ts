@@ -21,6 +21,7 @@ const GIST_ID_KEY = "personal_gist_id";
 const GIST_TOKEN_KEY = "personal_gist_token";
 const LAST_BACKUP_KEY = "personal_last_backup_at";
 const LAST_SYNCED_MANIFEST_HASH_KEY = "personal_last_synced_manifest_hash";
+const LAST_SYNCED_PART_HASHES_KEY = "personal_last_synced_part_hashes";
 const PERSIST_PERSONAL_KEY = "persist:personal";
 const PERSONAL_SCHEMA_VERSION = 2;
 const PERSONAL_MANIFEST_FILE_NAME = "my-recipes-personal-manifest.json";
@@ -50,6 +51,7 @@ type PersonalManifest = {
 };
 
 type PersonalSlices = Record<PersonalPartKey, unknown>;
+type PersonalPartHashMap = Record<PersonalPartKey, string>;
 
 const personalPartKeys = Object.keys(PERSONAL_PART_FILES) as PersonalPartKey[];
 
@@ -142,18 +144,98 @@ const parseJson = <T,>(content: string | null | undefined, fallback: T): T => {
     }
 };
 
-const buildSliceHashes = async (slices: PersonalSlices): Promise<Record<PersonalPartKey, string>> => {
+const buildSliceHashes = async (slices: PersonalSlices): Promise<PersonalPartHashMap> => {
     const entries = await Promise.all(
         personalPartKeys.map(async key => [key, await hashString(stableJson(slices[key]))] as const)
     );
-    return Object.fromEntries(entries) as Record<PersonalPartKey, string>;
+    return Object.fromEntries(entries) as PersonalPartHashMap;
+};
+
+const getManifestPartHashes = (manifest: PersonalManifest): PersonalPartHashMap => {
+    return Object.fromEntries(
+        personalPartKeys.map(partKey => [partKey, manifest.parts[partKey]?.hash ?? ""])
+    ) as PersonalPartHashMap;
+};
+
+const hasHashDifference = (left: PersonalPartHashMap, right: PersonalPartHashMap): boolean => {
+    return personalPartKeys.some(partKey => left[partKey] !== right[partKey]);
+};
+
+const readLastSyncedPartHashes = async (): Promise<PersonalPartHashMap | null> => {
+    const raw = await getStorageString(LAST_SYNCED_PART_HASHES_KEY);
+    if (!raw) return null;
+
+    try {
+        const parsed = JSON.parse(raw) as Partial<Record<PersonalPartKey, unknown>>;
+        if (!parsed || typeof parsed !== "object") return null;
+        const entries = personalPartKeys.map(partKey => {
+            const value = parsed[partKey];
+            return [partKey, typeof value === "string" ? value : ""] as const;
+        });
+        return Object.fromEntries(entries) as PersonalPartHashMap;
+    } catch {
+        return null;
+    }
+};
+
+const writeSyncCheckpoint = async (manifestContent: string, partHashes: PersonalPartHashMap): Promise<string> => {
+    const manifestHash = await hashString(manifestContent);
+    await Promise.all([
+        setStorageString(LAST_SYNCED_MANIFEST_HASH_KEY, manifestHash),
+        setStorageString(LAST_SYNCED_PART_HASHES_KEY, stableJson(partHashes)),
+    ]);
+    return manifestHash;
+};
+
+const buildPersonalBackupPatch = (params: {
+    previousManifest: PersonalManifest;
+    previousManifestContent?: string | null;
+    slices: PersonalSlices;
+    hashes: PersonalPartHashMap;
+    now: string;
+}): {
+    files: Record<string, { content: string }>;
+    nextManifest: PersonalManifest;
+    manifestContent: string;
+    changedFileCount: number;
+} => {
+    const files: Record<string, { content: string }> = {};
+    const parts = {} as Record<PersonalPartKey, PersonalPart>;
+
+    personalPartKeys.forEach(partKey => {
+        const previousPart = params.previousManifest.parts[partKey];
+        const changed = params.hashes[partKey] !== previousPart.hash;
+        const fileName = PERSONAL_PART_FILES[partKey];
+        if (changed) files[fileName] = { content: stableJson(params.slices[partKey]) };
+        parts[partKey] = {
+            key: partKey,
+            fileName,
+            version: changed ? params.now : previousPart.version || params.now,
+            hash: params.hashes[partKey],
+            count: countCollection(params.slices[partKey]),
+            updatedAt: changed ? params.now : previousPart.updatedAt || params.now,
+        };
+    });
+
+    const changedFileCount = Object.keys(files).length;
+    const nextManifest: PersonalManifest = {
+        schemaVersion: PERSONAL_SCHEMA_VERSION,
+        updatedAt: changedFileCount > 0 ? params.now : params.previousManifest.updatedAt || params.now,
+        parts,
+    };
+    const manifestContent = stableJson(nextManifest);
+    if (!params.previousManifestContent || manifestContent !== params.previousManifestContent) {
+        files[PERSONAL_MANIFEST_FILE_NAME] = { content: manifestContent };
+    }
+
+    return { files, nextManifest, manifestContent, changedFileCount };
 };
 
 const readChangedRemoteSlices = async (params: {
     gistJson: any;
     token: string;
     manifest: PersonalManifest;
-    localHashes: Record<PersonalPartKey, string>;
+    localHashes: PersonalPartHashMap;
     localSlices: PersonalSlices;
 }): Promise<{ restoredSlices: PersonalSlices; fetchedCount: number }> => {
     const restoredSlices = { ...params.localSlices } as PersonalSlices;
@@ -180,6 +262,7 @@ export interface UseGistBackupResult {
     setGistToken: (token: string) => Promise<void>;
     pushPersonalData: () => Promise<void>;
     pullPersonalData: () => Promise<void>;
+    autoSyncPersonalDataInBackground: () => Promise<boolean>;
     autoPullPersonalDataInBackground: () => Promise<boolean>;
     testGistConfig: (config?: { gistId?: string; gistToken?: string }) => Promise<void>;
     isPushing: boolean;
@@ -261,41 +344,20 @@ export const useGistBackup = (): UseGistBackupResult => {
             const previousManifest = normalizeManifest(parseJson<PersonalManifest | null>(existingManifestFile?.content, null));
             const hashes = await buildSliceHashes(personalSlices);
             const now = new Date().toISOString();
-            const files: Record<string, { content: string }> = {};
-
-            const parts = {} as Record<PersonalPartKey, PersonalPart>;
-            personalPartKeys.forEach(partKey => {
-                const previousPart = previousManifest.parts[partKey];
-                const changed = hashes[partKey] !== previousPart.hash;
-                const fileName = PERSONAL_PART_FILES[partKey];
-                if (changed) files[fileName] = { content: stableJson(personalSlices[partKey]) };
-                parts[partKey] = {
-                    key: partKey,
-                    fileName,
-                    version: changed ? now : previousPart.version || now,
-                    hash: hashes[partKey],
-                    count: countCollection(personalSlices[partKey]),
-                    updatedAt: changed ? now : previousPart.updatedAt || now,
-                };
+            const { files, manifestContent, changedFileCount } = buildPersonalBackupPatch({
+                previousManifest,
+                previousManifestContent: existingManifestFile?.content,
+                slices: personalSlices,
+                hashes,
+                now,
             });
-
-            const changedFileCount = Object.keys(files).length;
-            const nextManifest: PersonalManifest = {
-                schemaVersion: PERSONAL_SCHEMA_VERSION,
-                updatedAt: changedFileCount > 0 ? now : previousManifest.updatedAt || now,
-                parts,
-            };
-            const manifestContent = stableJson(nextManifest);
-            if (!existingManifestFile || manifestContent !== existingManifestFile.content) {
-                files[PERSONAL_MANIFEST_FILE_NAME] = { content: manifestContent };
-            }
 
             if (Object.keys(files).length > 0) {
                 await patchGistFiles(gistId.trim(), gistToken.trim(), files);
             }
 
             await setStorageString(LAST_BACKUP_KEY, now);
-            await setStorageString(LAST_SYNCED_MANIFEST_HASH_KEY, await hashString(manifestContent));
+            await writeSyncCheckpoint(manifestContent, hashes);
             setLastBackupAt(now);
             message.success({
                 content: changedFileCount === 0 ? "Sao lưu thành công (không có thay đổi mới)" : `Sao lưu thành công — ${changedFileCount} phần dữ liệu`,
@@ -336,7 +398,7 @@ export const useGistBackup = (): UseGistBackupResult => {
             });
 
             await setStorageString(PERSIST_PERSONAL_KEY, createPersistRoot(restoredSlices));
-            await setStorageString(LAST_SYNCED_MANIFEST_HASH_KEY, await hashString(manifestFile.content));
+            await writeSyncCheckpoint(manifestFile.content, getManifestPartHashes(manifest));
             message.success({ content: `Khôi phục thành công — tải ${fetchedCount} phần dữ liệu. Đang tải lại...`, key, duration: 2 });
             setTimeout(() => window.location.reload(), 1500);
         } catch (err: any) {
@@ -346,7 +408,7 @@ export const useGistBackup = (): UseGistBackupResult => {
         }
     };
 
-    const autoPullPersonalDataInBackground = useCallback(async (): Promise<boolean> => {
+    const autoSyncPersonalDataInBackground = useCallback(async (): Promise<boolean> => {
         const targetGistId = gistId.trim();
         const targetToken = gistToken.trim();
         if (!targetGistId || !targetToken || !navigator.onLine) return false;
@@ -356,20 +418,78 @@ export const useGistBackup = (): UseGistBackupResult => {
             const manifestFile = await readGistFile(gistJson, PERSONAL_MANIFEST_FILE_NAME, targetToken);
             if (!manifestFile) return false;
 
-            const manifestHash = await hashString(manifestFile.content);
-            const lastAppliedManifestHash = await getStorageString(LAST_SYNCED_MANIFEST_HASH_KEY);
-            if (lastAppliedManifestHash === manifestHash) return false;
-
             const manifest = normalizeManifest(JSON.parse(manifestFile.content));
-            const localHashes = await buildSliceHashes(personalSlices);
-            const hasRemoteChanges = personalPartKeys.some(partKey => {
-                const remoteHash = manifest.parts[partKey]?.hash;
-                return Boolean(remoteHash && remoteHash !== localHashes[partKey]);
-            });
+            const manifestHash = await hashString(manifestFile.content);
+            const [lastAppliedManifestHash, lastSyncedPartHashes, localHashes] = await Promise.all([
+                getStorageString(LAST_SYNCED_MANIFEST_HASH_KEY),
+                readLastSyncedPartHashes(),
+                buildSliceHashes(personalSlices),
+            ]);
+            const remoteHashes = getManifestPartHashes(manifest);
+            const localMatchesRemote = !hasHashDifference(localHashes, remoteHashes);
 
-            if (!hasRemoteChanges) {
-                await setStorageString(LAST_SYNCED_MANIFEST_HASH_KEY, manifestHash);
+            if (lastAppliedManifestHash === manifestHash) {
+                if (!localMatchesRemote) {
+                    const now = new Date().toISOString();
+                    const { files, manifestContent } = buildPersonalBackupPatch({
+                        previousManifest: manifest,
+                        previousManifestContent: manifestFile.content,
+                        slices: personalSlices,
+                        hashes: localHashes,
+                        now,
+                    });
+
+                    if (Object.keys(files).length > 0) {
+                        await patchGistFiles(targetGistId, targetToken, files);
+                    }
+                    await setStorageString(LAST_BACKUP_KEY, now);
+                    await writeSyncCheckpoint(manifestContent, localHashes);
+                    setLastBackupAt(now);
+                    return Object.keys(files).length > 0;
+                }
+
+                await writeSyncCheckpoint(manifestFile.content, remoteHashes);
                 return false;
+            }
+
+            const hasPartCheckpoint = Boolean(lastSyncedPartHashes && personalPartKeys.every(partKey => lastSyncedPartHashes[partKey]));
+            const localChangedSinceLastSync = Boolean(
+                hasPartCheckpoint && lastSyncedPartHashes && personalPartKeys.some(partKey => localHashes[partKey] !== lastSyncedPartHashes[partKey])
+            );
+            const remoteChangedSinceLastSync = Boolean(
+                hasPartCheckpoint && lastSyncedPartHashes && personalPartKeys.some(partKey => remoteHashes[partKey] !== lastSyncedPartHashes[partKey])
+            );
+
+            if (localMatchesRemote) {
+                await writeSyncCheckpoint(manifestFile.content, remoteHashes);
+                return false;
+            }
+
+            if (localChangedSinceLastSync && remoteChangedSinceLastSync) {
+                message.warning({
+                    content: "Dữ liệu cá nhân đã thay đổi cả trên máy này và trên Gist. Hãy đồng bộ thủ công để tránh ghi đè.",
+                    duration: 4,
+                });
+                return false;
+            }
+
+            if (localChangedSinceLastSync && !remoteChangedSinceLastSync) {
+                const now = new Date().toISOString();
+                const { files, manifestContent } = buildPersonalBackupPatch({
+                    previousManifest: manifest,
+                    previousManifestContent: manifestFile.content,
+                    slices: personalSlices,
+                    hashes: localHashes,
+                    now,
+                });
+
+                if (Object.keys(files).length > 0) {
+                    await patchGistFiles(targetGistId, targetToken, files);
+                }
+                await setStorageString(LAST_BACKUP_KEY, now);
+                await writeSyncCheckpoint(manifestContent, localHashes);
+                setLastBackupAt(now);
+                return Object.keys(files).length > 0;
             }
 
             const { restoredSlices, fetchedCount } = await readChangedRemoteSlices({
@@ -380,12 +500,12 @@ export const useGistBackup = (): UseGistBackupResult => {
                 localSlices: personalSlices,
             });
             if (fetchedCount === 0) {
-                await setStorageString(LAST_SYNCED_MANIFEST_HASH_KEY, manifestHash);
+                await writeSyncCheckpoint(manifestFile.content, remoteHashes);
                 return false;
             }
 
             await setStorageString(PERSIST_PERSONAL_KEY, createPersistRoot(restoredSlices));
-            await setStorageString(LAST_SYNCED_MANIFEST_HASH_KEY, manifestHash);
+            await writeSyncCheckpoint(manifestFile.content, remoteHashes);
             message.info({ content: "Đã đồng bộ dữ liệu cá nhân mới. Đang tải lại...", duration: 1.6 });
             setTimeout(() => window.location.reload(), 900);
             return true;
@@ -393,6 +513,8 @@ export const useGistBackup = (): UseGistBackupResult => {
             return false;
         }
     }, [gistId, gistToken, personalSlices]);
+
+    const autoPullPersonalDataInBackground = autoSyncPersonalDataInBackground;
 
     const testGistConfig = async (config?: { gistId?: string; gistToken?: string }): Promise<void> => {
         const targetGistId = (config?.gistId ?? gistId).trim();
@@ -450,6 +572,7 @@ export const useGistBackup = (): UseGistBackupResult => {
         gistId, gistToken,
         setGistId, setGistToken,
         pushPersonalData, pullPersonalData,
+        autoSyncPersonalDataInBackground,
         autoPullPersonalDataInBackground,
         testGistConfig,
         isPushing, isPulling, isTesting,

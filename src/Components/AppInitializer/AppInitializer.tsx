@@ -8,7 +8,7 @@ type AppInitializerProps = {
 }
 
 export const AppInitializer: React.FC<AppInitializerProps> = ({ children }) => {
-    const { gistId, gistToken, autoPullPersonalDataInBackground } = useGistBackup();
+    const { gistId, gistToken, autoSyncPersonalDataInBackground } = useGistBackup();
     const personalAutoSyncStartedRef = React.useRef(false);
 
     React.useEffect(() => {
@@ -31,13 +31,14 @@ export const AppInitializer: React.FC<AppInitializerProps> = ({ children }) => {
         if (personalAutoSyncStartedRef.current) return;
         if (!gistId.trim() || !gistToken.trim() || !navigator.onLine) return;
 
-        personalAutoSyncStartedRef.current = true;
         const idleWindow = window as typeof window & {
             requestIdleCallback?: (callback: () => void, options?: { timeout?: number }) => number;
             cancelIdleCallback?: (handle: number) => void;
         };
         const run = () => {
-            autoPullPersonalDataInBackground().catch(() => { });
+            if (personalAutoSyncStartedRef.current) return;
+            personalAutoSyncStartedRef.current = true;
+            autoSyncPersonalDataInBackground().catch(() => { });
         };
 
         if (idleWindow.requestIdleCallback) {
@@ -47,7 +48,7 @@ export const AppInitializer: React.FC<AppInitializerProps> = ({ children }) => {
 
         const timerId = window.setTimeout(run, 1800);
         return () => window.clearTimeout(timerId);
-    }, [autoPullPersonalDataInBackground, gistId, gistToken]);
+    }, [autoSyncPersonalDataInBackground, gistId, gistToken]);
 
     return <>{children}</>;
 };
