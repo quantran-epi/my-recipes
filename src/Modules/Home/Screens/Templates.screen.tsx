@@ -103,14 +103,6 @@ const templateCardStyle: React.CSSProperties = {
     padding: 10,
 };
 
-const templatePreviewTextStyle: React.CSSProperties = {
-    display: 'block',
-    color: '#4f3a7d',
-    fontSize: 12,
-    lineHeight: '17px',
-    marginTop: 6,
-};
-
 const templateActionsStyle: React.CSSProperties = {
     display: 'flex',
     gap: 4,
@@ -238,26 +230,6 @@ export const TemplatesScreen = () => {
         const name = dishesById.get(dishId)?.name ?? dishId;
         const serving = servings?.[dishId];
         return serving && serving !== 1 ? `${name} (${serving} phần)` : name;
-    };
-
-    const _getMealDayPreview = (day: WeeklyMealTemplateDay) => mealKeys.flatMap(key => {
-        const dishNames = (day.meals?.[key] ?? []).map(dishId => _formatDishWithServing(dishId, day.dishServings));
-        if (dishNames.length === 0) return [];
-        return [`${mealLabels[key]}: ${dishNames.join(', ')}`];
-    }).join(' | ') || 'Chưa có món';
-
-    const _getMealTemplatePreview = (template: WeeklyMealTemplate) => {
-        const firstDay = template.days[0];
-        if (!firstDay) return 'Chưa có món';
-        const prefix = getTemplateScope(template) === 'week' ? `${weekdayLabel(firstDay.offset)} - ` : '';
-        const hiddenCount = Math.max(0, template.days.length - 1);
-        return `${prefix}${_getMealDayPreview(firstDay)}${hiddenCount > 0 ? ` và ${hiddenCount} ngày khác` : ''}`;
-    };
-
-    const _getShoppingTemplatePreview = (template: ShoppingListTemplate) => {
-        if (template.dishes.length === 0) return 'Chưa có món';
-        const dishNames = template.dishes.slice(0, 5).map(id => _formatDishWithServing(id, template.dishServings));
-        return `${dishNames.join(', ')}${template.dishes.length > 5 ? ` và ${template.dishes.length - 5} món khác` : ''}`;
     };
 
     const _openMealCreator = () => {
@@ -514,7 +486,6 @@ export const TemplatesScreen = () => {
                                         <Tag color='blue' style={{ marginInlineEnd: 0 }}>{dishCount} món</Tag>
                                         <Tag style={{ marginInlineEnd: 0 }}>Cập nhật {formatRelativeDate(template.updatedAt)}</Tag>
                                     </Stack>
-                                    <Typography.Text style={templatePreviewTextStyle}>{_getMealTemplatePreview(template)}</Typography.Text>
                                 </div>
                                 <div style={templateActionsStyle}>
                                     <Tooltip title='Xem trước'><Button type='text' icon={<EyeOutlined />} onClick={() => setMealPreviewTarget(template)} /></Tooltip>
@@ -544,9 +515,6 @@ export const TemplatesScreen = () => {
                         <Stack justify='space-between' align='flex-start' gap={8}>
                             <div style={{ minWidth: 0 }}>
                                 <Typography.Text strong style={{ display: 'block', color: '#111827', fontSize: 15, lineHeight: '20px' }}>{template.name}</Typography.Text>
-                                <Typography.Text type='secondary' style={{ display: 'block', fontSize: 12, lineHeight: '17px', marginTop: 3 }}>
-                                    {_getShoppingTemplatePreview(template)}
-                                </Typography.Text>
                                 <Stack wrap='wrap' gap={5} style={{ marginTop: 5 }}>
                                     <Tag color={template.source === 'scratch' ? 'green' : 'purple'} style={{ marginInlineEnd: 0 }}>{template.source === 'scratch' ? 'Tự tạo' : 'Từ lịch'}</Tag>
                                     <Tag color='blue' style={{ marginInlineEnd: 0 }}>{template.dishes.length} món</Tag>
