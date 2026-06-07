@@ -1,5 +1,6 @@
-import { CalendarOutlined, DeleteOutlined, EditOutlined, EyeOutlined, PlayCircleOutlined, PlusOutlined, SaveOutlined, ShoppingCartOutlined } from '@ant-design/icons';
+import { CalendarOutlined, DeleteOutlined, EditOutlined, EyeOutlined, MoreOutlined, PlayCircleOutlined, PlusOutlined, SaveOutlined, ShoppingCartOutlined } from '@ant-design/icons';
 import { Button } from '@components/Button';
+import { Dropdown } from '@components/Dropdown';
 import { DatePicker } from '@components/Form/DatePicker';
 import { Input } from '@components/Form/Input';
 import { Option, Select } from '@components/Form/Select';
@@ -40,7 +41,6 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { useMessage } from '@components/Message';
 import { DeferredModalContent, Modal } from '@components/Modal';
-import { Tooltip } from '@components/Tootip';
 import { useScreenTitle } from '@hooks';
 import { RootRoutes } from '@routing/RootRoutes';
 import { ScheduledMealMealPlanner } from '@modules/ScheduledMeal/Screens/ScheduledMealMealPlanner.widget';
@@ -128,11 +128,24 @@ const templateUpdatedTextStyle: React.CSSProperties = {
 
 const templateActionsStyle: React.CSSProperties = {
     display: 'flex',
-    gap: 4,
-    flexWrap: 'wrap',
-    justifyContent: 'flex-end',
-    alignItems: 'center',
+    flexDirection: 'column',
+    gap: 8,
+    justifyContent: 'space-between',
+    alignItems: 'flex-end',
     flex: '0 1 auto',
+    minHeight: 66,
+};
+
+const templateMenuButtonStyle: React.CSSProperties = {
+    width: 32,
+    paddingInline: 0,
+    border: '1px solid rgba(116,54,220,0.12)',
+    background: '#fbf9ff',
+};
+
+const templateApplyButtonStyle: React.CSSProperties = {
+    borderRadius: 6,
+    boxShadow: '0 5px 12px rgba(116,54,220,0.14)',
 };
 
 const previewDayStyle: React.CSSProperties = {
@@ -513,10 +526,22 @@ export const TemplatesScreen = () => {
                                     </Stack>
                                 </div>
                                 <div style={templateActionsStyle}>
-                                    <Tooltip title='Xem trước'><Button type='text' icon={<EyeOutlined />} onClick={() => setMealPreviewTarget(template)} /></Tooltip>
-                                    <Tooltip title='Sửa mẫu'><Button type='text' icon={<EditOutlined />} onClick={() => _openMealTemplateEdit(template)} /></Tooltip>
-                                    <Button icon={<PlayCircleOutlined />} onClick={() => setTemplateApplyTarget(template)}>Áp dụng</Button>
-                                    <Button type='text' danger icon={<DeleteOutlined />} onClick={() => dispatch(removeWeeklyMealTemplate(template.id))} />
+                                    <Dropdown menu={{
+                                        items: [
+                                            { label: 'Xem trước', key: 'preview', icon: <EyeOutlined /> },
+                                            { label: 'Sửa mẫu', key: 'edit', icon: <EditOutlined /> },
+                                            { type: 'divider' },
+                                            { label: 'Xóa mẫu', key: 'delete', icon: <DeleteOutlined />, danger: true },
+                                        ],
+                                        onClick: (e) => {
+                                            if (e.key === 'preview') setMealPreviewTarget(template);
+                                            if (e.key === 'edit') _openMealTemplateEdit(template);
+                                            if (e.key === 'delete') dispatch(removeWeeklyMealTemplate(template.id));
+                                        },
+                                    }} placement='bottomRight' trigger={['click']}>
+                                        <Button type='text' aria-label='Tùy chọn mẫu thực đơn' icon={<MoreOutlined />} style={templateMenuButtonStyle} />
+                                    </Dropdown>
+                                    <Button type='primary' icon={<PlayCircleOutlined />} style={templateApplyButtonStyle} onClick={() => setTemplateApplyTarget(template)}>Áp dụng</Button>
                                 </div>
                             </div>
                         </Box>;
@@ -547,10 +572,22 @@ export const TemplatesScreen = () => {
                                 </Stack>
                             </div>
                             <div style={templateActionsStyle}>
-                                <Tooltip title='Xem trước'><Button type='text' icon={<EyeOutlined />} onClick={() => setShoppingPreviewTarget(template)} /></Tooltip>
-                                <Tooltip title='Sửa mẫu'><Button type='text' icon={<EditOutlined />} onClick={() => _openShoppingTemplateEdit(template)} /></Tooltip>
-                                <Button icon={<PlayCircleOutlined />} onClick={() => setShoppingApplyTarget(template)}>Áp dụng</Button>
-                                <Button type='text' danger icon={<DeleteOutlined />} onClick={() => dispatch(removeShoppingListTemplate(template.id))} />
+                                <Dropdown menu={{
+                                    items: [
+                                        { label: 'Xem trước', key: 'preview', icon: <EyeOutlined /> },
+                                        { label: 'Sửa mẫu', key: 'edit', icon: <EditOutlined /> },
+                                        { type: 'divider' },
+                                        { label: 'Xóa mẫu', key: 'delete', icon: <DeleteOutlined />, danger: true },
+                                    ],
+                                    onClick: (e) => {
+                                        if (e.key === 'preview') setShoppingPreviewTarget(template);
+                                        if (e.key === 'edit') _openShoppingTemplateEdit(template);
+                                        if (e.key === 'delete') dispatch(removeShoppingListTemplate(template.id));
+                                    },
+                                }} placement='bottomRight' trigger={['click']}>
+                                    <Button type='text' aria-label='Tùy chọn mẫu mua sắm' icon={<MoreOutlined />} style={templateMenuButtonStyle} />
+                                </Dropdown>
+                                <Button type='primary' icon={<PlayCircleOutlined />} style={templateApplyButtonStyle} onClick={() => setShoppingApplyTarget(template)}>Áp dụng</Button>
                             </div>
                         </div>
                     </Box>)}
