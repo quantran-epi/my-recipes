@@ -65,6 +65,14 @@ const getVietnameseWeekShoppingListName = (start: Dayjs, end?: Dayjs) => {
     return `Tuần ${weekOfMonth}, ${date.format("MM/YY")}`;
 };
 
+const topToolCardStyle: React.CSSProperties = {
+    background: "#fff",
+    border: "1px solid #f0f0f0",
+    borderRadius: 8,
+    padding: 10,
+    boxShadow: "0 2px 8px rgba(0,0,0,0.04)",
+};
+
 // ─── Main screen ─────────────────────────────────────────────────────────────
 export const ScheduledMealListScreen = () => {
     const [selectedDate, setSelectedDate] = useState<Date>(new Date());
@@ -136,11 +144,15 @@ export const ScheduledMealListScreen = () => {
 
     return (
         <React.Fragment>
-            <Stack justify="flex-end" style={{ padding: "8px 12px 0", marginBottom: 8 }}>
-                <Button icon={<ShoppingCartOutlined />} onClick={_onOpenRangeShopping}>
-                    Giỏ hàng theo khoảng ngày
-                </Button>
-            </Stack>
+            <Box style={{ padding: "8px 12px 0", marginBottom: 8 }}>
+                <Box style={topToolCardStyle}>
+                    <Stack justify="flex-end">
+                        <Button icon={<ShoppingCartOutlined />} onClick={_onOpenRangeShopping}>
+                            Giỏ hàng theo khoảng ngày
+                        </Button>
+                    </Stack>
+                </Box>
+            </Box>
 
             <Box style={{ padding: "0 12px" }}>
                 <Box style={{ border: "1px solid #f0f0f0", borderRadius: 8, background: "#fff", padding: 8 }}>

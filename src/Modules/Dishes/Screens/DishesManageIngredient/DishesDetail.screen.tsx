@@ -4,6 +4,7 @@ import { DeferredModalContent, Modal } from "@components/Modal"
 import { Popconfirm } from "@components/Popconfirm"
 import { Space } from "@components/Layout/Space"
 import { Stack } from "@components/Layout/Stack"
+import { Box } from "@components/Layout/Box"
 import { useMessage } from "@components/Message"
 import { useAdminMode, useScreenTitle, useToggle } from "@hooks"
 import { removeDishes } from "@store/Reducers/DishesReducer"
@@ -65,40 +66,42 @@ export const DishesDetailScreen = () => {
     return (
         <React.Fragment>
             {/* ── Top bar ── */}
-            <Stack align="center" justify="space-between" style={{ padding: "10px 16px", borderBottom: "1px solid #f0f0f0", background: "#fff" }}>
-                <Button
-                    type="text"
-                    icon={<ArrowLeftOutlined />}
-                    onClick={() => navigate(-1)}
-                    style={{ paddingInline: 0 }}
-                >
-                    Quay lại
-                </Button>
-                <Stack align="center" gap={6}>
-                    <Image src={NoodlesIcon} preview={false} width={22} style={{ marginBottom: 3 }} />
-                    <Typography.Text strong style={{ fontSize: 15 }}>
-                        {currentDish.name}
-                    </Typography.Text>
-                </Stack>
-                {isAdmin && (
-                    <Space size={4}>
-                        <Button type="text" icon={<EditOutlined />} onClick={toggleEdit.show} />
-                        <Popconfirm
-                            title="Xóa món ăn"
-                            description="Bạn chắc chắn muốn xóa món ăn này?"
-                            onConfirm={_onDelete}
-                            okText="Xóa"
-                            cancelText="Huỷ"
-                            okButtonProps={{ danger: true }}
+            <Box style={{ padding: "12px 16px 0" }}>
+                <Box style={{ background: "#fff", border: "1px solid #f0f0f0", borderRadius: 8, padding: 10, boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }}>
+                    <Stack align="center" justify="space-between" gap={8}>
+                        <Button
+                            icon={<ArrowLeftOutlined />}
+                            onClick={() => navigate(-1)}
                         >
-                            <Button type="text" danger icon={<DeleteOutlined />} />
-                        </Popconfirm>
-                    </Space>
-                )}
-            </Stack>
+                            Quay lại
+                        </Button>
+                        <Stack align="center" gap={6} style={{ minWidth: 0 }}>
+                            <Image src={NoodlesIcon} preview={false} width={22} style={{ marginBottom: 3 }} />
+                            <Typography.Text strong style={{ fontSize: 15, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                                {currentDish.name}
+                            </Typography.Text>
+                        </Stack>
+                        {isAdmin && (
+                            <Space size={4}>
+                                <Button icon={<EditOutlined />} onClick={toggleEdit.show} />
+                                <Popconfirm
+                                    title="Xóa món ăn"
+                                    description="Bạn chắc chắn muốn xóa món ăn này?"
+                                    onConfirm={_onDelete}
+                                    okText="Xóa"
+                                    cancelText="Huỷ"
+                                    okButtonProps={{ danger: true }}
+                                >
+                                    <Button danger icon={<DeleteOutlined />} />
+                                </Popconfirm>
+                            </Space>
+                        )}
+                    </Stack>
+                </Box>
+            </Box>
 
             {/* ── Detail content ── */}
-            <div style={{ padding: "16px 16px 100px" }}>
+            <div style={{ padding: "12px 16px 100px" }}>
                 <DishesDetailWidget dish={currentDish} />
             </div>
 

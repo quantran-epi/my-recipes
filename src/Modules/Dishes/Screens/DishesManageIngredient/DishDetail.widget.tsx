@@ -1,6 +1,5 @@
 import { Button } from "@components/Button"
 import { Image } from "@components/Image"
-import { Box } from "@components/Layout/Box"
 import { Divider } from "@components/Layout/Divider"
 import { Space } from "@components/Layout/Space"
 import { Stack } from "@components/Layout/Stack"
@@ -118,11 +117,9 @@ export const DishesDetailWidget: React.FunctionComponent<DishDetailWidgetProps> 
                 {dish.name}
             </Space>
         } destroyOnClose={true} onCancel={toggleDishesDetail.hide} footer={null} zIndex={2200}>
-            <Box style={{ maxHeight: 550, overflowY: "auto" }}>
-                <DeferredModalContent active={toggleDishesDetail.value} minHeight={220}>
-                    <DishesDetailWidget dish={dish} />
-                </DeferredModalContent>
-            </Box>
+            <DeferredModalContent active={toggleDishesDetail.value} minHeight={220}>
+                <DishesDetailWidget dish={dish} />
+            </DeferredModalContent>
         </Modal>}
 
         <Modal

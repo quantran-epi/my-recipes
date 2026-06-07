@@ -59,6 +59,25 @@ const filterRowStyle: React.CSSProperties = {
     scrollbarWidth: "none",
 };
 
+const topToolCardStyle: React.CSSProperties = {
+    background: "#fff",
+    border: "1px solid #f0f0f0",
+    borderRadius: 8,
+    padding: 10,
+    marginBottom: 10,
+    boxShadow: "0 2px 8px rgba(0,0,0,0.04)",
+};
+
+const searchControlRowStyle: React.CSSProperties = {
+    width: "100%",
+    display: "flex",
+};
+
+const searchInputStyle: React.CSSProperties = {
+    flex: 1,
+    minWidth: 0,
+};
+
 const filterChipStyle = (active: boolean): React.CSSProperties => ({
     border: active ? "1px solid #1677ff" : "1px solid #d9d9d9",
     background: active ? "#e6f4ff" : "#fff",
@@ -231,18 +250,20 @@ export const ShoppingListScreen = () => {
 
     return <React.Fragment>
         <div style={{ height: "100%", display: "flex", flexDirection: "column", minHeight: 0 }}>
-            <Stack.Compact>
-                <Input allowClear data-testid="shopping-list-search-input" placeholder="Tìm kiếm" onChange={_onSearchChange} />
-                <Button onClick={_onAdd} icon={<PlusOutlined />} />
-                <Button onClick={_onShowCalendar} icon={<CalendarOutlined />} />
-            </Stack.Compact>
-            <div style={filterRowStyle}>
-                {SHOPPING_LIST_STATUS_FILTERS.map(item => (
-                    <button key={item.value} type="button" data-testid={`shopping-list-filter-${item.value}`} onClick={() => _setActiveStatus(item.value)} style={filterChipStyle(activeStatus === item.value)}>
-                        {item.label} ({statusCounts[item.value] ?? 0})
-                    </button>
-                ))}
-            </div>
+            <Box style={topToolCardStyle}>
+                <Stack.Compact style={searchControlRowStyle}>
+                    <Input allowClear data-testid="shopping-list-search-input" placeholder="Tìm kiếm" onChange={_onSearchChange} style={searchInputStyle} />
+                    <Button onClick={_onAdd} icon={<PlusOutlined />} />
+                    <Button onClick={_onShowCalendar} icon={<CalendarOutlined />} />
+                </Stack.Compact>
+                <div style={filterRowStyle}>
+                    {SHOPPING_LIST_STATUS_FILTERS.map(item => (
+                        <button key={item.value} type="button" data-testid={`shopping-list-filter-${item.value}`} onClick={() => _setActiveStatus(item.value)} style={filterChipStyle(activeStatus === item.value)}>
+                            {item.label} ({statusCounts[item.value] ?? 0})
+                        </button>
+                    ))}
+                </div>
+            </Box>
             <div style={{ flex: 1, minHeight: 0, position: "relative" }}>
                 <VirtualList
                     listRef={listRef}

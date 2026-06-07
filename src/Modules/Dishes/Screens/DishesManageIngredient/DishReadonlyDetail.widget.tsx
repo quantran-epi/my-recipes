@@ -64,7 +64,7 @@ export const DishesReadonlyDetailModal: React.FunctionComponent<DishesReadonlyDe
             <Button type="primary" icon={<EditOutlined />} onClick={_onOpenDetail}>Mở trang chi tiết</Button>
         </Space>}
     >
-        <Box data-testid="dish-readonly-detail-modal" style={{ maxHeight: "70vh", overflowY: "auto", paddingRight: 4 }}>
+        <Box data-testid="dish-readonly-detail-modal">
             <DeferredModalContent active={open} minHeight={220}>
                 <DishesReadonlyDetailWidget dish={dish} targetServings={targetServings} />
             </DeferredModalContent>

@@ -49,7 +49,7 @@ const formatCostSummary = (summary: CostEstimateSummary): string => {
     return IngredientPriceHelper.formatRange(summary);
 }
 
-const truncateName = (value: string, maxLength = 28): string => {
+const truncateName = (value: string, maxLength = 42): string => {
     return value.length > maxLength ? `${value.slice(0, maxLength - 3)}...` : value;
 }
 
@@ -138,6 +138,17 @@ const dashboardCss = `
     box-shadow: 0 10px 24px rgba(74, 48, 130, 0.10);
     transform: translateY(-1px);
 }
+.dashboard-section-title {
+    color: #111827;
+    font-size: 19px;
+    font-weight: 800;
+    line-height: 25px;
+}
+.dashboard-section-subtitle {
+    color: #667085;
+    font-size: 12px;
+    line-height: 17px;
+}
 `;
 
 const Section: React.FunctionComponent<{ title: string; subtitle?: string; action?: React.ReactNode; children: React.ReactNode; icon?: React.ReactNode; tone?: string }> = ({ title, subtitle, action, children, icon, tone = '#1677ff' }) => {
@@ -148,17 +159,19 @@ const Section: React.FunctionComponent<{ title: string; subtitle?: string; actio
         boxShadow: '0 10px 28px rgba(74, 48, 130, 0.10)',
         overflow: 'hidden',
     }}>
-        <div style={{ padding: 12 }}>
-            <Stack justify='space-between' align='flex-start' gap={8} style={{ marginBottom: 10 }}>
+        <div style={{ padding: '13px 13px 11px', background: `linear-gradient(90deg, ${tone}12 0%, rgba(255,255,255,0.96) 72%)`, borderBottom: '1px solid rgba(116,54,220,0.09)' }}>
+            <Stack justify='space-between' align='flex-start' gap={8}>
                 <Stack align='flex-start' gap={9} style={{ minWidth: 0 }}>
-                    {icon && <span style={{ width: 36, height: 36, borderRadius: 8, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', color: tone, background: `${tone}14`, border: `1px solid ${tone}24`, flexShrink: 0 }}>{icon}</span>}
+                    {icon && <span style={{ width: 40, height: 40, borderRadius: 8, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', color: tone, background: `${tone}16`, border: `1px solid ${tone}28`, flexShrink: 0, fontSize: 19 }}>{icon}</span>}
                     <div style={{ minWidth: 0 }}>
-                        <Typography.Text strong style={{ display: 'block', fontSize: 17, lineHeight: '22px', color: '#111827' }}>{title}</Typography.Text>
-                        {subtitle && <Typography.Text type='secondary' style={{ display: 'block', fontSize: 12, lineHeight: '16px', marginTop: 2 }}>{subtitle}</Typography.Text>}
+                        <Typography.Text className='dashboard-section-title' style={{ display: 'block' }}>{title}</Typography.Text>
+                        {subtitle && <Typography.Text className='dashboard-section-subtitle' style={{ display: 'block', marginTop: 2 }}>{subtitle}</Typography.Text>}
                     </div>
                 </Stack>
                 {action && <div style={{ borderRadius: 999, background: '#f7f4ff', border: '1px solid rgba(116,54,220,0.10)' }}>{action}</div>}
             </Stack>
+        </div>
+        <div style={{ padding: 12 }}>
             <Stack direction='column' align='stretch' gap={8}>{children}</Stack>
         </div>
     </section>;
@@ -175,9 +188,9 @@ const DataMetric: React.FunctionComponent<{ icon: React.ReactNode; label: string
         <Stack align='flex-start' gap={8}>
             <span style={{ width: 30, height: 30, borderRadius: 8, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', color: tone ?? '#1677ff', background: `${tone ?? '#1677ff'}12`, flexShrink: 0 }}>{icon}</span>
             <div style={{ minWidth: 0 }}>
-                <Typography.Text strong style={{ display: 'block', lineHeight: '18px' }}>{value}</Typography.Text>
-                <Typography.Text type='secondary' style={{ display: 'block', fontSize: 12, lineHeight: '16px' }}>{label}</Typography.Text>
-                {detail && <Typography.Text type='secondary' style={{ display: 'block', fontSize: 11, lineHeight: '15px', marginTop: 4, overflowWrap: 'anywhere' }}>{detail}</Typography.Text>}
+                <Typography.Text strong style={{ display: 'block', color: '#111827', fontSize: 18, lineHeight: '23px' }}>{value}</Typography.Text>
+                <Typography.Text type='secondary' style={{ display: 'block', fontSize: 12, lineHeight: '16px', fontWeight: 650 }}>{label}</Typography.Text>
+                {detail && <Typography.Text type='secondary' style={{ display: 'block', fontSize: 11.5, lineHeight: '16px', marginTop: 4, overflowWrap: 'anywhere' }}>{detail}</Typography.Text>}
             </div>
         </Stack>
     </Box>;
@@ -389,10 +402,10 @@ const ActionRow: React.FunctionComponent<{
             <div style={{ padding: '10px 11px', minWidth: 0 }}>
                 <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) auto', gap: 8, alignItems: 'start' }}>
                     <div style={{ minWidth: 0 }}>
-                        <Typography.Text strong style={{ display: 'block', lineHeight: '19px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        <Typography.Text strong style={{ display: 'block', color: '#111827', fontSize: 14.5, lineHeight: '20px', overflowWrap: 'anywhere' }}>
                             {icon && <span style={{ color: accent, marginRight: 6 }}>{icon}</span>}{title}
                         </Typography.Text>
-                        <Typography.Text type='secondary' style={{ display: 'block', fontSize: 12, lineHeight: '16px', marginTop: 2 }}>{description}</Typography.Text>
+                        <Typography.Text type='secondary' style={{ display: 'block', fontSize: 12.5, lineHeight: '17px', marginTop: 2, overflowWrap: 'anywhere' }}>{description}</Typography.Text>
                     </div>
                     <Stack align='center' gap={6} style={{ flexShrink: 0 }}>
                         {right}

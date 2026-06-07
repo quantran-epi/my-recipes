@@ -3,6 +3,7 @@ import { Button } from "@components/Button";
 import { FastModalShell } from "@components/FastOverlay";
 import { Input } from "@components/Form/Input";
 import { Image } from "@components/Image";
+import { Box } from "@components/Layout/Box";
 import { Space } from "@components/Layout/Space";
 import { Stack } from "@components/Layout/Stack";
 import { scrollVirtualListToTop, VirtualListRowFrame, VirtualListScrollTopButton } from "@components/List";
@@ -51,6 +52,25 @@ const filterRowStyle: React.CSSProperties = {
     overflowX: "auto",
     padding: "6px 0 2px",
     scrollbarWidth: "none",
+};
+
+const topToolCardStyle: React.CSSProperties = {
+    background: "#fff",
+    border: "1px solid #f0f0f0",
+    borderRadius: 8,
+    padding: 10,
+    marginBottom: 10,
+    boxShadow: "0 2px 8px rgba(0,0,0,0.04)",
+};
+
+const searchControlRowStyle: React.CSSProperties = {
+    width: "100%",
+    display: "flex",
+};
+
+const searchInputStyle: React.CSSProperties = {
+    flex: 1,
+    minWidth: 0,
 };
 
 const filterChipStyle = (active: boolean): React.CSSProperties => ({
@@ -298,35 +318,37 @@ export const IngredientListScreen = () => {
 
     return <React.Fragment>
         <div style={{ height: "100%", display: "flex", flexDirection: "column", minHeight: 0 }}>
-            <Stack.Compact>
-                <Input allowClear data-testid="ingredient-search-input" placeholder="Tìm kiếm" onChange={_onSearchChange} />
-                {isAdmin && <Button onClick={_onAdd} icon={<PlusOutlined />} />}
-                <Tooltip title="Dùng trước hết hạn">
-                    <Button onClick={toggleUseFirst.show} icon={<FireOutlined style={{ color: "#ff4d4f" }} />} />
-                </Tooltip>
-                <Tooltip title="Thống kê nguyên liệu">
-                    <Button onClick={toggleStats.show} icon={<BarChartOutlined style={{ color: "#1677ff" }} />} />
-                </Tooltip>
-            </Stack.Compact>
-            <div style={filterRowStyle}>
-                {INGREDIENT_STOCK_FILTERS.map(item => (
-                    <button key={item.value} type="button" data-testid={`ingredient-filter-${item.value}`} onClick={() => _setActiveStockFilter(item.value)} style={filterChipStyle(activeStockFilter === item.value)}>
-                        {item.label} ({stockCounts[item.value] ?? 0})
-                    </button>
-                ))}
-            </div>
-            {availableCategories.length > 0 && (
+            <Box style={topToolCardStyle}>
+                <Stack.Compact style={searchControlRowStyle}>
+                    <Input allowClear data-testid="ingredient-search-input" placeholder="Tìm kiếm" onChange={_onSearchChange} style={searchInputStyle} />
+                    {isAdmin && <Button onClick={_onAdd} icon={<PlusOutlined />} />}
+                    <Tooltip title="Dùng trước hết hạn">
+                        <Button onClick={toggleUseFirst.show} icon={<FireOutlined style={{ color: "#ff4d4f" }} />} />
+                    </Tooltip>
+                    <Tooltip title="Thống kê nguyên liệu">
+                        <Button onClick={toggleStats.show} icon={<BarChartOutlined style={{ color: "#1677ff" }} />} />
+                    </Tooltip>
+                </Stack.Compact>
                 <div style={filterRowStyle}>
-                    <button type="button" data-testid="ingredient-category-filter-reset" onClick={_resetActiveCategory} style={filterChipStyle(activeCategory === null)}>
-                        Tất cả nhóm ({categoryCounts.__all ?? 0})
-                    </button>
-                    {availableCategories.map(category => (
-                        <button key={category} type="button" onClick={() => _toggleActiveCategory(category)} style={filterChipStyle(activeCategory === category)}>
-                            {category} ({categoryCounts[category] ?? 0})
+                    {INGREDIENT_STOCK_FILTERS.map(item => (
+                        <button key={item.value} type="button" data-testid={`ingredient-filter-${item.value}`} onClick={() => _setActiveStockFilter(item.value)} style={filterChipStyle(activeStockFilter === item.value)}>
+                            {item.label} ({stockCounts[item.value] ?? 0})
                         </button>
                     ))}
                 </div>
-            )}
+                {availableCategories.length > 0 && (
+                    <div style={filterRowStyle}>
+                        <button type="button" data-testid="ingredient-category-filter-reset" onClick={_resetActiveCategory} style={filterChipStyle(activeCategory === null)}>
+                            Tất cả nhóm ({categoryCounts.__all ?? 0})
+                        </button>
+                        {availableCategories.map(category => (
+                            <button key={category} type="button" onClick={() => _toggleActiveCategory(category)} style={filterChipStyle(activeCategory === category)}>
+                                {category} ({categoryCounts[category] ?? 0})
+                            </button>
+                        ))}
+                    </div>
+                )}
+            </Box>
             <div style={{ flex: 1, minHeight: 0, position: "relative" }}>
                 <VirtualList
                     listRef={listRef}

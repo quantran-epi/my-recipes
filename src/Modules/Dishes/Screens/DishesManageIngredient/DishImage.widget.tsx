@@ -32,7 +32,7 @@ export const DishImageWidget: React.FunctionComponent<DishImageWidgetProps> = ({
 }) => {
     const containerRef = useRef<HTMLDivElement | null>(null);
     const [failed, setFailed] = useState(false);
-    const effectiveLoading = surface === "list" ? "lazy" : loading;
+    const effectiveLoading = surface === "list" ? "lazy" : "eager";
     const effectiveShowBrokenLabel = showBrokenLabel ?? surface !== "list";
     const rootMargin = surface === "list" ? "48px 0px" : "180px 0px";
     const [canLoad, setCanLoad] = useState(effectiveLoading === "eager");

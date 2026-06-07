@@ -78,6 +78,25 @@ const filterRowStyle: React.CSSProperties = {
     scrollbarWidth: "none",
 };
 
+const topToolCardStyle: React.CSSProperties = {
+    background: "#fff",
+    border: "1px solid #f0f0f0",
+    borderRadius: 8,
+    padding: 10,
+    marginBottom: 10,
+    boxShadow: "0 2px 8px rgba(0,0,0,0.04)",
+};
+
+const searchControlRowStyle: React.CSSProperties = {
+    width: "100%",
+    display: "flex",
+};
+
+const searchInputStyle: React.CSSProperties = {
+    flex: 1,
+    minWidth: 0,
+};
+
 const filterChipStyle = (active: boolean): React.CSSProperties => ({
     border: active ? "1px solid #1677ff" : "1px solid #d9d9d9",
     background: active ? "#e6f4ff" : "#fff",
@@ -353,29 +372,31 @@ export const DishesListScreen = () => {
 
     return <React.Fragment>
         <div style={{ height: "100%", display: "flex", flexDirection: "column", minHeight: 0 }}>
-            <Stack.Compact>
-                <Input allowClear data-testid="dish-search-input" placeholder="Tìm kiếm" onChange={_onSearchChange} />
-                {isAdmin && <Button onClick={toggleAddModal.show} icon={<PlusOutlined />} />}
-            </Stack.Compact>
-            <div style={filterRowStyle}>
-                {DISH_STATUS_FILTERS.map(item => (
-                    <button key={item.value} type="button" data-testid={`dish-filter-${item.value}`} onClick={() => _setActiveStatus(item.value)} style={filterChipStyle(activeStatus === item.value)}>
-                        {item.label} ({statusCounts[item.value] ?? 0})
-                    </button>
-                ))}
-            </div>
-            {allTags.length > 0 && (
+            <Box style={topToolCardStyle}>
+                <Stack.Compact style={searchControlRowStyle}>
+                    <Input allowClear data-testid="dish-search-input" placeholder="Tìm kiếm" onChange={_onSearchChange} style={searchInputStyle} />
+                    {isAdmin && <Button onClick={toggleAddModal.show} icon={<PlusOutlined />} />}
+                </Stack.Compact>
                 <div style={filterRowStyle}>
-                    <button type="button" data-testid="dish-tag-filter-reset" onClick={_resetActiveTag} style={filterChipStyle(activeTag === null)}>
-                        Tất cả tag ({tagCounts.__all ?? 0})
-                    </button>
-                    {allTags.map(tag => (
-                        <button key={tag} type="button" onClick={() => _toggleActiveTag(tag)} style={filterChipStyle(activeTag === tag)}>
-                            {tag} ({tagCounts[tag] ?? 0})
+                    {DISH_STATUS_FILTERS.map(item => (
+                        <button key={item.value} type="button" data-testid={`dish-filter-${item.value}`} onClick={() => _setActiveStatus(item.value)} style={filterChipStyle(activeStatus === item.value)}>
+                            {item.label} ({statusCounts[item.value] ?? 0})
                         </button>
                     ))}
                 </div>
-            )}
+                {allTags.length > 0 && (
+                    <div style={filterRowStyle}>
+                        <button type="button" data-testid="dish-tag-filter-reset" onClick={_resetActiveTag} style={filterChipStyle(activeTag === null)}>
+                            Tất cả tag ({tagCounts.__all ?? 0})
+                        </button>
+                        {allTags.map(tag => (
+                            <button key={tag} type="button" onClick={() => _toggleActiveTag(tag)} style={filterChipStyle(activeTag === tag)}>
+                                {tag} ({tagCounts[tag] ?? 0})
+                            </button>
+                        ))}
+                    </div>
+                )}
+            </Box>
             <div style={{ flex: 1, minHeight: 0, position: "relative" }}>
                 <VirtualList
                     listRef={listRef}
@@ -633,11 +654,9 @@ const DishesItemComponent: React.FunctionComponent<DishesItemProps> = (props) =>
             <Button onClick={toggleDishesDetail.hide}>Đóng</Button>
             <Button type="primary" icon={<EditOutlined />} onClick={_onOpenDetailPage}>Mở trang chi tiết</Button>
         </Space>}>
-            <Box style={{ maxHeight: 550, overflowY: "auto" }}>
-                <DeferredModalContent active={toggleDishesDetail.value} minHeight={220}>
-                    <DishesDetailWidget dish={props.item} />
-                </DeferredModalContent>
-            </Box>
+            <DeferredModalContent active={toggleDishesDetail.value} minHeight={220}>
+                <DishesDetailWidget dish={props.item} />
+            </DeferredModalContent>
         </FastModalShell>}
         {toggleEdit.value && <Modal open={toggleEdit.value} title={
             <Space>
