@@ -324,17 +324,17 @@ export const DashboardAnalyticsScreen = () => {
     return <Box data-testid='dashboard-analytics' style={{ display: 'flex', flexDirection: 'column', gap: 12, padding: '0 0 14px', maxWidth: 980, margin: '0 auto' }}>
         <style>{analyticsCss}</style>
         <Box style={{ borderRadius: 8, padding: 14, background: 'linear-gradient(135deg, #8f46f7 0%, #7436dc 58%, #5e2bbf 100%)', color: '#fff', boxShadow: '0 18px 36px rgba(74,48,130,0.24)' }}>
-            <Stack justify='space-between' align='flex-start' gap={10} style={{ marginBottom: 12 }}>
+            <Stack justify='space-between' align='flex-start' gap={10} style={{ marginBottom: 6 }}>
                 <div style={{ minWidth: 0 }}>
                     <Typography.Text style={{ display: 'block', color: 'rgba(255,255,255,0.82)', fontSize: 12, lineHeight: '16px', fontWeight: 650 }}>My Recipes</Typography.Text>
                     <Typography.Text strong style={{ display: 'block', color: '#fff', fontSize: 22, lineHeight: '28px' }}>Phân tích bếp nhà</Typography.Text>
-                    <Typography.Text style={{ display: 'block', color: 'rgba(255,255,255,0.78)', fontSize: 12, lineHeight: '17px', marginTop: 2 }}>Dữ liệu thực đơn, mua sắm, tồn kho và món ăn trong một màn hình.</Typography.Text>
                 </div>
                 <Stack align='center' gap={6} style={{ flexShrink: 0 }}>
                     <span style={{ borderRadius: 999, padding: '5px 10px', background: 'rgba(255,255,255,0.16)', border: '1px solid rgba(255,255,255,0.22)', color: '#fff', fontSize: 11, fontWeight: 750, whiteSpace: 'nowrap' }}>{formatHeaderDateLabel()}</span>
                     <Button onClick={() => openRoute(RootRoutes.AuthorizedRoutes.Root())} style={{ borderRadius: 999, background: '#fff', borderColor: '#fff', color: '#5e2bbf', fontWeight: 750, display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>Tổng quan</Button>
                 </Stack>
             </Stack>
+            <Typography.Text style={{ display: 'block', color: 'rgba(255,255,255,0.78)', fontSize: 12, lineHeight: '17px', marginBottom: 12 }}>Dữ liệu thực đơn, mua sắm, tồn kho và món ăn trong một màn hình.</Typography.Text>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(156px, 1fr))', gap: 8 }}>
                 <StatCard label='Việc hôm nay' value={todayMeals.length + todayShoppingLists.length + activeSessions.length + urgentInventory.length} detail={`${todayDishCount} món trong thực đơn`} tone='#7436dc' icon={<CalendarOutlined />} />
                 <StatCard label='Mua sắm mở' value={openShoppingLists.length} detail={expensiveMetricsPending ? 'Đang tính chi phí...' : formatCostSummary(totalOpenShoppingCost)} tone='#0958d9' icon={<ShoppingCartOutlined />} />
