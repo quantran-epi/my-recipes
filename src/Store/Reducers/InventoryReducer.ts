@@ -51,7 +51,7 @@ export const inventorySlice = createSlice({
                 const deductBaseAmount = Math.min(batchBaseAmount, remaining);
                 remaining -= deductBaseAmount;
                 const nextBaseAmount = Math.max(0, batchBaseAmount - deductBaseAmount);
-                const nextAmount = IngredientUnitHelper.fromBaseAmount(ingredient, nextBaseAmount, batchUnit, baseUnit) ?? nextBaseAmount;
+                const nextAmount = InventoryHelper.roundAmount(IngredientUnitHelper.fromBaseAmount(ingredient, nextBaseAmount, batchUnit, baseUnit) ?? nextBaseAmount);
                 nextAmounts.set(batch.id, { unit: batchUnit, amount: nextAmount });
                 return batch;
             });

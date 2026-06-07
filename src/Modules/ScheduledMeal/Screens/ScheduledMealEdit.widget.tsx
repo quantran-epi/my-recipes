@@ -6,12 +6,15 @@ import { Option, Select } from "@components/Form/Select"
 import { Stack } from "@components/Layout/Stack"
 import { useMessage } from "@components/Message"
 import { SmartForm, useSmartForm } from "@components/SmartForm"
+import { DishServingSelector, normalizeDishServings } from "@modules/ShoppingList/Screens/DishServingSelector.widget"
 import { ScheduledMeal } from "@store/Models/ScheduledMeal"
 import { editScheduledMeal } from "@store/Reducers/ScheduledMealReducer"
 import { updateShoppingListIngredientMealData } from "@store/Reducers/ShoppingListReducer"
 import { selectDishes } from "@store/Selectors"
 import dayjs from "dayjs"
+import { useMemo } from "react"
 import { useDispatch, useSelector } from "react-redux"
+import { ScheduledMealEstimateSummary } from "./ScheduledMealEstimateSummary.widget"
 
 export const ScheduledMealEditWidget = ({ item, onDone }) => {
     const dispatch = useDispatch();
@@ -21,6 +24,7 @@ export const ScheduledMealEditWidget = ({ item, onDone }) => {
     const editScheduledMealForm = useSmartForm<ScheduledMeal>({
         defaultValues: {
             ...item,
+            dishServings: item.dishServings ?? {},
             plannedDate: dayjs(item.plannedDate)
         },
         onSubmit: (values) => {
@@ -34,42 +38,43 @@ export const ScheduledMealEditWidget = ({ item, onDone }) => {
             id: { name: ObjectPropertyHelper.nameof(defaultValues, e => e.id), noMarkup: true },
             name: { label: "Tên gợi nhớ", name: ObjectPropertyHelper.nameof(defaultValues, e => e.name) },
             meals: { name: ObjectPropertyHelper.nameof(defaultValues, e => e.meals), noMarkup: true },
+            dishServings: { name: ObjectPropertyHelper.nameof(defaultValues, e => e.dishServings), noMarkup: true },
             createdDate: { name: ObjectPropertyHelper.nameof(defaultValues, e => e.createdDate), noMarkup: true },
             plannedDate: { label: "Ngày kế hoạch", name: ObjectPropertyHelper.nameof(defaultValues, e => e.plannedDate) },
         }),
-        transformFunc: (values) => ({
-            ...values,
-            plannedDate: new Date(values.plannedDate)
-        })
+        transformFunc: (values) => {
+            const selectedDishIds = Object.values(values.meals ?? { breakfast: [], lunch: [], dinner: [] }).flat();
+            return {
+                ...values,
+                dishServings: normalizeDishServings(selectedDishIds, dishes, values.dishServings ?? {}),
+                plannedDate: new Date(values.plannedDate)
+            };
+        }
     })
 
     const meals = SmartForm.useWatch("meals", editScheduledMealForm.form);
+    const dishServings = SmartForm.useWatch("dishServings", editScheduledMealForm.form) ?? {};
+    const selectedDishIds = useMemo(() => Object.values(meals ?? { breakfast: [], lunch: [], dinner: [] }).flat(), [meals]);
 
     const _onSave = () => {
         editScheduledMealForm.submit();
     }
 
     const _onSelectDish = (dishIds: string[], meals: keyof ScheduledMeal["meals"]) => {
-        switch (meals) {
-            case "breakfast": editScheduledMealForm.form.setFieldsValue({
-                meals: {
-                    ...editScheduledMealForm.form.getFieldsValue().meals,
-                    breakfast: dishIds
-                }
-            }); break;
-            case "lunch": editScheduledMealForm.form.setFieldsValue({
-                meals: {
-                    ...editScheduledMealForm.form.getFieldsValue().meals,
-                    lunch: dishIds
-                }
-            }); break;
-            case "dinner": editScheduledMealForm.form.setFieldsValue({
-                meals: {
-                    ...editScheduledMealForm.form.getFieldsValue().meals,
-                    dinner: dishIds
-                }
-            }); break;
-        }
+        const currentValues = editScheduledMealForm.form.getFieldsValue();
+        const nextMeals = {
+            ...currentValues.meals,
+            [meals]: dishIds ?? [],
+        };
+        const nextSelectedDishIds = Object.values(nextMeals).flat() as string[];
+        editScheduledMealForm.form.setFieldsValue({
+            meals: nextMeals,
+            dishServings: normalizeDishServings(nextSelectedDishIds, dishes, currentValues.dishServings ?? {}),
+        });
+    }
+
+    const _onDishServingsChange = (nextValue: Record<string, number>) => {
+        editScheduledMealForm.form.setFieldsValue({ dishServings: nextValue });
     }
     return <SmartForm {...editScheduledMealForm.defaultProps}>
         <SmartForm.Item {...editScheduledMealForm.itemDefinitions.name}>
@@ -117,9 +122,16 @@ export const ScheduledMealEditWidget = ({ item, onDone }) => {
                 {dishes.map(dish => <Option key={dish.id} value={dish.id}>{dish.name}</Option>)}
             </Select>
         </SmartForm.Item>
+        <DishServingSelector
+            selectedDishIds={selectedDishIds}
+            dishes={dishes}
+            value={dishServings}
+            onChange={_onDishServingsChange}
+        />
         <SmartForm.Item {...editScheduledMealForm.itemDefinitions.plannedDate}>
             <DatePicker style={{ width: "100%" }} placeholder="Chọn ngày" format={"DD/MM/YYYY"} />
         </SmartForm.Item>
+        <ScheduledMealEstimateSummary dishIds={selectedDishIds} dishServings={dishServings} title="Ước tính ngày này" maxRows={4} />
         <Stack fullwidth justify="flex-end">
             <Button onClick={_onSave}>Lưu</Button>
         </Stack>

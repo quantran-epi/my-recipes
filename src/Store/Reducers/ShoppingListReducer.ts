@@ -127,13 +127,12 @@ export const ShoppingListSlice = createSlice({
                     let ingredientAmountsFromMeals: ShoppingListIngredientAmount[] = [];
                     allMeals.forEach(meal => {
                         const mealMeta = { id: meal.id, plannedDate: dayjs(meal.plannedDate).toDate() } as DishIngredientAmountMealMeta;
-                        let dishesFromThisMeal = [...meal.meals.breakfast, ...meal.meals.lunch, ...meal.meals.dinner]
-                            .flat()
-                            .map(d => action.payload.allDishes.find(d1 => d1.id === d));
+                        let dishIdsFromThisMeal = [...meal.meals.breakfast, ...meal.meals.lunch, ...meal.meals.dinner].flat();
 
-                        dishesFromThisMeal.forEach(dish => {
+                        dishIdsFromThisMeal.forEach(dishId => {
+                            const dish = action.payload.allDishes.find(d1 => d1.id === dishId);
                             ingredientAmountsFromMeals = ingredientAmountsFromMeals.concat(
-                                createShoppingListIngredientAmounts(shoppingList.id, dish, action.payload.allDishes, undefined, mealMeta)
+                                createShoppingListIngredientAmounts(shoppingList.id, dish, action.payload.allDishes, meal.dishServings?.[dishId], mealMeta)
                             );
                         });
                     });
@@ -286,12 +285,26 @@ export const ShoppingListSlice = createSlice({
                         ...gr,
                         amounts: gr.amounts.map(amt => {
                             if (amt.meal?.id === action.payload.id) {
+                                const nextTargetServings = amt.dish?.id ? action.payload.dishServings?.[amt.dish.id] : undefined;
+                                const currentTargetServings = amt.dish?.targetServings;
+                                const normalizedNextTargetServings = nextTargetServings && amt.dish
+                                    ? DishServingHelper.normalizeTargetServings(nextTargetServings, currentTargetServings ?? amt.dish.baseServings ?? 1)
+                                    : currentTargetServings;
+                                const servingScale = normalizedNextTargetServings && currentTargetServings
+                                    ? normalizedNextTargetServings / currentTargetServings
+                                    : 1;
+
                                 return {
                                     ...amt,
+                                    amount: servingScale !== 1 ? DishServingHelper.formatAmount(amt.amount, servingScale) : amt.amount,
                                     meal: {
                                         ...amt.meal,
                                         plannedDate: action.payload.plannedDate
-                                    }
+                                    },
+                                    dish: amt.dish ? {
+                                        ...amt.dish,
+                                        targetServings: normalizedNextTargetServings,
+                                    } : amt.dish,
                                 }
                             }
                             return amt;

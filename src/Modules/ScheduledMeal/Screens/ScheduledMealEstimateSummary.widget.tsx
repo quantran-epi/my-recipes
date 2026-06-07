@@ -16,6 +16,7 @@ import { useSelector } from "react-redux";
 
 type ScheduledMealEstimateSummaryProps = {
     dishIds: string[];
+    dishServings?: Record<string, number>;
     title?: string;
     maxRows?: number;
     defaultExpanded?: boolean;
@@ -56,7 +57,7 @@ const rowStatus = (row: IngredientNeedEstimateRow): { label: string; color: stri
     return { label: `Thiếu ${IngredientUnitHelper.formatAmount(row.missingAmount)} ${row.unit}`, color: "#d46b08" };
 }
 
-export const ScheduledMealEstimateSummary: React.FunctionComponent<ScheduledMealEstimateSummaryProps> = ({ dishIds, title = "Ước tính cho thực đơn", defaultExpanded = false }) => {
+export const ScheduledMealEstimateSummary: React.FunctionComponent<ScheduledMealEstimateSummaryProps> = ({ dishIds, dishServings, title = "Ước tính cho thực đơn", defaultExpanded = false }) => {
     const dishes = useSelector(selectDishes);
     const dishesById = useSelector(selectDishesById);
     const ingredients = useSelector(selectIngredients);
@@ -70,7 +71,7 @@ export const ScheduledMealEstimateSummary: React.FunctionComponent<ScheduledMeal
     }, [dishIds, dishesById]);
 
     const calculateEstimate = React.useCallback((): ScheduledMealEstimateMetrics => {
-        const amounts = selectedDishes.flatMap(dish => DishServingHelper.collectIngredientAmounts(dish, dishes));
+        const amounts = selectedDishes.flatMap(dish => DishServingHelper.collectIngredientAmounts(dish, dishes, { targetServings: dishServings?.[dish.id] }));
         const estimate = CostEstimateHelper.estimateIngredientAmounts(amounts, ingredients, { inventoryItems });
         const rows = estimate.rows.slice().sort((a, b) => {
             if ((a.missingAmount > 0) !== (b.missingAmount > 0)) return a.missingAmount > 0 ? -1 : 1;
@@ -84,7 +85,7 @@ export const ScheduledMealEstimateSummary: React.FunctionComponent<ScheduledMeal
             missingRows: rows.filter(row => row.missingAmount > 0),
             coveredRows: rows.filter(row => row.missingAmount <= 0),
         };
-    }, [selectedDishes, dishes, ingredients, inventoryItems]);
+    }, [selectedDishes, dishes, ingredients, inventoryItems, dishServings]);
     const { value: estimateMetrics, pending: estimatePending } = useScheduledCalculation(calculateEstimate, {
         enabled: selectedDishes.length > 0,
         initialValue: createEmptyScheduledMealEstimateMetrics,

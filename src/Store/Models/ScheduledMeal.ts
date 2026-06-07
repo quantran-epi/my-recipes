@@ -1,3 +1,5 @@
+export type ScheduledMealDishServings = Record<string, number>;
+
 export type ScheduledMeal = {
     id: string;
     name: string;
@@ -7,5 +9,6 @@ export type ScheduledMeal = {
         lunch: string[],
         dinner: string[]
     }
+    dishServings?: ScheduledMealDishServings;
     createdDate: Date;
 }

@@ -39,6 +39,11 @@ import { RootRoutes } from "@routing/RootRoutes";
 
 const getMealDateKey = (value: Date | string) => moment(value).format("YYYY-MM-DD");
 
+const getVietnameseWeekShoppingListName = (date: Dayjs) => {
+    const weekOfMonth = Math.ceil(date.date() / 7);
+    return `Tuần ${weekOfMonth}, ${date.format("MM/YY")}`;
+};
+
 // ─── Main screen ─────────────────────────────────────────────────────────────
 export const ScheduledMealListScreen = () => {
     const [selectedDate, setSelectedDate] = useState<Date>(new Date());
@@ -236,6 +241,7 @@ export const ScheduledMealListScreen = () => {
                 ) : (
                     <ShoppingListAddWidget
                         date={selectedRange ? selectedRange[0].toDate() : new Date()}
+                        initialName={selectedRange ? getVietnameseWeekShoppingListName(selectedRange[0]) : undefined}
                         scheduledMealIds={shoppingRangeMealIds}
                         onDone={() => setShoppingRangeOpen(false)}
                         onCreated={(shoppingList) => navigate(RootRoutes.AuthorizedRoutes.ShoppingListRoutes.Detail(shoppingList.id))}
@@ -258,6 +264,10 @@ export const ScheduledMealItem = ({ item, selected, dishNameById, onDelete }: { 
     const theme = useTheme();
 
     const _dishName = (id: string) => dishNameById.get(id) ?? id;
+    const _dishLabel = (id: string) => {
+        const servings = item.dishServings?.[id];
+        return servings ? `${_dishName(id)} (${servings} phần)` : _dishName(id);
+    };
 
     const _onToggleSelect = (e: CheckboxChangeEvent) => {
         dispatch(toggleSelectedMeals({ ids: [item.id], selected: e.target.checked }));
@@ -311,7 +321,7 @@ export const ScheduledMealItem = ({ item, selected, dishNameById, onDelete }: { 
                 <Stack wrap="wrap" gap={4}>
                     {dishIds.slice(0, 3).map((id, index) => (
                         <Tag key={`${id}-${index}`} style={{ maxWidth: "100%", fontSize: 11, padding: "1px 7px", margin: 0, borderRadius: 10, overflow: "hidden", textOverflow: "ellipsis" }}>
-                            {_dishName(id)}
+                            {_dishLabel(id)}
                         </Tag>
                     ))}
                     {dishIds.length > 3 && <Tag style={{ fontSize: 11, padding: "1px 7px", margin: 0, borderRadius: 10 }}>+{dishIds.length - 3}</Tag>}

@@ -21,6 +21,7 @@ import { DishServingSelector, normalizeDishServings } from './DishServingSelecto
 
 type ShoppingListAddWidgetProps = {
     date: Date | null;
+    initialName?: string;
     scheduledMealIds?: string[];
     dishIds?: string[];
     initialDishServings?: Record<string, number>;
@@ -29,7 +30,7 @@ type ShoppingListAddWidgetProps = {
     onCreated?: (shoppingList: ShoppingList) => void;
 }
 
-export const ShoppingListAddWidget: FunctionComponent<ShoppingListAddWidgetProps> = ({ date, scheduledMealIds, dishIds, initialDishServings, alreadyHaveIngredientIds, onDone, onCreated }) => {
+export const ShoppingListAddWidget: FunctionComponent<ShoppingListAddWidgetProps> = ({ date, initialName, scheduledMealIds, dishIds, initialDishServings, alreadyHaveIngredientIds, onDone, onCreated }) => {
     const dispatch = useDispatch();
     const dishes = useSelector(selectDishes);
     const scheduledMeals = useSelector(selectScheduledMeals);
@@ -42,7 +43,7 @@ export const ShoppingListAddWidget: FunctionComponent<ShoppingListAddWidgetProps
     const addShoppingListForm = useSmartForm<ShoppingList>({
         defaultValues: {
             id: "",
-            name: "No named",
+            name: initialName ?? "No named",
             dishes: [],
             dishServings: {},
             ingredients: [],
@@ -103,6 +104,7 @@ export const ShoppingListAddWidget: FunctionComponent<ShoppingListAddWidgetProps
     }
 
     useEffect(() => {
+        if (initialName) addShoppingListForm.form.setFieldsValue({ name: initialName });
         if (date) addShoppingListForm.form.setFieldsValue({ plannedDate: dayjs(date) });
         if (scheduledMealIds) addShoppingListForm.form.setFieldsValue({ scheduledMeals: scheduledMealIds });
         if (dishIds) {
@@ -110,7 +112,7 @@ export const ShoppingListAddWidget: FunctionComponent<ShoppingListAddWidgetProps
             setSelectedDishIds(dishIds);
             setDishServings(prev => normalizeDishServings(dishIds, dishes, { ...(initialDishServings ?? {}), ...prev }));
         }
-    }, [date, scheduledMealIds, dishIds, scheduledMeals])
+    }, [date, initialName, scheduledMealIds, dishIds, scheduledMeals])
 
     return <React.Fragment>
         <SmartForm {...addShoppingListForm.defaultProps}>

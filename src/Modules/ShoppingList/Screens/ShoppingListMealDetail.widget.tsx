@@ -1,4 +1,5 @@
 import { Button } from "@components/Button";
+import { DishServingHelper } from "@common/Helpers/DishServingHelper";
 import { Divider } from "@components/Layout/Divider";
 import { Stack } from "@components/Layout/Stack";
 import { List } from "@components/List";
@@ -37,39 +38,43 @@ export const ShoppingListMealDetailWidget: FunctionComponent<ShoppingListMealDet
         </Stack>
 
         <Divider orientation="left">Chi phí và tồn kho</Divider>
-        <ScheduledMealEstimateSummary dishIds={selectedDishIds} title="Ước tính thực đơn" maxRows={8} />
+        <ScheduledMealEstimateSummary dishIds={selectedDishIds} dishServings={meal.dishServings} title="Ước tính thực đơn" maxRows={8} />
 
         <Divider orientation="left">Bữa sáng</Divider>
         <List
             dataSource={meal.meals.breakfast}
-            renderItem={item => <ShoppingListMealDishesItem dish={_getDishesById(item)} />}
+            renderItem={item => <ShoppingListMealDishesItem dish={_getDishesById(item)} targetServings={meal.dishServings?.[item]} />}
         />
         <Divider orientation="left">Bữa trưa</Divider>
         <List
             dataSource={meal.meals.lunch}
-            renderItem={item => <ShoppingListMealDishesItem dish={_getDishesById(item)} />}
+            renderItem={item => <ShoppingListMealDishesItem dish={_getDishesById(item)} targetServings={meal.dishServings?.[item]} />}
         />
         <Divider orientation="left">Bữa tối</Divider>
         <List
             dataSource={meal.meals.dinner}
-            renderItem={item => <ShoppingListMealDishesItem dish={_getDishesById(item)} />}
+            renderItem={item => <ShoppingListMealDishesItem dish={_getDishesById(item)} targetServings={meal.dishServings?.[item]} />}
         />
     </React.Fragment>
 }
 
 type ShoppingListMealDishesItemProps = {
     dish?: Dishes;
+    targetServings?: number;
 }
 
 export const ShoppingListMealDishesItem: React.FunctionComponent<ShoppingListMealDishesItemProps> = (props) => {
     const toggleDishesDetail = useToggle();
 
     if (!props.dish) return null;
+    const targetServings = DishServingHelper.getTargetServings(props.dish, props.targetServings);
 
     return <List.Item>
         <Button onClick={toggleDishesDetail.show} type="link" style={{ color: "blue" }}>{props.dish.name}</Button>
+        <Typography.Text type="secondary" style={{ fontSize: 12 }}>({targetServings} phần)</Typography.Text>
         <DishesReadonlyDetailModal
             dish={props.dish}
+            targetServings={targetServings}
             open={toggleDishesDetail.value}
             onClose={toggleDishesDetail.hide}
         />
