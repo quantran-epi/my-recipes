@@ -118,9 +118,9 @@ const deriveConfigChanges = (
     if (JSON.stringify(normalizedRemote) !== JSON.stringify(normalizedLocal)) {
         return manifestChanges.length > 0
             ? manifestChanges
-            : [{ id: "inventory-config", name: "Cấu hình tồn kho", action: "modified" }];
+            : [{ id: "shared-config", name: "Cấu hình dùng chung", action: "modified" }];
     }
-    if (force) return [{ id: "inventory-config", name: "Cấu hình tồn kho", action: "sync" }];
+    if (force) return [{ id: "shared-config", name: "Cấu hình dùng chung", action: "sync" }];
     return [];
 };
 
@@ -343,7 +343,7 @@ export const SharedSyncModal: React.FC<Props> = ({
     const confirmSync = () => {
         modal.confirm({
             title: "Xác nhận đồng bộ dữ liệu dùng chung",
-            content: `Thao tác này sẽ cập nhật ${selectedIngredients.size} nguyên liệu, ${selectedDishes.size} món ăn${selectedConfig ? " và cấu hình tồn kho" : ""} đã chọn trên thiết bị này. Bạn có chắc muốn đồng bộ?`,
+            content: `Thao tác này sẽ cập nhật ${selectedIngredients.size} nguyên liệu, ${selectedDishes.size} món ăn${selectedConfig ? " và cấu hình dùng chung" : ""} đã chọn trên thiết bị này. Bạn có chắc muốn đồng bộ?`,
             okText: "Đồng bộ",
             cancelText: "Hủy",
             centered: true,

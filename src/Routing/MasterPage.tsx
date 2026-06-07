@@ -42,6 +42,7 @@ import BudgetIcon from "../../assets/icons/budget.png";
 import MonitorIcon from "../../assets/icons/monitor.png";
 import LayoutIcon from "../../assets/icons/layout.png";
 import MedicalRecordIcon from "../../assets/icons/medical-record.png";
+import DietIcon from "../../assets/icons/diet.png";
 import { INGREDIENT_PRESERVATION_OPTIONS, INGREDIENT_SHELF_LIFE_OPTIONS, IngredientPreservationCondition, IngredientShelfLife } from "@store/Models/Ingredient";
 import { DEFAULT_INVENTORY_HEALTH_CONFIG, InventoryHealthConfig, normalizeInventoryHealthConfig } from "@store/Models/SharedConfig";
 import { updateInventoryConfig } from "@store/Reducers/SharedConfigReducer";
@@ -157,6 +158,7 @@ export const MasterPage = () => {
             case "Nguyên liệu": return IngredientIcon;
             case "Tính chi phí": return BudgetIcon;
             case "Phân tích": return MonitorIcon;
+            case "Mục tiêu DD": return DietIcon;
             case "Mẫu dùng lại": return LayoutIcon;
             case "Sức khỏe dữ liệu": return MedicalRecordIcon;
             case 'Tổng quan': return HouseIcon;
@@ -342,7 +344,7 @@ const SidebarDrawer = ({ buttonStyle }: { buttonStyle?: React.CSSProperties }) =
     const onPublishSharedData = () => {
         modal.confirm({
             title: "Xác nhận xuất bản dữ liệu dùng chung",
-            content: "Thao tác này sẽ ghi các file dữ liệu dùng chung đã tách nhỏ lên GitHub để các thiết bị khác đồng bộ. Bạn có chắc muốn xuất bản dữ liệu hiện tại?",
+            content: "Thao tác này sẽ ghi nguyên liệu, món ăn và cấu hình dùng chung lên GitHub để các thiết bị khác đồng bộ. Bạn có chắc muốn xuất bản dữ liệu hiện tại?",
             okText: "Xuất bản",
             cancelText: "Hủy",
             centered: true,
@@ -390,6 +392,7 @@ const SidebarDrawer = ({ buttonStyle }: { buttonStyle?: React.CSSProperties }) =
     const sidebarNavItems = [
         { key: 'dashboard', href: RootRoutes.AuthorizedRoutes.Root(), icon: HouseIcon, label: 'Tổng quan' },
         { key: 'analytics', href: RootRoutes.AuthorizedRoutes.Analytics(), icon: MonitorIcon, label: 'Phân tích' },
+        { key: 'nutritionGoals', href: RootRoutes.AuthorizedRoutes.NutritionGoals(), icon: DietIcon, label: 'Mục tiêu dinh dưỡng' },
         { key: 'templates', href: RootRoutes.AuthorizedRoutes.Templates(), icon: LayoutIcon, label: 'Mẫu dùng lại' },
         { key: 'ingredients', href: RootRoutes.AuthorizedRoutes.IngredientRoutes.List(), icon: IngredientIcon, label: 'Nguyên liệu' },
         { key: 'dishes', href: RootRoutes.AuthorizedRoutes.DishesRoutes.List(), icon: DishesIcon, label: 'Món ăn' },
@@ -545,7 +548,7 @@ const SidebarDrawer = ({ buttonStyle }: { buttonStyle?: React.CSSProperties }) =
                                 <div style={{ minWidth: 0 }}>
                                     <Typography.Text strong style={{ display: "block", color: "#2f2545", fontSize: 15, lineHeight: "20px" }}>Dữ liệu dùng chung</Typography.Text>
                                     <Typography.Text type="secondary" style={{ display: "block", fontSize: 12, lineHeight: "17px" }}>
-                                        Cập nhật nguyên liệu, món ăn và cấu hình tồn kho mới nhất được admin xuất bản.
+                                        Cập nhật nguyên liệu, món ăn, mục tiêu dinh dưỡng và cấu hình tồn kho mới nhất được admin xuất bản.
                                     </Typography.Text>
                                 </div>
                                 <Button icon={<CloudDownloadOutlined />} loading={isSyncChecking} onClick={onImportCloud}>
@@ -634,7 +637,7 @@ const SidebarDrawer = ({ buttonStyle }: { buttonStyle?: React.CSSProperties }) =
                             <Flex vertical gap={8}>
                                 <Typography.Text strong style={{ display: "block", color: "#245822", fontSize: 15, lineHeight: "20px" }}>Quản trị xuất bản</Typography.Text>
                                 <Typography.Text type="secondary" style={{ fontSize: 12, lineHeight: "17px" }}>
-                                    Đẩy nguyên liệu, món ăn và cấu hình tồn kho hiện tại lên GitHub để các thiết bị khác đồng bộ thủ công.
+                                    Đẩy nguyên liệu, món ăn và cấu hình dùng chung hiện tại lên GitHub để các thiết bị khác đồng bộ thủ công.
                                 </Typography.Text>
                                 <AntInput.Password
                                     autoComplete="off"

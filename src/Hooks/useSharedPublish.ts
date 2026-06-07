@@ -226,9 +226,9 @@ const diffItems = <T extends { id: string; name: string }>(prev: T[], next: T[])
 const diffSharedConfig = (prev: SharedConfig | null | undefined, next: SharedConfig, hadExistingFile: boolean): SharedItemChange[] => {
     const normalizedPrev = prev ? normalizeSharedConfig(prev) : null;
     const normalizedNext = normalizeSharedConfig(next);
-    if (!hadExistingFile) return [{ id: "inventory-config", name: "Cấu hình tồn kho", action: "added" }];
+    if (!hadExistingFile) return [{ id: "shared-config", name: "Cấu hình dùng chung", action: "added" }];
     if (stableJson(normalizedPrev) !== stableJson(normalizedNext)) {
-        return [{ id: "inventory-config", name: "Cấu hình tồn kho", action: "modified" }];
+        return [{ id: "shared-config", name: "Cấu hình dùng chung", action: "modified" }];
     }
     return [];
 };

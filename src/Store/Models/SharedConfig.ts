@@ -1,6 +1,30 @@
 import { IngredientPreservationCondition, IngredientShelfLife } from "./Ingredient";
 
 export type InventoryExpirationDefaults = Record<IngredientShelfLife, Record<IngredientPreservationCondition, number>>;
+export type NutritionGoalNutrientKey = "calories" | "protein" | "carbs" | "fat" | "saturatedFat" | "cholesterol" | "fiber" | "sugar" | "sodium" | "potassium" | "calcium" | "iron" | "vitaminA" | "vitaminC";
+export type NutritionGoalCriteriaDirection = "at_least" | "at_most" | "between";
+
+export type NutritionGoalCriterion = {
+    id: string;
+    nutrient: NutritionGoalNutrientKey;
+    direction: NutritionGoalCriteriaDirection;
+    min?: number;
+    max?: number;
+}
+
+export type NutritionGoal = {
+    id: string;
+    name: string;
+    description?: string;
+    color?: string;
+    criteria: NutritionGoalCriterion[];
+    createdAt?: string;
+    updatedAt?: string;
+}
+
+export type NutritionConfig = {
+    goals: NutritionGoal[];
+}
 
 export type InventoryHealthConfig = {
     lowStockAmount: number;
@@ -10,6 +34,7 @@ export type InventoryHealthConfig = {
 
 export type SharedConfig = {
     inventory: InventoryHealthConfig;
+    nutrition: NutritionConfig;
 }
 
 export const DEFAULT_INVENTORY_EXPIRATION_DEFAULTS: InventoryExpirationDefaults = {
@@ -26,8 +51,58 @@ export const DEFAULT_INVENTORY_HEALTH_CONFIG: InventoryHealthConfig = {
     expirationDefaults: DEFAULT_INVENTORY_EXPIRATION_DEFAULTS,
 };
 
+export const DEFAULT_NUTRITION_GOALS: NutritionGoal[] = [
+    {
+        id: "balanced-meal",
+        name: "Bữa cân bằng",
+        description: "Kcal vừa phải, đủ đạm và có chất xơ cho một khẩu phần.",
+        color: "#7436dc",
+        criteria: [
+            { id: "balanced-calories", nutrient: "calories", direction: "between", min: 350, max: 650 },
+            { id: "balanced-protein", nutrient: "protein", direction: "at_least", min: 18 },
+            { id: "balanced-fat", nutrient: "fat", direction: "at_most", max: 28 },
+            { id: "balanced-fiber", nutrient: "fiber", direction: "at_least", min: 4 },
+        ],
+    },
+    {
+        id: "high-protein",
+        name: "Giàu đạm",
+        description: "Ưu tiên món có lượng protein cao cho mỗi khẩu phần.",
+        color: "#1677ff",
+        criteria: [
+            { id: "high-protein-protein", nutrient: "protein", direction: "at_least", min: 28 },
+            { id: "high-protein-calories", nutrient: "calories", direction: "at_most", max: 750 },
+        ],
+    },
+    {
+        id: "light-calories",
+        name: "Nhẹ kcal",
+        description: "Ưu tiên món nhẹ năng lượng nhưng vẫn có đạm cơ bản.",
+        color: "#389e0d",
+        criteria: [
+            { id: "light-calories-calories", nutrient: "calories", direction: "at_most", max: 450 },
+            { id: "light-calories-protein", nutrient: "protein", direction: "at_least", min: 12 },
+        ],
+    },
+    {
+        id: "high-fiber",
+        name: "Nhiều chất xơ",
+        description: "Ưu tiên món có nhiều rau củ, đậu, ngũ cốc hoặc chất xơ.",
+        color: "#d48806",
+        criteria: [
+            { id: "high-fiber-fiber", nutrient: "fiber", direction: "at_least", min: 7 },
+            { id: "high-fiber-calories", nutrient: "calories", direction: "at_most", max: 700 },
+        ],
+    },
+];
+
+export const DEFAULT_NUTRITION_CONFIG: NutritionConfig = {
+    goals: DEFAULT_NUTRITION_GOALS,
+};
+
 export const DEFAULT_SHARED_CONFIG: SharedConfig = {
     inventory: DEFAULT_INVENTORY_HEALTH_CONFIG,
+    nutrition: DEFAULT_NUTRITION_CONFIG,
 };
 
 export const normalizeInventoryHealthConfig = (config?: Partial<InventoryHealthConfig> | null): InventoryHealthConfig => ({
@@ -46,6 +121,51 @@ export const normalizeInventoryHealthConfig = (config?: Partial<InventoryHealthC
     },
 });
 
+const normalizeNumber = (value: unknown): number | undefined => {
+    if (value === null || value === undefined || value === "") return undefined;
+    const parsed = Number(value);
+    return Number.isFinite(parsed) && parsed >= 0 ? Math.round(parsed * 10) / 10 : undefined;
+};
+
+export const normalizeNutritionGoals = (goals?: Partial<NutritionGoal>[] | null): NutritionGoal[] => {
+    const source = Array.isArray(goals) ? goals : DEFAULT_NUTRITION_GOALS;
+    return source
+        .map((goal, goalIndex) => {
+            const criteria = (goal.criteria ?? [])
+                .map((criterion, criterionIndex) => {
+                    const direction = criterion.direction === "at_most" || criterion.direction === "between" ? criterion.direction : "at_least";
+                    return {
+                        id: criterion.id || `${goal.id || `goal-${goalIndex}`}-criterion-${criterionIndex}`,
+                        nutrient: criterion.nutrient ?? "calories",
+                        direction,
+                        min: normalizeNumber(criterion.min),
+                        max: normalizeNumber(criterion.max),
+                    } as NutritionGoalCriterion;
+                })
+                .filter(criterion => {
+                    if (criterion.direction === "at_least") return criterion.min !== undefined;
+                    if (criterion.direction === "at_most") return criterion.max !== undefined;
+                    return criterion.min !== undefined && criterion.max !== undefined;
+                });
+
+            return {
+                id: goal.id || `nutrition-goal-${goalIndex}`,
+                name: (goal.name || "Mục tiêu dinh dưỡng").trim(),
+                description: goal.description?.trim(),
+                color: goal.color || DEFAULT_NUTRITION_GOALS[goalIndex % DEFAULT_NUTRITION_GOALS.length]?.color || "#7436dc",
+                criteria,
+                createdAt: goal.createdAt,
+                updatedAt: goal.updatedAt,
+            } as NutritionGoal;
+        })
+        .filter(goal => goal.name && goal.criteria.length > 0);
+};
+
+export const normalizeNutritionConfig = (config?: Partial<NutritionConfig> | null): NutritionConfig => ({
+    goals: normalizeNutritionGoals(config?.goals),
+});
+
 export const normalizeSharedConfig = (config?: Partial<SharedConfig> | null): SharedConfig => ({
     inventory: normalizeInventoryHealthConfig(config?.inventory),
+    nutrition: normalizeNutritionConfig(config?.nutrition),
 });

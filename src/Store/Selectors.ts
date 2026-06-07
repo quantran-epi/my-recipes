@@ -15,6 +15,11 @@ export const selectInventoryHealthConfig = createSelector(
     config => config.inventory
 );
 
+export const selectNutritionGoals = createSelector(
+    [selectSharedConfig],
+    config => config.nutrition.goals
+);
+
 export const selectIngredientsById = createSelector(
     [selectIngredients],
     ingredients => new Map(ingredients.map(item => [item.id, item]))

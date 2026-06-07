@@ -14,6 +14,7 @@ import { ShoppingListDetailScreen } from "@modules/ShoppingList/Screens/Shopping
 import { ShoppingListScreen } from "@modules/ShoppingList/Screens/ShoppingList.screen";
 import { DashboardScreen } from "@modules/Home/Screens/Dashboard.screen";
 import { DashboardAnalyticsScreen } from "@modules/Home/Screens/DashboardAnalytics.screen";
+import { NutritionGoalsScreen } from "@modules/Home/Screens/NutritionGoals.screen";
 import { SyncBackupHealthScreen } from "@modules/Home/Screens/SyncBackupHealth.screen";
 import { TemplatesScreen } from "@modules/Home/Screens/Templates.screen";
 import { ScheduledMealRouter } from "@modules/ScheduledMeal/Routing/ScheduledMealRouter";
@@ -26,6 +27,7 @@ export const RootRouter = () => {
             <Route path={RootRoutes.AuthorizedRoutes.Root()} element={<MasterPage />}>
                 <Route index element={<DashboardScreen />} />
                 <Route path={RootRoutes.AuthorizedRoutes.Analytics()} element={<DashboardAnalyticsScreen />} />
+                <Route path={RootRoutes.AuthorizedRoutes.NutritionGoals()} element={<NutritionGoalsScreen />} />
                 <Route path={RootRoutes.AuthorizedRoutes.Templates()} element={<TemplatesScreen />} />
                 <Route path={RootRoutes.AuthorizedRoutes.SyncBackupHealth()} element={<SyncBackupHealthScreen />} />
                 <Route path={RootRoutes.AuthorizedRoutes.ExpensePlanner()} element={<DishExpensePlannerScreen />} />
