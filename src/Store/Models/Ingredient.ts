@@ -15,6 +15,18 @@ export type IngredientPriceEstimate = {
     currency: IngredientPriceCurrency;
 }
 
+export type IngredientNutritionInfo = {
+    calories?: number;
+    protein?: number;
+    carbs?: number;
+    fat?: number;
+    fiber?: number;
+    sugar?: number;
+    sodium?: number;
+    amount: number;
+    unit: IngredientUnit;
+}
+
 export const INGREDIENT_SHELF_LIFE_OPTIONS: { value: IngredientShelfLife; label: string; description: string; color: string; emoji: string }[] = [
     { value: "very_short", label: "Rất ngắn",  description: "1–3 ngày (rau thơm, hải sản tươi)",        color: "#ff4d4f", emoji: "🔴" },
     { value: "short",      label: "Ngắn",       description: "3–7 ngày (thịt tươi, rau củ lá)",          color: "#fa8c16", emoji: "🟠" },
@@ -64,4 +76,5 @@ export type Ingredient = {
     inventoryUnits?: IngredientUnit[];
     recipeUnitConversions?: Partial<Record<IngredientUnit, number>>;
     priceEstimate?: IngredientPriceEstimate;
+    nutrition?: IngredientNutritionInfo;
 }

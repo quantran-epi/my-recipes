@@ -14,6 +14,7 @@ import { Typography } from "@components/Typography";
 import { useScreenTitle, useToggle, useAdminMode, usePagedVirtualItems } from "@hooks";
 import { InventoryHelper } from "@common/Helpers/InventoryHelper";
 import { IngredientUnitHelper } from "@common/Helpers/IngredientUnitHelper";
+import { IngredientNutritionHelper } from "@common/Helpers/IngredientNutritionHelper";
 import { Ingredient, IngredientInventory, INGREDIENT_CATEGORIES, INGREDIENT_PRESERVATION_OPTIONS, INGREDIENT_SHELF_LIFE_OPTIONS } from "@store/Models/Ingredient";
 import { InventoryHealthConfig } from "@store/Models/SharedConfig";
 import { removeIngredient } from "@store/Reducers/IngredientReducer";
@@ -44,7 +45,7 @@ const INGREDIENT_STOCK_FILTERS: { value: IngredientStockFilter; label: string }[
     { value: "always_available", label: "Luôn có" },
 ];
 
-const INGREDIENT_ROW_DEFAULT_HEIGHT = 166;
+const INGREDIENT_ROW_DEFAULT_HEIGHT = 184;
 const INGREDIENT_LOAD_MORE_THRESHOLD = 8;
 
 const filterRowStyle: React.CSSProperties = {
@@ -433,6 +434,7 @@ const IngredientItemComponent: React.FunctionComponent<IngredientItemProps> = (p
     const expiryBadge = nearestExpiry ? InventoryHelper.expiryBadge(nearestExpiry.daysLeft) : null;
     const inventoryUnits = IngredientUnitHelper.getInventoryUnits(props.item);
     const recipeUnits = IngredientUnitHelper.getRecipeUnits(props.item);
+    const nutrition = IngredientNutritionHelper.getNutrition(props.item);
     const visibleRecipeUnits = recipeUnits.slice(0, 4).join(", ");
     const extraRecipeUnitCount = Math.max(0, recipeUnits.length - 4);
     const inventoryStatus = props.item.alwaysAvailable
@@ -490,7 +492,7 @@ const IngredientItemComponent: React.FunctionComponent<IngredientItemProps> = (p
                         </div>
                     </div>
 
-                    <div style={{ display: "grid", gridTemplateColumns: "minmax(120px, 0.92fr) minmax(0, 1.08fr)", gap: 8, alignItems: "stretch" }}>
+                    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(118px, 1fr))", gap: 8, alignItems: "stretch" }}>
                         <button
                             type="button"
                             data-testid={`ingredient-inventory-button-${props.item.id}`}
@@ -521,6 +523,16 @@ const IngredientItemComponent: React.FunctionComponent<IngredientItemProps> = (p
                                 Nhập kho: {inventoryUnits.join(", ")}
                             </Typography.Text>
                         </div>
+
+                        {nutrition && <div style={{ minWidth: 0, display: "flex", flexDirection: "column", justifyContent: "center", gap: 4, border: "1px solid rgba(116,54,220,0.12)", borderRadius: 8, background: "#fbf9ff", padding: "7px 9px" }}>
+                            <Typography.Text type="secondary" style={{ fontSize: 11, lineHeight: "14px" }}>Dinh dưỡng</Typography.Text>
+                            <Typography.Text strong style={{ color: "#7436dc", fontSize: 13, lineHeight: "18px", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                                {IngredientNutritionHelper.formatCalories(nutrition.calories)}
+                            </Typography.Text>
+                            <Typography.Text type="secondary" style={{ fontSize: 11, lineHeight: "14px", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                                Đạm {IngredientNutritionHelper.formatMacro(nutrition.protein)} / {IngredientNutritionHelper.formatBasis(nutrition)}
+                            </Typography.Text>
+                        </div>}
                     </div>
 
                     {expiryBadge && <Typography.Text style={{ color: expiryBadge.color, fontSize: 12, lineHeight: "16px" }}>

@@ -7,12 +7,14 @@ import { Stack } from "@components/Layout/Stack"
 import { useMessage } from "@components/Message"
 import { SmartForm, useSmartForm } from "@components/SmartForm"
 import { nanoid } from "@reduxjs/toolkit"
-import { INGREDIENT_CATEGORIES, INGREDIENT_PRESERVATION_OPTIONS, INGREDIENT_SHELF_LIFE_OPTIONS, Ingredient, IngredientPriceEstimate, IngredientUnit } from "@store/Models/Ingredient"
+import { INGREDIENT_CATEGORIES, INGREDIENT_PRESERVATION_OPTIONS, INGREDIENT_SHELF_LIFE_OPTIONS, Ingredient, IngredientNutritionInfo, IngredientPriceEstimate, IngredientUnit } from "@store/Models/Ingredient"
 import { addIngredient } from "@store/Reducers/IngredientReducer"
 import { IngredientUnitHelper } from "@common/Helpers/IngredientUnitHelper"
 import { IngredientPriceHelper } from "@common/Helpers/IngredientPriceHelper"
+import { IngredientNutritionHelper } from "@common/Helpers/IngredientNutritionHelper"
 import { IngredientUnitRulesEditor } from "./IngredientUnitRulesEditor"
 import { IngredientPriceEstimateEditor } from "./IngredientPriceEstimateEditor"
+import { IngredientNutritionEditor } from "./IngredientNutritionEditor"
 import { useState } from "react"
 import { useDispatch } from "react-redux"
 
@@ -28,6 +30,7 @@ export const IngredientAddWidget = () => {
         IngredientUnitHelper.normalizeRecipeConversions("g", ["g", "kg"], {})
     );
     const [priceEstimate, setPriceEstimate] = useState<Partial<IngredientPriceEstimate>>(() => ({ amount: 1, unit: "kg" as IngredientUnit, currency: "VND" }));
+    const [nutrition, setNutrition] = useState<Partial<IngredientNutritionInfo>>(() => ({ amount: 100, unit: "g" }));
 
     const addIngredientForm = useSmartForm<Ingredient>({
         defaultValues: {
@@ -41,6 +44,7 @@ export const IngredientAddWidget = () => {
             inventoryUnits,
             recipeUnitConversions: conversionValues,
             priceEstimate: undefined,
+            nutrition: undefined,
         },
         onSubmit: (values) => {
             const error = IngredientUnitHelper.validateRules(values.transformValues);
@@ -51,6 +55,11 @@ export const IngredientAddWidget = () => {
             const priceError = IngredientPriceHelper.validatePriceEstimate(priceEstimate);
             if (priceError) {
                 message.error(priceError);
+                return;
+            }
+            const nutritionError = IngredientNutritionHelper.validateNutrition(nutrition);
+            if (nutritionError) {
+                message.error(nutritionError);
                 return;
             }
             dispatch(addIngredient(values.transformValues));
@@ -68,6 +77,7 @@ export const IngredientAddWidget = () => {
             inventoryUnits: { name: ObjectPropertyHelper.nameof(defaultValues, e => e.inventoryUnits), noMarkup: true },
             recipeUnitConversions: { name: ObjectPropertyHelper.nameof(defaultValues, e => e.recipeUnitConversions), noMarkup: true },
             priceEstimate: { name: ObjectPropertyHelper.nameof(defaultValues, e => e.priceEstimate), noMarkup: true },
+            nutrition: { name: ObjectPropertyHelper.nameof(defaultValues, e => e.nutrition), noMarkup: true },
         }),
         transformFunc: (values) => ({
             ...values,
@@ -76,6 +86,7 @@ export const IngredientAddWidget = () => {
             inventoryUnits: uniqueUnits([...inventoryUnits, baseUnit]),
             recipeUnitConversions: IngredientUnitHelper.normalizeRecipeConversions(baseUnit, recipeUnits, conversionValues),
             priceEstimate: IngredientPriceHelper.normalizePriceEstimate(priceEstimate),
+            nutrition: IngredientNutritionHelper.normalizeNutrition(nutrition, baseUnit),
         })
     })
 
@@ -146,6 +157,11 @@ export const IngredientAddWidget = () => {
             value={priceEstimate}
             unitOptions={uniqueUnits([...inventoryUnits, baseUnit])}
             onChange={setPriceEstimate}
+        />
+        <IngredientNutritionEditor
+            value={nutrition}
+            unitOptions={uniqueUnits([...recipeUnits, ...inventoryUnits, baseUnit])}
+            onChange={setNutrition}
         />
         <Stack fullwidth justify="flex-end">
             <Button onClick={_onSave}>Lưu</Button>

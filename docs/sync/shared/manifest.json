@@ -1,18 +1,838 @@
 {
   "schemaVersion": 2,
-  "updatedAt": "2026-06-07T13:50:13.291Z",
+  "updatedAt": "2026-06-07T14:07:07.200Z",
   "parts": {
     "ingredients": {
       "key": "ingredients",
       "path": "docs/sync/shared/ingredients.json",
-      "version": "2026-06-06T12:13:59.624Z",
-      "hash": "b56670594e084a2aafe9d40d68d977f9938afcfaa2fd402fc01977bc73984855",
+      "version": "2026-06-07T14:07:07.200Z",
+      "hash": "09f1bec7b3f1fb595ef2d16a58e4118ce094f8d4e0a704d9251fa190f5785820",
       "count": 165,
-      "updatedAt": "2026-06-06T12:13:59.624Z",
+      "updatedAt": "2026-06-07T14:07:07.200Z",
       "changes": [
+        {
+          "id": "Đậu phụQdYQjd3uDU",
+          "name": "Đậu phụ",
+          "action": "modified"
+        },
+        {
+          "id": "Đậu nontHeqcHqWEy",
+          "name": "Đậu non",
+          "action": "modified"
+        },
+        {
+          "id": "Hành láZtNmZbNswb",
+          "name": "Hành lá",
+          "action": "modified"
+        },
+        {
+          "id": "Hành tímYvb82U-VOH",
+          "name": "Hành tím",
+          "action": "modified"
+        },
+        {
+          "id": "Mùi tàuUQolO_X6zd",
+          "name": "Mùi tàu",
+          "action": "modified"
+        },
+        {
+          "id": "Mùi tajayFO1gKOJ",
+          "name": "Mùi ta",
+          "action": "modified"
+        },
+        {
+          "id": "Kinh giới90WanixOVC",
+          "name": "Kinh giới",
+          "action": "modified"
+        },
+        {
+          "id": "Tía tôiZc3rSS3Pf",
+          "name": "Tía tô",
+          "action": "modified"
+        },
+        {
+          "id": "Thìa là2Y2R1GD_jq",
+          "name": "Thìa là",
+          "action": "modified"
+        },
+        {
+          "id": "Lá lốtE7OA57EkX-",
+          "name": "Lá lốt",
+          "action": "modified"
+        },
+        {
+          "id": "Tỏi3NILO1jEd0",
+          "name": "Tỏi",
+          "action": "modified"
+        },
+        {
+          "id": "Hành tâyPsERexf4zd",
+          "name": "Hành tây",
+          "action": "modified"
+        },
+        {
+          "id": "Xà láchGY5tn2xg5J",
+          "name": "Xà lách",
+          "action": "modified"
+        },
+        {
+          "id": "Dưa chuộtiww2N4-K0c",
+          "name": "Dưa chuột",
+          "action": "modified"
+        },
+        {
+          "id": "Trứng gà72vN9igVwa",
+          "name": "Trứng gà",
+          "action": "modified"
+        },
+        {
+          "id": "Trứng vịt59-1eAcjqZ",
+          "name": "Trứng vịt",
+          "action": "modified"
+        },
+        {
+          "id": "Trứng cáNtiSxACUNP",
+          "name": "Trứng cá",
+          "action": "modified"
+        },
+        {
+          "id": "Thịt heo nạc vaiVXHDweEHeG",
+          "name": "Thịt heo nạc vai",
+          "action": "modified"
+        },
+        {
+          "id": "Thịt heo ba chỉtn-meEAQZu",
+          "name": "Thịt heo ba chỉ",
+          "action": "modified"
+        },
+        {
+          "id": "Sườn heo nonlic0JR5JmA",
+          "name": "Sườn heo non",
+          "action": "modified"
+        },
+        {
+          "id": "Sườn heo già2aDAA9ooHw",
+          "name": "Sườn heo già",
+          "action": "modified"
+        },
+        {
+          "id": "Mỡ heo tảng0WU-I2Ixi4",
+          "name": "Mỡ heo tảng",
+          "action": "modified"
+        },
+        {
+          "id": "Mỡ heo lỏngd_H3wfitXK",
+          "name": "Mỡ heo lỏng",
+          "action": "modified"
+        },
+        {
+          "id": "Gan heo2X9fQYeB8e",
+          "name": "Gan heo",
+          "action": "modified"
+        },
+        {
+          "id": "Tim heoCWf5HOGp1L",
+          "name": "Tim heo",
+          "action": "modified"
+        },
+        {
+          "id": "Cật heoIFzsT44y8n",
+          "name": "Cật heo",
+          "action": "modified"
+        },
+        {
+          "id": "Thịt bò nạmJ1_LlvskPv",
+          "name": "Thịt bò nạm",
+          "action": "modified"
+        },
+        {
+          "id": "Thịt bò gầuxg6qB7XSss",
+          "name": "Thịt bò gầu",
+          "action": "modified"
+        },
+        {
+          "id": "Sườn bòsZCwrc2GVy",
+          "name": "Sườn bò",
+          "action": "modified"
+        },
+        {
+          "id": "Thịt bò thănDyzpaj8qvS",
+          "name": "Thịt bò thăn",
+          "action": "modified"
+        },
         {
           "id": "Bụng cáYEwaP8LSBh",
           "name": "Bụng cá",
+          "action": "modified"
+        },
+        {
+          "id": "Đuôi cáTG7XKl6Ss9",
+          "name": "Đuôi cá",
+          "action": "modified"
+        },
+        {
+          "id": "Đầu cáZC-K1PBaKf",
+          "name": "Đầu cá",
+          "action": "modified"
+        },
+        {
+          "id": "Thịt gà đùi0vjCseh7j1",
+          "name": "Thịt gà đùi",
+          "action": "modified"
+        },
+        {
+          "id": "Thịt gà cánhugfciVhuZy",
+          "name": "Thịt gà cánh",
+          "action": "modified"
+        },
+        {
+          "id": "Xương gàRn56emeuiJ",
+          "name": "Xương gà",
+          "action": "modified"
+        },
+        {
+          "id": "Thịt gà ứcirYK34PGfJ",
+          "name": "Thịt gà ức",
+          "action": "modified"
+        },
+        {
+          "id": "Thịt heo xayTtz3UMTzNU",
+          "name": "Thịt heo xay",
+          "action": "modified"
+        },
+        {
+          "id": "Thịt vịtVdTLg_qlzR",
+          "name": "Thịt vịt",
+          "action": "modified"
+        },
+        {
+          "id": "Cà tímIfuFxVXDBv",
+          "name": "Cà tím",
+          "action": "modified"
+        },
+        {
+          "id": "Xương ống heos9WjV1vL1p",
+          "name": "Xương ống heo",
+          "action": "modified"
+        },
+        {
+          "id": "Đường trắngDH_YV6vOlJ",
+          "name": "Đường trắng",
+          "action": "modified"
+        },
+        {
+          "id": "Đường phènCgPf36wjMX",
+          "name": "Đường phèn",
+          "action": "modified"
+        },
+        {
+          "id": "Muối iotmxmFIcYWUb",
+          "name": "Muối iot",
+          "action": "modified"
+        },
+        {
+          "id": "Muối trắngrOsVaI3tKv",
+          "name": "Muối trắng",
+          "action": "modified"
+        },
+        {
+          "id": "Nước mắm9koIj5Fz3a",
+          "name": "Nước mắm",
+          "action": "modified"
+        },
+        {
+          "id": "Xì dầuJhjF6UAtE7",
+          "name": "Xì dầu",
+          "action": "modified"
+        },
+        {
+          "id": "Mật ongOr177EkX2-",
+          "name": "Mật ong",
+          "action": "modified"
+        },
+        {
+          "id": "Hạt tiêu4eEOesKltQ",
+          "name": "Hạt tiêu",
+          "action": "modified"
+        },
+        {
+          "id": "Dầu ănb13XIYIrDh",
+          "name": "Dầu ăn",
+          "action": "modified"
+        },
+        {
+          "id": "Bột điềuNNx_gW88pY",
+          "name": "Bột điều",
+          "action": "modified"
+        },
+        {
+          "id": "Chanh2c6lpZSaM4",
+          "name": "Chanh",
+          "action": "modified"
+        },
+        {
+          "id": "Quất1tbPuuy1rb",
+          "name": "Quất",
+          "action": "modified"
+        },
+        {
+          "id": "Giò lụa9aRWcTrL67",
+          "name": "Giò lụa",
+          "action": "modified"
+        },
+        {
+          "id": "Chả mỡGr-Mw11ezE",
+          "name": "Chả mỡ",
+          "action": "modified"
+        },
+        {
+          "id": "Mọc bò0l6Y3y4t0R",
+          "name": "Mọc bò",
+          "action": "modified"
+        },
+        {
+          "id": "Cua đồng_ZT1s1jy48",
+          "name": "Cua đồng",
+          "action": "modified"
+        },
+        {
+          "id": "Cà chuaZP4MdEXiO_",
+          "name": "Cà chua",
+          "action": "modified"
+        },
+        {
+          "id": "Bơ lạtbK-8VT5e-z",
+          "name": "Bơ lạt",
+          "action": "modified"
+        },
+        {
+          "id": "Ớt đỏ cay4cIqrjz_8U",
+          "name": "Ớt đỏ cay",
+          "action": "modified"
+        },
+        {
+          "id": "Ớt chuông đỏOH3gtce7jk",
+          "name": "Ớt chuông đỏ",
+          "action": "modified"
+        },
+        {
+          "id": "Ớt chuông xanh1o16kbL30u",
+          "name": "Ớt chuông xanh",
+          "action": "modified"
+        },
+        {
+          "id": "Ớt chuông vàngFLYc7PslEU",
+          "name": "Ớt chuông vàng",
+          "action": "modified"
+        },
+        {
+          "id": "Ớt xanh cayXUZVWVDT_Y",
+          "name": "Ớt xanh cay",
+          "action": "modified"
+        },
+        {
+          "id": "Tương ớt1mzBq-weXz",
+          "name": "Tương ớt",
+          "action": "modified"
+        },
+        {
+          "id": "Tương càiHkFzpVbMI",
+          "name": "Tương cà",
+          "action": "modified"
+        },
+        {
+          "id": "Ngải cứutipq4kHmOB",
+          "name": "Ngải cứu",
+          "action": "modified"
+        },
+        {
+          "id": "Hạt senAdqkHmtif3",
+          "name": "Hạt sen",
+          "action": "modified"
+        },
+        {
+          "id": "Gừngc-VE7hkDli",
+          "name": "Gừng",
+          "action": "modified"
+        },
+        {
+          "id": "Kỷ tửE9xT5QTAhj",
+          "name": "Kỷ tử",
+          "action": "modified"
+        },
+        {
+          "id": "Táo đỏqFV1jSTBGd",
+          "name": "Táo đỏ",
+          "action": "modified"
+        },
+        {
+          "id": "TáođenTRNPr0KCC-",
+          "name": "Táo đen",
+          "action": "modified"
+        },
+        {
+          "id": "DấmwpjvOTf7hW",
+          "name": "Dấm",
+          "action": "modified"
+        },
+        {
+          "id": "Phở khô2CgiH-Mb0I",
+          "name": "Phở khô",
+          "action": "modified"
+        },
+        {
+          "id": "Bún khôK-nYu2l5_h",
+          "name": "Bún khô",
+          "action": "modified"
+        },
+        {
+          "id": "SảN-nr3-BboO",
+          "name": "Sả",
+          "action": "modified"
+        },
+        {
+          "id": "QuếpC5s9J3cnj",
+          "name": "Quế",
+          "action": "modified"
+        },
+        {
+          "id": "Thảo quảkXyurFzxSF",
+          "name": "Thảo quả",
+          "action": "modified"
+        },
+        {
+          "id": "Hoa hồiFHXr32fLXp",
+          "name": "Hoa hồi",
+          "action": "modified"
+        },
+        {
+          "id": "Thịt bò bắpTmUfLzE2tl",
+          "name": "Thịt bò bắp",
+          "action": "modified"
+        },
+        {
+          "id": "Giá đỗLaF0woHgwA",
+          "name": "Giá đỗ",
+          "action": "modified"
+        },
+        {
+          "id": "Húng quếSnTL9FBfY0",
+          "name": "Húng quế",
+          "action": "modified"
+        },
+        {
+          "id": "Hoa chuốiTvAka0CYhm",
+          "name": "Hoa chuối",
+          "action": "modified"
+        },
+        {
+          "id": "Tiết bòfJRNveQPQa",
+          "name": "Tiết bò",
+          "action": "modified"
+        },
+        {
+          "id": "Tiết lợn_KUqzKbZRf",
+          "name": "Tiết lợn",
+          "action": "modified"
+        },
+        {
+          "id": "Chả cuaZmSmfXObKL",
+          "name": "Chả cua",
+          "action": "modified"
+        },
+        {
+          "id": "Mắm ruốc4d_D077Cg6",
+          "name": "Mắm ruốc",
+          "action": "modified"
+        },
+        {
+          "id": "Mắm tépFPEkwDw6dm",
+          "name": "Mắm tép",
+          "action": "modified"
+        },
+        {
+          "id": "DứaGu02Q4sahX",
+          "name": "Dứa",
+          "action": "modified"
+        },
+        {
+          "id": "Sữa đặckKXUK_y9VF",
+          "name": "Sữa đặc",
+          "action": "modified"
+        },
+        {
+          "id": "Ngũ vị hươngL2e0rt-Wrb",
+          "name": "Ngũ vị hương",
+          "action": "modified"
+        },
+        {
+          "id": "Rau cảiiFdmSyx5A0",
+          "name": "Rau cải ngồng",
+          "action": "modified"
+        },
+        {
+          "id": "Rau ngót5vruLe8l5U",
+          "name": "Rau ngót",
+          "action": "modified"
+        },
+        {
+          "id": "Cá rô đồngt2S76dzM1q",
+          "name": "Cá rô đồng",
+          "action": "modified"
+        },
+        {
+          "id": "Cá rô phisWoe0YXYMA",
+          "name": "Cá rô phi",
+          "action": "modified"
+        },
+        {
+          "id": "Rượu vangGKL1_2rRy_",
+          "name": "Rượu vang",
+          "action": "modified"
+        },
+        {
+          "id": "XoàiZenHCISCaR",
+          "name": "Xoài",
+          "action": "modified"
+        },
+        {
+          "id": "Lá nem cuốnhi2Vczb6dt",
+          "name": "Lá nem cuốn",
+          "action": "modified"
+        },
+        {
+          "id": "Lá nem ránYsP2p9gQpD",
+          "name": "Lá nem rán",
+          "action": "modified"
+        },
+        {
+          "id": "Xúc xíchv-K-3pPXWH",
+          "name": "Xúc xích",
+          "action": "modified"
+        },
+        {
+          "id": "Rau rămUSdFLbxJzV",
+          "name": "Rau răm",
+          "action": "modified"
+        },
+        {
+          "id": "Đậu bắpaLBLtkkAtg",
+          "name": "Đậu bắp",
+          "action": "modified"
+        },
+        {
+          "id": "Nấm kim châmmlA63sS5ey",
+          "name": "Nấm kim châm",
+          "action": "modified"
+        },
+        {
+          "id": "Nấm đùi gàOxusi8DbqC",
+          "name": "Nấm đùi gà",
+          "action": "modified"
+        },
+        {
+          "id": "Nấm hải sảnqTCA-l7FSn",
+          "name": "Nấm hải sản",
+          "action": "modified"
+        },
+        {
+          "id": "Bí đỏdfZiGA8n81",
+          "name": "Bí đỏ",
+          "action": "modified"
+        },
+        {
+          "id": "Bí đaovRa5fhBI4Z",
+          "name": "Bí đao",
+          "action": "modified"
+        },
+        {
+          "id": "Gạo nếpEjVT24T5Uq",
+          "name": "Gạo nếp",
+          "action": "modified"
+        },
+        {
+          "id": "Gạo tẻC_vFfi5R77",
+          "name": "Gạo tẻ",
+          "action": "modified"
+        },
+        {
+          "id": "Cá chépdGCZp0Kz0l",
+          "name": "Cá chép",
+          "action": "modified"
+        },
+        {
+          "id": "MiếnObDS-xNaoB",
+          "name": "Miến",
+          "action": "modified"
+        },
+        {
+          "id": "Mộc nhĩzQ75NeGAeu",
+          "name": "Mộc nhĩ",
+          "action": "modified"
+        },
+        {
+          "id": "Nấm hươngF3SfMXRu9p",
+          "name": "Nấm hương",
+          "action": "modified"
+        },
+        {
+          "id": "Cà rốtGB2tp6fqpw",
+          "name": "Cà rốt",
+          "action": "modified"
+        },
+        {
+          "id": "Dọc mùng-Ykee9LwhY",
+          "name": "Dọc mùng",
+          "action": "modified"
+        },
+        {
+          "id": "Lá dongmBYN9i2dtX",
+          "name": "Lá dong",
+          "action": "modified"
+        },
+        {
+          "id": "Lá chuốiQ8n4MaNj6n",
+          "name": "Lá chuối",
+          "action": "modified"
+        },
+        {
+          "id": "Bột gạo tẻOiZgdglJUz",
+          "name": "Bột gạo tẻ",
+          "action": "modified"
+        },
+        {
+          "id": "Bột gạo nếpJnLKNIfFnn",
+          "name": "Bột gạo nếp",
+          "action": "modified"
+        },
+        {
+          "id": "Bột mìpg1-aZIoDs",
+          "name": "Bột mì",
+          "action": "modified"
+        },
+        {
+          "id": "Bột năngho3LUqgeAO",
+          "name": "Bột năng",
+          "action": "modified"
+        },
+        {
+          "id": "Men nởiej8VSL_mG",
+          "name": "Men nở",
+          "action": "modified"
+        },
+        {
+          "id": "Nước9jnS_eO8Cv",
+          "name": "Nước",
+          "action": "modified"
+        },
+        {
+          "id": "Tôm sú4vHhSAcJTQ",
+          "name": "Tôm sú",
+          "action": "modified"
+        },
+        {
+          "id": "TépQ19gfL2cl1",
+          "name": "Tép",
+          "action": "modified"
+        },
+        {
+          "id": "Tôm nhỏWyLLGEkqA0",
+          "name": "Tôm nhỏ",
+          "action": "modified"
+        },
+        {
+          "id": "Sữa tươi không đườngHqQaWllTs2",
+          "name": "Sữa tươi không đường",
+          "action": "modified"
+        },
+        {
+          "id": "Vừng đenriz3jbwY9w",
+          "name": "Vừng đen",
+          "action": "modified"
+        },
+        {
+          "id": "Vừng trắng2HuELM4uwT",
+          "name": "Vừng trắng",
+          "action": "modified"
+        },
+        {
+          "id": "Đậu xanhnIxKmFNrRM",
+          "name": "Đậu xanh",
+          "action": "modified"
+        },
+        {
+          "id": "Đậu đỏ26Kvs2YJnx",
+          "name": "Đậu đỏ",
+          "action": "modified"
+        },
+        {
+          "id": "Đậu đenzQGtWTgGky",
+          "name": "Đậu đen",
+          "action": "modified"
+        },
+        {
+          "id": "Đậu nànhj17It1Wlhn",
+          "name": "Đậu nành",
+          "action": "modified"
+        },
+        {
+          "id": "Đậu que51Zk81TOZu",
+          "name": "Đậu que",
+          "action": "modified"
+        },
+        {
+          "id": "Khoai tâylAyMsTv486",
+          "name": "Khoai tây",
+          "action": "modified"
+        },
+        {
+          "id": "Khoai langqUx7MJBv9X",
+          "name": "Khoai lang",
+          "action": "modified"
+        },
+        {
+          "id": "Nước dừaaW0TqQ5HKb",
+          "name": "Nước dừa",
+          "action": "modified"
+        },
+        {
+          "id": "Dừa nạoqQdzvpztgD",
+          "name": "Dừa nạo",
+          "action": "modified"
+        },
+        {
+          "id": "Lá chanhiB3cqNxKdQ",
+          "name": "Lá chanh",
+          "action": "modified"
+        },
+        {
+          "id": "Trứng cútj_0gniwu4w",
+          "name": "Trứng cút",
+          "action": "modified"
+        },
+        {
+          "id": "Mực ốngLunhJeJvsh",
+          "name": "Mực ống",
+          "action": "modified"
+        },
+        {
+          "id": "Rau cần tây4JcCvsR3IE",
+          "name": "Rau cần tây",
+          "action": "modified"
+        },
+        {
+          "id": "Rau cần talpL5fenu9D",
+          "name": "Rau cần ta",
+          "action": "modified"
+        },
+        {
+          "id": "Rau bíywN7JoWrKo",
+          "name": "Rau bí",
+          "action": "modified"
+        },
+        {
+          "id": "Rau đay-OjyFKet0H",
+          "name": "Rau đay",
+          "action": "modified"
+        },
+        {
+          "id": "MướpUs4jbq5bn0",
+          "name": "Mướp",
+          "action": "modified"
+        },
+        {
+          "id": "Rau mồng tơiMCVFPgFWtb",
+          "name": "Rau mồng tơi",
+          "action": "modified"
+        },
+        {
+          "id": "Cốt dừa0fULSP8Mc7",
+          "name": "Cốt dừa",
+          "action": "modified"
+        },
+        {
+          "id": "Tóp mỡU2aR7-xY4p",
+          "name": "Tóp mỡ",
+          "action": "modified"
+        },
+        {
+          "id": "Rễ ngòfxPj2T9HiF",
+          "name": "Rễ ngò",
+          "action": "modified"
+        },
+        {
+          "id": "Củ cảikk2MGWKOnc",
+          "name": "Củ cải",
+          "action": "modified"
+        },
+        {
+          "id": "Đậu phộnggq3Fe10jOx",
+          "name": "Đậu phộng",
+          "action": "modified"
+        },
+        {
+          "id": "Tương đen (Tương ngọt)7RPgXnGGi2",
+          "name": "Tương đen (Tương ngọt)",
+          "action": "modified"
+        },
+        {
+          "id": "Tỏi tâyI-jCssQy3V",
+          "name": "Tỏi tây",
+          "action": "modified"
+        },
+        {
+          "id": "Nước màumi1ObkFY7D",
+          "name": "Nước màu",
+          "action": "modified"
+        },
+        {
+          "id": "Đường vàngNlPTxVKgvv",
+          "name": "Đường vàng",
+          "action": "modified"
+        },
+        {
+          "id": "NghệvGpWT6hE_4",
+          "name": "Nghệ",
+          "action": "modified"
+        },
+        {
+          "id": "Quả sấuCYO1R7pm-6",
+          "name": "Quả sấu",
+          "action": "modified"
+        },
+        {
+          "id": "Mía câyHeGHZwD6T2",
+          "name": "Mía cây",
+          "action": "modified"
+        },
+        {
+          "id": "Dưa cảiBOMOcKVr8B",
+          "name": "Dưa cải",
+          "action": "modified"
+        },
+        {
+          "id": "Rau cải canhE6FrtMfNND",
+          "name": "Rau cải canh",
+          "action": "modified"
+        },
+        {
+          "id": "Rau cải thìaTCzhEhy6rE",
+          "name": "Rau cải thìa",
+          "action": "modified"
+        },
+        {
+          "id": "Rau cải chípDjFZcdqEQz",
+          "name": "Rau cải chíp",
+          "action": "modified"
+        },
+        {
+          "id": "Đu đủAMID8jvebp",
+          "name": "Đu đủ",
+          "action": "modified"
+        },
+        {
+          "id": "Khoai mon-shared-20260601",
+          "name": "Khoai môn",
           "action": "modified"
         }
       ]
@@ -508,12 +1328,832 @@
       ]
     }
   },
-  "ingredientsVersion": "2026-06-06T12:13:59.624Z",
+  "ingredientsVersion": "2026-06-07T14:07:07.200Z",
   "dishesVersion": "2026-06-07T13:50:13.291Z",
   "ingredientChanges": [
     {
+      "id": "Đậu phụQdYQjd3uDU",
+      "name": "Đậu phụ",
+      "action": "modified"
+    },
+    {
+      "id": "Đậu nontHeqcHqWEy",
+      "name": "Đậu non",
+      "action": "modified"
+    },
+    {
+      "id": "Hành láZtNmZbNswb",
+      "name": "Hành lá",
+      "action": "modified"
+    },
+    {
+      "id": "Hành tímYvb82U-VOH",
+      "name": "Hành tím",
+      "action": "modified"
+    },
+    {
+      "id": "Mùi tàuUQolO_X6zd",
+      "name": "Mùi tàu",
+      "action": "modified"
+    },
+    {
+      "id": "Mùi tajayFO1gKOJ",
+      "name": "Mùi ta",
+      "action": "modified"
+    },
+    {
+      "id": "Kinh giới90WanixOVC",
+      "name": "Kinh giới",
+      "action": "modified"
+    },
+    {
+      "id": "Tía tôiZc3rSS3Pf",
+      "name": "Tía tô",
+      "action": "modified"
+    },
+    {
+      "id": "Thìa là2Y2R1GD_jq",
+      "name": "Thìa là",
+      "action": "modified"
+    },
+    {
+      "id": "Lá lốtE7OA57EkX-",
+      "name": "Lá lốt",
+      "action": "modified"
+    },
+    {
+      "id": "Tỏi3NILO1jEd0",
+      "name": "Tỏi",
+      "action": "modified"
+    },
+    {
+      "id": "Hành tâyPsERexf4zd",
+      "name": "Hành tây",
+      "action": "modified"
+    },
+    {
+      "id": "Xà láchGY5tn2xg5J",
+      "name": "Xà lách",
+      "action": "modified"
+    },
+    {
+      "id": "Dưa chuộtiww2N4-K0c",
+      "name": "Dưa chuột",
+      "action": "modified"
+    },
+    {
+      "id": "Trứng gà72vN9igVwa",
+      "name": "Trứng gà",
+      "action": "modified"
+    },
+    {
+      "id": "Trứng vịt59-1eAcjqZ",
+      "name": "Trứng vịt",
+      "action": "modified"
+    },
+    {
+      "id": "Trứng cáNtiSxACUNP",
+      "name": "Trứng cá",
+      "action": "modified"
+    },
+    {
+      "id": "Thịt heo nạc vaiVXHDweEHeG",
+      "name": "Thịt heo nạc vai",
+      "action": "modified"
+    },
+    {
+      "id": "Thịt heo ba chỉtn-meEAQZu",
+      "name": "Thịt heo ba chỉ",
+      "action": "modified"
+    },
+    {
+      "id": "Sườn heo nonlic0JR5JmA",
+      "name": "Sườn heo non",
+      "action": "modified"
+    },
+    {
+      "id": "Sườn heo già2aDAA9ooHw",
+      "name": "Sườn heo già",
+      "action": "modified"
+    },
+    {
+      "id": "Mỡ heo tảng0WU-I2Ixi4",
+      "name": "Mỡ heo tảng",
+      "action": "modified"
+    },
+    {
+      "id": "Mỡ heo lỏngd_H3wfitXK",
+      "name": "Mỡ heo lỏng",
+      "action": "modified"
+    },
+    {
+      "id": "Gan heo2X9fQYeB8e",
+      "name": "Gan heo",
+      "action": "modified"
+    },
+    {
+      "id": "Tim heoCWf5HOGp1L",
+      "name": "Tim heo",
+      "action": "modified"
+    },
+    {
+      "id": "Cật heoIFzsT44y8n",
+      "name": "Cật heo",
+      "action": "modified"
+    },
+    {
+      "id": "Thịt bò nạmJ1_LlvskPv",
+      "name": "Thịt bò nạm",
+      "action": "modified"
+    },
+    {
+      "id": "Thịt bò gầuxg6qB7XSss",
+      "name": "Thịt bò gầu",
+      "action": "modified"
+    },
+    {
+      "id": "Sườn bòsZCwrc2GVy",
+      "name": "Sườn bò",
+      "action": "modified"
+    },
+    {
+      "id": "Thịt bò thănDyzpaj8qvS",
+      "name": "Thịt bò thăn",
+      "action": "modified"
+    },
+    {
       "id": "Bụng cáYEwaP8LSBh",
       "name": "Bụng cá",
+      "action": "modified"
+    },
+    {
+      "id": "Đuôi cáTG7XKl6Ss9",
+      "name": "Đuôi cá",
+      "action": "modified"
+    },
+    {
+      "id": "Đầu cáZC-K1PBaKf",
+      "name": "Đầu cá",
+      "action": "modified"
+    },
+    {
+      "id": "Thịt gà đùi0vjCseh7j1",
+      "name": "Thịt gà đùi",
+      "action": "modified"
+    },
+    {
+      "id": "Thịt gà cánhugfciVhuZy",
+      "name": "Thịt gà cánh",
+      "action": "modified"
+    },
+    {
+      "id": "Xương gàRn56emeuiJ",
+      "name": "Xương gà",
+      "action": "modified"
+    },
+    {
+      "id": "Thịt gà ứcirYK34PGfJ",
+      "name": "Thịt gà ức",
+      "action": "modified"
+    },
+    {
+      "id": "Thịt heo xayTtz3UMTzNU",
+      "name": "Thịt heo xay",
+      "action": "modified"
+    },
+    {
+      "id": "Thịt vịtVdTLg_qlzR",
+      "name": "Thịt vịt",
+      "action": "modified"
+    },
+    {
+      "id": "Cà tímIfuFxVXDBv",
+      "name": "Cà tím",
+      "action": "modified"
+    },
+    {
+      "id": "Xương ống heos9WjV1vL1p",
+      "name": "Xương ống heo",
+      "action": "modified"
+    },
+    {
+      "id": "Đường trắngDH_YV6vOlJ",
+      "name": "Đường trắng",
+      "action": "modified"
+    },
+    {
+      "id": "Đường phènCgPf36wjMX",
+      "name": "Đường phèn",
+      "action": "modified"
+    },
+    {
+      "id": "Muối iotmxmFIcYWUb",
+      "name": "Muối iot",
+      "action": "modified"
+    },
+    {
+      "id": "Muối trắngrOsVaI3tKv",
+      "name": "Muối trắng",
+      "action": "modified"
+    },
+    {
+      "id": "Nước mắm9koIj5Fz3a",
+      "name": "Nước mắm",
+      "action": "modified"
+    },
+    {
+      "id": "Xì dầuJhjF6UAtE7",
+      "name": "Xì dầu",
+      "action": "modified"
+    },
+    {
+      "id": "Mật ongOr177EkX2-",
+      "name": "Mật ong",
+      "action": "modified"
+    },
+    {
+      "id": "Hạt tiêu4eEOesKltQ",
+      "name": "Hạt tiêu",
+      "action": "modified"
+    },
+    {
+      "id": "Dầu ănb13XIYIrDh",
+      "name": "Dầu ăn",
+      "action": "modified"
+    },
+    {
+      "id": "Bột điềuNNx_gW88pY",
+      "name": "Bột điều",
+      "action": "modified"
+    },
+    {
+      "id": "Chanh2c6lpZSaM4",
+      "name": "Chanh",
+      "action": "modified"
+    },
+    {
+      "id": "Quất1tbPuuy1rb",
+      "name": "Quất",
+      "action": "modified"
+    },
+    {
+      "id": "Giò lụa9aRWcTrL67",
+      "name": "Giò lụa",
+      "action": "modified"
+    },
+    {
+      "id": "Chả mỡGr-Mw11ezE",
+      "name": "Chả mỡ",
+      "action": "modified"
+    },
+    {
+      "id": "Mọc bò0l6Y3y4t0R",
+      "name": "Mọc bò",
+      "action": "modified"
+    },
+    {
+      "id": "Cua đồng_ZT1s1jy48",
+      "name": "Cua đồng",
+      "action": "modified"
+    },
+    {
+      "id": "Cà chuaZP4MdEXiO_",
+      "name": "Cà chua",
+      "action": "modified"
+    },
+    {
+      "id": "Bơ lạtbK-8VT5e-z",
+      "name": "Bơ lạt",
+      "action": "modified"
+    },
+    {
+      "id": "Ớt đỏ cay4cIqrjz_8U",
+      "name": "Ớt đỏ cay",
+      "action": "modified"
+    },
+    {
+      "id": "Ớt chuông đỏOH3gtce7jk",
+      "name": "Ớt chuông đỏ",
+      "action": "modified"
+    },
+    {
+      "id": "Ớt chuông xanh1o16kbL30u",
+      "name": "Ớt chuông xanh",
+      "action": "modified"
+    },
+    {
+      "id": "Ớt chuông vàngFLYc7PslEU",
+      "name": "Ớt chuông vàng",
+      "action": "modified"
+    },
+    {
+      "id": "Ớt xanh cayXUZVWVDT_Y",
+      "name": "Ớt xanh cay",
+      "action": "modified"
+    },
+    {
+      "id": "Tương ớt1mzBq-weXz",
+      "name": "Tương ớt",
+      "action": "modified"
+    },
+    {
+      "id": "Tương càiHkFzpVbMI",
+      "name": "Tương cà",
+      "action": "modified"
+    },
+    {
+      "id": "Ngải cứutipq4kHmOB",
+      "name": "Ngải cứu",
+      "action": "modified"
+    },
+    {
+      "id": "Hạt senAdqkHmtif3",
+      "name": "Hạt sen",
+      "action": "modified"
+    },
+    {
+      "id": "Gừngc-VE7hkDli",
+      "name": "Gừng",
+      "action": "modified"
+    },
+    {
+      "id": "Kỷ tửE9xT5QTAhj",
+      "name": "Kỷ tử",
+      "action": "modified"
+    },
+    {
+      "id": "Táo đỏqFV1jSTBGd",
+      "name": "Táo đỏ",
+      "action": "modified"
+    },
+    {
+      "id": "TáođenTRNPr0KCC-",
+      "name": "Táo đen",
+      "action": "modified"
+    },
+    {
+      "id": "DấmwpjvOTf7hW",
+      "name": "Dấm",
+      "action": "modified"
+    },
+    {
+      "id": "Phở khô2CgiH-Mb0I",
+      "name": "Phở khô",
+      "action": "modified"
+    },
+    {
+      "id": "Bún khôK-nYu2l5_h",
+      "name": "Bún khô",
+      "action": "modified"
+    },
+    {
+      "id": "SảN-nr3-BboO",
+      "name": "Sả",
+      "action": "modified"
+    },
+    {
+      "id": "QuếpC5s9J3cnj",
+      "name": "Quế",
+      "action": "modified"
+    },
+    {
+      "id": "Thảo quảkXyurFzxSF",
+      "name": "Thảo quả",
+      "action": "modified"
+    },
+    {
+      "id": "Hoa hồiFHXr32fLXp",
+      "name": "Hoa hồi",
+      "action": "modified"
+    },
+    {
+      "id": "Thịt bò bắpTmUfLzE2tl",
+      "name": "Thịt bò bắp",
+      "action": "modified"
+    },
+    {
+      "id": "Giá đỗLaF0woHgwA",
+      "name": "Giá đỗ",
+      "action": "modified"
+    },
+    {
+      "id": "Húng quếSnTL9FBfY0",
+      "name": "Húng quế",
+      "action": "modified"
+    },
+    {
+      "id": "Hoa chuốiTvAka0CYhm",
+      "name": "Hoa chuối",
+      "action": "modified"
+    },
+    {
+      "id": "Tiết bòfJRNveQPQa",
+      "name": "Tiết bò",
+      "action": "modified"
+    },
+    {
+      "id": "Tiết lợn_KUqzKbZRf",
+      "name": "Tiết lợn",
+      "action": "modified"
+    },
+    {
+      "id": "Chả cuaZmSmfXObKL",
+      "name": "Chả cua",
+      "action": "modified"
+    },
+    {
+      "id": "Mắm ruốc4d_D077Cg6",
+      "name": "Mắm ruốc",
+      "action": "modified"
+    },
+    {
+      "id": "Mắm tépFPEkwDw6dm",
+      "name": "Mắm tép",
+      "action": "modified"
+    },
+    {
+      "id": "DứaGu02Q4sahX",
+      "name": "Dứa",
+      "action": "modified"
+    },
+    {
+      "id": "Sữa đặckKXUK_y9VF",
+      "name": "Sữa đặc",
+      "action": "modified"
+    },
+    {
+      "id": "Ngũ vị hươngL2e0rt-Wrb",
+      "name": "Ngũ vị hương",
+      "action": "modified"
+    },
+    {
+      "id": "Rau cảiiFdmSyx5A0",
+      "name": "Rau cải ngồng",
+      "action": "modified"
+    },
+    {
+      "id": "Rau ngót5vruLe8l5U",
+      "name": "Rau ngót",
+      "action": "modified"
+    },
+    {
+      "id": "Cá rô đồngt2S76dzM1q",
+      "name": "Cá rô đồng",
+      "action": "modified"
+    },
+    {
+      "id": "Cá rô phisWoe0YXYMA",
+      "name": "Cá rô phi",
+      "action": "modified"
+    },
+    {
+      "id": "Rượu vangGKL1_2rRy_",
+      "name": "Rượu vang",
+      "action": "modified"
+    },
+    {
+      "id": "XoàiZenHCISCaR",
+      "name": "Xoài",
+      "action": "modified"
+    },
+    {
+      "id": "Lá nem cuốnhi2Vczb6dt",
+      "name": "Lá nem cuốn",
+      "action": "modified"
+    },
+    {
+      "id": "Lá nem ránYsP2p9gQpD",
+      "name": "Lá nem rán",
+      "action": "modified"
+    },
+    {
+      "id": "Xúc xíchv-K-3pPXWH",
+      "name": "Xúc xích",
+      "action": "modified"
+    },
+    {
+      "id": "Rau rămUSdFLbxJzV",
+      "name": "Rau răm",
+      "action": "modified"
+    },
+    {
+      "id": "Đậu bắpaLBLtkkAtg",
+      "name": "Đậu bắp",
+      "action": "modified"
+    },
+    {
+      "id": "Nấm kim châmmlA63sS5ey",
+      "name": "Nấm kim châm",
+      "action": "modified"
+    },
+    {
+      "id": "Nấm đùi gàOxusi8DbqC",
+      "name": "Nấm đùi gà",
+      "action": "modified"
+    },
+    {
+      "id": "Nấm hải sảnqTCA-l7FSn",
+      "name": "Nấm hải sản",
+      "action": "modified"
+    },
+    {
+      "id": "Bí đỏdfZiGA8n81",
+      "name": "Bí đỏ",
+      "action": "modified"
+    },
+    {
+      "id": "Bí đaovRa5fhBI4Z",
+      "name": "Bí đao",
+      "action": "modified"
+    },
+    {
+      "id": "Gạo nếpEjVT24T5Uq",
+      "name": "Gạo nếp",
+      "action": "modified"
+    },
+    {
+      "id": "Gạo tẻC_vFfi5R77",
+      "name": "Gạo tẻ",
+      "action": "modified"
+    },
+    {
+      "id": "Cá chépdGCZp0Kz0l",
+      "name": "Cá chép",
+      "action": "modified"
+    },
+    {
+      "id": "MiếnObDS-xNaoB",
+      "name": "Miến",
+      "action": "modified"
+    },
+    {
+      "id": "Mộc nhĩzQ75NeGAeu",
+      "name": "Mộc nhĩ",
+      "action": "modified"
+    },
+    {
+      "id": "Nấm hươngF3SfMXRu9p",
+      "name": "Nấm hương",
+      "action": "modified"
+    },
+    {
+      "id": "Cà rốtGB2tp6fqpw",
+      "name": "Cà rốt",
+      "action": "modified"
+    },
+    {
+      "id": "Dọc mùng-Ykee9LwhY",
+      "name": "Dọc mùng",
+      "action": "modified"
+    },
+    {
+      "id": "Lá dongmBYN9i2dtX",
+      "name": "Lá dong",
+      "action": "modified"
+    },
+    {
+      "id": "Lá chuốiQ8n4MaNj6n",
+      "name": "Lá chuối",
+      "action": "modified"
+    },
+    {
+      "id": "Bột gạo tẻOiZgdglJUz",
+      "name": "Bột gạo tẻ",
+      "action": "modified"
+    },
+    {
+      "id": "Bột gạo nếpJnLKNIfFnn",
+      "name": "Bột gạo nếp",
+      "action": "modified"
+    },
+    {
+      "id": "Bột mìpg1-aZIoDs",
+      "name": "Bột mì",
+      "action": "modified"
+    },
+    {
+      "id": "Bột năngho3LUqgeAO",
+      "name": "Bột năng",
+      "action": "modified"
+    },
+    {
+      "id": "Men nởiej8VSL_mG",
+      "name": "Men nở",
+      "action": "modified"
+    },
+    {
+      "id": "Nước9jnS_eO8Cv",
+      "name": "Nước",
+      "action": "modified"
+    },
+    {
+      "id": "Tôm sú4vHhSAcJTQ",
+      "name": "Tôm sú",
+      "action": "modified"
+    },
+    {
+      "id": "TépQ19gfL2cl1",
+      "name": "Tép",
+      "action": "modified"
+    },
+    {
+      "id": "Tôm nhỏWyLLGEkqA0",
+      "name": "Tôm nhỏ",
+      "action": "modified"
+    },
+    {
+      "id": "Sữa tươi không đườngHqQaWllTs2",
+      "name": "Sữa tươi không đường",
+      "action": "modified"
+    },
+    {
+      "id": "Vừng đenriz3jbwY9w",
+      "name": "Vừng đen",
+      "action": "modified"
+    },
+    {
+      "id": "Vừng trắng2HuELM4uwT",
+      "name": "Vừng trắng",
+      "action": "modified"
+    },
+    {
+      "id": "Đậu xanhnIxKmFNrRM",
+      "name": "Đậu xanh",
+      "action": "modified"
+    },
+    {
+      "id": "Đậu đỏ26Kvs2YJnx",
+      "name": "Đậu đỏ",
+      "action": "modified"
+    },
+    {
+      "id": "Đậu đenzQGtWTgGky",
+      "name": "Đậu đen",
+      "action": "modified"
+    },
+    {
+      "id": "Đậu nànhj17It1Wlhn",
+      "name": "Đậu nành",
+      "action": "modified"
+    },
+    {
+      "id": "Đậu que51Zk81TOZu",
+      "name": "Đậu que",
+      "action": "modified"
+    },
+    {
+      "id": "Khoai tâylAyMsTv486",
+      "name": "Khoai tây",
+      "action": "modified"
+    },
+    {
+      "id": "Khoai langqUx7MJBv9X",
+      "name": "Khoai lang",
+      "action": "modified"
+    },
+    {
+      "id": "Nước dừaaW0TqQ5HKb",
+      "name": "Nước dừa",
+      "action": "modified"
+    },
+    {
+      "id": "Dừa nạoqQdzvpztgD",
+      "name": "Dừa nạo",
+      "action": "modified"
+    },
+    {
+      "id": "Lá chanhiB3cqNxKdQ",
+      "name": "Lá chanh",
+      "action": "modified"
+    },
+    {
+      "id": "Trứng cútj_0gniwu4w",
+      "name": "Trứng cút",
+      "action": "modified"
+    },
+    {
+      "id": "Mực ốngLunhJeJvsh",
+      "name": "Mực ống",
+      "action": "modified"
+    },
+    {
+      "id": "Rau cần tây4JcCvsR3IE",
+      "name": "Rau cần tây",
+      "action": "modified"
+    },
+    {
+      "id": "Rau cần talpL5fenu9D",
+      "name": "Rau cần ta",
+      "action": "modified"
+    },
+    {
+      "id": "Rau bíywN7JoWrKo",
+      "name": "Rau bí",
+      "action": "modified"
+    },
+    {
+      "id": "Rau đay-OjyFKet0H",
+      "name": "Rau đay",
+      "action": "modified"
+    },
+    {
+      "id": "MướpUs4jbq5bn0",
+      "name": "Mướp",
+      "action": "modified"
+    },
+    {
+      "id": "Rau mồng tơiMCVFPgFWtb",
+      "name": "Rau mồng tơi",
+      "action": "modified"
+    },
+    {
+      "id": "Cốt dừa0fULSP8Mc7",
+      "name": "Cốt dừa",
+      "action": "modified"
+    },
+    {
+      "id": "Tóp mỡU2aR7-xY4p",
+      "name": "Tóp mỡ",
+      "action": "modified"
+    },
+    {
+      "id": "Rễ ngòfxPj2T9HiF",
+      "name": "Rễ ngò",
+      "action": "modified"
+    },
+    {
+      "id": "Củ cảikk2MGWKOnc",
+      "name": "Củ cải",
+      "action": "modified"
+    },
+    {
+      "id": "Đậu phộnggq3Fe10jOx",
+      "name": "Đậu phộng",
+      "action": "modified"
+    },
+    {
+      "id": "Tương đen (Tương ngọt)7RPgXnGGi2",
+      "name": "Tương đen (Tương ngọt)",
+      "action": "modified"
+    },
+    {
+      "id": "Tỏi tâyI-jCssQy3V",
+      "name": "Tỏi tây",
+      "action": "modified"
+    },
+    {
+      "id": "Nước màumi1ObkFY7D",
+      "name": "Nước màu",
+      "action": "modified"
+    },
+    {
+      "id": "Đường vàngNlPTxVKgvv",
+      "name": "Đường vàng",
+      "action": "modified"
+    },
+    {
+      "id": "NghệvGpWT6hE_4",
+      "name": "Nghệ",
+      "action": "modified"
+    },
+    {
+      "id": "Quả sấuCYO1R7pm-6",
+      "name": "Quả sấu",
+      "action": "modified"
+    },
+    {
+      "id": "Mía câyHeGHZwD6T2",
+      "name": "Mía cây",
+      "action": "modified"
+    },
+    {
+      "id": "Dưa cảiBOMOcKVr8B",
+      "name": "Dưa cải",
+      "action": "modified"
+    },
+    {
+      "id": "Rau cải canhE6FrtMfNND",
+      "name": "Rau cải canh",
+      "action": "modified"
+    },
+    {
+      "id": "Rau cải thìaTCzhEhy6rE",
+      "name": "Rau cải thìa",
+      "action": "modified"
+    },
+    {
+      "id": "Rau cải chípDjFZcdqEQz",
+      "name": "Rau cải chíp",
+      "action": "modified"
+    },
+    {
+      "id": "Đu đủAMID8jvebp",
+      "name": "Đu đủ",
+      "action": "modified"
+    },
+    {
+      "id": "Khoai mon-shared-20260601",
+      "name": "Khoai môn",
       "action": "modified"
     }
   ],

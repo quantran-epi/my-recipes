@@ -20,6 +20,17 @@
       "amount": 1,
       "unit": "kg",
       "currency": "VND"
+    },
+    "nutrition": {
+      "amount": 100,
+      "unit": "g",
+      "calories": 76,
+      "protein": 8.1,
+      "carbs": 1.9,
+      "fat": 4.8,
+      "fiber": 0.3,
+      "sugar": 0.6,
+      "sodium": 7
     }
   },
   {
@@ -43,6 +54,17 @@
       "amount": 1,
       "unit": "kg",
       "currency": "VND"
+    },
+    "nutrition": {
+      "amount": 100,
+      "unit": "g",
+      "calories": 55,
+      "protein": 5.3,
+      "carbs": 2.1,
+      "fat": 3,
+      "fiber": 0.2,
+      "sugar": 0.8,
+      "sodium": 6
     }
   },
   {
@@ -66,6 +88,17 @@
       "amount": 1,
       "unit": "kg",
       "currency": "VND"
+    },
+    "nutrition": {
+      "amount": 100,
+      "unit": "g",
+      "calories": 35,
+      "protein": 2.5,
+      "carbs": 6,
+      "fat": 0.5,
+      "fiber": 3,
+      "sugar": 1,
+      "sodium": 30
     }
   },
   {
@@ -91,6 +124,17 @@
       "amount": 1,
       "unit": "kg",
       "currency": "VND"
+    },
+    "nutrition": {
+      "amount": 100,
+      "unit": "g",
+      "calories": 60,
+      "protein": 2,
+      "carbs": 13,
+      "fat": 0.3,
+      "fiber": 2,
+      "sugar": 4,
+      "sodium": 12
     }
   },
   {
@@ -114,6 +158,17 @@
       "amount": 1,
       "unit": "kg",
       "currency": "VND"
+    },
+    "nutrition": {
+      "amount": 100,
+      "unit": "g",
+      "calories": 35,
+      "protein": 2.5,
+      "carbs": 6,
+      "fat": 0.5,
+      "fiber": 3,
+      "sugar": 1,
+      "sodium": 30
     }
   },
   {
@@ -137,6 +192,17 @@
       "amount": 1,
       "unit": "kg",
       "currency": "VND"
+    },
+    "nutrition": {
+      "amount": 100,
+      "unit": "g",
+      "calories": 35,
+      "protein": 2.5,
+      "carbs": 6,
+      "fat": 0.5,
+      "fiber": 3,
+      "sugar": 1,
+      "sodium": 30
     }
   },
   {
@@ -160,6 +226,17 @@
       "amount": 1,
       "unit": "kg",
       "currency": "VND"
+    },
+    "nutrition": {
+      "amount": 100,
+      "unit": "g",
+      "calories": 35,
+      "protein": 2.5,
+      "carbs": 6,
+      "fat": 0.5,
+      "fiber": 3,
+      "sugar": 1,
+      "sodium": 30
     }
   },
   {
@@ -183,6 +260,17 @@
       "amount": 1,
       "unit": "kg",
       "currency": "VND"
+    },
+    "nutrition": {
+      "amount": 100,
+      "unit": "g",
+      "calories": 35,
+      "protein": 2.5,
+      "carbs": 6,
+      "fat": 0.5,
+      "fiber": 3,
+      "sugar": 1,
+      "sodium": 30
     }
   },
   {
@@ -206,6 +294,17 @@
       "amount": 1,
       "unit": "kg",
       "currency": "VND"
+    },
+    "nutrition": {
+      "amount": 100,
+      "unit": "g",
+      "calories": 35,
+      "protein": 2.5,
+      "carbs": 6,
+      "fat": 0.5,
+      "fiber": 3,
+      "sugar": 1,
+      "sodium": 30
     }
   },
   {
@@ -227,6 +326,17 @@
       "amount": 1,
       "unit": "lá",
       "currency": "VND"
+    },
+    "nutrition": {
+      "amount": 100,
+      "unit": "g",
+      "calories": 35,
+      "protein": 2.5,
+      "carbs": 6,
+      "fat": 0.5,
+      "fiber": 3,
+      "sugar": 1,
+      "sodium": 30
     }
   },
   {
@@ -254,6 +364,17 @@
       "amount": 1,
       "unit": "kg",
       "currency": "VND"
+    },
+    "nutrition": {
+      "amount": 100,
+      "unit": "g",
+      "calories": 60,
+      "protein": 2,
+      "carbs": 13,
+      "fat": 0.3,
+      "fiber": 2,
+      "sugar": 4,
+      "sodium": 12
     }
   },
   {
@@ -279,6 +400,17 @@
       "amount": 1,
       "unit": "kg",
       "currency": "VND"
+    },
+    "nutrition": {
+      "amount": 100,
+      "unit": "g",
+      "calories": 60,
+      "protein": 2,
+      "carbs": 13,
+      "fat": 0.3,
+      "fiber": 2,
+      "sugar": 4,
+      "sodium": 12
     }
   },
   {
@@ -304,6 +436,17 @@
       "amount": 1,
       "unit": "kg",
       "currency": "VND"
+    },
+    "nutrition": {
+      "amount": 100,
+      "unit": "g",
+      "calories": 28,
+      "protein": 2.1,
+      "carbs": 5,
+      "fat": 0.3,
+      "fiber": 2.3,
+      "sugar": 1.8,
+      "sodium": 25
     }
   },
   {
@@ -329,6 +472,17 @@
       "amount": 1,
       "unit": "kg",
       "currency": "VND"
+    },
+    "nutrition": {
+      "amount": 100,
+      "unit": "g",
+      "calories": 15,
+      "protein": 0.7,
+      "carbs": 3.6,
+      "fat": 0.1,
+      "fiber": 0.5,
+      "sugar": 1.7,
+      "sodium": 2
     }
   },
   {
@@ -350,6 +504,17 @@
       "amount": 1,
       "unit": "quả",
       "currency": "VND"
+    },
+    "nutrition": {
+      "amount": 100,
+      "unit": "g",
+      "calories": 143,
+      "protein": 12.6,
+      "carbs": 0.7,
+      "fat": 9.5,
+      "fiber": 0,
+      "sugar": 0.4,
+      "sodium": 142
     }
   },
   {
@@ -371,6 +536,17 @@
       "amount": 1,
       "unit": "quả",
       "currency": "VND"
+    },
+    "nutrition": {
+      "amount": 100,
+      "unit": "g",
+      "calories": 185,
+      "protein": 12.8,
+      "carbs": 1.5,
+      "fat": 13.8,
+      "fiber": 0,
+      "sugar": 1,
+      "sodium": 146
     }
   },
   {
@@ -394,6 +570,17 @@
       "amount": 1,
       "unit": "kg",
       "currency": "VND"
+    },
+    "nutrition": {
+      "amount": 100,
+      "unit": "g",
+      "calories": 143,
+      "protein": 22.3,
+      "carbs": 1.5,
+      "fat": 6.4,
+      "fiber": 0,
+      "sugar": 0,
+      "sodium": 91
     }
   },
   {
@@ -417,6 +604,17 @@
       "amount": 1,
       "unit": "kg",
       "currency": "VND"
+    },
+    "nutrition": {
+      "amount": 100,
+      "unit": "g",
+      "calories": 242,
+      "protein": 27,
+      "carbs": 0,
+      "fat": 14,
+      "fiber": 0,
+      "sugar": 0,
+      "sodium": 62
     }
   },
   {
@@ -440,6 +638,17 @@
       "amount": 1,
       "unit": "kg",
       "currency": "VND"
+    },
+    "nutrition": {
+      "amount": 100,
+      "unit": "g",
+      "calories": 518,
+      "protein": 9.3,
+      "carbs": 0,
+      "fat": 53,
+      "fiber": 0,
+      "sugar": 0,
+      "sodium": 32
     }
   },
   {
@@ -463,6 +672,17 @@
       "amount": 1,
       "unit": "kg",
       "currency": "VND"
+    },
+    "nutrition": {
+      "amount": 100,
+      "unit": "g",
+      "calories": 290,
+      "protein": 24,
+      "carbs": 0,
+      "fat": 21,
+      "fiber": 0,
+      "sugar": 0,
+      "sodium": 70
     }
   },
   {
@@ -486,6 +706,17 @@
       "amount": 1,
       "unit": "kg",
       "currency": "VND"
+    },
+    "nutrition": {
+      "amount": 100,
+      "unit": "g",
+      "calories": 290,
+      "protein": 24,
+      "carbs": 0,
+      "fat": 21,
+      "fiber": 0,
+      "sugar": 0,
+      "sodium": 70
     }
   },
   {
@@ -509,6 +740,17 @@
       "amount": 1,
       "unit": "kg",
       "currency": "VND"
+    },
+    "nutrition": {
+      "amount": 100,
+      "unit": "g",
+      "calories": 902,
+      "protein": 0,
+      "carbs": 0,
+      "fat": 100,
+      "fiber": 0,
+      "sugar": 0,
+      "sodium": 0
     }
   },
   {
@@ -532,6 +774,17 @@
       "amount": 1,
       "unit": "lít",
       "currency": "VND"
+    },
+    "nutrition": {
+      "amount": 100,
+      "unit": "ml",
+      "calories": 902,
+      "protein": 0,
+      "carbs": 0,
+      "fat": 100,
+      "fiber": 0,
+      "sugar": 0,
+      "sodium": 0
     }
   },
   {
@@ -555,6 +808,17 @@
       "amount": 1,
       "unit": "kg",
       "currency": "VND"
+    },
+    "nutrition": {
+      "amount": 100,
+      "unit": "g",
+      "calories": 165,
+      "protein": 26,
+      "carbs": 3.8,
+      "fat": 4.4,
+      "fiber": 0,
+      "sugar": 0,
+      "sodium": 76
     }
   },
   {
@@ -578,6 +842,17 @@
       "amount": 1,
       "unit": "kg",
       "currency": "VND"
+    },
+    "nutrition": {
+      "amount": 100,
+      "unit": "g",
+      "calories": 148,
+      "protein": 17.3,
+      "carbs": 1,
+      "fat": 6,
+      "fiber": 0,
+      "sugar": 0,
+      "sodium": 89
     }
   },
   {
@@ -601,6 +876,17 @@
       "amount": 1,
       "unit": "kg",
       "currency": "VND"
+    },
+    "nutrition": {
+      "amount": 100,
+      "unit": "g",
+      "calories": 100,
+      "protein": 16.5,
+      "carbs": 0.8,
+      "fat": 3.2,
+      "fiber": 0,
+      "sugar": 0,
+      "sodium": 182
     }
   },
   {
@@ -624,6 +910,17 @@
       "amount": 1,
       "unit": "kg",
       "currency": "VND"
+    },
+    "nutrition": {
+      "amount": 100,
+      "unit": "g",
+      "calories": 250,
+      "protein": 26,
+      "carbs": 0,
+      "fat": 15,
+      "fiber": 0,
+      "sugar": 0,
+      "sodium": 72
     }
   },
   {
@@ -647,6 +944,17 @@
       "amount": 1,
       "unit": "kg",
       "currency": "VND"
+    },
+    "nutrition": {
+      "amount": 100,
+      "unit": "g",
+      "calories": 250,
+      "protein": 26,
+      "carbs": 0,
+      "fat": 15,
+      "fiber": 0,
+      "sugar": 0,
+      "sodium": 72
     }
   },
   {
@@ -670,6 +978,17 @@
       "amount": 1,
       "unit": "kg",
       "currency": "VND"
+    },
+    "nutrition": {
+      "amount": 100,
+      "unit": "g",
+      "calories": 320,
+      "protein": 22,
+      "carbs": 0,
+      "fat": 25,
+      "fiber": 0,
+      "sugar": 0,
+      "sodium": 65
     }
   },
   {
@@ -693,6 +1012,17 @@
       "amount": 1,
       "unit": "kg",
       "currency": "VND"
+    },
+    "nutrition": {
+      "amount": 100,
+      "unit": "g",
+      "calories": 250,
+      "protein": 26,
+      "carbs": 0,
+      "fat": 15,
+      "fiber": 0,
+      "sugar": 0,
+      "sodium": 72
     }
   },
   {
@@ -717,7 +1047,18 @@
     "category": "Hải sản",
     "shelfLife": "very_short",
     "preservationCondition": "freezer",
-    "alwaysAvailable": false
+    "alwaysAvailable": false,
+    "nutrition": {
+      "amount": 100,
+      "unit": "g",
+      "calories": 120,
+      "protein": 20,
+      "carbs": 0,
+      "fat": 4,
+      "fiber": 0,
+      "sugar": 0,
+      "sodium": 60
+    }
   },
   {
     "id": "Đuôi cáTG7XKl6Ss9",
@@ -740,6 +1081,17 @@
       "amount": 1,
       "unit": "kg",
       "currency": "VND"
+    },
+    "nutrition": {
+      "amount": 100,
+      "unit": "g",
+      "calories": 120,
+      "protein": 20,
+      "carbs": 0,
+      "fat": 4,
+      "fiber": 0,
+      "sugar": 0,
+      "sodium": 60
     }
   },
   {
@@ -763,6 +1115,17 @@
       "amount": 1,
       "unit": "kg",
       "currency": "VND"
+    },
+    "nutrition": {
+      "amount": 100,
+      "unit": "g",
+      "calories": 120,
+      "protein": 20,
+      "carbs": 0,
+      "fat": 4,
+      "fiber": 0,
+      "sugar": 0,
+      "sodium": 60
     }
   },
   {
@@ -786,6 +1149,17 @@
       "amount": 1,
       "unit": "kg",
       "currency": "VND"
+    },
+    "nutrition": {
+      "amount": 100,
+      "unit": "g",
+      "calories": 215,
+      "protein": 18,
+      "carbs": 0,
+      "fat": 15,
+      "fiber": 0,
+      "sugar": 0,
+      "sodium": 82
     }
   },
   {
@@ -809,6 +1183,17 @@
       "amount": 1,
       "unit": "kg",
       "currency": "VND"
+    },
+    "nutrition": {
+      "amount": 100,
+      "unit": "g",
+      "calories": 203,
+      "protein": 30,
+      "carbs": 0,
+      "fat": 8.1,
+      "fiber": 0,
+      "sugar": 0,
+      "sodium": 87
     }
   },
   {
@@ -832,6 +1217,17 @@
       "amount": 1,
       "unit": "kg",
       "currency": "VND"
+    },
+    "nutrition": {
+      "amount": 100,
+      "unit": "g",
+      "calories": 190,
+      "protein": 18,
+      "carbs": 0,
+      "fat": 12,
+      "fiber": 0,
+      "sugar": 0,
+      "sodium": 80
     }
   },
   {
@@ -855,6 +1251,17 @@
       "amount": 1,
       "unit": "kg",
       "currency": "VND"
+    },
+    "nutrition": {
+      "amount": 100,
+      "unit": "g",
+      "calories": 165,
+      "protein": 31,
+      "carbs": 0,
+      "fat": 3.6,
+      "fiber": 0,
+      "sugar": 0,
+      "sodium": 74
     }
   },
   {
@@ -878,6 +1285,17 @@
       "amount": 1,
       "unit": "kg",
       "currency": "VND"
+    },
+    "nutrition": {
+      "amount": 100,
+      "unit": "g",
+      "calories": 242,
+      "protein": 27,
+      "carbs": 0,
+      "fat": 14,
+      "fiber": 0,
+      "sugar": 0,
+      "sodium": 62
     }
   },
   {
@@ -901,6 +1319,17 @@
       "amount": 1,
       "unit": "kg",
       "currency": "VND"
+    },
+    "nutrition": {
+      "amount": 100,
+      "unit": "g",
+      "calories": 337,
+      "protein": 19,
+      "carbs": 0,
+      "fat": 28,
+      "fiber": 0,
+      "sugar": 0,
+      "sodium": 89
     }
   },
   {
@@ -926,6 +1355,17 @@
       "amount": 1,
       "unit": "kg",
       "currency": "VND"
+    },
+    "nutrition": {
+      "amount": 100,
+      "unit": "g",
+      "calories": 25,
+      "protein": 1,
+      "carbs": 5.9,
+      "fat": 0.2,
+      "fiber": 3,
+      "sugar": 3.5,
+      "sodium": 2
     }
   },
   {
@@ -949,6 +1389,17 @@
       "amount": 1,
       "unit": "kg",
       "currency": "VND"
+    },
+    "nutrition": {
+      "amount": 100,
+      "unit": "g",
+      "calories": 220,
+      "protein": 18,
+      "carbs": 0,
+      "fat": 16,
+      "fiber": 0,
+      "sugar": 0,
+      "sodium": 75
     }
   },
   {
@@ -973,6 +1424,17 @@
       "amount": 1,
       "unit": "kg",
       "currency": "VND"
+    },
+    "nutrition": {
+      "amount": 100,
+      "unit": "g",
+      "calories": 387,
+      "protein": 0,
+      "carbs": 100,
+      "fat": 0,
+      "fiber": 0,
+      "sugar": 100,
+      "sodium": 1
     }
   },
   {
@@ -997,6 +1459,17 @@
       "amount": 1,
       "unit": "kg",
       "currency": "VND"
+    },
+    "nutrition": {
+      "amount": 100,
+      "unit": "g",
+      "calories": 387,
+      "protein": 0,
+      "carbs": 100,
+      "fat": 0,
+      "fiber": 0,
+      "sugar": 100,
+      "sodium": 1
     }
   },
   {
@@ -1021,6 +1494,17 @@
       "amount": 1,
       "unit": "kg",
       "currency": "VND"
+    },
+    "nutrition": {
+      "amount": 100,
+      "unit": "g",
+      "calories": 0,
+      "protein": 0,
+      "carbs": 0,
+      "fat": 0,
+      "fiber": 0,
+      "sugar": 0,
+      "sodium": 38758
     }
   },
   {
@@ -1044,6 +1528,17 @@
       "amount": 1,
       "unit": "kg",
       "currency": "VND"
+    },
+    "nutrition": {
+      "amount": 100,
+      "unit": "g",
+      "calories": 0,
+      "protein": 0,
+      "carbs": 0,
+      "fat": 0,
+      "fiber": 0,
+      "sugar": 0,
+      "sodium": 38758
     }
   },
   {
@@ -1068,6 +1563,17 @@
       "amount": 1,
       "unit": "lít",
       "currency": "VND"
+    },
+    "nutrition": {
+      "amount": 100,
+      "unit": "ml",
+      "calories": 35,
+      "protein": 5,
+      "carbs": 3,
+      "fat": 0,
+      "fiber": 0,
+      "sugar": 3,
+      "sodium": 7800
     }
   },
   {
@@ -1092,6 +1598,17 @@
       "amount": 1,
       "unit": "lít",
       "currency": "VND"
+    },
+    "nutrition": {
+      "amount": 100,
+      "unit": "ml",
+      "calories": 53,
+      "protein": 8.1,
+      "carbs": 4.9,
+      "fat": 0.6,
+      "fiber": 0.8,
+      "sugar": 0.4,
+      "sodium": 5637
     }
   },
   {
@@ -1116,6 +1633,17 @@
       "amount": 1,
       "unit": "lít",
       "currency": "VND"
+    },
+    "nutrition": {
+      "amount": 100,
+      "unit": "g",
+      "calories": 304,
+      "protein": 0.3,
+      "carbs": 82.4,
+      "fat": 0,
+      "fiber": 0.2,
+      "sugar": 82.1,
+      "sodium": 4
     }
   },
   {
@@ -1140,6 +1668,17 @@
       "amount": 1,
       "unit": "kg",
       "currency": "VND"
+    },
+    "nutrition": {
+      "amount": 100,
+      "unit": "g",
+      "calories": 280,
+      "protein": 8,
+      "carbs": 55,
+      "fat": 8,
+      "fiber": 20,
+      "sugar": 2,
+      "sodium": 40
     }
   },
   {
@@ -1164,6 +1703,17 @@
       "amount": 1,
       "unit": "lít",
       "currency": "VND"
+    },
+    "nutrition": {
+      "amount": 100,
+      "unit": "ml",
+      "calories": 884,
+      "protein": 0,
+      "carbs": 0,
+      "fat": 100,
+      "fiber": 0,
+      "sugar": 0,
+      "sodium": 0
     }
   },
   {
@@ -1188,6 +1738,17 @@
       "amount": 1,
       "unit": "kg",
       "currency": "VND"
+    },
+    "nutrition": {
+      "amount": 100,
+      "unit": "g",
+      "calories": 280,
+      "protein": 8,
+      "carbs": 55,
+      "fat": 8,
+      "fiber": 20,
+      "sugar": 2,
+      "sodium": 40
     }
   },
   {
@@ -1213,6 +1774,17 @@
       "amount": 1,
       "unit": "quả",
       "currency": "VND"
+    },
+    "nutrition": {
+      "amount": 100,
+      "unit": "g",
+      "calories": 30,
+      "protein": 0.7,
+      "carbs": 10,
+      "fat": 0.2,
+      "fiber": 2.8,
+      "sugar": 2.5,
+      "sodium": 2
     }
   },
   {
@@ -1234,6 +1806,17 @@
       "amount": 1,
       "unit": "quả",
       "currency": "VND"
+    },
+    "nutrition": {
+      "amount": 100,
+      "unit": "g",
+      "calories": 30,
+      "protein": 0.7,
+      "carbs": 10,
+      "fat": 0.2,
+      "fiber": 2.8,
+      "sugar": 2.5,
+      "sodium": 2
     }
   },
   {
@@ -1257,6 +1840,17 @@
       "amount": 1,
       "unit": "kg",
       "currency": "VND"
+    },
+    "nutrition": {
+      "amount": 100,
+      "unit": "g",
+      "calories": 230,
+      "protein": 16,
+      "carbs": 8,
+      "fat": 15,
+      "fiber": 0,
+      "sugar": 1,
+      "sodium": 900
     }
   },
   {
@@ -1280,6 +1874,17 @@
       "amount": 1,
       "unit": "kg",
       "currency": "VND"
+    },
+    "nutrition": {
+      "amount": 100,
+      "unit": "g",
+      "calories": 230,
+      "protein": 16,
+      "carbs": 8,
+      "fat": 15,
+      "fiber": 0,
+      "sugar": 1,
+      "sodium": 900
     }
   },
   {
@@ -1303,6 +1908,17 @@
       "amount": 1,
       "unit": "kg",
       "currency": "VND"
+    },
+    "nutrition": {
+      "amount": 100,
+      "unit": "g",
+      "calories": 210,
+      "protein": 17,
+      "carbs": 5,
+      "fat": 13,
+      "fiber": 0,
+      "sugar": 1,
+      "sodium": 750
     }
   },
   {
@@ -1326,6 +1942,17 @@
       "amount": 1,
       "unit": "kg",
       "currency": "VND"
+    },
+    "nutrition": {
+      "amount": 100,
+      "unit": "g",
+      "calories": 87,
+      "protein": 18,
+      "carbs": 0,
+      "fat": 1.1,
+      "fiber": 0,
+      "sugar": 0,
+      "sodium": 293
     }
   },
   {
@@ -1351,6 +1978,17 @@
       "amount": 1,
       "unit": "kg",
       "currency": "VND"
+    },
+    "nutrition": {
+      "amount": 100,
+      "unit": "g",
+      "calories": 18,
+      "protein": 0.9,
+      "carbs": 3.9,
+      "fat": 0.2,
+      "fiber": 1.2,
+      "sugar": 2.6,
+      "sodium": 5
     }
   },
   {
@@ -1374,6 +2012,17 @@
       "amount": 1,
       "unit": "kg",
       "currency": "VND"
+    },
+    "nutrition": {
+      "amount": 100,
+      "unit": "g",
+      "calories": 717,
+      "protein": 0.9,
+      "carbs": 0.1,
+      "fat": 81.1,
+      "fiber": 0,
+      "sugar": 0.1,
+      "sodium": 11
     }
   },
   {
@@ -1399,6 +2048,17 @@
       "amount": 1,
       "unit": "kg",
       "currency": "VND"
+    },
+    "nutrition": {
+      "amount": 100,
+      "unit": "g",
+      "calories": 40,
+      "protein": 1.9,
+      "carbs": 9,
+      "fat": 0.4,
+      "fiber": 1.5,
+      "sugar": 5,
+      "sodium": 7
     }
   },
   {
@@ -1424,6 +2084,17 @@
       "amount": 1,
       "unit": "kg",
       "currency": "VND"
+    },
+    "nutrition": {
+      "amount": 100,
+      "unit": "g",
+      "calories": 40,
+      "protein": 1.9,
+      "carbs": 9,
+      "fat": 0.4,
+      "fiber": 1.5,
+      "sugar": 5,
+      "sodium": 7
     }
   },
   {
@@ -1447,6 +2118,17 @@
       "amount": 1,
       "unit": "kg",
       "currency": "VND"
+    },
+    "nutrition": {
+      "amount": 100,
+      "unit": "g",
+      "calories": 40,
+      "protein": 1.9,
+      "carbs": 9,
+      "fat": 0.4,
+      "fiber": 1.5,
+      "sugar": 5,
+      "sodium": 7
     }
   },
   {
@@ -1470,6 +2152,17 @@
       "amount": 1,
       "unit": "kg",
       "currency": "VND"
+    },
+    "nutrition": {
+      "amount": 100,
+      "unit": "g",
+      "calories": 40,
+      "protein": 1.9,
+      "carbs": 9,
+      "fat": 0.4,
+      "fiber": 1.5,
+      "sugar": 5,
+      "sodium": 7
     }
   },
   {
@@ -1493,6 +2186,17 @@
       "amount": 1,
       "unit": "kg",
       "currency": "VND"
+    },
+    "nutrition": {
+      "amount": 100,
+      "unit": "g",
+      "calories": 40,
+      "protein": 1.9,
+      "carbs": 9,
+      "fat": 0.4,
+      "fiber": 1.5,
+      "sugar": 5,
+      "sodium": 7
     }
   },
   {
@@ -1517,6 +2221,17 @@
       "amount": 1,
       "unit": "lít",
       "currency": "VND"
+    },
+    "nutrition": {
+      "amount": 100,
+      "unit": "ml",
+      "calories": 100,
+      "protein": 1,
+      "carbs": 22,
+      "fat": 0.5,
+      "fiber": 1,
+      "sugar": 15,
+      "sodium": 1200
     }
   },
   {
@@ -1541,6 +2256,17 @@
       "amount": 1,
       "unit": "lít",
       "currency": "VND"
+    },
+    "nutrition": {
+      "amount": 100,
+      "unit": "ml",
+      "calories": 112,
+      "protein": 1.3,
+      "carbs": 25.8,
+      "fat": 0.2,
+      "fiber": 0.4,
+      "sugar": 21.8,
+      "sodium": 907
     }
   },
   {
@@ -1564,6 +2290,17 @@
       "amount": 1,
       "unit": "kg",
       "currency": "VND"
+    },
+    "nutrition": {
+      "amount": 100,
+      "unit": "g",
+      "calories": 28,
+      "protein": 2.1,
+      "carbs": 5,
+      "fat": 0.3,
+      "fiber": 2.3,
+      "sugar": 1.8,
+      "sodium": 25
     }
   },
   {
@@ -1587,6 +2324,17 @@
       "amount": 1,
       "unit": "kg",
       "currency": "VND"
+    },
+    "nutrition": {
+      "amount": 100,
+      "unit": "g",
+      "calories": 89,
+      "protein": 4.1,
+      "carbs": 17.3,
+      "fat": 0.5,
+      "fiber": 4.9,
+      "sugar": 0,
+      "sodium": 1
     }
   },
   {
@@ -1614,6 +2362,17 @@
       "amount": 1,
       "unit": "kg",
       "currency": "VND"
+    },
+    "nutrition": {
+      "amount": 100,
+      "unit": "g",
+      "calories": 60,
+      "protein": 2,
+      "carbs": 13,
+      "fat": 0.3,
+      "fiber": 2,
+      "sugar": 4,
+      "sodium": 12
     }
   },
   {
@@ -1637,6 +2396,17 @@
       "amount": 1,
       "unit": "kg",
       "currency": "VND"
+    },
+    "nutrition": {
+      "amount": 100,
+      "unit": "g",
+      "calories": 349,
+      "protein": 14.3,
+      "carbs": 77,
+      "fat": 0.4,
+      "fiber": 13,
+      "sugar": 45,
+      "sodium": 298
     }
   },
   {
@@ -1658,6 +2428,17 @@
       "amount": 1,
       "unit": "quả",
       "currency": "VND"
+    },
+    "nutrition": {
+      "amount": 100,
+      "unit": "g",
+      "calories": 287,
+      "protein": 3.7,
+      "carbs": 73.6,
+      "fat": 1.1,
+      "fiber": 6,
+      "sugar": 38,
+      "sodium": 9
     }
   },
   {
@@ -1679,6 +2460,17 @@
       "amount": 1,
       "unit": "quả",
       "currency": "VND"
+    },
+    "nutrition": {
+      "amount": 100,
+      "unit": "g",
+      "calories": 287,
+      "protein": 3.7,
+      "carbs": 73.6,
+      "fat": 1.1,
+      "fiber": 6,
+      "sugar": 38,
+      "sodium": 9
     }
   },
   {
@@ -1703,6 +2495,17 @@
       "amount": 1,
       "unit": "lít",
       "currency": "VND"
+    },
+    "nutrition": {
+      "amount": 100,
+      "unit": "ml",
+      "calories": 18,
+      "protein": 0,
+      "carbs": 0.9,
+      "fat": 0,
+      "fiber": 0,
+      "sugar": 0.4,
+      "sodium": 2
     }
   },
   {
@@ -1726,6 +2529,17 @@
       "amount": 1,
       "unit": "kg",
       "currency": "VND"
+    },
+    "nutrition": {
+      "amount": 100,
+      "unit": "g",
+      "calories": 350,
+      "protein": 7,
+      "carbs": 78,
+      "fat": 1,
+      "fiber": 2,
+      "sugar": 1,
+      "sodium": 20
     }
   },
   {
@@ -1749,6 +2563,17 @@
       "amount": 1,
       "unit": "kg",
       "currency": "VND"
+    },
+    "nutrition": {
+      "amount": 100,
+      "unit": "g",
+      "calories": 350,
+      "protein": 6,
+      "carbs": 80,
+      "fat": 0.5,
+      "fiber": 1.5,
+      "sugar": 0.5,
+      "sodium": 25
     }
   },
   {
@@ -1774,6 +2599,17 @@
       "amount": 1,
       "unit": "kg",
       "currency": "VND"
+    },
+    "nutrition": {
+      "amount": 100,
+      "unit": "g",
+      "calories": 60,
+      "protein": 2,
+      "carbs": 13,
+      "fat": 0.3,
+      "fiber": 2,
+      "sugar": 4,
+      "sodium": 12
     }
   },
   {
@@ -1795,6 +2631,17 @@
       "amount": 1,
       "unit": "thanh",
       "currency": "VND"
+    },
+    "nutrition": {
+      "amount": 100,
+      "unit": "g",
+      "calories": 280,
+      "protein": 8,
+      "carbs": 55,
+      "fat": 8,
+      "fiber": 20,
+      "sugar": 2,
+      "sodium": 40
     }
   },
   {
@@ -1816,6 +2663,17 @@
       "amount": 1,
       "unit": "quả",
       "currency": "VND"
+    },
+    "nutrition": {
+      "amount": 100,
+      "unit": "g",
+      "calories": 280,
+      "protein": 8,
+      "carbs": 55,
+      "fat": 8,
+      "fiber": 20,
+      "sugar": 2,
+      "sodium": 40
     }
   },
   {
@@ -1837,6 +2695,17 @@
       "amount": 1,
       "unit": "chiếc",
       "currency": "VND"
+    },
+    "nutrition": {
+      "amount": 100,
+      "unit": "g",
+      "calories": 280,
+      "protein": 8,
+      "carbs": 55,
+      "fat": 8,
+      "fiber": 20,
+      "sugar": 2,
+      "sodium": 40
     }
   },
   {
@@ -1860,6 +2729,17 @@
       "amount": 1,
       "unit": "kg",
       "currency": "VND"
+    },
+    "nutrition": {
+      "amount": 100,
+      "unit": "g",
+      "calories": 250,
+      "protein": 26,
+      "carbs": 0,
+      "fat": 15,
+      "fiber": 0,
+      "sugar": 0,
+      "sodium": 72
     }
   },
   {
@@ -1883,6 +2763,17 @@
       "amount": 1,
       "unit": "kg",
       "currency": "VND"
+    },
+    "nutrition": {
+      "amount": 100,
+      "unit": "g",
+      "calories": 28,
+      "protein": 2.1,
+      "carbs": 5,
+      "fat": 0.3,
+      "fiber": 2.3,
+      "sugar": 1.8,
+      "sodium": 25
     }
   },
   {
@@ -1906,6 +2797,17 @@
       "amount": 1,
       "unit": "kg",
       "currency": "VND"
+    },
+    "nutrition": {
+      "amount": 100,
+      "unit": "g",
+      "calories": 35,
+      "protein": 2.5,
+      "carbs": 6,
+      "fat": 0.5,
+      "fiber": 3,
+      "sugar": 1,
+      "sodium": 30
     }
   },
   {
@@ -1929,6 +2831,17 @@
       "amount": 1,
       "unit": "kg",
       "currency": "VND"
+    },
+    "nutrition": {
+      "amount": 100,
+      "unit": "g",
+      "calories": 28,
+      "protein": 2.1,
+      "carbs": 5,
+      "fat": 0.3,
+      "fiber": 2.3,
+      "sugar": 1.8,
+      "sodium": 25
     }
   },
   {
@@ -1952,6 +2865,17 @@
       "amount": 1,
       "unit": "kg",
       "currency": "VND"
+    },
+    "nutrition": {
+      "amount": 100,
+      "unit": "g",
+      "calories": 75,
+      "protein": 13,
+      "carbs": 0,
+      "fat": 0.3,
+      "fiber": 0,
+      "sugar": 0,
+      "sodium": 85
     }
   },
   {
@@ -1975,6 +2899,17 @@
       "amount": 1,
       "unit": "kg",
       "currency": "VND"
+    },
+    "nutrition": {
+      "amount": 100,
+      "unit": "g",
+      "calories": 75,
+      "protein": 13,
+      "carbs": 0,
+      "fat": 0.3,
+      "fiber": 0,
+      "sugar": 0,
+      "sodium": 85
     }
   },
   {
@@ -1998,6 +2933,17 @@
       "amount": 1,
       "unit": "kg",
       "currency": "VND"
+    },
+    "nutrition": {
+      "amount": 100,
+      "unit": "g",
+      "calories": 230,
+      "protein": 16,
+      "carbs": 8,
+      "fat": 15,
+      "fiber": 0,
+      "sugar": 1,
+      "sodium": 900
     }
   },
   {
@@ -2022,6 +2968,17 @@
       "amount": 1,
       "unit": "kg",
       "currency": "VND"
+    },
+    "nutrition": {
+      "amount": 100,
+      "unit": "g",
+      "calories": 120,
+      "protein": 18,
+      "carbs": 5,
+      "fat": 2,
+      "fiber": 0,
+      "sugar": 0,
+      "sodium": 7000
     }
   },
   {
@@ -2045,6 +3002,17 @@
       "amount": 1,
       "unit": "kg",
       "currency": "VND"
+    },
+    "nutrition": {
+      "amount": 100,
+      "unit": "g",
+      "calories": 110,
+      "protein": 17,
+      "carbs": 4,
+      "fat": 2,
+      "fiber": 0,
+      "sugar": 0,
+      "sodium": 6800
     }
   },
   {
@@ -2070,6 +3038,17 @@
       "amount": 1,
       "unit": "kg",
       "currency": "VND"
+    },
+    "nutrition": {
+      "amount": 100,
+      "unit": "g",
+      "calories": 50,
+      "protein": 0.5,
+      "carbs": 13.1,
+      "fat": 0.1,
+      "fiber": 1.4,
+      "sugar": 9.9,
+      "sodium": 1
     }
   },
   {
@@ -2094,6 +3073,17 @@
       "amount": 1,
       "unit": "lít",
       "currency": "VND"
+    },
+    "nutrition": {
+      "amount": 100,
+      "unit": "g",
+      "calories": 321,
+      "protein": 7.9,
+      "carbs": 54.4,
+      "fat": 8.7,
+      "fiber": 0,
+      "sugar": 54,
+      "sodium": 127
     }
   },
   {
@@ -2118,6 +3108,17 @@
       "amount": 1,
       "unit": "kg",
       "currency": "VND"
+    },
+    "nutrition": {
+      "amount": 100,
+      "unit": "g",
+      "calories": 280,
+      "protein": 8,
+      "carbs": 55,
+      "fat": 8,
+      "fiber": 20,
+      "sugar": 2,
+      "sodium": 40
     }
   },
   {
@@ -2141,6 +3142,17 @@
       "amount": 1,
       "unit": "kg",
       "currency": "VND"
+    },
+    "nutrition": {
+      "amount": 100,
+      "unit": "g",
+      "calories": 28,
+      "protein": 2.1,
+      "carbs": 5,
+      "fat": 0.3,
+      "fiber": 2.3,
+      "sugar": 1.8,
+      "sodium": 25
     }
   },
   {
@@ -2164,6 +3176,17 @@
       "amount": 1,
       "unit": "kg",
       "currency": "VND"
+    },
+    "nutrition": {
+      "amount": 100,
+      "unit": "g",
+      "calories": 28,
+      "protein": 2.1,
+      "carbs": 5,
+      "fat": 0.3,
+      "fiber": 2.3,
+      "sugar": 1.8,
+      "sodium": 25
     }
   },
   {
@@ -2187,6 +3210,17 @@
       "amount": 1,
       "unit": "kg",
       "currency": "VND"
+    },
+    "nutrition": {
+      "amount": 100,
+      "unit": "g",
+      "calories": 120,
+      "protein": 20,
+      "carbs": 0,
+      "fat": 4,
+      "fiber": 0,
+      "sugar": 0,
+      "sodium": 60
     }
   },
   {
@@ -2210,6 +3244,17 @@
       "amount": 1,
       "unit": "kg",
       "currency": "VND"
+    },
+    "nutrition": {
+      "amount": 100,
+      "unit": "g",
+      "calories": 120,
+      "protein": 20,
+      "carbs": 0,
+      "fat": 4,
+      "fiber": 0,
+      "sugar": 0,
+      "sodium": 60
     }
   },
   {
@@ -2233,6 +3278,17 @@
       "amount": 1,
       "unit": "lít",
       "currency": "VND"
+    },
+    "nutrition": {
+      "amount": 100,
+      "unit": "ml",
+      "calories": 85,
+      "protein": 0.1,
+      "carbs": 2.6,
+      "fat": 0,
+      "fiber": 0,
+      "sugar": 0.6,
+      "sodium": 4
     }
   },
   {
@@ -2258,6 +3314,17 @@
       "amount": 1,
       "unit": "kg",
       "currency": "VND"
+    },
+    "nutrition": {
+      "amount": 100,
+      "unit": "g",
+      "calories": 60,
+      "protein": 0.8,
+      "carbs": 15,
+      "fat": 0.4,
+      "fiber": 1.6,
+      "sugar": 13.7,
+      "sodium": 1
     }
   },
   {
@@ -2279,6 +3346,17 @@
       "amount": 1,
       "unit": "lá",
       "currency": "VND"
+    },
+    "nutrition": {
+      "amount": 100,
+      "unit": "g",
+      "calories": 240,
+      "protein": 5,
+      "carbs": 49,
+      "fat": 2.5,
+      "fiber": 2,
+      "sugar": 1,
+      "sodium": 470
     }
   },
   {
@@ -2300,6 +3378,17 @@
       "amount": 1,
       "unit": "lá",
       "currency": "VND"
+    },
+    "nutrition": {
+      "amount": 100,
+      "unit": "g",
+      "calories": 240,
+      "protein": 5,
+      "carbs": 49,
+      "fat": 2.5,
+      "fiber": 2,
+      "sugar": 1,
+      "sodium": 470
     }
   },
   {
@@ -2321,6 +3410,17 @@
       "amount": 1,
       "unit": "chiếc",
       "currency": "VND"
+    },
+    "nutrition": {
+      "amount": 100,
+      "unit": "g",
+      "calories": 301,
+      "protein": 12,
+      "carbs": 2,
+      "fat": 27,
+      "fiber": 0,
+      "sugar": 1,
+      "sodium": 1100
     }
   },
   {
@@ -2344,6 +3444,17 @@
       "amount": 1,
       "unit": "kg",
       "currency": "VND"
+    },
+    "nutrition": {
+      "amount": 100,
+      "unit": "g",
+      "calories": 28,
+      "protein": 2.1,
+      "carbs": 5,
+      "fat": 0.3,
+      "fiber": 2.3,
+      "sugar": 1.8,
+      "sodium": 25
     }
   },
   {
@@ -2367,6 +3478,17 @@
       "amount": 1,
       "unit": "kg",
       "currency": "VND"
+    },
+    "nutrition": {
+      "amount": 100,
+      "unit": "g",
+      "calories": 33,
+      "protein": 1.9,
+      "carbs": 7,
+      "fat": 0.2,
+      "fiber": 3,
+      "sugar": 1.5,
+      "sodium": 6
     }
   },
   {
@@ -2390,6 +3512,17 @@
       "amount": 1,
       "unit": "kg",
       "currency": "VND"
+    },
+    "nutrition": {
+      "amount": 100,
+      "unit": "g",
+      "calories": 30,
+      "protein": 3,
+      "carbs": 5,
+      "fat": 0.4,
+      "fiber": 2,
+      "sugar": 2,
+      "sodium": 8
     }
   },
   {
@@ -2413,6 +3546,17 @@
       "amount": 1,
       "unit": "kg",
       "currency": "VND"
+    },
+    "nutrition": {
+      "amount": 100,
+      "unit": "g",
+      "calories": 30,
+      "protein": 3,
+      "carbs": 5,
+      "fat": 0.4,
+      "fiber": 2,
+      "sugar": 2,
+      "sodium": 8
     }
   },
   {
@@ -2436,6 +3580,17 @@
       "amount": 1,
       "unit": "kg",
       "currency": "VND"
+    },
+    "nutrition": {
+      "amount": 100,
+      "unit": "g",
+      "calories": 30,
+      "protein": 3,
+      "carbs": 5,
+      "fat": 0.4,
+      "fiber": 2,
+      "sugar": 2,
+      "sodium": 8
     }
   },
   {
@@ -2459,6 +3614,17 @@
       "amount": 1,
       "unit": "kg",
       "currency": "VND"
+    },
+    "nutrition": {
+      "amount": 100,
+      "unit": "g",
+      "calories": 26,
+      "protein": 1,
+      "carbs": 6.5,
+      "fat": 0.1,
+      "fiber": 0.5,
+      "sugar": 2.8,
+      "sodium": 1
     }
   },
   {
@@ -2482,6 +3648,17 @@
       "amount": 1,
       "unit": "kg",
       "currency": "VND"
+    },
+    "nutrition": {
+      "amount": 100,
+      "unit": "g",
+      "calories": 15,
+      "protein": 0.6,
+      "carbs": 3.7,
+      "fat": 0.1,
+      "fiber": 1,
+      "sugar": 1.5,
+      "sodium": 5
     }
   },
   {
@@ -2505,6 +3682,17 @@
       "amount": 1,
       "unit": "kg",
       "currency": "VND"
+    },
+    "nutrition": {
+      "amount": 100,
+      "unit": "g",
+      "calories": 370,
+      "protein": 6.8,
+      "carbs": 81.7,
+      "fat": 0.6,
+      "fiber": 2.8,
+      "sugar": 0.1,
+      "sodium": 7
     }
   },
   {
@@ -2528,6 +3716,17 @@
       "amount": 1,
       "unit": "kg",
       "currency": "VND"
+    },
+    "nutrition": {
+      "amount": 100,
+      "unit": "g",
+      "calories": 365,
+      "protein": 7.1,
+      "carbs": 80,
+      "fat": 0.7,
+      "fiber": 1.3,
+      "sugar": 0.1,
+      "sodium": 5
     }
   },
   {
@@ -2551,6 +3750,17 @@
       "amount": 1,
       "unit": "kg",
       "currency": "VND"
+    },
+    "nutrition": {
+      "amount": 100,
+      "unit": "g",
+      "calories": 120,
+      "protein": 20,
+      "carbs": 0,
+      "fat": 4,
+      "fiber": 0,
+      "sugar": 0,
+      "sodium": 60
     }
   },
   {
@@ -2574,6 +3784,17 @@
       "amount": 1,
       "unit": "kg",
       "currency": "VND"
+    },
+    "nutrition": {
+      "amount": 100,
+      "unit": "g",
+      "calories": 351,
+      "protein": 0.2,
+      "carbs": 86,
+      "fat": 0.1,
+      "fiber": 1,
+      "sugar": 0.1,
+      "sodium": 10
     }
   },
   {
@@ -2597,6 +3818,17 @@
       "amount": 1,
       "unit": "kg",
       "currency": "VND"
+    },
+    "nutrition": {
+      "amount": 100,
+      "unit": "g",
+      "calories": 35,
+      "protein": 1.5,
+      "carbs": 7,
+      "fat": 0.2,
+      "fiber": 2,
+      "sugar": 3,
+      "sodium": 10
     }
   },
   {
@@ -2620,6 +3852,17 @@
       "amount": 1,
       "unit": "kg",
       "currency": "VND"
+    },
+    "nutrition": {
+      "amount": 100,
+      "unit": "g",
+      "calories": 30,
+      "protein": 3,
+      "carbs": 5,
+      "fat": 0.4,
+      "fiber": 2,
+      "sugar": 2,
+      "sodium": 8
     }
   },
   {
@@ -2643,6 +3886,17 @@
       "amount": 1,
       "unit": "kg",
       "currency": "VND"
+    },
+    "nutrition": {
+      "amount": 100,
+      "unit": "g",
+      "calories": 41,
+      "protein": 0.9,
+      "carbs": 9.6,
+      "fat": 0.2,
+      "fiber": 2.8,
+      "sugar": 4.7,
+      "sodium": 69
     }
   },
   {
@@ -2666,6 +3920,17 @@
       "amount": 1,
       "unit": "kg",
       "currency": "VND"
+    },
+    "nutrition": {
+      "amount": 100,
+      "unit": "g",
+      "calories": 15,
+      "protein": 0.6,
+      "carbs": 3.7,
+      "fat": 0.1,
+      "fiber": 1,
+      "sugar": 1.5,
+      "sodium": 5
     }
   },
   {
@@ -2687,6 +3952,17 @@
       "amount": 1,
       "unit": "lá",
       "currency": "VND"
+    },
+    "nutrition": {
+      "amount": 100,
+      "unit": "g",
+      "calories": 25,
+      "protein": 2,
+      "carbs": 5,
+      "fat": 0.3,
+      "fiber": 2,
+      "sugar": 1,
+      "sodium": 10
     }
   },
   {
@@ -2708,6 +3984,17 @@
       "amount": 1,
       "unit": "lá",
       "currency": "VND"
+    },
+    "nutrition": {
+      "amount": 100,
+      "unit": "g",
+      "calories": 25,
+      "protein": 2,
+      "carbs": 5,
+      "fat": 0.3,
+      "fiber": 2,
+      "sugar": 1,
+      "sodium": 10
     }
   },
   {
@@ -2731,6 +4018,17 @@
       "amount": 1,
       "unit": "kg",
       "currency": "VND"
+    },
+    "nutrition": {
+      "amount": 100,
+      "unit": "g",
+      "calories": 366,
+      "protein": 6,
+      "carbs": 80.1,
+      "fat": 1.4,
+      "fiber": 2.4,
+      "sugar": 0.1,
+      "sodium": 0
     }
   },
   {
@@ -2754,6 +4052,17 @@
       "amount": 1,
       "unit": "kg",
       "currency": "VND"
+    },
+    "nutrition": {
+      "amount": 100,
+      "unit": "g",
+      "calories": 370,
+      "protein": 6.8,
+      "carbs": 81.7,
+      "fat": 0.6,
+      "fiber": 2.8,
+      "sugar": 0.1,
+      "sodium": 7
     }
   },
   {
@@ -2777,6 +4086,17 @@
       "amount": 1,
       "unit": "kg",
       "currency": "VND"
+    },
+    "nutrition": {
+      "amount": 100,
+      "unit": "g",
+      "calories": 364,
+      "protein": 10.3,
+      "carbs": 76.3,
+      "fat": 1,
+      "fiber": 2.7,
+      "sugar": 0.3,
+      "sodium": 2
     }
   },
   {
@@ -2800,6 +4120,17 @@
       "amount": 1,
       "unit": "kg",
       "currency": "VND"
+    },
+    "nutrition": {
+      "amount": 100,
+      "unit": "g",
+      "calories": 358,
+      "protein": 0.2,
+      "carbs": 88.7,
+      "fat": 0,
+      "fiber": 0.9,
+      "sugar": 3.4,
+      "sodium": 1
     }
   },
   {
@@ -2823,6 +4154,17 @@
       "amount": 1,
       "unit": "kg",
       "currency": "VND"
+    },
+    "nutrition": {
+      "amount": 100,
+      "unit": "g",
+      "calories": 325,
+      "protein": 40.4,
+      "carbs": 41.2,
+      "fat": 7.6,
+      "fiber": 26.9,
+      "sugar": 0,
+      "sodium": 51
     }
   },
   {
@@ -2848,6 +4190,17 @@
       "amount": 1,
       "unit": "lít",
       "currency": "VND"
+    },
+    "nutrition": {
+      "amount": 100,
+      "unit": "ml",
+      "calories": 0,
+      "protein": 0,
+      "carbs": 0,
+      "fat": 0,
+      "fiber": 0,
+      "sugar": 0,
+      "sodium": 0
     }
   },
   {
@@ -2871,6 +4224,17 @@
       "amount": 1,
       "unit": "kg",
       "currency": "VND"
+    },
+    "nutrition": {
+      "amount": 100,
+      "unit": "g",
+      "calories": 99,
+      "protein": 24,
+      "carbs": 0.2,
+      "fat": 0.3,
+      "fiber": 0,
+      "sugar": 0,
+      "sodium": 111
     }
   },
   {
@@ -2894,6 +4258,17 @@
       "amount": 1,
       "unit": "kg",
       "currency": "VND"
+    },
+    "nutrition": {
+      "amount": 100,
+      "unit": "g",
+      "calories": 99,
+      "protein": 24,
+      "carbs": 0.2,
+      "fat": 0.3,
+      "fiber": 0,
+      "sugar": 0,
+      "sodium": 111
     }
   },
   {
@@ -2917,6 +4292,17 @@
       "amount": 1,
       "unit": "kg",
       "currency": "VND"
+    },
+    "nutrition": {
+      "amount": 100,
+      "unit": "g",
+      "calories": 99,
+      "protein": 24,
+      "carbs": 0.2,
+      "fat": 0.3,
+      "fiber": 0,
+      "sugar": 0,
+      "sodium": 111
     }
   },
   {
@@ -2940,6 +4326,17 @@
       "amount": 1,
       "unit": "lít",
       "currency": "VND"
+    },
+    "nutrition": {
+      "amount": 100,
+      "unit": "ml",
+      "calories": 42,
+      "protein": 3.4,
+      "carbs": 5,
+      "fat": 1,
+      "fiber": 0,
+      "sugar": 5,
+      "sodium": 44
     }
   },
   {
@@ -2963,6 +4360,17 @@
       "amount": 1,
       "unit": "kg",
       "currency": "VND"
+    },
+    "nutrition": {
+      "amount": 100,
+      "unit": "g",
+      "calories": 573,
+      "protein": 17.7,
+      "carbs": 23.4,
+      "fat": 49.7,
+      "fiber": 11.8,
+      "sugar": 0.3,
+      "sodium": 11
     }
   },
   {
@@ -2986,6 +4394,17 @@
       "amount": 1,
       "unit": "kg",
       "currency": "VND"
+    },
+    "nutrition": {
+      "amount": 100,
+      "unit": "g",
+      "calories": 573,
+      "protein": 17.7,
+      "carbs": 23.4,
+      "fat": 49.7,
+      "fiber": 11.8,
+      "sugar": 0.3,
+      "sodium": 11
     }
   },
   {
@@ -3009,6 +4428,17 @@
       "amount": 1,
       "unit": "kg",
       "currency": "VND"
+    },
+    "nutrition": {
+      "amount": 100,
+      "unit": "g",
+      "calories": 347,
+      "protein": 23.9,
+      "carbs": 62.6,
+      "fat": 1.2,
+      "fiber": 16.3,
+      "sugar": 6.6,
+      "sodium": 15
     }
   },
   {
@@ -3032,6 +4462,17 @@
       "amount": 1,
       "unit": "kg",
       "currency": "VND"
+    },
+    "nutrition": {
+      "amount": 100,
+      "unit": "g",
+      "calories": 337,
+      "protein": 22.5,
+      "carbs": 61.3,
+      "fat": 1.1,
+      "fiber": 15.2,
+      "sugar": 2.2,
+      "sodium": 12
     }
   },
   {
@@ -3055,6 +4496,17 @@
       "amount": 1,
       "unit": "kg",
       "currency": "VND"
+    },
+    "nutrition": {
+      "amount": 100,
+      "unit": "g",
+      "calories": 341,
+      "protein": 21.6,
+      "carbs": 62.4,
+      "fat": 1.4,
+      "fiber": 15.5,
+      "sugar": 2.1,
+      "sodium": 5
     }
   },
   {
@@ -3078,6 +4530,17 @@
       "amount": 1,
       "unit": "kg",
       "currency": "VND"
+    },
+    "nutrition": {
+      "amount": 100,
+      "unit": "g",
+      "calories": 446,
+      "protein": 36.5,
+      "carbs": 30.2,
+      "fat": 19.9,
+      "fiber": 9.3,
+      "sugar": 7.3,
+      "sodium": 2
     }
   },
   {
@@ -3101,6 +4564,17 @@
       "amount": 1,
       "unit": "kg",
       "currency": "VND"
+    },
+    "nutrition": {
+      "amount": 100,
+      "unit": "g",
+      "calories": 33,
+      "protein": 1.9,
+      "carbs": 7,
+      "fat": 0.2,
+      "fiber": 3,
+      "sugar": 1.5,
+      "sodium": 6
     }
   },
   {
@@ -3124,6 +4598,17 @@
       "amount": 1,
       "unit": "kg",
       "currency": "VND"
+    },
+    "nutrition": {
+      "amount": 100,
+      "unit": "g",
+      "calories": 77,
+      "protein": 2,
+      "carbs": 17.5,
+      "fat": 0.1,
+      "fiber": 2.2,
+      "sugar": 0.8,
+      "sodium": 6
     }
   },
   {
@@ -3149,6 +4634,17 @@
       "amount": 1,
       "unit": "kg",
       "currency": "VND"
+    },
+    "nutrition": {
+      "amount": 100,
+      "unit": "g",
+      "calories": 86,
+      "protein": 1.6,
+      "carbs": 20.1,
+      "fat": 0.1,
+      "fiber": 3,
+      "sugar": 4.2,
+      "sodium": 55
     }
   },
   {
@@ -3172,6 +4668,17 @@
       "amount": 1,
       "unit": "lít",
       "currency": "VND"
+    },
+    "nutrition": {
+      "amount": 100,
+      "unit": "ml",
+      "calories": 19,
+      "protein": 0.7,
+      "carbs": 3.7,
+      "fat": 0.2,
+      "fiber": 1.1,
+      "sugar": 2.6,
+      "sodium": 105
     }
   },
   {
@@ -3195,6 +4702,17 @@
       "amount": 1,
       "unit": "kg",
       "currency": "VND"
+    },
+    "nutrition": {
+      "amount": 100,
+      "unit": "g",
+      "calories": 354,
+      "protein": 3.3,
+      "carbs": 15.2,
+      "fat": 33.5,
+      "fiber": 9,
+      "sugar": 6.2,
+      "sodium": 20
     }
   },
   {
@@ -3216,6 +4734,17 @@
       "amount": 1,
       "unit": "lá",
       "currency": "VND"
+    },
+    "nutrition": {
+      "amount": 100,
+      "unit": "g",
+      "calories": 35,
+      "protein": 2.5,
+      "carbs": 6,
+      "fat": 0.5,
+      "fiber": 3,
+      "sugar": 1,
+      "sodium": 30
     }
   },
   {
@@ -3237,6 +4766,17 @@
       "amount": 1,
       "unit": "quả",
       "currency": "VND"
+    },
+    "nutrition": {
+      "amount": 100,
+      "unit": "g",
+      "calories": 158,
+      "protein": 13.1,
+      "carbs": 0.4,
+      "fat": 11.1,
+      "fiber": 0,
+      "sugar": 0.4,
+      "sodium": 141
     }
   },
   {
@@ -3260,6 +4800,17 @@
       "amount": 1,
       "unit": "kg",
       "currency": "VND"
+    },
+    "nutrition": {
+      "amount": 100,
+      "unit": "g",
+      "calories": 92,
+      "protein": 15.6,
+      "carbs": 3.1,
+      "fat": 1.4,
+      "fiber": 0,
+      "sugar": 0,
+      "sodium": 44
     }
   },
   {
@@ -3283,6 +4834,17 @@
       "amount": 1,
       "unit": "kg",
       "currency": "VND"
+    },
+    "nutrition": {
+      "amount": 100,
+      "unit": "g",
+      "calories": 28,
+      "protein": 2.1,
+      "carbs": 5,
+      "fat": 0.3,
+      "fiber": 2.3,
+      "sugar": 1.8,
+      "sodium": 25
     }
   },
   {
@@ -3306,6 +4868,17 @@
       "amount": 1,
       "unit": "kg",
       "currency": "VND"
+    },
+    "nutrition": {
+      "amount": 100,
+      "unit": "g",
+      "calories": 28,
+      "protein": 2.1,
+      "carbs": 5,
+      "fat": 0.3,
+      "fiber": 2.3,
+      "sugar": 1.8,
+      "sodium": 25
     }
   },
   {
@@ -3329,6 +4902,17 @@
       "amount": 1,
       "unit": "kg",
       "currency": "VND"
+    },
+    "nutrition": {
+      "amount": 100,
+      "unit": "g",
+      "calories": 28,
+      "protein": 2.1,
+      "carbs": 5,
+      "fat": 0.3,
+      "fiber": 2.3,
+      "sugar": 1.8,
+      "sodium": 25
     }
   },
   {
@@ -3352,6 +4936,17 @@
       "amount": 1,
       "unit": "kg",
       "currency": "VND"
+    },
+    "nutrition": {
+      "amount": 100,
+      "unit": "g",
+      "calories": 28,
+      "protein": 2.1,
+      "carbs": 5,
+      "fat": 0.3,
+      "fiber": 2.3,
+      "sugar": 1.8,
+      "sodium": 25
     }
   },
   {
@@ -3375,6 +4970,17 @@
       "amount": 1,
       "unit": "kg",
       "currency": "VND"
+    },
+    "nutrition": {
+      "amount": 100,
+      "unit": "g",
+      "calories": 15,
+      "protein": 0.6,
+      "carbs": 3.7,
+      "fat": 0.1,
+      "fiber": 1,
+      "sugar": 1.5,
+      "sodium": 5
     }
   },
   {
@@ -3398,6 +5004,17 @@
       "amount": 1,
       "unit": "kg",
       "currency": "VND"
+    },
+    "nutrition": {
+      "amount": 100,
+      "unit": "g",
+      "calories": 28,
+      "protein": 2.1,
+      "carbs": 5,
+      "fat": 0.3,
+      "fiber": 2.3,
+      "sugar": 1.8,
+      "sodium": 25
     }
   },
   {
@@ -3422,6 +5039,17 @@
       "amount": 1,
       "unit": "lít",
       "currency": "VND"
+    },
+    "nutrition": {
+      "amount": 100,
+      "unit": "ml",
+      "calories": 230,
+      "protein": 2.3,
+      "carbs": 5.5,
+      "fat": 23.8,
+      "fiber": 2.2,
+      "sugar": 3.3,
+      "sodium": 15
     }
   },
   {
@@ -3445,6 +5073,17 @@
       "amount": 1,
       "unit": "kg",
       "currency": "VND"
+    },
+    "nutrition": {
+      "amount": 100,
+      "unit": "g",
+      "calories": 545,
+      "protein": 35,
+      "carbs": 0,
+      "fat": 42,
+      "fiber": 0,
+      "sugar": 0,
+      "sodium": 900
     }
   },
   {
@@ -3466,6 +5105,17 @@
       "amount": 1,
       "unit": "chiếc",
       "currency": "VND"
+    },
+    "nutrition": {
+      "amount": 100,
+      "unit": "g",
+      "calories": 35,
+      "protein": 2.5,
+      "carbs": 6,
+      "fat": 0.5,
+      "fiber": 3,
+      "sugar": 1,
+      "sodium": 30
     }
   },
   {
@@ -3491,6 +5141,17 @@
       "amount": 1,
       "unit": "kg",
       "currency": "VND"
+    },
+    "nutrition": {
+      "amount": 100,
+      "unit": "g",
+      "calories": 18,
+      "protein": 0.6,
+      "carbs": 4.1,
+      "fat": 0.1,
+      "fiber": 1.6,
+      "sugar": 2.5,
+      "sodium": 21
     }
   },
   {
@@ -3514,6 +5175,17 @@
       "amount": 1,
       "unit": "kg",
       "currency": "VND"
+    },
+    "nutrition": {
+      "amount": 100,
+      "unit": "g",
+      "calories": 567,
+      "protein": 25.8,
+      "carbs": 16.1,
+      "fat": 49.2,
+      "fiber": 8.5,
+      "sugar": 4.7,
+      "sodium": 18
     }
   },
   {
@@ -3538,6 +5210,17 @@
       "amount": 1,
       "unit": "lít",
       "currency": "VND"
+    },
+    "nutrition": {
+      "amount": 100,
+      "unit": "ml",
+      "calories": 230,
+      "protein": 6,
+      "carbs": 44,
+      "fat": 3,
+      "fiber": 3,
+      "sugar": 20,
+      "sodium": 1700
     }
   },
   {
@@ -3563,6 +5246,17 @@
       "amount": 1,
       "unit": "kg",
       "currency": "VND"
+    },
+    "nutrition": {
+      "amount": 100,
+      "unit": "g",
+      "calories": 60,
+      "protein": 2,
+      "carbs": 13,
+      "fat": 0.3,
+      "fiber": 2,
+      "sugar": 4,
+      "sodium": 12
     }
   },
   {
@@ -3586,6 +5280,17 @@
       "amount": 1,
       "unit": "lít",
       "currency": "VND"
+    },
+    "nutrition": {
+      "amount": 100,
+      "unit": "ml",
+      "calories": 220,
+      "protein": 0,
+      "carbs": 55,
+      "fat": 0,
+      "fiber": 0,
+      "sugar": 55,
+      "sodium": 20
     }
   },
   {
@@ -3609,6 +5314,17 @@
       "amount": 1,
       "unit": "kg",
       "currency": "VND"
+    },
+    "nutrition": {
+      "amount": 100,
+      "unit": "g",
+      "calories": 380,
+      "protein": 0,
+      "carbs": 98,
+      "fat": 0,
+      "fiber": 0,
+      "sugar": 97,
+      "sodium": 28
     }
   },
   {
@@ -3634,6 +5350,17 @@
       "amount": 1,
       "unit": "kg",
       "currency": "VND"
+    },
+    "nutrition": {
+      "amount": 100,
+      "unit": "g",
+      "calories": 280,
+      "protein": 8,
+      "carbs": 55,
+      "fat": 8,
+      "fiber": 20,
+      "sugar": 2,
+      "sodium": 40
     }
   },
   {
@@ -3659,6 +5386,17 @@
       "amount": 1,
       "unit": "kg",
       "currency": "VND"
+    },
+    "nutrition": {
+      "amount": 100,
+      "unit": "g",
+      "calories": 52,
+      "protein": 0.8,
+      "carbs": 12,
+      "fat": 0.2,
+      "fiber": 3,
+      "sugar": 4,
+      "sodium": 2
     }
   },
   {
@@ -3682,6 +5420,17 @@
       "amount": 1,
       "unit": "kg",
       "currency": "VND"
+    },
+    "nutrition": {
+      "amount": 100,
+      "unit": "g",
+      "calories": 269,
+      "protein": 0,
+      "carbs": 73,
+      "fat": 0,
+      "fiber": 0,
+      "sugar": 73,
+      "sodium": 58
     }
   },
   {
@@ -3705,6 +5454,17 @@
       "amount": 1,
       "unit": "kg",
       "currency": "VND"
+    },
+    "nutrition": {
+      "amount": 100,
+      "unit": "g",
+      "calories": 20,
+      "protein": 1,
+      "carbs": 4,
+      "fat": 0.2,
+      "fiber": 2,
+      "sugar": 1.5,
+      "sodium": 550
     }
   },
   {
@@ -3728,6 +5488,17 @@
       "amount": 1,
       "unit": "kg",
       "currency": "VND"
+    },
+    "nutrition": {
+      "amount": 100,
+      "unit": "g",
+      "calories": 28,
+      "protein": 2.1,
+      "carbs": 5,
+      "fat": 0.3,
+      "fiber": 2.3,
+      "sugar": 1.8,
+      "sodium": 25
     }
   },
   {
@@ -3751,6 +5522,17 @@
       "amount": 1,
       "unit": "kg",
       "currency": "VND"
+    },
+    "nutrition": {
+      "amount": 100,
+      "unit": "g",
+      "calories": 28,
+      "protein": 2.1,
+      "carbs": 5,
+      "fat": 0.3,
+      "fiber": 2.3,
+      "sugar": 1.8,
+      "sodium": 25
     }
   },
   {
@@ -3774,6 +5556,17 @@
       "amount": 1,
       "unit": "kg",
       "currency": "VND"
+    },
+    "nutrition": {
+      "amount": 100,
+      "unit": "g",
+      "calories": 28,
+      "protein": 2.1,
+      "carbs": 5,
+      "fat": 0.3,
+      "fiber": 2.3,
+      "sugar": 1.8,
+      "sodium": 25
     }
   },
   {
@@ -3797,6 +5590,17 @@
       "amount": 1,
       "unit": "kg",
       "currency": "VND"
+    },
+    "nutrition": {
+      "amount": 100,
+      "unit": "g",
+      "calories": 43,
+      "protein": 0.5,
+      "carbs": 10.8,
+      "fat": 0.3,
+      "fiber": 1.7,
+      "sugar": 7.8,
+      "sodium": 8
     }
   },
   {
@@ -3822,6 +5626,17 @@
       "amount": 1,
       "unit": "kg",
       "currency": "VND"
+    },
+    "nutrition": {
+      "amount": 100,
+      "unit": "g",
+      "calories": 112,
+      "protein": 1.5,
+      "carbs": 26.5,
+      "fat": 0.2,
+      "fiber": 4.1,
+      "sugar": 0.4,
+      "sodium": 11
     }
   }
 ]

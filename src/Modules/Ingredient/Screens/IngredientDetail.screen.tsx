@@ -2,6 +2,7 @@ import { ArrowLeftOutlined, EditOutlined } from "@ant-design/icons";
 import { InventoryHelper } from "@common/Helpers/InventoryHelper";
 import { IngredientUnitHelper } from "@common/Helpers/IngredientUnitHelper";
 import { IngredientPriceHelper } from "@common/Helpers/IngredientPriceHelper";
+import { IngredientNutritionHelper } from "@common/Helpers/IngredientNutritionHelper";
 import { Button } from "@components/Button";
 import { Image } from "@components/Image";
 import { Box } from "@components/Layout/Box";
@@ -56,6 +57,7 @@ export const IngredientDetailScreen = () => {
     const shelfLife = INGREDIENT_SHELF_LIFE_OPTIONS.find(option => option.value === ingredient.shelfLife);
     const preservation = INGREDIENT_PRESERVATION_OPTIONS.find(option => option.value === ingredient.preservationCondition);
     const priceEstimate = ingredient.priceEstimate;
+    const nutrition = IngredientNutritionHelper.getNutrition(ingredient);
 
     const _onSuggest = (ingredientIds: string[]) => {
         setSuggestIds(ingredientIds);
@@ -108,6 +110,29 @@ export const IngredientDetailScreen = () => {
                 </Box>
             </Stack>
         </Box>
+
+        {nutrition && <Box style={{ background: "#fff", border: "1px solid rgba(116,54,220,0.12)", borderRadius: 8, padding: 14, marginBottom: 12, boxShadow: "0 8px 22px rgba(74,48,130,0.06)" }}>
+            <Stack justify="space-between" align="center" style={{ marginBottom: 10 }}>
+                <div>
+                    <Typography.Text strong>Dinh dưỡng</Typography.Text>
+                    <Typography.Text type="secondary" style={{ display: "block", fontSize: 12 }}>Mỗi {IngredientNutritionHelper.formatBasis(nutrition)}</Typography.Text>
+                </div>
+                <Typography.Text strong style={{ color: "#7436dc", fontSize: 18 }}>{IngredientNutritionHelper.formatCalories(nutrition.calories)}</Typography.Text>
+            </Stack>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(92px, 1fr))", gap: 8 }}>
+                {[
+                    { label: "Đạm", value: IngredientNutritionHelper.formatMacro(nutrition.protein) },
+                    { label: "Tinh bột", value: IngredientNutritionHelper.formatMacro(nutrition.carbs) },
+                    { label: "Chất béo", value: IngredientNutritionHelper.formatMacro(nutrition.fat) },
+                    { label: "Chất xơ", value: IngredientNutritionHelper.formatMacro(nutrition.fiber) },
+                    { label: "Đường", value: IngredientNutritionHelper.formatMacro(nutrition.sugar) },
+                    { label: "Natri", value: IngredientNutritionHelper.formatMacro(nutrition.sodium, "mg") },
+                ].map(item => <div key={item.label} style={{ border: "1px solid #f0f0f0", borderRadius: 8, background: "#fafafa", padding: "8px 9px" }}>
+                    <Typography.Text type="secondary" style={{ display: "block", fontSize: 11, lineHeight: "14px" }}>{item.label}</Typography.Text>
+                    <Typography.Text strong style={{ display: "block", fontSize: 14, lineHeight: "19px" }}>{item.value}</Typography.Text>
+                </div>)}
+            </div>
+        </Box>}
 
         <Box style={{ background: "#fff", border: "1px solid #f0f0f0", borderRadius: 8, padding: 14 }}>
             <IngredientInventoryWidget item={ingredient} onSuggest={_onSuggest} />
