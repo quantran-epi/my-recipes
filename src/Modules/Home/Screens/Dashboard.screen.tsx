@@ -121,42 +121,41 @@ const buildUrgentInventory = (
 
 const dashboardCss = `
 .dashboard-section-card {
-    transition: border-color 160ms ease, box-shadow 160ms ease;
+    transition: border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
 }
 .dashboard-section-card:hover {
-    border-color: rgba(22,119,255,0.22);
-    box-shadow: 0 10px 28px rgba(15,23,42,0.09);
+    border-color: rgba(116,54,220,0.20);
+    box-shadow: 0 14px 34px rgba(74, 48, 130, 0.13);
 }
 .dashboard-action-row:hover .dashboard-action-card {
-    border-color: rgba(22,119,255,0.26);
-    box-shadow: 0 8px 22px rgba(15,23,42,0.08);
+    border-color: rgba(116,54,220,0.18);
+    box-shadow: 0 10px 24px rgba(74, 48, 130, 0.10);
     transform: translateY(-1px);
 }
 .dashboard-focus-card:hover {
-    border-color: rgba(22,119,255,0.28);
-    box-shadow: 0 8px 22px rgba(15,23,42,0.08);
+    border-color: rgba(116,54,220,0.20);
+    box-shadow: 0 12px 26px rgba(74, 48, 130, 0.12);
 }
 `;
 
 const Section: React.FunctionComponent<{ title: string; subtitle?: string; action?: React.ReactNode; children: React.ReactNode; icon?: React.ReactNode; tone?: string }> = ({ title, subtitle, action, children, icon, tone = '#1677ff' }) => {
     return <section className='dashboard-section-card' style={{
-        border: '1px solid #eef2f7',
+        border: '1px solid rgba(116,54,220,0.10)',
         borderRadius: 8,
-        background: '#fff',
-        boxShadow: '0 4px 18px rgba(15,23,42,0.06)',
+        background: 'rgba(255,255,255,0.96)',
+        boxShadow: '0 10px 28px rgba(74, 48, 130, 0.10)',
         overflow: 'hidden',
     }}>
-        <div style={{ height: 4, background: tone }} />
         <div style={{ padding: 12 }}>
             <Stack justify='space-between' align='flex-start' gap={8} style={{ marginBottom: 10 }}>
                 <Stack align='flex-start' gap={9} style={{ minWidth: 0 }}>
-                    {icon && <span style={{ width: 34, height: 34, borderRadius: 8, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', color: tone, background: `${tone}12`, border: `1px solid ${tone}24`, flexShrink: 0 }}>{icon}</span>}
+                    {icon && <span style={{ width: 36, height: 36, borderRadius: 8, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', color: tone, background: `${tone}14`, border: `1px solid ${tone}24`, flexShrink: 0 }}>{icon}</span>}
                     <div style={{ minWidth: 0 }}>
                         <Typography.Text strong style={{ display: 'block', fontSize: 17, lineHeight: '22px', color: '#111827' }}>{title}</Typography.Text>
                         {subtitle && <Typography.Text type='secondary' style={{ display: 'block', fontSize: 12, lineHeight: '16px', marginTop: 2 }}>{subtitle}</Typography.Text>}
                     </div>
                 </Stack>
-                {action}
+                {action && <div style={{ borderRadius: 999, background: '#f7f4ff', border: '1px solid rgba(116,54,220,0.10)' }}>{action}</div>}
             </Stack>
             <Stack direction='column' align='stretch' gap={8}>{children}</Stack>
         </div>
@@ -164,13 +163,13 @@ const Section: React.FunctionComponent<{ title: string; subtitle?: string; actio
 }
 
 const EmptySection: React.FunctionComponent<{ text: string }> = ({ text }) => {
-    return <Box style={{ padding: '18px 8px', background: '#fff', border: '1px dashed #d9d9d9', borderRadius: 8 }}>
+    return <Box style={{ padding: '18px 8px', background: '#fbf9ff', border: '1px dashed rgba(116,54,220,0.16)', borderRadius: 8 }}>
         <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description={<Typography.Text type='secondary'>{text}</Typography.Text>} />
     </Box>;
 }
 
 const DataMetric: React.FunctionComponent<{ icon: React.ReactNode; label: string; value: string | number; detail?: React.ReactNode; tone?: string }> = ({ icon, label, value, detail, tone }) => {
-    return <Box style={{ padding: '11px 12px', border: '1px solid #eef2f7', borderRadius: 8, background: '#fff', minWidth: 0, boxShadow: '0 2px 10px rgba(15,23,42,0.04)' }}>
+    return <Box style={{ padding: '11px 12px', border: '1px solid rgba(116,54,220,0.10)', borderRadius: 8, background: '#fff', minWidth: 0, boxShadow: '0 6px 18px rgba(74,48,130,0.07)' }}>
         <Stack align='flex-start' gap={8}>
             <span style={{ width: 30, height: 30, borderRadius: 8, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', color: tone ?? '#1677ff', background: `${tone ?? '#1677ff'}12`, flexShrink: 0 }}>{icon}</span>
             <div style={{ minWidth: 0 }}>
@@ -197,26 +196,114 @@ type DashboardExpensiveMetrics = {
     shoppingListCosts: Record<string, string>;
 }
 
+type WeekOverviewItem = {
+    label: string;
+    dateLabel: string;
+    mealCount: number;
+    shoppingCount: number;
+}
+
 const createEmptyDashboardExpensiveMetrics = (): DashboardExpensiveMetrics => ({
     suggestions: [],
     shoppingListCosts: {},
 });
 
-const PriorityPanel: React.FunctionComponent<{ item: PriorityAction }> = ({ item }) => {
-    return <Box style={{ background: '#fff', border: `1px solid ${item.tone}33`, borderRadius: 8, overflow: 'hidden', boxShadow: '0 8px 24px rgba(15,23,42,0.08)' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: '5px minmax(0, 1fr)', minHeight: 92 }}>
-            <div style={{ background: item.tone }} />
-            <div style={{ padding: 13, display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) auto', gap: 12, alignItems: 'center', background: `linear-gradient(135deg, #fff 0%, ${item.tone}0d 100%)` }}>
-                <div style={{ minWidth: 0 }}>
-                    <Typography.Text type='secondary' style={{ display: 'block', fontSize: 12, lineHeight: '16px', marginBottom: 3 }}>Cần xử lý ngay</Typography.Text>
-                    <Typography.Text strong style={{ display: 'block', fontSize: 17, lineHeight: '22px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                        <span style={{ color: item.tone, marginRight: 6 }}>{item.icon}</span>{item.title}
-                    </Typography.Text>
-                    <Typography.Text type='secondary' style={{ display: 'block', fontSize: 12, lineHeight: '17px', marginTop: 3, overflowWrap: 'anywhere' }}>{item.description}</Typography.Text>
-                    {item.tags && <Stack wrap='wrap' gap={5} style={{ marginTop: 8 }}>{item.tags}</Stack>}
-                </div>
-                {item.onOpen && <Button type='primary' onClick={item.onOpen} style={{ boxShadow: `0 8px 18px ${item.tone}24` }}>{item.actionLabel}</Button>}
+type DashboardHeroMetric = {
+    label: string;
+    value: string | number;
+    detail: string;
+    tone: string;
+}
+
+const DashboardHero: React.FunctionComponent<{
+    item: PriorityAction;
+    monthLabel: string;
+    mainValue: number;
+    mainLabel: string;
+    metrics: DashboardHeroMetric[];
+}> = ({ item, monthLabel, mainValue, mainLabel, metrics }) => {
+    return <Box style={{
+        borderRadius: 8,
+        padding: 14,
+        background: 'linear-gradient(135deg, #8f46f7 0%, #7436dc 58%, #5e2bbf 100%)',
+        color: '#fff',
+        boxShadow: '0 18px 36px rgba(74,48,130,0.24)',
+        overflow: 'hidden',
+        position: 'relative',
+    }}>
+        <div style={{ position: 'absolute', top: -34, right: -24, width: 112, height: 112, borderRadius: '50%', background: 'rgba(255,255,255,0.14)' }} />
+        <div style={{ position: 'absolute', bottom: -48, left: -28, width: 128, height: 128, borderRadius: '50%', background: 'rgba(255,255,255,0.08)' }} />
+        <Stack justify='space-between' align='center' gap={8} style={{ position: 'relative', marginBottom: 12 }}>
+            <div style={{ minWidth: 0 }}>
+                <Typography.Text style={{ display: 'block', color: 'rgba(255,255,255,0.82)', fontSize: 12, lineHeight: '16px', fontWeight: 650 }}>My Recipes</Typography.Text>
+                <Typography.Text strong style={{ display: 'block', color: '#fff', fontSize: 16, lineHeight: '21px' }}>Tổng quan bếp hôm nay</Typography.Text>
             </div>
+            <span style={{ borderRadius: 999, padding: '5px 10px', background: 'rgba(255,255,255,0.16)', border: '1px solid rgba(255,255,255,0.22)', color: '#fff', fontSize: 11, fontWeight: 750, whiteSpace: 'nowrap' }}>{monthLabel}</span>
+        </Stack>
+        <div style={{ position: 'relative', display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) auto', gap: 10, alignItems: 'end', marginBottom: 12 }}>
+            <div style={{ minWidth: 0 }}>
+                <Typography.Text strong style={{ display: 'block', color: '#fff', fontSize: 36, lineHeight: '40px', letterSpacing: 0 }}>{mainValue}</Typography.Text>
+                <Typography.Text style={{ display: 'block', color: 'rgba(255,255,255,0.84)', fontSize: 12, lineHeight: '17px' }}>{mainLabel}</Typography.Text>
+            </div>
+            {item.onOpen && <Button onClick={item.onOpen} style={{ borderRadius: 999, background: '#fff', borderColor: '#fff', color: '#5e2bbf', fontWeight: 750, boxShadow: '0 10px 22px rgba(34,17,83,0.18)' }}>{item.actionLabel}</Button>}
+        </div>
+        <Box style={{ position: 'relative', borderRadius: 8, padding: 10, background: 'rgba(255,255,255,0.14)', border: '1px solid rgba(255,255,255,0.18)', marginBottom: 10 }}>
+            <Typography.Text style={{ display: 'block', color: 'rgba(255,255,255,0.76)', fontSize: 11, lineHeight: '15px', marginBottom: 3 }}>Ưu tiên hiện tại</Typography.Text>
+            <Typography.Text strong style={{ display: 'block', color: '#fff', fontSize: 15, lineHeight: '20px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                <span style={{ marginRight: 6 }}>{item.icon}</span>{item.title}
+            </Typography.Text>
+            <Typography.Text style={{ display: 'block', color: 'rgba(255,255,255,0.78)', fontSize: 12, lineHeight: '17px', marginTop: 2 }}>{item.description}</Typography.Text>
+            {item.tags && <Stack wrap='wrap' gap={5} style={{ marginTop: 8 }}>{item.tags}</Stack>}
+        </Box>
+        <div style={{ position: 'relative', display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 8 }}>
+            {metrics.map(metric => <div key={metric.label} style={{ minWidth: 0, borderRadius: 8, background: '#fff', padding: '9px 8px', boxShadow: '0 8px 18px rgba(34,17,83,0.16)' }}>
+                <Typography.Text strong style={{ display: 'block', color: metric.tone, fontSize: 16, lineHeight: '20px' }}>{metric.value}</Typography.Text>
+                <Typography.Text style={{ display: 'block', color: '#111827', fontSize: 11, fontWeight: 750, lineHeight: '15px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{metric.label}</Typography.Text>
+                <Typography.Text type='secondary' style={{ display: 'block', fontSize: 10, lineHeight: '13px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{metric.detail}</Typography.Text>
+            </div>)}
+        </div>
+    </Box>;
+}
+
+const WeeklyOverviewCard: React.FunctionComponent<{ items: WeekOverviewItem[] }> = ({ items }) => {
+    const maxValue = Math.max(1, ...items.map(item => item.mealCount + item.shoppingCount));
+    const totalMeals = items.reduce((sum, item) => sum + item.mealCount, 0);
+    const totalShopping = items.reduce((sum, item) => sum + item.shoppingCount, 0);
+
+    return <Box style={{
+        borderRadius: 8,
+        background: '#fff',
+        border: '1px solid rgba(116,54,220,0.10)',
+        boxShadow: '0 10px 28px rgba(74,48,130,0.10)',
+        padding: 12,
+    }}>
+        <Stack justify='space-between' align='flex-start' gap={8} style={{ marginBottom: 12 }}>
+            <div style={{ minWidth: 0 }}>
+                <Typography.Text strong style={{ display: 'block', fontSize: 16, lineHeight: '21px', color: '#111827' }}>Kế hoạch 7 ngày</Typography.Text>
+                <Typography.Text type='secondary' style={{ display: 'block', fontSize: 12, lineHeight: '16px' }}>{totalMeals} thực đơn · {totalShopping} danh sách mua</Typography.Text>
+            </div>
+            <Stack.Compact>
+                <span style={{ padding: '5px 10px', borderRadius: 999, background: '#f4efff', color: '#7436dc', fontSize: 11, fontWeight: 750 }}>Thực đơn</span>
+                <span style={{ padding: '5px 10px', borderRadius: 999, background: '#eef7ff', color: '#0958d9', fontSize: 11, fontWeight: 750 }}>Mua sắm</span>
+            </Stack.Compact>
+        </Stack>
+        <div style={{ display: 'grid', gridTemplateColumns: `repeat(${items.length}, minmax(0, 1fr))`, gap: 8, alignItems: 'end', minHeight: 126 }}>
+            {items.map(item => {
+                const total = item.mealCount + item.shoppingCount;
+                const height = Math.max(12, Math.round(total / maxValue * 80));
+                const mealHeight = total > 0 ? Math.max(6, Math.round(item.mealCount / Math.max(1, total) * height)) : 0;
+                const shoppingHeight = total > 0 ? Math.max(6, height - mealHeight) : 0;
+                return <div key={item.dateLabel} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, minWidth: 0 }}>
+                    <div style={{ height: 86, display: 'flex', alignItems: 'flex-end' }}>
+                        <div style={{ width: 20, height, borderRadius: 999, overflow: 'hidden', background: '#f1eef8', boxShadow: total > 0 ? '0 8px 16px rgba(116,54,220,0.16)' : 'none' }}>
+                            {shoppingHeight > 0 && <div style={{ height: shoppingHeight, background: '#48a6ff' }} />}
+                            {mealHeight > 0 && <div style={{ height: mealHeight, background: 'linear-gradient(180deg, #8f46f7 0%, #7436dc 100%)' }} />}
+                        </div>
+                    </div>
+                    <Typography.Text style={{ fontSize: 11, lineHeight: '14px', color: '#6b7280', whiteSpace: 'nowrap' }}>{item.label}</Typography.Text>
+                    <Typography.Text style={{ fontSize: 10, lineHeight: '13px', color: '#9ca3af', whiteSpace: 'nowrap' }}>{item.dateLabel}</Typography.Text>
+                </div>
+            })}
         </div>
     </Box>;
 }
@@ -232,17 +319,17 @@ const DashboardFocusCard: React.FunctionComponent<{
     return <button type='button' className='dashboard-focus-card' onClick={onOpen} style={{
         width: '100%',
         minHeight: 86,
-        border: '1px solid #eef2f7',
+        border: '1px solid rgba(116,54,220,0.10)',
         borderRadius: 8,
         background: '#fff',
         padding: 11,
         textAlign: 'left',
         cursor: 'pointer',
-        boxShadow: '0 2px 10px rgba(15,23,42,0.04)',
+        boxShadow: '0 8px 22px rgba(74,48,130,0.08)',
         transition: 'border-color 160ms ease, box-shadow 160ms ease',
     }}>
         <Stack align='flex-start' gap={9}>
-            <span style={{ width: 34, height: 34, borderRadius: 10, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', color: tone, background: `${tone}14`, flexShrink: 0 }}>{icon}</span>
+            <span style={{ width: 34, height: 34, borderRadius: 8, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', color: tone, background: `${tone}14`, flexShrink: 0 }}>{icon}</span>
             <div style={{ minWidth: 0 }}>
                 <Typography.Text strong style={{ display: 'block', color: '#111827', fontSize: 18, lineHeight: '22px' }}>{value}</Typography.Text>
                 <Typography.Text style={{ display: 'block', color: '#374151', fontSize: 12, fontWeight: 650, lineHeight: '16px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{title}</Typography.Text>
@@ -263,7 +350,7 @@ const ActionRow: React.FunctionComponent<{
     onOpen: () => void;
 }> = ({ testId, title, description, accent, icon, right, tags, onOpen }) => {
     return <button className='dashboard-action-row' data-testid={testId} onClick={onOpen} style={{ width: '100%', border: 0, background: 'transparent', padding: 0, textAlign: 'left', cursor: 'pointer' }}>
-        <div className='dashboard-action-card' style={{ display: 'grid', gridTemplateColumns: '5px minmax(0, 1fr)', border: '1px solid #eef2f7', borderRadius: 8, background: '#fff', overflow: 'hidden', boxShadow: '0 2px 10px rgba(15,23,42,0.04)', transition: 'border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease' }}>
+        <div className='dashboard-action-card' style={{ display: 'grid', gridTemplateColumns: '5px minmax(0, 1fr)', border: '1px solid rgba(116,54,220,0.10)', borderRadius: 8, background: '#fff', overflow: 'hidden', boxShadow: '0 6px 18px rgba(74,48,130,0.07)', transition: 'border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease' }}>
             <div style={{ background: accent }} />
             <div style={{ padding: '10px 11px', minWidth: 0 }}>
                 <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) auto', gap: 8, alignItems: 'start' }}>
@@ -378,6 +465,15 @@ export const DashboardScreen = () => {
         .filter(item => !item.completedAt)
         .sort((a, b) => moment(a.plannedDate ?? a.createdDate).valueOf() - moment(b.plannedDate ?? b.createdDate).valueOf()), [shoppingLists]);
     const todayShoppingLists = useMemo(() => openShoppingLists.filter(item => isSameDay(item.plannedDate)), [openShoppingLists]);
+    const weekOverview = useMemo(() => Array.from({ length: 7 }).map((_, index) => {
+        const date = today().add(index, 'day');
+        return {
+            label: index === 0 ? 'Hôm nay' : date.format('dd'),
+            dateLabel: date.format('DD/MM'),
+            mealCount: scheduledMeals.filter(item => moment(item.plannedDate).isSame(date, 'day')).length,
+            shoppingCount: openShoppingLists.filter(item => item.plannedDate && moment(item.plannedDate).isSame(date, 'day')).length,
+        };
+    }), [openShoppingLists, scheduledMeals]);
     const urgentInventory = useMemo(() => buildUrgentInventory(inventoryItems, ingredientsById), [inventoryItems, ingredientsById]);
     const calculateExpensiveMetrics = React.useCallback((): DashboardExpensiveMetrics => {
         const shoppingListCosts = openShoppingLists.reduce((result, item) => {
@@ -460,10 +556,23 @@ export const DashboardScreen = () => {
                             tone: '#389e0d',
                             onOpen: () => openRoute(RootRoutes.AuthorizedRoutes.DishesRoutes.List()),
                         };
+    const monthLabel = new Date().toLocaleDateString('vi-VN', { month: 'short', year: 'numeric' });
+    const todayActionCount = todayMeals.length + todayShoppingLists.length + activeSessions.length + urgentInventory.length;
+    const heroMetrics: DashboardHeroMetric[] = [
+        { label: 'Thực đơn', value: todayMeals.length, detail: `${todayDishCount} món`, tone: '#7436dc' },
+        { label: 'Mua sắm', value: todayShoppingLists.length, detail: `${openShoppingLists.length} đang mở`, tone: '#0958d9' },
+        { label: 'Kho', value: urgentInventory.length, detail: `${expiredCount} quá hạn`, tone: expiredCount > 0 ? '#cf1322' : '#fa8c16' },
+    ];
 
-    return <Box data-testid="dashboard" style={{ display: 'flex', flexDirection: 'column', gap: 14, padding: '0 0 14px', background: 'linear-gradient(180deg, #f8fafc 0%, #fff 42%)' }}>
+    return <Box data-testid="dashboard" style={{ display: 'flex', flexDirection: 'column', gap: 12, padding: '0 0 14px', maxWidth: 760, margin: '0 auto' }}>
         <style>{dashboardCss}</style>
-        <PriorityPanel item={priorityAction} />
+        <DashboardHero
+            item={priorityAction}
+            monthLabel={monthLabel}
+            mainValue={todayActionCount}
+            mainLabel='việc cần nhìn trong hôm nay'
+            metrics={heroMetrics}
+        />
 
         <Box style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(146px, 1fr))', gap: 8 }}>
             <DashboardFocusCard
@@ -501,6 +610,8 @@ export const DashboardScreen = () => {
                     : RootRoutes.AuthorizedRoutes.DishesRoutes.List())}
             />
         </Box>
+
+        <WeeklyOverviewCard items={weekOverview} />
 
         <Section
             title='Hôm nay'

@@ -17,7 +17,7 @@ import { useModal } from "@components/Modal/ModalProvider";
 import { SmartForm, useSmartForm } from "@components/SmartForm";
 import { Tooltip } from "@components/Tootip";
 import { Typography } from "@components/Typography";
-import { useAdminMode, useTheme, useToggle, useOnlineStatus, useSharedPublish, useSharedDataSync, type SyncedVersions } from "@hooks";
+import { useAdminMode, useToggle, useOnlineStatus, useSharedPublish, useSharedDataSync, type SyncedVersions } from "@hooks";
 import { ScheduledMealToolkitWidget } from "@modules/ScheduledMeal/Screens/ScheduledMealToolkit.widget";
 import { DishSuggesterScreen } from "@modules/DishSuggester/Screens/DishSuggester.screen";
 import { CookingSessionWidget } from "@modules/Dishes/Screens/CookingSession.widget";
@@ -59,6 +59,21 @@ const sidebarNavListStyle: React.CSSProperties = {
 };
 
 const APP_CONFIRM_Z_INDEX = 5200;
+
+const headerActionButtonStyle: React.CSSProperties = {
+    width: 38,
+    height: 38,
+    borderRadius: 999,
+    background: "rgba(255,255,255,0.16)",
+    border: "1px solid rgba(255,255,255,0.24)",
+    color: "#fff",
+    display: "inline-flex",
+    alignItems: "center",
+    justifyContent: "center",
+    boxShadow: "inset 0 1px 0 rgba(255,255,255,0.18)",
+};
+
+const getMonthLabel = () => new Date().toLocaleDateString("vi-VN", { month: "short", year: "numeric" });
 
 const sidebarNavButtonStyle = (active: boolean): React.CSSProperties => ({
     width: "100%",
@@ -108,7 +123,6 @@ const useDeferredDrawerTools = (open: boolean) => {
 };
 
 export const MasterPage = () => {
-    const theme = useTheme();
     const currentFeatureName = useSelector(selectCurrentFeatureName);    const { isOnline } = useOnlineStatus();
     const toggleSearch = useToggle();
     const location = useLocation();
@@ -137,29 +151,43 @@ export const MasterPage = () => {
     return <AppShellNavigationProvider value={appShellNavigation}>
         <Layout style={layoutStyles}>
             <Header style={{
-                height: 60,
-                lineHeight: "60px",
-                paddingInline: 10,
-                backgroundColor: "#fff",
-                borderBottom: "0.5px solid " + theme.token.colorBorder
+                height: 76,
+                lineHeight: "normal",
+                padding: "10px 12px 12px",
+                background: "linear-gradient(135deg, #8d46f6 0%, #7436dc 58%, #5e2bbf 100%)",
+                borderBottom: 0,
+                boxShadow: "0 12px 26px rgba(95, 43, 191, 0.22)",
+                color: "#fff",
+                zIndex: 10,
             }}>
-                <Stack justify="space-between" align="center">
-                    <Stack>
-                        <SidebarDrawer />
-                        <Tooltip title={currentFeatureName}>
-                            <Typography.Paragraph style={{ fontSize: 24, fontWeight: "500", marginBottom: 0, width: 230 }} ellipsis>{currentFeatureName}</Typography.Paragraph>
-                        </Tooltip>
+                <Stack justify="space-between" align="center" gap={10} style={{ height: "100%" }}>
+                    <Stack align="center" gap={9} style={{ minWidth: 0 }}>
+                        <SidebarDrawer buttonStyle={headerActionButtonStyle} />
+                        <span style={{ width: 38, height: 38, borderRadius: "50%", background: "rgba(255,255,255,0.18)", border: "1px solid rgba(255,255,255,0.28)", display: "inline-flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                            <Image src={LogoIcon} width={25} loading="eager" alt="My Recipes" />
+                        </span>
+                        <div style={{ minWidth: 0 }}>
+                            <Typography.Text style={{ display: "block", color: "rgba(255,255,255,0.82)", fontSize: 11, lineHeight: "14px", fontWeight: 650 }}>My Recipes</Typography.Text>
+                            <Tooltip title={currentFeatureName}>
+                                <Typography.Paragraph style={{ fontSize: 19, lineHeight: "23px", fontWeight: 750, marginBottom: 0, maxWidth: 160, color: "#fff" }} ellipsis>{currentFeatureName}</Typography.Paragraph>
+                            </Tooltip>
+                        </div>
                     </Stack>
-                    <Stack align="center" gap={4}>
+                    <Stack align="center" gap={6} style={{ flexShrink: 0 }}>
+                        <span style={{ borderRadius: 999, padding: "5px 9px", background: "rgba(255,255,255,0.16)", border: "1px solid rgba(255,255,255,0.22)", color: "#fff", fontSize: 11, fontWeight: 700, whiteSpace: "nowrap" }}>
+                            {getMonthLabel()}
+                        </span>
                         <Button
                             type="text"
                             aria-label="Tìm kiếm toàn cục"
                             data-testid="global-search-button"
-                            icon={<SearchOutlined style={{ fontSize: 20 }} />}
+                            icon={<SearchOutlined style={{ fontSize: 18 }} />}
                             onClick={toggleSearch.show}
-                            style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                            style={headerActionButtonStyle}
                         />
-                        {_featureIcon() && <Image src={_featureIcon()} width={36} loading="eager" alt={currentFeatureName} style={{ marginBottom: 5 }} />}
+                        {_featureIcon() && <span style={{ width: 38, height: 38, borderRadius: "50%", background: "#fff", display: "inline-flex", alignItems: "center", justifyContent: "center", boxShadow: "0 8px 18px rgba(34, 17, 83, 0.22)" }}>
+                            <Image src={_featureIcon()} width={24} loading="eager" alt={currentFeatureName} />
+                        </span>}
                     </Stack>
                 </Stack>
             </Header>
@@ -188,7 +216,7 @@ export const MasterPage = () => {
     </AppShellNavigationProvider>
 }
 
-const SidebarDrawer = () => {
+const SidebarDrawer = ({ buttonStyle }: { buttonStyle?: React.CSSProperties }) => {
     const [open, setOpen] = useState(false);
     const [pinModalOpen, setPinModalOpen] = useState(false);
     const [pin, setPin] = useState("");
@@ -318,7 +346,7 @@ const SidebarDrawer = () => {
 
     return (
         <React.Fragment>
-            <Button type="primary" data-testid="sidebar-drawer-button" onClick={showDrawer} icon={<MenuOutlined />} />
+            <Button type="text" data-testid="sidebar-drawer-button" onClick={showDrawer} icon={<MenuOutlined style={{ fontSize: 18 }} />} style={buttonStyle} />
             <FastDrawerShell
                 title={
                     <Flex align="center" gap={10}>
