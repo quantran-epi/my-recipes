@@ -248,7 +248,7 @@ export const ScheduledMealListScreen = () => {
     return (
         <React.Fragment>
             <style>{scheduledMealCss}</style>
-            <Box style={{ padding: "8px 12px 0", marginBottom: 8 }}>
+            <Box style={{ padding: "4px 0 0", marginBottom: 8 }}>
                 <Box style={topToolCardStyle}>
                     <div style={topActionRowStyle}>
                         <Button icon={<CalendarOutlined />} onClick={_onOpenTemplateApply} style={topActionButtonStyle}>
@@ -263,7 +263,7 @@ export const ScheduledMealListScreen = () => {
                 </Box>
             </Box>
 
-            <Box style={{ padding: "0 12px" }}>
+            <Box style={{ padding: 0 }}>
                 <Box style={dayNavigatorCardStyle}>
                     <Button
                         aria-label="Ngày trước"
@@ -297,13 +297,13 @@ export const ScheduledMealListScreen = () => {
                 </Box>
             </Box>
 
-            {calendarVisible && <Box style={{ padding: "8px 12px 0" }}>
+            {calendarVisible && <Box style={{ padding: "8px 0 0" }}>
                 <Box style={{ border: "1px solid rgba(116,54,220,0.10)", borderRadius: 8, background: "#fff", padding: 8, boxShadow: "0 8px 22px rgba(74,48,130,0.08)" }}>
                     <Calendar fullscreen={false} value={dayjs(selectedDate)} onSelect={_onSelect} cellRender={_cellRender} />
                 </Box>
             </Box>}
 
-            <Box style={{ padding: "10px 12px 0" }}>
+            <Box style={{ padding: "8px 0 0" }}>
                 <Box style={{
                     display: "grid",
                     gridTemplateColumns: "minmax(0, 1fr) auto",
@@ -327,7 +327,7 @@ export const ScheduledMealListScreen = () => {
                 </Box>
             </Box>
 
-            <Box style={{ padding: "8px 12px 16px" }}>
+            <Box style={{ padding: "8px 0 16px" }}>
                 {mealsToday.length === 0 ? (
                     <Box style={{ textAlign: "center", padding: "24px 0", border: "1px dashed #d9d9d9", borderRadius: 8, background: "#fafafa" }}>
                         <Typography.Text type="secondary">Chưa có thực đơn trong ngày này</Typography.Text>
@@ -571,9 +571,6 @@ export const ScheduledMealItem = ({ item, selected, dishNameById, onDelete }: { 
                     <div style={{ display: "grid", gridTemplateColumns: "minmax(0, 1fr) auto", gap: 8, alignItems: "start" }}>
                         <Stack gap={7} align="flex-start" style={{ minWidth: 0 }}>
                             <Checkbox checked={selected} onChange={_onToggleSelect} style={{ marginTop: 2, marginRight: 0 }} />
-                            <span style={{ width: 38, height: 38, borderRadius: 8, display: "inline-flex", alignItems: "center", justifyContent: "center", background: `${railColor}16`, border: `1px solid ${railColor}28`, flexShrink: 0 }}>
-                                <Image src={MealsIcon} preview={false} width={23} style={{ marginBottom: 2 }} />
-                            </span>
                             <div style={{ minWidth: 0 }}>
                                 <Tooltip title={item.name}>
                                     <Typography.Paragraph style={{ marginBottom: 2, color: "#111827", fontWeight: 800, lineHeight: "22px", fontSize: 15.5 }} ellipsis={{ rows: 2 }}>

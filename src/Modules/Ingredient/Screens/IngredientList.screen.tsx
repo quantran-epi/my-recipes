@@ -14,7 +14,6 @@ import { Typography } from "@components/Typography";
 import { useScreenTitle, useToggle, useAdminMode, usePagedVirtualItems, useScheduledCalculation } from "@hooks";
 import { InventoryHelper } from "@common/Helpers/InventoryHelper";
 import { IngredientUnitHelper } from "@common/Helpers/IngredientUnitHelper";
-import { IngredientNutritionHelper } from "@common/Helpers/IngredientNutritionHelper";
 import { Ingredient, IngredientInventory, INGREDIENT_CATEGORIES, INGREDIENT_PRESERVATION_OPTIONS, INGREDIENT_SHELF_LIFE_OPTIONS } from "@store/Models/Ingredient";
 import { InventoryHealthConfig } from "@store/Models/SharedConfig";
 import { removeIngredient } from "@store/Reducers/IngredientReducer";
@@ -53,9 +52,9 @@ const INGREDIENT_STOCK_FILTERS: { value: IngredientStockFilter; label: string }[
     { value: "always_available", label: "Luôn có" },
 ];
 
-const INGREDIENT_ROW_DEFAULT_HEIGHT = 184;
+const INGREDIENT_ROW_DEFAULT_HEIGHT = 158;
 const INGREDIENT_LOAD_MORE_THRESHOLD = 8;
-const LIST_SEARCH_DEBOUNCE_MS = 220;
+const LIST_SEARCH_DEBOUNCE_MS = 550;
 
 const filterRowStyle: React.CSSProperties = {
     display: "flex",
@@ -122,6 +121,28 @@ const createEmptyIngredientFilterData = (): IngredientFilterData => ({
     categoryCounts: { __all: 0 },
 });
 
+const DeferredSearchInput = React.memo(({ onCommit }: { onCommit: (value: string) => void }) => {
+    const [value, setValue] = useState("");
+    const commitSearch = useMemo(() => debounce((nextValue: string) => {
+        React.startTransition(() => onCommit(nextValue));
+    }, LIST_SEARCH_DEBOUNCE_MS), [onCommit]);
+
+    const onChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
+        const nextValue = event.target.value;
+        setValue(nextValue);
+        if (nextValue.trim() === "") {
+            commitSearch.cancel();
+            React.startTransition(() => onCommit(nextValue));
+            return;
+        }
+        commitSearch(nextValue);
+    }, [commitSearch, onCommit]);
+
+    useEffect(() => () => commitSearch.cancel(), [commitSearch]);
+
+    return <Input allowClear data-testid="ingredient-search-input" placeholder="Tìm kiếm" value={value} onChange={onChange} style={searchInputStyle} />;
+});
+
 const getIngredientStockSnapshot = (
     ingredient: Ingredient,
     inventoryItems: Record<string, IngredientInventory>,
@@ -174,9 +195,7 @@ export const IngredientListScreen = () => {
     const [inventoryIngredient, setInventoryIngredient] = useState<Ingredient | null>(null);
     const dispatch = useDispatch();
     useScreenTitle({ value: "Nguyên liệu", deps: [] });
-    const [searchInputText, setSearchInputText] = useState("");
     const [searchText, setSearchText] = useState("");
-    const [searchCommitPending, setSearchCommitPending] = useState(false);
     const [activeStockFilter, setActiveStockFilter] = useState<IngredientStockFilter>("all");
     const [activeCategory, setActiveCategory] = useState<string | null>(null);
     const inventoryItems = useSelector(selectInventory);
@@ -192,21 +211,9 @@ export const IngredientListScreen = () => {
     const { isAdmin } = useAdminMode();
     const normalizedSearch = searchText.trim().toLowerCase();
 
-    const _commitSearchText = useMemo(() => debounce((nextValue: string) => {
-        React.startTransition(() => {
-            setSearchText(nextValue);
-            setSearchCommitPending(false);
-        });
-    }, LIST_SEARCH_DEBOUNCE_MS), []);
-
-    const _onSearchChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
-        const nextValue = event.target.value;
-        setSearchInputText(nextValue);
-        setSearchCommitPending(true);
-        _commitSearchText(nextValue);
-    }, [_commitSearchText]);
-
-    useEffect(() => () => _commitSearchText.cancel(), [_commitSearchText]);
+    const _onSearchCommit = useCallback((nextValue: string) => {
+        setSearchText(nextValue);
+    }, []);
 
     const _setScrollTopVisible = useCallback((nextVisible: boolean) => {
         setShowScrollTop(current => current === nextVisible ? current : nextVisible);
@@ -295,7 +302,7 @@ export const IngredientListScreen = () => {
     });
 
     const { filteredIngredients, stockSnapshots, stockCounts, categoryCounts } = filterData;
-    const searchPending = searchCommitPending || filterDataPending;
+    const searchPending = filterDataPending;
     const pagedIngredientsResetKey = `${activeStockFilter}|${activeCategory ?? "all"}|${normalizedSearch}`;
     const {
         visibleItems: visibleIngredients,
@@ -363,7 +370,7 @@ export const IngredientListScreen = () => {
         <div style={{ height: "100%", display: "flex", flexDirection: "column", minHeight: 0 }}>
             <Box style={topToolCardStyle}>
                 <Stack.Compact style={searchControlRowStyle}>
-                    <Input allowClear data-testid="ingredient-search-input" placeholder="Tìm kiếm" value={searchInputText} onChange={_onSearchChange} style={searchInputStyle} />
+                    <DeferredSearchInput onCommit={_onSearchCommit} />
                     {isAdmin && <Button onClick={_onAdd} icon={<PlusOutlined />} />}
                     <Tooltip title="Dùng trước hết hạn">
                         <Button onClick={toggleUseFirst.show} icon={<FireOutlined style={{ color: "#ff4d4f" }} />} />
@@ -472,7 +479,6 @@ const IngredientItemComponent: React.FunctionComponent<IngredientItemProps> = (p
     const expiryBadge = nearestExpiry ? InventoryHelper.expiryBadge(nearestExpiry.daysLeft) : null;
     const inventoryUnits = IngredientUnitHelper.getInventoryUnits(props.item);
     const recipeUnits = IngredientUnitHelper.getRecipeUnits(props.item);
-    const nutrition = IngredientNutritionHelper.getNutrition(props.item);
     const visibleRecipeUnits = recipeUnits.slice(0, 4).join(", ");
     const extraRecipeUnitCount = Math.max(0, recipeUnits.length - 4);
     const inventoryStatus = props.item.alwaysAvailable
@@ -521,6 +527,9 @@ const IngredientItemComponent: React.FunctionComponent<IngredientItemProps> = (p
                         </div>
 
                         <div style={{ display: "flex", alignItems: "center", gap: 4, flexShrink: 0 }}>
+                            <Tooltip title="Xem dinh dưỡng">
+                                <Button type="text" icon={<BarChartOutlined />} aria-label="Xem chi tiết dinh dưỡng" onClick={toggleNutrition.show} style={{ width: 34, paddingInline: 0 }} />
+                            </Tooltip>
                             {props.isAdmin && <Button onClick={toggleEdit.show} icon={<EditOutlined />} style={{ width: 34, paddingInline: 0 }} />}
                             {props.isAdmin && (
                                 <Popconfirm title="Xóa?" onConfirm={() => props.onDelete(props.item)}>
@@ -561,22 +570,6 @@ const IngredientItemComponent: React.FunctionComponent<IngredientItemProps> = (p
                                 Nhập kho: {inventoryUnits.join(", ")}
                             </Typography.Text>
                         </div>
-
-                        {nutrition && <div style={{ minWidth: 0, display: "flex", flexDirection: "column", justifyContent: "center", gap: 4, border: "1px solid rgba(116,54,220,0.12)", borderRadius: 8, background: "#fbf9ff", padding: "7px 9px" }}>
-                            <Stack justify="space-between" align="center" gap={6}>
-                                <Typography.Text type="secondary" style={{ fontSize: 11, lineHeight: "14px" }}>Dinh dưỡng</Typography.Text>
-                                <Button type="text" icon={<BarChartOutlined />} aria-label="Xem chi tiết dinh dưỡng" onClick={toggleNutrition.show} style={{ width: 26, height: 24, paddingInline: 0 }} />
-                            </Stack>
-                            <Typography.Text strong style={{ color: "#7436dc", fontSize: 13, lineHeight: "18px", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
-                                {IngredientNutritionHelper.formatCalories(nutrition.calories)}
-                            </Typography.Text>
-                            <Typography.Text type="secondary" style={{ fontSize: 11, lineHeight: "14px", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
-                                Đạm {IngredientNutritionHelper.formatMacro(nutrition.protein)} · Béo {IngredientNutritionHelper.formatMacro(nutrition.fat)}
-                            </Typography.Text>
-                            <Typography.Text type="secondary" style={{ fontSize: 11, lineHeight: "14px", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
-                                Mỗi {IngredientNutritionHelper.formatBasis(nutrition)}
-                            </Typography.Text>
-                        </div>}
                     </div>
 
                     {expiryBadge && <Typography.Text style={{ color: expiryBadge.color, fontSize: 12, lineHeight: "16px" }}>

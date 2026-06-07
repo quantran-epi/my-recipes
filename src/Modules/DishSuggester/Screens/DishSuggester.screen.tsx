@@ -240,6 +240,7 @@ export const DishSuggesterScreen: React.FC<DishSuggesterScreenProps> = ({ open, 
         initialValue: createEmptyNutritionDishCalculation,
     });
     const nutritionSuggestions = nutritionCalculation.suggestions;
+    const selectedDishIdSet = useMemo(() => new Set(selectedDishIds), [selectedDishIds]);
 
     const selectedScored = useMemo(() => {
         const source = mode === "inventory" ? inventoryScored : ingredientScored;
@@ -258,11 +259,31 @@ export const DishSuggesterScreen: React.FC<DishSuggesterScreenProps> = ({ open, 
         return Array.from(ids);
     }, [selectedScored]);
 
-    const _toggleDish = (dishId: string) => {
+    const _toggleDish = React.useCallback((dishId: string) => {
         setSelectedDishIds(prev =>
             prev.includes(dishId) ? prev.filter(id => id !== dishId) : [...prev, dishId]
         );
-    };
+    }, []);
+
+    const _onNutritionGoalChange = React.useCallback((goalId: string) => {
+        setSelectedDishIds([]);
+        setNutritionGoalId(goalId);
+    }, []);
+
+    const _onFridgeSearchChange = React.useCallback((ids: string[]) => {
+        setSelectedDishIds([]);
+        setFridgeSearchIds(ids);
+    }, []);
+
+    const _onDurationSearchChange = React.useCallback((ids: string[]) => {
+        setSelectedDishIds([]);
+        setDurationSearchIds(ids);
+    }, []);
+
+    const _onMaxMinutesChange = React.useCallback((value: number) => {
+        setSelectedDishIds([]);
+        setMaxMinutes(value);
+    }, []);
 
     const _onNext = () => setStep(1);
     const _onBack = () => setStep(0);
@@ -444,9 +465,9 @@ export const DishSuggesterScreen: React.FC<DishSuggesterScreenProps> = ({ open, 
     );
 
     const NutritionMetric = ({ label, value, tone }: { label: string; value: string; tone: string }) => (
-        <div style={{ minWidth: 0 }}>
-            <Typography.Text strong style={{ display: "block", color: tone, fontSize: 13, lineHeight: "17px" }}>{value}</Typography.Text>
-            <Typography.Text type="secondary" style={{ display: "block", fontSize: 10, lineHeight: "13px", whiteSpace: "nowrap" }}>{label}</Typography.Text>
+        <div style={{ minWidth: 0, border: `1px solid ${tone}22`, borderRadius: 8, background: `${tone}0d`, padding: "6px 7px" }}>
+            <Typography.Text strong style={{ display: "block", color: tone, fontSize: 12.5, lineHeight: "17px", overflowWrap: "anywhere" }}>{value}</Typography.Text>
+            <Typography.Text type="secondary" style={{ display: "block", fontSize: 10.5, lineHeight: "13px" }}>{label}</Typography.Text>
         </div>
     );
 
@@ -474,7 +495,7 @@ export const DishSuggesterScreen: React.FC<DishSuggesterScreenProps> = ({ open, 
                     return <button
                         key={goal.id}
                         type="button"
-                        onClick={() => setNutritionGoalId(goal.id)}
+                        onClick={() => _onNutritionGoalChange(goal.id)}
                         style={{
                             border: active ? `2px solid ${tone}` : "1px solid #e8e2f7",
                             background: active ? `${tone}12` : "#fff",
@@ -498,7 +519,7 @@ export const DishSuggesterScreen: React.FC<DishSuggesterScreenProps> = ({ open, 
         </Box>
     );
 
-    const NutritionSuggestionList = () => {
+    const renderNutritionSuggestionList = () => {
         const goal = selectedNutritionGoal;
         if (!goal) return null;
         const tone = goal.color ?? "#7436dc";
@@ -511,13 +532,13 @@ export const DishSuggesterScreen: React.FC<DishSuggesterScreenProps> = ({ open, 
             </Stack>
             <Select
                 value={goal.id}
-                onChange={setNutritionGoalId}
+                onChange={_onNutritionGoalChange}
                 style={{ width: "100%", marginBottom: 10 }}
                 options={nutritionGoals.map(item => ({ value: item.id, label: `${item.name} - ${item.criteria.length} tiêu chí` }))}
             />
             <Box style={{ maxHeight: 430, overflowY: "auto", paddingRight: 2 }}>
                 {nutritionSuggestions.map(item => {
-                    const selected = selectedDishIds.includes(item.dish.id);
+                    const selected = selectedDishIdSet.has(item.dish.id);
                     const pct = Math.round(item.score * 100);
                     const coverageTone = item.nutrition.coveragePercent >= 80 ? "#389e0d" : item.nutrition.coveragePercent >= 50 ? "#d48806" : "#cf1322";
                     return <div
@@ -557,7 +578,7 @@ export const DishSuggesterScreen: React.FC<DishSuggesterScreenProps> = ({ open, 
                                     <span style={{ padding: "2px 8px", borderRadius: 999, background: `${item.tone}16`, color: item.tone, fontSize: 12, lineHeight: "18px", fontWeight: 800, whiteSpace: "nowrap" }}>{pct}%</span>
                                 </div>
                                 <Typography.Text type="secondary" style={{ display: "block", fontSize: 11, lineHeight: "15px", marginTop: 2 }}>{item.reason}</Typography.Text>
-                                <div style={{ display: "grid", gridTemplateColumns: "repeat(5, minmax(0, 1fr))", gap: 8, marginTop: 9 }}>
+                                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(72px, 1fr))", gap: 6, marginTop: 9 }}>
                                     <NutritionMetric label="kcal" value={DishNutritionHelper.formatCalories(item.nutrition.perServing.calories)} tone="#7436dc" />
                                     <NutritionMetric label="đạm" value={DishNutritionHelper.formatGram(item.nutrition.perServing.protein)} tone="#1677ff" />
                                     <NutritionMetric label="béo" value={DishNutritionHelper.formatGram(item.nutrition.perServing.fat)} tone="#d46b08" />
@@ -686,7 +707,7 @@ export const DishSuggesterScreen: React.FC<DishSuggesterScreenProps> = ({ open, 
                                 allowClear
                                 placeholder="Lọc món chứa nguyên liệu..."
                                 value={fridgeSearchIds}
-                                onChange={setFridgeSearchIds}
+                                onChange={_onFridgeSearchChange}
                                 style={{ width: "100%", marginBottom: 10 }}
                                 size="small"
                                 maxTagCount="responsive"
@@ -731,7 +752,7 @@ export const DishSuggesterScreen: React.FC<DishSuggesterScreenProps> = ({ open, 
                             <InputNumber
                                 min={5} max={480} step={5}
                                 value={maxMinutes}
-                                onChange={v => setMaxMinutes(v ?? 30)}
+                                onChange={v => _onMaxMinutesChange(v ?? 30)}
                                 addonAfter="phút"
                                 style={{ width: 140 }}
                             />
@@ -741,7 +762,7 @@ export const DishSuggesterScreen: React.FC<DishSuggesterScreenProps> = ({ open, 
                                         key={m}
                                         size="small"
                                         type={maxMinutes === m ? "primary" : "default"}
-                                        onClick={() => setMaxMinutes(m)}
+                                        onClick={() => _onMaxMinutesChange(m)}
                                         style={{ borderRadius: 14 }}
                                     >
                                         {m} phút
@@ -780,7 +801,7 @@ export const DishSuggesterScreen: React.FC<DishSuggesterScreenProps> = ({ open, 
                                 allowClear
                                 placeholder="Lọc món chứa nguyên liệu..."
                                 value={durationSearchIds}
-                                onChange={setDurationSearchIds}
+                                onChange={_onDurationSearchChange}
                                 style={{ width: "100%", marginBottom: 10 }}
                                 size="small"
                                 maxTagCount="responsive"
@@ -797,7 +818,7 @@ export const DishSuggesterScreen: React.FC<DishSuggesterScreenProps> = ({ open, 
                                 allowClear
                                 placeholder="Lọc món chứa nguyên liệu..."
                                 value={durationSearchIds}
-                                onChange={setDurationSearchIds}
+                                onChange={_onDurationSearchChange}
                                 style={{ width: "100%", marginBottom: 10 }}
                                 size="small"
                                 maxTagCount="responsive"
@@ -935,7 +956,7 @@ export const DishSuggesterScreen: React.FC<DishSuggesterScreenProps> = ({ open, 
                                 Xem mục tiêu
                             </Button>
                         </Box>
-                        : <NutritionSuggestionList />
+                        : renderNutritionSuggestionList()
                     }
                     <Stack justify="space-between" style={{ marginTop: 12 }}>
                         <Button onClick={_onBack} icon={<LeftOutlined />} style={{ borderRadius: 20 }}>

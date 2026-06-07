@@ -141,7 +141,7 @@ const EMPTY_DISH_SUMMARY: DishListItemSummary = {
 
 const DISH_ROW_DEFAULT_HEIGHT = 184;
 const DISH_LOAD_MORE_THRESHOLD = 8;
-const LIST_SEARCH_DEBOUNCE_MS = 220;
+const LIST_SEARCH_DEBOUNCE_MS = 550;
 
 const DISH_DURATION_LABELS: Record<keyof DishDuration, string> = {
     unfreeze: 'Rã đông',
@@ -158,6 +158,28 @@ const createEmptyDishFilterData = (): DishFilterData => ({
         return result;
     }, {} as Record<DishStatusFilter, number>),
     tagCounts: { __all: 0 },
+});
+
+const DeferredSearchInput = React.memo(({ onCommit }: { onCommit: (value: string) => void }) => {
+    const [value, setValue] = useState("");
+    const commitSearch = useMemo(() => debounce((nextValue: string) => {
+        React.startTransition(() => onCommit(nextValue));
+    }, LIST_SEARCH_DEBOUNCE_MS), [onCommit]);
+
+    const onChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
+        const nextValue = event.target.value;
+        setValue(nextValue);
+        if (nextValue.trim() === "") {
+            commitSearch.cancel();
+            React.startTransition(() => onCommit(nextValue));
+            return;
+        }
+        commitSearch(nextValue);
+    }, [commitSearch, onCommit]);
+
+    useEffect(() => () => commitSearch.cancel(), [commitSearch]);
+
+    return <Input allowClear data-testid="dish-search-input" placeholder="Tìm kiếm" value={value} onChange={onChange} style={searchInputStyle} />;
 });
 
 const DishDurationDetail: React.FunctionComponent<{ duration: DishDuration }> = ({ duration }) => {
@@ -242,9 +264,7 @@ export const DishesListScreen = () => {
     const dishes = useSelector(selectDishes);
     const ingredients = useSelector(selectIngredients);
     const toggleAddModal = useToggle({ defaultValue: false });
-    const [searchInputText, setSearchInputText] = useState<string>("");
     const [searchText, setSearchText] = useState<string>("");
-    const [searchCommitPending, setSearchCommitPending] = useState(false);
     const [activeTag, setActiveTag] = useState<string | null>(null);
     const [activeStatus, setActiveStatus] = useState<DishStatusFilter>("all");
     const dispatch = useDispatch();
@@ -260,21 +280,9 @@ export const DishesListScreen = () => {
     const { isAdmin } = useAdminMode();
     const normalizedSearch = searchText.trim().toLowerCase();
 
-    const _commitSearchText = useMemo(() => debounce((nextValue: string) => {
-        React.startTransition(() => {
-            setSearchText(nextValue);
-            setSearchCommitPending(false);
-        });
-    }, LIST_SEARCH_DEBOUNCE_MS), []);
-
-    const _onSearchChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
-        const nextValue = event.target.value;
-        setSearchInputText(nextValue);
-        setSearchCommitPending(true);
-        _commitSearchText(nextValue);
-    }, [_commitSearchText]);
-
-    useEffect(() => () => _commitSearchText.cancel(), [_commitSearchText]);
+    const _onSearchCommit = useCallback((nextValue: string) => {
+        setSearchText(nextValue);
+    }, []);
 
     const _setScrollTopVisible = useCallback((nextVisible: boolean) => {
         setShowScrollTop(current => current === nextVisible ? current : nextVisible);
@@ -352,7 +360,7 @@ export const DishesListScreen = () => {
     });
 
     const { filteredDishes, statusCounts, tagCounts } = filterData;
-    const searchPending = searchCommitPending || filterDataPending;
+    const searchPending = filterDataPending;
     const pagedDishesResetKey = `${activeStatus}|${activeTag ?? "all"}|${normalizedSearch}`;
     const {
         visibleItems: visibleDishes,
@@ -407,7 +415,7 @@ export const DishesListScreen = () => {
         <div style={{ height: "100%", display: "flex", flexDirection: "column", minHeight: 0 }}>
             <Box style={topToolCardStyle}>
                 <Stack.Compact style={searchControlRowStyle}>
-                    <Input allowClear data-testid="dish-search-input" placeholder="Tìm kiếm" value={searchInputText} onChange={_onSearchChange} style={searchInputStyle} />
+                    <DeferredSearchInput onCommit={_onSearchCommit} />
                     {isAdmin && <Button onClick={toggleAddModal.show} icon={<PlusOutlined />} />}
                 </Stack.Compact>
                 {searchPending && <Typography.Text type="secondary" style={{ display: "block", fontSize: 11, lineHeight: "15px", marginTop: 5 }}>Đang lọc danh sách...</Typography.Text>}
