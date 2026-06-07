@@ -51,11 +51,11 @@ const drawerToolsPlaceholderStyle: React.CSSProperties = {
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
-    color: "#8c8c8c",
+    color: "#8f46f7",
 };
 
 const sidebarNavListStyle: React.CSSProperties = {
-    padding: "8px 4px",
+    padding: "10px 8px 8px",
 };
 
 const APP_CONFIRM_Z_INDEX = 5200;
@@ -81,16 +81,17 @@ const sidebarNavButtonStyle = (active: boolean): React.CSSProperties => ({
     display: "flex",
     alignItems: "center",
     gap: 10,
-    padding: "9px 12px",
-    border: 0,
+    padding: "10px 12px",
+    border: active ? "1px solid rgba(116, 54, 220, 0.16)" : "1px solid transparent",
     borderRadius: 8,
-    background: active ? "#f0f5ff" : "transparent",
-    color: active ? "#1677ff" : "#1f1f1f",
+    background: active ? "linear-gradient(135deg, #f5f0ff 0%, #ffffff 100%)" : "transparent",
+    color: active ? "#5e2bbf" : "#2f2545",
     font: "inherit",
     fontSize: 16,
     fontWeight: active ? 650 : 500,
     textAlign: "left",
     cursor: "pointer",
+    boxShadow: active ? "0 8px 18px rgba(116, 54, 220, 0.10)" : "none",
 });
 
 const useDeferredDrawerTools = (open: boolean) => {
@@ -347,8 +348,13 @@ const SidebarDrawer = ({ buttonStyle }: { buttonStyle?: React.CSSProperties }) =
             <FastDrawerShell
                 title={
                     <Flex align="center" gap={10}>
-                        <Image src={LogoIcon} width={32} loading="eager" alt="My Recipes" />
-                        <Typography.Text style={{ fontSize: 22, fontWeight: 600 }}>My Recipes</Typography.Text>
+                        <span style={{ width: 38, height: 38, borderRadius: "50%", background: "linear-gradient(135deg, #8f46f7 0%, #5e2bbf 100%)", display: "inline-flex", alignItems: "center", justifyContent: "center", boxShadow: "0 8px 18px rgba(116,54,220,0.22)" }}>
+                            <Image src={LogoIcon} width={25} loading="eager" alt="My Recipes" />
+                        </span>
+                        <div style={{ minWidth: 0 }}>
+                            <Typography.Text style={{ display: "block", fontSize: 18, lineHeight: "22px", fontWeight: 750, color: "#2f2545" }}>My Recipes</Typography.Text>
+                            <Typography.Text type="secondary" style={{ display: "block", fontSize: 11, lineHeight: "15px" }}>Bếp nhà hôm nay</Typography.Text>
+                        </div>
                     </Flex>
                 }
                 onClose={onClose}
@@ -398,7 +404,7 @@ const SidebarDrawer = ({ buttonStyle }: { buttonStyle?: React.CSSProperties }) =
                         <>
                             <Divider orientation="left" style={{ fontSize: 12, color: "#888", marginTop: 20, marginBottom: 12 }}>Quản trị</Divider>
                             <Flex vertical gap={4}>
-                                <div style={{ border: "1px solid #f0f0f0", borderRadius: 8, padding: "8px 10px", background: "#fafafa", marginBottom: 6 }}>
+                                <div style={{ border: "1px solid rgba(116,54,220,0.12)", borderRadius: 8, padding: "8px 10px", background: "#fbf9ff", marginBottom: 6 }}>
                                     <Flex vertical gap={6}>
                                         <Typography.Text strong style={{ fontSize: 12 }}>GitHub token xuất bản</Typography.Text>
                                         <AntInput.Password
@@ -776,10 +782,10 @@ const BottomTabNavigator = () => {
             gap: 0,
             padding: "6px 8px",
             boxSizing: "border-box",
-            border: "1px solid rgba(226, 232, 240, 0.96)",
+            border: "1px solid rgba(116, 54, 220, 0.14)",
             borderRadius: 20,
-            background: "#ffffff",
-            boxShadow: "0 14px 34px rgba(15, 23, 42, 0.14), 0 5px 12px rgba(15, 23, 42, 0.07)",
+            background: "rgba(255,255,255,0.98)",
+            boxShadow: "0 14px 34px rgba(74, 48, 130, 0.18), 0 5px 12px rgba(74, 48, 130, 0.08)",
             pointerEvents: "auto",
             overflow: "visible",
         }
@@ -800,8 +806,8 @@ const BottomTabNavigator = () => {
             height: 52,
             border: 0,
             borderRadius: 14,
-            background: active ? "rgba(245, 130, 32, 0.10)" : "transparent",
-            color: active ? "#1f2937" : "#6b7280",
+            background: active ? "rgba(116, 54, 220, 0.10)" : "transparent",
+            color: active ? "#2f2545" : "#6b6478",
             cursor: "pointer",
             font: "inherit",
             padding: "4px 2px 3px",
@@ -824,7 +830,7 @@ const BottomTabNavigator = () => {
             border: 0,
             borderRadius: 20,
             background: "transparent",
-            color: "#1f2937",
+            color: "#2f2545",
             cursor: "pointer",
             font: "inherit",
             padding: 0,
@@ -842,7 +848,7 @@ const BottomTabNavigator = () => {
             alignItems: "center",
             justifyContent: "center",
             borderRadius: 10,
-            background: active ? "rgba(245, 130, 32, 0.12)" : "transparent",
+            background: active ? "rgba(116, 54, 220, 0.12)" : "transparent",
             flexShrink: 0,
         }
     }
@@ -874,11 +880,11 @@ const BottomTabNavigator = () => {
             borderRadius: "50%",
             border: "5px solid #ffffff",
             background: active
-                ? "linear-gradient(135deg, #0395ff 0%, #10b6ff 100%)"
-                : "linear-gradient(135deg, #0aa7ff 0%, #1db7ff 100%)",
+                ? "linear-gradient(135deg, #8f46f7 0%, #5e2bbf 100%)"
+                : "linear-gradient(135deg, #9b5cff 0%, #7436dc 100%)",
             boxShadow: active
-                ? "0 10px 20px rgba(0, 153, 255, 0.32)"
-                : "0 8px 18px rgba(0, 153, 255, 0.28)",
+                ? "0 10px 20px rgba(116, 54, 220, 0.34)"
+                : "0 8px 18px rgba(116, 54, 220, 0.28)",
             boxSizing: "border-box",
             flexShrink: 0,
         }
@@ -887,7 +893,7 @@ const BottomTabNavigator = () => {
     const _labelStyles = (active: boolean): React.CSSProperties => {
         return {
             display: "block",
-            color: active ? "#1f2937" : "#6b7280",
+            color: active ? "#2f2545" : "#6b6478",
             fontWeight: active ? 650 : 500,
             fontSize: 10,
             lineHeight: "13px",
@@ -901,7 +907,7 @@ const BottomTabNavigator = () => {
     const _centerLabelStyles = (): React.CSSProperties => {
         return {
             display: "block",
-            color: "#1f2937",
+            color: "#2f2545",
             fontWeight: 650,
             fontSize: 10,
             lineHeight: "13px",

@@ -12,8 +12,10 @@ function App() {
   return (
     <ConfigProvider theme={{
       token: {
-        colorPrimary: "rgb(245, 130, 32)",
-        colorLink: "#3d4195",
+        colorPrimary: "#7436dc",
+        colorPrimaryHover: "#8f46f7",
+        colorPrimaryActive: "#5e2bbf",
+        colorLink: "#7436dc",
         colorBorderSecondary: "#d9d9d9",
         fontFamily: "system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
         fontSize: 18,

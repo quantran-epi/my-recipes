@@ -96,10 +96,10 @@ const closeButtonStyle: React.CSSProperties = {
     display: "inline-flex",
     alignItems: "center",
     justifyContent: "center",
-    border: "1px solid #edf0f5",
+    border: "1px solid rgba(116, 54, 220, 0.16)",
     borderRadius: 10,
     background: "#fff",
-    color: "#4b5d6f",
+    color: "#5e2bbf",
     cursor: "pointer",
     flexShrink: 0,
 };
@@ -110,7 +110,7 @@ const shellTitleStyle: React.CSSProperties = {
     alignItems: "center",
     gap: 8,
     fontWeight: 650,
-    color: "#182536",
+    color: "#2f2545",
 };
 
 export const FastModalShell: React.FunctionComponent<FastModalShellProps> = ({
@@ -251,16 +251,16 @@ export const FastDrawerShell: React.FunctionComponent<FastDrawerShellProps> = ({
                     flexDirection: "column",
                     overflow: "hidden",
                     borderRight: "1px solid rgba(232, 237, 245, 0.96)",
-                    borderRadius: "0 18px 18px 0",
-                    background: "#fff",
-                    boxShadow: "16px 0 48px rgba(15, 23, 42, 0.22)",
+    borderRadius: "0 18px 18px 0",
+    background: "linear-gradient(180deg, #f5f0ff 0%, #ffffff 42%)",
+    boxShadow: "16px 0 48px rgba(74, 48, 130, 0.24)",
                     animation: drawerInAnimation,
                     transformOrigin: "left center",
                     willChange: "opacity, transform",
                 }}
                 onMouseDown={(event) => event.stopPropagation()}
             >
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, padding: "14px 14px 12px 16px", borderBottom: "1px solid #f0f2f5" }}>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, padding: "14px 14px 12px 16px", borderBottom: "1px solid rgba(116, 54, 220, 0.10)", background: "rgba(255,255,255,0.72)" }}>
                     <div style={shellTitleStyle}>{title}</div>
                     {closable && <button type="button" aria-label="Ẩn menu" onClick={onClose} style={closeButtonStyle}>
                         <CloseOutlined />
