@@ -34,6 +34,8 @@ export const selectSelectedMeals = (state: RootState) => state.personal.schedule
 export const selectCookingSessions = (state: RootState) => state.personal.cookingSession.sessions;
 export const selectAppContext = (state: RootState) => state.personal.appContext;
 export const selectCurrentFeatureName = (state: RootState) => state.personal.appContext.currentFeatureName;
+export const selectShoppingListNameHistory = (state: RootState) => state.personal.appContext.shoppingListNameHistory ?? [];
+export const selectScheduledMealNameHistory = (state: RootState) => state.personal.appContext.scheduledMealNameHistory ?? [];
 
 export const selectShoppingListsById = createSelector(
     [selectShoppingLists],

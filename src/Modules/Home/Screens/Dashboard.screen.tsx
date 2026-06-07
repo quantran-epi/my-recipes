@@ -120,6 +120,13 @@ const buildUrgentInventory = (
 }
 
 const dashboardCss = `
+.dashboard-section-card {
+    transition: border-color 160ms ease, box-shadow 160ms ease;
+}
+.dashboard-section-card:hover {
+    border-color: rgba(22,119,255,0.22);
+    box-shadow: 0 10px 28px rgba(15,23,42,0.09);
+}
 .dashboard-action-row:hover .dashboard-action-card {
     border-color: rgba(22,119,255,0.26);
     box-shadow: 0 8px 22px rgba(15,23,42,0.08);
@@ -131,16 +138,28 @@ const dashboardCss = `
 }
 `;
 
-const Section: React.FunctionComponent<{ title: string; subtitle?: string; action?: React.ReactNode; children: React.ReactNode }> = ({ title, subtitle, action, children }) => {
-    return <section>
-        <Stack justify='space-between' align='flex-start' gap={8} style={{ marginBottom: 8 }}>
-            <div style={{ minWidth: 0 }}>
-                <Typography.Text strong style={{ display: 'block', fontSize: 16, lineHeight: '21px' }}>{title}</Typography.Text>
-                {subtitle && <Typography.Text type='secondary' style={{ display: 'block', fontSize: 12, lineHeight: '16px' }}>{subtitle}</Typography.Text>}
-            </div>
-            {action}
-        </Stack>
-        <Stack direction='column' align='stretch' gap={8}>{children}</Stack>
+const Section: React.FunctionComponent<{ title: string; subtitle?: string; action?: React.ReactNode; children: React.ReactNode; icon?: React.ReactNode; tone?: string }> = ({ title, subtitle, action, children, icon, tone = '#1677ff' }) => {
+    return <section className='dashboard-section-card' style={{
+        border: '1px solid #eef2f7',
+        borderRadius: 8,
+        background: '#fff',
+        boxShadow: '0 4px 18px rgba(15,23,42,0.06)',
+        overflow: 'hidden',
+    }}>
+        <div style={{ height: 4, background: tone }} />
+        <div style={{ padding: 12 }}>
+            <Stack justify='space-between' align='flex-start' gap={8} style={{ marginBottom: 10 }}>
+                <Stack align='flex-start' gap={9} style={{ minWidth: 0 }}>
+                    {icon && <span style={{ width: 34, height: 34, borderRadius: 8, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', color: tone, background: `${tone}12`, border: `1px solid ${tone}24`, flexShrink: 0 }}>{icon}</span>}
+                    <div style={{ minWidth: 0 }}>
+                        <Typography.Text strong style={{ display: 'block', fontSize: 17, lineHeight: '22px', color: '#111827' }}>{title}</Typography.Text>
+                        {subtitle && <Typography.Text type='secondary' style={{ display: 'block', fontSize: 12, lineHeight: '16px', marginTop: 2 }}>{subtitle}</Typography.Text>}
+                    </div>
+                </Stack>
+                {action}
+            </Stack>
+            <Stack direction='column' align='stretch' gap={8}>{children}</Stack>
+        </div>
     </section>;
 }
 
@@ -442,7 +461,7 @@ export const DashboardScreen = () => {
                             onOpen: () => openRoute(RootRoutes.AuthorizedRoutes.DishesRoutes.List()),
                         };
 
-    return <Box data-testid="dashboard" style={{ display: 'flex', flexDirection: 'column', gap: 14, paddingBottom: 12 }}>
+    return <Box data-testid="dashboard" style={{ display: 'flex', flexDirection: 'column', gap: 14, padding: '0 0 14px', background: 'linear-gradient(180deg, #f8fafc 0%, #fff 42%)' }}>
         <style>{dashboardCss}</style>
         <PriorityPanel item={priorityAction} />
 
@@ -486,6 +505,8 @@ export const DashboardScreen = () => {
         <Section
             title='Hôm nay'
             subtitle='Phiên nấu, thực đơn và danh sách mua cần xem trước.'
+            icon={<CalendarOutlined />}
+            tone='#1677ff'
             action={<Button type='link' onClick={() => openRoute(RootRoutes.AuthorizedRoutes.ScheduledMealRoutes.List())}>Mở thực đơn</Button>}
         >
             {activeSessions.length === 0 && todayMeals.length === 0 && todayShoppingLists.length === 0
@@ -500,6 +521,8 @@ export const DashboardScreen = () => {
         <Section
             title='Nguyên liệu cần dùng sớm'
             subtitle='Ưu tiên nguyên liệu hết hạn hoặc còn tối đa 3 ngày.'
+            icon={<WarningOutlined />}
+            tone={expiredCount > 0 ? '#cf1322' : '#fa8c16'}
             action={<Button type='link' onClick={() => openRoute(RootRoutes.AuthorizedRoutes.IngredientRoutes.List())}>Mở kho</Button>}
         >
             {urgentInventory.length === 0
@@ -510,6 +533,8 @@ export const DashboardScreen = () => {
         <Section
             title='Gợi ý món nên nấu'
             subtitle='Tính từ tồn kho hiện tại và nguyên liệu cần dùng sớm.'
+            icon={<FireOutlined />}
+            tone='#389e0d'
             action={<Button type='link' onClick={() => openRoute(RootRoutes.AuthorizedRoutes.DishesRoutes.List())}>Mở món ăn</Button>}
         >
             {expensiveMetricsPending
@@ -522,6 +547,8 @@ export const DashboardScreen = () => {
         <Section
             title='Danh sách mua sắm đang mở'
             subtitle='Theo dõi tiến độ và chi phí còn cần mua.'
+            icon={<ShoppingCartOutlined />}
+            tone='#0958d9'
             action={<Button type='link' onClick={() => openRoute(RootRoutes.AuthorizedRoutes.ShoppingListRoutes.List())}>Mở mua sắm</Button>}
         >
             {openShoppingLists.length === 0
@@ -529,7 +556,7 @@ export const DashboardScreen = () => {
                 : openShoppingLists.slice(0, 5).map(item => <ShoppingListRow key={item.id} item={item} cost={expensiveMetricsPending ? '...' : shoppingListCosts[item.id] ?? '0đ'} onOpen={() => openRoute(RootRoutes.AuthorizedRoutes.ShoppingListRoutes.Detail(item.id))} />)}
         </Section>
 
-        <Section title='Tổng quan dữ liệu' subtitle='Tình trạng dữ liệu chính trong app.'>
+        <Section title='Tổng quan dữ liệu' subtitle='Tình trạng dữ liệu chính trong app.' icon={<CheckCircleOutlined />} tone='#722ed1'>
             <Box style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(190px, 1fr))', gap: 10 }}>
                 <DataMetric icon={<CheckCircleOutlined />} label='Món đã hoàn thiện' value={completedDishes.length} detail='Đã bật trạng thái hoàn thiện' tone='#389e0d' />
                 <DataMetric icon={<ClockCircleOutlined />} label='Món chưa hoàn thiện' value={incompleteDishes.length} detail={incompleteDishes.length > 0 ? `Chưa bật hoàn thiện: ${formatNamePreview(incompleteDishes.map(item => item.name), 'Không có món nào', 'món khác')}` : 'Không có món cần cập nhật'} tone='#d46b08' />

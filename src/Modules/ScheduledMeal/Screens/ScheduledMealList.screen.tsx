@@ -12,6 +12,7 @@ import { Tooltip } from "@components/Tootip";
 import { Typography } from "@components/Typography";
 import { useScreenTitle, useTheme, useToggle } from "@hooks";
 import { ScheduledMeal } from "@store/Models/ScheduledMeal";
+import { rememberScheduledMealName } from "@store/Reducers/AppContextReducer";
 import { addScheduledMeal, removeScheduledMeal, toggleSelectedMeals } from "@store/Reducers/ScheduledMealReducer";
 import { selectDishNameById, selectScheduledMeals, selectSelectedMealIds } from "@store/Selectors";
 import { Calendar, DatePicker, Tag } from "antd";
@@ -39,8 +40,28 @@ import { RootRoutes } from "@routing/RootRoutes";
 
 const getMealDateKey = (value: Date | string) => moment(value).format("YYYY-MM-DD");
 
-const getVietnameseWeekShoppingListName = (date: Dayjs) => {
-    const weekOfMonth = Math.ceil(date.date() / 7);
+const getPrimaryRangeDate = (start: Dayjs, end?: Dayjs) => {
+    if (!end || start.isSame(end, "month")) return start;
+
+    const monthCounts = new Map<string, { count: number; firstDate: Dayjs }>();
+    let cursor = start.startOf("day");
+    const lastDate = end.startOf("day");
+    while (cursor.isBefore(lastDate, "day") || cursor.isSame(lastDate, "day")) {
+        const key = cursor.format("YYYY-MM");
+        const current = monthCounts.get(key);
+        monthCounts.set(key, {
+            count: (current?.count ?? 0) + 1,
+            firstDate: current?.firstDate ?? cursor,
+        });
+        cursor = cursor.add(1, "day");
+    }
+
+    return Array.from(monthCounts.values()).sort((a, b) => b.count - a.count)[0]?.firstDate ?? start;
+};
+
+const getVietnameseWeekShoppingListName = (start: Dayjs, end?: Dayjs) => {
+    const date = getPrimaryRangeDate(start, end);
+    const weekOfMonth = Math.floor((date.date() - 1) / 7) + 1;
     return `Tuần ${weekOfMonth}, ${date.format("MM/YY")}`;
 };
 
@@ -241,7 +262,7 @@ export const ScheduledMealListScreen = () => {
                 ) : (
                     <ShoppingListAddWidget
                         date={selectedRange ? selectedRange[0].toDate() : new Date()}
-                        initialName={selectedRange ? getVietnameseWeekShoppingListName(selectedRange[0]) : undefined}
+                        initialName={selectedRange ? getVietnameseWeekShoppingListName(selectedRange[0], selectedRange[1]) : undefined}
                         scheduledMealIds={shoppingRangeMealIds}
                         onDone={() => setShoppingRangeOpen(false)}
                         onCreated={(shoppingList) => navigate(RootRoutes.AuthorizedRoutes.ShoppingListRoutes.Detail(shoppingList.id))}
@@ -281,6 +302,7 @@ export const ScheduledMealItem = ({ item, selected, dishNameById, onDelete }: { 
             plannedDate: copyDate.toDate(),
             createdDate: new Date(),
         }));
+        dispatch(rememberScheduledMealName(item.name));
         toggleCopyModal.hide();
         setCopyDate(null);
     };

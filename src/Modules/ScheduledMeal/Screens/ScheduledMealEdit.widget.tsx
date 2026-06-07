@@ -1,25 +1,37 @@
 import { ObjectPropertyHelper } from "@common/Helpers/ObjectProperty"
 import { Button } from "@components/Button"
 import { DatePicker } from "@components/Form/DatePicker"
-import { Input } from "@components/Form/Input"
-import { Option, Select } from "@components/Form/Select"
 import { Stack } from "@components/Layout/Stack"
 import { useMessage } from "@components/Message"
 import { SmartForm, useSmartForm } from "@components/SmartForm"
-import { DishServingSelector, normalizeDishServings } from "@modules/ShoppingList/Screens/DishServingSelector.widget"
+import { normalizeDishServings } from "@modules/ShoppingList/Screens/DishServingSelector.widget"
 import { ScheduledMeal } from "@store/Models/ScheduledMeal"
+import { rememberScheduledMealName } from "@store/Reducers/AppContextReducer"
 import { editScheduledMeal } from "@store/Reducers/ScheduledMealReducer"
 import { updateShoppingListIngredientMealData } from "@store/Reducers/ShoppingListReducer"
-import { selectDishes } from "@store/Selectors"
+import { selectDishes, selectScheduledMealNameHistory, selectScheduledMeals } from "@store/Selectors"
+import { AutoComplete } from "antd"
 import dayjs from "dayjs"
 import { useMemo } from "react"
 import { useDispatch, useSelector } from "react-redux"
 import { ScheduledMealEstimateSummary } from "./ScheduledMealEstimateSummary.widget"
+import { ScheduledMealMealPlanner } from "./ScheduledMealMealPlanner.widget"
+
+const buildNameOptions = (names: string[]) => {
+    const uniqueNames = Array.from(new Map(names
+        .map(name => name.trim())
+        .filter(Boolean)
+        .map(name => [name.toLowerCase(), name])).values());
+    return uniqueNames.map(name => ({ value: name }));
+}
 
 export const ScheduledMealEditWidget = ({ item, onDone }) => {
     const dispatch = useDispatch();
     const dishes = useSelector(selectDishes);
+    const scheduledMeals = useSelector(selectScheduledMeals);
+    const scheduledMealNameHistory = useSelector(selectScheduledMealNameHistory);
     const message = useMessage();
+    const nameOptions = useMemo(() => buildNameOptions([...scheduledMealNameHistory, ...scheduledMeals.map(meal => meal.name)]), [scheduledMealNameHistory, scheduledMeals]);
 
     const editScheduledMealForm = useSmartForm<ScheduledMeal>({
         defaultValues: {
@@ -29,6 +41,7 @@ export const ScheduledMealEditWidget = ({ item, onDone }) => {
         },
         onSubmit: (values) => {
             dispatch(editScheduledMeal(values.transformValues));
+            dispatch(rememberScheduledMealName(values.transformValues.name));
             dispatch(updateShoppingListIngredientMealData(values.transformValues));
             message.success("Đã lưu thực đơn");
             editScheduledMealForm.reset();
@@ -60,74 +73,23 @@ export const ScheduledMealEditWidget = ({ item, onDone }) => {
         editScheduledMealForm.submit();
     }
 
-    const _onSelectDish = (dishIds: string[], meals: keyof ScheduledMeal["meals"]) => {
-        const currentValues = editScheduledMealForm.form.getFieldsValue();
-        const nextMeals = {
-            ...currentValues.meals,
-            [meals]: dishIds ?? [],
-        };
-        const nextSelectedDishIds = Object.values(nextMeals).flat() as string[];
+    const _onMealsChange = (nextMeals: ScheduledMeal["meals"], nextDishServings: Record<string, number>) => {
         editScheduledMealForm.form.setFieldsValue({
             meals: nextMeals,
-            dishServings: normalizeDishServings(nextSelectedDishIds, dishes, currentValues.dishServings ?? {}),
+            dishServings: nextDishServings,
         });
-    }
-
-    const _onDishServingsChange = (nextValue: Record<string, number>) => {
-        editScheduledMealForm.form.setFieldsValue({ dishServings: nextValue });
     }
     return <SmartForm {...editScheduledMealForm.defaultProps}>
         <SmartForm.Item {...editScheduledMealForm.itemDefinitions.name}>
-            <Input placeholder="Nhập tên" autoFocus allowClear />
+            <AutoComplete
+                options={nameOptions}
+                placeholder="Nhập tên"
+                autoFocus
+                allowClear
+                filterOption={(inputValue, option) => (option?.value ?? "").toString().toLowerCase().includes(inputValue.toLowerCase())}
+            />
         </SmartForm.Item>
-        <SmartForm.Item label="Bữa sáng">
-            <Select
-                onChange={value => _onSelectDish(value, "breakfast")}
-                value={meals?.breakfast}
-                showSearch
-                mode="multiple"
-                filterOption={(inputValue, option) => {
-                    if (!option?.children) return false;
-                    return option?.children?.toString().toLowerCase().includes(inputValue.toLowerCase());
-                }}
-                style={{ width: '100%' }}>
-                {dishes.map(dish => <Option key={dish.id} value={dish.id}>{dish.name}</Option>)}
-            </Select>
-        </SmartForm.Item>
-        <SmartForm.Item label="Bữa trưa">
-            <Select
-                onChange={value => _onSelectDish(value, "lunch")}
-                value={meals?.lunch}
-                showSearch
-                mode="multiple"
-                filterOption={(inputValue, option) => {
-                    if (!option?.children) return false;
-                    return option?.children?.toString().toLowerCase().includes(inputValue.toLowerCase());
-                }}
-                style={{ width: '100%' }}>
-                {dishes.map(dish => <Option key={dish.id} value={dish.id}>{dish.name}</Option>)}
-            </Select>
-        </SmartForm.Item>
-        <SmartForm.Item label="Bữa tối">
-            <Select
-                onChange={value => _onSelectDish(value, "dinner")}
-                value={meals?.dinner}
-                showSearch
-                mode="multiple"
-                filterOption={(inputValue, option) => {
-                    if (!option?.children) return false;
-                    return option?.children?.toString().toLowerCase().includes(inputValue.toLowerCase());
-                }}
-                style={{ width: '100%' }}>
-                {dishes.map(dish => <Option key={dish.id} value={dish.id}>{dish.name}</Option>)}
-            </Select>
-        </SmartForm.Item>
-        <DishServingSelector
-            selectedDishIds={selectedDishIds}
-            dishes={dishes}
-            value={dishServings}
-            onChange={_onDishServingsChange}
-        />
+        <ScheduledMealMealPlanner meals={meals} dishServings={dishServings} dishes={dishes} onMealsChange={_onMealsChange} />
         <SmartForm.Item {...editScheduledMealForm.itemDefinitions.plannedDate}>
             <DatePicker style={{ width: "100%" }} placeholder="Chọn ngày" format={"DD/MM/YYYY"} />
         </SmartForm.Item>

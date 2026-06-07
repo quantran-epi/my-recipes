@@ -1,23 +1,30 @@
 import { ObjectPropertyHelper } from "@common/Helpers/ObjectProperty"
 import { Button } from "@components/Button"
 import { DatePicker } from "@components/Form/DatePicker"
-import { Input } from "@components/Form/Input"
 import { Option, Select } from "@components/Form/Select"
 import { Stack } from "@components/Layout/Stack"
 import { useMessage } from "@components/Message"
 import { SmartForm, useSmartForm } from "@components/SmartForm"
-import { Typography } from "@components/Typography"
 import { nanoid } from "@reduxjs/toolkit"
 import { ShoppingList } from "@store/Models/ShoppingList"
-import { removeAllSelectedMeals } from "@store/Reducers/ScheduledMealReducer"
+import { rememberShoppingListName } from "@store/Reducers/AppContextReducer"
 import { addShoppingList, generateIngredient } from "@store/Reducers/ShoppingListReducer"
-import { selectDishes, selectIngredients, selectInventory, selectScheduledMeals } from "@store/Selectors"
+import { selectDishes, selectIngredients, selectInventory, selectScheduledMeals, selectShoppingListNameHistory, selectShoppingLists } from "@store/Selectors"
+import { AutoComplete } from "antd"
 import dayjs from "dayjs"
 import moment from "moment"
-import React, { FunctionComponent, useEffect, useState } from "react"
+import React, { FunctionComponent, useEffect, useMemo, useState } from "react"
 import { useDispatch, useSelector } from "react-redux"
 
 import { DishServingSelector, normalizeDishServings } from './DishServingSelector.widget';
+
+const buildNameOptions = (names: string[]) => {
+    const uniqueNames = Array.from(new Map(names
+        .map(name => name.trim())
+        .filter(Boolean)
+        .map(name => [name.toLowerCase(), name])).values());
+    return uniqueNames.map(name => ({ value: name }));
+}
 
 type ShoppingListAddWidgetProps = {
     date: Date | null;
@@ -33,12 +40,15 @@ type ShoppingListAddWidgetProps = {
 export const ShoppingListAddWidget: FunctionComponent<ShoppingListAddWidgetProps> = ({ date, initialName, scheduledMealIds, dishIds, initialDishServings, alreadyHaveIngredientIds, onDone, onCreated }) => {
     const dispatch = useDispatch();
     const dishes = useSelector(selectDishes);
+    const shoppingLists = useSelector(selectShoppingLists);
+    const shoppingListNameHistory = useSelector(selectShoppingListNameHistory);
     const scheduledMeals = useSelector(selectScheduledMeals);
     const allIngredients = useSelector(selectIngredients);
     const inventory = useSelector(selectInventory);
     const message = useMessage();
     const [selectedDishIds, setSelectedDishIds] = useState<string[]>(dishIds ?? []);
     const [dishServings, setDishServings] = useState<Record<string, number>>(() => normalizeDishServings(dishIds ?? [], dishes, initialDishServings ?? {}));
+    const nameOptions = useMemo(() => buildNameOptions([...shoppingListNameHistory, ...shoppingLists.map(item => item.name)]), [shoppingListNameHistory, shoppingLists]);
 
     const addShoppingListForm = useSmartForm<ShoppingList>({
         defaultValues: {
@@ -58,6 +68,7 @@ export const ShoppingListAddWidget: FunctionComponent<ShoppingListAddWidgetProps
             const normalizedDishServings = normalizeDishServings(transformed.dishes ?? [], dishes, dishServings);
             const transformedWithServings = { ...transformed, dishServings: normalizedDishServings };
             dispatch(addShoppingList(transformedWithServings));
+            dispatch(rememberShoppingListName(transformedWithServings.name));
             // Auto-generate ingredient checklist; mark already-have items as done
             dispatch(generateIngredient({
                 shoppingListId: transformedWithServings.id,
@@ -117,7 +128,13 @@ export const ShoppingListAddWidget: FunctionComponent<ShoppingListAddWidgetProps
     return <React.Fragment>
         <SmartForm {...addShoppingListForm.defaultProps}>
             <SmartForm.Item {...addShoppingListForm.itemDefinitions.name}>
-                <Input placeholder="Nhập tên" autoFocus allowClear />
+                <AutoComplete
+                    options={nameOptions}
+                    placeholder="Nhập tên"
+                    autoFocus
+                    allowClear
+                    filterOption={(inputValue, option) => (option?.value ?? "").toString().toLowerCase().includes(inputValue.toLowerCase())}
+                />
             </SmartForm.Item>
             <SmartForm.Item {...addShoppingListForm.itemDefinitions.dishes}>
                 <Select
