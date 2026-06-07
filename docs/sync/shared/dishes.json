@@ -262,7 +262,11 @@
       "serve": null,
       "cooldown": null
     },
-    "baseServings": 2
+    "baseServings": 2,
+    "tags": [
+      "Ăn sáng",
+      "Món chính"
+    ]
   },
   {
     "id": "Bún cá chan1Ew2KgsgmT",
@@ -349,7 +353,11 @@
       "serve": null,
       "cooldown": null
     },
-    "baseServings": 2
+    "baseServings": 2,
+    "tags": [
+      "Ăn sáng",
+      "Món chính"
+    ]
   },
   {
     "id": "Bún cá chấmU4hU2b399-",
@@ -471,7 +479,11 @@
       "serve": null,
       "cooldown": null
     },
-    "baseServings": 2
+    "baseServings": 2,
+    "tags": [
+      "Ăn sáng",
+      "Món chính"
+    ]
   },
   {
     "id": "Bún thịtnướngUqWqmbOE7I",
@@ -559,7 +571,12 @@
       "serve": null,
       "cooldown": null
     },
-    "baseServings": 2
+    "baseServings": 2,
+    "tags": [
+      "Ăn sáng",
+      "Món chính",
+      "Nướng"
+    ]
   },
   {
     "id": "Bún sườn thịtaCscwGORwq",
@@ -691,7 +708,11 @@
       "serve": null,
       "cooldown": null
     },
-    "baseServings": 2
+    "baseServings": 2,
+    "tags": [
+      "Ăn sáng",
+      "Món chính"
+    ]
   },
   {
     "id": "Bún riêu cua7DaVnQCpYq",
@@ -868,7 +889,11 @@
       "serve": null,
       "cooldown": null
     },
-    "baseServings": 2
+    "baseServings": 2,
+    "tags": [
+      "Ăn sáng",
+      "Món chính"
+    ]
   },
   {
     "id": "Bún chả-wKNw4Uzrc",
@@ -949,7 +974,12 @@
       "serve": null,
       "cooldown": null
     },
-    "baseServings": 2
+    "baseServings": 2,
+    "tags": [
+      "Ăn sáng",
+      "Món chính",
+      "Nướng"
+    ]
   },
   {
     "id": "Phở bòWaCgW7nbpG",
@@ -1116,7 +1146,11 @@
       "serve": null,
       "cooldown": null
     },
-    "baseServings": 2
+    "baseServings": 2,
+    "tags": [
+      "Ăn sáng",
+      "Món chính"
+    ]
   },
   {
     "id": "Phở gàhgVbN9BnEZ",
@@ -1301,7 +1335,11 @@
       "serve": null,
       "cooldown": null
     },
-    "baseServings": 2
+    "baseServings": 2,
+    "tags": [
+      "Ăn sáng",
+      "Món chính"
+    ]
   },
   {
     "id": "Phở sườn thịto25085Lqjt",
@@ -1452,7 +1490,11 @@
       "serve": null,
       "cooldown": null
     },
-    "baseServings": 2
+    "baseServings": 2,
+    "tags": [
+      "Ăn sáng",
+      "Món chính"
+    ]
   },
   {
     "id": "Bánh mì chảKzqj_9cvC0",
@@ -1542,7 +1584,11 @@
       "serve": null,
       "cooldown": null
     },
-    "baseServings": 2
+    "baseServings": 2,
+    "tags": [
+      "Ăn sáng",
+      "Ăn vặt"
+    ]
   },
   {
     "id": "Bánh mì trứngYXTAjmVDVy",
@@ -1632,7 +1678,11 @@
       "serve": null,
       "cooldown": null
     },
-    "baseServings": 2
+    "baseServings": 2,
+    "tags": [
+      "Ăn sáng",
+      "Ăn vặt"
+    ]
   },
   {
     "id": "Bánh mì chả trứng4L3M-9r9SW",
@@ -1722,7 +1772,11 @@
       "serve": null,
       "cooldown": null
     },
-    "baseServings": 2
+    "baseServings": 2,
+    "tags": [
+      "Ăn sáng",
+      "Ăn vặt"
+    ]
   },
   {
     "id": "Bánh mì thịt nướngjHjYfxtOCf",
@@ -1803,7 +1857,12 @@
       "serve": null,
       "cooldown": null
     },
-    "baseServings": 2
+    "baseServings": 2,
+    "tags": [
+      "Ăn sáng",
+      "Món chính",
+      "Nướng"
+    ]
   },
   {
     "id": "Bánh mì sốt vangU5O-BSsuoj",
@@ -1886,7 +1945,11 @@
       "serve": null,
       "cooldown": null
     },
-    "baseServings": 2
+    "baseServings": 2,
+    "tags": [
+      "Ăn sáng",
+      "Món chính"
+    ]
   },
   {
     "id": "Bánh mì bò bít tếtETcY3mgKom",
@@ -1965,7 +2028,11 @@
       "serve": null,
       "cooldown": null
     },
-    "baseServings": 2
+    "baseServings": 2,
+    "tags": [
+      "Ăn sáng",
+      "Món chính"
+    ]
   },
   {
     "id": "Bánh bao thịtw6NDAJV_R9",
@@ -2085,7 +2152,12 @@
       "serve": null,
       "cooldown": null
     },
-    "baseServings": 2
+    "baseServings": 2,
+    "tags": [
+      "Ăn sáng",
+      "Ăn vặt",
+      "Hấp"
+    ]
   },
   {
     "id": "Bánh bao thịt trứngFidOo_-fXE",
@@ -2145,7 +2217,12 @@
       "serve": null,
       "cooldown": null
     },
-    "baseServings": 2
+    "baseServings": 2,
+    "tags": [
+      "Ăn sáng",
+      "Ăn vặt",
+      "Hấp"
+    ]
   },
   {
     "id": "Bánh bao đậu xanh14gE89JJzD",
@@ -2235,7 +2312,12 @@
       "serve": null,
       "cooldown": null
     },
-    "baseServings": 2
+    "baseServings": 2,
+    "tags": [
+      "Ăn sáng",
+      "Ăn vặt",
+      "Hấp"
+    ]
   },
   {
     "id": "Bánh bao khoai mônLqCoXzgEwy",
@@ -2313,7 +2395,12 @@
       "serve": null,
       "cooldown": null
     },
-    "baseServings": 2
+    "baseServings": 2,
+    "tags": [
+      "Ăn sáng",
+      "Ăn vặt",
+      "Hấp"
+    ]
   },
   {
     "id": "Bánh tẻUsui_Ug4Ow",
@@ -2491,7 +2578,12 @@
       "serve": null,
       "cooldown": null
     },
-    "baseServings": 2
+    "baseServings": 2,
+    "tags": [
+      "Ăn sáng",
+      "Ăn vặt",
+      "Hấp"
+    ]
   },
   {
     "id": "Bánh rán đườngJq4BlL8hzr",
@@ -2551,7 +2643,12 @@
       "serve": null,
       "cooldown": null
     },
-    "baseServings": 2
+    "baseServings": 2,
+    "tags": [
+      "Ăn vặt",
+      "Tráng miệng",
+      "Chiên"
+    ]
   },
   {
     "id": "Bánh rán mèYlhY6pSPNS",
@@ -2679,7 +2776,12 @@
       "serve": null,
       "cooldown": null
     },
-    "baseServings": 2
+    "baseServings": 2,
+    "tags": [
+      "Ăn vặt",
+      "Tráng miệng",
+      "Chiên"
+    ]
   },
   {
     "id": "Bánh mochi Hàn Quốc8sMDMtqZLp",
@@ -2797,7 +2899,11 @@
       "serve": null,
       "cooldown": null
     },
-    "baseServings": 2
+    "baseServings": 2,
+    "tags": [
+      "Ăn vặt",
+      "Tráng miệng"
+    ]
   },
   {
     "id": "Há cảo thịtANEgIKhgjL",
@@ -2965,7 +3071,12 @@
       "serve": null,
       "cooldown": null
     },
-    "baseServings": 2
+    "baseServings": 2,
+    "tags": [
+      "Ăn vặt",
+      "Khai vị",
+      "Hấp"
+    ]
   },
   {
     "id": "Há cảo tôm thịtl3oOSN5oVE",
@@ -3025,7 +3136,12 @@
       "serve": null,
       "cooldown": null
     },
-    "baseServings": 2
+    "baseServings": 2,
+    "tags": [
+      "Ăn vặt",
+      "Khai vị",
+      "Hấp"
+    ]
   },
   {
     "id": "Bánh cuốn chảCZ_BcZ5FYH",
@@ -3095,7 +3211,12 @@
       "serve": null,
       "cooldown": null
     },
-    "baseServings": 2
+    "baseServings": 2,
+    "tags": [
+      "Ăn sáng",
+      "Món chính",
+      "Hấp"
+    ]
   },
   {
     "id": "Bánh cuốn chả nướngE15dUu79KH",
@@ -3156,7 +3277,12 @@
       "serve": null,
       "cooldown": null
     },
-    "baseServings": 2
+    "baseServings": 2,
+    "tags": [
+      "Ăn sáng",
+      "Món chính",
+      "Nướng"
+    ]
   },
   {
     "id": "Thịt heo kho tộmXl-EQhHzc",
@@ -3285,7 +3411,10 @@
       "serve": null,
       "cooldown": null
     },
-    "baseServings": 2
+    "baseServings": 2,
+    "tags": [
+      "Món chính"
+    ]
   },
   {
     "id": "Thịt heo kho tàuaCPPJEzn2u",
@@ -3413,7 +3542,10 @@
       "serve": null,
       "cooldown": null
     },
-    "baseServings": 2
+    "baseServings": 2,
+    "tags": [
+      "Món chính"
+    ]
   },
   {
     "id": "Thịt rang cháy cạnhjR-i4HmL-R",
@@ -3522,7 +3654,10 @@
       "serve": null,
       "cooldown": null
     },
-    "baseServings": 2
+    "baseServings": 2,
+    "tags": [
+      "Món chính"
+    ]
   },
   {
     "id": "Thịt rang sả ớt1VlNr-YF_L",
@@ -3635,7 +3770,10 @@
       "serve": null,
       "cooldown": null
     },
-    "baseServings": 2
+    "baseServings": 2,
+    "tags": [
+      "Món chính"
+    ]
   },
   {
     "id": "Thịt nướng mậtongrSMGs780fv",
@@ -3804,7 +3942,11 @@
       "serve": null,
       "cooldown": null
     },
-    "baseServings": 2
+    "baseServings": 2,
+    "tags": [
+      "Món chính",
+      "Nướng"
+    ]
   },
   {
     "id": "Nem ránWHi3tylvI1",
@@ -3982,7 +4124,12 @@
       "serve": null,
       "cooldown": null
     },
-    "baseServings": 2
+    "baseServings": 2,
+    "tags": [
+      "Món chính",
+      "Ăn vặt",
+      "Chiên"
+    ]
   },
   {
     "id": "Nem cuốnoaV_NZCmq5",
@@ -4152,7 +4299,12 @@
       "serve": null,
       "cooldown": null
     },
-    "baseServings": 2
+    "baseServings": 2,
+    "tags": [
+      "Món chính",
+      "Khai vị",
+      "Salad"
+    ]
   },
   {
     "id": "Nem nướng Nha TrangTKi1hePlxN",
@@ -4292,7 +4444,11 @@
       "serve": null,
       "cooldown": null
     },
-    "baseServings": 2
+    "baseServings": 2,
+    "tags": [
+      "Món chính",
+      "Nướng"
+    ]
   },
   {
     "id": "Trứng chiên thịt2lYnyNmIAN",
@@ -4391,7 +4547,11 @@
       "serve": null,
       "cooldown": null
     },
-    "baseServings": 2
+    "baseServings": 2,
+    "tags": [
+      "Món chính",
+      "Chiên"
+    ]
   },
   {
     "id": "Đậu que xào thịtB6q9Ab7M0p",
@@ -4520,7 +4680,11 @@
       "serve": null,
       "cooldown": null
     },
-    "baseServings": 2
+    "baseServings": 2,
+    "tags": [
+      "Món chính",
+      "Xào"
+    ]
   },
   {
     "id": "Sườn xàochua ngọteFYLzGgWNB",
@@ -4688,7 +4852,11 @@
       "serve": null,
       "cooldown": null
     },
-    "baseServings": 2
+    "baseServings": 2,
+    "tags": [
+      "Món chính",
+      "Xào"
+    ]
   },
   {
     "id": "Bí đao nấu sườnT5E11NwG9V",
@@ -4836,7 +5004,11 @@
       "serve": null,
       "cooldown": null
     },
-    "baseServings": 2
+    "baseServings": 2,
+    "tags": [
+      "Canh",
+      "Món chính"
+    ]
   },
   {
     "id": "Bí đỏ nấu sườnOK2EPMR8-_",
@@ -4974,7 +5146,11 @@
       "serve": null,
       "cooldown": null
     },
-    "baseServings": 2
+    "baseServings": 2,
+    "tags": [
+      "Canh",
+      "Món chính"
+    ]
   },
   {
     "id": "Đu đủ nấu sườnOaBBVKILRI",
@@ -5102,7 +5278,11 @@
       "serve": null,
       "cooldown": null
     },
-    "baseServings": 2
+    "baseServings": 2,
+    "tags": [
+      "Canh",
+      "Món chính"
+    ]
   },
   {
     "id": "Sườn hầm ngũ quảnb0L2xGBZl",
@@ -5223,7 +5403,11 @@
       "serve": null,
       "cooldown": null
     },
-    "baseServings": 2
+    "baseServings": 2,
+    "tags": [
+      "Canh",
+      "Món chính"
+    ]
   },
   {
     "id": "Chả lá lốtyiP92XK_Jc",
@@ -5341,7 +5525,11 @@
       "serve": null,
       "cooldown": null
     },
-    "baseServings": 2
+    "baseServings": 2,
+    "tags": [
+      "Món chính",
+      "Chiên"
+    ]
   },
   {
     "id": "Gà rang lá chanhcnUYkqoDq3",
@@ -5459,7 +5647,10 @@
       "serve": null,
       "cooldown": null
     },
-    "baseServings": 2
+    "baseServings": 2,
+    "tags": [
+      "Món chính"
+    ]
   },
   {
     "id": "Gà xào sả ớtVfovGNIUhC",
@@ -5607,7 +5798,11 @@
       "serve": null,
       "cooldown": null
     },
-    "baseServings": 2
+    "baseServings": 2,
+    "tags": [
+      "Món chính",
+      "Xào"
+    ]
   },
   {
     "id": "Gà chiên mắmqZNDqYlsWY",
@@ -5887,7 +6082,11 @@
       "serve": null,
       "cooldown": null
     },
-    "baseServings": 2
+    "baseServings": 2,
+    "tags": [
+      "Món chính",
+      "Xào"
+    ]
   },
   {
     "id": "Gà tầnbG8OqbqMTK",
@@ -6035,7 +6234,11 @@
       "serve": null,
       "cooldown": null
     },
-    "baseServings": 2
+    "baseServings": 2,
+    "tags": [
+      "Canh",
+      "Món chính"
+    ]
   },
   {
     "id": "Tôm rang hànhF8W8plnKT7",
@@ -6133,7 +6336,10 @@
       "serve": null,
       "cooldown": null
     },
-    "baseServings": 2
+    "baseServings": 2,
+    "tags": [
+      "Món chính"
+    ]
   },
   {
     "id": "Tôm rim bơ tỏich4Dm7CDlW",
@@ -6238,7 +6444,10 @@
       "serve": null,
       "cooldown": null
     },
-    "baseServings": 2
+    "baseServings": 2,
+    "tags": [
+      "Món chính"
+    ]
   },
   {
     "id": "Tôm hấp sảI0_8nFFpz4",
@@ -6329,7 +6538,11 @@
       "serve": null,
       "cooldown": null
     },
-    "baseServings": 2
+    "baseServings": 2,
+    "tags": [
+      "Món chính",
+      "Hấp"
+    ]
   },
   {
     "id": "Đậu tẩm hànhFjUFTPHaUH",
@@ -6428,7 +6641,11 @@
       "serve": null,
       "cooldown": null
     },
-    "baseServings": 2
+    "baseServings": 2,
+    "tags": [
+      "Món phụ",
+      "Chiên"
+    ]
   },
   {
     "id": "Đậu sốt cà chuaTq8NcZ6Qlr",
@@ -6566,7 +6783,10 @@
       "serve": null,
       "cooldown": null
     },
-    "baseServings": 2
+    "baseServings": 2,
+    "tags": [
+      "Món phụ"
+    ]
   },
   {
     "id": "Cà tím nấu đậuFwdnaf-a_w",
@@ -6724,7 +6944,10 @@
       "serve": null,
       "cooldown": null
     },
-    "baseServings": 2
+    "baseServings": 2,
+    "tags": [
+      "Món phụ"
+    ]
   },
   {
     "id": "Cải xào bòNqFLICg3fs",
@@ -6822,7 +7045,11 @@
       "serve": null,
       "cooldown": null
     },
-    "baseServings": 2
+    "baseServings": 2,
+    "tags": [
+      "Món chính",
+      "Xào"
+    ]
   },
   {
     "id": "Cần tây xào bòkluzOX2jap",
@@ -6980,7 +7207,11 @@
       "serve": null,
       "cooldown": null
     },
-    "baseServings": 2
+    "baseServings": 2,
+    "tags": [
+      "Món chính",
+      "Xào"
+    ]
   },
   {
     "id": "Bò lúc lắcdhQP6vbomX",
@@ -7178,7 +7409,11 @@
       "serve": null,
       "cooldown": null
     },
-    "baseServings": 2
+    "baseServings": 2,
+    "tags": [
+      "Món chính",
+      "Xào"
+    ]
   },
   {
     "id": "Bò sốt vangdF28akq1Mp",
@@ -7376,7 +7611,10 @@
       "serve": null,
       "cooldown": null
     },
-    "baseServings": 2
+    "baseServings": 2,
+    "tags": [
+      "Món chính"
+    ]
   },
   {
     "id": "Bánh baoLKwsrX4wPV",
@@ -7576,7 +7814,11 @@
       "serve": null,
       "cooldown": null
     },
-    "baseServings": 2
+    "baseServings": 2,
+    "tags": [
+      "Ăn sáng",
+      "Ăn vặt"
+    ]
   },
   {
     "id": "Cá khoK1SnToMpDi",
@@ -7754,7 +7996,10 @@
       "serve": null,
       "cooldown": null
     },
-    "baseServings": 2
+    "baseServings": 2,
+    "tags": [
+      "Món chính"
+    ]
   },
   {
     "id": "Cá nấu chua6cAGOrVK_E",
@@ -7962,7 +8207,11 @@
       "serve": null,
       "cooldown": null
     },
-    "baseServings": 2
+    "baseServings": 2,
+    "tags": [
+      "Canh",
+      "Món chính"
+    ]
   },
   {
     "id": "Cá rim cà chuawUgDfH6RNq",
@@ -8130,7 +8379,10 @@
       "serve": null,
       "cooldown": null
     },
-    "baseServings": 2
+    "baseServings": 2,
+    "tags": [
+      "Món chính"
+    ]
   },
   {
     "id": "Đậu non nấu cà chuaTTfZ5gtok9",
@@ -8259,7 +8511,10 @@
       "serve": null,
       "cooldown": null
     },
-    "baseServings": 2
+    "baseServings": 2,
+    "tags": [
+      "Món phụ"
+    ]
   },
   {
     "id": "Trứng chiên hành2TlY54LLcQ",
@@ -8340,7 +8595,11 @@
       "serve": null,
       "cooldown": null
     },
-    "baseServings": 2
+    "baseServings": 2,
+    "tags": [
+      "Món phụ",
+      "Chiên"
+    ]
   },
   {
     "id": "Canh cua nấu mồng tơiTQ-BZFGHQC",
@@ -8420,7 +8679,10 @@
       "serve": null,
       "cooldown": null
     },
-    "baseServings": 2
+    "baseServings": 2,
+    "tags": [
+      "Canh"
+    ]
   },
   {
     "id": "Mực xào cần tâycYKhDiwKv9",
@@ -8568,7 +8830,11 @@
       "serve": null,
       "cooldown": null
     },
-    "baseServings": 2
+    "baseServings": 2,
+    "tags": [
+      "Món chính",
+      "Xào"
+    ]
   },
   {
     "id": "Khoai lang luộc-XvNSV54c7",
@@ -8637,7 +8903,12 @@
       "serve": null,
       "cooldown": null
     },
-    "baseServings": 2
+    "baseServings": 2,
+    "tags": [
+      "Món phụ",
+      "Ăn vặt",
+      "Luộc"
+    ]
   },
   {
     "id": "Trứng luộcTPJEiuAgr5",
@@ -8707,7 +8978,11 @@
       "serve": null,
       "cooldown": null
     },
-    "baseServings": 2
+    "baseServings": 2,
+    "tags": [
+      "Món phụ",
+      "Luộc"
+    ]
   },
   {
     "id": "Thịt nướng sảwdM8vUkIif",
@@ -8819,7 +9094,11 @@
       "serve": null,
       "cooldown": null
     },
-    "baseServings": 2
+    "baseServings": 2,
+    "tags": [
+      "Món chính",
+      "Nướng"
+    ]
   },
   {
     "id": "Nước sốt bún trộnHQE5qZrQpv",
@@ -8918,7 +9197,11 @@
       "serve": null,
       "cooldown": null
     },
-    "baseServings": 2
+    "baseServings": 2,
+    "tags": [
+      "Món phụ",
+      "Salad"
+    ]
   },
   {
     "id": "Cà rốt và củ cải ngâm chua ngọtEwWkyZx38p",
@@ -9026,7 +9309,11 @@
       "serve": null,
       "cooldown": null
     },
-    "baseServings": 2
+    "baseServings": 2,
+    "tags": [
+      "Món phụ",
+      "Salad"
+    ]
   },
   {
     "id": "Nước chấm nem nướngTae9hkbHGW",
@@ -9195,7 +9482,10 @@
       "serve": null,
       "cooldown": null
     },
-    "baseServings": 2
+    "baseServings": 2,
+    "tags": [
+      "Món phụ"
+    ]
   },
   {
     "id": "Bánh cuốn8njAOXZMLa",
@@ -9315,7 +9605,12 @@
       "serve": null,
       "cooldown": null
     },
-    "baseServings": 2
+    "baseServings": 2,
+    "tags": [
+      "Ăn sáng",
+      "Món chính",
+      "Hấp"
+    ]
   },
   {
     "id": "Chả nướng bămseNLEMMZFp",
@@ -9385,7 +9680,11 @@
       "serve": null,
       "cooldown": null
     },
-    "baseServings": 2
+    "baseServings": 2,
+    "tags": [
+      "Món chính",
+      "Nướng"
+    ]
   },
   {
     "id": "Chả nướng miếngAqMSAIpst1",
@@ -9445,7 +9744,11 @@
       "serve": null,
       "cooldown": null
     },
-    "baseServings": 2
+    "baseServings": 2,
+    "tags": [
+      "Món chính",
+      "Nướng"
+    ]
   },
   {
     "id": "Chả nướng lẫn78Xm_wfZ7d",
@@ -9552,7 +9855,11 @@
       "serve": null,
       "cooldown": null
     },
-    "baseServings": 2
+    "baseServings": 2,
+    "tags": [
+      "Món chính",
+      "Nướng"
+    ]
   },
   {
     "id": "Bánh cuốn chả nướng miếngfSgiyqTVGg",
@@ -9613,7 +9920,12 @@
       "serve": null,
       "cooldown": null
     },
-    "baseServings": 2
+    "baseServings": 2,
+    "tags": [
+      "Ăn sáng",
+      "Món chính",
+      "Nướng"
+    ]
   },
   {
     "id": "Bánh cuốn chả nướng lẫn0RpjzyE-2Z",
@@ -9674,7 +9986,12 @@
       "serve": null,
       "cooldown": null
     },
-    "baseServings": 2
+    "baseServings": 2,
+    "tags": [
+      "Ăn sáng",
+      "Món chính",
+      "Nướng"
+    ]
   },
   {
     "id": "Nước chấm bánh cuốnECD_ldv04_",
@@ -9803,7 +10120,10 @@
       "serve": null,
       "cooldown": null
     },
-    "baseServings": 2
+    "baseServings": 2,
+    "tags": [
+      "Món phụ"
+    ]
   },
   {
     "id": "Bò bít tếtaOXbsKyhgB",
@@ -9921,7 +10241,10 @@
       "serve": null,
       "cooldown": null
     },
-    "baseServings": 2
+    "baseServings": 2,
+    "tags": [
+      "Món chính"
+    ]
   },
   {
     "id": "Bánh mì thịt nướng mật ongegAwiclMzM",
@@ -10002,7 +10325,12 @@
       "serve": null,
       "cooldown": null
     },
-    "baseServings": 2
+    "baseServings": 2,
+    "tags": [
+      "Ăn sáng",
+      "Món chính",
+      "Nướng"
+    ]
   },
   {
     "id": "Nước chấm hải sảnabDnXSNf-y",
@@ -10098,7 +10426,10 @@
       "serve": null,
       "cooldown": null
     },
-    "baseServings": 2
+    "baseServings": 2,
+    "tags": [
+      "Món phụ"
+    ]
   },
   {
     "id": "Bún chả miếngfKGq1GQZND",
@@ -10179,7 +10510,12 @@
       "serve": null,
       "cooldown": null
     },
-    "baseServings": 2
+    "baseServings": 2,
+    "tags": [
+      "Ăn sáng",
+      "Món chính",
+      "Nướng"
+    ]
   },
   {
     "id": "Bún chả lẫnU69ZgQadyy",
@@ -10260,7 +10596,12 @@
       "serve": null,
       "cooldown": null
     },
-    "baseServings": 2
+    "baseServings": 2,
+    "tags": [
+      "Ăn sáng",
+      "Món chính",
+      "Nướng"
+    ]
   },
   {
     "id": "Nước chấm bún chả9XYmqW0KpO",
@@ -10379,7 +10720,10 @@
       "serve": null,
       "cooldown": null
     },
-    "baseServings": 2
+    "baseServings": 2,
+    "tags": [
+      "Món phụ"
+    ]
   },
   {
     "id": "Sốt ướp chả nướng (bún chả)bgtSIsRYZV",
@@ -10508,7 +10852,11 @@
       "serve": null,
       "cooldown": null
     },
-    "baseServings": 2
+    "baseServings": 2,
+    "tags": [
+      "Món phụ",
+      "Nướng"
+    ]
   },
   {
     "id": "Sốt ướp thịt nướng sảViIOYxgxhe",
@@ -10613,7 +10961,11 @@
       "serve": null,
       "cooldown": null
     },
-    "baseServings": 2
+    "baseServings": 2,
+    "tags": [
+      "Món phụ",
+      "Nướng"
+    ]
   },
   {
     "id": "Sốt ướp thịt nướng mật ongqZhf-2mjJm",
@@ -10718,7 +11070,11 @@
       "serve": null,
       "cooldown": null
     },
-    "baseServings": 2
+    "baseServings": 2,
+    "tags": [
+      "Món phụ",
+      "Nướng"
+    ]
   },
   {
     "id": "Riêu cuaBBGR0lt-N3",
@@ -10826,7 +11182,10 @@
       "serve": null,
       "cooldown": null
     },
-    "baseServings": 2
+    "baseServings": 2,
+    "tags": [
+      "Món phụ"
+    ]
   },
   {
     "id": "Bánh rán mèmHwyy7hdxN",
@@ -10886,7 +11245,12 @@
       "serve": null,
       "cooldown": null
     },
-    "baseServings": 2
+    "baseServings": 2,
+    "tags": [
+      "Ăn vặt",
+      "Tráng miệng",
+      "Chiên"
+    ]
   },
   {
     "id": "Nước chấm cá rán0UK9PsMOJv",
@@ -10994,7 +11358,10 @@
       "serve": null,
       "cooldown": null
     },
-    "baseServings": 2
+    "baseServings": 2,
+    "tags": [
+      "Món phụ"
+    ]
   },
   {
     "id": "Gà kho sả ớt2NJpSsMRKr",
@@ -11162,7 +11529,10 @@
       "serve": null,
       "cooldown": null
     },
-    "baseServings": 2
+    "baseServings": 2,
+    "tags": [
+      "Món chính"
+    ]
   },
   {
     "id": "Cá om dưaAAAq2tCTdc",
@@ -11322,7 +11692,10 @@
       "serve": null,
       "cooldown": null
     },
-    "baseServings": 2
+    "baseServings": 2,
+    "tags": [
+      "Món chính"
+    ]
   },
   {
     "id": "Dưa muối_3Gl1lv4L_",
@@ -11402,7 +11775,10 @@
       "serve": null,
       "cooldown": null
     },
-    "baseServings": 2
+    "baseServings": 2,
+    "tags": [
+      "Món phụ"
+    ]
   },
   {
     "id": "Nước chấm chua ngọtG7qG4YmA5R",
@@ -11510,7 +11886,10 @@
       "serve": null,
       "cooldown": null
     },
-    "baseServings": 2
+    "baseServings": 2,
+    "tags": [
+      "Món phụ"
+    ]
   },
   {
     "id": "Sườn chua cay TháiQZm3j8N_jt",
@@ -11628,6 +12007,10 @@
     "includeDishes": [],
     "note": "",
     "image": "https://cdn.tgdd.vn/Files/2017/03/24/964475/cach-lam-suon-xao-chua-ngot-ngon-bat-bai-vo-cung-don-gian-202212051056278431.jpg",
-    "baseServings": 2
+    "baseServings": 2,
+    "tags": [
+      "Canh",
+      "Món chính"
+    ]
   }
 ]
