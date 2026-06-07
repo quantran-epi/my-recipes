@@ -4,6 +4,7 @@ import { DishIngredientAmountMealMeta, Dishes } from '@store/Models/Dishes';
 import { Ingredient, IngredientInventory, IngredientUnit } from '@store/Models/Ingredient';
 import { ScheduledMeal } from '@store/Models/ScheduledMeal';
 import { ShoppingList, ShoppingListCompletionImport, ShoppingListIngredientAmount, ShoppingListIngredientGroup } from '@store/Models/ShoppingList';
+import { InventoryHealthConfig } from '@store/Models/SharedConfig';
 import { IngredientUnitHelper } from '@common/Helpers/IngredientUnitHelper';
 import { DishServingHelper } from '@common/Helpers/DishServingHelper';
 import { InventoryHelper } from '@common/Helpers/InventoryHelper';
@@ -17,6 +18,7 @@ export type ShoppingListGenerateIngredientParams = {
     allScheduledMeals: ScheduledMeal[];
     allIngredients?: Ingredient[];
     inventory?: Record<string, IngredientInventory>;
+    inventoryConfig?: InventoryHealthConfig;
     alreadyHaveIngredientIds?: string[];
     autoMarkCoveredByInventory?: boolean;
     dishServings?: Record<string, number>;
@@ -161,7 +163,7 @@ export const ShoppingListSlice = createSlice({
                             }, 0);
                             const inStockBaseAmount = forceCoveredByManualSelection
                                 ? requiredBaseAmount
-                                : InventoryHelper.availableAmount(action.payload.inventory?.[key], ingredient, requiredBaseAmount);
+                                : InventoryHelper.availableAmount(action.payload.inventory?.[key], ingredient, requiredBaseAmount, action.payload.inventoryConfig);
                             const isCovered = shouldAutoMark && (
                                 InventoryHelper.isAlwaysAvailable(ingredient)
                                 || forceCoveredByManualSelection

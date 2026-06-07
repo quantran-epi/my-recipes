@@ -10,7 +10,7 @@ import { Tooltip } from "@components/Tootip";
 import { Typography } from "@components/Typography";
 import { useScheduledCalculation, useToggle } from "@hooks";
 import { DishScorer, ScoredDish, ScoredDishGroup } from "../Helpers/DishScorer";
-import { selectDishes, selectIngredients, selectIngredientsById, selectInventory } from "@store/Selectors";
+import { selectDishes, selectIngredients, selectIngredientsById, selectInventory, selectInventoryHealthConfig } from "@store/Selectors";
 import { InputNumber, Input, Select, Spin } from "antd";
 import React, { useMemo, useState } from "react";
 import { useSelector } from "react-redux";
@@ -74,6 +74,7 @@ export const DishSuggesterScreen: React.FC<DishSuggesterScreenProps> = ({ open, 
     const allIngredients = useSelector(selectIngredients);
     const ingredientsById = useSelector(selectIngredientsById);
     const inventory = useSelector(selectInventory);
+    const inventoryConfig = useSelector(selectInventoryHealthConfig);
 
     const [mode, setMode] = useState<Mode>(initialMode ?? "ingredients");
     const [step, setStep] = useState(0);
@@ -105,10 +106,10 @@ export const DishSuggesterScreen: React.FC<DishSuggesterScreenProps> = ({ open, 
             .filter(([id, inv]) => {
                 const ingredient = ingredientsById.get(id);
                 return !InventoryHelper.isAlwaysAvailable(ingredient)
-                    && InventoryHelper.totalUsableAmount(inv as any, ingredient) > 0;
+                    && InventoryHelper.totalUsableAmount(inv as any, ingredient, inventoryConfig) > 0;
             })
             .map(([id]) => id);
-    }, [open, inventory, ingredientsById]);
+    }, [open, inventory, ingredientsById, inventoryConfig]);
 
     const calculateIngredientSuggestions = React.useCallback((): DishSuggestionCalculation => {
         const scored = DishScorer.score(dishes, selectedIngredientIds, dishes);
@@ -122,9 +123,9 @@ export const DishSuggesterScreen: React.FC<DishSuggesterScreenProps> = ({ open, 
     const ingredientGroups = ingredientSuggestions.groups;
 
     const calculateInventorySuggestions = React.useCallback((): DishSuggestionCalculation => {
-        const scored = DishScorer.scoreWithInventory(dishes, inventory as any, dishes, allIngredients);
+        const scored = DishScorer.scoreWithInventory(dishes, inventory as any, dishes, allIngredients, inventoryConfig);
         return { scored, groups: DishScorer.group(scored) };
-    }, [allIngredients, dishes, inventory]);
+    }, [allIngredients, dishes, inventory, inventoryConfig]);
     const { value: inventorySuggestions, pending: inventorySuggestionsPending } = useScheduledCalculation(calculateInventorySuggestions, {
         enabled: open && mode === "inventory",
         initialValue: createEmptyDishSuggestionCalculation,

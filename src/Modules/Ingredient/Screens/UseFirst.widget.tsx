@@ -7,7 +7,7 @@ import { Typography } from "@components/Typography";
 import { InventoryHelper } from "@common/Helpers/InventoryHelper";
 import { IngredientUnitHelper } from "@common/Helpers/IngredientUnitHelper";
 import { INGREDIENT_SHELF_LIFE_OPTIONS } from "@store/Models/Ingredient";
-import { selectIngredientsById, selectInventory } from "@store/Selectors";
+import { selectIngredientsById, selectInventory, selectInventoryHealthConfig } from "@store/Selectors";
 import { Checkbox, Empty } from "antd";
 import React, { useState } from "react";
 import { useSelector } from "react-redux";
@@ -18,11 +18,10 @@ type UseFirstWidgetProps = {
     onSuggest: (ingredientIds: string[]) => void;
 }
 
-const URGENT_DAYS_THRESHOLD = 3;
-
 export const UseFirstWidget: React.FC<UseFirstWidgetProps> = ({ open, onClose, onSuggest }) => {
     const inventory = useSelector(selectInventory);
     const ingredientsById = useSelector(selectIngredientsById);
+    const inventoryConfig = useSelector(selectInventoryHealthConfig);
 
     const [selectedIds, setSelectedIds] = useState<string[]>([]);
 
@@ -30,19 +29,19 @@ export const UseFirstWidget: React.FC<UseFirstWidgetProps> = ({ open, onClose, o
     const urgentItems = Object.entries(inventory)
         .filter(([id, inv]) => {
             const ingr = ingredientsById.get(id);
-            const totalAmt = InventoryHelper.totalUsableAmount(inv as any, ingr);
+            const totalAmt = InventoryHelper.totalUsableAmount(inv as any, ingr, inventoryConfig);
             if (totalAmt <= 0) return false;
             if (!ingr?.shelfLife) return false;
-            const nearest = InventoryHelper.nearestExpiryBatch(inv as any, ingr);
-            return nearest !== null && nearest.daysLeft <= URGENT_DAYS_THRESHOLD;
+            const nearest = InventoryHelper.nearestExpiryBatch(inv as any, ingr, inventoryConfig);
+            return nearest !== null && InventoryHelper.isUrgentExpiry(nearest.daysLeft, inventoryConfig);
         })
         .map(([id, inv]) => {
             const ingr = ingredientsById.get(id)!;
-            const nearest = InventoryHelper.nearestExpiryBatch(inv as any, ingr);
+            const nearest = InventoryHelper.nearestExpiryBatch(inv as any, ingr, inventoryConfig);
             const daysLeft = nearest?.daysLeft ?? null;
             const badge = InventoryHelper.expiryBadge(daysLeft);
             const opt = INGREDIENT_SHELF_LIFE_OPTIONS.find(o => o.value === ingr.shelfLife);
-            const totalAmt = InventoryHelper.totalUsableAmount(inv as any, ingr);
+            const totalAmt = InventoryHelper.totalUsableAmount(inv as any, ingr, inventoryConfig);
             const urgentAmt = nearest?.batch.amount ?? totalAmt; // amount of the near-expiry batch
             const unit = IngredientUnitHelper.getBatchUnit(inv as any, nearest?.batch, ingr);
             const urgentBaseAmt = nearest?.batch

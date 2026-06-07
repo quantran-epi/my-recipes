@@ -9,7 +9,7 @@ import { InventoryHelper } from "@common/Helpers/InventoryHelper";
 import { IngredientUnitHelper } from "@common/Helpers/IngredientUnitHelper";
 import { cancelCooking, finishCooking } from "@store/Reducers/CookingSessionReducer";
 import { deductInventory } from "@store/Reducers/InventoryReducer";
-import { selectDishes, selectDishesById, selectIngredientsById, selectInventory } from "@store/Selectors";
+import { selectDishes, selectDishesById, selectIngredientsById, selectInventory, selectInventoryHealthConfig } from "@store/Selectors";
 import moment from "moment";
 import 'moment/locale/vi';
 import React, { useMemo } from "react";
@@ -29,6 +29,7 @@ export const FinishCookingWidget: React.FunctionComponent<FinishCookingWidgetPro
     const dishesById = useSelector(selectDishesById);
     const ingredientsById = useSelector(selectIngredientsById);
     const inventoryItems = useSelector(selectInventory);
+    const inventoryConfig = useSelector(selectInventoryHealthConfig);
 
     const dish = dishesById.get(session.dishId);
 
@@ -56,6 +57,7 @@ export const FinishCookingWidget: React.FunctionComponent<FinishCookingWidgetPro
             amount: d.total,
             unit: d.unit as any,
             ingredient: ingredientsById.get(d.id),
+            inventoryConfig,
         })));
         dispatch(finishCooking(session.id));
         message.success("Đã hoàn thành phiên nấu");

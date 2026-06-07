@@ -15,8 +15,9 @@ import { useScreenTitle, useToggle, useAdminMode, usePagedVirtualItems } from "@
 import { InventoryHelper } from "@common/Helpers/InventoryHelper";
 import { IngredientUnitHelper } from "@common/Helpers/IngredientUnitHelper";
 import { Ingredient, IngredientInventory, INGREDIENT_CATEGORIES, INGREDIENT_PRESERVATION_OPTIONS, INGREDIENT_SHELF_LIFE_OPTIONS } from "@store/Models/Ingredient";
+import { InventoryHealthConfig } from "@store/Models/SharedConfig";
 import { removeIngredient } from "@store/Reducers/IngredientReducer";
-import { selectIngredients, selectInventory } from "@store/Selectors";
+import { selectIngredients, selectInventory, selectInventoryHealthConfig } from "@store/Selectors";
 import { debounce, sortBy } from "lodash";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -57,7 +58,7 @@ const filterRowStyle: React.CSSProperties = {
 const topToolCardStyle: React.CSSProperties = {
     background: "#fff",
     border: "1px solid #f0f0f0",
-    borderRadius: 8,
+    borderRadius: 0,
     padding: 10,
     marginBottom: 10,
     boxShadow: "0 2px 8px rgba(0,0,0,0.04)",
@@ -95,6 +96,7 @@ const ingredientMatchesCategory = (ingredient: Ingredient, category: string | nu
 
 type IngredientStockSnapshot = {
     usableAmount: number;
+    lowStock: boolean;
     urgent: boolean;
     hasInventory: boolean;
     nearestExpiry: ReturnType<typeof InventoryHelper.nearestExpiryBatch>;
@@ -103,14 +105,16 @@ type IngredientStockSnapshot = {
 const getIngredientStockSnapshot = (
     ingredient: Ingredient,
     inventoryItems: Record<string, IngredientInventory>,
+    inventoryConfig?: InventoryHealthConfig,
 ): IngredientStockSnapshot => {
     const inventory = inventoryItems[ingredient.id];
-    const snapshot = InventoryHelper.inventorySnapshot(inventory, ingredient);
+    const snapshot = InventoryHelper.inventorySnapshot(inventory, ingredient, inventoryConfig);
     return {
         usableAmount: snapshot.usableAmount,
+        lowStock: InventoryHelper.isLowStock(snapshot.usableAmount, inventoryConfig),
         hasInventory: snapshot.hasInventory,
         nearestExpiry: snapshot.nearestExpiry,
-        urgent: Boolean(snapshot.nearestExpiry && snapshot.nearestExpiry.daysLeft <= 3),
+        urgent: InventoryHelper.isUrgentExpiry(snapshot.nearestExpiry?.daysLeft, inventoryConfig),
     };
 }
 
@@ -118,11 +122,12 @@ const ingredientMatchesStock = (
     ingredient: Ingredient,
     stockFilter: IngredientStockFilter,
     stock: IngredientStockSnapshot,
+    inventoryConfig?: InventoryHealthConfig,
 ): boolean => {
     return stockFilter === "all"
         || (stockFilter === "in_stock" && (InventoryHelper.isAlwaysAvailable(ingredient) || stock.usableAmount > 0))
         || (stockFilter === "need_stock" && !InventoryHelper.isAlwaysAvailable(ingredient) && stock.usableAmount <= 0)
-        || (stockFilter === "low_stock" && !InventoryHelper.isAlwaysAvailable(ingredient) && stock.usableAmount > 0 && stock.usableAmount <= 2)
+        || (stockFilter === "low_stock" && !InventoryHelper.isAlwaysAvailable(ingredient) && InventoryHelper.isLowStock(stock.usableAmount, inventoryConfig))
         || (stockFilter === "urgent" && stock.urgent)
         || (stockFilter === "always_available" && InventoryHelper.isAlwaysAvailable(ingredient));
 }
@@ -153,6 +158,7 @@ export const IngredientListScreen = () => {
     const [activeStockFilter, setActiveStockFilter] = useState<IngredientStockFilter>("all");
     const [activeCategory, setActiveCategory] = useState<string | null>(null);
     const inventoryItems = useSelector(selectInventory);
+    const inventoryConfig = useSelector(selectInventoryHealthConfig);
     const virtualListStyle = useMemo<React.CSSProperties>(() => ({
         height: "100%",
         overscrollBehavior: "contain",
@@ -219,23 +225,23 @@ export const IngredientListScreen = () => {
         ingredients.forEach(ingredient => {
             const matchesSearch = ingredientMatchesSearch(ingredient, normalizedSearch);
             if (!matchesSearch) return;
-            const stock = getIngredientStockSnapshot(ingredient, inventoryItems);
+            const stock = getIngredientStockSnapshot(ingredient, inventoryItems, inventoryConfig);
             stockSnapshots[ingredient.id] = stock;
 
             if (ingredientMatchesCategory(ingredient, activeCategory)) {
                 INGREDIENT_STOCK_FILTERS.forEach(item => {
-                    if (ingredientMatchesStock(ingredient, item.value, stock)) stockCounts[item.value] += 1;
+                    if (ingredientMatchesStock(ingredient, item.value, stock, inventoryConfig)) stockCounts[item.value] += 1;
                 });
             }
 
-            if (ingredientMatchesStock(ingredient, activeStockFilter, stock)) {
+            if (ingredientMatchesStock(ingredient, activeStockFilter, stock, inventoryConfig)) {
                 categoryCounts.__all += 1;
                 if (ingredient.category && categorySet.has(ingredient.category)) {
                     categoryCounts[ingredient.category] = (categoryCounts[ingredient.category] ?? 0) + 1;
                 }
             }
 
-            if (ingredientMatchesCategory(ingredient, activeCategory) && ingredientMatchesStock(ingredient, activeStockFilter, stock)) {
+            if (ingredientMatchesCategory(ingredient, activeCategory) && ingredientMatchesStock(ingredient, activeStockFilter, stock, inventoryConfig)) {
                 filtered.push(ingredient);
             }
         });
@@ -250,7 +256,7 @@ export const IngredientListScreen = () => {
             stockCounts,
             categoryCounts,
         };
-    }, [ingredients, inventoryItems, normalizedSearch, activeCategory, activeStockFilter, availableCategories]);
+    }, [ingredients, inventoryItems, inventoryConfig, normalizedSearch, activeCategory, activeStockFilter, availableCategories]);
 
     const { filteredIngredients, stockSnapshots, stockCounts, categoryCounts } = filterData;
     const pagedIngredientsResetKey = `${activeStockFilter}|${activeCategory ?? "all"}|${normalizedSearch}`;
@@ -435,10 +441,10 @@ const IngredientItemComponent: React.FunctionComponent<IngredientItemProps> = (p
             ? { label: "Chưa có tồn kho", detail: "Bấm để nhập lô đầu tiên", color: "#8c8c8c", background: "#fafafa", border: "#d9d9d9" }
             : totalAmt <= 0
                 ? { label: "Hết khả dụng", detail: "Không còn lô dùng được", color: "#cf1322", background: "#fff1f0", border: "#ffa39e" }
-                : totalAmt <= 2
+                : props.stockSnapshot.lowStock
                     ? { label: `${IngredientUnitHelper.formatAmount(totalAmt)} ${inventoryUnit}`, detail: "Tồn kho thấp", color: "#d46b08", background: "#fff7e6", border: "#ffd591" }
                     : { label: `${IngredientUnitHelper.formatAmount(totalAmt)} ${inventoryUnit}`, detail: "Tồn kho ổn", color: "#389e0d", background: "#f6ffed", border: "#b7eb8f" };
-    const railColor = expiryBadge && nearestExpiry?.daysLeft <= 3 ? expiryBadge.color : inventoryStatus.color;
+    const railColor = expiryBadge && props.stockSnapshot.urgent ? expiryBadge.color : inventoryStatus.color;
 
     return <React.Fragment>
         <div data-testid={`ingredient-list-item-${props.item.id}`} style={{ padding: "6px 0 8px", boxSizing: "border-box" }}>

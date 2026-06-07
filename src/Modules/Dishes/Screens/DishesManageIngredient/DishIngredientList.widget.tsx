@@ -14,8 +14,9 @@ import { Tooltip } from "@components/Tootip"
 import { useToggle } from "@hooks"
 import { Dishes, DishesIngredientAmount } from "@store/Models/Dishes"
 import { Ingredient, IngredientInventory } from "@store/Models/Ingredient"
+import { InventoryHealthConfig } from "@store/Models/SharedConfig"
 import { DishesIngredientAddParams, removeIngredientsFromDish } from "@store/Reducers/DishesReducer"
-import { selectIngredientsById, selectInventory } from "@store/Selectors"
+import { selectIngredientsById, selectInventory, selectInventoryHealthConfig } from "@store/Selectors"
 import { Typography } from "antd"
 import React, { FunctionComponent, useEffect, useMemo } from "react"
 import { useDispatch, useSelector } from "react-redux"
@@ -37,6 +38,7 @@ export const DishIngredientListWidget: FunctionComponent<DishIngredientListWidge
     const dispatch = useDispatch();
     const ingredientsById = useSelector(selectIngredientsById);
     const inventoryItems = useSelector(selectInventory);
+    const inventoryConfig = useSelector(selectInventoryHealthConfig);
     const sortedIngredients = useMemo(() => orderBy(props.currentDist.ingredients, [obj => obj.required], ['desc']), [props.currentDist.ingredients]);
 
     const addDishesForm = useSmartForm<DishesIngredientAddParams>({
@@ -73,7 +75,7 @@ export const DishIngredientListWidget: FunctionComponent<DishIngredientListWidge
         <Button fullwidth onClick={_onAddIngredient}>Thêm nguyên liệu</Button>
         <List
             dataSource={sortedIngredients}
-            renderItem={(item) => <IngredientItem dish={props.currentDist} ingredientAmount={item} ingredient={ingredientsById.get(item.ingredientId)} inventory={inventoryItems[item.ingredientId]} onDelete={_onDelete} />} />
+            renderItem={(item) => <IngredientItem dish={props.currentDist} ingredientAmount={item} ingredient={ingredientsById.get(item.ingredientId)} inventory={inventoryItems[item.ingredientId]} inventoryConfig={inventoryConfig} onDelete={_onDelete} />} />
 
         <Modal open={toggleAddIngredientToDishes.value} title={<Stack gap={0} direction="column" align="flex-start">
             <Space>
@@ -94,6 +96,7 @@ type IngredientItemProps = {
     ingredientAmount: DishesIngredientAmount;
     ingredient?: Ingredient;
     inventory?: IngredientInventory;
+    inventoryConfig?: InventoryHealthConfig;
     onDelete: (dish: Dishes, ingredientAmount: DishesIngredientAmount) => void;
 }
 
@@ -106,11 +109,11 @@ export const IngredientItem: React.FunctionComponent<IngredientItemProps> = (pro
     const requiredAmount = IngredientUnitHelper.toBaseAmount(ingredientAmount, props.ingredientAmount.amount, props.ingredientAmount.unit, baseUnit)
         ?? IngredientUnitHelper.parseAmount(props.ingredientAmount.amount);
     const isAlwaysAvailable = InventoryHelper.isAlwaysAvailable(ingredientAmount);
-    const stockAmount = InventoryHelper.availableAmount(inventory, ingredientAmount, requiredAmount);
+    const stockAmount = InventoryHelper.availableAmount(inventory, ingredientAmount, requiredAmount, props.inventoryConfig);
     const hasStock = isAlwaysAvailable || stockAmount > 0;
     const enoughStock = isAlwaysAvailable || (requiredAmount > 0 ? stockAmount >= requiredAmount : hasStock);
-    const nearestExpiry = InventoryHelper.nearestExpiryBatch(inventory, ingredientAmount);
-    const expiryBadge = nearestExpiry && nearestExpiry.daysLeft <= 3 ? InventoryHelper.expiryBadge(nearestExpiry.daysLeft) : null;
+    const nearestExpiry = InventoryHelper.nearestExpiryBatch(inventory, ingredientAmount, props.inventoryConfig);
+    const expiryBadge = nearestExpiry && InventoryHelper.isUrgentExpiry(nearestExpiry.daysLeft, props.inventoryConfig) ? InventoryHelper.expiryBadge(nearestExpiry.daysLeft) : null;
     const inventoryStatus = isAlwaysAvailable
         ? { color: "#52c41a", label: "✓ Luôn có" }
         : enoughStock

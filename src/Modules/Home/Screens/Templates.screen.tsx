@@ -25,6 +25,7 @@ import {
     selectDishes,
     selectIngredients,
     selectInventory,
+    selectInventoryHealthConfig,
     selectScheduledMeals,
     selectShoppingListTemplates,
     selectShoppingLists,
@@ -130,6 +131,7 @@ export const TemplatesScreen = () => {
     const dishes = useSelector(selectDishes);
     const ingredients = useSelector(selectIngredients);
     const inventory = useSelector(selectInventory);
+    const inventoryConfig = useSelector(selectInventoryHealthConfig);
     const scheduledMeals = useSelector(selectScheduledMeals);
     const shoppingLists = useSelector(selectShoppingLists);
     const weeklyMealTemplates = useSelector(selectWeeklyMealTemplates);
@@ -242,6 +244,7 @@ export const TemplatesScreen = () => {
             allScheduledMeals: scheduledMeals,
             allIngredients: ingredients,
             inventory,
+            inventoryConfig,
             alreadyHaveIngredientIds: [],
             autoMarkCoveredByInventory: true,
             dishServings: normalizedServings,

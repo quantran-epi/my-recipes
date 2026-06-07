@@ -9,7 +9,7 @@ import { nanoid } from "@reduxjs/toolkit"
 import { ShoppingList } from "@store/Models/ShoppingList"
 import { rememberShoppingListName } from "@store/Reducers/AppContextReducer"
 import { addShoppingList, generateIngredient } from "@store/Reducers/ShoppingListReducer"
-import { selectDishes, selectIngredients, selectInventory, selectScheduledMeals, selectShoppingListNameHistory, selectShoppingLists } from "@store/Selectors"
+import { selectDishes, selectIngredients, selectInventory, selectInventoryHealthConfig, selectScheduledMeals, selectShoppingListNameHistory, selectShoppingLists } from "@store/Selectors"
 import { AutoComplete } from "antd"
 import dayjs from "dayjs"
 import moment from "moment"
@@ -45,6 +45,7 @@ export const ShoppingListAddWidget: FunctionComponent<ShoppingListAddWidgetProps
     const scheduledMeals = useSelector(selectScheduledMeals);
     const allIngredients = useSelector(selectIngredients);
     const inventory = useSelector(selectInventory);
+    const inventoryConfig = useSelector(selectInventoryHealthConfig);
     const message = useMessage();
     const [selectedDishIds, setSelectedDishIds] = useState<string[]>(dishIds ?? []);
     const [dishServings, setDishServings] = useState<Record<string, number>>(() => normalizeDishServings(dishIds ?? [], dishes, initialDishServings ?? {}));
@@ -76,6 +77,7 @@ export const ShoppingListAddWidget: FunctionComponent<ShoppingListAddWidgetProps
                 allScheduledMeals: scheduledMeals,
                 allIngredients: allIngredients,
                 inventory,
+                inventoryConfig,
                 alreadyHaveIngredientIds: alreadyHaveIngredientIds ?? [],
                 autoMarkCoveredByInventory: true,
                 dishServings: normalizedDishServings,

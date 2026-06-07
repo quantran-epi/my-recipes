@@ -48,7 +48,7 @@ export const ShoppingListDetailScreen = () => {
             <Button icon={<ArrowLeftOutlined />} onClick={_backToList}>Quay lại</Button>
         </Stack>
 
-        <Box style={{ background: "#fff", border: "1px solid #f0f0f0", borderRadius: 8, padding: 14, marginBottom: 12 }}>
+        <Box style={{ background: "#fff", border: "1px solid #f0f0f0", borderRadius: 0, padding: 14, marginBottom: 12 }}>
             <Stack justify="space-between" align="flex-start" style={{ gap: 12 }}>
                 <Box style={{ minWidth: 0 }}>
                     <Space>
@@ -78,7 +78,7 @@ export const ShoppingListDetailScreen = () => {
             </Stack>
         </Box>
 
-        <Box style={{ background: "#fff", border: "1px solid #f0f0f0", borderRadius: 8, padding: 14 }}>
+        <Box style={{ background: "#fff", border: "1px solid #f0f0f0", borderRadius: 0, padding: 14 }}>
             <ShoppingListDetailWidget shoppingList={shoppingList} />
         </Box>
         {toggleEditModal.value && <Modal open={toggleEditModal.value} title={

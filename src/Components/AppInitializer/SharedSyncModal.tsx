@@ -11,17 +11,20 @@ import { Button } from "@components/Button";
 import { useDispatch, useSelector } from "react-redux";
 import { addIngredient, editIngredient, removeIngredient } from "@store/Reducers/IngredientReducer";
 import { addDishes, editDishes, removeDishes } from "@store/Reducers/DishesReducer";
-import { selectDishes, selectIngredients, selectScheduledMeals, selectShoppingLists } from "@store/Selectors";
-import { getSharedDishesUrl, getSharedIngredientsUrl, SharedData, SharedItemChange, SharedManifest } from "../../Hooks/useSharedPublish";
+import { selectDishes, selectIngredients, selectScheduledMeals, selectSharedConfig, selectShoppingLists } from "@store/Selectors";
+import { getSharedConfigUrl, getSharedDishesUrl, getSharedIngredientsUrl, SharedData, SharedItemChange, SharedManifest } from "../../Hooks/useSharedPublish";
 import { SyncedVersions } from "../../Hooks/useSharedDataSync";
 import { Ingredient } from "@store/Models/Ingredient";
 import { Dishes } from "@store/Models/Dishes";
+import { normalizeSharedConfig, SharedConfig } from "@store/Models/SharedConfig";
+import { replaceSharedConfig } from "@store/Reducers/SharedConfigReducer";
 
 interface Props {
     open: boolean;
     manifest: SharedManifest;
     hasIngredientChanges: boolean;
     hasDishChanges: boolean;
+    hasConfigChanges: boolean;
     force?: boolean;
     onDone: (synced: SyncedVersions) => void;
     onCancel: () => void;
@@ -103,11 +106,30 @@ export const deriveSnapshotChanges = <T extends { id: string; name: string }>(
     return changes;
 };
 
+const deriveConfigChanges = (
+    remoteConfig: SharedConfig | undefined,
+    localConfig: SharedConfig,
+    manifestChanges: SharedItemChange[],
+    force?: boolean,
+): SharedItemChange[] => {
+    if (!remoteConfig) return manifestChanges;
+    const normalizedRemote = normalizeSharedConfig(remoteConfig);
+    const normalizedLocal = normalizeSharedConfig(localConfig);
+    if (JSON.stringify(normalizedRemote) !== JSON.stringify(normalizedLocal)) {
+        return manifestChanges.length > 0
+            ? manifestChanges
+            : [{ id: "inventory-config", name: "Cấu hình tồn kho", action: "modified" }];
+    }
+    if (force) return [{ id: "inventory-config", name: "Cấu hình tồn kho", action: "sync" }];
+    return [];
+};
+
 export const SharedSyncModal: React.FC<Props> = ({
     open,
     manifest,
     hasIngredientChanges,
     hasDishChanges,
+    hasConfigChanges,
     force,
     onDone,
     onCancel,
@@ -116,6 +138,7 @@ export const SharedSyncModal: React.FC<Props> = ({
     const modal = useModal();
     const existingIngredients = useSelector(selectIngredients);
     const existingDishes = useSelector(selectDishes);
+    const existingConfig = useSelector(selectSharedConfig);
     const shoppingLists = useSelector(selectShoppingLists);
     const scheduledMeals = useSelector(selectScheduledMeals);
 
@@ -127,11 +150,14 @@ export const SharedSyncModal: React.FC<Props> = ({
 
     const [selectedIngredients, setSelectedIngredients] = useState<Set<string>>(new Set());
     const [selectedDishes, setSelectedDishes] = useState<Set<string>>(new Set());
+    const [selectedConfig, setSelectedConfig] = useState(false);
     const shouldFetchIngredients = force || hasIngredientChanges || (manifest.ingredientChanges?.length ?? 0) > 0;
     const shouldFetchDishes = force || hasDishChanges || (manifest.dishChanges?.length ?? 0) > 0;
+    const shouldFetchConfig = Boolean(manifest.configVersion || manifest.parts.config.version) && (force || hasConfigChanges || (manifest.configChanges?.length ?? 0) > 0);
     const requiredPartsLoaded =
         (!shouldFetchIngredients || !!sharedData.ingredients) &&
-        (!shouldFetchDishes || !!sharedData.dishes);
+        (!shouldFetchDishes || !!sharedData.dishes) &&
+        (!shouldFetchConfig || !!sharedData.config);
 
     const ingredientChanges = useMemo(() => {
         if (!sharedData.ingredients) return manifest.ingredientChanges;
@@ -143,9 +169,14 @@ export const SharedSyncModal: React.FC<Props> = ({
         return deriveSnapshotChanges(sharedData.dishes, existingDishes, manifest.dishChanges, force);
     }, [sharedData.dishes, existingDishes, manifest.dishChanges, force]);
 
+    const configChanges = useMemo(() => {
+        return deriveConfigChanges(sharedData.config, existingConfig, manifest.configChanges, force);
+    }, [sharedData.config, existingConfig, manifest.configChanges, force]);
+
     const hasIngredientRows = ingredientChanges.length > 0;
     const hasDishRows = dishChanges.length > 0;
-    const hasManifestChanges = hasIngredientChanges || hasDishChanges;
+    const hasConfigRows = configChanges.length > 0;
+    const hasManifestChanges = hasIngredientChanges || hasDishChanges || hasConfigChanges;
 
     // Initialise checkboxes from manifest defaults
     useEffect(() => {
@@ -156,7 +187,8 @@ export const SharedSyncModal: React.FC<Props> = ({
         setSelectedDishes(new Set(
             dishChanges.filter(c => defaultChecked(c.action)).map(c => c.id)
         ));
-    }, [open, ingredientChanges, dishChanges]);
+        setSelectedConfig(configChanges.some(c => defaultChecked(c.action)));
+    }, [open, ingredientChanges, dishChanges, configChanges]);
 
     // Fetch only the split data parts needed by this sync after the modal shell has painted.
     useEffect(() => {
@@ -170,7 +202,7 @@ export const SharedSyncModal: React.FC<Props> = ({
 
         cancelSchedule = scheduleAfterPaint(() => {
             if (cancelled) return;
-            if (!shouldFetchIngredients && !shouldFetchDishes) return;
+            if (!shouldFetchIngredients && !shouldFetchDishes && !shouldFetchConfig) return;
             setIsFetching(true);
             const fetchPart = async <T,>(url: string): Promise<T> => {
                 const res = await fetch(url + "?t=" + Date.now());
@@ -183,9 +215,10 @@ export const SharedSyncModal: React.FC<Props> = ({
             Promise.all([
                 shouldFetchIngredients ? fetchPart<Ingredient[]>(getSharedIngredientsUrl()) : Promise.resolve(undefined),
                 shouldFetchDishes ? fetchPart<Dishes[]>(getSharedDishesUrl()) : Promise.resolve(undefined),
+                shouldFetchConfig ? fetchPart<SharedConfig>(getSharedConfigUrl()) : Promise.resolve(undefined),
             ])
-                .then(([ingredients, dishes]) => {
-                    if (!cancelled) setSharedData({ ingredients, dishes });
+                .then(([ingredients, dishes, config]) => {
+                    if (!cancelled) setSharedData({ ingredients, dishes, config: config ? normalizeSharedConfig(config) : undefined });
                 })
                 .catch(e => {
                     if (!cancelled) setFetchError(e?.message ?? "Lỗi không xác định");
@@ -199,7 +232,7 @@ export const SharedSyncModal: React.FC<Props> = ({
             cancelled = true;
             cancelSchedule?.();
         };
-    }, [open, shouldFetchIngredients, shouldFetchDishes]);
+    }, [open, shouldFetchIngredients, shouldFetchDishes, shouldFetchConfig]);
 
     // Impact analysis is scheduled so warnings can fill in after selectable rows appear.
     useEffect(() => {
@@ -291,19 +324,26 @@ export const SharedSyncModal: React.FC<Props> = ({
                 }
             });
 
+        // ── Shared config ───────────────────────────────────────────────────
+        if (selectedConfig && sharedData.config) {
+            dispatch(replaceSharedConfig(sharedData.config));
+        }
+
         const syncedIngredients = ingredientChanges.some(c => selectedIngredients.has(c.id));
         const syncedDishes = dishChanges.some(c => selectedDishes.has(c.id));
+        const syncedConfig = selectedConfig && configChanges.length > 0;
 
         onDone({
             ingredientsVersion: syncedIngredients ? manifest.ingredientsVersion : "",
             dishesVersion: syncedDishes ? manifest.dishesVersion : "",
+            configVersion: syncedConfig ? manifest.configVersion : "",
         });
     };
 
     const confirmSync = () => {
         modal.confirm({
             title: "Xác nhận đồng bộ dữ liệu dùng chung",
-            content: `Thao tác này sẽ cập nhật ${selectedIngredients.size} nguyên liệu và ${selectedDishes.size} món ăn đã chọn trên thiết bị này. Bạn có chắc muốn đồng bộ?`,
+            content: `Thao tác này sẽ cập nhật ${selectedIngredients.size} nguyên liệu, ${selectedDishes.size} món ăn${selectedConfig ? " và cấu hình tồn kho" : ""} đã chọn trên thiết bị này. Bạn có chắc muốn đồng bộ?`,
             okText: "Đồng bộ",
             cancelText: "Hủy",
             centered: true,
@@ -312,7 +352,7 @@ export const SharedSyncModal: React.FC<Props> = ({
         });
     };
 
-    const totalSelected = selectedIngredients.size + selectedDishes.size;
+    const totalSelected = selectedIngredients.size + selectedDishes.size + (selectedConfig ? 1 : 0);
 
     return (
         <Modal
@@ -420,7 +460,30 @@ export const SharedSyncModal: React.FC<Props> = ({
                     </Flex>
                 </>
             )}
-            {!isFetching && sharedData && !hasIngredientRows && !hasDishRows && (
+
+            {/* ── Shared config ───────────────────────────────────── */}
+            {hasConfigRows && (
+                <>
+                    <Divider orientation="left" style={{ marginTop: 16, marginBottom: 8 }}>
+                        <Typography.Text strong>Cấu hình dùng chung</Typography.Text>
+                        <Badge count={configChanges.length} style={{ marginLeft: 8, backgroundColor: "#722ed1" }} />
+                    </Divider>
+                    <Flex vertical gap={6}>
+                        {configChanges.map(c => (
+                            <Flex key={c.id} data-testid={`shared-sync-config-${c.id}`} align="center" gap={8}>
+                                <Checkbox
+                                    data-testid={`shared-sync-config-checkbox-${c.id}`}
+                                    checked={selectedConfig}
+                                    onChange={e => setSelectedConfig(e.target.checked)}
+                                />
+                                {actionLabel(c.action)}
+                                <Typography.Text>{c.name}</Typography.Text>
+                            </Flex>
+                        ))}
+                    </Flex>
+                </>
+            )}
+            {!isFetching && sharedData && !hasIngredientRows && !hasDishRows && !hasConfigRows && (
                 <Typography.Text type="secondary" style={{ display: "block", marginTop: 12, fontSize: 12 }}>
                     Không có mục dùng chung nào để đồng bộ.
                 </Typography.Text>

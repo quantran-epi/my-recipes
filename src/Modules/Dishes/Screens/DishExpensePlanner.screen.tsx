@@ -30,7 +30,7 @@ export const DishExpensePlannerScreen = () => {
         <Box style={{
             padding: "12px 14px",
             border: "1px solid #e6f4ff",
-            borderRadius: 8,
+            borderRadius: 0,
             background: "#f7fbff",
         }}>
             <div style={{ display: "flex", alignItems: "center", gap: 8, minWidth: 0 }}>

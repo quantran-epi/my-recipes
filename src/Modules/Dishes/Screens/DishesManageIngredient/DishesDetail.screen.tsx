@@ -67,7 +67,7 @@ export const DishesDetailScreen = () => {
         <React.Fragment>
             {/* ── Top bar ── */}
             <Box style={{ padding: "12px 16px 0" }}>
-                <Box style={{ background: "#fff", border: "1px solid #f0f0f0", borderRadius: 8, padding: 10, boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }}>
+                <Box style={{ background: "#fff", border: "1px solid #f0f0f0", borderRadius: 0, padding: 10, boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }}>
                     <Stack align="center" justify="space-between" gap={8}>
                         <Button
                             icon={<ArrowLeftOutlined />}

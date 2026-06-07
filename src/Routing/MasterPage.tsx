@@ -1,4 +1,4 @@
-import { CloudDownloadOutlined, CloudUploadOutlined, DatabaseOutlined, ExportOutlined, HistoryOutlined, ImportOutlined, LockOutlined, MenuOutlined, UnlockOutlined, FireOutlined, QuestionCircleOutlined, SearchOutlined, LoadingOutlined, SyncOutlined } from "@ant-design/icons";
+import { CloudDownloadOutlined, CloudUploadOutlined, DatabaseOutlined, ExportOutlined, HistoryOutlined, ImportOutlined, LockOutlined, MenuOutlined, UnlockOutlined, FireOutlined, QuestionCircleOutlined, SearchOutlined, LoadingOutlined, SyncOutlined, SettingOutlined } from "@ant-design/icons";
 import { ObjectPropertyHelper } from "@common/Helpers/ObjectProperty";
 import { getStorageString, setStorageString } from "@common/Storage/AppStorage";
 import { SharedSyncModal } from "@components/AppInitializer/SharedSyncModal";
@@ -25,11 +25,11 @@ import { CookingHistoryWidget } from "@modules/Dishes/Screens/CookingHistory.wid
 import { GistBackupWidget } from "@components/GistBackupWidget";
 import { UserGuideScreen } from "@modules/Home/Screens/UserGuide.screen";
 import { GlobalSearchScreen } from "@modules/Home/Screens/GlobalSearch.screen";
-import { selectCookingSessions, selectCurrentFeatureName, selectDishesById } from "@store/Selectors";
-import { Flex, Input as AntInput, Layout, Divider } from "antd";
+import { selectCookingSessions, selectCurrentFeatureName, selectDishesById, selectInventoryHealthConfig } from "@store/Selectors";
+import { Flex, Input as AntInput, Layout, Divider, InputNumber } from "antd";
 import React, { useState } from "react";
 import { CopyToClipboard } from 'react-copy-to-clipboard';
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import LogoIcon from "../../assets/icons/logo.png";
 import HouseIcon from "../../assets/icons/house.png";
@@ -40,6 +40,9 @@ import IngredientIcon from "../../assets/icons/vegetable.png";
 import SuggesterIcon from "../../assets/icons/cooking.png";
 import BudgetIcon from "../../assets/icons/budget.png";
 import AnalysisIcon from "../../assets/icons/analysis.png";
+import { INGREDIENT_PRESERVATION_OPTIONS, INGREDIENT_SHELF_LIFE_OPTIONS, IngredientPreservationCondition, IngredientShelfLife } from "@store/Models/Ingredient";
+import { DEFAULT_INVENTORY_HEALTH_CONFIG, InventoryHealthConfig, normalizeInventoryHealthConfig } from "@store/Models/SharedConfig";
+import { updateInventoryConfig } from "@store/Reducers/SharedConfigReducer";
 import { AppShellNavigationProvider, useAppShellNavigation, useAppShellNavigationController } from "./AppShellNavigationContext";
 import { RootRoutes } from "./RootRoutes";
 
@@ -130,7 +133,8 @@ const useDeferredDrawerTools = (open: boolean) => {
 };
 
 export const MasterPage = () => {
-    const currentFeatureName = useSelector(selectCurrentFeatureName);    const { isOnline } = useOnlineStatus();
+    const currentFeatureName = useSelector(selectCurrentFeatureName);
+    const { isOnline } = useOnlineStatus();
     const toggleSearch = useToggle();
     const location = useLocation();
     const navigate = useNavigate();
@@ -171,12 +175,12 @@ export const MasterPage = () => {
                 zIndex: 10,
             }}>
                 <Stack justify="space-between" align="center" gap={10} style={{ height: "100%" }}>
-                    <Stack align="center" gap={9} style={{ minWidth: 0 }}>
+                    <Stack align="center" gap={9} style={{ minWidth: 0, flex: "1 1 auto" }}>
                         <SidebarDrawer buttonStyle={headerActionButtonStyle} />
                         <div style={{ minWidth: 0 }}>
                             <Typography.Text style={{ display: "block", color: "rgba(255,255,255,0.82)", fontSize: 11, lineHeight: "14px", fontWeight: 650 }}>My Recipes</Typography.Text>
                             <Tooltip title={currentFeatureName}>
-                                <Typography.Paragraph style={{ fontSize: 19, lineHeight: "23px", fontWeight: 750, marginBottom: 0, maxWidth: 210, color: "#fff" }} ellipsis>{currentFeatureName}</Typography.Paragraph>
+                                <Typography.Paragraph style={{ fontSize: 18, lineHeight: "22px", fontWeight: 750, marginBottom: 0, maxWidth: "min(190px, calc(100vw - 210px))", color: "#fff" }} ellipsis>{currentFeatureName}</Typography.Paragraph>
                             </Tooltip>
                         </div>
                     </Stack>
@@ -192,7 +196,7 @@ export const MasterPage = () => {
                             onClick={toggleSearch.show}
                             style={headerActionButtonStyle}
                         />
-                        {_featureIcon() && <span style={{ width: 38, height: 38, borderRadius: "50%", background: "#fff", display: "inline-flex", alignItems: "center", justifyContent: "center", boxShadow: "0 8px 18px rgba(34, 17, 83, 0.22)" }}>
+                        {_featureIcon() && currentFeatureName !== "Sức khỏe dữ liệu" && <span style={{ width: 38, height: 38, borderRadius: "50%", background: "#fff", display: "inline-flex", alignItems: "center", justifyContent: "center", boxShadow: "0 8px 18px rgba(34, 17, 83, 0.22)" }}>
                             <Image src={_featureIcon()} width={24} loading="eager" alt={currentFeatureName} />
                         </span>}
                     </Stack>
@@ -224,6 +228,7 @@ export const MasterPage = () => {
 }
 
 const SidebarDrawer = ({ buttonStyle }: { buttonStyle?: React.CSSProperties }) => {
+    const dispatch = useDispatch();
     const [open, setOpen] = useState(false);
     const [pinModalOpen, setPinModalOpen] = useState(false);
     const [pin, setPin] = useState("");
@@ -251,10 +256,17 @@ const SidebarDrawer = ({ buttonStyle }: { buttonStyle?: React.CSSProperties }) =
     const toolsReady = useDeferredDrawerTools(open);
     const location = useLocation();
     const [publishTokenInput, setPublishTokenInput] = useState(githubToken);
+    const inventoryConfig = useSelector(selectInventoryHealthConfig);
+    const [inventoryConfigDraft, setInventoryConfigDraft] = useState<InventoryHealthConfig>(() => normalizeInventoryHealthConfig(inventoryConfig));
 
     React.useEffect(() => {
         setPublishTokenInput(githubToken);
     }, [githubToken]);
+
+    React.useEffect(() => {
+        if (!toggleBackupCenter.value) return;
+        setInventoryConfigDraft(normalizeInventoryHealthConfig(inventoryConfig));
+    }, [toggleBackupCenter.value, inventoryConfig]);
 
     const showDrawer = () => {
         setOpen(true);
@@ -337,6 +349,35 @@ const SidebarDrawer = ({ buttonStyle }: { buttonStyle?: React.CSSProperties }) =
         });
     };
 
+    const updateInventoryConfigNumber = (key: "lowStockAmount" | "urgentExpiryDays", value: number | null) => {
+        setInventoryConfigDraft(prev => normalizeInventoryHealthConfig({
+            ...prev,
+            [key]: typeof value === "number" ? value : 0,
+        }));
+    };
+
+    const updateExpirationDefault = (shelfLife: IngredientShelfLife, preservationCondition: IngredientPreservationCondition, value: number | null) => {
+        setInventoryConfigDraft(prev => normalizeInventoryHealthConfig({
+            ...prev,
+            expirationDefaults: {
+                ...prev.expirationDefaults,
+                [shelfLife]: {
+                    ...prev.expirationDefaults[shelfLife],
+                    [preservationCondition]: typeof value === "number" ? value : 0,
+                },
+            },
+        }));
+    };
+
+    const resetInventoryConfigDraft = () => {
+        setInventoryConfigDraft(normalizeInventoryHealthConfig(DEFAULT_INVENTORY_HEALTH_CONFIG));
+    };
+
+    const saveInventoryConfig = () => {
+        dispatch(updateInventoryConfig(inventoryConfigDraft));
+        message.success("Đã lưu cấu hình tồn kho dùng chung");
+    };
+
     const publishTokenSaved = publishTokenInput.trim() === githubToken;
     const publishTokenStatusText = githubTokenSource === "local"
         ? "Đang dùng token lưu trên thiết bị này."
@@ -348,7 +389,6 @@ const SidebarDrawer = ({ buttonStyle }: { buttonStyle?: React.CSSProperties }) =
         { key: 'dashboard', href: RootRoutes.AuthorizedRoutes.Root(), icon: HouseIcon, label: 'Tổng quan' },
         { key: 'analytics', href: RootRoutes.AuthorizedRoutes.Analytics(), icon: AnalysisIcon, label: 'Phân tích' },
         { key: 'templates', href: RootRoutes.AuthorizedRoutes.Templates(), icon: MealsIcon, label: 'Mẫu dùng lại' },
-        { key: 'syncHealth', href: RootRoutes.AuthorizedRoutes.SyncBackupHealth(), icon: AnalysisIcon, label: 'Sức khỏe dữ liệu' },
         { key: 'ingredients', href: RootRoutes.AuthorizedRoutes.IngredientRoutes.List(), icon: IngredientIcon, label: 'Nguyên liệu' },
         { key: 'dishes', href: RootRoutes.AuthorizedRoutes.DishesRoutes.List(), icon: DishesIcon, label: 'Món ăn' },
         { key: 'expensePlanner', href: RootRoutes.AuthorizedRoutes.ExpensePlanner(), icon: BudgetIcon, label: 'Kế hoạch chi phí' },
@@ -503,7 +543,7 @@ const SidebarDrawer = ({ buttonStyle }: { buttonStyle?: React.CSSProperties }) =
                                 <div style={{ minWidth: 0 }}>
                                     <Typography.Text strong style={{ display: "block", color: "#2f2545", fontSize: 15, lineHeight: "20px" }}>Dữ liệu dùng chung</Typography.Text>
                                     <Typography.Text type="secondary" style={{ display: "block", fontSize: 12, lineHeight: "17px" }}>
-                                        Cập nhật nguyên liệu và món ăn mới nhất được admin xuất bản.
+                                        Cập nhật nguyên liệu, món ăn và cấu hình tồn kho mới nhất được admin xuất bản.
                                     </Typography.Text>
                                 </div>
                                 <Button icon={<CloudDownloadOutlined />} loading={isSyncChecking} onClick={onImportCloud}>
@@ -512,11 +552,87 @@ const SidebarDrawer = ({ buttonStyle }: { buttonStyle?: React.CSSProperties }) =
                             </Stack>
                         </Box>
 
+                        {isAdmin && <Box style={{ border: "1px solid rgba(116,54,220,0.14)", borderRadius: 8, padding: 10, background: "#fff" }}>
+                            <Flex vertical gap={10}>
+                                <Flex align="flex-start" gap={8}>
+                                    <span style={{ width: 34, height: 34, borderRadius: 8, display: "inline-flex", alignItems: "center", justifyContent: "center", color: "#7436dc", background: "rgba(116,54,220,0.12)", flexShrink: 0 }}>
+                                        <SettingOutlined />
+                                    </span>
+                                    <div style={{ minWidth: 0 }}>
+                                        <Typography.Text strong style={{ display: "block", color: "#2f2545", fontSize: 15, lineHeight: "20px" }}>Cấu hình tồn kho dùng chung</Typography.Text>
+                                        <Typography.Text type="secondary" style={{ display: "block", fontSize: 12, lineHeight: "17px" }}>
+                                            Thiết lập ngưỡng cảnh báo tồn kho và hạn dùng mặc định cho lô hàng chưa nhập ngày hết hạn riêng.
+                                        </Typography.Text>
+                                    </div>
+                                </Flex>
+
+                                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: 8 }}>
+                                    <Box style={{ border: "1px solid #f0f0f0", borderRadius: 0, padding: 9, background: "#fbf9ff" }}>
+                                        <Typography.Text strong style={{ display: "block", fontSize: 12, marginBottom: 5 }}>Ngưỡng thiếu hàng</Typography.Text>
+                                        <InputNumber
+                                            min={0}
+                                            step={0.5}
+                                            value={inventoryConfigDraft.lowStockAmount}
+                                            onChange={value => updateInventoryConfigNumber("lowStockAmount", value)}
+                                            style={{ width: "100%" }}
+                                            addonAfter="đv"
+                                        />
+                                        <Typography.Text type="secondary" style={{ display: "block", fontSize: 11, lineHeight: "15px", marginTop: 5 }}>
+                                            Tồn kho lớn hơn 0 và nhỏ hơn hoặc bằng số này sẽ được xem là thấp.
+                                        </Typography.Text>
+                                    </Box>
+                                    <Box style={{ border: "1px solid #f0f0f0", borderRadius: 0, padding: 9, background: "#fbf9ff" }}>
+                                        <Typography.Text strong style={{ display: "block", fontSize: 12, marginBottom: 5 }}>Sắp hết hạn trong</Typography.Text>
+                                        <InputNumber
+                                            min={0}
+                                            step={1}
+                                            value={inventoryConfigDraft.urgentExpiryDays}
+                                            onChange={value => updateInventoryConfigNumber("urgentExpiryDays", value)}
+                                            style={{ width: "100%" }}
+                                            addonAfter="ngày"
+                                        />
+                                        <Typography.Text type="secondary" style={{ display: "block", fontSize: 11, lineHeight: "15px", marginTop: 5 }}>
+                                            Lô hàng còn trong khoảng ngày này sẽ được ưu tiên cảnh báo và gợi ý nấu trước.
+                                        </Typography.Text>
+                                    </Box>
+                                </div>
+
+                                <Flex vertical gap={8}>
+                                    <Typography.Text strong style={{ fontSize: 13, color: "#2f2545" }}>Hạn dùng mặc định theo bảo quản</Typography.Text>
+                                    {INGREDIENT_SHELF_LIFE_OPTIONS.map(shelfLife => (
+                                        <Box key={shelfLife.value} style={{ border: "1px solid #f0f0f0", borderRadius: 0, padding: 9, background: "#fff" }}>
+                                            <Typography.Text strong style={{ display: "block", fontSize: 12, lineHeight: "16px", marginBottom: 7 }}>{shelfLife.label}</Typography.Text>
+                                            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(118px, 1fr))", gap: 7 }}>
+                                                {INGREDIENT_PRESERVATION_OPTIONS.map(condition => (
+                                                    <div key={condition.value}>
+                                                        <Typography.Text type="secondary" style={{ display: "block", fontSize: 11, lineHeight: "15px", marginBottom: 3 }}>{condition.label}</Typography.Text>
+                                                        <InputNumber
+                                                            min={0}
+                                                            step={1}
+                                                            value={inventoryConfigDraft.expirationDefaults[shelfLife.value][condition.value]}
+                                                            onChange={value => updateExpirationDefault(shelfLife.value, condition.value, value)}
+                                                            style={{ width: "100%" }}
+                                                            addonAfter="ngày"
+                                                        />
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </Box>
+                                    ))}
+                                </Flex>
+
+                                <Flex gap={8} wrap="wrap" justify="flex-end">
+                                    <Button type="text" onClick={resetInventoryConfigDraft}>Dùng mặc định</Button>
+                                    <Button type="primary" onClick={saveInventoryConfig}>Lưu cấu hình</Button>
+                                </Flex>
+                            </Flex>
+                        </Box>}
+
                         {isAdmin && <Box style={{ border: "1px solid rgba(82,196,26,0.18)", borderRadius: 8, padding: 10, background: "#fcfff8" }}>
                             <Flex vertical gap={8}>
                                 <Typography.Text strong style={{ display: "block", color: "#245822", fontSize: 15, lineHeight: "20px" }}>Quản trị xuất bản</Typography.Text>
                                 <Typography.Text type="secondary" style={{ fontSize: 12, lineHeight: "17px" }}>
-                                    Đẩy nguyên liệu và món ăn hiện tại lên GitHub để các thiết bị khác đồng bộ thủ công.
+                                    Đẩy nguyên liệu, món ăn và cấu hình tồn kho hiện tại lên GitHub để các thiết bị khác đồng bộ thủ công.
                                 </Typography.Text>
                                 <AntInput.Password
                                     autoComplete="off"
@@ -577,6 +693,7 @@ const SidebarDrawer = ({ buttonStyle }: { buttonStyle?: React.CSSProperties }) =
                     manifest={pendingSync.manifest}
                     hasIngredientChanges={pendingSync.hasIngredientChanges}
                     hasDishChanges={pendingSync.hasDishChanges}
+                    hasConfigChanges={pendingSync.hasConfigChanges}
                     force={pendingSync.force}
                     onDone={onSharedSyncDone}
                     onCancel={dismissSync}

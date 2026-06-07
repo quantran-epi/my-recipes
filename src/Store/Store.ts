@@ -8,11 +8,13 @@ import ShoppingListReducer from "./Reducers/ShoppingListReducer";
 import ScheduledMealReducer from "./Reducers/ScheduledMealReducer";
 import CookingSessionReducer from "./Reducers/CookingSessionReducer";
 import InventoryReducer from "./Reducers/InventoryReducer";
+import SharedConfigReducer from "./Reducers/SharedConfigReducer";
 
 // Shared data: ingredients + dishes — published by admin, synced by users
 const sharedReducer = combineReducers({
     ingredient: IngredientReducer,
     dishes: DishesReducer,
+    config: SharedConfigReducer,
 });
 
 // Personal data: everything else — stays per-device

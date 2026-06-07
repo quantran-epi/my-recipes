@@ -1,6 +1,7 @@
 import { createSlice } from '@reduxjs/toolkit';
 import type { PayloadAction } from '@reduxjs/toolkit';
 import { Ingredient, IngredientInventory, IngredientUnit } from '@store/Models/Ingredient';
+import { InventoryHealthConfig } from '@store/Models/SharedConfig';
 import { IngredientUnitHelper } from '@common/Helpers/IngredientUnitHelper';
 import { InventoryHelper } from '@common/Helpers/InventoryHelper';
 
@@ -22,6 +23,7 @@ export type DeductInventoryParams = {
     amount: number;
     unit?: IngredientUnit;
     ingredient?: Ingredient;
+    inventoryConfig?: InventoryHealthConfig;
 }
 
 export const inventorySlice = createSlice({
@@ -44,7 +46,7 @@ export const inventorySlice = createSlice({
             }
             let remaining = IngredientUnitHelper.toBaseAmount(ingredient, action.payload.amount, action.payload.unit ?? baseUnit, baseUnit) ?? action.payload.amount;
             const nextAmounts = new Map<string, { amount: number; unit: IngredientUnit }>();
-            InventoryHelper.sortBatchesForConsumption(inv, ingredient).forEach(batch => {
+            InventoryHelper.sortBatchesForConsumption(inv, ingredient, action.payload.inventoryConfig).forEach(batch => {
                 if (remaining <= 0) return batch;
                 const batchUnit = IngredientUnitHelper.getBatchUnit(inv, batch, ingredient);
                 const batchBaseAmount = IngredientUnitHelper.toBaseAmount(ingredient, batch.amount, batchUnit, baseUnit) ?? batch.amount;

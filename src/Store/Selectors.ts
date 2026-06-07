@@ -3,11 +3,17 @@
  * Import from here instead of accessing state.shared.* or state.personal.* directly.
  */
 import { RootState } from "@store/Store";
+import { DEFAULT_SHARED_CONFIG, normalizeSharedConfig } from "@store/Models/SharedConfig";
 import { createSelector } from "reselect";
 
 // ── Shared (admin-published) ─────────────────────────────────────────────────
 export const selectIngredients = (state: RootState) => state.shared.ingredient.ingredients;
 export const selectDishes = (state: RootState) => state.shared.dishes.dishes;
+export const selectSharedConfig = (state: RootState) => normalizeSharedConfig(state.shared.config?.config ?? DEFAULT_SHARED_CONFIG);
+export const selectInventoryHealthConfig = createSelector(
+    [selectSharedConfig],
+    config => config.inventory
+);
 
 export const selectIngredientsById = createSelector(
     [selectIngredients],

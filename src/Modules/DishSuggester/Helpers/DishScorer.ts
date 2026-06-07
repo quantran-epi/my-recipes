@@ -4,6 +4,7 @@ import { IngredientUnitHelper } from "@common/Helpers/IngredientUnitHelper";
 import { InventoryHelper } from "@common/Helpers/InventoryHelper";
 import { CostEstimateHelper } from "@common/Helpers/CostEstimateHelper";
 import { IngredientPriceRange } from "@common/Helpers/IngredientPriceHelper";
+import { InventoryHealthConfig } from "@store/Models/SharedConfig";
 
 export type ScoredDish = {
     dish: Dishes;
@@ -83,8 +84,6 @@ const collectAllIngredientAmounts = (
     return result;
 };
 
-const URGENT_DAYS_THRESHOLD = 3;
-
 const getNearestUrgentDays = (scored: ScoredDish): number => {
     const days = scored.urgentIngredients?.map(item => item.daysLeft) ?? [];
     return days.length > 0 ? Math.min(...days) : Number.POSITIVE_INFINITY;
@@ -137,7 +136,7 @@ export const DishScorer = {
             });
     },
 
-    scoreWithInventory(dishes: Dishes[], inventory: Record<string, IngredientInventory>, allDishes: Dishes[], allIngredients: Ingredient[]): ScoredDish[] {
+    scoreWithInventory(dishes: Dishes[], inventory: Record<string, IngredientInventory>, allDishes: Dishes[], allIngredients: Ingredient[], inventoryConfig?: InventoryHealthConfig): ScoredDish[] {
         if (Object.keys(inventory).length === 0) return [];
 
         const dishById = new Map(allDishes.map(dish => [dish.id, dish]));
@@ -163,7 +162,7 @@ export const DishScorer = {
 
                 const ingredientDetails = requiredIds.map(id => {
                     const item = grouped[id];
-                    const inStock = InventoryHelper.availableAmount(inventory[id], item.ingredient, item.required);
+                    const inStock = InventoryHelper.availableAmount(inventory[id], item.ingredient, item.required, inventoryConfig);
                     const matched = item.required > 0 && inStock >= item.required;
                     const needToBuy = Math.max(0, item.required - inStock);
                     return {
@@ -191,8 +190,8 @@ export const DishScorer = {
                 }, CostEstimateHelper.emptySummary());
                 const urgentIngredients = requiredIds
                     .map(id => {
-                        const urgent = InventoryHelper.nearestExpiryBatch(inventory[id], grouped[id].ingredient);
-                        return urgent && urgent.daysLeft <= URGENT_DAYS_THRESHOLD
+                        const urgent = InventoryHelper.nearestExpiryBatch(inventory[id], grouped[id].ingredient, inventoryConfig);
+                        return urgent && InventoryHelper.isUrgentExpiry(urgent.daysLeft, inventoryConfig)
                             ? { ingredientId: id, daysLeft: urgent.daysLeft }
                             : null;
                     })

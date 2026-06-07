@@ -4,15 +4,17 @@
  *   docs/sync/shared/manifest.json
  *   docs/sync/shared/ingredients.json
  *   docs/sync/shared/dishes.json
+ *   docs/sync/shared/config.json
  */
 import { message } from "antd";
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { countCollection, hashString, stableJson } from "@common/Helpers/SyncDataHelper";
 import { getStorageString, removeStorageItem, setStorageString } from "@common/Storage/AppStorage";
-import { selectDishes, selectIngredients } from "@store/Selectors";
+import { selectDishes, selectIngredients, selectSharedConfig } from "@store/Selectors";
 import { Ingredient } from "@store/Models/Ingredient";
 import { Dishes } from "@store/Models/Dishes";
+import { normalizeSharedConfig, SharedConfig } from "@store/Models/SharedConfig";
 import { saveSyncedVersions } from "./useSharedDataSync";
 
 const REPO_OWNER = "quantran-epi";
@@ -22,6 +24,7 @@ export const SHARED_MANIFEST_PATH = "docs/sync/shared/manifest.json";
 export const SHARED_PART_PATHS = {
     ingredients: "docs/sync/shared/ingredients.json",
     dishes: "docs/sync/shared/dishes.json",
+    config: "docs/sync/shared/config.json",
 } as const;
 export const SHARED_SYNC_RAW_BASE_URL =
     "https://raw.githubusercontent.com/quantran-epi/my-recipes/refs/heads/main/docs/sync/shared";
@@ -65,19 +68,23 @@ export interface SharedManifest {
     parts: Record<SharedPartKey, SharedManifestPart>;
     ingredientsVersion: string;
     dishesVersion: string;
+    configVersion: string;
     ingredientChanges: SharedItemChange[];
     dishChanges: SharedItemChange[];
+    configChanges: SharedItemChange[];
 }
 
 export interface SharedData {
     ingredients: Ingredient[];
     dishes: Dishes[];
+    config: SharedConfig;
 }
 
 const getSharedPartUrl = (part: SharedPartKey) => `${SHARED_SYNC_RAW_BASE_URL}/${part}.json`;
 
 export const getSharedIngredientsUrl = () => getSharedPartUrl("ingredients");
 export const getSharedDishesUrl = () => getSharedPartUrl("dishes");
+export const getSharedConfigUrl = () => getSharedPartUrl("config");
 
 const emptyManifest = (): SharedManifest => ({
     schemaVersion: SHARED_SYNC_SCHEMA_VERSION,
@@ -101,11 +108,22 @@ const emptyManifest = (): SharedManifest => ({
             updatedAt: "",
             changes: [],
         },
+        config: {
+            key: "config",
+            path: SHARED_PART_PATHS.config,
+            version: "",
+            hash: "",
+            count: 0,
+            updatedAt: "",
+            changes: [],
+        },
     },
     ingredientsVersion: "",
     dishesVersion: "",
+    configVersion: "",
     ingredientChanges: [],
     dishChanges: [],
+    configChanges: [],
 });
 
 export const normalizeSharedManifest = (manifest: Partial<SharedManifest> | null | undefined): SharedManifest => {
@@ -128,11 +146,19 @@ export const normalizeSharedManifest = (manifest: Partial<SharedManifest> | null
                 version: manifest?.parts?.dishes?.version ?? manifest?.dishesVersion ?? "",
                 changes: manifest?.parts?.dishes?.changes ?? manifest?.dishChanges ?? [],
             },
+            config: {
+                ...base.parts.config,
+                ...manifest?.parts?.config,
+                version: manifest?.parts?.config?.version ?? manifest?.configVersion ?? "",
+                changes: manifest?.parts?.config?.changes ?? manifest?.configChanges ?? [],
+            },
         },
         ingredientsVersion: manifest?.ingredientsVersion ?? manifest?.parts?.ingredients?.version ?? "",
         dishesVersion: manifest?.dishesVersion ?? manifest?.parts?.dishes?.version ?? "",
+        configVersion: manifest?.configVersion ?? manifest?.parts?.config?.version ?? "",
         ingredientChanges: manifest?.ingredientChanges ?? manifest?.parts?.ingredients?.changes ?? [],
         dishChanges: manifest?.dishChanges ?? manifest?.parts?.dishes?.changes ?? [],
+        configChanges: manifest?.configChanges ?? manifest?.parts?.config?.changes ?? [],
     };
 };
 
@@ -197,6 +223,16 @@ const diffItems = <T extends { id: string; name: string }>(prev: T[], next: T[])
     return changes;
 };
 
+const diffSharedConfig = (prev: SharedConfig | null | undefined, next: SharedConfig, hadExistingFile: boolean): SharedItemChange[] => {
+    const normalizedPrev = prev ? normalizeSharedConfig(prev) : null;
+    const normalizedNext = normalizeSharedConfig(next);
+    if (!hadExistingFile) return [{ id: "inventory-config", name: "Cấu hình tồn kho", action: "added" }];
+    if (stableJson(normalizedPrev) !== stableJson(normalizedNext)) {
+        return [{ id: "inventory-config", name: "Cấu hình tồn kho", action: "modified" }];
+    }
+    return [];
+};
+
 export interface UseSharedPublishResult {
     publishSharedData: () => Promise<void>;
     isPublishing: boolean;
@@ -217,6 +253,7 @@ export const useSharedPublish = (): UseSharedPublishResult => {
     const [githubToken, setGithubTokenState] = useState<string>("");
     const ingredients = useSelector(selectIngredients);
     const dishes = useSelector(selectDishes);
+    const sharedConfig = useSelector(selectSharedConfig);
     const localGithubToken = githubToken.trim();
     const publishGithubToken = localGithubToken || BUILD_GITHUB_TOKEN;
     const githubTokenSource = localGithubToken ? "local" : BUILD_GITHUB_TOKEN ? "build" : "none";
@@ -282,6 +319,7 @@ export const useSharedPublish = (): UseSharedPublishResult => {
                 getFileSha(SHARED_MANIFEST_PATH, tokenToTest),
                 getFileSha(SHARED_PART_PATHS.ingredients, tokenToTest),
                 getFileSha(SHARED_PART_PATHS.dishes, tokenToTest),
+                getFileSha(SHARED_PART_PATHS.config, tokenToTest),
             ]);
 
             message.success({ content: "GitHub token hợp lệ cho repo và có quyền ghi", key, duration: 4 });
@@ -307,33 +345,41 @@ export const useSharedPublish = (): UseSharedPublishResult => {
         message.loading({ content: "Đang xuất bản dữ liệu dùng chung...", key, duration: 0 });
 
         try {
-            const [existingManifestFile, existingIngredientsFile, existingDishesFile] = await Promise.all([
+            const [existingManifestFile, existingIngredientsFile, existingDishesFile, existingConfigFile] = await Promise.all([
                 getFileSha(SHARED_MANIFEST_PATH, publishGithubToken),
                 getFileSha(SHARED_PART_PATHS.ingredients, publishGithubToken),
                 getFileSha(SHARED_PART_PATHS.dishes, publishGithubToken),
+                getFileSha(SHARED_PART_PATHS.config, publishGithubToken),
             ]);
 
             const prevManifest = normalizeSharedManifest(parseJson<SharedManifest | null>(existingManifestFile?.content, null));
             const prevIngredients = parseJson<Ingredient[]>(existingIngredientsFile?.content, []);
             const prevDishes = parseJson<Dishes[]>(existingDishesFile?.content, []);
+            const prevConfig = normalizeSharedConfig(parseJson<Partial<SharedConfig> | null>(existingConfigFile?.content, null));
             const now = new Date().toISOString();
 
             const ingredientChanges = diffItems(prevIngredients, ingredients);
             const dishChanges = diffItems(prevDishes, dishes);
+            const configChanges = diffSharedConfig(prevConfig, sharedConfig, Boolean(existingConfigFile));
             const ingredientsContent = stableJson(ingredients);
             const dishesContent = stableJson(dishes);
-            const [ingredientsHash, dishesHash, existingIngredientsHash, existingDishesHash] = await Promise.all([
+            const configContent = stableJson(normalizeSharedConfig(sharedConfig));
+            const [ingredientsHash, dishesHash, configHash, existingIngredientsHash, existingDishesHash, existingConfigHash] = await Promise.all([
                 hashString(ingredientsContent),
                 hashString(dishesContent),
+                hashString(configContent),
                 existingIngredientsFile ? hashString(existingIngredientsFile.content) : Promise.resolve(""),
                 existingDishesFile ? hashString(existingDishesFile.content) : Promise.resolve(""),
+                existingConfigFile ? hashString(existingConfigFile.content) : Promise.resolve(""),
             ]);
 
             const previousIngredientsHash = prevManifest.parts.ingredients.hash || existingIngredientsHash;
             const previousDishesHash = prevManifest.parts.dishes.hash || existingDishesHash;
+            const previousConfigHash = prevManifest.parts.config.hash || existingConfigHash;
             const ingredientsChanged = ingredientsHash !== previousIngredientsHash || !existingIngredientsFile;
             const dishesChanged = dishesHash !== previousDishesHash || !existingDishesFile;
-            const anyPartChanged = ingredientsChanged || dishesChanged;
+            const configChanged = configHash !== previousConfigHash || !existingConfigFile;
+            const anyPartChanged = ingredientsChanged || dishesChanged || configChanged;
 
             const newManifest = normalizeSharedManifest({
                 schemaVersion: SHARED_SYNC_SCHEMA_VERSION,
@@ -357,11 +403,22 @@ export const useSharedPublish = (): UseSharedPublishResult => {
                         updatedAt: dishesChanged ? now : prevManifest.parts.dishes.updatedAt || now,
                         changes: dishChanges,
                     },
+                    config: {
+                        key: "config",
+                        path: SHARED_PART_PATHS.config,
+                        version: configChanged ? now : prevManifest.parts.config.version || now,
+                        hash: configHash,
+                        count: 1,
+                        updatedAt: configChanged ? now : prevManifest.parts.config.updatedAt || now,
+                        changes: configChanges,
+                    },
                 },
                 ingredientsVersion: ingredientsChanged ? now : prevManifest.ingredientsVersion || now,
                 dishesVersion: dishesChanged ? now : prevManifest.dishesVersion || now,
+                configVersion: configChanged ? now : prevManifest.configVersion || now,
                 ingredientChanges,
                 dishChanges,
+                configChanges,
             });
 
             const manifestContent = stableJson(newManifest);
@@ -372,14 +429,18 @@ export const useSharedPublish = (): UseSharedPublishResult => {
             if (dishesChanged) {
                 await pushFile(SHARED_PART_PATHS.dishes, publishGithubToken, existingDishesFile?.sha ?? null, dishesContent, commitMsg);
             }
+            if (configChanged) {
+                await pushFile(SHARED_PART_PATHS.config, publishGithubToken, existingConfigFile?.sha ?? null, configContent, commitMsg);
+            }
             if (!existingManifestFile || manifestContent !== existingManifestFile.content) {
                 await pushFile(SHARED_MANIFEST_PATH, publishGithubToken, existingManifestFile?.sha ?? null, manifestContent, commitMsg);
             }
 
-            const totalChanges = ingredientChanges.length + dishChanges.length;
+            const totalChanges = ingredientChanges.length + dishChanges.length + configChanges.length;
             await saveSyncedVersions({
                 ingredientsVersion: newManifest.ingredientsVersion,
                 dishesVersion: newManifest.dishesVersion,
+                configVersion: newManifest.configVersion,
             });
 
             const publishedAt = now;

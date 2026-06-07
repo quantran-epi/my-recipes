@@ -10,7 +10,7 @@ import { InventoryHelper } from "@common/Helpers/InventoryHelper";
 import { INGREDIENT_PRESERVATION_OPTIONS, Ingredient, IngredientPreservationCondition, IngredientUnit, InventoryBatch, InventoryBatchDiscard } from "@store/Models/Ingredient";
 import { IngredientUnitHelper } from "@common/Helpers/IngredientUnitHelper";
 import { setInventory } from "@store/Reducers/InventoryReducer";
-import { selectInventoryById } from "@store/Selectors";
+import { selectInventoryById, selectInventoryHealthConfig } from "@store/Selectors";
 import { Alert, DatePicker, Divider, InputNumber } from "antd";
 import dayjs, { Dayjs } from "dayjs";
 import React, { useState } from "react";
@@ -38,6 +38,7 @@ export const IngredientInventoryWidget: React.FC<IngredientInventoryWidgetProps>
     const dispatch = useDispatch();
     const message = useMessage();
     const inventory = useSelector(selectInventoryById(item.id));
+    const inventoryConfig = useSelector(selectInventoryHealthConfig);
     const inventoryUnits = IngredientUnitHelper.getInventoryUnits(item);
     const baseUnit = IngredientUnitHelper.getBaseUnit(item, inventoryUnits);
     const defaultUnit = inventory?.unit ?? baseUnit;
@@ -100,12 +101,12 @@ export const IngredientInventoryWidget: React.FC<IngredientInventoryWidgetProps>
     };
 
     const _isExpiredBatch = (row: BatchRow) => {
-        return InventoryHelper.isBatchExpired(_toInventoryBatch(row), item);
+        return InventoryHelper.isBatchExpired(_toInventoryBatch(row), item, inventoryConfig);
     };
 
     const _discardExpiredBatch = (row: BatchRow) => {
         const batch = _toInventoryBatch(row);
-        const effectiveExpiry = InventoryHelper.batchExpiry(batch, item)?.toISOString();
+        const effectiveExpiry = InventoryHelper.batchExpiry(batch, item, inventoryConfig)?.toISOString();
 
         setBatches(prev => prev.filter(b => b.id !== row.id));
         setDiscardHistory(prev => [{
@@ -152,7 +153,7 @@ export const IngredientInventoryWidget: React.FC<IngredientInventoryWidgetProps>
         let best: { row: BatchRow; daysLeft: number } | null = null;
         batches.forEach(row => {
             if (row.amount <= 0) return;
-            const days = InventoryHelper.daysUntilBatchExpiry(_toInventoryBatch(row), item);
+            const days = InventoryHelper.daysUntilBatchExpiry(_toInventoryBatch(row), item, inventoryConfig);
             if (days === null || days < 0) return;
             if (best === null || days < best.daysLeft) best = { row, daysLeft: days };
         });
@@ -160,7 +161,7 @@ export const IngredientInventoryWidget: React.FC<IngredientInventoryWidgetProps>
     })();
 
     const nearestBadge = nearestBatch ? InventoryHelper.expiryBadge(nearestBatch.daysLeft) : null;
-    const isExpiringSoon = nearestBatch !== null && nearestBatch.daysLeft <= 1;
+    const isExpiringSoon = nearestBatch !== null && InventoryHelper.isUrgentExpiry(nearestBatch.daysLeft, inventoryConfig);
 
     return (
         <div>
@@ -267,8 +268,8 @@ export const IngredientInventoryWidget: React.FC<IngredientInventoryWidgetProps>
                     {/* Per-batch expiry hint */}
                     {(batch.expiresAt || (item.shelfLife && batch.purchasedAt)) && (() => {
                         const inventoryBatch = _toInventoryBatch(batch);
-                        const days = InventoryHelper.daysUntilBatchExpiry(inventoryBatch, item);
-                        const expiry = InventoryHelper.batchExpiry(inventoryBatch, item);
+                        const days = InventoryHelper.daysUntilBatchExpiry(inventoryBatch, item, inventoryConfig);
+                        const expiry = InventoryHelper.batchExpiry(inventoryBatch, item, inventoryConfig);
                         const sourceLabel = _getExpirySourceLabel(batch);
                         const bdg = InventoryHelper.expiryBadge(days);
                         if (!bdg) return null;
@@ -327,7 +328,7 @@ export const IngredientInventoryWidget: React.FC<IngredientInventoryWidgetProps>
             {nearestBadge && (
                 <Box style={{ marginBottom: 12 }}>
                     <Alert
-                        type={isExpiringSoon ? "error" : nearestBatch!.daysLeft <= 3 ? "warning" : "success"}
+                        type={isExpiringSoon ? "error" : "success"}
                         showIcon
                         icon={isExpiringSoon ? <WarningOutlined /> : undefined}
                         message={

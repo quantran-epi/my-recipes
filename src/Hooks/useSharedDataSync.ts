@@ -18,12 +18,14 @@ export type SharedSyncHealth = {
 export interface SyncedVersions {
     ingredientsVersion: string;
     dishesVersion: string;
+    configVersion: string;
 }
 
 export interface PendingSync {
     manifest: SharedManifest;
     hasIngredientChanges: boolean;
     hasDishChanges: boolean;
+    hasConfigChanges: boolean;
     force?: boolean;
 }
 
@@ -40,7 +42,12 @@ export interface UseSharedDataSyncResult {
 }
 
 export const getSyncedVersions = (): Promise<SyncedVersions> => {
-    return getStorageJson<SyncedVersions>(SYNCED_VERSIONS_KEY, { ingredientsVersion: "", dishesVersion: "" });
+    return getStorageJson<Partial<SyncedVersions>>(SYNCED_VERSIONS_KEY, { ingredientsVersion: "", dishesVersion: "", configVersion: "" })
+        .then(v => ({
+            ingredientsVersion: v.ingredientsVersion ?? "",
+            dishesVersion: v.dishesVersion ?? "",
+            configVersion: v.configVersion ?? "",
+        }));
 };
 
 export const saveSyncedVersions = (v: SyncedVersions): Promise<void> => {
@@ -71,7 +78,7 @@ export const checkSharedDataUpdates = async (options?: CheckSharedDataUpdatesOpt
     if (!text || !text.trim()) throw new Error("Manifest dữ liệu chia sẻ trống");
 
     const manifest = normalizeSharedManifest(JSON.parse(text));
-    if (!manifest.parts.ingredients.version && !manifest.parts.dishes.version) {
+    if (!manifest.parts.ingredients.version && !manifest.parts.dishes.version && !manifest.parts.config.version) {
         throw new Error("Manifest dữ liệu chia sẻ không hợp lệ");
     }
 
@@ -80,6 +87,7 @@ export const checkSharedDataUpdates = async (options?: CheckSharedDataUpdatesOpt
     const synced = await getSyncedVersions();
     const ingredientChanges = manifest.ingredientChanges ?? manifest.parts.ingredients.changes ?? [];
     const dishChanges = manifest.dishChanges ?? manifest.parts.dishes.changes ?? [];
+    const configChanges = manifest.configChanges ?? manifest.parts.config.changes ?? [];
 
     const hasIngredientChanges = Boolean(
         !!manifest.ingredientsVersion &&
@@ -93,16 +101,24 @@ export const checkSharedDataUpdates = async (options?: CheckSharedDataUpdatesOpt
         (dishChanges.length > 0 || options?.force)
     );
 
-    if (!hasIngredientChanges && !hasDishChanges && !options?.force) return null;
+    const hasConfigChanges = Boolean(
+        !!manifest.configVersion &&
+        manifest.configVersion !== synced.configVersion &&
+        (configChanges.length > 0 || options?.force)
+    );
+
+    if (!hasIngredientChanges && !hasDishChanges && !hasConfigChanges && !options?.force) return null;
 
     return {
         manifest: {
             ...manifest,
             ingredientChanges,
             dishChanges,
+            configChanges,
         },
         hasIngredientChanges,
         hasDishChanges,
+        hasConfigChanges,
         force: options?.force,
     };
 };
@@ -129,6 +145,7 @@ export const useSharedDataSync = (): UseSharedDataSyncResult => {
         await saveSyncedVersions({
             ingredientsVersion: versions.ingredientsVersion || current.ingredientsVersion,
             dishesVersion: versions.dishesVersion || current.dishesVersion,
+            configVersion: versions.configVersion || current.configVersion,
         });
         setPendingSync(null);
     };

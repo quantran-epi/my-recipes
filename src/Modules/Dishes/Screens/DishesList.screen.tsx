@@ -81,7 +81,7 @@ const filterRowStyle: React.CSSProperties = {
 const topToolCardStyle: React.CSSProperties = {
     background: "#fff",
     border: "1px solid #f0f0f0",
-    borderRadius: 8,
+    borderRadius: 0,
     padding: 10,
     marginBottom: 10,
     boxShadow: "0 2px 8px rgba(0,0,0,0.04)",

@@ -13,8 +13,9 @@ import { useScheduledCalculation, useScreenTitle } from '@hooks';
 import { DishScorer, ScoredDish } from '@modules/DishSuggester/Helpers/DishScorer';
 import { RootRoutes } from '@routing/RootRoutes';
 import { Ingredient, IngredientInventory, IngredientUnit, InventoryBatch } from '@store/Models/Ingredient';
+import { InventoryHealthConfig } from '@store/Models/SharedConfig';
 import { ShoppingList, ShoppingListIngredientGroup } from '@store/Models/ShoppingList';
-import { selectCookingSessions, selectDishes, selectIngredients, selectIngredientsById, selectInventory, selectScheduledMeals, selectShoppingLists } from '@store/Selectors';
+import { selectCookingSessions, selectDishes, selectIngredients, selectIngredientsById, selectInventory, selectInventoryHealthConfig, selectScheduledMeals, selectShoppingLists } from '@store/Selectors';
 import moment from 'moment';
 import React, { useMemo } from 'react';
 import { useSelector } from 'react-redux';
@@ -73,13 +74,14 @@ const getGroupNeedToBuy = (
     group: ShoppingListIngredientGroup,
     ingredient: Ingredient | undefined,
     inventory: IngredientInventory | undefined,
+    inventoryConfig?: InventoryHealthConfig,
 ): { amount: number; unit: IngredientUnit } => {
     const unit = IngredientUnitHelper.getBaseUnit(ingredient, group.amounts.map(item => item.unit));
     const required = group.amounts.reduce((sum, item) => {
         const converted = IngredientUnitHelper.toBaseAmount(ingredient, item.amount, item.unit, unit);
         return sum + (converted ?? IngredientUnitHelper.parseAmount(item.amount));
     }, 0);
-    const available = InventoryHelper.availableAmount(inventory, ingredient, required);
+    const available = InventoryHelper.availableAmount(inventory, ingredient, required, inventoryConfig);
     return { amount: Math.max(0, required - available), unit };
 }
 
@@ -87,11 +89,12 @@ const estimateShoppingListCart = (
     shoppingList: ShoppingList,
     ingredientsById: Map<string, Ingredient>,
     inventoryItems: Record<string, IngredientInventory>,
+    inventoryConfig?: InventoryHealthConfig,
 ): CostEstimateSummary => {
     return shoppingList.ingredients.reduce((summary, group) => {
         const ingredient = getIngredientById(ingredientsById, group.ingredientId);
         if (InventoryHelper.isAlwaysAvailable(ingredient)) return summary;
-        const need = getGroupNeedToBuy(group, ingredient, inventoryItems[group.ingredientId]);
+        const need = getGroupNeedToBuy(group, ingredient, inventoryItems[group.ingredientId], inventoryConfig);
         if (need.amount > 0) CostEstimateHelper.addAmount(summary, ingredient, need.amount, need.unit);
         return summary;
     }, CostEstimateHelper.emptySummary());
@@ -106,6 +109,7 @@ const getProgress = (shoppingList: ShoppingList): { done: number; total: number;
 const buildUrgentInventory = (
     inventoryItems: Record<string, IngredientInventory>,
     ingredientsById: Map<string, Ingredient>,
+    inventoryConfig?: InventoryHealthConfig,
 ): UrgentInventoryItem[] => {
     return Object.entries(inventoryItems).flatMap(([ingredientId, inventory]) => {
         const ingredient = getIngredientById(ingredientsById, ingredientId);
@@ -114,9 +118,9 @@ const buildUrgentInventory = (
         return batches
             .filter(batch => batch.amount > 0)
             .map(batch => {
-                const daysLeft = InventoryHelper.daysUntilBatchExpiry(batch, ingredient);
-                const expiry = InventoryHelper.batchExpiry(batch, ingredient);
-                if (daysLeft === null || daysLeft > 3) return null;
+                const daysLeft = InventoryHelper.daysUntilBatchExpiry(batch, ingredient, inventoryConfig);
+                const expiry = InventoryHelper.batchExpiry(batch, ingredient, inventoryConfig);
+                if (!InventoryHelper.isUrgentExpiry(daysLeft, inventoryConfig)) return null;
                 return {
                     ingredientId,
                     ingredientName: ingredient?.name ?? ingredientId,
@@ -229,6 +233,7 @@ export const DashboardAnalyticsScreen = () => {
     const ingredientsById = useSelector(selectIngredientsById);
     const dishes = useSelector(selectDishes);
     const inventoryItems = useSelector(selectInventory);
+    const inventoryConfig = useSelector(selectInventoryHealthConfig);
     const shoppingLists = useSelector(selectShoppingLists);
     const scheduledMeals = useSelector(selectScheduledMeals);
     const cookingSessions = useSelector(selectCookingSessions);
@@ -244,7 +249,7 @@ export const DashboardAnalyticsScreen = () => {
         .filter(item => !item.completedAt)
         .sort((a, b) => moment(a.plannedDate ?? a.createdDate).valueOf() - moment(b.plannedDate ?? b.createdDate).valueOf()), [shoppingLists]);
     const todayShoppingLists = useMemo(() => openShoppingLists.filter(item => isSameDay(item.plannedDate)), [openShoppingLists]);
-    const urgentInventory = useMemo(() => buildUrgentInventory(inventoryItems, ingredientsById), [inventoryItems, ingredientsById]);
+    const urgentInventory = useMemo(() => buildUrgentInventory(inventoryItems, ingredientsById, inventoryConfig), [inventoryItems, ingredientsById, inventoryConfig]);
     const weekOverview = useMemo(() => Array.from({ length: 7 }).map((_, index) => {
         const date = today().add(index, 'day');
         return {
@@ -287,7 +292,7 @@ export const DashboardAnalyticsScreen = () => {
     const calculateExpensiveMetrics = React.useCallback((): AnalyticsExpensiveMetrics => {
         const totalOpenShoppingCost = CostEstimateHelper.emptySummary();
         const shoppingCosts = openShoppingLists.slice(0, 6).map(list => {
-            const summary = estimateShoppingListCart(list, ingredientsById, inventoryItems);
+            const summary = estimateShoppingListCart(list, ingredientsById, inventoryItems, inventoryConfig);
             CostEstimateHelper.mergeSummary(totalOpenShoppingCost, summary);
             const progress = getProgress(list);
             return {
@@ -302,9 +307,9 @@ export const DashboardAnalyticsScreen = () => {
         return {
             shoppingCosts,
             totalOpenShoppingCost,
-            suggestions: DishScorer.scoreWithInventory(dishes, inventoryItems, dishes, ingredients).slice(0, 5),
+            suggestions: DishScorer.scoreWithInventory(dishes, inventoryItems, dishes, ingredients, inventoryConfig).slice(0, 5),
         };
-    }, [dishes, ingredients, ingredientsById, inventoryItems, openShoppingLists]);
+    }, [dishes, ingredients, ingredientsById, inventoryItems, inventoryConfig, openShoppingLists]);
     const { value: expensiveMetrics, pending: expensiveMetricsPending } = useScheduledCalculation(calculateExpensiveMetrics, {
         initialValue: createEmptyAnalyticsExpensiveMetrics,
     });

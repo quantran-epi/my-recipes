@@ -236,13 +236,13 @@ export const SyncBackupHealthScreen = () => {
 
         <section style={cardStyle}>
             <div style={cardHeaderStyle}>
-                <CardTitle icon={<SyncOutlined />} title='Dữ liệu dùng chung' subtitle='Theo dõi đồng bộ món ăn/nguyên liệu và trạng thái xuất bản admin.' />
+                <CardTitle icon={<SyncOutlined />} title='Dữ liệu dùng chung' subtitle='Theo dõi đồng bộ món ăn, nguyên liệu, cấu hình và trạng thái xuất bản admin.' />
             </div>
             <div style={{ padding: 12 }}>
                 <div style={metricGridStyle}>
                     <Metric label='Kiểm tra cập nhật lần cuối' value={formatDateTime(sharedHealth?.lastCheckedAt)} detail='Chỉ kiểm tra khi bạn bấm đồng bộ hoặc kiểm tra thủ công.' />
                     <Metric label='Xuất bản admin gần nhất' value={formatDateTime(lastPublishAt)} detail={hasGithubToken ? 'Thiết bị có token xuất bản.' : 'Chưa có token xuất bản trên thiết bị này.'} />
-                    <Metric label='Version đã đồng bộ' value={sharedHealth?.syncedVersions.ingredientsVersion || sharedHealth?.syncedVersions.dishesVersion ? 'Đã có' : 'Chưa có'} detail={`Nguyên liệu: ${sharedHealth?.syncedVersions.ingredientsVersion || 'chưa'} · Món ăn: ${sharedHealth?.syncedVersions.dishesVersion || 'chưa'}`} />
+                    <Metric label='Version đã đồng bộ' value={sharedHealth?.syncedVersions.ingredientsVersion || sharedHealth?.syncedVersions.dishesVersion || sharedHealth?.syncedVersions.configVersion ? 'Đã có' : 'Chưa có'} detail={`Nguyên liệu: ${sharedHealth?.syncedVersions.ingredientsVersion || 'chưa'} · Món ăn: ${sharedHealth?.syncedVersions.dishesVersion || 'chưa'} · Cấu hình: ${sharedHealth?.syncedVersions.configVersion || 'chưa'}`} />
                 </div>
                 <Stack wrap='wrap' gap={8} style={{ marginTop: 10 }}>
                     <Button icon={<ReloadOutlined />} loading={isSyncChecking} onClick={() => _checkShared(false)}>Kiểm tra cập nhật</Button>
@@ -256,6 +256,7 @@ export const SyncBackupHealthScreen = () => {
             manifest={pendingSync.manifest}
             hasIngredientChanges={pendingSync.hasIngredientChanges}
             hasDishChanges={pendingSync.hasDishChanges}
+            hasConfigChanges={pendingSync.hasConfigChanges}
             force={pendingSync.force}
             onDone={_onSharedSynced}
             onCancel={dismissSync}
