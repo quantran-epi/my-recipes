@@ -4,8 +4,8 @@ milestone: v1.0
 milestone_name: milestone
 status: ready
 stopped_at: Completed 04-02-PLAN.md
-last_updated: "2026-06-06T14:36:25Z"
-last_activity: 2026-06-06 -- Completed quick task 260606-hse: house nav, personal auto sync, bottom tab and stats polish
+last_updated: "2026-06-07T13:04:08Z"
+last_activity: 2026-06-07 -- Backfilled quick task 260607-ctw: calendar and template workflow update
 progress:
   total_phases: 5
   completed_phases: 4
@@ -28,7 +28,7 @@ See: .planning/PROJECT.md (updated 2026-06-05)
 Phase: 5 (release-gate-and-product-guardrails) — READY
 Plan: Not started
 Status: Phase 04 complete; ready for Phase 05
-Last activity: 2026-06-06 -- Completed quick task 260606-hse: house nav, personal auto sync, bottom tab and stats polish
+Last activity: 2026-06-07 -- Backfilled quick task 260607-ctw: calendar and template workflow update
 
 Progress: [████████░░] 80%
 
@@ -36,6 +36,7 @@ Progress: [████████░░] 80%
 
 | Date | Task | Artifact |
 |------|------|----------|
+| 2026-06-07 | Calendar and template workflow update | `.planning/quick/260607-ctw-calendar-template-workflows/260607-ctw-SUMMARY.md` |
 | 2026-06-06 | House nav, personal auto sync, bottom tab, and stats polish | `.planning/quick/260606-hse-house-nav-personal-autosync-tab-polish/260606-hse-SUMMARY.md` |
 | 2026-06-06 | Fix first shared sync labels | `.planning/quick/260606-fss-fix-first-sync-labels/260606-fss-SUMMARY.md` |
 | 2026-06-06 | IndexedDB storage and split sync | `.planning/quick/260606-idb-indexeddb-split-sync/260606-idb-SUMMARY.md` |
