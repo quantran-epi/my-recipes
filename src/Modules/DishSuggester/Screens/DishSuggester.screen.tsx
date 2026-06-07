@@ -1,4 +1,4 @@
-import { BarChartOutlined, BulbOutlined, CalculatorOutlined, ClockCircleOutlined, LeftOutlined, SettingOutlined, ShoppingCartOutlined, ThunderboltOutlined } from "@ant-design/icons";
+import { BarChartOutlined, BulbOutlined, CalculatorOutlined, ClockCircleOutlined, DownOutlined, LeftOutlined, RightOutlined, SettingOutlined, ShoppingCartOutlined, ThunderboltOutlined } from "@ant-design/icons";
 import { DishNutritionHelper, DishNutritionSummary } from "@common/Helpers/DishNutritionHelper";
 import { NutritionGoalHelper, NutritionGoalMatch } from "@common/Helpers/NutritionGoalHelper";
 import { Button } from "@components/Button";
@@ -127,6 +127,7 @@ export const DishSuggesterScreen: React.FC<DishSuggesterScreenProps> = ({ open, 
     const [fridgeSearchIds, setFridgeSearchIds] = useState<string[]>([]);
     const [durationSearchIds, setDurationSearchIds] = useState<string[]>([]);
     const [nutritionGoalId, setNutritionGoalId] = useState<string>(nutritionGoals[0]?.id ?? "");
+    const [expandedNutritionDishIds, setExpandedNutritionDishIds] = useState<Set<string>>(() => new Set());
 
     React.useEffect(() => {
         if (nutritionGoals.length === 0) {
@@ -265,8 +266,19 @@ export const DishSuggesterScreen: React.FC<DishSuggesterScreenProps> = ({ open, 
         );
     }, []);
 
+    const _toggleNutritionDetails = React.useCallback((dishId: string, event: React.MouseEvent<HTMLElement>) => {
+        event.stopPropagation();
+        setExpandedNutritionDishIds(prev => {
+            const next = new Set(prev);
+            if (next.has(dishId)) next.delete(dishId);
+            else next.add(dishId);
+            return next;
+        });
+    }, []);
+
     const _onNutritionGoalChange = React.useCallback((goalId: string) => {
         setSelectedDishIds([]);
+        setExpandedNutritionDishIds(new Set());
         setNutritionGoalId(goalId);
     }, []);
 
@@ -292,6 +304,7 @@ export const DishSuggesterScreen: React.FC<DishSuggesterScreenProps> = ({ open, 
         setStep(0);
         setSelectedIngredientIds([]);
         setSelectedDishIds([]);
+        setExpandedNutritionDishIds(new Set());
         onClose();
     };
 
@@ -299,6 +312,7 @@ export const DishSuggesterScreen: React.FC<DishSuggesterScreenProps> = ({ open, 
         setMode(m);
         setStep(m === "inventory" ? 1 : 0);
         setSelectedDishIds([]);
+        setExpandedNutritionDishIds(new Set());
         setFridgeSearchIds([]);
         setDurationSearchIds([]);
     };
@@ -539,7 +553,7 @@ export const DishSuggesterScreen: React.FC<DishSuggesterScreenProps> = ({ open, 
             <Box style={{ maxHeight: 430, overflowY: "auto", paddingRight: 2 }}>
                 {nutritionSuggestions.map(item => {
                     const selected = selectedDishIdSet.has(item.dish.id);
-                    const pct = Math.round(item.score * 100);
+                    const expanded = expandedNutritionDishIds.has(item.dish.id);
                     const coverageTone = item.nutrition.coveragePercent >= 80 ? "#389e0d" : item.nutrition.coveragePercent >= 50 ? "#d48806" : "#cf1322";
                     return <div
                         key={item.dish.id}
@@ -573,23 +587,33 @@ export const DishSuggesterScreen: React.FC<DishSuggesterScreenProps> = ({ open, 
                             }}>{selected ? "✓" : ""}</div>
                             <DishImageWidget src={item.dish.image} width={44} height={44} borderRadius={7} fallbackIconSize={24} showBrokenLabel={false} style={{ flexShrink: 0, marginTop: 1 }} />
                             <Box style={{ minWidth: 0, flex: 1 }}>
-                                <div style={{ display: "grid", gridTemplateColumns: "minmax(0, 1fr) auto", gap: 8, alignItems: "start" }}>
+                                <div style={{ display: "grid", gridTemplateColumns: "minmax(0, 1fr)", gap: 8, alignItems: "start" }}>
                                     <Typography.Text strong style={{ display: "block", color: "#111827", fontSize: 14, lineHeight: "18px", overflowWrap: "anywhere" }}>{item.dish.name}</Typography.Text>
-                                    <span style={{ padding: "2px 8px", borderRadius: 999, background: `${item.tone}16`, color: item.tone, fontSize: 12, lineHeight: "18px", fontWeight: 800, whiteSpace: "nowrap" }}>{pct}%</span>
                                 </div>
                                 <Typography.Text type="secondary" style={{ display: "block", fontSize: 11, lineHeight: "15px", marginTop: 2 }}>{item.reason}</Typography.Text>
-                                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(72px, 1fr))", gap: 6, marginTop: 9 }}>
-                                    <NutritionMetric label="kcal" value={DishNutritionHelper.formatCalories(item.nutrition.perServing.calories)} tone="#7436dc" />
-                                    <NutritionMetric label="đạm" value={DishNutritionHelper.formatGram(item.nutrition.perServing.protein)} tone="#1677ff" />
-                                    <NutritionMetric label="béo" value={DishNutritionHelper.formatGram(item.nutrition.perServing.fat)} tone="#d46b08" />
-                                    <NutritionMetric label="xơ" value={DishNutritionHelper.formatGram(item.nutrition.perServing.fiber)} tone="#389e0d" />
-                                    <NutritionMetric label="dữ liệu" value={`${item.nutrition.coveragePercent}%`} tone={coverageTone} />
-                                </div>
-                                {(item.nutrition.missingNutritionIngredientIds.length > 0 || item.nutrition.missingConversionIngredientIds.length > 0) && (
-                                    <Typography.Text type="secondary" style={{ display: "block", fontSize: 10, lineHeight: "14px", marginTop: 8 }}>
-                                        Thiếu dữ liệu/quy đổi cho {item.nutrition.missingNutritionIngredientIds.length + item.nutrition.missingConversionIngredientIds.length} nguyên liệu.
-                                    </Typography.Text>
-                                )}
+                                <Button
+                                    type="text"
+                                    icon={expanded ? <DownOutlined /> : <RightOutlined />}
+                                    onClick={(event) => _toggleNutritionDetails(item.dish.id, event)}
+                                    aria-label={`${expanded ? "Ẩn" : "Xem"} dinh dưỡng của ${item.dish.name}`}
+                                    style={{ marginTop: 5, paddingInline: 0, height: 28, color: item.tone, fontWeight: 700 }}
+                                >
+                                    Dinh dưỡng
+                                </Button>
+                                {expanded && <>
+                                    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(72px, 1fr))", gap: 6, marginTop: 6 }}>
+                                        <NutritionMetric label="kcal" value={DishNutritionHelper.formatCalories(item.nutrition.perServing.calories)} tone="#7436dc" />
+                                        <NutritionMetric label="đạm" value={DishNutritionHelper.formatGram(item.nutrition.perServing.protein)} tone="#1677ff" />
+                                        <NutritionMetric label="béo" value={DishNutritionHelper.formatGram(item.nutrition.perServing.fat)} tone="#d46b08" />
+                                        <NutritionMetric label="xơ" value={DishNutritionHelper.formatGram(item.nutrition.perServing.fiber)} tone="#389e0d" />
+                                        <NutritionMetric label="dữ liệu" value={`${item.nutrition.coveragePercent}%`} tone={coverageTone} />
+                                    </div>
+                                    {(item.nutrition.missingNutritionIngredientIds.length > 0 || item.nutrition.missingConversionIngredientIds.length > 0) && (
+                                        <Typography.Text type="secondary" style={{ display: "block", fontSize: 10, lineHeight: "14px", marginTop: 8 }}>
+                                            Thiếu dữ liệu/quy đổi cho {item.nutrition.missingNutritionIngredientIds.length + item.nutrition.missingConversionIngredientIds.length} nguyên liệu.
+                                        </Typography.Text>
+                                    )}
+                                </>}
                             </Box>
                         </Stack>
                     </div>;

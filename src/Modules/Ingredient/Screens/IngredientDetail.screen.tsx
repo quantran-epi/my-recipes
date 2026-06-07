@@ -83,9 +83,9 @@ export const IngredientDetailScreen = () => {
         <Box style={{ background: "#fff", border: "1px solid #f0f0f0", borderRadius: 8, padding: 14, marginBottom: 12 }}>
             <Stack justify="space-between" align="flex-start" style={{ gap: 12 }}>
                 <Box style={{ minWidth: 0 }}>
-                    <Space>
+                    <Space style={{ minWidth: 0, alignItems: "flex-start" }}>
                         <Image src={VegetablesIcon} preview={false} width={26} style={{ marginBottom: 3 }} />
-                        <Typography.Title level={4} style={{ margin: 0 }}>{ingredient.name}</Typography.Title>
+                        <Typography.Title level={4} style={{ margin: 0, minWidth: 0, lineHeight: "24px", overflowWrap: "anywhere" }}>{ingredient.name}</Typography.Title>
                     </Space>
                     <Stack wrap="wrap" gap={8} style={{ marginTop: 8 }}>
                         {ingredient.category && <Typography.Text type="secondary">Nhóm: {ingredient.category}</Typography.Text>}

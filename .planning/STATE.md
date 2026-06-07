@@ -4,8 +4,8 @@ milestone: v1.0
 milestone_name: milestone
 status: ready
 stopped_at: Completed 04-02-PLAN.md
-last_updated: "2026-06-07T16:27:54Z"
-last_activity: 2026-06-07 -- Completed quick task 260607-wl9: list and nutrition suggestor performance fixes
+last_updated: "2026-06-07T23:51:31Z"
+last_activity: 2026-06-08 -- Completed quick task 260608-9df: nutrition suggestor and detail layout polish
 progress:
   total_phases: 5
   completed_phases: 4
@@ -28,7 +28,7 @@ See: .planning/PROJECT.md (updated 2026-06-05)
 Phase: 5 (release-gate-and-product-guardrails) — READY
 Plan: Not started
 Status: Phase 04 complete; ready for Phase 05
-Last activity: 2026-06-07 -- Completed quick task 260607-wl9: list and nutrition suggestor performance fixes
+Last activity: 2026-06-08 -- Completed quick task 260608-9df: nutrition suggestor and detail layout polish
 
 Progress: [████████░░] 80%
 
@@ -36,6 +36,7 @@ Progress: [████████░░] 80%
 
 | Date | Task | Artifact |
 |------|------|----------|
+| 2026-06-08 | Nutrition suggestor and detail layout polish | `.planning/quick/260608-9df-fix-nutrition-suggestor-expansion-dish-d/260608-9df-SUMMARY.md` |
 | 2026-06-07 | List and nutrition suggestor performance fixes | `.planning/quick/260607-wl9-fix-remaining-list-search-lag-simplify-i/260607-wl9-SUMMARY.md` |
 | 2026-06-07 | Nutrition icons and label | `.planning/quick/260607-vhv-use-diet-and-nutrition-plan-icons-for-nu/260607-vhv-SUMMARY.md` |
 | 2026-06-07 | Scheduled meal day-focused UI | `.planning/quick/260607-v9x-update-scheduled-meal-page-to-default-to/260607-v9x-SUMMARY.md` |

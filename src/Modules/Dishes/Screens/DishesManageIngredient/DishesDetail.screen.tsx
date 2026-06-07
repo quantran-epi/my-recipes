@@ -19,6 +19,15 @@ import { RootRoutes } from "@routing/RootRoutes"
 import NoodlesIcon from "../../../../../assets/icons/noodles.png"
 import { Image } from "@components/Image"
 
+const topToolCardStyle: React.CSSProperties = {
+    background: "#fff",
+    border: "1px solid #f0f0f0",
+    borderRadius: 0,
+    padding: 10,
+    marginBottom: 10,
+    boxShadow: "0 2px 8px rgba(0,0,0,0.04)",
+};
+
 export const DishesDetailScreen = () => {
     const [params] = useSearchParams();
     const dishes = useSelector(selectDishes);
@@ -66,42 +75,40 @@ export const DishesDetailScreen = () => {
     return (
         <React.Fragment>
             {/* ── Top bar ── */}
-            <Box style={{ padding: "12px 16px 0" }}>
-                <Box style={{ background: "#fff", border: "1px solid #f0f0f0", borderRadius: 0, padding: 10, boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }}>
-                    <Stack align="center" justify="space-between" gap={8}>
-                        <Button
-                            icon={<ArrowLeftOutlined />}
-                            onClick={() => navigate(-1)}
-                        >
-                            Quay lại
-                        </Button>
-                        <Stack align="center" gap={6} style={{ minWidth: 0 }}>
-                            <Image src={NoodlesIcon} preview={false} width={22} style={{ marginBottom: 3 }} />
-                            <Typography.Text strong style={{ fontSize: 15, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
-                                {currentDish.name}
-                            </Typography.Text>
-                        </Stack>
-                        {isAdmin && (
-                            <Space size={4}>
-                                <Button icon={<EditOutlined />} onClick={toggleEdit.show} />
-                                <Popconfirm
-                                    title="Xóa món ăn"
-                                    description="Bạn chắc chắn muốn xóa món ăn này?"
-                                    onConfirm={_onDelete}
-                                    okText="Xóa"
-                                    cancelText="Huỷ"
-                                    okButtonProps={{ danger: true }}
-                                >
-                                    <Button danger icon={<DeleteOutlined />} />
-                                </Popconfirm>
-                            </Space>
-                        )}
+            <Box style={topToolCardStyle}>
+                <div style={{ display: "grid", gridTemplateColumns: isAdmin ? "auto minmax(0, 1fr) auto" : "auto minmax(0, 1fr)", alignItems: "center", gap: 8 }}>
+                    <Button
+                        icon={<ArrowLeftOutlined />}
+                        onClick={() => navigate(-1)}
+                    >
+                        Quay lại
+                    </Button>
+                    <Stack align="center" justify="center" gap={6} style={{ minWidth: 0, width: "100%" }}>
+                        <Image src={NoodlesIcon} preview={false} width={22} style={{ marginBottom: 3, flexShrink: 0 }} />
+                        <Typography.Text strong style={{ minWidth: 0, fontSize: 15, lineHeight: "19px", whiteSpace: "normal", overflowWrap: "anywhere", textAlign: "center" }}>
+                            {currentDish.name}
+                        </Typography.Text>
                     </Stack>
-                </Box>
+                    {isAdmin && (
+                        <Space size={4}>
+                            <Button icon={<EditOutlined />} onClick={toggleEdit.show} />
+                            <Popconfirm
+                                title="Xóa món ăn"
+                                description="Bạn chắc chắn muốn xóa món ăn này?"
+                                onConfirm={_onDelete}
+                                okText="Xóa"
+                                cancelText="Huỷ"
+                                okButtonProps={{ danger: true }}
+                            >
+                                <Button danger icon={<DeleteOutlined />} />
+                            </Popconfirm>
+                        </Space>
+                    )}
+                </div>
             </Box>
 
             {/* ── Detail content ── */}
-            <div style={{ padding: "12px 16px 100px" }}>
+            <div style={{ paddingBottom: 100 }}>
                 <DishesDetailWidget dish={currentDish} />
             </div>
 

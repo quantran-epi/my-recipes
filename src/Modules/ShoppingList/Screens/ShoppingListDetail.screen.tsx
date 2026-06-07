@@ -18,6 +18,15 @@ import ShoppingListIcon from "../../../../assets/icons/shoppingList.png";
 import { ShoppingListDetailWidget } from "./ShoppingListDetail.widget";
 import { ShoppingListEditWidget } from "./ShoppingListEdit.widget";
 
+const topToolCardStyle: React.CSSProperties = {
+    background: "#fff",
+    border: "1px solid #f0f0f0",
+    borderRadius: 0,
+    padding: 10,
+    marginBottom: 10,
+    boxShadow: "0 2px 8px rgba(0,0,0,0.04)",
+};
+
 export const ShoppingListDetailScreen = () => {
     const [searchParams] = useSearchParams();
     const navigate = useNavigate();
@@ -44,16 +53,18 @@ export const ShoppingListDetailScreen = () => {
     const isReadonly = Boolean(shoppingList.completedAt);
 
     return <React.Fragment>
-        <Stack justify="space-between" align="center" style={{ marginBottom: 12 }}>
-            <Button icon={<ArrowLeftOutlined />} onClick={_backToList}>Quay lại</Button>
-        </Stack>
+        <Box style={topToolCardStyle}>
+            <Stack justify="space-between" align="center" gap={8} wrap="wrap">
+                <Button icon={<ArrowLeftOutlined />} onClick={_backToList}>Quay lại</Button>
+            </Stack>
+        </Box>
 
         <Box style={{ background: "#fff", border: "1px solid #f0f0f0", borderRadius: 0, padding: 14, marginBottom: 12 }}>
             <Stack justify="space-between" align="flex-start" style={{ gap: 12 }}>
                 <Box style={{ minWidth: 0 }}>
-                    <Space>
+                    <Space style={{ minWidth: 0, alignItems: "flex-start" }}>
                         <Image src={ShoppingListIcon} preview={false} width={26} style={{ marginBottom: 3 }} />
-                        <Typography.Title level={4} style={{ margin: 0 }}>{shoppingList.name}</Typography.Title>
+                        <Typography.Title level={4} style={{ margin: 0, minWidth: 0, lineHeight: "24px", overflowWrap: "anywhere" }}>{shoppingList.name}</Typography.Title>
                     </Space>
                     <Typography.Text type="secondary" style={{ display: "block", marginTop: 6 }}>
                         {shoppingList.plannedDate
