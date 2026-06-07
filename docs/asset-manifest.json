@@ -1,7 +1,7 @@
 {
   "files": {
     "main.css": "/my-recipes/static/css/main.87da95ed.css",
-    "main.js": "/my-recipes/static/js/main.6074fb7c.js",
+    "main.js": "/my-recipes/static/js/main.a4a3a0b9.js",
     "static/js/206.82a4e427.chunk.js": "/my-recipes/static/js/206.82a4e427.chunk.js",
     "static/media/noodles.png": "/my-recipes/static/media/noodles.db502210854831dbe3a0.png",
     "static/media/budget.png": "/my-recipes/static/media/budget.9a0121f5eb55c9f69d1b.png",
@@ -14,13 +14,16 @@
     "service-worker.js": "/my-recipes/service-worker.js",
     "static/media/night.png": "/my-recipes/static/media/night.1bfbd92981bc5bc48482.png",
     "static/media/cooking.png": "/my-recipes/static/media/cooking.74b847a79919accf12c1.png",
+    "static/media/layout.png": "/my-recipes/static/media/layout.5cf9cee6f365d76d7b7b.png",
     "static/media/done.png": "/my-recipes/static/media/done.815a1f74cff7ec5e25c2.png",
     "static/media/vegetable.png": "/my-recipes/static/media/vegetable.165d06b94cb28a23e3f0.png",
+    "static/media/medical-record.png": "/my-recipes/static/media/medical-record.d0b400dce31a7c3a573a.png",
     "static/media/process.png": "/my-recipes/static/media/process.9a41cb47fced821a7c90.png",
     "static/media/meals.png": "/my-recipes/static/media/meals.27a8d17ec40b2d8c48b4.png",
     "static/media/time.png": "/my-recipes/static/media/time.7be30ab4672480d8c939.png",
     "static/media/nineteen.png": "/my-recipes/static/media/nineteen.8e5aac60f00e0492e358.png",
     "static/media/sunrise.png": "/my-recipes/static/media/sunrise.f250b0303eae6910c50d.png",
+    "static/media/monitor.png": "/my-recipes/static/media/monitor.9c18700942af2b36587a.png",
     "static/media/eraser.png": "/my-recipes/static/media/eraser.abbb08605884bbb04e5d.png",
     "static/media/shopping-cart-add.png": "/my-recipes/static/media/shopping-cart-add.d45b8db8b3b4ff8eaf55.png",
     "static/media/list-check.png": "/my-recipes/static/media/list-check.873717da297a599a32a8.png",
@@ -29,6 +32,6 @@
   },
   "entrypoints": [
     "static/css/main.87da95ed.css",
-    "static/js/main.6074fb7c.js"
+    "static/js/main.a4a3a0b9.js"
   ]
 }

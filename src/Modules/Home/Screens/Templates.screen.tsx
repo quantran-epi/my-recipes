@@ -4,6 +4,7 @@ import { DatePicker } from '@components/Form/DatePicker';
 import { Input } from '@components/Form/Input';
 import { Option, Select } from '@components/Form/Select';
 import { Empty } from '@components/Empty';
+import { Image } from '@components/Image';
 import { Box } from '@components/Layout/Box';
 import { Stack } from '@components/Layout/Stack';
 import { Tag } from '@components/Tag';
@@ -40,6 +41,7 @@ import { useNavigate } from 'react-router-dom';
 import { useMessage } from '@components/Message';
 import { useScreenTitle } from '@hooks';
 import { RootRoutes } from '@routing/RootRoutes';
+import LayoutIcon from '../../../../assets/icons/layout.png';
 
 type MealKey = keyof ScheduledMeal['meals'];
 
@@ -86,6 +88,27 @@ const templateCardStyle: React.CSSProperties = {
     borderRadius: 8,
     background: '#fbf9ff',
     padding: 10,
+};
+
+const instructionGridStyle: React.CSSProperties = {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(230px, 1fr))',
+    gap: 10,
+};
+
+const instructionCardStyle: React.CSSProperties = {
+    border: '1px solid rgba(116,54,220,0.12)',
+    borderRadius: 0,
+    background: '#fbf9ff',
+    padding: 11,
+};
+
+const instructionStepStyle: React.CSSProperties = {
+    display: 'block',
+    color: '#4f3a7d',
+    fontSize: 12,
+    lineHeight: '17px',
+    marginTop: 6,
 };
 
 const getDateKey = (value: Date | string | Dayjs) => moment(dayjs.isDayjs(value) ? value.toDate() : value).format('YYYY-MM-DD');
@@ -254,6 +277,28 @@ export const TemplatesScreen = () => {
     };
 
     return <Box data-testid='templates-screen' style={pageStyle}>
+        <section style={sectionStyle}>
+            <div style={sectionHeaderStyle}>
+                <SectionTitle icon={<Image src={LayoutIcon} preview={false} width={24} alt='' />} title='Cách dùng mẫu' subtitle='Lưu lại lịch quen thuộc để tạo nhanh thực đơn hoặc lịch mua sắm mới.' />
+            </div>
+            <div style={bodyStyle}>
+                <div style={instructionGridStyle}>
+                    <Box style={instructionCardStyle}>
+                        <Typography.Text strong style={{ display: 'block', color: '#2f2545', fontSize: 14 }}>Mẫu thực đơn theo tuần</Typography.Text>
+                        <Typography.Text style={instructionStepStyle}>1. Tạo thực đơn cho một tuần trong trang Thực đơn.</Typography.Text>
+                        <Typography.Text style={instructionStepStyle}>2. Ở đây, chọn ngày bắt đầu tuần nguồn rồi bấm Lưu mẫu tuần.</Typography.Text>
+                        <Typography.Text style={instructionStepStyle}>3. Khi cần dùng lại, chọn tuần bắt đầu mới và bấm Áp dụng trên mẫu đã lưu.</Typography.Text>
+                    </Box>
+                    <Box style={instructionCardStyle}>
+                        <Typography.Text strong style={{ display: 'block', color: '#2f2545', fontSize: 14 }}>Mẫu mua sắm</Typography.Text>
+                        <Typography.Text style={instructionStepStyle}>1. Tạo một lịch mua sắm nguồn có các món thường mua chung.</Typography.Text>
+                        <Typography.Text style={instructionStepStyle}>2. Chọn lịch đó ở ô Lịch mua sắm nguồn rồi bấm Lưu mẫu mua sắm.</Typography.Text>
+                        <Typography.Text style={instructionStepStyle}>3. Chọn ngày mua mới và bấm Áp dụng để tạo lịch mua sắm mới kèm checklist.</Typography.Text>
+                    </Box>
+                </div>
+            </div>
+        </section>
+
         <section style={sectionStyle}>
             <div style={sectionHeaderStyle}>
                 <SectionTitle icon={<CalendarOutlined />} title='Mẫu thực đơn theo tuần' subtitle='Lưu một tuần đã lên lịch và áp dụng lại cho tuần khác.' />

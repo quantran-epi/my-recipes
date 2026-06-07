@@ -39,7 +39,9 @@ import ShoppingListIcon from "../../assets/icons/shoppingList.png";
 import IngredientIcon from "../../assets/icons/vegetable.png";
 import SuggesterIcon from "../../assets/icons/cooking.png";
 import BudgetIcon from "../../assets/icons/budget.png";
-import AnalysisIcon from "../../assets/icons/analysis.png";
+import MonitorIcon from "../../assets/icons/monitor.png";
+import LayoutIcon from "../../assets/icons/layout.png";
+import MedicalRecordIcon from "../../assets/icons/medical-record.png";
 import { INGREDIENT_PRESERVATION_OPTIONS, INGREDIENT_SHELF_LIFE_OPTIONS, IngredientPreservationCondition, IngredientShelfLife } from "@store/Models/Ingredient";
 import { DEFAULT_INVENTORY_HEALTH_CONFIG, InventoryHealthConfig, normalizeInventoryHealthConfig } from "@store/Models/SharedConfig";
 import { updateInventoryConfig } from "@store/Reducers/SharedConfigReducer";
@@ -154,9 +156,9 @@ export const MasterPage = () => {
             case "Lịch mua sắm": return ShoppingListIcon;
             case "Nguyên liệu": return IngredientIcon;
             case "Kế hoạch chi phí": return BudgetIcon;
-            case "Phân tích": return AnalysisIcon;
-            case "Mẫu dùng lại": return MealsIcon;
-            case "Sức khỏe dữ liệu": return AnalysisIcon;
+            case "Phân tích": return MonitorIcon;
+            case "Mẫu dùng lại": return LayoutIcon;
+            case "Sức khỏe dữ liệu": return MedicalRecordIcon;
             case 'Tổng quan': return HouseIcon;
             default: return null;
         }
@@ -387,8 +389,8 @@ const SidebarDrawer = ({ buttonStyle }: { buttonStyle?: React.CSSProperties }) =
 
     const sidebarNavItems = [
         { key: 'dashboard', href: RootRoutes.AuthorizedRoutes.Root(), icon: HouseIcon, label: 'Tổng quan' },
-        { key: 'analytics', href: RootRoutes.AuthorizedRoutes.Analytics(), icon: AnalysisIcon, label: 'Phân tích' },
-        { key: 'templates', href: RootRoutes.AuthorizedRoutes.Templates(), icon: MealsIcon, label: 'Mẫu dùng lại' },
+        { key: 'analytics', href: RootRoutes.AuthorizedRoutes.Analytics(), icon: MonitorIcon, label: 'Phân tích' },
+        { key: 'templates', href: RootRoutes.AuthorizedRoutes.Templates(), icon: LayoutIcon, label: 'Mẫu dùng lại' },
         { key: 'ingredients', href: RootRoutes.AuthorizedRoutes.IngredientRoutes.List(), icon: IngredientIcon, label: 'Nguyên liệu' },
         { key: 'dishes', href: RootRoutes.AuthorizedRoutes.DishesRoutes.List(), icon: DishesIcon, label: 'Món ăn' },
         { key: 'expensePlanner', href: RootRoutes.AuthorizedRoutes.ExpensePlanner(), icon: BudgetIcon, label: 'Kế hoạch chi phí' },
@@ -448,7 +450,7 @@ const SidebarDrawer = ({ buttonStyle }: { buttonStyle?: React.CSSProperties }) =
                             Dữ liệu & sao lưu
                         </Button>
                         <Button
-                            icon={<SyncOutlined />}
+                            icon={<Image src={MedicalRecordIcon} preview={false} width={18} alt="" />}
                             block
                             onClick={() => onNavigate(RootRoutes.AuthorizedRoutes.SyncBackupHealth())}
                         >
