@@ -11,7 +11,7 @@ import { DeferredModalContent, Modal } from "@components/Modal";
 import { Popconfirm } from "@components/Popconfirm";
 import { Tooltip } from "@components/Tootip";
 import { Typography } from "@components/Typography";
-import { useScreenTitle, useToggle, useAdminMode, usePagedVirtualItems } from "@hooks";
+import { useScreenTitle, useToggle, useAdminMode, usePagedVirtualItems, useScheduledCalculation } from "@hooks";
 import { InventoryHelper } from "@common/Helpers/InventoryHelper";
 import { IngredientUnitHelper } from "@common/Helpers/IngredientUnitHelper";
 import { IngredientNutritionHelper } from "@common/Helpers/IngredientNutritionHelper";
@@ -37,6 +37,13 @@ const LazyDishSuggesterScreen = React.lazy(() => import("@modules/DishSuggester/
 
 type IngredientStockFilter = "all" | "in_stock" | "need_stock" | "low_stock" | "urgent" | "always_available";
 
+type IngredientFilterData = {
+    filteredIngredients: Ingredient[];
+    stockSnapshots: Record<string, IngredientStockSnapshot>;
+    stockCounts: Record<IngredientStockFilter, number>;
+    categoryCounts: Record<string, number>;
+}
+
 const INGREDIENT_STOCK_FILTERS: { value: IngredientStockFilter; label: string }[] = [
     { value: "all", label: "Tất cả" },
     { value: "in_stock", label: "Đang có" },
@@ -48,6 +55,7 @@ const INGREDIENT_STOCK_FILTERS: { value: IngredientStockFilter; label: string }[
 
 const INGREDIENT_ROW_DEFAULT_HEIGHT = 184;
 const INGREDIENT_LOAD_MORE_THRESHOLD = 8;
+const LIST_SEARCH_DEBOUNCE_MS = 220;
 
 const filterRowStyle: React.CSSProperties = {
     display: "flex",
@@ -104,6 +112,16 @@ type IngredientStockSnapshot = {
     nearestExpiry: ReturnType<typeof InventoryHelper.nearestExpiryBatch>;
 }
 
+const createEmptyIngredientFilterData = (): IngredientFilterData => ({
+    filteredIngredients: [],
+    stockSnapshots: {},
+    stockCounts: INGREDIENT_STOCK_FILTERS.reduce((result, item) => {
+        result[item.value] = 0;
+        return result;
+    }, {} as Record<IngredientStockFilter, number>),
+    categoryCounts: { __all: 0 },
+});
+
 const getIngredientStockSnapshot = (
     ingredient: Ingredient,
     inventoryItems: Record<string, IngredientInventory>,
@@ -155,8 +173,10 @@ export const IngredientListScreen = () => {
     const toggleAddModal = useToggle({ defaultValue: false });
     const [inventoryIngredient, setInventoryIngredient] = useState<Ingredient | null>(null);
     const dispatch = useDispatch();
-    const { } = useScreenTitle({ value: "Nguyên liệu", deps: [] });
+    useScreenTitle({ value: "Nguyên liệu", deps: [] });
+    const [searchInputText, setSearchInputText] = useState("");
     const [searchText, setSearchText] = useState("");
+    const [searchCommitPending, setSearchCommitPending] = useState(false);
     const [activeStockFilter, setActiveStockFilter] = useState<IngredientStockFilter>("all");
     const [activeCategory, setActiveCategory] = useState<string | null>(null);
     const inventoryItems = useSelector(selectInventory);
@@ -172,12 +192,21 @@ export const IngredientListScreen = () => {
     const { isAdmin } = useAdminMode();
     const normalizedSearch = searchText.trim().toLowerCase();
 
-    const _onSearchChange = useMemo(() => debounce((event: React.ChangeEvent<HTMLInputElement>) => {
-        const nextValue = event.target.value;
-        React.startTransition(() => setSearchText(nextValue));
-    }, 350), []);
+    const _commitSearchText = useMemo(() => debounce((nextValue: string) => {
+        React.startTransition(() => {
+            setSearchText(nextValue);
+            setSearchCommitPending(false);
+        });
+    }, LIST_SEARCH_DEBOUNCE_MS), []);
 
-    useEffect(() => () => _onSearchChange.cancel(), [_onSearchChange]);
+    const _onSearchChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
+        const nextValue = event.target.value;
+        setSearchInputText(nextValue);
+        setSearchCommitPending(true);
+        _commitSearchText(nextValue);
+    }, [_commitSearchText]);
+
+    useEffect(() => () => _commitSearchText.cancel(), [_commitSearchText]);
 
     const _setScrollTopVisible = useCallback((nextVisible: boolean) => {
         setShowScrollTop(current => current === nextVisible ? current : nextVisible);
@@ -214,7 +243,7 @@ export const IngredientListScreen = () => {
         return INGREDIENT_CATEGORIES.filter(category => categorySet.has(category));
     }, [ingredients]);
 
-    const filterData = useMemo(() => {
+    const calculateFilterData = useCallback((): IngredientFilterData => {
         const stockCounts = INGREDIENT_STOCK_FILTERS.reduce((result, item) => {
             result[item.value] = 0;
             return result;
@@ -260,7 +289,13 @@ export const IngredientListScreen = () => {
         };
     }, [ingredients, inventoryItems, inventoryConfig, normalizedSearch, activeCategory, activeStockFilter, availableCategories]);
 
+    const { value: filterData, pending: filterDataPending } = useScheduledCalculation(calculateFilterData, {
+        initialValue: createEmptyIngredientFilterData,
+        retainPreviousValue: true,
+    });
+
     const { filteredIngredients, stockSnapshots, stockCounts, categoryCounts } = filterData;
+    const searchPending = searchCommitPending || filterDataPending;
     const pagedIngredientsResetKey = `${activeStockFilter}|${activeCategory ?? "all"}|${normalizedSearch}`;
     const {
         visibleItems: visibleIngredients,
@@ -328,7 +363,7 @@ export const IngredientListScreen = () => {
         <div style={{ height: "100%", display: "flex", flexDirection: "column", minHeight: 0 }}>
             <Box style={topToolCardStyle}>
                 <Stack.Compact style={searchControlRowStyle}>
-                    <Input allowClear data-testid="ingredient-search-input" placeholder="Tìm kiếm" onChange={_onSearchChange} style={searchInputStyle} />
+                    <Input allowClear data-testid="ingredient-search-input" placeholder="Tìm kiếm" value={searchInputText} onChange={_onSearchChange} style={searchInputStyle} />
                     {isAdmin && <Button onClick={_onAdd} icon={<PlusOutlined />} />}
                     <Tooltip title="Dùng trước hết hạn">
                         <Button onClick={toggleUseFirst.show} icon={<FireOutlined style={{ color: "#ff4d4f" }} />} />
@@ -337,6 +372,7 @@ export const IngredientListScreen = () => {
                         <Button onClick={toggleStats.show} icon={<BarChartOutlined style={{ color: "#1677ff" }} />} />
                     </Tooltip>
                 </Stack.Compact>
+                {searchPending && <Typography.Text type="secondary" style={{ display: "block", fontSize: 11, lineHeight: "15px", marginTop: 5 }}>Đang lọc danh sách...</Typography.Text>}
                 <div style={filterRowStyle}>
                     {INGREDIENT_STOCK_FILTERS.map(item => (
                         <button key={item.value} type="button" data-testid={`ingredient-filter-${item.value}`} onClick={() => _setActiveStockFilter(item.value)} style={filterChipStyle(activeStockFilter === item.value)}>

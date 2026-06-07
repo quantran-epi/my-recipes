@@ -13,7 +13,7 @@ import { DeferredModalContent, Modal } from "@components/Modal";
 import { Popover } from "@components/Popover";
 import { Tag } from "@components/Tag";
 import { Typography } from "@components/Typography";
-import { useScreenTitle, useToggle, useAdminMode, usePagedVirtualItems } from "@hooks";
+import { useScreenTitle, useToggle, useAdminMode, usePagedVirtualItems, useScheduledCalculation } from "@hooks";
 import { useAppShellNavigation } from "@routing/AppShellNavigationContext";
 import { DISH_TAGS, DishDuration, Dishes } from "@store/Models/Dishes";
 import { Ingredient } from "@store/Models/Ingredient";
@@ -61,6 +61,12 @@ type DishRowProps = {
 };
 
 type DishStatusFilter = "all" | "ready" | "needs_update" | "has_ingredients" | "has_steps";
+
+type DishFilterData = {
+    filteredDishes: Dishes[];
+    statusCounts: Record<DishStatusFilter, number>;
+    tagCounts: Record<string, number>;
+}
 
 const DISH_STATUS_FILTERS: { value: DishStatusFilter; label: string }[] = [
     { value: "all", label: "Tất cả" },
@@ -135,6 +141,7 @@ const EMPTY_DISH_SUMMARY: DishListItemSummary = {
 
 const DISH_ROW_DEFAULT_HEIGHT = 184;
 const DISH_LOAD_MORE_THRESHOLD = 8;
+const LIST_SEARCH_DEBOUNCE_MS = 220;
 
 const DISH_DURATION_LABELS: Record<keyof DishDuration, string> = {
     unfreeze: 'Rã đông',
@@ -143,6 +150,15 @@ const DISH_DURATION_LABELS: Record<keyof DishDuration, string> = {
     serve: 'Trình bày',
     cooldown: 'Để nguội',
 };
+
+const createEmptyDishFilterData = (): DishFilterData => ({
+    filteredDishes: [],
+    statusCounts: DISH_STATUS_FILTERS.reduce((result, item) => {
+        result[item.value] = 0;
+        return result;
+    }, {} as Record<DishStatusFilter, number>),
+    tagCounts: { __all: 0 },
+});
 
 const DishDurationDetail: React.FunctionComponent<{ duration: DishDuration }> = ({ duration }) => {
     return <List size="small" dataSource={Object.entries(duration)} renderItem={item => <List.Item style={{ paddingInline: 0 }}>
@@ -226,11 +242,13 @@ export const DishesListScreen = () => {
     const dishes = useSelector(selectDishes);
     const ingredients = useSelector(selectIngredients);
     const toggleAddModal = useToggle({ defaultValue: false });
+    const [searchInputText, setSearchInputText] = useState<string>("");
     const [searchText, setSearchText] = useState<string>("");
+    const [searchCommitPending, setSearchCommitPending] = useState(false);
     const [activeTag, setActiveTag] = useState<string | null>(null);
     const [activeStatus, setActiveStatus] = useState<DishStatusFilter>("all");
     const dispatch = useDispatch();
-    const { } = useScreenTitle({ value: "Món ăn", deps: [] });
+    useScreenTitle({ value: "Món ăn", deps: [] });
     const virtualListStyle = useMemo<React.CSSProperties>(() => ({
         height: "100%",
         overscrollBehavior: "contain",
@@ -242,12 +260,21 @@ export const DishesListScreen = () => {
     const { isAdmin } = useAdminMode();
     const normalizedSearch = searchText.trim().toLowerCase();
 
-    const _onSearchChange = useMemo(() => debounce((event: React.ChangeEvent<HTMLInputElement>) => {
-        const nextValue = event.target.value;
-        React.startTransition(() => setSearchText(nextValue));
-    }, 350), []);
+    const _commitSearchText = useMemo(() => debounce((nextValue: string) => {
+        React.startTransition(() => {
+            setSearchText(nextValue);
+            setSearchCommitPending(false);
+        });
+    }, LIST_SEARCH_DEBOUNCE_MS), []);
 
-    useEffect(() => () => _onSearchChange.cancel(), [_onSearchChange]);
+    const _onSearchChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
+        const nextValue = event.target.value;
+        setSearchInputText(nextValue);
+        setSearchCommitPending(true);
+        _commitSearchText(nextValue);
+    }, [_commitSearchText]);
+
+    useEffect(() => () => _commitSearchText.cancel(), [_commitSearchText]);
 
     const _setScrollTopVisible = useCallback((nextVisible: boolean) => {
         setShowScrollTop(current => current === nextVisible ? current : nextVisible);
@@ -275,7 +302,7 @@ export const DishesListScreen = () => {
         return DISH_TAGS.filter(t => tagSet.has(t));
     }, [dishes]);
 
-    const filterData = useMemo(() => {
+    const calculateFilterData = useCallback((): DishFilterData => {
         const statusCounts = DISH_STATUS_FILTERS.reduce((result, item) => {
             result[item.value] = 0;
             return result;
@@ -319,7 +346,13 @@ export const DishesListScreen = () => {
         };
     }, [dishes, normalizedSearch, activeTag, activeStatus, allTags]);
 
+    const { value: filterData, pending: filterDataPending } = useScheduledCalculation(calculateFilterData, {
+        initialValue: createEmptyDishFilterData,
+        retainPreviousValue: true,
+    });
+
     const { filteredDishes, statusCounts, tagCounts } = filterData;
+    const searchPending = searchCommitPending || filterDataPending;
     const pagedDishesResetKey = `${activeStatus}|${activeTag ?? "all"}|${normalizedSearch}`;
     const {
         visibleItems: visibleDishes,
@@ -374,9 +407,10 @@ export const DishesListScreen = () => {
         <div style={{ height: "100%", display: "flex", flexDirection: "column", minHeight: 0 }}>
             <Box style={topToolCardStyle}>
                 <Stack.Compact style={searchControlRowStyle}>
-                    <Input allowClear data-testid="dish-search-input" placeholder="Tìm kiếm" onChange={_onSearchChange} style={searchInputStyle} />
+                    <Input allowClear data-testid="dish-search-input" placeholder="Tìm kiếm" value={searchInputText} onChange={_onSearchChange} style={searchInputStyle} />
                     {isAdmin && <Button onClick={toggleAddModal.show} icon={<PlusOutlined />} />}
                 </Stack.Compact>
+                {searchPending && <Typography.Text type="secondary" style={{ display: "block", fontSize: 11, lineHeight: "15px", marginTop: 5 }}>Đang lọc danh sách...</Typography.Text>}
                 <div style={filterRowStyle}>
                     {DISH_STATUS_FILTERS.map(item => (
                         <button key={item.value} type="button" data-testid={`dish-filter-${item.value}`} onClick={() => _setActiveStatus(item.value)} style={filterChipStyle(activeStatus === item.value)}>
