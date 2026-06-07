@@ -4,11 +4,16 @@
  * per-part version stamps stored locally, and surfaces pending changes.
  */
 import { useState } from "react";
-import { getStorageJson, setStorageJson, setStorageString } from "@common/Storage/AppStorage";
+import { getStorageJson, getStorageString, setStorageJson, setStorageString } from "@common/Storage/AppStorage";
 import { normalizeSharedManifest, SHARED_MANIFEST_URL, SharedManifest } from "./useSharedPublish";
 
 const LAST_CHECK_KEY = "shared_last_checked";
 const SYNCED_VERSIONS_KEY = "shared_synced_versions";
+
+export type SharedSyncHealth = {
+    lastCheckedAt: string | null;
+    syncedVersions: SyncedVersions;
+}
 
 export interface SyncedVersions {
     ingredientsVersion: string;
@@ -40,6 +45,18 @@ export const getSyncedVersions = (): Promise<SyncedVersions> => {
 
 export const saveSyncedVersions = (v: SyncedVersions): Promise<void> => {
     return setStorageJson(SYNCED_VERSIONS_KEY, v);
+};
+
+export const getSharedSyncHealth = async (): Promise<SharedSyncHealth> => {
+    const [lastCheckedRaw, syncedVersions] = await Promise.all([
+        getStorageString(LAST_CHECK_KEY),
+        getSyncedVersions(),
+    ]);
+    const lastCheckedMs = lastCheckedRaw ? Number(lastCheckedRaw) : NaN;
+    return {
+        lastCheckedAt: Number.isFinite(lastCheckedMs) ? new Date(lastCheckedMs).toISOString() : null,
+        syncedVersions,
+    };
 };
 
 export const checkSharedDataUpdates = async (options?: CheckSharedDataUpdatesOptions): Promise<PendingSync | null> => {

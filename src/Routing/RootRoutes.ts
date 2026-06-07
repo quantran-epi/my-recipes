@@ -21,6 +21,8 @@ const ExpensePlanner = (dishId?: string | string[], targetServings?: number) => 
 const AuthorizedRoutes = {
     Root: () => "/",
     Analytics: () => RouteHelpers.CreateRoute('/analytics'),
+    Templates: () => RouteHelpers.CreateRoute('/templates'),
+    SyncBackupHealth: () => RouteHelpers.CreateRoute('/sync-backup-health'),
     ExpensePlanner,
     IngredientRoutes,
     DishesRoutes,

@@ -6,6 +6,7 @@ import React, { useContext } from "react";
 type MessageProviderContextData = {
     error: (content?: JointContent, duration?: number | VoidFunction, onClose?: VoidFunction) => Function;
     success: (content?: JointContent, duration?: number | VoidFunction, onClose?: VoidFunction) => Function;
+    warning: (content?: JointContent, duration?: number | VoidFunction, onClose?: VoidFunction) => Function;
 }
 
 type MessageProviderProps = {
@@ -14,7 +15,8 @@ type MessageProviderProps = {
 
 const MessageContext = React.createContext<MessageProviderContextData>({
     error: () => () => { },
-    success: () => () => { }
+    success: () => () => { },
+    warning: () => () => { }
 });
 
 export const MessageProvider: React.FunctionComponent<MessageProviderProps> = (props) => {
@@ -30,9 +32,15 @@ export const MessageProvider: React.FunctionComponent<MessageProviderProps> = (p
         return messageApi.success(content, duration, onClose);
     }
 
+    const warning = (content?: JointContent, duration?: number | VoidFunction, onClose?: VoidFunction) => {
+        content = content || COMMON_MESSAGE.ERROR;
+        return messageApi.warning(content, duration, onClose);
+    }
+
     return <MessageContext.Provider value={{
         error,
-        success
+        success,
+        warning
     }}>
         {props.children}
         {contextHolder}

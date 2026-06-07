@@ -34,7 +34,7 @@ const PERSONAL_PART_FILES = {
     cookingSession: "personal-cookingSession.json",
 } as const;
 
-type PersonalPartKey = keyof typeof PERSONAL_PART_FILES;
+export type PersonalPartKey = keyof typeof PERSONAL_PART_FILES;
 
 type PersonalPart = {
     key: PersonalPartKey;
@@ -52,6 +52,14 @@ type PersonalManifest = {
 
 type PersonalSlices = Record<PersonalPartKey, unknown>;
 type PersonalPartHashMap = Record<PersonalPartKey, string>;
+
+export type PersonalBackupHealth = {
+    configured: boolean;
+    lastBackupAt: string | null;
+    hasCheckpoint: boolean;
+    pendingLocalParts: PersonalPartKey[];
+    localCounts: Record<PersonalPartKey, number>;
+}
 
 const personalPartKeys = Object.keys(PERSONAL_PART_FILES) as PersonalPartKey[];
 
@@ -264,6 +272,7 @@ export interface UseGistBackupResult {
     pullPersonalData: () => Promise<void>;
     autoSyncPersonalDataInBackground: () => Promise<boolean>;
     autoPullPersonalDataInBackground: () => Promise<boolean>;
+    inspectPersonalBackupHealth: () => Promise<PersonalBackupHealth>;
     testGistConfig: (config?: { gistId?: string; gistToken?: string }) => Promise<void>;
     isPushing: boolean;
     isPulling: boolean;
@@ -516,6 +525,27 @@ export const useGistBackup = (): UseGistBackupResult => {
 
     const autoPullPersonalDataInBackground = autoSyncPersonalDataInBackground;
 
+    const inspectPersonalBackupHealth = useCallback(async (): Promise<PersonalBackupHealth> => {
+        const [localHashes, lastSyncedPartHashes] = await Promise.all([
+            buildSliceHashes(personalSlices),
+            readLastSyncedPartHashes(),
+        ]);
+        const hasCheckpoint = Boolean(lastSyncedPartHashes && personalPartKeys.every(partKey => lastSyncedPartHashes[partKey]));
+        const pendingLocalParts = hasCheckpoint && lastSyncedPartHashes
+            ? personalPartKeys.filter(partKey => localHashes[partKey] !== lastSyncedPartHashes[partKey])
+            : personalPartKeys;
+
+        return {
+            configured: Boolean(gistId.trim() && gistToken.trim()),
+            lastBackupAt,
+            hasCheckpoint,
+            pendingLocalParts,
+            localCounts: Object.fromEntries(
+                personalPartKeys.map(partKey => [partKey, countCollection(personalSlices[partKey])])
+            ) as Record<PersonalPartKey, number>,
+        };
+    }, [gistId, gistToken, lastBackupAt, personalSlices]);
+
     const testGistConfig = async (config?: { gistId?: string; gistToken?: string }): Promise<void> => {
         const targetGistId = (config?.gistId ?? gistId).trim();
         const targetToken = (config?.gistToken ?? gistToken).trim();
@@ -574,6 +604,7 @@ export const useGistBackup = (): UseGistBackupResult => {
         pushPersonalData, pullPersonalData,
         autoSyncPersonalDataInBackground,
         autoPullPersonalDataInBackground,
+        inspectPersonalBackupHealth,
         testGistConfig,
         isPushing, isPulling, isTesting,
         lastBackupAt,

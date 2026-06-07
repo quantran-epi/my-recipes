@@ -1,4 +1,4 @@
-import { CloudDownloadOutlined, CloudUploadOutlined, ExportOutlined, HistoryOutlined, ImportOutlined, LockOutlined, MenuOutlined, UnlockOutlined, FireOutlined, QuestionCircleOutlined, SearchOutlined, LoadingOutlined } from "@ant-design/icons";
+import { CloudDownloadOutlined, CloudUploadOutlined, DatabaseOutlined, ExportOutlined, HistoryOutlined, ImportOutlined, LockOutlined, MenuOutlined, UnlockOutlined, FireOutlined, QuestionCircleOutlined, SearchOutlined, LoadingOutlined, SyncOutlined } from "@ant-design/icons";
 import { ObjectPropertyHelper } from "@common/Helpers/ObjectProperty";
 import { getStorageString, setStorageString } from "@common/Storage/AppStorage";
 import { SharedSyncModal } from "@components/AppInitializer/SharedSyncModal";
@@ -151,6 +151,8 @@ export const MasterPage = () => {
             case "Nguyên liệu": return IngredientIcon;
             case "Kế hoạch chi phí": return BudgetIcon;
             case "Phân tích": return AnalysisIcon;
+            case "Mẫu dùng lại": return MealsIcon;
+            case "Sức khỏe dữ liệu": return AnalysisIcon;
             case 'Tổng quan': return HouseIcon;
             default: return null;
         }
@@ -244,6 +246,7 @@ const SidebarDrawer = ({ buttonStyle }: { buttonStyle?: React.CSSProperties }) =
     const modal = useModal();
     const toggleHistory = useToggle();
     const toggleGuide = useToggle();
+    const toggleBackupCenter = useToggle();
     const { navigateWithFeedback } = useAppShellNavigation();
     const toolsReady = useDeferredDrawerTools(open);
     const location = useLocation();
@@ -293,6 +296,7 @@ const SidebarDrawer = ({ buttonStyle }: { buttonStyle?: React.CSSProperties }) =
             const nextPendingSync = await checkNow({ force: true });
             if (nextPendingSync) {
                 setOpen(false);
+                toggleBackupCenter.hide();
             } else {
                 message.success("Dữ liệu dùng chung đã mới nhất");
             }
@@ -343,6 +347,8 @@ const SidebarDrawer = ({ buttonStyle }: { buttonStyle?: React.CSSProperties }) =
     const sidebarNavItems = [
         { key: 'dashboard', href: RootRoutes.AuthorizedRoutes.Root(), icon: HouseIcon, label: 'Tổng quan' },
         { key: 'analytics', href: RootRoutes.AuthorizedRoutes.Analytics(), icon: AnalysisIcon, label: 'Phân tích' },
+        { key: 'templates', href: RootRoutes.AuthorizedRoutes.Templates(), icon: MealsIcon, label: 'Mẫu dùng lại' },
+        { key: 'syncHealth', href: RootRoutes.AuthorizedRoutes.SyncBackupHealth(), icon: AnalysisIcon, label: 'Sức khỏe dữ liệu' },
         { key: 'ingredients', href: RootRoutes.AuthorizedRoutes.IngredientRoutes.List(), icon: IngredientIcon, label: 'Nguyên liệu' },
         { key: 'dishes', href: RootRoutes.AuthorizedRoutes.DishesRoutes.List(), icon: DishesIcon, label: 'Món ăn' },
         { key: 'expensePlanner', href: RootRoutes.AuthorizedRoutes.ExpensePlanner(), icon: BudgetIcon, label: 'Kế hoạch chi phí' },
@@ -391,81 +397,27 @@ const SidebarDrawer = ({ buttonStyle }: { buttonStyle?: React.CSSProperties }) =
                 <Box data-testid="sidebar-drawer-tools" style={{ padding: "0 16px 24px" }}>
                     {!toolsReady ? <div style={drawerToolsPlaceholderStyle}><LoadingOutlined /></div> : <React.Fragment>
 
-                    {/* ── Sync shared data ── */}
-                    <Divider orientation="left" style={{ fontSize: 12, color: "#888", marginTop: 16, marginBottom: 12 }}>Dữ liệu dùng chung</Divider>
-                    <Flex vertical gap={4}>
+                    {/* ── Data center ── */}
+                    <Divider orientation="left" style={{ fontSize: 12, color: "#888", marginTop: 16, marginBottom: 12 }}>Dữ liệu</Divider>
+                    <Flex vertical gap={8}>
                         <Button
-                            icon={<CloudDownloadOutlined />}
-                            loading={isSyncChecking}
+                            icon={<DatabaseOutlined />}
                             block
-                            onClick={onImportCloud}
+                            onClick={toggleBackupCenter.show}
                         >
-                            Đồng bộ dữ liệu mới
+                            Dữ liệu & sao lưu
+                        </Button>
+                        <Button
+                            icon={<SyncOutlined />}
+                            block
+                            onClick={() => onNavigate(RootRoutes.AuthorizedRoutes.SyncBackupHealth())}
+                        >
+                            Sức khỏe dữ liệu
                         </Button>
                         <Typography.Text type="secondary" style={{ fontSize: 11, paddingLeft: 2 }}>
-                            Cập nhật nguyên liệu và món ăn mới nhất được admin xuất bản.
+                            Đồng bộ dùng chung, sao lưu cá nhân và trạng thái backup được gom vào một nơi.
                         </Typography.Text>
                     </Flex>
-
-                    {/* ── Admin publish ── */}
-                    {isAdmin && (
-                        <>
-                            <Divider orientation="left" style={{ fontSize: 12, color: "#888", marginTop: 20, marginBottom: 12 }}>Quản trị</Divider>
-                            <Flex vertical gap={4}>
-                                <div style={{ border: "1px solid rgba(116,54,220,0.12)", borderRadius: 8, padding: "8px 10px", background: "#fbf9ff", marginBottom: 6 }}>
-                                    <Flex vertical gap={6}>
-                                        <Typography.Text strong style={{ fontSize: 12 }}>GitHub token xuất bản</Typography.Text>
-                                        <AntInput.Password
-                                            size="small"
-                                            autoComplete="off"
-                                            placeholder="Token có quyền ghi repo contents"
-                                            value={publishTokenInput}
-                                            onChange={e => setPublishTokenInput(e.target.value)}
-                                        />
-                                        <Flex gap={6}>
-                                            <Button size="small" type="dashed" disabled={publishTokenSaved} onClick={onSavePublishToken} block>
-                                                Lưu token
-                                            </Button>
-                                            <Button size="small" loading={isTestingGithubToken} disabled={!publishTokenInput.trim() && !hasGithubToken} onClick={onTestPublishToken} block>
-                                                Kiểm tra
-                                            </Button>
-                                            <Button size="small" type="text" disabled={!githubToken} onClick={onClearPublishToken} block>
-                                                Xoá
-                                            </Button>
-                                        </Flex>
-                                        <Typography.Text type="secondary" style={{ fontSize: 11, lineHeight: "16px" }}>
-                                            {publishTokenStatusText}
-                                        </Typography.Text>
-                                    </Flex>
-                                </div>
-                                <Button
-                                    icon={<CloudUploadOutlined />}
-                                    loading={isPublishing}
-                                    disabled={!hasGithubToken}
-                                    onClick={onPublishSharedData}
-                                    block
-                                    style={{ color: "#52c41a", borderColor: "#52c41a" }}
-                                >
-                                    Xuất bản dữ liệu dùng chung
-                                </Button>
-                                <Typography.Text type="secondary" style={{ fontSize: 11, paddingLeft: 2 }}>
-                                    Đẩy danh sách nguyên liệu & món ăn hiện tại lên GitHub để mọi người đồng bộ.
-                                </Typography.Text>
-                                {lastPublishAt && (
-                                    <Typography.Text type="secondary" style={{ fontSize: 11, paddingLeft: 2, color: "#52c41a" }}>
-                                        ✅ Xuất bản lần cuối: {new Date(lastPublishAt).toLocaleString("vi-VN")}
-                                    </Typography.Text>
-                                )}
-                            </Flex>
-                        </>
-                    )}
-
-                    {/* ── Personal backup — everyone including admin ── */}
-                    <Divider orientation="left" style={{ fontSize: 12, color: "#888", marginTop: 20, marginBottom: 8 }}>Sao lưu cá nhân</Divider>
-                    <Typography.Text type="secondary" style={{ fontSize: 11, paddingLeft: 2, display: "block", marginBottom: 8 }}>
-                        Sao lưu tồn kho, lịch mua sắm và thực đơn vào GitHub Gist để không mất dữ liệu khi đổi thiết bị.
-                    </Typography.Text>
-                    <GistBackupWidget />
 
                     {/* ── Cooking history ── */}
                     <Divider orientation="left" style={{ fontSize: 12, color: "#888", marginTop: 20, marginBottom: 12 }}>Nấu ăn</Divider>
@@ -535,6 +487,88 @@ const SidebarDrawer = ({ buttonStyle }: { buttonStyle?: React.CSSProperties }) =
                     />
                     {pinError && <Typography.Text type="danger">{pinError}</Typography.Text>}
                 </Flex>
+            </Modal>
+            <Modal
+                title={<Space><DatabaseOutlined style={{ color: "#7436dc" }} />Dữ liệu & sao lưu</Space>}
+                open={toggleBackupCenter.value}
+                onCancel={toggleBackupCenter.hide}
+                footer={null}
+                width="min(720px, calc(100vw - 24px))"
+                destroyOnClose={false}
+            >
+                <DeferredModalContent active={toggleBackupCenter.value} minHeight={280}>
+                    {toggleBackupCenter.value ? <Flex vertical gap={12}>
+                        <Box style={{ border: "1px solid rgba(116,54,220,0.12)", borderRadius: 8, padding: 10, background: "#fbf9ff" }}>
+                            <Stack justify="space-between" align="flex-start" gap={8}>
+                                <div style={{ minWidth: 0 }}>
+                                    <Typography.Text strong style={{ display: "block", color: "#2f2545", fontSize: 15, lineHeight: "20px" }}>Dữ liệu dùng chung</Typography.Text>
+                                    <Typography.Text type="secondary" style={{ display: "block", fontSize: 12, lineHeight: "17px" }}>
+                                        Cập nhật nguyên liệu và món ăn mới nhất được admin xuất bản.
+                                    </Typography.Text>
+                                </div>
+                                <Button icon={<CloudDownloadOutlined />} loading={isSyncChecking} onClick={onImportCloud}>
+                                    Đồng bộ mới
+                                </Button>
+                            </Stack>
+                        </Box>
+
+                        {isAdmin && <Box style={{ border: "1px solid rgba(82,196,26,0.18)", borderRadius: 8, padding: 10, background: "#fcfff8" }}>
+                            <Flex vertical gap={8}>
+                                <Typography.Text strong style={{ display: "block", color: "#245822", fontSize: 15, lineHeight: "20px" }}>Quản trị xuất bản</Typography.Text>
+                                <Typography.Text type="secondary" style={{ fontSize: 12, lineHeight: "17px" }}>
+                                    Đẩy nguyên liệu và món ăn hiện tại lên GitHub để các thiết bị khác đồng bộ thủ công.
+                                </Typography.Text>
+                                <AntInput.Password
+                                    autoComplete="off"
+                                    placeholder="Token có quyền ghi repo contents"
+                                    value={publishTokenInput}
+                                    onChange={e => setPublishTokenInput(e.target.value)}
+                                />
+                                <Flex gap={8} wrap="wrap">
+                                    <Button type="dashed" disabled={publishTokenSaved} onClick={onSavePublishToken}>
+                                        Lưu token
+                                    </Button>
+                                    <Button loading={isTestingGithubToken} disabled={!publishTokenInput.trim() && !hasGithubToken} onClick={onTestPublishToken}>
+                                        Kiểm tra token
+                                    </Button>
+                                    <Button type="text" disabled={!githubToken} onClick={onClearPublishToken}>
+                                        Xoá token
+                                    </Button>
+                                </Flex>
+                                <Typography.Text type="secondary" style={{ fontSize: 11, lineHeight: "16px" }}>
+                                    {publishTokenStatusText}
+                                </Typography.Text>
+                                <Button
+                                    icon={<CloudUploadOutlined />}
+                                    loading={isPublishing}
+                                    disabled={!hasGithubToken}
+                                    onClick={onPublishSharedData}
+                                    style={{ color: "#52c41a", borderColor: "#52c41a" }}
+                                >
+                                    Xuất bản dữ liệu dùng chung
+                                </Button>
+                                {lastPublishAt && <Typography.Text type="secondary" style={{ fontSize: 11, color: "#52c41a" }}>
+                                    Xuất bản lần cuối: {new Date(lastPublishAt).toLocaleString("vi-VN")}
+                                </Typography.Text>}
+                            </Flex>
+                        </Box>}
+
+                        <Box style={{ border: "1px solid #f0f0f0", borderRadius: 8, padding: 10, background: "#fff" }}>
+                            <Stack justify="space-between" align="flex-start" gap={8} style={{ marginBottom: 6 }}>
+                                <div style={{ minWidth: 0 }}>
+                                    <Typography.Text strong style={{ display: "block", color: "#2f2545", fontSize: 15, lineHeight: "20px" }}>Sao lưu cá nhân</Typography.Text>
+                                    <Typography.Text type="secondary" style={{ display: "block", fontSize: 12, lineHeight: "17px" }}>
+                                        Sao lưu tồn kho, lịch mua sắm, thực đơn và mẫu dùng lại vào GitHub Gist.
+                                    </Typography.Text>
+                                </div>
+                                <Button icon={<SyncOutlined />} onClick={() => { toggleBackupCenter.hide(); onNavigate(RootRoutes.AuthorizedRoutes.SyncBackupHealth()); }}>
+                                    Xem sức khỏe
+                                </Button>
+                            </Stack>
+                            <GistBackupWidget />
+                        </Box>
+                    </Flex> : null}
+                </DeferredModalContent>
             </Modal>
             <ScheduledMealToolkitWidget onNavigate={onNavigate} />
             {pendingSync && (
