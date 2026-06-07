@@ -1,10 +1,9 @@
-import { CalendarOutlined, DeleteOutlined, PlayCircleOutlined, SaveOutlined, ShoppingCartOutlined } from '@ant-design/icons';
+import { CalendarOutlined, DeleteOutlined, PlayCircleOutlined, PlusOutlined, SaveOutlined, ShoppingCartOutlined } from '@ant-design/icons';
 import { Button } from '@components/Button';
 import { DatePicker } from '@components/Form/DatePicker';
 import { Input } from '@components/Form/Input';
 import { Option, Select } from '@components/Form/Select';
 import { Empty } from '@components/Empty';
-import { Image } from '@components/Image';
 import { Box } from '@components/Layout/Box';
 import { Stack } from '@components/Layout/Stack';
 import { Tag } from '@components/Tag';
@@ -43,7 +42,6 @@ import { useMessage } from '@components/Message';
 import { DeferredModalContent, Modal } from '@components/Modal';
 import { useScreenTitle } from '@hooks';
 import { RootRoutes } from '@routing/RootRoutes';
-import LayoutIcon from '../../../../assets/icons/layout.png';
 import { ScheduledMealMealPlanner } from '@modules/ScheduledMeal/Screens/ScheduledMealMealPlanner.widget';
 
 type MealKey = keyof ScheduledMeal['meals'];
@@ -78,6 +76,14 @@ const sectionHeaderStyle: React.CSSProperties = {
     borderBottom: '1px solid rgba(116,54,220,0.09)',
 };
 
+const sectionHeaderRowStyle: React.CSSProperties = {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    gap: 10,
+    flexWrap: 'wrap',
+};
+
 const bodyStyle: React.CSSProperties = {
     padding: 12,
 };
@@ -94,27 +100,6 @@ const templateCardStyle: React.CSSProperties = {
     borderRadius: 8,
     background: '#fbf9ff',
     padding: 10,
-};
-
-const instructionGridStyle: React.CSSProperties = {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(230px, 1fr))',
-    gap: 10,
-};
-
-const instructionCardStyle: React.CSSProperties = {
-    border: '1px solid rgba(116,54,220,0.12)',
-    borderRadius: 0,
-    background: '#fbf9ff',
-    padding: 11,
-};
-
-const instructionStepStyle: React.CSSProperties = {
-    display: 'block',
-    color: '#4f3a7d',
-    fontSize: 12,
-    lineHeight: '17px',
-    marginTop: 6,
 };
 
 const getDateKey = (value: Date | string | Dayjs) => moment(dayjs.isDayjs(value) ? value.toDate() : value).format('YYYY-MM-DD');
@@ -187,6 +172,8 @@ export const TemplatesScreen = () => {
     const shoppingListTemplates = useSelector(selectShoppingListTemplates);
     useScreenTitle({ value: 'Mẫu dùng lại', deps: [] });
 
+    const [mealCreatorOpen, setMealCreatorOpen] = useState(false);
+    const [shoppingCreatorOpen, setShoppingCreatorOpen] = useState(false);
     const [mealTemplateScope, setMealTemplateScope] = useState<MealTemplateScope>('day');
     const [mealTemplateCreateMode, setMealTemplateCreateMode] = useState<MealTemplateCreateMode>('existing');
     const [mealTemplateName, setMealTemplateName] = useState(`Mẫu ngày ${dayjs().format('DD/MM')}`);
@@ -278,6 +265,7 @@ export const TemplatesScreen = () => {
         };
         dispatch(upsertWeeklyMealTemplate(template));
         message.success(`Đã lưu mẫu ${mealTemplateScope === 'day' ? 'ngày' : 'tuần'} (${days.length} ngày có món)`);
+        setMealCreatorOpen(false);
     };
 
     const _applyMealTemplate = (template: WeeklyMealTemplate, date: Dayjs) => {
@@ -335,6 +323,7 @@ export const TemplatesScreen = () => {
         };
         dispatch(upsertShoppingListTemplate(template));
         message.success('Đã lưu mẫu mua sắm');
+        setShoppingCreatorOpen(false);
     };
 
     const _applyShoppingListTemplate = (template: ShoppingListTemplate, date = shoppingApplyDate) => {
@@ -387,32 +376,85 @@ export const TemplatesScreen = () => {
     return <Box data-testid='templates-screen' style={pageStyle}>
         <section style={sectionStyle}>
             <div style={sectionHeaderStyle}>
-                <SectionTitle icon={<Image src={LayoutIcon} preview={false} width={24} alt='' />} title='Cách dùng mẫu' subtitle='Lưu lại lịch quen thuộc để tạo nhanh thực đơn hoặc lịch mua sắm mới.' />
+                <div style={sectionHeaderRowStyle}>
+                    <SectionTitle icon={<CalendarOutlined />} title='Mẫu thực đơn' subtitle='Danh sách mẫu ngày và mẫu tuần đã lưu.' />
+                    <Button icon={<PlusOutlined />} onClick={() => setMealCreatorOpen(true)}>Tạo mẫu</Button>
+                </div>
             </div>
             <div style={bodyStyle}>
-                <div style={instructionGridStyle}>
-                    <Box style={instructionCardStyle}>
-                        <Typography.Text strong style={{ display: 'block', color: '#2f2545', fontSize: 14 }}>Mẫu thực đơn</Typography.Text>
-                        <Typography.Text style={instructionStepStyle}>1. Chọn mẫu ngày hoặc mẫu tuần.</Typography.Text>
-                        <Typography.Text style={instructionStepStyle}>2. Lưu từ thực đơn đã tạo hoặc tự thiết kế món cho từng bữa.</Typography.Text>
-                        <Typography.Text style={instructionStepStyle}>3. Bấm Áp dụng rồi chọn ngày hoặc tuần muốn tạo thực đơn.</Typography.Text>
-                    </Box>
-                    <Box style={instructionCardStyle}>
-                        <Typography.Text strong style={{ display: 'block', color: '#2f2545', fontSize: 14 }}>Mẫu mua sắm</Typography.Text>
-                        <Typography.Text style={instructionStepStyle}>1. Lưu từ lịch mua sắm đã có hoặc chọn món để tạo mẫu mới.</Typography.Text>
-                        <Typography.Text style={instructionStepStyle}>2. Mẫu giữ món và khẩu phần để tạo checklist nhanh.</Typography.Text>
-                        <Typography.Text style={instructionStepStyle}>3. Bấm Áp dụng rồi chọn ngày mua mới.</Typography.Text>
-                    </Box>
-                </div>
+                {weeklyMealTemplates.length === 0 ? <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description='Chưa có mẫu thực đơn'>
+                    <Button icon={<PlusOutlined />} onClick={() => setMealCreatorOpen(true)}>Tạo mẫu</Button>
+                </Empty> : <Stack direction='column' align='stretch' gap={8}>
+                    {weeklyMealTemplates.map(template => {
+                        const dishCount = template.days.reduce((sum, day) => sum + getDishCountFromMeals(day.meals), 0);
+                        const scope = getTemplateScope(template);
+                        return <Box key={template.id} style={templateCardStyle}>
+                            <Stack justify='space-between' align='flex-start' gap={8}>
+                                <div style={{ minWidth: 0 }}>
+                                    <Typography.Text strong style={{ display: 'block', color: '#111827', fontSize: 15, lineHeight: '20px' }}>{template.name}</Typography.Text>
+                                    <Stack wrap='wrap' gap={5} style={{ marginTop: 5 }}>
+                                        <Tag color={scope === 'day' ? 'green' : 'purple'} style={{ marginInlineEnd: 0 }}>{scope === 'day' ? 'Mẫu ngày' : 'Mẫu tuần'}</Tag>
+                                        <Tag color='purple' style={{ marginInlineEnd: 0 }}>{template.days.length} ngày</Tag>
+                                        <Tag color='blue' style={{ marginInlineEnd: 0 }}>{dishCount} món</Tag>
+                                        <Tag style={{ marginInlineEnd: 0 }}>Cập nhật {formatRelativeDate(template.updatedAt)}</Tag>
+                                    </Stack>
+                                </div>
+                                <Stack gap={5}>
+                                    <Button icon={<PlayCircleOutlined />} onClick={() => setTemplateApplyTarget(template)}>Áp dụng</Button>
+                                    <Button type='text' danger icon={<DeleteOutlined />} onClick={() => dispatch(removeWeeklyMealTemplate(template.id))} />
+                                </Stack>
+                            </Stack>
+                        </Box>;
+                    })}
+                </Stack>}
             </div>
         </section>
 
         <section style={sectionStyle}>
             <div style={sectionHeaderStyle}>
-                <SectionTitle icon={<CalendarOutlined />} title='Mẫu thực đơn' subtitle='Tạo mẫu ngày hoặc tuần từ lịch đã có, hoặc tự thiết kế từ đầu.' />
+                <div style={sectionHeaderRowStyle}>
+                    <SectionTitle icon={<ShoppingCartOutlined />} title='Mẫu mua sắm' subtitle='Danh sách nhóm món hay mua đã lưu.' />
+                    <Button icon={<PlusOutlined />} onClick={() => setShoppingCreatorOpen(true)}>Tạo mẫu</Button>
+                </div>
             </div>
             <div style={bodyStyle}>
-                <Box style={{ border: '1px solid #f0f0f0', borderRadius: 8, padding: 10, background: '#fff' }}>
+                {shoppingListTemplates.length === 0 ? <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description='Chưa có mẫu mua sắm'>
+                    <Button icon={<PlusOutlined />} onClick={() => setShoppingCreatorOpen(true)}>Tạo mẫu</Button>
+                </Empty> : <Stack direction='column' align='stretch' gap={8}>
+                    {shoppingListTemplates.map(template => <Box key={template.id} style={templateCardStyle}>
+                        <Stack justify='space-between' align='flex-start' gap={8}>
+                            <div style={{ minWidth: 0 }}>
+                                <Typography.Text strong style={{ display: 'block', color: '#111827', fontSize: 15, lineHeight: '20px' }}>{template.name}</Typography.Text>
+                                <Typography.Text type='secondary' style={{ display: 'block', fontSize: 12, lineHeight: '17px', marginTop: 3 }}>
+                                    {template.dishes.slice(0, 4).map(id => dishesById.get(id)?.name ?? id).join(', ')}{template.dishes.length > 4 ? ` và ${template.dishes.length - 4} món khác` : ''}
+                                </Typography.Text>
+                                <Stack wrap='wrap' gap={5} style={{ marginTop: 5 }}>
+                                    <Tag color={template.source === 'scratch' ? 'green' : 'purple'} style={{ marginInlineEnd: 0 }}>{template.source === 'scratch' ? 'Tự tạo' : 'Từ lịch'}</Tag>
+                                    <Tag color='blue' style={{ marginInlineEnd: 0 }}>{template.dishes.length} món</Tag>
+                                    <Tag style={{ marginInlineEnd: 0 }}>Cập nhật {formatRelativeDate(template.updatedAt)}</Tag>
+                                </Stack>
+                            </div>
+                            <Stack gap={5}>
+                                <Button icon={<PlayCircleOutlined />} onClick={() => setShoppingApplyTarget(template)}>Áp dụng</Button>
+                                <Button type='text' danger icon={<DeleteOutlined />} onClick={() => dispatch(removeShoppingListTemplate(template.id))} />
+                            </Stack>
+                        </Stack>
+                    </Box>)}
+                </Stack>}
+            </div>
+        </section>
+
+        <Modal
+            open={mealCreatorOpen}
+            title='Tạo mẫu thực đơn'
+            onCancel={() => setMealCreatorOpen(false)}
+            footer={null}
+            width={760}
+            bodyStyle={{ maxHeight: 'min(72vh, 680px)', overflowY: 'auto' }}
+            destroyOnClose
+        >
+            <DeferredModalContent active={mealCreatorOpen} minHeight={180}>
+                <Box style={{ padding: '4px 0' }}>
                     <div style={{ ...fieldGridStyle, marginBottom: 10 }}>
                         <div>
                             <Typography.Text strong style={{ display: 'block', fontSize: 12, marginBottom: 5 }}>Tên mẫu</Typography.Text>
@@ -465,39 +507,20 @@ export const TemplatesScreen = () => {
                         <Stack justify='flex-end'><Button icon={<SaveOutlined />} onClick={_saveMealTemplate}>Lưu mẫu tuần</Button></Stack>
                     </Stack>}
                 </Box>
+            </DeferredModalContent>
+        </Modal>
 
-                {weeklyMealTemplates.length === 0 ? <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description='Chưa có mẫu thực đơn' /> : <Stack direction='column' align='stretch' gap={8} style={{ marginTop: 10 }}>
-                    {weeklyMealTemplates.map(template => {
-                        const dishCount = template.days.reduce((sum, day) => sum + getDishCountFromMeals(day.meals), 0);
-                        const scope = getTemplateScope(template);
-                        return <Box key={template.id} style={templateCardStyle}>
-                            <Stack justify='space-between' align='flex-start' gap={8}>
-                                <div style={{ minWidth: 0 }}>
-                                    <Typography.Text strong style={{ display: 'block', color: '#111827', fontSize: 15, lineHeight: '20px' }}>{template.name}</Typography.Text>
-                                    <Stack wrap='wrap' gap={5} style={{ marginTop: 5 }}>
-                                        <Tag color={scope === 'day' ? 'green' : 'purple'} style={{ marginInlineEnd: 0 }}>{scope === 'day' ? 'Mẫu ngày' : 'Mẫu tuần'}</Tag>
-                                        <Tag color='purple' style={{ marginInlineEnd: 0 }}>{template.days.length} ngày</Tag>
-                                        <Tag color='blue' style={{ marginInlineEnd: 0 }}>{dishCount} món</Tag>
-                                        <Tag style={{ marginInlineEnd: 0 }}>Cập nhật {formatRelativeDate(template.updatedAt)}</Tag>
-                                    </Stack>
-                                </div>
-                                <Stack gap={5}>
-                                    <Button icon={<PlayCircleOutlined />} onClick={() => setTemplateApplyTarget(template)}>Áp dụng</Button>
-                                    <Button type='text' danger icon={<DeleteOutlined />} onClick={() => dispatch(removeWeeklyMealTemplate(template.id))} />
-                                </Stack>
-                            </Stack>
-                        </Box>;
-                    })}
-                </Stack>}
-            </div>
-        </section>
-
-        <section style={sectionStyle}>
-            <div style={sectionHeaderStyle}>
-                <SectionTitle icon={<ShoppingCartOutlined />} title='Mẫu mua sắm' subtitle='Lưu nhóm món hay mua và tạo nhanh lịch mua sắm mới.' />
-            </div>
-            <div style={bodyStyle}>
-                <Box style={{ border: '1px solid #f0f0f0', borderRadius: 8, padding: 10, background: '#fff' }}>
+        <Modal
+            open={shoppingCreatorOpen}
+            title='Tạo mẫu mua sắm'
+            onCancel={() => setShoppingCreatorOpen(false)}
+            footer={null}
+            width={680}
+            bodyStyle={{ maxHeight: 'min(72vh, 620px)', overflowY: 'auto' }}
+            destroyOnClose
+        >
+            <DeferredModalContent active={shoppingCreatorOpen} minHeight={160}>
+                <Box style={{ padding: '4px 0' }}>
                     <div style={{ ...fieldGridStyle, marginBottom: 10 }}>
                         <div>
                             <Typography.Text strong style={{ display: 'block', fontSize: 12, marginBottom: 5 }}>Tên mẫu</Typography.Text>
@@ -533,30 +556,8 @@ export const TemplatesScreen = () => {
                         <Stack justify='flex-end'><Button icon={<SaveOutlined />} onClick={_saveShoppingListTemplate}>Lưu mẫu mua sắm</Button></Stack>
                     </Box>}
                 </Box>
-
-                {shoppingListTemplates.length === 0 ? <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description='Chưa có mẫu mua sắm' /> : <Stack direction='column' align='stretch' gap={8} style={{ marginTop: 10 }}>
-                    {shoppingListTemplates.map(template => <Box key={template.id} style={templateCardStyle}>
-                        <Stack justify='space-between' align='flex-start' gap={8}>
-                            <div style={{ minWidth: 0 }}>
-                                <Typography.Text strong style={{ display: 'block', color: '#111827', fontSize: 15, lineHeight: '20px' }}>{template.name}</Typography.Text>
-                                <Typography.Text type='secondary' style={{ display: 'block', fontSize: 12, lineHeight: '17px', marginTop: 3 }}>
-                                    {template.dishes.slice(0, 4).map(id => dishesById.get(id)?.name ?? id).join(', ')}{template.dishes.length > 4 ? ` và ${template.dishes.length - 4} món khác` : ''}
-                                </Typography.Text>
-                                <Stack wrap='wrap' gap={5} style={{ marginTop: 5 }}>
-                                    <Tag color={template.source === 'scratch' ? 'green' : 'purple'} style={{ marginInlineEnd: 0 }}>{template.source === 'scratch' ? 'Tự tạo' : 'Từ lịch'}</Tag>
-                                    <Tag color='blue' style={{ marginInlineEnd: 0 }}>{template.dishes.length} món</Tag>
-                                    <Tag style={{ marginInlineEnd: 0 }}>Cập nhật {formatRelativeDate(template.updatedAt)}</Tag>
-                                </Stack>
-                            </div>
-                            <Stack gap={5}>
-                                <Button icon={<PlayCircleOutlined />} onClick={() => setShoppingApplyTarget(template)}>Áp dụng</Button>
-                                <Button type='text' danger icon={<DeleteOutlined />} onClick={() => dispatch(removeShoppingListTemplate(template.id))} />
-                            </Stack>
-                        </Stack>
-                    </Box>)}
-                </Stack>}
-            </div>
-        </section>
+            </DeferredModalContent>
+        </Modal>
 
         <Modal
             open={Boolean(templateApplyTarget)}
