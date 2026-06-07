@@ -97,10 +97,33 @@ const fieldGridStyle: React.CSSProperties = {
 };
 
 const templateCardStyle: React.CSSProperties = {
-    border: '1px solid #f0f0f0',
+    border: '1px solid rgba(116,54,220,0.12)',
+    borderLeft: '3px solid #7436dc',
     borderRadius: 8,
-    background: '#fbf9ff',
-    padding: 10,
+    background: '#fff',
+    padding: '11px 11px 11px 12px',
+    boxShadow: '0 6px 18px rgba(74,48,130,0.06)',
+};
+
+const templateCardInnerStyle: React.CSSProperties = {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    gap: 10,
+    flexWrap: 'wrap',
+};
+
+const templateContentStyle: React.CSSProperties = {
+    minWidth: 210,
+    flex: '1 1 260px',
+};
+
+const templateUpdatedTextStyle: React.CSSProperties = {
+    display: 'block',
+    color: '#8c8c8c',
+    fontSize: 11,
+    lineHeight: '15px',
+    marginTop: 2,
 };
 
 const templateActionsStyle: React.CSSProperties = {
@@ -108,6 +131,8 @@ const templateActionsStyle: React.CSSProperties = {
     gap: 4,
     flexWrap: 'wrap',
     justifyContent: 'flex-end',
+    alignItems: 'center',
+    flex: '0 1 auto',
 };
 
 const previewDayStyle: React.CSSProperties = {
@@ -477,14 +502,14 @@ export const TemplatesScreen = () => {
                         const dishCount = template.days.reduce((sum, day) => sum + getDishCountFromMeals(day.meals), 0);
                         const scope = getTemplateScope(template);
                         return <Box key={template.id} style={templateCardStyle}>
-                            <Stack justify='space-between' align='flex-start' gap={8}>
-                                <div style={{ minWidth: 0 }}>
+                            <div style={templateCardInnerStyle}>
+                                <div style={templateContentStyle}>
                                     <Typography.Text strong style={{ display: 'block', color: '#111827', fontSize: 15, lineHeight: '20px' }}>{template.name}</Typography.Text>
-                                    <Stack wrap='wrap' gap={5} style={{ marginTop: 5 }}>
+                                    <Typography.Text style={templateUpdatedTextStyle}>Cập nhật {formatRelativeDate(template.updatedAt)}</Typography.Text>
+                                    <Stack wrap='wrap' gap={5} style={{ marginTop: 7 }}>
                                         <Tag color={scope === 'day' ? 'green' : 'purple'} style={{ marginInlineEnd: 0 }}>{scope === 'day' ? 'Mẫu ngày' : 'Mẫu tuần'}</Tag>
                                         <Tag color='purple' style={{ marginInlineEnd: 0 }}>{template.days.length} ngày</Tag>
                                         <Tag color='blue' style={{ marginInlineEnd: 0 }}>{dishCount} món</Tag>
-                                        <Tag style={{ marginInlineEnd: 0 }}>Cập nhật {formatRelativeDate(template.updatedAt)}</Tag>
                                     </Stack>
                                 </div>
                                 <div style={templateActionsStyle}>
@@ -493,7 +518,7 @@ export const TemplatesScreen = () => {
                                     <Button icon={<PlayCircleOutlined />} onClick={() => setTemplateApplyTarget(template)}>Áp dụng</Button>
                                     <Button type='text' danger icon={<DeleteOutlined />} onClick={() => dispatch(removeWeeklyMealTemplate(template.id))} />
                                 </div>
-                            </Stack>
+                            </div>
                         </Box>;
                     })}
                 </Stack>}
@@ -512,13 +537,13 @@ export const TemplatesScreen = () => {
                     <Button icon={<PlusOutlined />} onClick={_openShoppingCreator}>Tạo mẫu</Button>
                 </Empty> : <Stack direction='column' align='stretch' gap={8}>
                     {shoppingListTemplates.map(template => <Box key={template.id} style={templateCardStyle}>
-                        <Stack justify='space-between' align='flex-start' gap={8}>
-                            <div style={{ minWidth: 0 }}>
+                        <div style={templateCardInnerStyle}>
+                            <div style={templateContentStyle}>
                                 <Typography.Text strong style={{ display: 'block', color: '#111827', fontSize: 15, lineHeight: '20px' }}>{template.name}</Typography.Text>
-                                <Stack wrap='wrap' gap={5} style={{ marginTop: 5 }}>
+                                <Typography.Text style={templateUpdatedTextStyle}>Cập nhật {formatRelativeDate(template.updatedAt)}</Typography.Text>
+                                <Stack wrap='wrap' gap={5} style={{ marginTop: 7 }}>
                                     <Tag color={template.source === 'scratch' ? 'green' : 'purple'} style={{ marginInlineEnd: 0 }}>{template.source === 'scratch' ? 'Tự tạo' : 'Từ lịch'}</Tag>
                                     <Tag color='blue' style={{ marginInlineEnd: 0 }}>{template.dishes.length} món</Tag>
-                                    <Tag style={{ marginInlineEnd: 0 }}>Cập nhật {formatRelativeDate(template.updatedAt)}</Tag>
                                 </Stack>
                             </div>
                             <div style={templateActionsStyle}>
@@ -527,7 +552,7 @@ export const TemplatesScreen = () => {
                                 <Button icon={<PlayCircleOutlined />} onClick={() => setShoppingApplyTarget(template)}>Áp dụng</Button>
                                 <Button type='text' danger icon={<DeleteOutlined />} onClick={() => dispatch(removeShoppingListTemplate(template.id))} />
                             </div>
-                        </Stack>
+                        </div>
                     </Box>)}
                 </Stack>}
             </div>
