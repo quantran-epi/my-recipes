@@ -36,8 +36,13 @@ const durationIcon = (key: DishDurationPhaseKey, color: string) => {
 
 const quickMinuteOptions = [5, 10, 15, 20, 30, 45];
 
+const getActivePhaseKeys = (duration: DishDuration): Set<DishDurationPhaseKey> => {
+    return new Set(DishDurationHelper.getActiveItems(duration).map(item => item.phase.key));
+};
+
 export const DishDurationEditor: FunctionComponent<DishDurationEditorProps> = ({ value, onChange }) => {
     const duration = useMemo(() => DishDurationHelper.normalize(value), [value]);
+    const [activePhaseKeys, setActivePhaseKeys] = useState<Set<DishDurationPhaseKey>>(() => getActivePhaseKeys(duration));
     const activeItems = useMemo(() => DishDurationHelper.getActiveItems(duration), [duration]);
     const totalMinutes = useMemo(() => DishDurationHelper.getTotalMinutes(duration), [duration]);
     const tempo = DishDurationHelper.getTempo(totalMinutes);
@@ -49,11 +54,26 @@ export const DishDurationEditor: FunctionComponent<DishDurationEditorProps> = ({
 
     const _setPhaseActive = (key: DishDurationPhaseKey, active: boolean) => {
         const phase = DishDurationHelper.getPhase(key);
+        setActivePhaseKeys(previous => {
+            const next = new Set(previous);
+            active ? next.add(key) : next.delete(key);
+            return next;
+        });
         _updateDuration({ [key]: active ? (duration[key] ?? phase.defaultMinutes) : null });
     };
 
     const _setPhaseMinutes = (key: DishDurationPhaseKey, minutes: number | null) => {
+        setActivePhaseKeys(previous => {
+            const next = new Set(previous);
+            next.add(key);
+            return next;
+        });
         _updateDuration({ [key]: minutes && minutes > 0 ? Math.round(minutes) : null });
+    };
+
+    const _applyPreset = (nextDuration: DishDuration) => {
+        setActivePhaseKeys(getActivePhaseKeys(nextDuration));
+        onChange(nextDuration);
     };
 
     return <Stack direction="column" gap={10} style={{ width: "100%" }}>
@@ -89,15 +109,16 @@ export const DishDurationEditor: FunctionComponent<DishDurationEditorProps> = ({
             />
         </Box>
 
-        <Box style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(118px, 1fr))", gap: 8 }}>
+        <Box style={{ display: "flex", flexWrap: "wrap", gap: 8, alignItems: "stretch" }}>
             {DishDurationHelper.presets.map(preset => {
                 const presetTotal = DishDurationHelper.getTotalMinutes(preset.duration);
                 return <button
                     key={preset.label}
                     type="button"
-                    onClick={() => onChange(preset.duration)}
+                    onClick={() => _applyPreset(preset.duration)}
                     style={{
-                        minWidth: 0,
+                        flex: "1 1 118px",
+                        minWidth: 118,
                         padding: "9px 10px",
                         borderRadius: 8,
                         border: "1px solid #e8ddff",
@@ -112,9 +133,10 @@ export const DishDurationEditor: FunctionComponent<DishDurationEditorProps> = ({
             })}
             <button
                 type="button"
-                onClick={() => onChange(DishDurationHelper.createEmpty())}
+                onClick={() => _applyPreset(DishDurationHelper.createEmpty())}
                 style={{
-                    minWidth: 0,
+                    flex: "1 1 118px",
+                    minWidth: 118,
                     padding: "9px 10px",
                     borderRadius: 8,
                     border: "1px dashed #d9d9d9",
@@ -131,7 +153,7 @@ export const DishDurationEditor: FunctionComponent<DishDurationEditorProps> = ({
         <Stack direction="column" gap={8}>
             {DishDurationHelper.phases.map(phase => {
                 const minutes = duration[phase.key];
-                const active = Boolean(minutes && minutes > 0);
+                const active = activePhaseKeys.has(phase.key);
                 return <Box key={phase.key} style={{
                     border: `1px solid ${active ? phase.border : "#f0f0f0"}`,
                     borderRadius: 8,
@@ -192,7 +214,7 @@ export const DishDurationWidget: FunctionComponent<DishDurationWidgetProps> = (p
     };
 
     return <Stack direction="column" gap={12} style={{ width: "100%" }}>
-        <DishDurationEditor value={duration} onChange={setDuration} />
+        <DishDurationEditor key={props.dish.id} value={duration} onChange={setDuration} />
         <Stack justify="flex-end">
             <Button type="primary" onClick={_onSave}>Lưu thời lượng</Button>
         </Stack>
