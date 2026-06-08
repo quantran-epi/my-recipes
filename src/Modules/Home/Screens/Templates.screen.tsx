@@ -1,4 +1,5 @@
 import { CalendarOutlined, DeleteOutlined, EditOutlined, EyeOutlined, MoreOutlined, PlayCircleOutlined, PlusOutlined, SaveOutlined, ShoppingCartOutlined } from '@ant-design/icons';
+import { DateHelpers } from '@common/Helpers/DateHelper';
 import { Button } from '@components/Button';
 import { Dropdown } from '@components/Dropdown';
 import { DatePicker } from '@components/Form/DatePicker';
@@ -198,7 +199,7 @@ const createEmptyTemplateDay = (offset = 0): WeeklyMealTemplateDay => ({
 
 const createEmptyTemplateWeek = (): WeeklyMealTemplateDay[] => Array.from({ length: 7 }, (_, offset) => createEmptyTemplateDay(offset));
 
-const weekdayLabel = (offset: number) => getMondayStart(dayjs()).add(offset, 'day').format('dddd');
+const weekdayLabel = (offset: number) => DateHelpers.capitalizeWeekdayLabel(getMondayStart(dayjs()).add(offset, 'day').format('dddd'));
 
 const mealLabels: Record<MealKey, string> = {
     breakfast: 'Sáng',

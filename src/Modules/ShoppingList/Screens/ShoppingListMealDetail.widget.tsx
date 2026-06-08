@@ -1,4 +1,5 @@
 import { Button } from "@components/Button";
+import { DateHelpers } from "@common/Helpers/DateHelper";
 import { DishServingHelper } from "@common/Helpers/DishServingHelper";
 import { Divider } from "@components/Layout/Divider";
 import { Stack } from "@components/Layout/Stack";
@@ -9,7 +10,6 @@ import { DishesReadonlyDetailModal } from "@modules/Dishes/Screens/DishesManageI
 import { ScheduledMealEstimateSummary } from "@modules/ScheduledMeal/Screens/ScheduledMealEstimateSummary.widget";
 import { Dishes } from "@store/Models/Dishes";
 import { selectDishesById, selectScheduledMealsById } from "@store/Selectors";
-import moment from "moment";
 import React, { FunctionComponent } from "react";
 import { useSelector } from "react-redux";
 
@@ -34,7 +34,7 @@ export const ShoppingListMealDetailWidget: FunctionComponent<ShoppingListMealDet
         <Divider orientation="left">Thông tin chung</Divider>
         <Stack gap={0} direction="column" align="flex-start">
             <Typography.Text><Typography.Text strong>Tên gợi nhớ: </Typography.Text> {meal.name}</Typography.Text>
-            <Typography.Text><Typography.Text strong>Ngày thực hiện: </Typography.Text> {moment(meal.plannedDate).format("ddd, DD/MM/YYYY")}</Typography.Text>
+            <Typography.Text><Typography.Text strong>Ngày thực hiện: </Typography.Text> {DateHelpers.formatWithCapitalizedWeekday(meal.plannedDate, "ddd, DD/MM/YYYY")}</Typography.Text>
         </Stack>
 
         <Divider orientation="left">Chi phí và tồn kho</Divider>

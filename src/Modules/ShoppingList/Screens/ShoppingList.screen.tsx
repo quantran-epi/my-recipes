@@ -503,9 +503,9 @@ const ShoppingListItemComponent: React.FunctionComponent<ShoppingListItemProps> 
                 : hasChecklist
                     ? { label: "Đang mua", color: "#d46b08", background: "#fff7e6", border: "#ffd591", icon: <OrderedListOutlined /> }
                     : { label: "Chưa có checklist", color: "#8c8c8c", background: "#fafafa", border: "#d9d9d9", icon: <OrderedListOutlined /> };
-    const plannedLabel = props.item.plannedDate ? moment(props.item.plannedDate).format("ddd, DD/MM/YY") : "Chưa đặt";
+    const plannedLabel = props.item.plannedDate ? DateHelpers.formatWithCapitalizedWeekday(props.item.plannedDate, "ddd, DD/MM/YY") : "Chưa đặt";
     const plannedColor = isOverdue ? "#cf1322" : "#595959";
-    const createdLabel = moment(props.item.createdDate).format("ddd, DD/MM/YY hh:mm A");
+    const createdLabel = DateHelpers.formatWithCapitalizedWeekday(props.item.createdDate, "ddd, DD/MM/YY hh:mm A");
     const completedLabel = props.item.completedAt ? moment(props.item.completedAt).format("DD/MM/YY") : null;
 
     return <React.Fragment>

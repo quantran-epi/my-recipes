@@ -25,7 +25,22 @@ const buildNameOptions = (names: string[]) => {
     return uniqueNames.map(name => ({ value: name }));
 }
 
-export const ScheduledMealAddWidget = ({ date, onDone }) => {
+type ScheduledMealAddWidgetProps = {
+    date: Date | null;
+    initialName?: string;
+    initialMeals?: ScheduledMeal["meals"];
+    initialDishServings?: Record<string, number>;
+    onDone: () => void;
+    onCreated?: (scheduledMeal: ScheduledMeal) => void;
+}
+
+const createEmptyMeals = (): ScheduledMeal["meals"] => ({
+    breakfast: [],
+    lunch: [],
+    dinner: [],
+});
+
+export const ScheduledMealAddWidget = ({ date, initialName, initialMeals, initialDishServings, onDone, onCreated }: ScheduledMealAddWidgetProps) => {
     const dispatch = useDispatch();
     const dishes = useSelector(selectDishes);
     const scheduledMeals = useSelector(selectScheduledMeals);
@@ -36,13 +51,9 @@ export const ScheduledMealAddWidget = ({ date, onDone }) => {
     const addScheduledMealForm = useSmartForm<ScheduledMeal>({
         defaultValues: {
             id: "",
-            name: "No named",
-            meals: {
-                breakfast: [],
-                dinner: [],
-                lunch: []
-            },
-            dishServings: {},
+            name: initialName ?? "No named",
+            meals: initialMeals ?? createEmptyMeals(),
+            dishServings: initialDishServings ?? {},
             createdDate: new Date(),
             plannedDate: null
         },
@@ -52,6 +63,7 @@ export const ScheduledMealAddWidget = ({ date, onDone }) => {
             message.success("Đã tạo thực đơn");
             addScheduledMealForm.reset();
             onDone();
+            onCreated?.(values.transformValues);
         },
         itemDefinitions: defaultValues => ({
             id: { name: ObjectPropertyHelper.nameof(defaultValues, e => e.id), noMarkup: true },
@@ -88,8 +100,11 @@ export const ScheduledMealAddWidget = ({ date, onDone }) => {
     }
 
     useEffect(() => {
+        if (initialName) addScheduledMealForm.form.setFieldsValue({ name: initialName });
+        if (initialMeals) addScheduledMealForm.form.setFieldsValue({ meals: initialMeals });
+        if (initialDishServings) addScheduledMealForm.form.setFieldsValue({ dishServings: initialDishServings });
         if (date) addScheduledMealForm.form.setFieldsValue({ plannedDate: dayjs(date) });
-    }, [date])
+    }, [addScheduledMealForm.form, date, initialName, initialMeals, initialDishServings])
 
     return <SmartForm {...addScheduledMealForm.defaultProps}>
         <SmartForm.Item {...addScheduledMealForm.itemDefinitions.name}>

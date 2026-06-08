@@ -2,6 +2,7 @@ import {
     CalendarOutlined, CopyOutlined, DeleteOutlined, EditOutlined,
     HolderOutlined, LeftOutlined, PlusOutlined, RightOutlined, ShoppingCartOutlined
 } from "@ant-design/icons";
+import { DateHelpers } from "@common/Helpers/DateHelper";
 import { Badge } from "@components/Badge";
 import { Button } from "@components/Button";
 import { Dropdown } from "@components/Dropdown";
@@ -274,7 +275,7 @@ export const ScheduledMealListScreen = () => {
                     />
                     <div style={{ minWidth: 0, textAlign: "center" }}>
                         <Typography.Text strong style={{ display: "block", color: "#111827", fontSize: 18, lineHeight: "24px", overflowWrap: "anywhere" }}>
-                            {moment(selectedDate).format("dddd, DD/MM/YYYY")}
+                            {DateHelpers.formatWithCapitalizedWeekday(selectedDate, "dddd, DD/MM/YYYY")}
                         </Typography.Text>
                         <Space size={5} wrap style={{ justifyContent: "center", marginTop: 4 }}>
                             <span style={{ padding: "1px 8px", borderRadius: 999, background: selectedDayStatus.background, color: selectedDayStatus.color, border: `1px solid ${selectedDayStatus.border}`, fontSize: 11, lineHeight: "18px", fontWeight: 700 }}>{selectedDayStatus.label}</span>

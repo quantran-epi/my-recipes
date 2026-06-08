@@ -17,6 +17,7 @@ import { Input, InputNumber, Select } from 'antd';
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import NutritionPlanIcon from '../../../../assets/icons/nutrition-plan.png';
+import { NutritionCalculatorWidget } from './NutritionCalculator.widget';
 
 const goalColors = ['#7436dc', '#1677ff', '#389e0d', '#d48806', '#cf1322', '#13a8a8'];
 
@@ -166,6 +167,8 @@ export const NutritionGoalsScreen = () => {
                 </Stack>}
             </Stack>
         </Box>
+
+        <NutritionCalculatorWidget />
 
         {!isAdmin && <Box style={{ border: '1px solid rgba(116,54,220,0.12)', borderRadius: 0, background: '#fff', padding: 11 }}>
             <Typography.Text type='secondary' style={{ fontSize: 12, lineHeight: '17px' }}>Bạn có thể xem mục tiêu. Đăng nhập admin để thêm, sửa hoặc xoá mục tiêu dùng chung.</Typography.Text>
