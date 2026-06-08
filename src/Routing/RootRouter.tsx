@@ -31,13 +31,13 @@ const RouteLoadingFallback = () => <div style={{ padding: 12, color: '#6b6478', 
 export const RootRouter = () => {
     return <BrowserRouter basename="/my-recipes">
         <Routes>
+            <Route path={RootRoutes.AuthorizedRoutes.UserGuideWelcome()} element={<React.Suspense fallback={<RouteLoadingFallback />}><UserGuideWelcomeScreen /></React.Suspense>} />
+            <Route path={RootRoutes.AuthorizedRoutes.UserGuideTour()} element={<React.Suspense fallback={<RouteLoadingFallback />}><UserGuideTourScreen /></React.Suspense>} />
             <Route path={RootRoutes.AuthorizedRoutes.Root()} element={<MasterPage />}>
                 <Route index element={<DashboardScreen />} />
                 <Route path={RootRoutes.AuthorizedRoutes.Analytics()} element={<DashboardAnalyticsScreen />} />
                 <Route path={RootRoutes.AuthorizedRoutes.NutritionGoals()} element={<NutritionGoalsScreen />} />
                 <Route path={RootRoutes.AuthorizedRoutes.UserGuide()} element={<UserGuideScreen />} />
-                <Route path={RootRoutes.AuthorizedRoutes.UserGuideWelcome()} element={<React.Suspense fallback={<RouteLoadingFallback />}><UserGuideWelcomeScreen /></React.Suspense>} />
-                <Route path={RootRoutes.AuthorizedRoutes.UserGuideTour()} element={<React.Suspense fallback={<RouteLoadingFallback />}><UserGuideTourScreen /></React.Suspense>} />
                 <Route path={RootRoutes.AuthorizedRoutes.Templates()} element={<TemplatesScreen />} />
                 <Route path={RootRoutes.AuthorizedRoutes.SyncBackupHealth()} element={<SyncBackupHealthScreen />} />
                 <Route path={RootRoutes.AuthorizedRoutes.ExpensePlanner()} element={<DishExpensePlannerScreen />} />

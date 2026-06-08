@@ -2,7 +2,6 @@ import { CalendarOutlined, CheckCircleOutlined, LeftOutlined, PlayCircleOutlined
 import { Button } from '@components/Button';
 import { Box } from '@components/Layout/Box';
 import { Stack } from '@components/Layout/Stack';
-import { Tag } from '@components/Tag';
 import { Typography } from '@components/Typography';
 import { useScreenTitle } from '@hooks';
 import { RootRoutes } from '@routing/RootRoutes';
@@ -17,85 +16,193 @@ type WelcomeSlide = {
     description: string;
     tone: string;
     icon: React.ReactNode;
-    metrics: { label: string; value: string; tone: string }[];
+    previewTitle: string;
+    previewRows: { label: string; value: string; note: string; tone: string }[];
     points: string[];
 }
 
 const WELCOME_SLIDES: WelcomeSlide[] = [
     {
-        key: 'daily-flow',
-        eyebrow: 'Bếp nhà mỗi ngày',
-        title: 'Quyết định nấu gì nhanh hơn',
-        description: 'My Recipes gom món ăn, tồn kho, thực đơn và lịch mua sắm để bạn không phải nhớ mọi thứ trong đầu.',
+        key: 'today',
+        eyebrow: 'My Recipes',
+        title: 'Bếp nhà trong một màn hình',
+        description: 'Mở app là thấy hôm nay cần nấu gì, cần mua gì và nguyên liệu nào nên dùng trước.',
         tone: '#7436dc',
         icon: <ThunderboltOutlined />,
-        metrics: [
-            { label: 'Mở app', value: '1', tone: '#7436dc' },
-            { label: 'Chọn món', value: '2', tone: '#13a8a8' },
-            { label: 'Tạo giỏ', value: '3', tone: '#0958d9' },
+        previewTitle: 'Tổng quan hôm nay',
+        previewRows: [
+            { label: 'Việc cần xem', value: '4', note: 'Thực đơn, mua sắm, tồn kho', tone: '#7436dc' },
+            { label: 'Gợi ý món', value: '3', note: 'Dựa trên nguyên liệu còn lại', tone: '#389e0d' },
+            { label: 'Giỏ đang mở', value: '2', note: 'Có thể tiếp tục đi mua', tone: '#0958d9' },
         ],
-        points: ['Xem việc cần chú ý hôm nay', 'Chọn món theo dữ liệu thật', 'Tạo kế hoạch mua và nấu từ cùng một luồng'],
+        points: ['Đọc dashboard trước', 'Chọn món từ dữ liệu thật', 'Đi tiếp sang thực đơn hoặc mua sắm'],
     },
     {
         key: 'inventory',
-        eyebrow: 'Tồn kho thực tế',
-        title: 'Biết nguyên liệu nào nên dùng trước',
-        description: 'Tồn kho theo từng lô giúp app cảnh báo nguyên liệu gần hết hạn và tính phần còn thiếu khi tạo giỏ mua.',
+        eyebrow: 'Tồn kho',
+        title: 'Biết nguyên liệu nào phải xử lý',
+        description: 'Tồn kho theo lô giúp app tính hạn dùng, lượng còn lại và nguyên liệu còn thiếu khi tạo giỏ.',
         tone: '#389e0d',
         icon: <CheckCircleOutlined />,
-        metrics: [
-            { label: 'Lô còn dùng', value: '8', tone: '#389e0d' },
-            { label: 'Sắp hết hạn', value: '2', tone: '#d48806' },
-            { label: 'Luôn có sẵn', value: '5', tone: '#13a8a8' },
+        previewTitle: 'Kho lạnh',
+        previewRows: [
+            { label: 'Rau cải', value: '2 ngày', note: 'Nên dùng trước', tone: '#d48806' },
+            { label: 'Ức gà', value: '450g', note: 'Đủ cho 2 phần', tone: '#389e0d' },
+            { label: 'Trứng', value: '8 quả', note: 'Luôn dễ ghép món', tone: '#13a8a8' },
         ],
-        points: ['Cập nhật tồn kho sau khi mua', 'Ưu tiên nguyên liệu sắp hết hạn', 'Dùng dữ liệu kho để gợi ý món sát hơn'],
+        points: ['Cập nhật sau khi mua', 'Theo dõi lô sắp hết hạn', 'Để gợi ý món chính xác hơn'],
     },
     {
-        key: 'meal-plan',
-        eyebrow: 'Kế hoạch nấu ăn',
-        title: 'Lên thực đơn rồi gom mua sắm',
-        description: 'Thực đơn theo ngày và khẩu phần giúp bạn chuẩn bị cả tuần, sau đó tạo một giỏ mua sắm từ nhiều bữa.',
+        key: 'plan',
+        eyebrow: 'Thực đơn',
+        title: 'Lên lịch bữa ăn rồi gom mua sắm',
+        description: 'Chọn món theo ngày, chỉnh khẩu phần, sau đó tạo một danh sách mua cho nhiều bữa.',
         tone: '#1677ff',
         icon: <CalendarOutlined />,
-        metrics: [
-            { label: 'Bữa hôm nay', value: '3', tone: '#1677ff' },
-            { label: 'Món đã chọn', value: '5', tone: '#7436dc' },
-            { label: 'Ngày tới', value: '7', tone: '#13a8a8' },
+        previewTitle: 'Thứ Hai, 08/06/2026',
+        previewRows: [
+            { label: 'Sáng', value: 'Cháo yến mạch', note: '1 phần', tone: '#1677ff' },
+            { label: 'Trưa', value: 'Cơm gà', note: '2 phần', tone: '#7436dc' },
+            { label: 'Tối', value: 'Canh rau', note: '3 phần', tone: '#389e0d' },
         ],
-        points: ['Thêm món theo sáng, trưa, tối', 'Chỉnh khẩu phần theo số người ăn', 'Tạo giỏ mua từ một ngày hoặc nhiều ngày'],
+        points: ['Lập kế hoạch theo ngày', 'Dùng khẩu phần đúng', 'Tạo giỏ mua từ nhiều bữa'],
     },
     {
         key: 'shopping',
-        eyebrow: 'Đi chợ gọn hơn',
-        title: 'Tick đồ đã mua và nhập về kho',
-        description: 'Shopping list gom nguyên liệu từ món và thực đơn, theo dõi tiến độ mua, rồi cập nhật lại tồn kho khi hoàn tất.',
+        eyebrow: 'Mua sắm',
+        title: 'Đi chợ gọn và nhập kho sau khi mua',
+        description: 'Danh sách mua sắm gom nguyên liệu còn thiếu, theo dõi tiến độ và đưa đồ đã mua về tồn kho.',
         tone: '#0958d9',
         icon: <ShoppingCartOutlined />,
-        metrics: [
-            { label: 'Cần mua', value: '12', tone: '#0958d9' },
-            { label: 'Đã mua', value: '7', tone: '#389e0d' },
-            { label: 'Còn lại', value: '5', tone: '#d48806' },
+        previewTitle: 'Giỏ cuối tuần',
+        previewRows: [
+            { label: 'Đã mua', value: '7/12', note: 'Còn 5 mục', tone: '#389e0d' },
+            { label: 'Ước tính', value: '320k', note: 'Dựa trên giá nguyên liệu', tone: '#0958d9' },
+            { label: 'Từ thực đơn', value: '4 bữa', note: 'Tự gom nguyên liệu', tone: '#7436dc' },
         ],
-        points: ['Tick nhóm nguyên liệu khi đi mua', 'Xem số lượng còn cần mua', 'Hoàn tất để nhập nguyên liệu mới vào kho'],
+        points: ['Tick khi đi mua', 'Xem phần còn thiếu', 'Hoàn tất để nhập kho'],
     },
 ];
 
 const welcomeCss = `
-.user-guide-welcome-shell {
-    min-height: calc(100dvh - 180px);
+.guide-welcome-screen {
+    min-height: 100vh;
+    min-height: 100dvh;
+    width: 100%;
+    position: relative;
+    overflow: hidden;
+    background: radial-gradient(circle at 18% 18%, rgba(116,54,220,0.18), transparent 31%), linear-gradient(145deg, #f7f3ff 0%, #ffffff 48%, #eefbf7 100%);
+    color: #111827;
 }
-.user-guide-welcome-card {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(220px, 0.72fr);
-    gap: 12px;
-    align-items: stretch;
+.guide-welcome-main {
+    min-height: 100vh;
+    min-height: 100dvh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: calc(24px + env(safe-area-inset-top)) 76px calc(92px + env(safe-area-inset-bottom));
+    box-sizing: border-box;
 }
-.user-guide-welcome-metrics {
+.guide-welcome-stage {
+    width: min(980px, 100%);
     display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: minmax(0, 0.96fr) minmax(260px, 0.82fr);
+    gap: 18px;
+    align-items: center;
+}
+.guide-welcome-copy {
+    min-width: 0;
+}
+.guide-welcome-orb {
+    width: 58px;
+    height: 58px;
+    border-radius: 18px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255,255,255,0.92);
+    box-shadow: 0 16px 34px rgba(74,48,130,0.16);
+    font-size: 27px;
+}
+.guide-welcome-phone {
+    border: 1px solid rgba(116,54,220,0.14);
+    border-radius: 28px;
+    background: rgba(255,255,255,0.92);
+    box-shadow: 0 24px 54px rgba(74,48,130,0.18);
+    padding: 12px;
+    min-width: 0;
+}
+.guide-welcome-phone-inner {
+    border-radius: 22px;
+    overflow: hidden;
+    border: 1px solid rgba(116,54,220,0.10);
+    background: linear-gradient(180deg, #f3eefc 0%, #fff 58%, #fbfffd 100%);
+}
+.guide-welcome-phone-header {
+    padding: 14px;
+    color: #fff;
+}
+.guide-welcome-preview-list {
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+}
+.guide-welcome-preview-row {
+    border-radius: 14px;
+    border: 1px solid rgba(116,54,220,0.10);
+    background: rgba(255,255,255,0.94);
+    padding: 10px;
+    box-shadow: 0 8px 18px rgba(74,48,130,0.07);
+}
+.guide-welcome-arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 48px;
+    height: 48px;
+    border-radius: 999px;
+    border: 1px solid rgba(116,54,220,0.16);
+    background: rgba(255,255,255,0.88);
+    color: #5e2bbf;
+    box-shadow: 0 14px 30px rgba(74,48,130,0.16);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 3;
+}
+.guide-welcome-arrow:disabled {
+    opacity: 0.38;
+    cursor: default;
+}
+.guide-welcome-arrow-left { left: max(16px, env(safe-area-inset-left)); }
+.guide-welcome-arrow-right { right: max(16px, env(safe-area-inset-right)); }
+.guide-welcome-bottom {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: calc(20px + env(safe-area-inset-bottom));
+    z-index: 4;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    padding: 0 16px;
+    box-sizing: border-box;
+}
+.guide-welcome-dots {
+    display: flex;
+    align-items: center;
+    justify-content: center;
     gap: 8px;
+    padding: 10px 12px;
+    border-radius: 999px;
+    background: rgba(255,255,255,0.84);
+    border: 1px solid rgba(116,54,220,0.12);
+    box-shadow: 0 10px 24px rgba(74,48,130,0.12);
 }
-.user-guide-welcome-dot {
+.guide-welcome-dot {
     width: 8px;
     height: 8px;
     border-radius: 999px;
@@ -104,27 +211,30 @@ const welcomeCss = `
     cursor: pointer;
 }
 @media (max-width: 760px) {
-    .user-guide-welcome-page {
-        max-width: 100% !important;
-        padding-bottom: 98px !important;
+    .guide-welcome-main {
+        align-items: flex-start;
+        padding: calc(22px + env(safe-area-inset-top)) 18px calc(96px + env(safe-area-inset-bottom));
+        overflow-y: auto;
     }
-    .user-guide-welcome-card {
+    .guide-welcome-stage {
         grid-template-columns: minmax(0, 1fr);
+        gap: 14px;
     }
-}
-@media (max-width: 420px) {
-    .user-guide-welcome-metrics {
-        grid-template-columns: minmax(0, 1fr);
+    .guide-welcome-copy h1 {
+        font-size: 31px !important;
+        line-height: 37px !important;
     }
+    .guide-welcome-arrow {
+        top: auto;
+        bottom: calc(18px + env(safe-area-inset-bottom));
+        transform: none;
+        width: 42px;
+        height: 42px;
+    }
+    .guide-welcome-arrow-left { left: 16px; }
+    .guide-welcome-arrow-right { right: 16px; }
 }
 `;
-
-const WelcomeMetric: React.FunctionComponent<{ label: string; value: string; tone: string }> = ({ label, value, tone }) => {
-    return <Box style={{ border: `1px solid ${tone}22`, borderRadius: 8, background: `${tone}09`, padding: 10, minWidth: 0 }}>
-        <Typography.Text strong style={{ display: 'block', color: tone, fontSize: 22, lineHeight: '27px' }}>{value}</Typography.Text>
-        <Typography.Text type='secondary' style={{ display: 'block', fontSize: 11, lineHeight: '15px', fontWeight: 720 }}>{label}</Typography.Text>
-    </Box>;
-};
 
 export const UserGuideWelcomeScreen: React.FC = () => {
     const navigate = useNavigate();
@@ -145,60 +255,72 @@ export const UserGuideWelcomeScreen: React.FC = () => {
         else setIndex(prev => Math.min(WELCOME_SLIDES.length - 1, prev + 1));
     }, [finish, isLast]);
 
-    return <Box data-testid='user-guide-welcome-page' className='user-guide-welcome-page user-guide-welcome-shell' style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 12, padding: '0 0 14px', maxWidth: 920, margin: '0 auto' }}>
+    return <div className='guide-welcome-screen' data-testid='user-guide-welcome-page'>
         <style>{welcomeCss}</style>
-        <Box style={{ borderRadius: 8, padding: 14, background: 'linear-gradient(135deg, #ffffff 0%, #f6fffb 46%, #fbf9ff 100%)', border: '1px solid rgba(116,54,220,0.12)', boxShadow: '0 14px 34px rgba(74,48,130,0.10)' }}>
-            <div className='user-guide-welcome-card'>
-                <Box style={{ minWidth: 0 }}>
-                    <Stack align='center' gap={8} wrap='wrap' style={{ marginBottom: 14 }}>
-                        <span style={{ width: 44, height: 44, borderRadius: 8, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', color: slide.tone, background: `${slide.tone}12`, border: `1px solid ${slide.tone}24`, fontSize: 21, flexShrink: 0 }}>{slide.icon}</span>
+        <button className='guide-welcome-arrow guide-welcome-arrow-left' type='button' aria-label='Slide trước' disabled={isFirst} onClick={previous}><LeftOutlined /></button>
+        <button className='guide-welcome-arrow guide-welcome-arrow-right' type='button' aria-label={isLast ? 'Bắt đầu tour' : 'Slide sau'} onClick={next}>{isLast ? <PlayCircleOutlined /> : <RightOutlined />}</button>
+
+        <main className='guide-welcome-main'>
+            <section className='guide-welcome-stage' aria-live='polite'>
+                <div className='guide-welcome-copy'>
+                    <Stack align='center' gap={12} style={{ marginBottom: 18 }}>
+                        <span className='guide-welcome-orb' style={{ color: slide.tone }}>{slide.icon}</span>
                         <div style={{ minWidth: 0 }}>
-                            <Typography.Text style={{ display: 'block', color: slide.tone, fontSize: 12, lineHeight: '16px', fontWeight: 780 }}>{slide.eyebrow}</Typography.Text>
-                            <Typography.Text strong style={{ display: 'block', color: '#111827', fontSize: 24, lineHeight: '30px' }}>{slide.title}</Typography.Text>
+                            <Typography.Text style={{ display: 'block', color: slide.tone, fontSize: 13, lineHeight: '18px', fontWeight: 820 }}>{slide.eyebrow}</Typography.Text>
+                            <Typography.Title level={1} style={{ margin: 0, color: '#111827', fontSize: 44, lineHeight: '52px', letterSpacing: 0 }}>{slide.title}</Typography.Title>
                         </div>
                     </Stack>
-                    <Typography.Text style={{ display: 'block', color: '#2f2545', fontSize: 13, lineHeight: '20px', marginBottom: 14 }}>{slide.description}</Typography.Text>
-                    <div className='user-guide-welcome-metrics'>
-                        {slide.metrics.map(metric => <WelcomeMetric key={metric.label} {...metric} />)}
-                    </div>
-                </Box>
-
-                <Box style={{ border: `1px solid ${slide.tone}18`, borderRadius: 8, background: `${slide.tone}07`, padding: 12, minWidth: 0 }}>
-                    <Stack justify='space-between' align='center' gap={8} style={{ marginBottom: 10 }}>
-                        <Typography.Text strong style={{ color: '#111827', fontSize: 14, lineHeight: '19px' }}>Bạn sẽ dùng để làm gì?</Typography.Text>
-                        <Tag color='purple' style={{ marginInlineEnd: 0 }}>{index + 1}/{WELCOME_SLIDES.length}</Tag>
-                    </Stack>
-                    <Stack direction='column' align='stretch' gap={8}>
-                        {slide.points.map(point => <Box key={point} style={{ border: '1px solid rgba(116,54,220,0.10)', borderRadius: 8, background: '#fff', padding: 9 }}>
-                            <Stack align='flex-start' gap={8}>
-                                <CheckCircleOutlined style={{ color: slide.tone, marginTop: 2, flexShrink: 0 }} />
-                                <Typography.Text style={{ color: '#2f2545', fontSize: 12, lineHeight: '17px', fontWeight: 700 }}>{point}</Typography.Text>
+                    <Typography.Paragraph style={{ color: '#3f3658', fontSize: 16, lineHeight: '25px', marginBottom: 18, maxWidth: 560 }}>{slide.description}</Typography.Paragraph>
+                    <Stack direction='column' align='stretch' gap={9} style={{ maxWidth: 520 }}>
+                        {slide.points.map(point => <Box key={point} style={{ border: '1px solid rgba(116,54,220,0.12)', background: 'rgba(255,255,255,0.74)', borderRadius: 12, padding: '10px 12px' }}>
+                            <Stack align='center' gap={9}>
+                                <CheckCircleOutlined style={{ color: slide.tone, flexShrink: 0 }} />
+                                <Typography.Text style={{ color: '#2f2545', fontSize: 13, lineHeight: '18px', fontWeight: 720 }}>{point}</Typography.Text>
                             </Stack>
                         </Box>)}
                     </Stack>
-                </Box>
-            </div>
+                </div>
 
-            <Stack justify='space-between' align='center' gap={10} wrap='wrap' style={{ marginTop: 14 }}>
-                <Button icon={<LeftOutlined />} disabled={isFirst} onClick={previous} style={{ borderRadius: 999 }}>Trước</Button>
-                <Stack align='center' gap={7}>
-                    {WELCOME_SLIDES.map((item, dotIndex) => {
-                        const active = dotIndex === index;
-                        return <button
-                            key={item.key}
-                            type='button'
-                            className='user-guide-welcome-dot'
-                            aria-label={`Mở slide ${dotIndex + 1}`}
-                            aria-pressed={active}
-                            onClick={() => setIndex(dotIndex)}
-                            style={{ width: active ? 22 : 8, background: active ? slide.tone : 'rgba(116,54,220,0.22)', transition: 'width 160ms ease, background 160ms ease' }}
-                        />;
-                    })}
-                </Stack>
-                <Button type='primary' icon={isLast ? <PlayCircleOutlined /> : <RightOutlined />} onClick={next} style={{ borderRadius: 999, background: slide.tone, borderColor: slide.tone, fontWeight: 760 }}>{isLast ? 'Bắt đầu tour' : 'Tiếp'}</Button>
-            </Stack>
-        </Box>
-    </Box>;
+                <div className='guide-welcome-phone' aria-hidden='true'>
+                    <div className='guide-welcome-phone-inner'>
+                        <div className='guide-welcome-phone-header' style={{ background: `linear-gradient(135deg, ${slide.tone} 0%, #5e2bbf 100%)` }}>
+                            <Typography.Text style={{ color: 'rgba(255,255,255,0.76)', fontSize: 11, lineHeight: '15px', fontWeight: 760 }}>My Recipes</Typography.Text>
+                            <Typography.Text strong style={{ display: 'block', color: '#fff', fontSize: 20, lineHeight: '25px', marginTop: 2 }}>{slide.previewTitle}</Typography.Text>
+                        </div>
+                        <div className='guide-welcome-preview-list'>
+                            {slide.previewRows.map(row => <div key={row.label} className='guide-welcome-preview-row'>
+                                <Stack justify='space-between' align='center' gap={10}>
+                                    <div style={{ minWidth: 0 }}>
+                                        <Typography.Text strong style={{ display: 'block', color: '#111827', fontSize: 13, lineHeight: '18px' }}>{row.label}</Typography.Text>
+                                        <Typography.Text type='secondary' style={{ display: 'block', fontSize: 11, lineHeight: '15px', marginTop: 1 }}>{row.note}</Typography.Text>
+                                    </div>
+                                    <Typography.Text strong style={{ color: row.tone, fontSize: 16, lineHeight: '21px', flexShrink: 0 }}>{row.value}</Typography.Text>
+                                </Stack>
+                            </div>)}
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <div className='guide-welcome-bottom'>
+            <div className='guide-welcome-dots'>
+                {WELCOME_SLIDES.map((item, dotIndex) => {
+                    const active = dotIndex === index;
+                    return <button
+                        key={item.key}
+                        type='button'
+                        className='guide-welcome-dot'
+                        aria-label={`Mở slide ${dotIndex + 1}`}
+                        aria-pressed={active}
+                        onClick={() => setIndex(dotIndex)}
+                        style={{ width: active ? 26 : 8, background: active ? slide.tone : 'rgba(116,54,220,0.24)', transition: 'width 180ms ease, background 180ms ease' }}
+                    />;
+                })}
+            </div>
+            {isLast && <Button type='primary' onClick={finish} style={{ borderRadius: 999, background: slide.tone, borderColor: slide.tone, fontWeight: 800 }}>Bắt đầu tour</Button>}
+        </div>
+    </div>;
 };
 
 export default UserGuideWelcomeScreen;
