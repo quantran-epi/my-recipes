@@ -1,5 +1,6 @@
 import {
     CalendarOutlined,
+    CalculatorOutlined,
     CheckCircleOutlined,
     FireOutlined,
     PieChartOutlined,
@@ -28,7 +29,7 @@ import { ScheduledMeal } from '@store/Models/ScheduledMeal';
 import { ShoppingList } from '@store/Models/ShoppingList';
 import { NutritionGoal } from '@store/Models/SharedConfig';
 import { selectDishes, selectIngredientsById, selectNutritionGoals, selectScheduledMeals, selectShoppingLists } from '@store/Selectors';
-import { Progress, Segmented } from 'antd';
+import { Progress } from 'antd';
 import dayjs from 'dayjs';
 import React, { useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
@@ -65,10 +66,10 @@ type NutritionAggregate = {
     hasNutrition: boolean;
 }
 
-const sourceOptions = [
-    { label: 'Món ăn', value: 'dishes', icon: <PieChartOutlined /> },
-    { label: 'Lịch mua sắm', value: 'shoppingLists', icon: <ShoppingCartOutlined /> },
-    { label: 'Thực đơn', value: 'scheduledMeals', icon: <CalendarOutlined /> },
+const sourceOptions: Array<{ label: string; shortLabel: string; value: NutritionCalculatorSource; icon: React.ReactNode; description: string; tone: string; background: string; border: string }> = [
+    { label: 'Món ăn', shortLabel: 'Món', value: 'dishes', icon: <PieChartOutlined />, description: 'Tự chọn món và khẩu phần', tone: '#7436dc', background: '#f9f0ff', border: '#d3adf7' },
+    { label: 'Lịch mua sắm', shortLabel: 'Mua sắm', value: 'shoppingLists', icon: <ShoppingCartOutlined />, description: 'Tính từ danh sách đang có', tone: '#0958d9', background: '#e6f4ff', border: '#91caff' },
+    { label: 'Thực đơn', shortLabel: 'Thực đơn', value: 'scheduledMeals', icon: <CalendarOutlined />, description: 'Tổng hợp theo bữa đã lên', tone: '#13a8a8', background: '#e6fffb', border: '#87e8de' },
 ];
 
 const emptyMeals = (): ScheduledMeal['meals'] => ({ breakfast: [], lunch: [], dinner: [] });
@@ -201,7 +202,7 @@ const primaryMetricKeys = ['calories', 'protein', 'carbs', 'fat', 'fiber'] as co
 
 const compactSourceLabel = (value: string) => value.length > 58 ? `${value.slice(0, 55)}...` : value;
 
-export const NutritionCalculatorWidget: React.FunctionComponent = () => {
+const NutritionCalculatorModalContent: React.FunctionComponent = () => {
     const navigate = useNavigate();
     const dishes = useSelector(selectDishes);
     const ingredientsById = useSelector(selectIngredientsById);
@@ -283,14 +284,39 @@ export const NutritionCalculatorWidget: React.FunctionComponent = () => {
                     </Stack>}
                 </Stack>
 
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(220px, 100%), 1fr))', gap: 10, alignItems: 'start' }}>
-                    <Segmented
-                        value={source}
-                        onChange={(value) => setSource(value as NutritionCalculatorSource)}
-                        options={sourceOptions}
-                        block
-                        style={{ width: '100%' }}
-                    />
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 8, marginBottom: 10 }}>
+                    {sourceOptions.map(option => {
+                        const active = source === option.value;
+                        return <button
+                            key={option.value}
+                            type='button'
+                            onClick={() => setSource(option.value)}
+                            aria-pressed={active}
+                            style={{
+                                minWidth: 0,
+                                minHeight: 82,
+                                display: 'flex',
+                                flexDirection: 'column',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                gap: 4,
+                                border: active ? `2px solid ${option.tone}` : `1px solid ${option.border}`,
+                                borderRadius: 8,
+                                background: active ? option.background : '#fff',
+                                color: active ? option.tone : '#4b5563',
+                                cursor: 'pointer',
+                                padding: '8px 6px',
+                                boxShadow: active ? `0 10px 22px ${option.tone}1f` : '0 5px 14px rgba(15,23,42,0.05)',
+                            }}
+                        >
+                            <span style={{ width: 30, height: 30, borderRadius: 8, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', background: active ? '#fff' : option.background, color: option.tone, fontSize: 16, flexShrink: 0 }}>{option.icon}</span>
+                            <Typography.Text strong style={{ display: 'block', color: 'inherit', fontSize: 12, lineHeight: '15px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '100%' }}>{option.shortLabel}</Typography.Text>
+                            <Typography.Text type='secondary' style={{ display: 'block', fontSize: 10, lineHeight: '13px', textAlign: 'center', maxWidth: '100%', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{option.description}</Typography.Text>
+                        </button>;
+                    })}
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr)', gap: 10, alignItems: 'start' }}>
                     {source === 'dishes' && <Select
                         showSearch
                         mode='multiple'
@@ -446,4 +472,39 @@ export const NutritionCalculatorWidget: React.FunctionComponent = () => {
             </DeferredModalContent>
         </Modal>
     </Box>;
+};
+
+export const NutritionCalculatorWidget: React.FunctionComponent = () => {
+    const [open, setOpen] = useState(false);
+
+    return <>
+        <Box style={{ border: '1px solid rgba(19,168,168,0.18)', borderRadius: 8, background: 'linear-gradient(135deg, #ffffff 0%, #f6fffb 50%, #fff7e6 100%)', padding: 13, boxShadow: '0 12px 28px rgba(15,23,42,0.08)', overflow: 'hidden' }}>
+            <Stack justify='space-between' align='center' gap={12}>
+                <Stack align='center' gap={10} style={{ minWidth: 0 }}>
+                    <span style={{ width: 42, height: 42, borderRadius: 8, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', color: '#0f766e', background: '#ccfbf1', border: '1px solid #99f6e4', flexShrink: 0, fontSize: 18 }}>
+                        <CalculatorOutlined />
+                    </span>
+                    <div style={{ minWidth: 0 }}>
+                        <Typography.Text strong style={{ display: 'block', color: '#111827', fontSize: 17, lineHeight: '22px' }}>Máy tính dinh dưỡng</Typography.Text>
+                        <Typography.Text type='secondary' style={{ display: 'block', fontSize: 12, lineHeight: '17px', marginTop: 2 }}>Tính tổng dinh dưỡng từ món ăn, lịch mua sắm hoặc thực đơn đã lên.</Typography.Text>
+                    </div>
+                </Stack>
+                <Button type='primary' icon={<FireOutlined />} onClick={() => setOpen(true)} style={{ borderRadius: 999, fontWeight: 750, flexShrink: 0 }}>Tính</Button>
+            </Stack>
+        </Box>
+
+        <Modal
+            open={open}
+            title={<Space><CalculatorOutlined />Máy tính dinh dưỡng</Space>}
+            onCancel={() => setOpen(false)}
+            footer={null}
+            width='min(980px, calc(100vw - 24px))'
+            bodyStyle={{ maxHeight: 'calc(100vh - 128px)', overflowY: 'auto' }}
+            destroyOnClose
+        >
+            <DeferredModalContent active={open} minHeight={520}>
+                <NutritionCalculatorModalContent />
+            </DeferredModalContent>
+        </Modal>
+    </>;
 };

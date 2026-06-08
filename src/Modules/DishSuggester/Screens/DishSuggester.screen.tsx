@@ -553,7 +553,6 @@ export const DishSuggesterScreen: React.FC<DishSuggesterScreenProps> = ({ open, 
                 {nutritionSuggestions.map(item => {
                     const selected = selectedDishIdSet.has(item.dish.id);
                     const expanded = expandedNutritionDishIds.has(item.dish.id);
-                    const coverageTone = item.nutrition.coveragePercent >= 80 ? "#389e0d" : item.nutrition.coveragePercent >= 50 ? "#d48806" : "#cf1322";
                     return <div
                         key={item.dish.id}
                         data-testid={`nutrition-suggestion-item-${item.dish.id}`}
@@ -568,7 +567,7 @@ export const DishSuggesterScreen: React.FC<DishSuggesterScreenProps> = ({ open, 
                             boxShadow: "0 8px 18px rgba(74,48,130,0.06)",
                         }}
                     >
-                        <Stack gap={10} align="flex-start">
+                        <div style={{ display: "grid", gridTemplateColumns: "22px 44px minmax(0, 1fr) 34px", gap: 10, alignItems: "start" }}>
                             <div style={{
                                 width: 22,
                                 height: 22,
@@ -586,26 +585,14 @@ export const DishSuggesterScreen: React.FC<DishSuggesterScreenProps> = ({ open, 
                             }}>{selected ? "✓" : ""}</div>
                             <DishImageWidget src={item.dish.image} width={44} height={44} borderRadius={7} fallbackIconSize={24} showBrokenLabel={false} style={{ flexShrink: 0, marginTop: 1 }} />
                             <Box style={{ minWidth: 0, flex: 1 }}>
-                                <div style={{ display: "grid", gridTemplateColumns: "minmax(0, 1fr)", gap: 8, alignItems: "start" }}>
-                                    <Typography.Text strong style={{ display: "block", color: "#111827", fontSize: 14, lineHeight: "18px", overflowWrap: "anywhere" }}>{item.dish.name}</Typography.Text>
-                                </div>
+                                <Typography.Text strong style={{ display: "block", color: "#111827", fontSize: 14, lineHeight: "18px", overflowWrap: "anywhere" }}>{item.dish.name}</Typography.Text>
                                 <Typography.Text type="secondary" style={{ display: "block", fontSize: 11, lineHeight: "15px", marginTop: 2 }}>{item.reason}</Typography.Text>
-                                <Button
-                                    type="text"
-                                    icon={expanded ? <DownOutlined /> : <RightOutlined />}
-                                    onClick={(event) => _toggleNutritionDetails(item.dish.id, event)}
-                                    aria-label={`${expanded ? "Ẩn" : "Xem"} dinh dưỡng của ${item.dish.name}`}
-                                    style={{ marginTop: 5, paddingInline: 0, height: 28, color: item.tone, fontWeight: 700 }}
-                                >
-                                    Dinh dưỡng
-                                </Button>
                                 {expanded && <>
                                     <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(72px, 1fr))", gap: 6, marginTop: 6 }}>
                                         <NutritionMetric label="kcal" value={DishNutritionHelper.formatCalories(item.nutrition.perServing.calories)} tone="#7436dc" />
                                         <NutritionMetric label="đạm" value={DishNutritionHelper.formatGram(item.nutrition.perServing.protein)} tone="#1677ff" />
                                         <NutritionMetric label="béo" value={DishNutritionHelper.formatGram(item.nutrition.perServing.fat)} tone="#d46b08" />
                                         <NutritionMetric label="xơ" value={DishNutritionHelper.formatGram(item.nutrition.perServing.fiber)} tone="#389e0d" />
-                                        <NutritionMetric label="dữ liệu" value={`${item.nutrition.coveragePercent}%`} tone={coverageTone} />
                                     </div>
                                     {(item.nutrition.missingNutritionIngredientIds.length > 0 || item.nutrition.missingConversionIngredientIds.length > 0) && (
                                         <Typography.Text type="secondary" style={{ display: "block", fontSize: 10, lineHeight: "14px", marginTop: 8 }}>
@@ -614,7 +601,14 @@ export const DishSuggesterScreen: React.FC<DishSuggesterScreenProps> = ({ open, 
                                     )}
                                 </>}
                             </Box>
-                        </Stack>
+                            <Button
+                                type="text"
+                                icon={expanded ? <DownOutlined /> : <RightOutlined />}
+                                onClick={(event) => _toggleNutritionDetails(item.dish.id, event)}
+                                aria-label={`${expanded ? "Ẩn" : "Xem"} dinh dưỡng của ${item.dish.name}`}
+                                style={{ width: 34, height: 34, paddingInline: 0, borderRadius: 999, color: item.tone }}
+                            />
+                        </div>
                     </div>;
                 })}
             </Box>
