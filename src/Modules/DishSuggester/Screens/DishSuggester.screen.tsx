@@ -47,6 +47,7 @@ type DishSuggesterScreenProps = {
     onClose: () => void;
     initialMode?: Mode;
     initialIngredientIds?: string[];
+    previewInline?: boolean;
 }
 
 const totalDurationMins = (dish: Dishes) => {
@@ -92,7 +93,7 @@ const PendingCalculationBox: React.FunctionComponent<{ text: string }> = ({ text
     </Box>;
 };
 
-export const DishSuggesterScreen: React.FC<DishSuggesterScreenProps> = ({ open, onClose, initialMode, initialIngredientIds }) => {
+export const DishSuggesterScreen: React.FC<DishSuggesterScreenProps> = ({ open, onClose, initialMode, initialIngredientIds, previewInline }) => {
     const navigate = useNavigate();
     const dishes = useSelector(selectDishes);
     const allIngredients = useSelector(selectIngredients);
@@ -628,20 +629,7 @@ export const DishSuggesterScreen: React.FC<DishSuggesterScreenProps> = ({ open, 
         </>;
     };
 
-    return <>
-        <Modal
-            open={open}
-            onCancel={_onClose}
-            footer={null}
-            destroyOnClose
-            title={
-                <Space>
-                    <Image src={NoodlesIcon} preview={false} width={22} style={{ marginBottom: 3 }} />
-                    Nấu gì hôm nay?
-                </Space>
-            }
-            style={{ top: 24 }}
-        >
+    const content = <>
             <ModeTabs />
 
             {/* ── Mode: ingredients ── */}
@@ -1003,9 +991,9 @@ export const DishSuggesterScreen: React.FC<DishSuggesterScreenProps> = ({ open, 
                     </Stack>
                 </>
             )}
-        </Modal>
+    </>;
 
-        {toggleShoppingListAdd.value && <Modal
+    const shoppingListModal = toggleShoppingListAdd.value ? <Modal
             open={toggleShoppingListAdd.value}
             onCancel={toggleShoppingListAdd.hide}
             footer={null}
@@ -1033,6 +1021,36 @@ export const DishSuggesterScreen: React.FC<DishSuggesterScreenProps> = ({ open, 
                     onCreated={(shoppingList) => navigate(RootRoutes.AuthorizedRoutes.ShoppingListRoutes.Detail(shoppingList.id))}
                 />
             </DeferredModalContent>
-        </Modal>}
+        </Modal> : null;
+
+    if (previewInline) {
+        return <Box data-testid="dish-suggester-inline-preview" style={{ height: "100%", minHeight: 0, overflowY: "auto", padding: 12, background: "#fff" }}>
+            <Stack align="center" gap={8} style={{ marginBottom: 12 }}>
+                <Image src={NoodlesIcon} preview={false} width={22} style={{ marginBottom: 3 }} />
+                <Typography.Text strong style={{ fontSize: 16, lineHeight: "21px", color: "#111827" }}>Nấu gì hôm nay?</Typography.Text>
+            </Stack>
+            {content}
+            {shoppingListModal}
+        </Box>;
+    }
+
+    return <>
+        <Modal
+            open={open}
+            onCancel={_onClose}
+            footer={null}
+            destroyOnClose
+            title={
+                <Space>
+                    <Image src={NoodlesIcon} preview={false} width={22} style={{ marginBottom: 3 }} />
+                    Nấu gì hôm nay?
+                </Space>
+            }
+            style={{ top: 24 }}
+        >
+            {content}
+        </Modal>
+
+        {shoppingListModal}
     </>;
 };

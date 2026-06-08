@@ -1,4 +1,4 @@
-import { CalendarOutlined, CheckCircleOutlined, LeftOutlined, PlayCircleOutlined, RightOutlined, SearchOutlined, ShoppingCartOutlined, ThunderboltOutlined } from '@ant-design/icons';
+import { CalendarOutlined, CheckCircleOutlined, LeftOutlined, PlayCircleOutlined, RightOutlined, ShoppingCartOutlined, ThunderboltOutlined } from '@ant-design/icons';
 import { Button } from '@components/Button';
 import { Image } from '@components/Image';
 import { Box } from '@components/Layout/Box';
@@ -9,6 +9,7 @@ import { RootRoutes } from '@routing/RootRoutes';
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { markUserGuideWelcomeComplete } from './UserGuideOnboardingStorage';
+import { GuidePreviewScreenKey, GuideRealPreviewScreen } from './UserGuideRealPreview';
 import HouseIcon from '../../../../assets/icons/house.png';
 import MealsIcon from '../../../../assets/icons/meals.png';
 import DishesIcon from '../../../../assets/icons/noodles.png';
@@ -102,6 +103,15 @@ const WELCOME_SLIDES: WelcomeSlide[] = [
     },
 ];
 
+const getWelcomePreviewScreen = (slideKey: string): GuidePreviewScreenKey => {
+    switch (slideKey) {
+        case 'inventory': return 'inventory';
+        case 'plan': return 'meals';
+        case 'shopping': return 'shopping';
+        default: return 'dashboard';
+    }
+};
+
 const welcomeCss = `
 .guide-welcome-screen {
     min-height: 100vh;
@@ -113,13 +123,14 @@ const welcomeCss = `
     color: #111827;
 }
 .guide-welcome-main {
-    min-height: 100vh;
-    min-height: 100dvh;
+    height: 100vh;
+    height: 100dvh;
     display: flex;
     align-items: center;
     justify-content: center;
     padding: calc(24px + env(safe-area-inset-top)) 76px calc(92px + env(safe-area-inset-bottom));
     box-sizing: border-box;
+    overflow-y: auto;
 }
 .guide-welcome-stage {
     width: min(980px, 100%);
@@ -182,6 +193,21 @@ const welcomeCss = `
     background: rgba(255,255,255,0.96);
     box-shadow: 0 10px 24px rgba(74,48,130,0.10);
     overflow: hidden;
+}
+.guide-welcome-real-preview {
+    height: 380px;
+    min-height: 0;
+    overflow: hidden;
+    background: linear-gradient(180deg, #e9e3f4 0%, #f6f3fb 52%, #ffffff 100%);
+    padding: 10px;
+    box-sizing: border-box;
+}
+.guide-welcome-real-preview .guide-real-preview {
+    border-radius: 8px;
+    overflow: hidden;
+}
+.guide-welcome-real-preview .guide-real-preview [data-testid="dashboard"] {
+    padding-bottom: 12px !important;
 }
 .guide-welcome-preview-control {
     margin: 10px 10px 0;
@@ -264,7 +290,7 @@ const welcomeCss = `
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    z-index: 3;
+    z-index: 7;
 }
 .guide-welcome-arrow:disabled {
     opacity: 0.38;
@@ -277,13 +303,14 @@ const welcomeCss = `
     left: 0;
     right: 0;
     bottom: calc(20px + env(safe-area-inset-bottom));
-    z-index: 4;
+    z-index: 5;
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 14px;
     padding: 0 16px;
     box-sizing: border-box;
+    pointer-events: none;
 }
 .guide-welcome-dots {
     display: flex;
@@ -295,7 +322,9 @@ const welcomeCss = `
     background: rgba(255,255,255,0.84);
     border: 1px solid rgba(116,54,220,0.12);
     box-shadow: 0 10px 24px rgba(74,48,130,0.12);
+    pointer-events: auto;
 }
+.guide-welcome-bottom .ant-btn { pointer-events: auto; }
 .guide-welcome-dot {
     width: 8px;
     height: 8px;
@@ -308,7 +337,6 @@ const welcomeCss = `
     .guide-welcome-main {
         align-items: flex-start;
         padding: calc(22px + env(safe-area-inset-top)) 18px calc(96px + env(safe-area-inset-bottom));
-        overflow-y: auto;
     }
     .guide-welcome-stage {
         grid-template-columns: minmax(0, 1fr);
@@ -327,6 +355,7 @@ const welcomeCss = `
     }
     .guide-welcome-arrow-left { left: 16px; }
     .guide-welcome-arrow-right { right: 16px; }
+    .guide-welcome-real-preview { height: 338px; }
 }
 `;
 
@@ -348,51 +377,6 @@ export const UserGuideWelcomeScreen: React.FC = () => {
         if (isLast) finish();
         else setIndex(prev => Math.min(WELCOME_SLIDES.length - 1, prev + 1));
     }, [finish, isLast]);
-
-    const renderPreviewControl = () => {
-        if (slide.key === 'inventory') {
-            return <div className='guide-welcome-preview-control'>
-                <Stack align='center' gap={7} style={{ minWidth: 0 }}>
-                    <SearchOutlined style={{ color: slide.tone, flexShrink: 0 }} />
-                    <Typography.Text type='secondary' style={{ fontSize: 10.5, lineHeight: '15px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', flex: '1 1 auto', minWidth: 0 }}>Tìm nguyên liệu hoặc lô tồn kho</Typography.Text>
-                </Stack>
-                <div className='guide-welcome-preview-pills' style={{ marginTop: 7 }}>
-                    {['Còn hàng', 'Rau củ', 'Sắp hết hạn'].map((label, labelIndex) => <span key={label} className='guide-welcome-preview-pill' style={{ color: labelIndex === 0 ? slide.tone : '#6b6478', background: labelIndex === 0 ? `${slide.tone}10` : '#fff', borderColor: labelIndex === 0 ? `${slide.tone}35` : 'rgba(116,54,220,0.12)' }}>{label}</span>)}
-                </div>
-            </div>;
-        }
-
-        if (slide.key === 'plan') {
-            return <div className='guide-welcome-preview-control'>
-                <Stack align='center' justify='space-between' gap={7}>
-                    <span className='guide-welcome-preview-pill' style={{ color: slide.tone, background: `${slide.tone}10`, borderColor: `${slide.tone}35` }}><LeftOutlined /></span>
-                    <div style={{ textAlign: 'center', minWidth: 0 }}>
-                        <Typography.Text strong style={{ display: 'block', color: '#111827', fontSize: 11.5, lineHeight: '16px' }}>Monday, 08/06/2026</Typography.Text>
-                        <Typography.Text type='secondary' style={{ display: 'block', fontSize: 9.5, lineHeight: '13px' }}>3 bữa · 6 phần</Typography.Text>
-                    </div>
-                    <span className='guide-welcome-preview-pill' style={{ color: slide.tone, background: `${slide.tone}10`, borderColor: `${slide.tone}35` }}><RightOutlined /></span>
-                </Stack>
-            </div>;
-        }
-
-        if (slide.key === 'shopping') {
-            return <div className='guide-welcome-preview-control'>
-                <Stack justify='space-between' align='center' gap={8} style={{ marginBottom: 7 }}>
-                    <Typography.Text strong style={{ color: '#111827', fontSize: 11, lineHeight: '15px' }}>Tiến độ mua</Typography.Text>
-                    <span className='guide-welcome-preview-pill' style={{ color: slide.tone, background: `${slide.tone}10`, borderColor: `${slide.tone}35` }}>7/12</span>
-                </Stack>
-                <div className='guide-welcome-progress-track'>
-                    <div className='guide-welcome-progress-bar' style={{ width: '58%', background: `linear-gradient(90deg, ${slide.tone} 0%, #13a8a8 100%)` }} />
-                </div>
-            </div>;
-        }
-
-        return <div className='guide-welcome-preview-control'>
-            <div className='guide-welcome-preview-pills'>
-                {['Monday 3 bữa', '2 giỏ mở', '2 lô ưu tiên'].map((label, labelIndex) => <span key={label} className='guide-welcome-preview-pill' style={{ color: labelIndex === 0 ? slide.tone : '#6b6478', background: labelIndex === 0 ? `${slide.tone}10` : '#fff', borderColor: labelIndex === 0 ? `${slide.tone}35` : 'rgba(116,54,220,0.12)' }}>{label}</span>)}
-            </div>
-        </div>;
-    };
 
     return <div className='guide-welcome-screen' data-testid='user-guide-welcome-page'>
         <style>{welcomeCss}</style>
@@ -437,30 +421,8 @@ export const UserGuideWelcomeScreen: React.FC = () => {
                                 </Stack>
                             </Stack>
                         </div>
-                        <div className='guide-welcome-preview-list'>
-                            <div className='guide-welcome-mini-section'>
-                                <div style={{ padding: 10, background: `linear-gradient(90deg, ${slide.tone}12 0%, rgba(255,255,255,0.96) 72%)`, borderBottom: '1px solid rgba(116,54,220,0.09)' }}>
-                                    <Stack justify='space-between' align='center' gap={8}>
-                                        <div style={{ minWidth: 0 }}>
-                                            <Typography.Text strong style={{ display: 'block', color: '#111827', fontSize: 14, lineHeight: '19px' }}>{slide.previewTitle}</Typography.Text>
-                                            <Typography.Text type='secondary' style={{ display: 'block', fontSize: 10.5, lineHeight: '15px' }}>{slide.previewSubtitle}</Typography.Text>
-                                        </div>
-                                        <span style={{ borderRadius: 999, padding: '3px 8px', color: slide.tone, background: `${slide.tone}12`, border: `1px solid ${slide.tone}24`, fontSize: 10, lineHeight: '14px', fontWeight: 800 }}>Demo</span>
-                                    </Stack>
-                                </div>
-                                {renderPreviewControl()}
-                                <div style={{ padding: 10, display: 'flex', flexDirection: 'column', gap: 8 }}>
-                                    {slide.previewRows.map(row => <div key={row.label} className='guide-welcome-preview-row'>
-                                        <Stack justify='space-between' align='center' gap={10}>
-                                            <div style={{ minWidth: 0 }}>
-                                                <Typography.Text strong style={{ display: 'block', color: '#111827', fontSize: 12.5, lineHeight: '17px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{row.label}</Typography.Text>
-                                                <Typography.Text type='secondary' style={{ display: 'block', fontSize: 10.5, lineHeight: '15px', marginTop: 1 }}>{row.note}</Typography.Text>
-                                            </div>
-                                            <Typography.Text strong style={{ color: row.tone, fontSize: 14, lineHeight: '19px', flexShrink: 0 }}>{row.value}</Typography.Text>
-                                        </Stack>
-                                    </div>)}
-                                </div>
-                            </div>
+                        <div className='guide-welcome-real-preview'>
+                            <GuideRealPreviewScreen screen={getWelcomePreviewScreen(slide.key)} compact />
                         </div>
                         <div className='guide-welcome-mini-tabbar'>
                             <div className='guide-welcome-mini-dock'>

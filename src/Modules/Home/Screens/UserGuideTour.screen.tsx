@@ -1,4 +1,4 @@
-import { CalendarOutlined, CheckCircleOutlined, ClockCircleOutlined, CloseOutlined, DatabaseOutlined, FireOutlined, LeftOutlined, PlayCircleOutlined, RightOutlined, SearchOutlined, ShoppingCartOutlined, WarningOutlined } from '@ant-design/icons';
+import { CheckCircleOutlined, ClockCircleOutlined, CloseOutlined, LeftOutlined, RightOutlined } from '@ant-design/icons';
 import { Button } from '@components/Button';
 import { Image } from '@components/Image';
 import { Box } from '@components/Layout/Box';
@@ -8,6 +8,7 @@ import { useScreenTitle } from '@hooks';
 import { RootRoutes } from '@routing/RootRoutes';
 import React from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import { GuideRealPreviewScreen } from './UserGuideRealPreview';
 import HouseIcon from '../../../../assets/icons/house.png';
 import MealsIcon from '../../../../assets/icons/meals.png';
 import DishesIcon from '../../../../assets/icons/noodles.png';
@@ -51,12 +52,6 @@ type FakeTargetProps = {
     style?: React.CSSProperties;
 }
 
-type FakeScreenProps = {
-    target: React.FunctionComponent<FakeTargetProps>;
-    selectedRows: string[];
-    onToggleRow: (key: string) => void;
-}
-
 const GUIDE_TOUR_STORAGE_KEY = 'my-recipes-user-guide-tour-done-v2';
 
 const SCREEN_CONFIGS: ScreenConfig[] = [
@@ -83,7 +78,7 @@ const TOUR_STEPS: TourStep[] = [
         target: 'dashboard-priority',
         title: 'Ưu tiên việc cần làm',
         description: 'Các card này giống dashboard thật: mỗi dòng là một hành động nhanh để mở đúng luồng nấu, mua hoặc xử lý tồn kho.',
-        hint: 'Chạm thử từng card fake để thấy trạng thái chọn.',
+        hint: 'Chạm thử từng card minh họa để thấy trạng thái chọn trong tour.',
     },
     {
         id: 'inventory-list',
@@ -114,7 +109,7 @@ const TOUR_STEPS: TourStep[] = [
         screen: 'dishes',
         target: 'dish-actions',
         title: 'Từ món sang hành động',
-        description: 'Từ một món có thể bắt đầu nấu, tạo giỏ mua hoặc mở chi tiết nguyên liệu. Tour chỉ mô phỏng, không ghi dữ liệu thật.',
+        description: 'Từ một món có thể bắt đầu nấu, tạo giỏ mua hoặc mở chi tiết nguyên liệu. Tour chạy trong sandbox nên không ghi dữ liệu thật.',
         hint: 'Luồng thường dùng: chọn món -> tạo giỏ hoặc thêm vào thực đơn.',
     },
     {
@@ -146,7 +141,7 @@ const TOUR_STEPS: TourStep[] = [
         screen: 'shopping',
         target: 'shopping-items',
         title: 'Tick từng nhóm nguyên liệu',
-        description: 'Các dòng fake này mô phỏng nhóm nguyên liệu trong giỏ thật. Khi hoàn tất, app thật có thể nhập nguyên liệu về kho.',
+        description: 'Các dòng dữ liệu minh họa này dùng layout giỏ thật. Khi hoàn tất trong app thật, người dùng có thể nhập nguyên liệu về kho.',
         hint: 'Chạm thử để thấy trạng thái đã mua.',
     },
     {
@@ -244,10 +239,19 @@ const tourCss = `
 }
 .guide-tour-app-content {
     height: calc(100% - 156px);
-    overflow: hidden;
+    overflow-y: auto;
+    overflow-x: hidden;
     background: linear-gradient(180deg, #e9e3f4 0%, #f6f3fb 52%, #ffffff 100%);
     padding: 12px;
     box-sizing: border-box;
+}
+.guide-tour-real-target,
+.guide-real-preview {
+    height: 100%;
+    min-height: 0;
+}
+.guide-real-preview [data-testid="dashboard"] {
+    padding-bottom: 92px !important;
 }
 .guide-tour-bottom-tab {
     height: 80px;
@@ -298,93 +302,6 @@ const tourCss = `
     color: #2f2545;
     font-size: 10px;
     font-weight: 650;
-}
-.guide-tour-screen-card {
-    border: 1px solid rgba(116,54,220,0.10);
-    border-radius: 8px;
-    background: rgba(255,255,255,0.96);
-    box-shadow: 0 10px 28px rgba(74,48,130,0.10);
-    overflow: hidden;
-}
-.guide-tour-card-header {
-    padding: 11px;
-    border-bottom: 1px solid rgba(116,54,220,0.09);
-}
-.guide-tour-card-body {
-    padding: 10px;
-}
-.guide-tour-row {
-    border: 1px solid rgba(116,54,220,0.10);
-    border-radius: 8px;
-    background: #fff;
-    padding: 9px;
-    box-shadow: 0 6px 16px rgba(74,48,130,0.06);
-}
-.guide-tour-filter-row {
-    display: flex;
-    align-items: center;
-    gap: 7px;
-    overflow: hidden;
-}
-.guide-tour-chip {
-    display: inline-flex;
-    align-items: center;
-    min-height: 24px;
-    border-radius: 999px;
-    padding: 3px 8px;
-    border: 1px solid rgba(116,54,220,0.14);
-    background: #fff;
-    color: #5e2bbf;
-    font-size: 10px;
-    line-height: 14px;
-    font-weight: 780;
-    white-space: nowrap;
-}
-.guide-tour-card-title {
-    display: block;
-    color: #111827;
-    font-size: 13px;
-    line-height: 18px;
-    font-weight: 800;
-}
-.guide-tour-card-subtitle {
-    display: block;
-    color: #8b8796;
-    font-size: 10.5px;
-    line-height: 15px;
-    margin-top: 1px;
-}
-.guide-tour-meta-grid {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 7px;
-}
-.guide-tour-three-grid {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 7px;
-}
-.guide-tour-progress-track {
-    height: 8px;
-    border-radius: 999px;
-    background: rgba(116,54,220,0.12);
-    overflow: hidden;
-}
-.guide-tour-progress-bar {
-    height: 100%;
-    border-radius: inherit;
-}
-.guide-tour-fake-button {
-    border: 1px solid rgba(116,54,220,0.14);
-    border-radius: 999px;
-    background: #fff;
-    color: #5e2bbf;
-    min-height: 30px;
-    padding: 5px 10px;
-    font: inherit;
-    font-size: 11px;
-    font-weight: 750;
-    cursor: pointer;
 }
 .guide-tour-step-panel {
     border: 1px solid rgba(116,54,220,0.12);
@@ -472,330 +389,11 @@ const FakeTarget: React.FunctionComponent<FakeTargetProps> = ({ targetKey, child
     return <div ref={node => register(targetKey, node)} className={className} style={style}>{children}</div>;
 };
 
-const FakeButton: React.FunctionComponent<{ children: React.ReactNode; tone?: string; selected?: boolean; onClick?: () => void }> = ({ children, tone = '#7436dc', selected, onClick }) => {
-    return <button type='button' className='guide-tour-fake-button' onClick={onClick} style={{ color: selected ? '#fff' : tone, background: selected ? tone : '#fff', borderColor: `${tone}33` }}>{children}</button>;
-};
-
-const MiniMetric: React.FunctionComponent<{ label: string; value: string; tone: string }> = ({ label, value, tone }) => {
-    return <Box style={{ border: `1px solid ${tone}22`, borderRadius: 8, background: `${tone}09`, padding: 8, minWidth: 0 }}>
-        <Typography.Text strong style={{ display: 'block', color: tone, fontSize: 18, lineHeight: '23px' }}>{value}</Typography.Text>
-        <Typography.Text type='secondary' style={{ display: 'block', fontSize: 10, lineHeight: '14px', fontWeight: 720 }}>{label}</Typography.Text>
-    </Box>;
-};
-
-const MiniInfo: React.FunctionComponent<{ label: string; value: string; tone: string; note?: string }> = ({ label, value, tone, note }) => {
-    return <Box style={{ border: `1px solid ${tone}22`, borderRadius: 8, background: '#fff', padding: 8, minWidth: 0 }}>
-        <Typography.Text type='secondary' style={{ display: 'block', fontSize: 10, lineHeight: '14px', fontWeight: 720, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{label}</Typography.Text>
-        <Typography.Text strong style={{ display: 'block', color: tone, fontSize: 12, lineHeight: '17px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{value}</Typography.Text>
-        {note && <Typography.Text type='secondary' style={{ display: 'block', fontSize: 9.5, lineHeight: '13px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{note}</Typography.Text>}
-    </Box>;
-};
-
-const FakeSearchBar: React.FunctionComponent<{ placeholder: string; tone: string; chips?: string[] }> = ({ placeholder, tone, chips = [] }) => {
-    return <Box className='guide-tour-row' style={{ padding: 8 }}>
-        <div className='guide-tour-filter-row'>
-            <SearchOutlined style={{ color: tone, flexShrink: 0 }} />
-            <Typography.Text type='secondary' style={{ fontSize: 12, lineHeight: '16px', minWidth: 0, flex: '1 1 auto', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{placeholder}</Typography.Text>
-            {chips.map(chip => <span key={chip} className='guide-tour-chip' style={{ color: tone, borderColor: `${tone}30`, background: `${tone}09` }}>{chip}</span>)}
-        </div>
-    </Box>;
-};
-
-const FakeFilterChips: React.FunctionComponent<{ chips: string[]; activeIndex?: number; tone: string }> = ({ chips, activeIndex = 0, tone }) => {
-    return <div className='guide-tour-filter-row'>
-        {chips.map((chip, index) => <span key={chip} className='guide-tour-chip' style={{ color: index === activeIndex ? tone : '#6b6478', borderColor: index === activeIndex ? `${tone}38` : 'rgba(116,54,220,0.12)', background: index === activeIndex ? `${tone}0f` : '#fff' }}>{chip}</span>)}
-    </div>;
-};
-
-const FakeProgress: React.FunctionComponent<{ percent: number; tone: string }> = ({ percent, tone }) => {
-    return <div className='guide-tour-progress-track'>
-        <div className='guide-tour-progress-bar' style={{ width: `${percent}%`, background: `linear-gradient(90deg, ${tone} 0%, #13a8a8 100%)` }} />
-    </div>;
-};
-
-const SectionHeader: React.FunctionComponent<{ icon: React.ReactNode; title: string; subtitle: string; tone: string; action?: string }> = ({ icon, title, subtitle, tone, action }) => {
-    return <div className='guide-tour-card-header' style={{ background: `linear-gradient(90deg, ${tone}12 0%, rgba(255,255,255,0.96) 72%)` }}>
-        <Stack justify='space-between' align='center' gap={8}>
-            <Stack align='center' gap={8} style={{ minWidth: 0 }}>
-                <span style={{ width: 34, height: 34, borderRadius: 8, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', color: tone, background: `${tone}14`, border: `1px solid ${tone}26`, flexShrink: 0 }}>{icon}</span>
-                <div style={{ minWidth: 0 }}>
-                    <Typography.Text strong style={{ display: 'block', color: '#111827', fontSize: 15, lineHeight: '20px' }}>{title}</Typography.Text>
-                    <Typography.Text type='secondary' style={{ display: 'block', fontSize: 10.5, lineHeight: '15px' }}>{subtitle}</Typography.Text>
-                </div>
-            </Stack>
-            {action && <span style={pillStyle(tone)}>{action}</span>}
-        </Stack>
-    </div>;
-};
-
-const DashboardFakeScreen: React.FunctionComponent<FakeScreenProps> = ({ target, selectedRows, onToggleRow }) => {
-    return <Stack direction='column' align='stretch' gap={10}>
-        {target({ targetKey: 'dashboard-hero', children: <Box className='guide-tour-screen-card' style={{ borderColor: 'rgba(116,54,220,0.18)' }}>
-            <SectionHeader icon={<CalendarOutlined />} title='Hôm nay' subtitle='Thứ Hai, 08/06/2026 · bếp nhà cần xem trước' tone='#7436dc' action='4 việc' />
-            <div className='guide-tour-card-body'>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 8 }}>
-                    <MiniMetric label='Bữa' value='3' tone='#7436dc' />
-                    <MiniMetric label='Mua sắm' value='2' tone='#0958d9' />
-                    <MiniMetric label='Sắp hết hạn' value='2' tone='#d48806' />
-                </div>
-                <Box style={{ marginTop: 8, border: '1px solid rgba(116,54,220,0.10)', borderRadius: 8, background: '#fff', padding: 8 }}>
-                    <FakeFilterChips tone='#7436dc' chips={['Mon 3 bữa', 'Tue 1 giỏ', 'Wed chuẩn bị', 'Thu rảnh']} />
-                </Box>
-            </div>
-        </Box> })}
-
-        {target({ targetKey: 'dashboard-priority', children: <Box className='guide-tour-screen-card'>
-            <SectionHeader icon={<WarningOutlined />} title='Việc nên làm trước' subtitle='Mở đúng luồng từ dashboard' tone='#d48806' action='Ưu tiên' />
-            <div className='guide-tour-card-body'>
-                <Stack direction='column' align='stretch' gap={8}>
-                    {[
-                        ['cook', 'Nấu cơm gà áp chảo', 'Đủ 80% nguyên liệu · 32 phút', 'Mở món ăn'],
-                        ['shop', 'Đi chợ cho 4 bữa', 'Còn 5 nguyên liệu · ước tính 320k', 'Mở giỏ'],
-                        ['stock', 'Dùng rau cải trước', '300g còn 2 ngày dùng tốt', 'Mở kho'],
-                    ].map(([key, title, note, action]) => <button key={key} type='button' onClick={() => onToggleRow(key)} className='guide-tour-row' style={{ textAlign: 'left', cursor: 'pointer', borderColor: selectedRows.includes(key) ? '#7436dc55' : 'rgba(116,54,220,0.10)', background: selectedRows.includes(key) ? '#7436dc0d' : '#fff' }}>
-                        <Stack justify='space-between' align='center' gap={8}>
-                            <div style={{ minWidth: 0 }}>
-                                <Typography.Text className='guide-tour-card-title'>{title}</Typography.Text>
-                                <Typography.Text className='guide-tour-card-subtitle'>{note}</Typography.Text>
-                            </div>
-                            <span style={pillStyle(selectedRows.includes(key) ? '#7436dc' : '#6b6478')}>{selectedRows.includes(key) ? 'Đã xem' : action}</span>
-                        </Stack>
-                    </button>)}
-                </Stack>
-            </div>
-        </Box> })}
-    </Stack>;
-};
-
-const InventoryFakeScreen: React.FunctionComponent<FakeScreenProps> = ({ target, selectedRows, onToggleRow }) => {
-    return <Stack direction='column' align='stretch' gap={10}>
-        <FakeSearchBar placeholder='Tìm nguyên liệu, nhóm hoặc lô tồn kho' tone='#389e0d' chips={['Còn hàng', 'Sắp hết hạn']} />
-        {target({ targetKey: 'inventory-list', children: <Box className='guide-tour-screen-card'>
-            <SectionHeader icon={<DatabaseOutlined />} title='Nguyên liệu' subtitle='Danh sách tồn kho hiện tại' tone='#389e0d' action='24 mục' />
-            <div className='guide-tour-card-body'>
-                <FakeFilterChips tone='#389e0d' chips={['Tất cả', 'Rau củ', 'Thịt cá', 'Đồ khô']} />
-                <div className='guide-tour-meta-grid' style={{ marginTop: 8, marginBottom: 8 }}>
-                    <MiniInfo label='Có thể dùng ngay' value='18 mục' note='đang còn hàng' tone='#389e0d' />
-                    <MiniInfo label='Cần dùng trước' value='3 lô' note='trong 2 ngày' tone='#d48806' />
-                </div>
-                <Stack direction='column' align='stretch' gap={8}>
-                    {[
-                        ['chicken', 'Ức gà', '450g', 'Thịt cá · ngăn đông', 'Đủ cho 2 phần cơm gà', '#389e0d'],
-                        ['greens', 'Rau cải xanh', '300g', 'Rau củ · ngăn mát', 'Nên dùng trước 10/06', '#d48806'],
-                        ['egg', 'Trứng gà', '8 quả', 'Đạm nhanh · kệ mát', 'Dễ ghép món sáng', '#13a8a8'],
-                    ].map(([key, name, value, category, note, tone]) => <button key={key} type='button' onClick={() => onToggleRow(key)} className='guide-tour-row' style={{ textAlign: 'left', cursor: 'pointer', borderColor: selectedRows.includes(key) ? `${tone}66` : 'rgba(116,54,220,0.10)' }}>
-                        <Stack justify='space-between' align='center' gap={8}>
-                            <div style={{ minWidth: 0 }}>
-                                <Typography.Text className='guide-tour-card-title'>{name}</Typography.Text>
-                                <Typography.Text className='guide-tour-card-subtitle'>{value} · {category} · {note}</Typography.Text>
-                            </div>
-                            <span style={pillStyle(tone)}>{selectedRows.includes(key) ? 'Đã xem' : key === 'greens' ? 'Ưu tiên' : 'Còn hàng'}</span>
-                        </Stack>
-                    </button>)}
-                </Stack>
-            </div>
-        </Box> })}
-        {target({ targetKey: 'inventory-batch', children: <Box className='guide-tour-row' style={{ borderColor: '#d4880633', background: '#d488060a' }}>
-            <Stack direction='column' align='stretch' gap={7}>
-                <Stack justify='space-between' align='center' gap={10}>
-                    <div style={{ minWidth: 0 }}>
-                        <Typography.Text className='guide-tour-card-title'>Lô rau cải mua 06/06</Typography.Text>
-                        <Typography.Text className='guide-tour-card-subtitle'>300g · ngăn mát · nên dùng trước 10/06</Typography.Text>
-                    </div>
-                    <span style={pillStyle('#d48806')}>2 ngày</span>
-                </Stack>
-                <FakeProgress percent={72} tone='#d48806' />
-                <Typography.Text type='secondary' style={{ fontSize: 10.5, lineHeight: '15px' }}>Lô này được dùng trong gợi ý món, cảnh báo hết hạn và shopping list.</Typography.Text>
-            </Stack>
-        </Box> })}
-    </Stack>;
-};
-
-const DishesFakeScreen: React.FunctionComponent<FakeScreenProps> = ({ target, selectedRows, onToggleRow }) => {
-    return <Stack direction='column' align='stretch' gap={10}>
-        <FakeSearchBar placeholder='Tìm món ăn, nguyên liệu hoặc tag' tone='#d48806' chips={['Hoàn thiện', '30 phút']} />
-        {target({ targetKey: 'dishes-list', children: <Box className='guide-tour-screen-card'>
-            <SectionHeader icon={<FireOutlined />} title='Món ăn' subtitle='Công thức, khẩu phần và trạng thái dữ liệu' tone='#d48806' action='128 món' />
-            <div className='guide-tour-card-body'>
-                <FakeFilterChips tone='#d48806' chips={['Tất cả', 'Hoàn thiện', 'Món chính', 'Nhanh']} activeIndex={1} />
-                <Stack direction='column' align='stretch' gap={8}>
-                    {[
-                        ['rice-chicken', 'Cơm gà áp chảo', '2 phần · 32 phút', 'Đủ 80% nguyên liệu', ['Món chính', 'Áp chảo'], '#389e0d'],
-                        ['oat', 'Cháo yến mạch trứng', '1 phần · 12 phút', 'Thiếu sữa tươi', ['Ăn sáng', 'Nhanh'], '#d48806'],
-                        ['soup', 'Canh rau cải đậu hũ', '3 phần · 22 phút', 'Dùng rau sắp hết hạn', ['Canh', 'Nhẹ'], '#13a8a8'],
-                    ].map(([key, name, meta, note, tags, tone]) => <button key={String(key)} type='button' onClick={() => onToggleRow(String(key))} className='guide-tour-row' style={{ textAlign: 'left', cursor: 'pointer', borderColor: selectedRows.includes(String(key)) ? `${tone}66` : 'rgba(116,54,220,0.10)', background: selectedRows.includes(String(key)) ? `${tone}0a` : '#fff' }}>
-                        <Stack justify='space-between' align='center' gap={8}>
-                            <div style={{ minWidth: 0 }}>
-                                <Typography.Text className='guide-tour-card-title'>{name}</Typography.Text>
-                                <Typography.Text className='guide-tour-card-subtitle'>{meta} · {note}</Typography.Text>
-                                <Stack gap={5} wrap='wrap' style={{ marginTop: 5 }}>
-                                    {(tags as string[]).map(tag => <span key={tag} style={pillStyle(String(tone))}>{tag}</span>)}
-                                </Stack>
-                            </div>
-                            <span style={pillStyle(selectedRows.includes(String(key)) ? '#7436dc' : String(tone))}>{selectedRows.includes(String(key)) ? 'Chọn' : 'Xem'}</span>
-                        </Stack>
-                    </button>)}
-                </Stack>
-            </div>
-        </Box> })}
-        {target({ targetKey: 'dish-actions', children: <Box className='guide-tour-row'>
-            <Stack justify='space-between' align='center' gap={8} wrap='wrap'>
-                <div style={{ minWidth: 0 }}>
-                    <Typography.Text className='guide-tour-card-title'>Hành động từ món đã chọn</Typography.Text>
-                    <Typography.Text className='guide-tour-card-subtitle'>Nấu, tạo giỏ mua hoặc thêm vào thực đơn</Typography.Text>
-                </div>
-                <Stack align='center' gap={7} wrap='wrap' style={{ justifyContent: 'flex-end' }}>
-                    {['Nấu', 'Tạo giỏ', 'Thực đơn'].map(label => <FakeButton key={label} tone='#d48806' selected={selectedRows.includes(label)} onClick={() => onToggleRow(label)}>{label}</FakeButton>)}
-                </Stack>
-            </Stack>
-        </Box> })}
-    </Stack>;
-};
-
-const SuggestionsFakeScreen: React.FunctionComponent<FakeScreenProps> = ({ target, selectedRows, onToggleRow }) => {
-    return <Stack direction='column' align='stretch' gap={10}>
-        {target({ targetKey: 'suggestion-tabs', children: <Box className='guide-tour-row'>
-            <Stack direction='column' align='stretch' gap={8}>
-                <FakeFilterChips tone='#13a8a8' chips={['Tủ lạnh', 'Thời gian', 'Dinh dưỡng']} />
-                <div className='guide-tour-meta-grid'>
-                    <MiniInfo label='Có sẵn trong kho' value='14 nguyên liệu' note='đọc từ tồn kho' tone='#389e0d' />
-                    <MiniInfo label='Món đủ dữ liệu' value='36 món' note='có khẩu phần' tone='#13a8a8' />
-                </div>
-            </Stack>
-        </Box> })}
-        {target({ targetKey: 'suggestion-card', children: <Box className='guide-tour-screen-card' style={{ borderColor: '#13a8a833' }}>
-            <SectionHeader icon={<PlayCircleOutlined />} title='Món phù hợp nhất' subtitle='Xếp hạng theo nguyên liệu đang có' tone='#13a8a8' action='92 điểm' />
-            <div className='guide-tour-card-body'>
-                <Stack direction='column' align='stretch' gap={8}>
-                    <Box className='guide-tour-row' style={{ background: '#13a8a80a', borderColor: '#13a8a833' }}>
-                        <Stack justify='space-between' align='center' gap={8}>
-                            <div style={{ minWidth: 0 }}>
-                                <Typography.Text className='guide-tour-card-title'>Cơm gà áp chảo</Typography.Text>
-                                <Typography.Text className='guide-tour-card-subtitle'>32 phút · 2 phần · giàu đạm</Typography.Text>
-                            </div>
-                            <CheckCircleOutlined style={{ color: '#13a8a8', fontSize: 18 }} />
-                        </Stack>
-                    </Box>
-                    <Box className='guide-tour-row'>
-                        <Stack justify='space-between' align='center' gap={8}>
-                            <Typography.Text style={{ fontSize: 12, lineHeight: '17px', color: '#2f2545', fontWeight: 720 }}>Có sẵn: gà, cơm, trứng, rau cải</Typography.Text>
-                            <CheckCircleOutlined style={{ color: '#389e0d' }} />
-                        </Stack>
-                    </Box>
-                    <Box className='guide-tour-row'>
-                        <Stack justify='space-between' align='center' gap={8}>
-                            <Typography.Text style={{ fontSize: 12, lineHeight: '17px', color: '#2f2545', fontWeight: 720 }}>Cần mua: hành lá 100g</Typography.Text>
-                            <ShoppingCartOutlined style={{ color: '#0958d9' }} />
-                        </Stack>
-                    </Box>
-                    <Stack gap={7} wrap='wrap' style={{ justifyContent: 'flex-end' }}>
-                        <FakeButton tone='#13a8a8' selected={selectedRows.includes('suggest-dish')} onClick={() => onToggleRow('suggest-dish')}>Chọn</FakeButton>
-                        <FakeButton tone='#0958d9' selected={selectedRows.includes('suggest-cart')} onClick={() => onToggleRow('suggest-cart')}>Giỏ</FakeButton>
-                        <FakeButton tone='#7436dc' selected={selectedRows.includes('suggest-nutrition')} onClick={() => onToggleRow('suggest-nutrition')}>Nutrition</FakeButton>
-                    </Stack>
-                </Stack>
-            </div>
-        </Box> })}
-    </Stack>;
-};
-
-const ShoppingFakeScreen: React.FunctionComponent<FakeScreenProps> = ({ target, selectedRows, onToggleRow }) => {
-    return <Stack direction='column' align='stretch' gap={10}>
-        <FakeSearchBar placeholder='Tìm lịch mua sắm, món hoặc nguyên liệu' tone='#0958d9' chips={['Đang mua', 'Tuần này']} />
-        {target({ targetKey: 'shopping-summary', children: <Box className='guide-tour-screen-card'>
-            <SectionHeader icon={<ShoppingCartOutlined />} title='Giỏ cuối tuần' subtitle='Từ 4 bữa trong thực đơn' tone='#0958d9' action='7/12' />
-            <div className='guide-tour-card-body'>
-                <FakeProgress percent={58} tone='#0958d9' />
-                <div className='guide-tour-meta-grid' style={{ marginTop: 9 }}>
-                    <MiniMetric label='Còn mua' value='5 mục' tone='#0958d9' />
-                    <MiniMetric label='Ước tính' value='320k' tone='#d48806' />
-                </div>
-                <div className='guide-tour-three-grid' style={{ marginTop: 8 }}>
-                    <MiniInfo label='Nguồn' value='4 bữa' tone='#7436dc' />
-                    <MiniInfo label='Ngày mua' value='09/06' tone='#0958d9' />
-                    <MiniInfo label='Nhập kho' value='sẵn' tone='#389e0d' />
-                </div>
-            </div>
-        </Box> })}
-        {target({ targetKey: 'shopping-items', children: <Box className='guide-tour-screen-card'>
-            <SectionHeader icon={<CheckCircleOutlined />} title='Nguyên liệu cần mua' subtitle='Tick khi đi chợ' tone='#0958d9' />
-            <div className='guide-tour-card-body'>
-                <Stack direction='column' align='stretch' gap={8}>
-                    {[
-                        ['scallion', 'Hành lá', '100g', 'cho cơm gà', false],
-                        ['milk', 'Sữa tươi', '1 hộp', 'cho cháo yến mạch', true],
-                        ['tofu', 'Đậu hũ non', '2 miếng', 'cho canh tối', false],
-                    ].map(([key, name, amount, source, done]) => {
-                        const selected = selectedRows.includes(String(key)) || Boolean(done);
-                        return <button key={String(key)} type='button' onClick={() => onToggleRow(String(key))} className='guide-tour-row' style={{ textAlign: 'left', cursor: 'pointer', borderColor: selected ? '#0958d955' : 'rgba(116,54,220,0.10)', background: selected ? '#0958d90d' : '#fff' }}>
-                            <Stack justify='space-between' align='center' gap={8}>
-                                <Stack align='center' gap={8} style={{ minWidth: 0 }}>
-                                    <span style={{ width: 24, height: 24, borderRadius: 999, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', color: selected ? '#fff' : '#0958d9', background: selected ? '#0958d9' : '#fff', border: '1px solid #0958d944', flexShrink: 0 }}>{selected ? <CheckCircleOutlined /> : null}</span>
-                                    <div style={{ minWidth: 0 }}>
-                                        <Typography.Text style={{ display: 'block', color: '#2f2545', fontSize: 12, lineHeight: '17px', fontWeight: 720 }}>{name}</Typography.Text>
-                                        <Typography.Text type='secondary' style={{ display: 'block', fontSize: 10, lineHeight: '14px' }}>{source}</Typography.Text>
-                                    </div>
-                                </Stack>
-                                <Typography.Text strong style={{ color: '#0958d9', fontSize: 12, lineHeight: '17px' }}>{amount}</Typography.Text>
-                            </Stack>
-                        </button>;
-                    })}
-                </Stack>
-            </div>
-        </Box> })}
-    </Stack>;
-};
-
-const MealsFakeScreen: React.FunctionComponent<FakeScreenProps> = ({ target, selectedRows, onToggleRow }) => {
-    return <Stack direction='column' align='stretch' gap={10}>
-        {target({ targetKey: 'meal-date', children: <Box className='guide-tour-row' style={{ borderColor: '#1677ff33', background: '#1677ff0a' }}>
-            <Stack direction='column' align='stretch' gap={8}>
-                <Stack align='center' justify='space-between' gap={8}>
-                    <FakeButton tone='#1677ff'><LeftOutlined /></FakeButton>
-                <div style={{ textAlign: 'center', minWidth: 0 }}>
-                    <Typography.Text strong style={{ display: 'block', color: '#111827', fontSize: 15, lineHeight: '20px' }}>Monday, 08/06/2026</Typography.Text>
-                    <Typography.Text type='secondary' style={{ display: 'block', fontSize: 10.5, lineHeight: '15px' }}>3 bữa · 6 phần</Typography.Text>
-                </div>
-                    <FakeButton tone='#1677ff'><RightOutlined /></FakeButton>
-                </Stack>
-                <Stack justify='center' gap={6} wrap='wrap'>
-                    <span style={pillStyle('#1677ff')}>Chọn ngày</span>
-                    <span style={pillStyle('#13a8a8')}>Từ mẫu</span>
-                    <span style={pillStyle('#0958d9')}>Tạo giỏ</span>
-                </Stack>
-            </Stack>
-        </Box> })}
-        {target({ targetKey: 'meal-plan', children: <Box className='guide-tour-screen-card'>
-            <SectionHeader icon={<CalendarOutlined />} title='Kế hoạch hôm nay' subtitle='Theo buổi ăn và khẩu phần' tone='#1677ff' action='Tạo giỏ' />
-            <div className='guide-tour-card-body'>
-                <Stack direction='column' align='stretch' gap={8}>
-                    {[
-                        ['morning', 'Sáng', 'Cháo yến mạch trứng', '1 phần', '12 phút'],
-                        ['lunch', 'Trưa', 'Cơm gà áp chảo', '2 phần', '32 phút'],
-                        ['dinner', 'Tối', 'Canh rau cải đậu hũ', '3 phần', '22 phút'],
-                    ].map(([key, meal, dish, serving, duration]) => <button key={key} type='button' onClick={() => onToggleRow(key)} className='guide-tour-row' style={{ textAlign: 'left', cursor: 'pointer', borderColor: selectedRows.includes(key) ? '#1677ff55' : 'rgba(116,54,220,0.10)', background: selectedRows.includes(key) ? '#1677ff0d' : '#fff' }}>
-                        <Stack justify='space-between' align='center' gap={8}>
-                            <div style={{ minWidth: 0 }}>
-                                <Typography.Text strong style={{ display: 'block', color: '#1677ff', fontSize: 11, lineHeight: '15px' }}>{meal}</Typography.Text>
-                                <Typography.Text style={{ display: 'block', color: '#2f2545', fontSize: 12, lineHeight: '17px', fontWeight: 720 }}>{dish}</Typography.Text>
-                                <Typography.Text type='secondary' style={{ display: 'block', fontSize: 10, lineHeight: '14px' }}>{duration} · tạo giỏ được</Typography.Text>
-                            </div>
-                            <span style={pillStyle('#1677ff')}>{serving}</span>
-                        </Stack>
-                    </button>)}
-                </Stack>
-            </div>
-        </Box> })}
-    </Stack>;
-};
-
 const FakeAppShell: React.FunctionComponent<{
     screen: ScreenConfig;
     target: React.FunctionComponent<FakeTargetProps>;
-    selectedRows: string[];
-    onToggleRow: (key: string) => void;
-}> = ({ screen, target, selectedRows, onToggleRow }) => {
-    const props = { target, selectedRows, onToggleRow };
+    activeTarget: string;
+}> = ({ screen, target, activeTarget }) => {
     return <div className='guide-tour-phone'>
         <div className='guide-tour-app-header'>
             <Stack justify='space-between' align='center' gap={10} style={{ height: '100%' }}>
@@ -813,12 +411,11 @@ const FakeAppShell: React.FunctionComponent<{
             </Stack>
         </div>
         <div className='guide-tour-app-content'>
-            {screen.key === 'dashboard' && <DashboardFakeScreen {...props} />}
-            {screen.key === 'inventory' && <InventoryFakeScreen {...props} />}
-            {screen.key === 'dishes' && <DishesFakeScreen {...props} />}
-            {screen.key === 'suggestions' && <SuggestionsFakeScreen {...props} />}
-            {screen.key === 'shopping' && <ShoppingFakeScreen {...props} />}
-            {screen.key === 'meals' && <MealsFakeScreen {...props} />}
+            {target({
+                targetKey: activeTarget,
+                className: 'guide-tour-real-target',
+                children: <GuideRealPreviewScreen screen={screen.key} />,
+            })}
         </div>
         <div className='guide-tour-bottom-tab'>
             <div className='guide-tour-bottom-dock'>
@@ -917,7 +514,6 @@ export const UserGuideTourScreen: React.FC = () => {
     const navigate = useNavigate();
     const [searchParams, setSearchParams] = useSearchParams();
     const [stepIndex, setStepIndex] = React.useState(() => getStepIndexFromItem(searchParams.get('item')));
-    const [selectedRows, setSelectedRows] = React.useState<string[]>([]);
     const [completedTours, setCompletedTours] = React.useState<string[]>(readCompletedTours);
     const targetElements = React.useRef<Record<string, HTMLDivElement | null>>({});
     const [spotlightRect, setSpotlightRect] = React.useState<SpotlightRect | null>(null);
@@ -965,7 +561,6 @@ export const UserGuideTourScreen: React.FC = () => {
     const goToStep = React.useCallback((nextIndex: number) => {
         const bounded = Math.max(0, Math.min(TOUR_STEPS.length - 1, nextIndex));
         setStepIndex(bounded);
-        setSelectedRows([]);
         const nextStep = TOUR_STEPS[bounded];
         setSearchParams({ item: nextStep.screen }, { replace: true });
     }, [setSearchParams]);
@@ -982,11 +577,6 @@ export const UserGuideTourScreen: React.FC = () => {
         navigate(RootRoutes.AuthorizedRoutes.UserGuide({ page: 'start' }), { replace: true });
     }, [markScreenComplete, navigate, step.screen]);
 
-    const toggleRow = React.useCallback((key: string) => {
-        setSelectedRows(prev => prev.includes(key) ? prev.filter(item => item !== key) : [...prev, key]);
-        window.requestAnimationFrame(updateSpotlight);
-    }, [updateSpotlight]);
-
     const selectScreen = React.useCallback((screenKey: TourScreenKey) => {
         const index = TOUR_STEPS.findIndex(item => item.screen === screenKey);
         if (index >= 0) goToStep(index);
@@ -996,7 +586,7 @@ export const UserGuideTourScreen: React.FC = () => {
         <div className='guide-tour-screen' data-testid='user-guide-tour-page'>
             <style>{tourCss}</style>
             <div className='guide-tour-layout'>
-                <FakeAppShell screen={screen} target={target} selectedRows={selectedRows} onToggleRow={toggleRow} />
+                <FakeAppShell screen={screen} target={target} activeTarget={step.target} />
 
                 <aside className='guide-tour-side-panel'>
                     <Box className='guide-tour-step-panel'>
@@ -1029,7 +619,7 @@ export const UserGuideTourScreen: React.FC = () => {
                         <Box style={{ marginTop: 12, border: `1px solid ${screen.tone}18`, borderRadius: 10, background: `${screen.tone}08`, padding: 10 }}>
                             <Stack align='center' gap={8}>
                                 <ClockCircleOutlined style={{ color: screen.tone }} />
-                                <Typography.Text style={{ color: '#2f2545', fontSize: 11, lineHeight: '16px', fontWeight: 720 }}>Tour dùng dữ liệu giả đẹp và màn hình mô phỏng. Không có trang thật nào bị thêm target hoặc bị ghi dữ liệu.</Typography.Text>
+                                <Typography.Text style={{ color: '#2f2545', fontSize: 11, lineHeight: '16px', fontWeight: 720 }}>Tour dùng màn hình thật trong sandbox dữ liệu giả. Không có trang thật nào bị thêm target hoặc bị ghi dữ liệu.</Typography.Text>
                             </Stack>
                         </Box>
                     </Box>
