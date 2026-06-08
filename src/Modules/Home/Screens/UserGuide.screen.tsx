@@ -9,7 +9,9 @@ import {
     DatabaseOutlined,
     FireOutlined,
     MedicineBoxOutlined,
+    PlayCircleOutlined,
     QuestionCircleOutlined,
+    ReloadOutlined,
     SearchOutlined,
     ShoppingCartOutlined,
 } from '@ant-design/icons';
@@ -20,6 +22,7 @@ import { Tag } from '@components/Tag';
 import { Typography } from '@components/Typography';
 import { useScreenTitle } from '@hooks';
 import { RootRoutes } from '@routing/RootRoutes';
+import { Progress } from 'antd';
 import React from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 
@@ -40,6 +43,15 @@ type GuidePage = {
     actionPath?: string;
     steps: GuideStep[];
     tips: string[];
+}
+
+type GuideFlow = {
+    key: string;
+    label: string;
+    description: string;
+    pageKeys: string[];
+    tone: string;
+    icon: React.ReactNode;
 }
 
 const GUIDE_PAGES: GuidePage[] = [
@@ -253,7 +265,69 @@ const GUIDE_PAGES: GuidePage[] = [
     },
 ];
 
+const GUIDE_FLOWS: GuideFlow[] = [
+    {
+        key: 'daily',
+        label: 'Dùng hằng ngày',
+        description: 'Mở app, chọn món, tạo giỏ và lên thực đơn nhanh.',
+        pageKeys: ['start', 'suggestions', 'shopping', 'meals'],
+        tone: '#7436dc',
+        icon: <PlayCircleOutlined />,
+    },
+    {
+        key: 'setup',
+        label: 'Thiết lập dữ liệu',
+        description: 'Hoàn thiện nguyên liệu, món ăn, giá, nutrition và backup.',
+        pageKeys: ['ingredients', 'dishes', 'nutrition', 'data', 'health'],
+        tone: '#389e0d',
+        icon: <DatabaseOutlined />,
+    },
+    {
+        key: 'plan',
+        label: 'Lên kế hoạch tuần',
+        description: 'Dùng thực đơn, mẫu, mua sắm và analytics để chuẩn bị cả tuần.',
+        pageKeys: ['meals', 'templates', 'shopping', 'analytics'],
+        tone: '#1677ff',
+        icon: <CalendarOutlined />,
+    },
+    {
+        key: 'nutrition-flow',
+        label: 'Ăn theo mục tiêu',
+        description: 'Tính dinh dưỡng, xem mục tiêu và chọn món phù hợp hơn.',
+        pageKeys: ['nutrition', 'suggestions', 'analytics', 'health'],
+        tone: '#d48806',
+        icon: <CalculatorOutlined />,
+    },
+];
+
+const GUIDE_PROGRESS_STORAGE_KEY = 'my-recipes-user-guide-progress-v1';
+
 const getGuidePage = (key: string | null): GuidePage => GUIDE_PAGES.find(item => item.key === key) ?? GUIDE_PAGES[0];
+
+const getGuideFlow = (key: string | null): GuideFlow => GUIDE_FLOWS.find(item => item.key === key) ?? GUIDE_FLOWS[0];
+
+const getStepId = (pageKey: string, index: number) => `${pageKey}:${index}`;
+
+const getPageStepIds = (page: GuidePage) => page.steps.map((_, index) => getStepId(page.key, index));
+
+const getAllStepIds = () => GUIDE_PAGES.flatMap(getPageStepIds);
+
+const readCompletedGuideSteps = (): string[] => {
+    if (typeof window === 'undefined') return [];
+
+    try {
+        const raw = window.localStorage.getItem(GUIDE_PROGRESS_STORAGE_KEY);
+        const parsed = raw ? JSON.parse(raw) : [];
+        return Array.isArray(parsed) ? parsed.filter((item): item is string => typeof item === 'string') : [];
+    } catch {
+        return [];
+    }
+};
+
+const writeCompletedGuideSteps = (ids: string[]) => {
+    if (typeof window === 'undefined') return;
+    window.localStorage.setItem(GUIDE_PROGRESS_STORAGE_KEY, JSON.stringify(ids));
+};
 
 const userGuideCss = `
 .user-guide-layout {
@@ -267,6 +341,28 @@ const userGuideCss = `
 }
 .user-guide-desktop-nav {
     display: block;
+}
+.user-guide-flow-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(142px, 1fr));
+    gap: 8px;
+}
+.user-guide-progress-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 104px;
+    gap: 10px;
+    align-items: center;
+}
+.user-guide-flow-sequence {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(116px, 1fr));
+    gap: 7px;
+}
+.user-guide-step-card {
+    transition: border-color 140ms ease, background 140ms ease, transform 140ms ease;
+}
+.user-guide-step-card:active {
+    transform: scale(0.995);
 }
 @media (max-width: 760px) {
     .user-guide-page {
@@ -306,8 +402,18 @@ const userGuideCss = `
     .user-guide-action-wrap button {
         width: 100%;
     }
+    .user-guide-flow-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .user-guide-progress-grid {
+        grid-template-columns: minmax(0, 1fr);
+    }
 }
 @media (max-width: 420px) {
+    .user-guide-flow-grid,
+    .user-guide-flow-sequence {
+        grid-template-columns: minmax(0, 1fr);
+    }
     .user-guide-step-row {
         gap: 7px !important;
     }
@@ -322,12 +428,58 @@ export const UserGuideScreen: React.FC = () => {
     const navigate = useNavigate();
     const [searchParams, setSearchParams] = useSearchParams();
     const activePage = getGuidePage(searchParams.get('page'));
+    const activeFlow = getGuideFlow(searchParams.get('flow'));
     const activeIndex = GUIDE_PAGES.findIndex(item => item.key === activePage.key);
+    const [completedStepIds, setCompletedStepIds] = React.useState<string[]>(readCompletedGuideSteps);
     useScreenTitle({ value: 'Hướng dẫn', deps: [] });
 
+    const completedStepSet = React.useMemo(() => new Set(completedStepIds), [completedStepIds]);
+    const allStepIds = React.useMemo(() => getAllStepIds(), []);
+    const activePageStepIds = React.useMemo(() => getPageStepIds(activePage), [activePage]);
+    const activeFlowPages = React.useMemo(() => activeFlow.pageKeys.map(key => getGuidePage(key)), [activeFlow]);
+    const activeFlowStepIds = React.useMemo(() => activeFlowPages.flatMap(getPageStepIds), [activeFlowPages]);
+    const completedActiveSteps = activePageStepIds.filter(id => completedStepSet.has(id)).length;
+    const completedFlowSteps = activeFlowStepIds.filter(id => completedStepSet.has(id)).length;
+    const activePagePercent = activePageStepIds.length > 0 ? Math.round(completedActiveSteps / activePageStepIds.length * 100) : 0;
+    const activeFlowPercent = activeFlowStepIds.length > 0 ? Math.round(completedFlowSteps / activeFlowStepIds.length * 100) : 0;
+    const overallPercent = allStepIds.length > 0 ? Math.round(completedStepIds.length / allStepIds.length * 100) : 0;
+
+    const updateCompletedSteps = React.useCallback((ids: string[]) => {
+        const validIds = new Set(allStepIds);
+        const nextIds = Array.from(new Set(ids.filter(id => validIds.has(id))));
+        setCompletedStepIds(nextIds);
+        writeCompletedGuideSteps(nextIds);
+    }, [allStepIds]);
+
     const selectPage = React.useCallback((key: string) => {
-        setSearchParams({ page: key });
+        const nextParams = new URLSearchParams(searchParams);
+        nextParams.set('page', key);
+        nextParams.set('flow', activeFlow.key);
+        setSearchParams(nextParams);
+    }, [activeFlow.key, searchParams, setSearchParams]);
+
+    const selectFlow = React.useCallback((key: string) => {
+        const nextFlow = getGuideFlow(key);
+        setSearchParams({ page: nextFlow.pageKeys[0], flow: nextFlow.key });
     }, [setSearchParams]);
+
+    const toggleStep = React.useCallback((stepId: string) => {
+        if (completedStepSet.has(stepId)) updateCompletedSteps(completedStepIds.filter(id => id !== stepId));
+        else updateCompletedSteps([...completedStepIds, stepId]);
+    }, [completedStepIds, completedStepSet, updateCompletedSteps]);
+
+    const completeActivePage = React.useCallback(() => {
+        updateCompletedSteps([...completedStepIds, ...activePageStepIds]);
+    }, [activePageStepIds, completedStepIds, updateCompletedSteps]);
+
+    const resetActivePage = React.useCallback(() => {
+        const activeIds = new Set(activePageStepIds);
+        updateCompletedSteps(completedStepIds.filter(id => !activeIds.has(id)));
+    }, [activePageStepIds, completedStepIds, updateCompletedSteps]);
+
+    const resetAllProgress = React.useCallback(() => {
+        updateCompletedSteps([]);
+    }, [updateCompletedSteps]);
 
     const previousPage = activeIndex > 0 ? GUIDE_PAGES[activeIndex - 1] : undefined;
     const nextPage = activeIndex < GUIDE_PAGES.length - 1 ? GUIDE_PAGES[activeIndex + 1] : undefined;
@@ -338,11 +490,64 @@ export const UserGuideScreen: React.FC = () => {
             <Stack justify='space-between' align='flex-start' gap={12} wrap='wrap'>
                 <div style={{ minWidth: 0 }}>
                     <Typography.Text style={{ display: 'block', color: '#7436dc', fontSize: 12, lineHeight: '16px', fontWeight: 750 }}>My Recipes</Typography.Text>
-                    <Typography.Text strong style={{ display: 'block', color: '#111827', fontSize: 22, lineHeight: '28px' }}>Hướng dẫn sử dụng</Typography.Text>
-                    <Typography.Text type='secondary' style={{ display: 'block', fontSize: 12, lineHeight: '17px', marginTop: 3 }}>Mỗi nhóm hướng dẫn là một trang riêng để bạn đọc đúng việc đang cần làm.</Typography.Text>
+                    <Typography.Text strong style={{ display: 'block', color: '#111827', fontSize: 22, lineHeight: '28px' }}>Hướng dẫn tương tác</Typography.Text>
+                    <Typography.Text type='secondary' style={{ display: 'block', fontSize: 12, lineHeight: '17px', marginTop: 3 }}>Chọn lộ trình, tick từng bước và mở nhanh màn hình liên quan.</Typography.Text>
                 </div>
-                <Tag color='purple' style={{ marginInlineEnd: 0 }}>{GUIDE_PAGES.length} trang hướng dẫn</Tag>
+                <Stack align='center' gap={8} wrap='wrap' style={{ flexShrink: 0 }}>
+                    <Tag color='purple' style={{ marginInlineEnd: 0 }}>{GUIDE_PAGES.length} trang</Tag>
+                    <Tag color='green' style={{ marginInlineEnd: 0 }}>{completedStepIds.length}/{allStepIds.length} bước</Tag>
+                </Stack>
             </Stack>
+            <div className='user-guide-progress-grid' style={{ marginTop: 12 }}>
+                <div style={{ minWidth: 0 }}>
+                    <Typography.Text strong style={{ display: 'block', color: '#111827', fontSize: 12, lineHeight: '16px', marginBottom: 5 }}>Tiến độ toàn bộ hướng dẫn</Typography.Text>
+                    <Progress percent={overallPercent} size='small' strokeColor='#7436dc' trailColor='rgba(116,54,220,0.12)' />
+                </div>
+                <Button icon={<ReloadOutlined />} onClick={resetAllProgress} disabled={completedStepIds.length === 0} style={{ borderRadius: 999, color: '#7436dc', borderColor: 'rgba(116,54,220,0.28)' }}>Làm lại</Button>
+            </div>
+        </Box>
+
+        <Box style={{ border: `1px solid ${activeFlow.tone}22`, borderRadius: 8, background: '#fff', padding: 12, boxShadow: '0 10px 24px rgba(15,23,42,0.06)' }}>
+            <Stack justify='space-between' align='flex-start' gap={10} style={{ marginBottom: 10 }}>
+                <Stack align='center' gap={9} style={{ minWidth: 0 }}>
+                    <span style={{ width: 34, height: 34, borderRadius: 8, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', color: activeFlow.tone, background: `${activeFlow.tone}12`, border: `1px solid ${activeFlow.tone}24`, flexShrink: 0 }}>{activeFlow.icon}</span>
+                    <div style={{ minWidth: 0 }}>
+                        <Typography.Text strong style={{ display: 'block', color: '#111827', fontSize: 15, lineHeight: '20px' }}>{activeFlow.label}</Typography.Text>
+                        <Typography.Text type='secondary' style={{ display: 'block', fontSize: 11, lineHeight: '15px', marginTop: 2 }}>{activeFlow.description}</Typography.Text>
+                    </div>
+                </Stack>
+                <Tag color={activeFlowPercent === 100 ? 'green' : 'blue'} style={{ marginInlineEnd: 0 }}>{activeFlowPercent}%</Tag>
+            </Stack>
+            <div className='user-guide-flow-grid'>
+                {GUIDE_FLOWS.map(flow => {
+                    const active = flow.key === activeFlow.key;
+                    return <button key={flow.key} type='button' onClick={() => selectFlow(flow.key)} aria-pressed={active} style={{ minWidth: 0, border: `1px solid ${active ? flow.tone : 'rgba(116,54,220,0.10)'}`, borderRadius: 8, background: active ? `${flow.tone}10` : '#fff', padding: 10, textAlign: 'left', cursor: 'pointer' }}>
+                        <Stack align='center' gap={8}>
+                            <span style={{ width: 28, height: 28, borderRadius: 8, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', color: flow.tone, background: `${flow.tone}12`, border: `1px solid ${flow.tone}22`, flexShrink: 0 }}>{flow.icon}</span>
+                            <div style={{ minWidth: 0 }}>
+                                <Typography.Text strong style={{ display: 'block', color: active ? flow.tone : '#111827', fontSize: 12, lineHeight: '16px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{flow.label}</Typography.Text>
+                                <Typography.Text type='secondary' style={{ display: 'block', fontSize: 10, lineHeight: '14px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{flow.pageKeys.length} mục</Typography.Text>
+                            </div>
+                        </Stack>
+                    </button>;
+                })}
+            </div>
+            <div className='user-guide-flow-sequence' style={{ marginTop: 10 }}>
+                {activeFlowPages.map((page, index) => {
+                    const pageIds = getPageStepIds(page);
+                    const doneCount = pageIds.filter(id => completedStepSet.has(id)).length;
+                    const active = page.key === activePage.key;
+                    return <button key={`${activeFlow.key}-${page.key}`} type='button' onClick={() => selectPage(page.key)} style={{ border: `1px solid ${active ? page.tone : `${page.tone}22`}`, borderRadius: 8, background: active ? `${page.tone}10` : '#fcfcfd', padding: '8px 9px', textAlign: 'left', cursor: 'pointer', minWidth: 0 }}>
+                        <Stack justify='space-between' align='center' gap={7}>
+                            <Stack align='center' gap={6} style={{ minWidth: 0 }}>
+                                <span style={{ color: page.tone, flexShrink: 0 }}>{page.icon}</span>
+                                <Typography.Text strong style={{ color: active ? page.tone : '#111827', fontSize: 11, lineHeight: '15px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{index + 1}. {page.title}</Typography.Text>
+                            </Stack>
+                            <Tag color={doneCount === pageIds.length ? 'green' : 'default'} style={{ marginInlineEnd: 0, flexShrink: 0 }}>{doneCount}/{pageIds.length}</Tag>
+                        </Stack>
+                    </button>;
+                })}
+            </div>
         </Box>
 
         <Box className='user-guide-mobile-picker' style={{ border: `1px solid ${activePage.tone}22`, borderRadius: 8, background: '#fff', padding: 10, boxShadow: '0 8px 18px rgba(15,23,42,0.08)' }}>
@@ -363,13 +568,18 @@ export const UserGuideScreen: React.FC = () => {
                 <Stack direction='column' align='stretch' gap={7}>
                     {GUIDE_PAGES.map((page, index) => {
                         const active = page.key === activePage.key;
+                        const pageStepIds = getPageStepIds(page);
+                        const pageDoneCount = pageStepIds.filter(id => completedStepSet.has(id)).length;
                         return <button key={page.key} type='button' onClick={() => selectPage(page.key)} style={{ width: '100%', border: `1px solid ${active ? page.tone : 'rgba(116,54,220,0.10)'}`, borderRadius: 8, background: active ? `${page.tone}0f` : '#fff', padding: 9, textAlign: 'left', cursor: 'pointer' }}>
-                            <Stack align='center' gap={8}>
+                            <Stack align='center' justify='space-between' gap={8}>
+                                <Stack align='center' gap={8} style={{ minWidth: 0 }}>
                                 <span style={{ width: 28, height: 28, borderRadius: 8, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', color: page.tone, background: `${page.tone}12`, border: `1px solid ${page.tone}22`, flexShrink: 0 }}>{page.icon}</span>
                                 <div style={{ minWidth: 0 }}>
                                     <Typography.Text strong style={{ display: 'block', color: active ? page.tone : '#111827', fontSize: 12, lineHeight: '16px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{index + 1}. {page.title}</Typography.Text>
                                     <Typography.Text type='secondary' style={{ display: 'block', fontSize: 10, lineHeight: '14px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{page.subtitle}</Typography.Text>
                                 </div>
+                                </Stack>
+                                <Tag color={pageDoneCount === pageStepIds.length ? 'green' : 'default'} style={{ marginInlineEnd: 0, flexShrink: 0 }}>{pageDoneCount}/{pageStepIds.length}</Tag>
                             </Stack>
                         </button>;
                     })}
@@ -391,20 +601,45 @@ export const UserGuideScreen: React.FC = () => {
                     </Stack>
 
                     <Box style={{ border: `1px solid ${activePage.tone}18`, borderRadius: 8, background: `${activePage.tone}08`, padding: 11, marginBottom: 12 }}>
-                        <Typography.Text style={{ display: 'block', color: '#2f2545', fontSize: 12, lineHeight: '18px' }}>{activePage.summary}</Typography.Text>
+                        <Stack justify='space-between' align='flex-start' gap={10} style={{ marginBottom: 9 }}>
+                            <Typography.Text style={{ display: 'block', color: '#2f2545', fontSize: 12, lineHeight: '18px', flex: 1 }}>{activePage.summary}</Typography.Text>
+                            <Tag color={activePagePercent === 100 ? 'green' : 'purple'} style={{ marginInlineEnd: 0, flexShrink: 0 }}>{completedActiveSteps}/{activePageStepIds.length}</Tag>
+                        </Stack>
+                        <Progress percent={activePagePercent} size='small' strokeColor={activePage.tone} trailColor={`${activePage.tone}18`} />
                     </Box>
 
+                    <Stack justify='space-between' align='center' gap={8} wrap='wrap' style={{ marginBottom: 10 }}>
+                        <Typography.Text strong style={{ color: '#111827', fontSize: 13, lineHeight: '18px' }}>Các bước thực hiện</Typography.Text>
+                        <Stack gap={6} wrap='wrap' justify='flex-end'>
+                            <Button size='small' disabled={activePagePercent === 100} onClick={completeActivePage} style={{ borderRadius: 999, color: activePage.tone, borderColor: `${activePage.tone}33` }}>Xong trang</Button>
+                            <Button size='small' disabled={completedActiveSteps === 0} onClick={resetActivePage} style={{ borderRadius: 999 }}>Làm lại trang</Button>
+                        </Stack>
+                    </Stack>
+
                     <Stack direction='column' align='stretch' gap={9}>
-                        {activePage.steps.map((step, index) => <Box key={`${activePage.key}-${step.title}`} style={{ border: '1px solid #eef2f7', borderRadius: 8, background: '#fcfcfd', padding: 10 }}>
-                            <Stack className='user-guide-step-row' align='flex-start' gap={9}>
-                                <span className='user-guide-step-number' style={{ width: 26, height: 26, borderRadius: 999, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', color: '#fff', background: activePage.tone, fontSize: 12, lineHeight: '16px', fontWeight: 800, flexShrink: 0 }}>{index + 1}</span>
-                                <div style={{ minWidth: 0 }}>
-                                    <Typography.Text strong style={{ display: 'block', color: '#111827', fontSize: 13, lineHeight: '18px' }}>{step.title}</Typography.Text>
-                                    <Typography.Text type='secondary' style={{ display: 'block', fontSize: 12, lineHeight: '17px', marginTop: 2 }}>{step.desc}</Typography.Text>
-                                    {step.note && <Typography.Text style={{ display: 'block', color: activePage.tone, fontSize: 11, lineHeight: '15px', marginTop: 4, fontWeight: 700 }}>{step.note}</Typography.Text>}
-                                </div>
-                            </Stack>
-                        </Box>)}
+                        {activePage.steps.map((step, index) => {
+                            const stepId = getStepId(activePage.key, index);
+                            const completed = completedStepSet.has(stepId);
+                            return <button
+                                key={`${activePage.key}-${step.title}`}
+                                type='button'
+                                className='user-guide-step-card'
+                                aria-pressed={completed}
+                                onClick={() => toggleStep(stepId)}
+                                style={{ width: '100%', border: `1px solid ${completed ? `${activePage.tone}44` : '#eef2f7'}`, borderRadius: 8, background: completed ? `${activePage.tone}0f` : '#fcfcfd', padding: 10, textAlign: 'left', cursor: 'pointer' }}
+                            >
+                                <Stack className='user-guide-step-row' align='flex-start' gap={9}>
+                                    <span className='user-guide-step-number' style={{ width: 26, height: 26, borderRadius: 999, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', color: completed ? activePage.tone : '#fff', background: completed ? '#fff' : activePage.tone, border: completed ? `1px solid ${activePage.tone}44` : 'none', fontSize: 12, lineHeight: '16px', fontWeight: 800, flexShrink: 0 }}>
+                                        {completed ? <CheckCircleOutlined /> : index + 1}
+                                    </span>
+                                    <div style={{ minWidth: 0 }}>
+                                        <Typography.Text strong style={{ display: 'block', color: completed ? activePage.tone : '#111827', fontSize: 13, lineHeight: '18px' }}>{step.title}</Typography.Text>
+                                        <Typography.Text type='secondary' style={{ display: 'block', fontSize: 12, lineHeight: '17px', marginTop: 2 }}>{step.desc}</Typography.Text>
+                                        {step.note && <Typography.Text style={{ display: 'block', color: activePage.tone, fontSize: 11, lineHeight: '15px', marginTop: 4, fontWeight: 700 }}>{step.note}</Typography.Text>}
+                                    </div>
+                                </Stack>
+                            </button>;
+                        })}
                     </Stack>
 
                     <Box style={{ border: '1px solid rgba(116,54,220,0.10)', borderRadius: 8, background: '#fbf9ff', padding: 11, marginTop: 12 }}>
