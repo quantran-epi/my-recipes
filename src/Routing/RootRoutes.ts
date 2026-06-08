@@ -70,6 +70,7 @@ const UserGuideWelcome = () => RouteHelpers.CreateRoute('/guide/welcome');
 const AuthorizedRoutes = {
     Root: () => "/",
     Analytics: () => RouteHelpers.CreateRoute('/analytics'),
+    DishSuggester: () => RouteHelpers.CreateRoute('/dish-suggester'),
     NutritionGoals,
     UserGuide,
     UserGuideTour,

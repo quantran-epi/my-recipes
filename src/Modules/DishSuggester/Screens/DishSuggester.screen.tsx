@@ -1,4 +1,4 @@
-import { BarChartOutlined, BulbOutlined, CalculatorOutlined, ClockCircleOutlined, LeftOutlined, MinusOutlined, PieChartOutlined, PlusOutlined, SettingOutlined, ShoppingCartOutlined, ThunderboltOutlined } from "@ant-design/icons";
+import { BarChartOutlined, BulbOutlined, CalculatorOutlined, ClockCircleOutlined, ExportOutlined, LeftOutlined, MinusOutlined, PieChartOutlined, PlusOutlined, SettingOutlined, ShoppingCartOutlined, ThunderboltOutlined } from "@ant-design/icons";
 import { DishDurationHelper } from "@common/Helpers/DishDurationHelper";
 import { DishNutritionHelper, DishNutritionSummary } from "@common/Helpers/DishNutritionHelper";
 import { NutritionGoalHelper, NutritionGoalMatch } from "@common/Helpers/NutritionGoalHelper";
@@ -21,6 +21,8 @@ import { IngredientPickerWidget } from "./IngredientPicker.widget";
 import { DishSuggestionList } from "./DishSuggestionList.widget";
 import { DishImageWidget } from "@modules/Dishes/Screens/DishesManageIngredient/DishImage.widget";
 import { ShoppingListAddWidget } from "@modules/ShoppingList/Screens/ShoppingListAdd.widget";
+import { DishExpensePlannerWidget } from "@modules/Dishes/Screens/DishesManageIngredient/DishExpensePlanner.widget";
+import { NutritionCalculatorModalContent, type NutritionCalculatorInitialSelection } from "@modules/Home/Screens/NutritionCalculator.widget";
 import ShoppingListIcon from "../../../../assets/icons/shoppingList.png";
 import NoodlesIcon from "../../../../assets/icons/noodles.png";
 import DietIcon from "../../../../assets/icons/diet.png";
@@ -32,6 +34,7 @@ import { RootRoutes } from "@routing/RootRoutes";
 import { NutritionGoal as SharedNutritionGoal } from "@store/Models/SharedConfig";
 
 type Mode = "ingredients" | "inventory" | "duration" | "nutrition";
+type SuggesterActionMode = "navigate" | "modal";
 
 type NutritionSuggestion = {
     dish: Dishes;
@@ -48,6 +51,8 @@ type DishSuggesterScreenProps = {
     initialMode?: Mode;
     initialIngredientIds?: string[];
     previewInline?: boolean;
+    pageInline?: boolean;
+    actionMode?: SuggesterActionMode;
 }
 
 const totalDurationMins = (dish: Dishes) => {
@@ -93,7 +98,7 @@ const PendingCalculationBox: React.FunctionComponent<{ text: string }> = ({ text
     </Box>;
 };
 
-export const DishSuggesterScreen: React.FC<DishSuggesterScreenProps> = ({ open, onClose, initialMode, initialIngredientIds, previewInline }) => {
+export const DishSuggesterScreen: React.FC<DishSuggesterScreenProps> = ({ open, onClose, initialMode, initialIngredientIds, previewInline, pageInline, actionMode = "navigate" }) => {
     const navigate = useNavigate();
     const dishes = useSelector(selectDishes);
     const allIngredients = useSelector(selectIngredients);
@@ -121,6 +126,8 @@ export const DishSuggesterScreen: React.FC<DishSuggesterScreenProps> = ({ open, 
     const [selectedIngredientIds, setSelectedIngredientIds] = useState<string[]>(initialIngredientIds ?? []);
     const [selectedDishIds, setSelectedDishIds] = useState<string[]>([]);
     const toggleShoppingListAdd = useToggle();
+    const toggleExpensePlanner = useToggle();
+    const toggleNutritionCalculator = useToggle();
 
     const [maxMinutes, setMaxMinutes] = useState<number>(30);
     const [fridgeSearchIds, setFridgeSearchIds] = useState<string[]>([]);
@@ -241,6 +248,16 @@ export const DishSuggesterScreen: React.FC<DishSuggesterScreenProps> = ({ open, 
     });
     const nutritionSuggestions = nutritionCalculation.suggestions;
     const selectedDishIdSet = useMemo(() => new Set(selectedDishIds), [selectedDishIds]);
+    const selectedDishesForActions = useMemo(() => selectedDishIds
+        .map(id => dishes.find(dish => dish.id === id))
+        .filter((dish): dish is Dishes => Boolean(dish)), [dishes, selectedDishIds]);
+    const nutritionInitialSelection = useMemo<NutritionCalculatorInitialSelection>(() => ({
+        key: `dishes|${selectedDishIds.join(",")}||`,
+        source: "dishes",
+        dishIds: selectedDishIds,
+        shoppingListIds: [],
+        mealIds: [],
+    }), [selectedDishIds]);
 
     const selectedScored = useMemo(() => {
         const source = mode === "inventory" ? inventoryScored : ingredientScored;
@@ -320,13 +337,26 @@ export const DishSuggesterScreen: React.FC<DishSuggesterScreenProps> = ({ open, 
 
     const _onOpenExpensePlanner = (dishIds: string[]) => {
         if (dishIds.length === 0) return;
+        if (actionMode === "modal") {
+            toggleExpensePlanner.show();
+            return;
+        }
         navigate(RootRoutes.AuthorizedRoutes.ExpensePlanner(dishIds));
         _onClose();
     };
 
     const _onOpenNutritionCalculator = (dishIds: string[]) => {
         if (dishIds.length === 0) return;
+        if (actionMode === "modal") {
+            toggleNutritionCalculator.show();
+            return;
+        }
         navigate(RootRoutes.AuthorizedRoutes.NutritionGoals({ calculator: true, source: "dishes", dishes: dishIds }));
+        _onClose();
+    };
+
+    const _onOpenSeparatePage = () => {
+        navigate(RootRoutes.AuthorizedRoutes.DishSuggester());
         _onClose();
     };
 
@@ -1016,21 +1046,54 @@ export const DishSuggesterScreen: React.FC<DishSuggesterScreenProps> = ({ open, 
                     }
                     onDone={() => {
                         toggleShoppingListAdd.hide();
-                        _onClose();
+                        if (!pageInline) _onClose();
                     }}
-                    onCreated={(shoppingList) => navigate(RootRoutes.AuthorizedRoutes.ShoppingListRoutes.Detail(shoppingList.id))}
+                    onCreated={(shoppingList) => {
+                        toggleShoppingListAdd.hide();
+                        if (actionMode !== "modal") navigate(RootRoutes.AuthorizedRoutes.ShoppingListRoutes.Detail(shoppingList.id));
+                    }}
                 />
             </DeferredModalContent>
         </Modal> : null;
 
-    if (previewInline) {
-        return <Box data-testid="dish-suggester-inline-preview" style={{ height: "100%", minHeight: 0, overflowY: "auto", padding: 12, background: "#fff" }}>
+    const expensePlannerModal = toggleExpensePlanner.value ? <Modal
+        open={toggleExpensePlanner.value}
+        onCancel={toggleExpensePlanner.hide}
+        footer={null}
+        destroyOnClose
+        width='min(900px, calc(100vw - 24px))'
+        title={<Space><CalculatorOutlined />Tính chi phí</Space>}
+        bodyStyle={{ maxHeight: 'calc(100vh - 128px)', overflowY: 'auto', padding: '18px' }}
+    >
+        <DeferredModalContent active={toggleExpensePlanner.value} minHeight={360}>
+            <DishExpensePlannerWidget initialDishes={selectedDishesForActions} allowDishSelection />
+        </DeferredModalContent>
+    </Modal> : null;
+
+    const nutritionCalculatorModal = toggleNutritionCalculator.value ? <Modal
+        open={toggleNutritionCalculator.value}
+        onCancel={toggleNutritionCalculator.hide}
+        footer={null}
+        destroyOnClose
+        width='min(980px, calc(100vw - 24px))'
+        title={<Space><PieChartOutlined />Máy tính dinh dưỡng</Space>}
+        bodyStyle={{ maxHeight: 'calc(100vh - 128px)', overflowY: 'auto', padding: '22px 18px 18px' }}
+    >
+        <DeferredModalContent active={toggleNutritionCalculator.value} minHeight={520}>
+            <NutritionCalculatorModalContent initialSelection={nutritionInitialSelection} />
+        </DeferredModalContent>
+    </Modal> : null;
+
+    if (previewInline || pageInline) {
+        return <Box data-testid={pageInline ? "dish-suggester-page-content" : "dish-suggester-inline-preview"} style={{ height: pageInline ? undefined : "100%", minHeight: 0, overflowY: "auto", padding: pageInline ? 0 : 12, background: "#fff" }}>
             <Stack align="center" gap={8} style={{ marginBottom: 12 }}>
                 <Image src={NoodlesIcon} preview={false} width={22} style={{ marginBottom: 3 }} />
                 <Typography.Text strong style={{ fontSize: 16, lineHeight: "21px", color: "#111827" }}>Nấu gì hôm nay?</Typography.Text>
             </Stack>
             {content}
             {shoppingListModal}
+            {expensePlannerModal}
+            {nutritionCalculatorModal}
         </Box>;
     }
 
@@ -1041,10 +1104,13 @@ export const DishSuggesterScreen: React.FC<DishSuggesterScreenProps> = ({ open, 
             footer={null}
             destroyOnClose
             title={
-                <Space>
-                    <Image src={NoodlesIcon} preview={false} width={22} style={{ marginBottom: 3 }} />
-                    Nấu gì hôm nay?
-                </Space>
+                <Stack justify="space-between" align="center" gap={10} style={{ width: "100%" }}>
+                    <Space>
+                        <Image src={NoodlesIcon} preview={false} width={22} style={{ marginBottom: 3 }} />
+                        Nấu gì hôm nay?
+                    </Space>
+                    <Button size="small" icon={<ExportOutlined />} onClick={_onOpenSeparatePage} style={{ borderRadius: 999, color: "#7436dc", borderColor: "rgba(116,54,220,0.28)", flexShrink: 0 }}>Trang riêng</Button>
+                </Stack>
             }
             style={{ top: 24 }}
         >
@@ -1052,5 +1118,7 @@ export const DishSuggesterScreen: React.FC<DishSuggesterScreenProps> = ({ open, 
         </Modal>
 
         {shoppingListModal}
+        {expensePlannerModal}
+        {nutritionCalculatorModal}
     </>;
 };

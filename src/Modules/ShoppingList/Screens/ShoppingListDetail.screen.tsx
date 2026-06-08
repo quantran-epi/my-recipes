@@ -10,6 +10,7 @@ import { Typography } from "@components/Typography";
 import { useScreenTitle, useToggle } from "@hooks";
 import { RootRoutes } from "@routing/RootRoutes";
 import { selectShoppingListsById } from "@store/Selectors";
+import { NutritionCalculatorModalContent } from "@modules/Home/Screens/NutritionCalculator.widget";
 import moment from "moment";
 import React from "react";
 import { useSelector } from "react-redux";
@@ -27,15 +28,18 @@ const topToolCardStyle: React.CSSProperties = {
     boxShadow: "0 2px 8px rgba(0,0,0,0.04)",
 };
 
-const headerIconButtonStyle: React.CSSProperties = {
-    width: 36,
-    height: 36,
-    minWidth: 36,
-    paddingInline: 0,
+const headerActionRowStyle: React.CSSProperties = {
+    display: "grid",
+    gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
+    gap: 8,
+    marginTop: 12,
+    width: "100%",
+};
+
+const headerActionButtonStyle: React.CSSProperties = {
+    height: 38,
     borderRadius: 8,
-    display: "inline-flex",
-    alignItems: "center",
-    justifyContent: "center",
+    fontWeight: 700,
 };
 
 export const ShoppingListDetailScreen = () => {
@@ -45,6 +49,7 @@ export const ShoppingListDetailScreen = () => {
     const shoppingListsById = useSelector(selectShoppingListsById);
     const shoppingList = shoppingListsById.get(shoppingListId);
     const toggleEditModal = useToggle({ defaultValue: false });
+    const toggleNutritionModal = useToggle({ defaultValue: false });
 
     useScreenTitle({ value: shoppingList?.name ?? "Lịch mua sắm", deps: [shoppingList?.name] });
 
@@ -63,11 +68,13 @@ export const ShoppingListDetailScreen = () => {
     const itemCount = shoppingList.ingredients.length;
     const isReadonly = Boolean(shoppingList.completedAt);
     const hasCalculatorSource = shoppingList.dishes.length > 0 || shoppingList.scheduledMeals.length > 0;
-    const _openNutritionCalculator = () => navigate(RootRoutes.AuthorizedRoutes.NutritionGoals({
-        calculator: true,
-        source: "shoppingLists",
-        shoppingLists: [shoppingList.id],
-    }));
+    const nutritionInitialSelection = {
+        key: `shoppingLists||${shoppingList.id}|`,
+        source: "shoppingLists" as const,
+        dishIds: [],
+        shoppingListIds: [shoppingList.id],
+        mealIds: [],
+    };
 
     return <React.Fragment>
         <Box style={topToolCardStyle}>
@@ -89,31 +96,34 @@ export const ShoppingListDetailScreen = () => {
                             : `Tạo lúc: ${moment(shoppingList.createdDate).format("DD/MM/YYYY HH:mm")}`}
                     </Typography.Text>
                 </Box>
-                <Stack direction="column" align="flex-end" gap={2}>
+                <Stack direction="column" align="flex-end" gap={2} style={{ flexShrink: 0, minWidth: 132 }}>
                     <Typography.Text strong>{doneCount}/{itemCount} đã mua</Typography.Text>
                     <Typography.Text type="secondary" style={{ fontSize: 12 }}>
                         {shoppingList.dishes.length} món · {shoppingList.scheduledMeals.length} thực đơn
                     </Typography.Text>
-                    <Stack gap={6} justify="flex-end" align="center" style={{ marginTop: 8, width: "100%" }}>
-                        <Button
-                            size="small"
-                            aria-label="Mở máy tính dinh dưỡng"
-                            icon={<PieChartOutlined />}
-                            disabled={!hasCalculatorSource}
-                            onClick={_openNutritionCalculator}
-                            style={{ ...headerIconButtonStyle, color: "#7436dc", borderColor: "rgba(116,54,220,0.28)" }}
-                        />
-                        {!isReadonly && <Button
-                            size="small"
-                            type="primary"
-                            aria-label="Sửa lịch mua sắm"
-                            icon={<EditOutlined />}
-                            onClick={toggleEditModal.show}
-                            style={headerIconButtonStyle}
-                        />}
-                    </Stack>
                 </Stack>
             </Stack>
+            <div style={headerActionRowStyle}>
+                <Button
+                    aria-label="Mở máy tính dinh dưỡng"
+                    icon={<PieChartOutlined />}
+                    disabled={!hasCalculatorSource}
+                    onClick={toggleNutritionModal.show}
+                    style={{ ...headerActionButtonStyle, color: "#7436dc", borderColor: "rgba(116,54,220,0.28)" }}
+                >
+                    Dinh dưỡng
+                </Button>
+                <Button
+                    type="primary"
+                    aria-label="Sửa lịch mua sắm"
+                    icon={<EditOutlined />}
+                    disabled={isReadonly}
+                    onClick={toggleEditModal.show}
+                    style={headerActionButtonStyle}
+                >
+                    Sửa
+                </Button>
+            </div>
         </Box>
 
         <Box style={{ background: "#fff", border: "1px solid #f0f0f0", borderRadius: 0, padding: 14 }}>
@@ -129,6 +139,19 @@ export const ShoppingListDetailScreen = () => {
                 <div data-testid="shopping-list-detail-edit-modal">
                     <ShoppingListEditWidget item={shoppingList} onDone={toggleEditModal.hide} />
                 </div>
+            </DeferredModalContent>
+        </Modal>}
+        {toggleNutritionModal.value && <Modal
+            open={toggleNutritionModal.value}
+            title={<Space><PieChartOutlined />Máy tính dinh dưỡng</Space>}
+            onCancel={toggleNutritionModal.hide}
+            footer={null}
+            width='min(980px, calc(100vw - 24px))'
+            bodyStyle={{ maxHeight: 'calc(100vh - 128px)', overflowY: 'auto', padding: '22px 18px 18px' }}
+            destroyOnClose
+        >
+            <DeferredModalContent active={toggleNutritionModal.value} minHeight={520}>
+                <NutritionCalculatorModalContent initialSelection={nutritionInitialSelection} />
             </DeferredModalContent>
         </Modal>}
     </React.Fragment>;

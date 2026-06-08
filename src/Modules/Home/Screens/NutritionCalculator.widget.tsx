@@ -35,11 +35,11 @@ import React, { useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 
-type NutritionCalculatorSource = 'dishes' | 'shoppingLists' | 'scheduledMeals';
+export type NutritionCalculatorSource = 'dishes' | 'shoppingLists' | 'scheduledMeals';
 
 type CreationModal = 'scheduledMeal' | 'shoppingList' | null;
 
-type NutritionCalculatorInitialSelection = {
+export type NutritionCalculatorInitialSelection = {
     key: string;
     source: NutritionCalculatorSource;
     dishIds: string[];
@@ -258,7 +258,7 @@ const CalculatorMetricTile: React.FunctionComponent<{ label: string; value: stri
     </Box>;
 };
 
-const NutritionCalculatorModalContent: React.FunctionComponent<{ initialSelection?: NutritionCalculatorInitialSelection }> = ({ initialSelection }) => {
+export const NutritionCalculatorModalContent: React.FunctionComponent<{ initialSelection?: NutritionCalculatorInitialSelection }> = ({ initialSelection }) => {
     const navigate = useNavigate();
     const dishes = useSelector(selectDishes);
     const ingredientsById = useSelector(selectIngredientsById);

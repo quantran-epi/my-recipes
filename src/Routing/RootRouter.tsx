@@ -22,6 +22,7 @@ import { UserGuideScreen } from "@modules/Home/Screens/UserGuide.screen";
 import { ScheduledMealRouter } from "@modules/ScheduledMeal/Routing/ScheduledMealRouter";
 import { ScheduledMealListScreen } from "@modules/ScheduledMeal/Screens/ScheduledMealList.screen";
 import { DishExpensePlannerScreen } from "@modules/Dishes/Screens/DishExpensePlanner.screen";
+import { DishSuggesterPageScreen } from "@modules/DishSuggester/Screens/DishSuggesterPage.screen";
 
 const UserGuideTourScreen = React.lazy(() => import("@modules/Home/Screens/UserGuideTour.screen"));
 const UserGuideWelcomeScreen = React.lazy(() => import("@modules/Home/Screens/UserGuideWelcome.screen"));
@@ -36,6 +37,7 @@ export const RootRouter = () => {
             <Route path={RootRoutes.AuthorizedRoutes.Root()} element={<MasterPage />}>
                 <Route index element={<DashboardScreen />} />
                 <Route path={RootRoutes.AuthorizedRoutes.Analytics()} element={<DashboardAnalyticsScreen />} />
+                <Route path={RootRoutes.AuthorizedRoutes.DishSuggester()} element={<DishSuggesterPageScreen />} />
                 <Route path={RootRoutes.AuthorizedRoutes.NutritionGoals()} element={<NutritionGoalsScreen />} />
                 <Route path={RootRoutes.AuthorizedRoutes.UserGuide()} element={<UserGuideScreen />} />
                 <Route path={RootRoutes.AuthorizedRoutes.Templates()} element={<TemplatesScreen />} />

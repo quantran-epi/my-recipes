@@ -23,6 +23,7 @@ type TourStep = {
     id: string;
     screen: TourScreenKey;
     target: string;
+    selector?: string;
     title: string;
     description: string;
     hint: string;
@@ -45,13 +46,6 @@ type SpotlightRect = {
     height: number;
 }
 
-type FakeTargetProps = {
-    targetKey: string;
-    children: React.ReactNode;
-    className?: string;
-    style?: React.CSSProperties;
-}
-
 const GUIDE_TOUR_STORAGE_KEY = 'my-recipes-user-guide-tour-done-v2';
 
 const SCREEN_CONFIGS: ScreenConfig[] = [
@@ -68,6 +62,7 @@ const TOUR_STEPS: TourStep[] = [
         id: 'dashboard-hero',
         screen: 'dashboard',
         target: 'dashboard-hero',
+        selector: '[data-testid="dashboard"]',
         title: 'Bắt đầu từ Tổng quan',
         description: 'Đây là nơi người dùng nhìn việc quan trọng trong ngày: bữa đã lên lịch, giỏ mua đang mở và nguyên liệu cần xử lý.',
         hint: 'Dùng Tổng quan như màn hình mở app mỗi ngày.',
@@ -76,6 +71,7 @@ const TOUR_STEPS: TourStep[] = [
         id: 'dashboard-priority',
         screen: 'dashboard',
         target: 'dashboard-priority',
+        selector: '[data-testid^="dashboard-suggestion-"], [data-testid^="dashboard-shopping-list-"], [data-testid^="dashboard-urgent-"]',
         title: 'Ưu tiên việc cần làm',
         description: 'Các card này giống dashboard thật: mỗi dòng là một hành động nhanh để mở đúng luồng nấu, mua hoặc xử lý tồn kho.',
         hint: 'Chạm thử từng card minh họa để thấy trạng thái chọn trong tour.',
@@ -84,6 +80,7 @@ const TOUR_STEPS: TourStep[] = [
         id: 'inventory-list',
         screen: 'inventory',
         target: 'inventory-list',
+        selector: '[data-testid="ingredient-virtual-list"]',
         title: 'Tồn kho là nền dữ liệu chính',
         description: 'Trang Nguyên liệu thật có tìm kiếm, lọc và danh sách theo nhóm. Tour dùng dữ liệu đẹp để giải thích cách đọc lô còn lại.',
         hint: 'Ưu tiên nguyên liệu có cảnh báo hạn dùng.',
@@ -92,6 +89,7 @@ const TOUR_STEPS: TourStep[] = [
         id: 'inventory-batch',
         screen: 'inventory',
         target: 'inventory-batch',
+        selector: '[data-testid="ingredient-list-item-guide-greens"], [data-testid^="ingredient-list-item-"]',
         title: 'Xem từng lô đang có',
         description: 'Mỗi lô có số lượng, đơn vị và hạn dùng. Dữ liệu này giúp app tính món gợi ý và lượng cần mua.',
         hint: 'Cập nhật kho sau khi mua để các trang khác tính đúng.',
@@ -100,6 +98,7 @@ const TOUR_STEPS: TourStep[] = [
         id: 'dishes-list',
         screen: 'dishes',
         target: 'dishes-list',
+        selector: '[data-testid="dish-virtual-list"]',
         title: 'Danh sách món để chọn nhanh',
         description: 'Trang Món ăn thật là danh sách có tìm kiếm, lọc trạng thái và thông tin khẩu phần/thời gian để chọn món nhanh.',
         hint: 'Món càng đầy đủ nguyên liệu và khẩu phần, tính toán càng tốt.',
@@ -108,6 +107,7 @@ const TOUR_STEPS: TourStep[] = [
         id: 'dish-actions',
         screen: 'dishes',
         target: 'dish-actions',
+        selector: '[data-testid="dish-list-item-guide-dish-chicken-rice"], [data-testid^="dish-list-item-"]',
         title: 'Từ món sang hành động',
         description: 'Từ một món có thể bắt đầu nấu, tạo giỏ mua hoặc mở chi tiết nguyên liệu. Tour chạy trong sandbox nên không ghi dữ liệu thật.',
         hint: 'Luồng thường dùng: chọn món -> tạo giỏ hoặc thêm vào thực đơn.',
@@ -116,6 +116,7 @@ const TOUR_STEPS: TourStep[] = [
         id: 'suggestion-tabs',
         screen: 'suggestions',
         target: 'suggestion-tabs',
+        selector: '[data-testid="dish-suggester-inline-preview"]',
         title: 'Gợi ý theo tình huống',
         description: 'Gợi ý món thật có các chế độ như tủ lạnh, thời gian và dinh dưỡng. Daily tour tập trung vào luồng tủ lạnh.',
         hint: 'Khi không biết nấu gì, bắt đầu từ Nấu gì?.',
@@ -124,6 +125,7 @@ const TOUR_STEPS: TourStep[] = [
         id: 'suggestion-card',
         screen: 'suggestions',
         target: 'suggestion-card',
+        selector: '[data-testid="dish-suggestion-item-guide-dish-chicken-rice"], [data-testid^="dish-suggestion-item-"]',
         title: 'Món phù hợp nhất',
         description: 'Card món hiển thị điểm khớp, nguyên liệu có sẵn và nguyên liệu còn thiếu để người dùng quyết định nhanh.',
         hint: 'Chọn nhiều món rồi tạo giỏ hoặc tính dinh dưỡng.',
@@ -132,6 +134,7 @@ const TOUR_STEPS: TourStep[] = [
         id: 'shopping-summary',
         screen: 'shopping',
         target: 'shopping-summary',
+        selector: '[data-testid="shopping-list-virtual-list"]',
         title: 'Giỏ mua có tiến độ rõ ràng',
         description: 'Shopping list thật cho biết đã mua bao nhiêu, còn gì cần mua và chi phí ước tính nếu nguyên liệu có giá.',
         hint: 'Dùng khi đang đi chợ để không bỏ sót nguyên liệu.',
@@ -140,6 +143,7 @@ const TOUR_STEPS: TourStep[] = [
         id: 'shopping-items',
         screen: 'shopping',
         target: 'shopping-items',
+        selector: '[data-testid="shopping-list-item-guide-shopping-weekend"], [data-testid^="shopping-list-item-"]',
         title: 'Tick từng nhóm nguyên liệu',
         description: 'Các dòng dữ liệu minh họa này dùng layout giỏ thật. Khi hoàn tất trong app thật, người dùng có thể nhập nguyên liệu về kho.',
         hint: 'Chạm thử để thấy trạng thái đã mua.',
@@ -148,6 +152,7 @@ const TOUR_STEPS: TourStep[] = [
         id: 'meal-date',
         screen: 'meals',
         target: 'meal-date',
+        selector: '.scheduled-meal-day-arrow + div',
         title: 'Thực đơn theo ngày',
         description: 'Trang Thực đơn thật xoay quanh ngày đang xem. Người dùng chọn ngày rồi thêm món vào sáng, trưa hoặc tối.',
         hint: 'Nhãn ngày là trung tâm của kế hoạch hôm đó.',
@@ -156,6 +161,7 @@ const TOUR_STEPS: TourStep[] = [
         id: 'meal-plan',
         screen: 'meals',
         target: 'meal-plan',
+        selector: '.scheduled-meal-card',
         title: 'Tạo giỏ từ nhiều bữa',
         description: 'Sau khi lên bữa và khẩu phần, app có thể gom nguyên liệu còn thiếu thành lịch mua sắm cho một hoặc nhiều ngày.',
         hint: 'Luồng kết thúc: thực đơn -> tạo giỏ -> mua -> nhập kho.',
@@ -166,6 +172,9 @@ const getScreenConfig = (key: TourScreenKey): ScreenConfig => SCREEN_CONFIGS.fin
 
 const getStepIndexFromItem = (item: string | null): number => {
     if (!item) return 0;
+    const exactStepIndex = TOUR_STEPS.findIndex(step => step.id === item);
+    if (exactStepIndex >= 0) return exactStepIndex;
+
     const screenMap: Record<string, TourScreenKey> = {
         start: 'dashboard',
         ingredients: 'inventory',
@@ -382,18 +391,59 @@ const pillStyle = (tone: string): React.CSSProperties => ({
     whiteSpace: 'nowrap',
 });
 
-const FakeTargetContext = React.createContext<(key: string, node: HTMLDivElement | null) => void>(() => undefined);
+const FakeTargetContext = React.createContext<(key: string, node: HTMLElement | null) => void>(() => undefined);
 
-const FakeTarget: React.FunctionComponent<FakeTargetProps> = ({ targetKey, children, className, style }) => {
+const GuidePreviewTarget: React.FunctionComponent<{
+    screenKey: TourScreenKey;
+    targetKey: string;
+    selector?: string;
+}> = ({ screenKey, targetKey, selector }) => {
     const register = React.useContext(FakeTargetContext);
-    return <div ref={node => register(targetKey, node)} className={className} style={style}>{children}</div>;
+    const containerRef = React.useRef<HTMLDivElement | null>(null);
+
+    React.useLayoutEffect(() => {
+        const container = containerRef.current;
+        if (!container) {
+            register(targetKey, null);
+            return;
+        }
+
+        let cancelled = false;
+        let frameId = 0;
+
+        const resolveTarget = () => {
+            if (cancelled) return;
+            const selectedNode = selector ? container.querySelector<HTMLElement>(selector) : null;
+            const targetNode = selectedNode ?? container;
+            if (targetNode !== container) {
+                targetNode.scrollIntoView({ block: 'center', inline: 'nearest' });
+            }
+            frameId = window.requestAnimationFrame(() => {
+                if (!cancelled) register(targetKey, targetNode);
+            });
+        };
+
+        register(targetKey, container);
+        frameId = window.requestAnimationFrame(resolveTarget);
+        const timeoutId = window.setTimeout(resolveTarget, 160);
+
+        return () => {
+            cancelled = true;
+            window.cancelAnimationFrame(frameId);
+            window.clearTimeout(timeoutId);
+            register(targetKey, null);
+        };
+    }, [register, screenKey, selector, targetKey]);
+
+    return <div ref={containerRef} className='guide-tour-real-target'>
+        <GuideRealPreviewScreen screen={screenKey} />
+    </div>;
 };
 
 const FakeAppShell: React.FunctionComponent<{
     screen: ScreenConfig;
-    target: React.FunctionComponent<FakeTargetProps>;
-    activeTarget: string;
-}> = ({ screen, target, activeTarget }) => {
+    activeStep: TourStep;
+}> = ({ screen, activeStep }) => {
     return <div className='guide-tour-phone'>
         <div className='guide-tour-app-header'>
             <Stack justify='space-between' align='center' gap={10} style={{ height: '100%' }}>
@@ -411,11 +461,7 @@ const FakeAppShell: React.FunctionComponent<{
             </Stack>
         </div>
         <div className='guide-tour-app-content'>
-            {target({
-                targetKey: activeTarget,
-                className: 'guide-tour-real-target',
-                children: <GuideRealPreviewScreen screen={screen.key} />,
-            })}
+            <GuidePreviewTarget screenKey={screen.key} targetKey={activeStep.target} selector={activeStep.selector} />
         </div>
         <div className='guide-tour-bottom-tab'>
             <div className='guide-tour-bottom-dock'>
@@ -515,16 +561,21 @@ export const UserGuideTourScreen: React.FC = () => {
     const [searchParams, setSearchParams] = useSearchParams();
     const [stepIndex, setStepIndex] = React.useState(() => getStepIndexFromItem(searchParams.get('item')));
     const [completedTours, setCompletedTours] = React.useState<string[]>(readCompletedTours);
-    const targetElements = React.useRef<Record<string, HTMLDivElement | null>>({});
+    const targetElements = React.useRef<Record<string, HTMLElement | null>>({});
+    const activeTargetRef = React.useRef<string>('');
+    const [targetRevision, setTargetRevision] = React.useState(0);
     const [spotlightRect, setSpotlightRect] = React.useState<SpotlightRect | null>(null);
     useScreenTitle({ value: 'Tour hướng dẫn', deps: [] });
 
     const step = TOUR_STEPS[Math.min(stepIndex, TOUR_STEPS.length - 1)];
     const screen = getScreenConfig(step.screen);
     const completedScreenSet = React.useMemo(() => new Set(completedTours), [completedTours]);
+    activeTargetRef.current = step.target;
 
-    const registerTarget = React.useCallback((key: string, node: HTMLDivElement | null) => {
+    const registerTarget = React.useCallback((key: string, node: HTMLElement | null) => {
+        if (targetElements.current[key] === node) return;
         targetElements.current[key] = node;
+        if (key === activeTargetRef.current) setTargetRevision(value => value + 1);
     }, []);
 
     const updateSpotlight = React.useCallback(() => {
@@ -534,6 +585,10 @@ export const UserGuideTourScreen: React.FC = () => {
             return;
         }
         const next = node.getBoundingClientRect();
+        if (next.width <= 0 || next.height <= 0) {
+            setSpotlightRect(null);
+            return;
+        }
         setSpotlightRect({ left: next.left, top: next.top, width: next.width, height: next.height });
     }, [step.target]);
 
@@ -544,13 +599,11 @@ export const UserGuideTourScreen: React.FC = () => {
             window.cancelAnimationFrame(frame);
             window.removeEventListener('resize', updateSpotlight);
         };
-    }, [updateSpotlight, stepIndex]);
+    }, [updateSpotlight, stepIndex, targetRevision]);
 
     React.useEffect(() => {
         setStepIndex(getStepIndexFromItem(searchParams.get('item')));
     }, [searchParams]);
-
-    const target = React.useCallback<React.FunctionComponent<FakeTargetProps>>((props) => <FakeTarget {...props} />, []);
 
     const markScreenComplete = React.useCallback((screenKey: TourScreenKey) => {
         const next = Array.from(new Set([...completedTours, screenKey]));
@@ -562,7 +615,7 @@ export const UserGuideTourScreen: React.FC = () => {
         const bounded = Math.max(0, Math.min(TOUR_STEPS.length - 1, nextIndex));
         setStepIndex(bounded);
         const nextStep = TOUR_STEPS[bounded];
-        setSearchParams({ item: nextStep.screen }, { replace: true });
+        setSearchParams({ item: nextStep.id }, { replace: true });
     }, [setSearchParams]);
 
     const next = React.useCallback(() => {
@@ -586,7 +639,7 @@ export const UserGuideTourScreen: React.FC = () => {
         <div className='guide-tour-screen' data-testid='user-guide-tour-page'>
             <style>{tourCss}</style>
             <div className='guide-tour-layout'>
-                <FakeAppShell screen={screen} target={target} activeTarget={step.target} />
+                <FakeAppShell screen={screen} activeStep={step} />
 
                 <aside className='guide-tour-side-panel'>
                     <Box className='guide-tour-step-panel'>
