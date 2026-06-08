@@ -27,6 +27,17 @@ const topToolCardStyle: React.CSSProperties = {
     boxShadow: "0 2px 8px rgba(0,0,0,0.04)",
 };
 
+const headerIconButtonStyle: React.CSSProperties = {
+    width: 36,
+    height: 36,
+    minWidth: 36,
+    paddingInline: 0,
+    borderRadius: 8,
+    display: "inline-flex",
+    alignItems: "center",
+    justifyContent: "center",
+};
+
 export const ShoppingListDetailScreen = () => {
     const [searchParams] = useSearchParams();
     const navigate = useNavigate();
@@ -83,25 +94,23 @@ export const ShoppingListDetailScreen = () => {
                     <Typography.Text type="secondary" style={{ fontSize: 12 }}>
                         {shoppingList.dishes.length} món · {shoppingList.scheduledMeals.length} thực đơn
                     </Typography.Text>
-                    <Stack gap={6} wrap="wrap" justify="flex-end" style={{ marginTop: 6 }}>
+                    <Stack gap={6} justify="flex-end" align="center" style={{ marginTop: 8, width: "100%" }}>
                         <Button
                             size="small"
+                            aria-label="Mở máy tính dinh dưỡng"
                             icon={<PieChartOutlined />}
                             disabled={!hasCalculatorSource}
                             onClick={_openNutritionCalculator}
-                            style={{ borderRadius: 999, color: "#7436dc", borderColor: "rgba(116,54,220,0.28)", fontWeight: 650 }}
-                        >
-                            Dinh dưỡng
-                        </Button>
+                            style={{ ...headerIconButtonStyle, color: "#7436dc", borderColor: "rgba(116,54,220,0.28)" }}
+                        />
                         {!isReadonly && <Button
                             size="small"
                             type="primary"
+                            aria-label="Sửa lịch mua sắm"
                             icon={<EditOutlined />}
                             onClick={toggleEditModal.show}
-                            style={{ borderRadius: 999 }}
-                        >
-                            Sửa
-                        </Button>}
+                            style={headerIconButtonStyle}
+                        />}
                     </Stack>
                 </Stack>
             </Stack>

@@ -4,8 +4,8 @@ milestone: v1.0
 milestone_name: milestone
 status: ready
 stopped_at: Completed 04-02-PLAN.md
-last_updated: "2026-06-08T15:53:22Z"
-last_activity: 2026-06-08 -- Completed quick task 260608-rui: real UI tour harness
+last_updated: "2026-06-08T16:04:33Z"
+last_activity: 2026-06-08 -- Completed quick task 260608-sug: simple user guide and shopping detail actions
 progress:
   total_phases: 5
   completed_phases: 4
@@ -28,7 +28,7 @@ See: .planning/PROJECT.md (updated 2026-06-05)
 Phase: 5 (release-gate-and-product-guardrails) — READY
 Plan: Not started
 Status: Phase 04 complete; ready for Phase 05
-Last activity: 2026-06-08 -- Completed quick task 260608-rui: real UI tour harness
+Last activity: 2026-06-08 -- Completed quick task 260608-sug: simple user guide and shopping detail actions
 
 Progress: [████████░░] 80%
 
@@ -36,6 +36,7 @@ Progress: [████████░░] 80%
 
 | Date | Task | Artifact |
 |------|------|----------|
+| 2026-06-08 | Simple user guide and shopping detail actions | `.planning/quick/260608-sug-simple-user-guide-shopping-actions/260608-sug-SUMMARY.md` |
 | 2026-06-08 | Real UI tour harness | `.planning/quick/260608-rui-real-ui-tour-harness/260608-rui-SUMMARY.md` |
 | 2026-06-08 | Realistic guide tour UI | `.planning/quick/260608-k9m-realistic-guide-tour-ui/260608-k9m-SUMMARY.md` |
 | 2026-06-08 | Fullscreen onboarding and realistic fake tour | `.planning/quick/260608-v6r-fullscreen-onboarding-realistic-tour/260608-v6r-SUMMARY.md` |
