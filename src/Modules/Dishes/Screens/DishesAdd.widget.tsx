@@ -1,18 +1,22 @@
 import { ObjectPropertyHelper } from "@common/Helpers/ObjectProperty"
+import { DishDurationHelper } from "@common/Helpers/DishDurationHelper"
 import { Button } from "@components/Button"
 import { ImageInput } from "@components/Form/ImageInput"
 import { Input, TextArea } from "@components/Form/Input"
 import { Select } from "@components/Form/Select"
 import { ServingSizeInput } from "@components/Form/ServingSizeInput"
+import { Box } from "@components/Layout/Box"
 import { Stack } from "@components/Layout/Stack"
 import { useMessage } from "@components/Message"
 import { SmartForm, useSmartForm } from "@components/SmartForm"
+import { Typography } from "@components/Typography"
 import { nanoid } from "@reduxjs/toolkit"
 import { DISH_TAGS, Dishes } from "@store/Models/Dishes"
 import { addDishes } from "@store/Reducers/DishesReducer"
 import { selectDishes } from "@store/Selectors"
 import { useMemo } from "react"
 import { useDispatch, useSelector } from "react-redux"
+import { DishDurationEditor } from "./DishesManageIngredient/DishDuration.widget"
 
 export const DishesAddWidget = () => {
     const dispatch = useDispatch();
@@ -31,13 +35,7 @@ export const DishesAddWidget = () => {
             includeDishes: [],
             steps: [],
             isCompleted: false,
-            duration: {
-                unfreeze: null,
-                prepare: null,
-                cooking: null,
-                serve: null,
-                cooldown: null
-            },
+            duration: DishDurationHelper.createEmpty(),
             image: "",
             tags: [],
         },
@@ -61,9 +59,16 @@ export const DishesAddWidget = () => {
         }),
         transformFunc: (values) => ({
             ...values,
-            id: values.name.concat(nanoid(10))
+            id: values.name.concat(nanoid(10)),
+            duration: DishDurationHelper.normalize(values.duration),
         })
     })
+
+    const durationValue = SmartForm.useWatch("duration", addDishesForm.form);
+
+    const _onDurationChange = (duration) => {
+        addDishesForm.form.setFieldsValue({ duration });
+    }
 
     const _onSave = () => {
         addDishesForm.submit();
@@ -87,6 +92,10 @@ export const DishesAddWidget = () => {
         <SmartForm.Item {...addDishesForm.itemDefinitions.note}>
             <TextArea rows={3} placeholder="Ghi chú" />
         </SmartForm.Item>
+        <Box style={{ border: "1px solid #f0f0f0", borderRadius: 8, padding: 12, background: "#fff", marginBottom: 12 }}>
+            <Typography.Text strong style={{ display: "block", marginBottom: 8 }}>Thời lượng</Typography.Text>
+            <DishDurationEditor value={durationValue} onChange={_onDurationChange} />
+        </Box>
         <SmartForm.Item {...addDishesForm.itemDefinitions.tags}>
             <Select mode="multiple" placeholder="Chọn thể loại" options={tagOptions} style={{ width: '100%' }} />
         </SmartForm.Item>

@@ -1,4 +1,5 @@
 import { BarChartOutlined, BulbOutlined, CalculatorOutlined, ClockCircleOutlined, DownOutlined, LeftOutlined, RightOutlined, SettingOutlined, ShoppingCartOutlined, ThunderboltOutlined } from "@ant-design/icons";
+import { DishDurationHelper } from "@common/Helpers/DishDurationHelper";
 import { DishNutritionHelper, DishNutritionSummary } from "@common/Helpers/DishNutritionHelper";
 import { NutritionGoalHelper, NutritionGoalMatch } from "@common/Helpers/NutritionGoalHelper";
 import { Button } from "@components/Button";
@@ -50,9 +51,7 @@ type DishSuggesterScreenProps = {
 }
 
 const totalDurationMins = (dish: Dishes) => {
-    const d = dish.duration;
-    if (!d) return 0;
-    return (d.unfreeze ?? 0) + (d.prepare ?? 0) + (d.cooking ?? 0) + (d.serve ?? 0) + (d.cooldown ?? 0);
+    return DishDurationHelper.getTotalMinutes(dish.duration);
 };
 
 type DishSuggestionCalculation = {
@@ -854,6 +853,8 @@ export const DishSuggesterScreen: React.FC<DishSuggesterScreenProps> = ({ open, 
                             <Box style={{ maxHeight: 380, overflowY: "auto" }}>
                                 {filteredDurationDishes.map(dish => {
                                     const mins = totalDurationMins(dish);
+                                    const durationItems = DishDurationHelper.getActiveItems(dish.duration);
+                                    const tempo = DishDurationHelper.getTempo(mins);
                                     const selected = selectedDishIds.includes(dish.id);
                                     const ingredients = dish.ingredients ?? [];
                                     const availableCount = ingredients.filter(req => {
@@ -882,11 +883,16 @@ export const DishSuggesterScreen: React.FC<DishSuggesterScreenProps> = ({ open, 
                                                             {availableCount}/{ingredients.length} có sẵn
                                                         </span>
                                                     )}
-                                                    <Tag color={mins <= 20 ? "green" : mins <= 45 ? "blue" : "orange"} style={{ marginRight: 0 }}>
-                                                        🕐 {mins} phút
+                                                    <Tag style={{ marginRight: 0, color: tempo.color, background: tempo.background, borderColor: tempo.border }}>
+                                                        🕐 {DishDurationHelper.formatMinutes(mins)}
                                                     </Tag>
                                                 </Stack>
                                             </div>
+                                            {durationItems.length > 0 && <Space wrap size={[4, 4]} style={{ marginBottom: ingredients.length > 0 ? 7 : 0 }}>
+                                                {durationItems.map(item => <span key={item.phase.key} style={{ padding: "1px 7px", borderRadius: 999, border: `1px solid ${item.phase.border}`, background: "#fff", color: item.phase.color, fontSize: 11, lineHeight: "18px", whiteSpace: "nowrap" }}>
+                                                    {item.phase.shortLabel} {item.minutes}'
+                                                </span>)}
+                                            </Space>}
                                             {ingredients.length > 0 && (
                                                 <Stack wrap="wrap" gap={4}>
                                                     {ingredients.map(req => {

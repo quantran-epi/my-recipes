@@ -39,13 +39,9 @@ export type DishesStep = {
     required: boolean;
 }
 
-export type DishDuration = {
-    unfreeze: number;
-    prepare: number;
-    cooking: number;
-    serve: number;
-    cooldown: number;
-}
+export type DishDurationPhaseKey = "unfreeze" | "prepare" | "cooking" | "serve" | "cooldown";
+
+export type DishDuration = Record<DishDurationPhaseKey, number | null>;
 
 export type Dishes = {
     id: string;

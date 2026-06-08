@@ -1,4 +1,5 @@
 import { EditOutlined, QuestionCircleOutlined } from "@ant-design/icons";
+import { DishDurationHelper } from "@common/Helpers/DishDurationHelper";
 import { IngredientUnitHelper } from "@common/Helpers/IngredientUnitHelper";
 import { InventoryHelper } from "@common/Helpers/InventoryHelper";
 import { ServingSizeInput } from "@components/Form/ServingSizeInput";
@@ -96,18 +97,10 @@ export const DishesReadonlyDetailWidget: React.FunctionComponent<DishesReadonlyD
             .filter(Boolean) as Dishes[];
     }, [dish.includeDishes, dishesById]);
 
-    const durationItems = useMemo(() => {
-        const labels: Record<keyof Dishes["duration"], string> = {
-            unfreeze: "Rã đông",
-            prepare: "Sơ chế",
-            cooking: "Nấu",
-            serve: "Trình bày",
-            cooldown: "Để nguội",
-        };
-
-        return Object.entries(dish.duration ?? {})
-            .filter(([, value]) => value !== null && value !== undefined && value > 0)
-            .map(([key, value]) => ({ label: labels[key as keyof Dishes["duration"]], value }));
+    const durationSummary = useMemo(() => {
+        const items = DishDurationHelper.getActiveItems(dish.duration);
+        const total = DishDurationHelper.getTotalMinutes(dish.duration);
+        return { items, total, tempo: DishDurationHelper.getTempo(total) };
     }, [dish.duration]);
 
     return <React.Fragment>
@@ -140,19 +133,28 @@ export const DishesReadonlyDetailWidget: React.FunctionComponent<DishesReadonlyD
 
         <DishCostEstimateWidget dish={dish} targetServings={targetServings} />
 
-        {(dish.note || durationItems.length > 0) && <React.Fragment>
+        {(dish.note || durationSummary.items.length > 0) && <React.Fragment>
             <Divider orientation="left"><Space>
                 <Image src={AnalysisIcon} preview={false} width={22} style={{ marginBottom: 3 }} />
                 Thông tin chung
             </Space></Divider>
-            {dish.note && <Typography.Paragraph style={{ marginBottom: durationItems.length > 0 ? 8 : 0 }}>
+            {dish.note && <Typography.Paragraph style={{ marginBottom: durationSummary.items.length > 0 ? 8 : 0 }}>
                 <Typography.Text strong>Ghi chú: </Typography.Text>{dish.note}
             </Typography.Paragraph>}
-            {durationItems.length > 0 && <Space wrap size={[6, 6]}>
-                {durationItems.map(item => <Tag key={item.label} icon={<Image src={ClockIcon} preview={false} width={12} style={{ marginBottom: 2 }} />}>
-                    {item.label}: {item.value} phút
-                </Tag>)}
-            </Space>}
+            {durationSummary.items.length > 0 && <Box style={{ border: `1px solid ${durationSummary.tempo.border}`, borderRadius: 8, padding: 10, background: durationSummary.tempo.background }}>
+                <Stack justify="space-between" align="center" gap={8} style={{ marginBottom: 8 }}>
+                    <Space size={6}>
+                        <Image src={ClockIcon} preview={false} width={16} style={{ marginBottom: 2 }} />
+                        <Typography.Text strong style={{ color: durationSummary.tempo.color }}>Thời lượng</Typography.Text>
+                    </Space>
+                    <Typography.Text strong style={{ color: durationSummary.tempo.color }}>{DishDurationHelper.formatMinutes(durationSummary.total)}</Typography.Text>
+                </Stack>
+                <Space wrap size={[6, 6]}>
+                    {durationSummary.items.map(item => <Tag key={item.phase.key} style={{ borderColor: item.phase.border, background: "#fff", color: item.phase.color, marginInlineEnd: 0 }}>
+                        {item.phase.shortLabel}: {DishDurationHelper.formatMinutes(item.minutes)}
+                    </Tag>)}
+                </Space>
+            </Box>}
         </React.Fragment>}
 
         {includedDishes.length > 0 && <React.Fragment>

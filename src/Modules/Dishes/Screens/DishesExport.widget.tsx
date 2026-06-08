@@ -1,4 +1,5 @@
 import React from "react";
+import { DishDurationHelper } from "@common/Helpers/DishDurationHelper";
 import { Button } from "@components/Button";
 import { Modal } from "@components/Modal";
 import { Typography } from "@components/Typography";
@@ -26,14 +27,10 @@ const formatDishToText = (dish: Dishes, ingredientsById: Map<string, Ingredient>
     }
 
     if (dish.duration) {
-        const parts: string[] = [];
-        if (dish.duration.unfreeze) parts.push(`Rã đông: ${dish.duration.unfreeze} phút`);
-        if (dish.duration.prepare) parts.push(`Sơ chế: ${dish.duration.prepare} phút`);
-        if (dish.duration.cooking) parts.push(`Nấu: ${dish.duration.cooking} phút`);
-        if (dish.duration.serve) parts.push(`Phục vụ: ${dish.duration.serve} phút`);
-        if (dish.duration.cooldown) parts.push(`Nguội: ${dish.duration.cooldown} phút`);
+        const parts = DishDurationHelper.getActiveItems(dish.duration)
+            .map(item => `${item.phase.label}: ${DishDurationHelper.formatMinutes(item.minutes)}`);
         if (parts.length > 0) {
-            lines.push(`${indent}⏱ Thời gian: ${parts.join(" | ")}`);
+            lines.push(`${indent}⏱ Thời gian: ${DishDurationHelper.formatMinutes(DishDurationHelper.getTotalMinutes(dish.duration))} (${parts.join(" | ")})`);
             lines.push("");
         }
     }

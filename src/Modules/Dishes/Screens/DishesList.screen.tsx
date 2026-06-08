@@ -1,4 +1,5 @@
 import { CheckCircleOutlined, ClockCircleOutlined, CopyOutlined, DeleteOutlined, EditOutlined, ExclamationCircleOutlined, FileTextOutlined, HolderOutlined, PlusOutlined, FireOutlined } from "@ant-design/icons";
+import { DishDurationHelper } from "@common/Helpers/DishDurationHelper";
 import { Button } from "@components/Button";
 import { Dropdown } from "@components/Dropdown";
 import { FastModalShell } from "@components/FastOverlay";
@@ -33,8 +34,6 @@ import { DishesDetailWidget } from "./DishesManageIngredient/DishDetail.widget";
 import { DishImageWidget } from "./DishesManageIngredient/DishImage.widget";
 import { DishDurationWidget } from "./DishesManageIngredient/DishDuration.widget";
 import { CookingSessionWidget } from "./CookingSession.widget";
-import moment from "moment";
-import 'moment/locale/vi';
 
 type DishListItemSummary = {
     ingredientCount: number;
@@ -143,14 +142,6 @@ const DISH_ROW_DEFAULT_HEIGHT = 184;
 const DISH_LOAD_MORE_THRESHOLD = 8;
 const LIST_SEARCH_DEBOUNCE_MS = 550;
 
-const DISH_DURATION_LABELS: Record<keyof DishDuration, string> = {
-    unfreeze: 'Rã đông',
-    prepare: 'Sơ chế',
-    cooking: 'Nấu nướng',
-    serve: 'Trình bày',
-    cooldown: 'Để nguội',
-};
-
 const createEmptyDishFilterData = (): DishFilterData => ({
     filteredDishes: [],
     statusCounts: DISH_STATUS_FILTERS.reduce((result, item) => {
@@ -183,12 +174,30 @@ const DeferredSearchInput = React.memo(({ onCommit }: { onCommit: (value: string
 });
 
 const DishDurationDetail: React.FunctionComponent<{ duration: DishDuration }> = ({ duration }) => {
-    return <List size="small" dataSource={Object.entries(duration)} renderItem={item => <List.Item style={{ paddingInline: 0 }}>
-        <Stack fullwidth justify="space-between">
-            <Typography.Text style={{ fontSize: 16 }}>{DISH_DURATION_LABELS[item[0] as keyof DishDuration]}:</Typography.Text>
-            {Boolean(item[1]) && <Tag>{moment.duration(item[1], "minutes").locale("vi").humanize()}</Tag>}
-        </Stack>
-    </List.Item>} />;
+    const items = DishDurationHelper.getActiveItems(duration);
+    const total = DishDurationHelper.getTotalMinutes(duration);
+    const tempo = DishDurationHelper.getTempo(total);
+
+    if (items.length === 0) {
+        return <Box style={{ width: 220, padding: 4 }}>
+            <Typography.Text type="secondary">Chưa nhập thời lượng cho món này.</Typography.Text>
+        </Box>;
+    }
+
+    return <Box style={{ width: 240 }}>
+        <Box style={{ border: `1px solid ${tempo.border}`, background: tempo.background, borderRadius: 8, padding: "8px 10px", marginBottom: 6 }}>
+            <Stack justify="space-between" align="center" gap={8}>
+                <Typography.Text strong style={{ color: tempo.color }}>{tempo.label}</Typography.Text>
+                <Typography.Text strong style={{ color: tempo.color }}>{DishDurationHelper.formatMinutes(total)}</Typography.Text>
+            </Stack>
+        </Box>
+        <List size="small" dataSource={items} renderItem={item => <List.Item style={{ paddingInline: 0 }}>
+            <Stack fullwidth justify="space-between" gap={8}>
+                <Typography.Text style={{ fontSize: 13, color: item.phase.color }}>{item.phase.shortLabel}</Typography.Text>
+                <Tag style={{ marginRight: 0 }}>{DishDurationHelper.formatMinutes(item.minutes)}</Tag>
+            </Stack>
+        </List.Item>} />
+    </Box>;
 };
 
 const buildDishListSummaries = (allDishes: Dishes[], visibleDishes: Dishes[] = allDishes): Record<string, DishListItemSummary> => {
@@ -481,9 +490,6 @@ type DishesItemProps = {
     isAdmin: boolean;
 }
 
-moment.relativeTimeRounding((v) => parseFloat(v.toFixed(1)));
-moment.relativeTimeThreshold('m', 60);
-
 const DishesItemComponent: React.FunctionComponent<DishesItemProps> = (props) => {
     const toggleEdit = useToggle({ defaultValue: false });
     const toggleDishesDetail = useToggle();
@@ -503,11 +509,11 @@ const DishesItemComponent: React.FunctionComponent<DishesItemProps> = (props) =>
     }
 
     const _sumDuration = () => {
-        return moment.duration(Object.values(props.item.duration).reduce((prev, cur) => prev + cur || 0, 0), "minutes").locale("vi").humanize();
+        return DishDurationHelper.formatMinutes(DishDurationHelper.getTotalMinutes(props.item.duration));
     }
 
     const _hasDuration = () => {
-        return Object.values(props.item.duration).some(e => e !== null);
+        return DishDurationHelper.hasDuration(props.item.duration);
     }
 
     const toggleExport = useToggle();
@@ -596,7 +602,7 @@ const DishesItemComponent: React.FunctionComponent<DishesItemProps> = (props) =>
                         >
                             <ClockCircleOutlined style={{ fontSize: 11, flexShrink: 0 }} />
                             <span style={{ minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                                {hasDuration ? _sumDuration() : "Chưa set"}
+                                {hasDuration ? _sumDuration() : "Chưa có"}
                             </span>
                         </button>
                     </Popover>

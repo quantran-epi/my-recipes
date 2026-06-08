@@ -1,19 +1,23 @@
 import { ObjectPropertyHelper } from "@common/Helpers/ObjectProperty"
+import { DishDurationHelper } from "@common/Helpers/DishDurationHelper"
 import { Button } from "@components/Button"
 import { ImageInput } from "@components/Form/ImageInput"
 import { Input, TextArea } from "@components/Form/Input"
 import { Select } from "@components/Form/Select"
 import { ServingSizeInput } from "@components/Form/ServingSizeInput"
 import { Switch } from "@components/Form/Switch"
+import { Box } from "@components/Layout/Box"
 import { Stack } from "@components/Layout/Stack"
 import { useMessage } from "@components/Message"
 import { SmartForm, useSmartForm } from "@components/SmartForm"
+import { Typography } from "@components/Typography"
 import { DISH_TAGS, Dishes } from "@store/Models/Dishes"
 import { editDishes } from "@store/Reducers/DishesReducer"
 import { ShoppingListIngredientHelpers, updateShoppingListIngredientDishData } from "@store/Reducers/ShoppingListReducer"
 import { selectDishes } from "@store/Selectors"
 import { useMemo } from "react"
 import { useDispatch, useSelector } from "react-redux"
+import { DishDurationEditor } from "./DishesManageIngredient/DishDuration.widget"
 
 export const DishesEditWidget = ({ item, onDone }) => {
     const dispatch = useDispatch();
@@ -23,15 +27,16 @@ export const DishesEditWidget = ({ item, onDone }) => {
     const tagOptions = useMemo(() => DISH_TAGS.map(tag => ({ label: tag, value: tag })), []);
 
     const editDishesForm = useSmartForm<Dishes>({
-        defaultValues: { tags: [], ...item, baseServings: item.baseServings ?? 2 },
+        defaultValues: { tags: [], ...item, baseServings: item.baseServings ?? 2, duration: DishDurationHelper.normalize(item.duration) },
         onSubmit: (values) => {
-            if (values.transformValues.includeDishes.some(e => ShoppingListIngredientHelpers.isInclude(e, dishes, values.transformValues.id))) {
+            const dishToSave = { ...values.transformValues, duration: DishDurationHelper.normalize(values.transformValues.duration) };
+            if (dishToSave.includeDishes.some(e => ShoppingListIngredientHelpers.isInclude(e, dishes, dishToSave.id))) {
                 message.error("Lỗi lặp vòng tròn");
                 return;
             }
 
-            dispatch(editDishes(values.transformValues));
-            dispatch(updateShoppingListIngredientDishData(values.transformValues));
+            dispatch(editDishes(dishToSave));
+            dispatch(updateShoppingListIngredientDishData(dishToSave));
             message.success("Đã lưu món ăn");
             onDone();
         },
@@ -54,6 +59,12 @@ export const DishesEditWidget = ({ item, onDone }) => {
         editDishesForm.submit();
     }
 
+    const durationValue = SmartForm.useWatch("duration", editDishesForm.form);
+
+    const _onDurationChange = (duration) => {
+        editDishesForm.form.setFieldsValue({ duration });
+    }
+
     return <SmartForm {...editDishesForm.defaultProps}>
         <SmartForm.Item {...editDishesForm.itemDefinitions.name}>
             <Input placeholder="Nhập tên" autoFocus />
@@ -72,6 +83,10 @@ export const DishesEditWidget = ({ item, onDone }) => {
         <SmartForm.Item {...editDishesForm.itemDefinitions.note}>
             <TextArea rows={3} placeholder="Ghi chú" />
         </SmartForm.Item>
+        <Box style={{ border: "1px solid #f0f0f0", borderRadius: 8, padding: 12, background: "#fff", marginBottom: 12 }}>
+            <Typography.Text strong style={{ display: "block", marginBottom: 8 }}>Thời lượng</Typography.Text>
+            <DishDurationEditor value={durationValue} onChange={_onDurationChange} />
+        </Box>
         <SmartForm.Item {...editDishesForm.itemDefinitions.tags}>
             <Select mode="multiple" placeholder="Chọn thể loại" options={tagOptions} style={{ width: '100%' }} />
         </SmartForm.Item>

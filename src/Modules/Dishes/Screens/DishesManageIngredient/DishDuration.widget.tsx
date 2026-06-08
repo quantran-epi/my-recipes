@@ -1,96 +1,200 @@
-import { ObjectPropertyHelper } from "@common/Helpers/ObjectProperty";
+import { ClockCircleOutlined, CoffeeOutlined, FireOutlined, HourglassOutlined, PauseCircleOutlined, ToolOutlined } from "@ant-design/icons";
+import { DishDurationHelper } from "@common/Helpers/DishDurationHelper";
 import { Button } from "@components/Button";
-import { Form } from "@components/Form";
 import { InputNumber } from "@components/Form/InputNumber";
-import { Option, Select } from "@components/Form/Select";
+import { Switch } from "@components/Form/Switch";
+import { Box } from "@components/Layout/Box";
+import { Space } from "@components/Layout/Space";
 import { Stack } from "@components/Layout/Stack";
-import { SmartForm, useSmartForm } from "@components/SmartForm"
-import { DishDuration, Dishes } from "@store/Models/Dishes";
+import { Typography } from "@components/Typography";
+import { DishDuration, DishDurationPhaseKey, Dishes } from "@store/Models/Dishes";
 import { DishesDurationEditParams } from "@store/Reducers/DishesReducer";
-import { FunctionComponent, useEffect, useState } from "react"
+import { Progress } from "antd";
+import React, { FunctionComponent, useEffect, useMemo, useState } from "react";
+
+type DishDurationEditorProps = {
+    value?: Partial<DishDuration> | null;
+    onChange: (value: DishDuration) => void;
+}
 
 type DishDurationWidgetProps = {
     dish: Dishes;
     onSave: (value: DishesDurationEditParams) => void;
 }
 
+const durationIcon = (key: DishDurationPhaseKey, color: string) => {
+    const style: React.CSSProperties = { color, fontSize: 16 };
+    switch (key) {
+        case "unfreeze": return <HourglassOutlined style={style} />;
+        case "prepare": return <ToolOutlined style={style} />;
+        case "cooking": return <FireOutlined style={style} />;
+        case "serve": return <CoffeeOutlined style={style} />;
+        case "cooldown": return <PauseCircleOutlined style={style} />;
+        default: return <ClockCircleOutlined style={style} />;
+    }
+};
+
+const quickMinuteOptions = [5, 10, 15, 20, 30, 45];
+
+export const DishDurationEditor: FunctionComponent<DishDurationEditorProps> = ({ value, onChange }) => {
+    const duration = useMemo(() => DishDurationHelper.normalize(value), [value]);
+    const activeItems = useMemo(() => DishDurationHelper.getActiveItems(duration), [duration]);
+    const totalMinutes = useMemo(() => DishDurationHelper.getTotalMinutes(duration), [duration]);
+    const tempo = DishDurationHelper.getTempo(totalMinutes);
+    const activeCount = activeItems.length;
+
+    const _updateDuration = (next: Partial<DishDuration>) => {
+        onChange(DishDurationHelper.normalize({ ...duration, ...next }));
+    };
+
+    const _setPhaseActive = (key: DishDurationPhaseKey, active: boolean) => {
+        const phase = DishDurationHelper.getPhase(key);
+        _updateDuration({ [key]: active ? (duration[key] ?? phase.defaultMinutes) : null });
+    };
+
+    const _setPhaseMinutes = (key: DishDurationPhaseKey, minutes: number | null) => {
+        _updateDuration({ [key]: minutes && minutes > 0 ? Math.round(minutes) : null });
+    };
+
+    return <Stack direction="column" gap={10} style={{ width: "100%" }}>
+        <Box style={{
+            border: `1px solid ${tempo.border}`,
+            borderRadius: 8,
+            padding: 12,
+            background: `linear-gradient(135deg, ${tempo.background} 0%, #fff 72%)`,
+        }}>
+            <Stack justify="space-between" align="flex-start" gap={10}>
+                <Stack align="center" gap={9} style={{ minWidth: 0 }}>
+                    <span style={{ width: 36, height: 36, borderRadius: 8, background: "#fff", border: `1px solid ${tempo.border}`, display: "inline-flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                        <ClockCircleOutlined style={{ color: tempo.color, fontSize: 18 }} />
+                    </span>
+                    <div style={{ minWidth: 0 }}>
+                        <Typography.Text strong style={{ display: "block", color: tempo.color, lineHeight: "19px" }}>Tổng thời lượng</Typography.Text>
+                        <Typography.Text type="secondary" style={{ display: "block", fontSize: 12, lineHeight: "16px" }}>
+                            {activeCount > 0 ? `${activeCount} giai đoạn đang dùng` : "Chưa nhập thời gian cho món này"}
+                        </Typography.Text>
+                    </div>
+                </Stack>
+                <div style={{ textAlign: "right", flexShrink: 0 }}>
+                    <Typography.Text strong style={{ display: "block", color: tempo.color, fontSize: 20, lineHeight: "24px" }}>{DishDurationHelper.formatMinutes(totalMinutes)}</Typography.Text>
+                    <Typography.Text type="secondary" style={{ display: "block", fontSize: 12 }}>{tempo.label}</Typography.Text>
+                </div>
+            </Stack>
+            <Progress
+                percent={Math.min(100, Math.round(totalMinutes / 120 * 100))}
+                showInfo={false}
+                strokeColor={tempo.color}
+                trailColor="rgba(0,0,0,0.06)"
+                style={{ marginTop: 8 }}
+            />
+        </Box>
+
+        <Box style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(118px, 1fr))", gap: 8 }}>
+            {DishDurationHelper.presets.map(preset => {
+                const presetTotal = DishDurationHelper.getTotalMinutes(preset.duration);
+                return <button
+                    key={preset.label}
+                    type="button"
+                    onClick={() => onChange(preset.duration)}
+                    style={{
+                        minWidth: 0,
+                        padding: "9px 10px",
+                        borderRadius: 8,
+                        border: "1px solid #e8ddff",
+                        background: "#fbf9ff",
+                        cursor: "pointer",
+                        textAlign: "left",
+                    }}
+                >
+                    <Typography.Text strong style={{ display: "block", color: "#7436dc", fontSize: 12.5, lineHeight: "17px" }}>{preset.label}</Typography.Text>
+                    <Typography.Text type="secondary" style={{ display: "block", fontSize: 11, lineHeight: "15px" }}>{DishDurationHelper.formatMinutes(presetTotal)}</Typography.Text>
+                </button>;
+            })}
+            <button
+                type="button"
+                onClick={() => onChange(DishDurationHelper.createEmpty())}
+                style={{
+                    minWidth: 0,
+                    padding: "9px 10px",
+                    borderRadius: 8,
+                    border: "1px dashed #d9d9d9",
+                    background: "#fff",
+                    cursor: "pointer",
+                    textAlign: "left",
+                }}
+            >
+                <Typography.Text strong style={{ display: "block", color: "#595959", fontSize: 12.5, lineHeight: "17px" }}>Xóa thời lượng</Typography.Text>
+                <Typography.Text type="secondary" style={{ display: "block", fontSize: 11, lineHeight: "15px" }}>Đặt lại về trống</Typography.Text>
+            </button>
+        </Box>
+
+        <Stack direction="column" gap={8}>
+            {DishDurationHelper.phases.map(phase => {
+                const minutes = duration[phase.key];
+                const active = Boolean(minutes && minutes > 0);
+                return <Box key={phase.key} style={{
+                    border: `1px solid ${active ? phase.border : "#f0f0f0"}`,
+                    borderRadius: 8,
+                    padding: 10,
+                    background: active ? phase.background : "#fff",
+                }}>
+                    <Stack align="flex-start" justify="space-between" gap={10} style={{ width: "100%" }}>
+                        <Stack align="flex-start" gap={9} style={{ minWidth: 0 }}>
+                            <span style={{ width: 32, height: 32, borderRadius: 8, background: "#fff", border: `1px solid ${active ? phase.border : "#f0f0f0"}`, display: "inline-flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                                {durationIcon(phase.key, active ? phase.color : "#8c8c8c")}
+                            </span>
+                            <div style={{ minWidth: 0 }}>
+                                <Typography.Text strong style={{ display: "block", color: active ? phase.color : "#262626", lineHeight: "18px" }}>{phase.label}</Typography.Text>
+                                <Typography.Text type="secondary" style={{ display: "block", fontSize: 11, lineHeight: "15px" }}>{phase.description}</Typography.Text>
+                            </div>
+                        </Stack>
+                        <Switch checked={active} onChange={(checked) => _setPhaseActive(phase.key, checked)} />
+                    </Stack>
+
+                    {active && <Box style={{ marginTop: 9, paddingLeft: 41 }}>
+                        <Stack align="center" gap={8} wrap="wrap">
+                            <InputNumber
+                                min={1}
+                                max={480}
+                                step={5}
+                                value={minutes ?? undefined}
+                                addonAfter="phút"
+                                onChange={(nextValue) => _setPhaseMinutes(phase.key, typeof nextValue === "number" ? nextValue : null)}
+                                style={{ width: 132 }}
+                            />
+                            <Space size={[5, 5]} wrap>
+                                {quickMinuteOptions.map(option => <Button
+                                    key={option}
+                                    type={minutes === option ? "primary" : "default"}
+                                    onClick={() => _setPhaseMinutes(phase.key, option)}
+                                    style={{ height: 30, borderRadius: 999, paddingInline: 10, fontSize: 12 }}
+                                >
+                                    {option}'
+                                </Button>)}
+                            </Space>
+                        </Stack>
+                    </Box>}
+                </Box>;
+            })}
+        </Stack>
+    </Stack>;
+};
+
 export const DishDurationWidget: FunctionComponent<DishDurationWidgetProps> = (props) => {
-    const [disableFields, setDisabledFields] = useState<string[]>([]);
-
-    const _isDisable = (field: string) => {
-        return disableFields.includes(field);
-    }
-
-    const durationForm = useSmartForm<DishDuration>({
-        defaultValues: props.dish.duration,
-        layout: "horizontal",
-        onSubmit: (values) => {
-            props.onSave({ dishId: props.dish.id, duration: values.transformValues });
-        },
-        itemDefinitions: (defaultValues) => ({
-            unfreeze: { label: "Rã đông", name: ObjectPropertyHelper.nameof(defaultValues, e => e.unfreeze) },
-            prepare: { label: "Sơ chế", name: ObjectPropertyHelper.nameof(defaultValues, e => e.prepare) },
-            cooking: { label: "Nấu nướng", name: ObjectPropertyHelper.nameof(defaultValues, e => e.cooking) },
-            serve: { label: "Trình bày", name: ObjectPropertyHelper.nameof(defaultValues, e => e.serve) },
-            cooldown: { label: "Để nguội", name: ObjectPropertyHelper.nameof(defaultValues, e => e.cooldown) },
-        })
-    });
-
-    const _onToggleDisable = (value: "none" | "min", field: string) => {
-        switch (value) {
-            case "min": setDisabledFields(disableFields.filter(e => e !== field)); break;
-            case "none":
-                setDisabledFields([...disableFields, field]);
-                durationForm.form.setFieldsValue({ [field]: null });
-                break;
-        }
-    }
-
-    const _onSave = () => {
-        durationForm.submit();
-    }
+    const [duration, setDuration] = useState<DishDuration>(() => DishDurationHelper.normalize(props.dish.duration));
 
     useEffect(() => {
-        setDisabledFields(Object.entries(props.dish.duration).filter(e => e[1] === null).map(e => e[0]));
-    }, [props.dish])
+        setDuration(DishDurationHelper.normalize(props.dish.duration));
+    }, [props.dish]);
 
-    return <Form
-        labelCol={{ xs: 10 }}
-        wrapperCol={{ xs: 14 }}
-        {...durationForm.defaultProps}>
-        <Form.Item {...durationForm.itemDefinitions.unfreeze}>
-            <InputNumber disabled={_isDisable("unfreeze")} min={0} addonAfter={<Select defaultValue={props.dish.duration.unfreeze === null ? "none" : "min"} onChange={(value) => _onToggleDisable(value, "unfreeze")} style={{ width: 100 }}>
-                <Option value="min">phút</Option>
-                <Option value="none">none</Option>
-            </Select>} />
-        </Form.Item>
-        <SmartForm.Item {...durationForm.itemDefinitions.prepare}>
-            <InputNumber disabled={_isDisable("prepare")} min={0} addonAfter={<Select defaultValue={props.dish.duration.prepare === null ? "none" : "min"} onChange={(value) => _onToggleDisable(value, "prepare")} style={{ width: 100 }}>
-                <Option value="min">phút</Option>
-                <Option value="none">none</Option>
-            </Select>} />
-        </SmartForm.Item>
-        <SmartForm.Item {...durationForm.itemDefinitions.cooking}>
-            <InputNumber disabled={_isDisable("cooking")} min={0} addonAfter={<Select defaultValue={props.dish.duration.cooking === null ? "none" : "min"} onChange={(value) => _onToggleDisable(value, "cooking")} style={{ width: 100 }}>
-                <Option value="min">phút</Option>
-                <Option value="none">none</Option>
-            </Select>} />
-        </SmartForm.Item>
-        <SmartForm.Item {...durationForm.itemDefinitions.serve}>
-            <InputNumber disabled={_isDisable("serve")} min={0} addonAfter={<Select defaultValue={props.dish.duration.serve === null ? "none" : "min"} onChange={(value) => _onToggleDisable(value, "serve")} style={{ width: 100 }}>
-                <Option value="min">phút</Option>
-                <Option value="none">none</Option>
-            </Select>} />
-        </SmartForm.Item>
-        <SmartForm.Item {...durationForm.itemDefinitions.cooldown}>
-            <InputNumber disabled={_isDisable("cooldown")} min={0} addonAfter={<Select defaultValue={props.dish.duration.cooldown === null ? "none" : "min"} onChange={(value) => _onToggleDisable(value, "cooldown")} style={{ width: 100 }}>
-                <Option value="min">phút</Option>
-                <Option value="none">none</Option>
-            </Select>} />
-        </SmartForm.Item>
+    const _onSave = () => {
+        props.onSave({ dishId: props.dish.id, duration: DishDurationHelper.normalize(duration) });
+    };
 
+    return <Stack direction="column" gap={12} style={{ width: "100%" }}>
+        <DishDurationEditor value={duration} onChange={setDuration} />
         <Stack justify="flex-end">
-            <Button onClick={_onSave}>Lưu</Button>
+            <Button type="primary" onClick={_onSave}>Lưu thời lượng</Button>
         </Stack>
-    </Form>
-}
+    </Stack>;
+};
