@@ -4,8 +4,8 @@ milestone: v1.0
 milestone_name: milestone
 status: ready
 stopped_at: Completed 04-02-PLAN.md
-last_updated: "2026-06-08T13:22:34Z"
-last_activity: 2026-06-08 -- Completed quick task 260608-s7j: mobile scheduled meal and nutrition suggester fixes
+last_updated: "2026-06-08T13:39:49Z"
+last_activity: 2026-06-08 -- Completed quick task 260608-sk4: analytics expense help and calculator deep links
 progress:
   total_phases: 5
   completed_phases: 4
@@ -28,7 +28,7 @@ See: .planning/PROJECT.md (updated 2026-06-05)
 Phase: 5 (release-gate-and-product-guardrails) — READY
 Plan: Not started
 Status: Phase 04 complete; ready for Phase 05
-Last activity: 2026-06-08 -- Completed quick task 260608-s7j: mobile scheduled meal and nutrition suggester fixes
+Last activity: 2026-06-08 -- Completed quick task 260608-sk4: analytics expense help and calculator deep links
 
 Progress: [████████░░] 80%
 
@@ -36,6 +36,7 @@ Progress: [████████░░] 80%
 
 | Date | Task | Artifact |
 |------|------|----------|
+| 2026-06-08 | Analytics expense help and calculator deep links | `.planning/quick/260608-sk4-redesign-analytics-expense-summary-help-/260608-sk4-SUMMARY.md` |
 | 2026-06-08 | Mobile scheduled meal and nutrition suggester fixes | `.planning/quick/260608-s7j-fix-mobile-scheduled-meal-date-button-wr/260608-s7j-SUMMARY.md` |
 | 2026-06-08 | Dish duration UI and data polish | `.planning/quick/260608-9kl-reorganize-dish-duration-ui-ux-and-durat/260608-9kl-SUMMARY.md` |
 | 2026-06-08 | Nutrition suggestor and detail layout polish | `.planning/quick/260608-9df-fix-nutrition-suggestor-expansion-dish-d/260608-9df-SUMMARY.md` |

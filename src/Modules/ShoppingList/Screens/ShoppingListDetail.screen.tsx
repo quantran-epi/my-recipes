@@ -1,4 +1,4 @@
-import { ArrowLeftOutlined, EditOutlined } from "@ant-design/icons";
+import { ArrowLeftOutlined, EditOutlined, PieChartOutlined } from "@ant-design/icons";
 import { Button } from "@components/Button";
 import { Image } from "@components/Image";
 import { Box } from "@components/Layout/Box";
@@ -51,6 +51,12 @@ export const ShoppingListDetailScreen = () => {
     const doneCount = shoppingList.ingredients.filter(item => item.isDone).length;
     const itemCount = shoppingList.ingredients.length;
     const isReadonly = Boolean(shoppingList.completedAt);
+    const hasCalculatorSource = shoppingList.dishes.length > 0 || shoppingList.scheduledMeals.length > 0;
+    const _openNutritionCalculator = () => navigate(RootRoutes.AuthorizedRoutes.NutritionGoals({
+        calculator: true,
+        source: "shoppingLists",
+        shoppingLists: [shoppingList.id],
+    }));
 
     return <React.Fragment>
         <Box style={topToolCardStyle}>
@@ -77,14 +83,26 @@ export const ShoppingListDetailScreen = () => {
                     <Typography.Text type="secondary" style={{ fontSize: 12 }}>
                         {shoppingList.dishes.length} món · {shoppingList.scheduledMeals.length} thực đơn
                     </Typography.Text>
-                    {!isReadonly && <Button
-                        type="primary"
-                        icon={<EditOutlined />}
-                        onClick={toggleEditModal.show}
-                        style={{ marginTop: 6 }}
-                    >
-                        Sửa
-                    </Button>}
+                    <Stack gap={6} wrap="wrap" justify="flex-end" style={{ marginTop: 6 }}>
+                        <Button
+                            size="small"
+                            icon={<PieChartOutlined />}
+                            disabled={!hasCalculatorSource}
+                            onClick={_openNutritionCalculator}
+                            style={{ borderRadius: 999, color: "#7436dc", borderColor: "rgba(116,54,220,0.28)", fontWeight: 650 }}
+                        >
+                            Dinh dưỡng
+                        </Button>
+                        {!isReadonly && <Button
+                            size="small"
+                            type="primary"
+                            icon={<EditOutlined />}
+                            onClick={toggleEditModal.show}
+                            style={{ borderRadius: 999 }}
+                        >
+                            Sửa
+                        </Button>}
+                    </Stack>
                 </Stack>
             </Stack>
         </Box>

@@ -33,11 +33,19 @@ import { Progress } from 'antd';
 import dayjs from 'dayjs';
 import React, { useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 
 type NutritionCalculatorSource = 'dishes' | 'shoppingLists' | 'scheduledMeals';
 
 type CreationModal = 'scheduledMeal' | 'shoppingList' | null;
+
+type NutritionCalculatorInitialSelection = {
+    key: string;
+    source: NutritionCalculatorSource;
+    dishIds: string[];
+    shoppingListIds: string[];
+    mealIds: string[];
+}
 
 type CalculatorDishEntry = {
     key: string;
@@ -202,6 +210,30 @@ const primaryMetricKeys = ['calories', 'protein', 'carbs', 'fat', 'fiber'] as co
 
 const compactSourceLabel = (value: string) => value.length > 58 ? `${value.slice(0, 55)}...` : value;
 
+const splitQueryIds = (value: string | null): string[] => Array.from(new Set((value ?? '').split(',').map(item => item.trim()).filter(Boolean)));
+
+const getInitialSelectionFromSearch = (searchParams: URLSearchParams): NutritionCalculatorInitialSelection => {
+    const dishIds = splitQueryIds(searchParams.get('dishes'));
+    const shoppingListIds = splitQueryIds(searchParams.get('shoppingLists'));
+    const mealIds = splitQueryIds(searchParams.get('scheduledMeals'));
+    const requestedSource = searchParams.get('source');
+    const source: NutritionCalculatorSource = requestedSource === 'shoppingLists' || requestedSource === 'scheduledMeals' || requestedSource === 'dishes'
+        ? requestedSource
+        : shoppingListIds.length > 0
+            ? 'shoppingLists'
+            : mealIds.length > 0
+                ? 'scheduledMeals'
+                : 'dishes';
+
+    return {
+        key: [source, dishIds.join(','), shoppingListIds.join(','), mealIds.join(',')].join('|'),
+        source,
+        dishIds,
+        shoppingListIds,
+        mealIds,
+    };
+};
+
 const CalculatorPanel: React.FunctionComponent<{ title: string; subtitle?: string; icon: React.ReactNode; tone: string; action?: React.ReactNode; children: React.ReactNode }> = ({ title, subtitle, icon, tone, action, children }) => {
     return <Box style={{ border: `1px solid ${tone}1f`, borderRadius: 8, background: '#fff', padding: 12, boxShadow: '0 10px 24px rgba(15,23,42,0.06)', minWidth: 0 }}>
         <Stack justify='space-between' align='flex-start' gap={10} style={{ marginBottom: 11 }}>
@@ -226,7 +258,7 @@ const CalculatorMetricTile: React.FunctionComponent<{ label: string; value: stri
     </Box>;
 };
 
-const NutritionCalculatorModalContent: React.FunctionComponent = () => {
+const NutritionCalculatorModalContent: React.FunctionComponent<{ initialSelection?: NutritionCalculatorInitialSelection }> = ({ initialSelection }) => {
     const navigate = useNavigate();
     const dishes = useSelector(selectDishes);
     const ingredientsById = useSelector(selectIngredientsById);
@@ -236,11 +268,12 @@ const NutritionCalculatorModalContent: React.FunctionComponent = () => {
     const dishesById = useMemo(() => new Map(dishes.map(item => [item.id, item])), [dishes]);
     const shoppingListsById = useMemo(() => new Map(shoppingLists.map(item => [item.id, item])), [shoppingLists]);
     const scheduledMealsById = useMemo(() => new Map(scheduledMeals.map(item => [item.id, item])), [scheduledMeals]);
-    const [source, setSource] = useState<NutritionCalculatorSource>('dishes');
-    const [selectedDishIds, setSelectedDishIds] = useState<string[]>([]);
-    const [selectedDishServings, setSelectedDishServings] = useState<Record<string, number>>({});
-    const [selectedShoppingListIds, setSelectedShoppingListIds] = useState<string[]>([]);
-    const [selectedMealIds, setSelectedMealIds] = useState<string[]>([]);
+    const initialDishIds = initialSelection?.dishIds ?? [];
+    const [source, setSource] = useState<NutritionCalculatorSource>(initialSelection?.source ?? 'dishes');
+    const [selectedDishIds, setSelectedDishIds] = useState<string[]>(initialDishIds);
+    const [selectedDishServings, setSelectedDishServings] = useState<Record<string, number>>(() => normalizeDishServings(initialDishIds, dishesById, {}));
+    const [selectedShoppingListIds, setSelectedShoppingListIds] = useState<string[]>(initialSelection?.shoppingListIds ?? []);
+    const [selectedMealIds, setSelectedMealIds] = useState<string[]>(initialSelection?.mealIds ?? []);
     const [creationModal, setCreationModal] = useState<CreationModal>(null);
 
     const entries = useMemo(() => {
@@ -505,7 +538,19 @@ const NutritionCalculatorModalContent: React.FunctionComponent = () => {
 };
 
 export const NutritionCalculatorWidget: React.FunctionComponent = () => {
+    const [searchParams, setSearchParams] = useSearchParams();
     const [open, setOpen] = useState(false);
+    const routeOpen = searchParams.get('calculator') === '1';
+    const initialSelection = useMemo(() => getInitialSelectionFromSearch(searchParams), [searchParams]);
+    const modalOpen = open || routeOpen;
+
+    const _close = () => {
+        setOpen(false);
+        if (!routeOpen) return;
+        const nextParams = new URLSearchParams(searchParams);
+        ['calculator', 'source', 'dishes', 'shoppingLists', 'scheduledMeals'].forEach(key => nextParams.delete(key));
+        setSearchParams(nextParams, { replace: true });
+    };
 
     return <>
         <Box style={{ border: '1px solid rgba(19,168,168,0.18)', borderRadius: 8, background: 'linear-gradient(135deg, #ffffff 0%, #f6fffb 50%, #fff7e6 100%)', padding: 13, boxShadow: '0 12px 28px rgba(15,23,42,0.08)', overflow: 'hidden' }}>
@@ -524,16 +569,16 @@ export const NutritionCalculatorWidget: React.FunctionComponent = () => {
         </Box>
 
         <Modal
-            open={open}
+            open={modalOpen}
             title={<Space><CalculatorOutlined />Máy tính dinh dưỡng</Space>}
-            onCancel={() => setOpen(false)}
+            onCancel={_close}
             footer={null}
             width='min(980px, calc(100vw - 24px))'
             bodyStyle={{ maxHeight: 'calc(100vh - 128px)', overflowY: 'auto', padding: '22px 18px 18px' }}
             destroyOnClose
         >
-            <DeferredModalContent active={open} minHeight={520}>
-                <NutritionCalculatorModalContent />
+            <DeferredModalContent active={modalOpen} minHeight={520}>
+                <NutritionCalculatorModalContent key={routeOpen ? initialSelection.key : 'manual'} initialSelection={routeOpen ? initialSelection : undefined} />
             </DeferredModalContent>
         </Modal>
     </>;

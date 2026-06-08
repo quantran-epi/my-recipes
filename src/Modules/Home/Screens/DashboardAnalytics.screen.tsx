@@ -392,6 +392,68 @@ const InsightCard: React.FunctionComponent<{ title: string; value: string; detai
     </Box>;
 }
 
+const ExpenseSignalCard: React.FunctionComponent<{
+    pending: boolean;
+    highestShoppingCost?: ShoppingCostRow;
+    totalOpenShoppingCost: CostEstimateSummary;
+    shoppingCostCount: number;
+    onOpenShopping: () => void;
+    onOpenHighest?: () => void;
+}> = ({ pending, highestShoppingCost, totalOpenShoppingCost, shoppingCostCount, onOpenShopping, onOpenHighest }) => {
+    const [showHelp, setShowHelp] = React.useState(false);
+    const hasShoppingCost = shoppingCostCount > 0;
+    const totalLabel = pending ? 'Đang tính...' : hasShoppingCost ? formatCostSummary(totalOpenShoppingCost) : 'Chưa có dữ liệu';
+    const highestLabel = highestShoppingCost ? `${highestShoppingCost.costLabel} · còn ${highestShoppingCost.remainingCount} nhóm` : 'Chưa có danh sách cần mua';
+
+    return <Box style={{ border: '1px solid rgba(9,88,217,0.16)', borderRadius: 8, background: '#fff', padding: 11, minWidth: 0, boxShadow: '0 8px 20px rgba(15,23,42,0.06)' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '32px minmax(0, 1fr) auto', gap: 9, alignItems: 'start', marginBottom: 8 }}>
+            <span style={{ width: 32, height: 32, borderRadius: 8, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', color: '#0958d9', background: '#e6f4ff', border: '1px solid #bae0ff', flexShrink: 0 }}><DollarCircleOutlined /></span>
+            <div style={{ minWidth: 0 }}>
+                <Typography.Text type='secondary' style={{ display: 'block', fontSize: 11, lineHeight: '15px' }}>Chi phí còn cần mua</Typography.Text>
+                <Typography.Text strong style={{ display: 'block', color: '#111827', fontSize: 16, lineHeight: '20px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{totalLabel}</Typography.Text>
+            </div>
+            <button
+                type='button'
+                aria-label='Mô tả chi phí còn cần mua'
+                aria-expanded={showHelp}
+                onClick={() => setShowHelp(value => !value)}
+                style={{ width: 30, height: 30, borderRadius: 999, border: '1px solid rgba(9,88,217,0.22)', background: showHelp ? '#e6f4ff' : '#fff', color: '#0958d9', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', padding: 0 }}
+            >
+                <QuestionCircleOutlined />
+            </button>
+        </div>
+
+        <Box style={{ border: '1px solid #e6f4ff', borderRadius: 8, background: '#f7fbff', padding: '8px 9px', marginBottom: 8 }}>
+            <Stack justify='space-between' align='flex-start' gap={8}>
+                <div style={{ minWidth: 0 }}>
+                    <Typography.Text strong style={{ display: 'block', color: '#0958d9', fontSize: 12, lineHeight: '16px' }}>Danh sách cao nhất</Typography.Text>
+                    <Typography.Text style={{ display: 'block', color: '#111827', fontSize: 12, lineHeight: '17px', marginTop: 2, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                        {highestShoppingCost ? highestShoppingCost.name : 'Không có lịch mua đang mở'}
+                    </Typography.Text>
+                    <Typography.Text type='secondary' style={{ display: 'block', fontSize: 11, lineHeight: '15px', marginTop: 2 }}>{highestLabel}</Typography.Text>
+                </div>
+                <span style={{ flexShrink: 0, borderRadius: 999, padding: '2px 8px', background: '#fff', color: '#0958d9', border: '1px solid #bae0ff', fontSize: 11, lineHeight: '16px', fontWeight: 800 }}>
+                    {highestShoppingCost ? `${highestShoppingCost.progress}% xong` : `${shoppingCostCount} danh sách`}
+                </span>
+            </Stack>
+            {highestShoppingCost && <div style={{ height: 6, borderRadius: 999, background: '#e6f4ff', overflow: 'hidden', marginTop: 8 }}>
+                <div style={{ height: '100%', width: `${Math.max(3, highestShoppingCost.progress)}%`, borderRadius: 999, background: highestShoppingCost.progress >= 100 ? '#389e0d' : '#0958d9' }} />
+            </div>}
+        </Box>
+
+        {showHelp && <Box style={{ border: '1px solid rgba(9,88,217,0.14)', borderRadius: 8, background: '#f7fbff', padding: '8px 9px', marginBottom: 8 }}>
+            <Typography.Text style={{ display: 'block', color: '#2f2545', fontSize: 12, lineHeight: '18px' }}>
+                Đây là ước tính tiền cho phần nguyên liệu còn cần mua trong các danh sách chưa hoàn tất. App trừ tồn kho hiện tại và các nhóm đã đánh dấu mua xong, rồi dùng giá đã lưu ở nguyên liệu để tính khoảng tiền. Nó không phải tổng tiền đã chi.
+            </Typography.Text>
+        </Box>}
+
+        <Stack gap={6} wrap='wrap' justify='flex-end'>
+            {highestShoppingCost && onOpenHighest && <Button size='small' onClick={onOpenHighest} style={{ height: 28, padding: '0 9px', borderRadius: 999, color: '#0958d9', borderColor: 'rgba(9,88,217,0.30)', fontWeight: 650, fontSize: 11 }}>Mở cao nhất</Button>}
+            <Button size='small' onClick={onOpenShopping} style={{ height: 28, padding: '0 9px', borderRadius: 999, color: '#0958d9', borderColor: 'rgba(9,88,217,0.30)', fontWeight: 650, fontSize: 11 }}>Mua sắm</Button>
+        </Stack>
+    </Box>;
+}
+
 export const DashboardAnalyticsScreen = () => {
     const navigate = useNavigate();
     const ingredients = useSelector(selectIngredients);
@@ -575,14 +637,13 @@ export const DashboardAnalyticsScreen = () => {
                     actionLabel='Mở'
                     onOpen={() => openRoute(RootRoutes.AuthorizedRoutes.ScheduledMealRoutes.List())}
                 />
-                <InsightCard
-                    title='Danh sách tốn nhất'
-                    value={expensiveMetricsPending ? 'Đang tính...' : highestShoppingCost ? truncateName(highestShoppingCost.name, 22) : 'Chưa có chi phí'}
-                    detail={highestShoppingCost ? `${highestShoppingCost.costLabel} · tiến độ ${highestShoppingCost.progress}%. Tổng đang mở: ${formatCostSummary(totalOpenShoppingCost)}.` : 'Không có danh sách mua sắm đang mở hoặc chưa đủ giá.'}
-                    icon={<DollarCircleOutlined />}
-                    tone='#0958d9'
-                    actionLabel='Mở'
-                    onOpen={() => openRoute(RootRoutes.AuthorizedRoutes.ShoppingListRoutes.List())}
+                <ExpenseSignalCard
+                    pending={expensiveMetricsPending}
+                    highestShoppingCost={highestShoppingCost}
+                    totalOpenShoppingCost={totalOpenShoppingCost}
+                    shoppingCostCount={shoppingCosts.length}
+                    onOpenShopping={() => openRoute(RootRoutes.AuthorizedRoutes.ShoppingListRoutes.List())}
+                    onOpenHighest={highestShoppingCost ? () => openRoute(RootRoutes.AuthorizedRoutes.ShoppingListRoutes.Detail(highestShoppingCost.id)) : undefined}
                 />
                 <InsightCard
                     title='Rủi ro hao hụt'

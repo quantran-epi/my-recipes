@@ -1,4 +1,4 @@
-import { BarChartOutlined, BulbOutlined, CalculatorOutlined, ClockCircleOutlined, LeftOutlined, MinusOutlined, PlusOutlined, SettingOutlined, ShoppingCartOutlined, ThunderboltOutlined } from "@ant-design/icons";
+import { BarChartOutlined, BulbOutlined, CalculatorOutlined, ClockCircleOutlined, LeftOutlined, MinusOutlined, PieChartOutlined, PlusOutlined, SettingOutlined, ShoppingCartOutlined, ThunderboltOutlined } from "@ant-design/icons";
 import { DishDurationHelper } from "@common/Helpers/DishDurationHelper";
 import { DishNutritionHelper, DishNutritionSummary } from "@common/Helpers/DishNutritionHelper";
 import { NutritionGoalHelper, NutritionGoalMatch } from "@common/Helpers/NutritionGoalHelper";
@@ -323,6 +323,12 @@ export const DishSuggesterScreen: React.FC<DishSuggesterScreenProps> = ({ open, 
         _onClose();
     };
 
+    const _onOpenNutritionCalculator = (dishIds: string[]) => {
+        if (dishIds.length === 0) return;
+        navigate(RootRoutes.AuthorizedRoutes.NutritionGoals({ calculator: true, source: "dishes", dishes: dishIds }));
+        _onClose();
+    };
+
     const actionButtonStyle: React.CSSProperties = {
         width: 40,
         height: 40,
@@ -373,6 +379,14 @@ export const DishSuggesterScreen: React.FC<DishSuggesterScreenProps> = ({ open, 
                 data-testid="dish-suggester-expense-planner-button"
                 icon={<CalculatorOutlined />}
                 onClick={() => _onOpenExpensePlanner(dishIds)}
+                style={actionButtonStyle}
+            />
+            <Button
+                disabled={disabled}
+                aria-label={`Tính dinh dưỡng cho ${dishIds.length} món`}
+                data-testid="dish-suggester-nutrition-calculator-button"
+                icon={<PieChartOutlined />}
+                onClick={() => _onOpenNutritionCalculator(dishIds)}
                 style={actionButtonStyle}
             />
         </Stack>;
