@@ -22,6 +22,7 @@ const AuthorizedRoutes = {
     Root: () => "/",
     Analytics: () => RouteHelpers.CreateRoute('/analytics'),
     NutritionGoals: () => RouteHelpers.CreateRoute('/nutrition-goals'),
+    UserGuide: () => RouteHelpers.CreateRoute('/guide'),
     Templates: () => RouteHelpers.CreateRoute('/templates'),
     SyncBackupHealth: () => RouteHelpers.CreateRoute('/sync-backup-health'),
     ExpensePlanner,

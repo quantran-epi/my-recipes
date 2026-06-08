@@ -713,7 +713,7 @@ export const DashboardAnalyticsScreen = () => {
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 12 }}>
             <SectionCard title='Áp lực ngân sách mua sắm' subtitle='Danh sách nào còn tốn tiền và còn nhiều món chưa mua.' helpText={analyticsHelp.shoppingBudget} icon={<DollarCircleOutlined />} tone='#0958d9'>
-                {expensiveMetricsPending ? <EmptyAnalytics text='Đang tính chi phí mua sắm...' /> : shoppingCosts.length === 0 ? <EmptyAnalytics text='Không có danh sách mua sắm đang mở.' /> : <Stack direction='column' align='stretch' gap={10}>
+                {expensiveMetricsPending ? <EmptyAnalytics text='Đang tính chi phí mua sắm...' /> : shoppingCosts.length === 0 ? <EmptyAnalytics text='Không có danh sách mua sắm đang mở.' /> : <div style={{ display: 'flex', flexDirection: 'column', gap: 10, width: '100%' }}>
                     <ChartFrame height={206}>
                         <ResponsiveContainer width='100%' height='100%'>
                             <BarChart data={shoppingCostChartData} layout='vertical' margin={{ top: 6, right: 20, left: 12, bottom: 0 }}>
@@ -726,8 +726,8 @@ export const DashboardAnalyticsScreen = () => {
                         </ResponsiveContainer>
                     </ChartFrame>
                     <ChartSummaryRow items={shoppingCosts.slice(0, 4).map(item => ({ label: truncateName(item.name, 14), value: `${item.remainingCount} cần mua`, color: item.progress >= 100 ? '#389e0d' : '#0958d9' }))} />
-                    <Stack direction='column' align='stretch' gap={7}>
-                        {shoppingCosts.slice(0, 4).map(item => <button key={item.id} type='button' onClick={() => openRoute(RootRoutes.AuthorizedRoutes.ShoppingListRoutes.Detail(item.id))} style={{ border: '1px solid rgba(9,88,217,0.12)', borderRadius: 8, background: '#fff', padding: '9px 10px', textAlign: 'left', cursor: 'pointer' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 7, width: '100%' }}>
+                        {shoppingCosts.slice(0, 4).map(item => <button key={item.id} type='button' onClick={() => openRoute(RootRoutes.AuthorizedRoutes.ShoppingListRoutes.Detail(item.id))} style={{ width: '100%', boxSizing: 'border-box', border: '1px solid rgba(9,88,217,0.12)', borderRadius: 8, background: '#fff', padding: '9px 10px', textAlign: 'left', cursor: 'pointer' }}>
                             <Stack justify='space-between' gap={8} align='flex-start'>
                                 <div style={{ minWidth: 0 }}>
                                     <Typography.Text strong style={{ display: 'block', color: '#111827', fontSize: 12, lineHeight: '16px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{item.name}</Typography.Text>
@@ -739,9 +739,9 @@ export const DashboardAnalyticsScreen = () => {
                                 <div style={{ height: '100%', width: `${Math.max(3, item.progress)}%`, borderRadius: 999, background: item.progress >= 100 ? '#389e0d' : '#0958d9' }} />
                             </div>
                         </button>)}
-                    </Stack>
+                    </div>
                     <Button onClick={() => openRoute(RootRoutes.AuthorizedRoutes.ShoppingListRoutes.List())} style={{ borderRadius: 999, color: '#0958d9', borderColor: 'rgba(9,88,217,0.30)', fontWeight: 700 }}>Mở mua sắm</Button>
-                </Stack>}
+                </div>}
             </SectionCard>
 
             <SectionCard title='Chất lượng dữ liệu món ăn' subtitle='Dữ liệu đã đủ tin cậy cho gợi ý, nutrition và lập kế hoạch chưa.' helpText={analyticsHelp.dataQuality} icon={<CheckCircleOutlined />} tone='#389e0d'>

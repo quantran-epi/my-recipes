@@ -129,6 +129,39 @@ const dayArrowButtonStyle: React.CSSProperties = {
     boxShadow: "0 8px 18px rgba(74,48,130,0.09)",
 };
 
+const dayPickerControlRowStyle: React.CSSProperties = {
+    minHeight: 28,
+    display: "grid",
+    gridTemplateColumns: "minmax(0, 84px) minmax(0, 72px)",
+    justifyContent: "center",
+    alignItems: "center",
+    gap: 6,
+    width: "min(100%, 164px)",
+    margin: "7px auto 0",
+};
+
+const dayPickerButtonStyle: React.CSSProperties = {
+    width: "100%",
+    minWidth: 0,
+    height: 28,
+    borderRadius: 999,
+    fontSize: 12,
+    lineHeight: "16px",
+    fontWeight: 500,
+    paddingInline: 8,
+    color: "#5e2bbf",
+    borderColor: "rgba(116,54,220,0.18)",
+    background: "rgba(255,255,255,0.86)",
+    boxShadow: "none",
+    overflow: "hidden",
+};
+
+const dayPickerSingleControlRowStyle: React.CSSProperties = {
+    ...dayPickerControlRowStyle,
+    gridTemplateColumns: "minmax(0, 84px)",
+    width: "min(100%, 84px)",
+};
+
 const scheduledMealCss = `
 .scheduled-meal-card {
     transition: border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
@@ -294,11 +327,11 @@ export const ScheduledMealListScreen = () => {
                             <span style={{ padding: "1px 8px", borderRadius: 999, background: selectedDayStatus.background, color: selectedDayStatus.color, border: `1px solid ${selectedDayStatus.border}`, fontSize: 11, lineHeight: "18px", fontWeight: 700 }}>{selectedDayStatus.label}</span>
                             <Typography.Text type="secondary" style={{ fontSize: 12 }}>{mealsToday.length} thực đơn</Typography.Text>
                         </Space>
-                        <div style={{ minHeight: 32, display: "flex", alignItems: "center", justifyContent: "center", gap: 6, marginTop: 8, flexWrap: "nowrap" }}>
-                            <Button onClick={() => setCalendarVisible(value => !value)} icon={<CalendarOutlined />} style={{ width: 102, borderRadius: 999, fontWeight: 650, flexShrink: 0, whiteSpace: "nowrap" }}>
-                                {calendarVisible ? "Ẩn lịch" : "Chọn ngày"}
+                        <div style={dayjs(selectedDate).isSame(dayjs(), "day") ? dayPickerSingleControlRowStyle : dayPickerControlRowStyle}>
+                            <Button size="small" onClick={() => setCalendarVisible(value => !value)} icon={<CalendarOutlined />} style={dayPickerButtonStyle}>
+                                <span style={{ display: "block", minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{calendarVisible ? "Ẩn" : "Ngày"}</span>
                             </Button>
-                            {!dayjs(selectedDate).isSame(dayjs(), "day") && <Button onClick={_goToday} style={{ width: 82, borderRadius: 999, fontWeight: 650, flexShrink: 0, whiteSpace: "nowrap" }}>Hôm nay</Button>}
+                            {!dayjs(selectedDate).isSame(dayjs(), "day") && <Button size="small" onClick={_goToday} style={dayPickerButtonStyle}>Hôm nay</Button>}
                         </div>
                     </div>
                     <Button

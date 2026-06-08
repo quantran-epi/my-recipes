@@ -23,7 +23,6 @@ import { DishSuggesterScreen } from "@modules/DishSuggester/Screens/DishSuggeste
 import { CookingSessionWidget } from "@modules/Dishes/Screens/CookingSession.widget";
 import { CookingHistoryWidget } from "@modules/Dishes/Screens/CookingHistory.widget";
 import { GistBackupWidget } from "@components/GistBackupWidget";
-import { UserGuideScreen } from "@modules/Home/Screens/UserGuide.screen";
 import { GlobalSearchScreen } from "@modules/Home/Screens/GlobalSearch.screen";
 import { selectCookingSessions, selectCurrentFeatureName, selectDishesById, selectInventoryHealthConfig } from "@store/Selectors";
 import { Flex, Input as AntInput, Layout, Divider, InputNumber } from "antd";
@@ -254,7 +253,6 @@ const SidebarDrawer = ({ buttonStyle }: { buttonStyle?: React.CSSProperties }) =
     const message = useMessage();
     const modal = useModal();
     const toggleHistory = useToggle();
-    const toggleGuide = useToggle();
     const toggleBackupCenter = useToggle();
     const { navigateWithFeedback } = useAppShellNavigation();
     const toolsReady = useDeferredDrawerTools(open);
@@ -477,7 +475,7 @@ const SidebarDrawer = ({ buttonStyle }: { buttonStyle?: React.CSSProperties }) =
                         icon={<QuestionCircleOutlined />}
                         block
                         style={{ marginTop: 8 }}
-                        onClick={() => { setOpen(false); toggleGuide.show(); }}
+                        onClick={() => onNavigate(RootRoutes.AuthorizedRoutes.UserGuide())}
                     >
                         Hướng dẫn sử dụng
                     </Button>
@@ -705,7 +703,6 @@ const SidebarDrawer = ({ buttonStyle }: { buttonStyle?: React.CSSProperties }) =
                 />
             )}
             {toggleHistory.value && <CookingHistoryWidget open={toggleHistory.value} onClose={toggleHistory.hide} />}
-            {toggleGuide.value && <UserGuideScreen open={toggleGuide.value} onClose={toggleGuide.hide} />}
         </React.Fragment>
     );
 };
