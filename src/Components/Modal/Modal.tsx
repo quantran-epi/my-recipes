@@ -6,6 +6,7 @@ import React from "react";
 type AppModalProps = ModalProps & {
     onClose?: () => void;
     bodyStyle?: React.CSSProperties;
+    headerActions?: React.ReactNode;
 };
 
 type AppModalComponent = React.FunctionComponent<AppModalProps> & Pick<typeof AntModal, "useModal" | "confirm" | "destroyAll" | "info" | "success" | "error" | "warning">;
@@ -22,6 +23,7 @@ const ModalBase: React.FunctionComponent<AppModalProps> = ({
     title,
     children,
     footer,
+    headerActions,
     width,
     style,
     styles,
@@ -76,6 +78,7 @@ const ModalBase: React.FunctionComponent<AppModalProps> = ({
         afterOpenChange={afterOpenChange}
         onClose={() => _onCancel()}
         footer={footerNode}
+        headerActions={headerActions}
         bodyStyle={{ ...styles?.body, ...bodyStyle }}
     >
         {isOpen || !destroyOnClose ? children : null}

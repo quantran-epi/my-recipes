@@ -1104,14 +1104,18 @@ export const DishSuggesterScreen: React.FC<DishSuggesterScreenProps> = ({ open, 
             footer={null}
             destroyOnClose
             title={
-                <Stack justify="space-between" align="center" gap={10} style={{ width: "100%" }}>
-                    <Space>
-                        <Image src={NoodlesIcon} preview={false} width={22} style={{ marginBottom: 3 }} />
-                        Nấu gì hôm nay?
-                    </Space>
-                    <Button size="small" icon={<ExportOutlined />} onClick={_onOpenSeparatePage} style={{ borderRadius: 999, color: "#7436dc", borderColor: "rgba(116,54,220,0.28)", flexShrink: 0 }}>Trang riêng</Button>
-                </Stack>
+                <Space>
+                    <Image src={NoodlesIcon} preview={false} width={22} style={{ marginBottom: 3 }} />
+                    Nấu gì hôm nay?
+                </Space>
             }
+            headerActions={<Button
+                aria-label="Mở trang Nấu gì riêng"
+                data-testid="dish-suggester-open-page-button"
+                icon={<ExportOutlined />}
+                onClick={_onOpenSeparatePage}
+                style={{ width: 34, height: 34, borderRadius: 10, paddingInline: 0, color: "#7436dc", borderColor: "rgba(116,54,220,0.20)" }}
+            />}
             style={{ top: 24 }}
         >
             {content}

@@ -18,6 +18,7 @@ type FastOverlayBaseProps = {
 
 type FastModalShellProps = FastOverlayBaseProps & {
     footer?: React.ReactNode;
+    headerActions?: React.ReactNode;
     width?: FastOverlaySize;
     style?: React.CSSProperties;
     bodyStyle?: React.CSSProperties;
@@ -119,6 +120,7 @@ export const FastModalShell: React.FunctionComponent<FastModalShellProps> = ({
     onClose,
     children,
     footer,
+    headerActions,
     width,
     zIndex,
     style,
@@ -188,10 +190,13 @@ export const FastModalShell: React.FunctionComponent<FastModalShellProps> = ({
                 onMouseDown={(event) => event.stopPropagation()}
             >
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, padding: "14px 16px 12px", borderBottom: "1px solid #f0f2f5" }}>
-                    <div style={shellTitleStyle}>{title}</div>
-                    {closable && <button type="button" aria-label="Thoát" onClick={onClose} style={closeButtonStyle}>
-                        <CloseOutlined />
-                    </button>}
+                    <div style={{ ...shellTitleStyle, flex: "1 1 auto" }}>{title}</div>
+                    <div style={{ display: "inline-flex", alignItems: "center", gap: 6, flexShrink: 0 }}>
+                        {headerActions}
+                        {closable && <button type="button" aria-label="Thoát" onClick={onClose} style={closeButtonStyle}>
+                            <CloseOutlined />
+                        </button>}
+                    </div>
                 </div>
                 <div style={{ minHeight: 0, overflowY: "auto", padding: 16, ...bodyStyle }}>
                     {children}
