@@ -12,10 +12,7 @@ import ShoppinglistIcon from "../../../../assets/icons/shoppingList.png"
 import ListCheckIcon from "../../../../assets/icons/list-check.png"
 import EraseIcon from "../../../../assets/icons/eraser.png"
 import ShoppingListAddIcon from "../../../../assets/icons/shopping-cart-add.png"
-import DishesIcon from "../../../../assets/icons/noodles.png";
 import IngredientIcon from "../../../../assets/icons/vegetable.png";
-import MealsIcon from "../../../../assets/icons/meals.png";
-import BudgetIcon from "../../../../assets/icons/budget.png";
 import HouseIcon from "../../../../assets/icons/house.png";
 import MonitorIcon from "../../../../assets/icons/monitor.png";
 import { Space } from "@components/Layout/Space";
@@ -121,11 +118,7 @@ export const ScheduledMealToolkitWidget: React.FC<ScheduledMealToolkitWidgetProp
             {selectedMeals.length > 0 && <FloatButton description="Tạo lịch mua" tooltip={`Tạo lịch mua sắm (${selectedMeals.length})`} icon={<Image preview={false} src={ShoppingListAddIcon} width={20} style={floatIconStyle} />} onClick={_onOpenAddShoppingList} />}
             <FloatButton description="Tổng quan" tooltip="Tổng quan" icon={<Image preview={false} src={HouseIcon} width={20} style={floatIconStyle} />} onClick={() => _navigate(RootRoutes.AuthorizedRoutes.Root())} />
             <FloatButton description="Phân tích" tooltip="Phân tích dữ liệu" icon={<Image preview={false} src={MonitorIcon} width={20} style={floatIconStyle} />} onClick={() => _navigate(RootRoutes.AuthorizedRoutes.Analytics())} />
-            <FloatButton description="Món ăn" tooltip="Món ăn" icon={<Image preview={false} src={DishesIcon} width={20} style={floatIconStyle} />} onClick={() => _navigate(RootRoutes.AuthorizedRoutes.DishesRoutes.List())} />
             <FloatButton description="Nguyên liệu" tooltip="Nguyên liệu" icon={<Image preview={false} src={IngredientIcon} width={20} style={floatIconStyle} />} onClick={() => _navigate(RootRoutes.AuthorizedRoutes.IngredientRoutes.List())} />
-            <FloatButton description="Mua sắm" tooltip="Mua sắm" icon={<Image preview={false} src={ShoppinglistIcon} width={20} style={floatIconStyle} />} onClick={() => _navigate(RootRoutes.AuthorizedRoutes.ShoppingListRoutes.List())} />
-            <FloatButton description="Thực đơn" tooltip="Thực đơn" icon={<Image preview={false} src={MealsIcon} width={20} style={floatIconStyle} />} onClick={() => _navigate(RootRoutes.AuthorizedRoutes.ScheduledMealRoutes.List())} />
-            <FloatButton description="Tính phí" tooltip="Tính chi phí" icon={<Image preview={false} src={BudgetIcon} width={20} style={floatIconStyle} />} onClick={() => _navigate(RootRoutes.AuthorizedRoutes.ExpensePlanner())} />
         </FloatButton.Group>
 
         {toggleAddModal.value && <Modal open={toggleAddModal.value} title={

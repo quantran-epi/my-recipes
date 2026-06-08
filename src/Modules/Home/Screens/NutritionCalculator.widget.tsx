@@ -278,8 +278,8 @@ export const NutritionCalculatorWidget: React.FunctionComponent = () => {
                         </div>
                     </Stack>
                     {source === 'dishes' && <Stack gap={7} wrap='wrap' style={{ flexShrink: 0 }}>
-                        <Button disabled={!canCreateFromDishes} icon={<CalendarOutlined />} onClick={() => setCreationModal('scheduledMeal')}>Tạo thực đơn</Button>
-                        <Button disabled={!canCreateFromDishes} icon={<ShoppingCartOutlined />} onClick={() => setCreationModal('shoppingList')}>Tạo lịch mua sắm</Button>
+                        <Button aria-label='Tạo thực đơn từ món đã chọn' disabled={!canCreateFromDishes} icon={<CalendarOutlined />} onClick={() => setCreationModal('scheduledMeal')}>Thực đơn</Button>
+                        <Button aria-label='Tạo lịch mua sắm từ món đã chọn' disabled={!canCreateFromDishes} icon={<ShoppingCartOutlined />} onClick={() => setCreationModal('shoppingList')}>Mua sắm</Button>
                     </Stack>}
                 </Stack>
 
