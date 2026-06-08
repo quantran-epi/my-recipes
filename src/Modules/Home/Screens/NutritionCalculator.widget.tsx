@@ -202,6 +202,30 @@ const primaryMetricKeys = ['calories', 'protein', 'carbs', 'fat', 'fiber'] as co
 
 const compactSourceLabel = (value: string) => value.length > 58 ? `${value.slice(0, 55)}...` : value;
 
+const CalculatorPanel: React.FunctionComponent<{ title: string; subtitle?: string; icon: React.ReactNode; tone: string; action?: React.ReactNode; children: React.ReactNode }> = ({ title, subtitle, icon, tone, action, children }) => {
+    return <Box style={{ border: `1px solid ${tone}1f`, borderRadius: 8, background: '#fff', padding: 12, boxShadow: '0 10px 24px rgba(15,23,42,0.06)', minWidth: 0 }}>
+        <Stack justify='space-between' align='flex-start' gap={10} style={{ marginBottom: 11 }}>
+            <Stack align='center' gap={9} style={{ minWidth: 0 }}>
+                <span style={{ width: 34, height: 34, borderRadius: 8, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', color: tone, background: `${tone}12`, border: `1px solid ${tone}24`, flexShrink: 0 }}>{icon}</span>
+                <div style={{ minWidth: 0 }}>
+                    <Typography.Text strong style={{ display: 'block', color: '#111827', fontSize: 15, lineHeight: '20px' }}>{title}</Typography.Text>
+                    {subtitle && <Typography.Text type='secondary' style={{ display: 'block', fontSize: 11, lineHeight: '15px', marginTop: 2 }}>{subtitle}</Typography.Text>}
+                </div>
+            </Stack>
+            {action && <div style={{ flexShrink: 0, display: 'flex', justifyContent: 'flex-end' }}>{action}</div>}
+        </Stack>
+        {children}
+    </Box>;
+};
+
+const CalculatorMetricTile: React.FunctionComponent<{ label: string; value: string; detail: string; tone: string }> = ({ label, value, detail, tone }) => {
+    return <Box style={{ border: `1px solid ${tone}1f`, borderRadius: 8, background: `${tone}08`, padding: 10, minWidth: 0 }}>
+        <Typography.Text type='secondary' style={{ display: 'block', fontSize: 11, lineHeight: '15px' }}>{label}</Typography.Text>
+        <Typography.Text strong style={{ display: 'block', fontSize: 17, lineHeight: '23px', color: tone, overflowWrap: 'anywhere' }}>{value}</Typography.Text>
+        <Typography.Text type='secondary' style={{ display: 'block', fontSize: 11, lineHeight: '15px' }}>{detail}</Typography.Text>
+    </Box>;
+};
+
 const NutritionCalculatorModalContent: React.FunctionComponent = () => {
     const navigate = useNavigate();
     const dishes = useSelector(selectDishes);
@@ -264,27 +288,38 @@ const NutritionCalculatorModalContent: React.FunctionComponent = () => {
             : selectedMealIds.length;
     const canCreateFromDishes = source === 'dishes' && selectedDishIds.length > 0;
 
-    return <Box style={{ border: '1px solid rgba(19,168,168,0.18)', borderRadius: 8, background: '#fff', boxShadow: '0 14px 32px rgba(15,23,42,0.08)', overflow: 'hidden' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: '5px minmax(0, 1fr)', background: 'linear-gradient(135deg, #ffffff 0%, #f6fffb 46%, #fff7e6 100%)' }}>
-            <div style={{ background: 'linear-gradient(180deg, #13a8a8 0%, #faad14 100%)' }} />
-            <div style={{ padding: 13, minWidth: 0 }}>
-                <Stack justify='space-between' align='flex-start' gap={10} style={{ marginBottom: 12 }}>
-                    <Stack align='center' gap={9} style={{ minWidth: 0 }}>
-                        <span style={{ width: 38, height: 38, borderRadius: 8, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', color: '#0f766e', background: '#ccfbf1', border: '1px solid #99f6e4', flexShrink: 0 }}>
+    return <>
+        <Box style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+            <Box style={{ border: '1px solid rgba(19,168,168,0.18)', borderRadius: 8, background: 'linear-gradient(135deg, #ffffff 0%, #f6fffb 48%, #fff7e6 100%)', padding: 14, boxShadow: '0 12px 28px rgba(15,23,42,0.07)' }}>
+                <Stack justify='space-between' align='flex-start' gap={12} wrap='wrap'>
+                    <Stack align='center' gap={10} style={{ minWidth: 0 }}>
+                        <span style={{ width: 42, height: 42, borderRadius: 8, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', color: '#0f766e', background: '#ccfbf1', border: '1px solid #99f6e4', flexShrink: 0, fontSize: 18 }}>
                             <FireOutlined />
                         </span>
                         <div style={{ minWidth: 0 }}>
                             <Typography.Text strong style={{ display: 'block', fontSize: 18, lineHeight: '23px', color: '#111827' }}>Máy tính dinh dưỡng</Typography.Text>
-                            <Typography.Text type='secondary' style={{ display: 'block', fontSize: 12, lineHeight: '17px' }}>{selectedSourceCount} nguồn · {aggregate.results.length} lượt món · {aggregate.servings} phần</Typography.Text>
+                            <Typography.Text type='secondary' style={{ display: 'block', fontSize: 12, lineHeight: '17px', marginTop: 2 }}>Chọn nguồn, kiểm tra tổng dinh dưỡng và xem mức độ khớp mục tiêu.</Typography.Text>
                         </div>
                     </Stack>
-                    {source === 'dishes' && <Stack gap={7} wrap='wrap' style={{ flexShrink: 0 }}>
-                        <Button aria-label='Tạo thực đơn từ món đã chọn' disabled={!canCreateFromDishes} icon={<CalendarOutlined />} onClick={() => setCreationModal('scheduledMeal')}>Thực đơn</Button>
-                        <Button aria-label='Tạo lịch mua sắm từ món đã chọn' disabled={!canCreateFromDishes} icon={<ShoppingCartOutlined />} onClick={() => setCreationModal('shoppingList')}>Mua sắm</Button>
-                    </Stack>}
+                    <Stack align='center' gap={6} wrap='wrap' style={{ flexShrink: 0 }}>
+                        <Tag color='cyan' style={{ marginInlineEnd: 0 }}>{selectedSourceCount} nguồn</Tag>
+                        <Tag color='blue' style={{ marginInlineEnd: 0 }}>{aggregate.results.length} lượt món</Tag>
+                        <Tag color='gold' style={{ marginInlineEnd: 0 }}>{aggregate.servings} phần</Tag>
+                    </Stack>
                 </Stack>
+            </Box>
 
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 8, marginBottom: 10 }}>
+            <CalculatorPanel
+                title='Chọn dữ liệu tính'
+                subtitle='Bắt đầu từ món lẻ, lịch mua sắm hoặc thực đơn đã lên.'
+                icon={<CalculatorOutlined />}
+                tone='#13a8a8'
+                action={source === 'dishes' ? <Stack gap={6} wrap='wrap' justify='flex-end'>
+                    <Button size='small' aria-label='Tạo thực đơn từ món đã chọn' disabled={!canCreateFromDishes} icon={<CalendarOutlined />} onClick={() => setCreationModal('scheduledMeal')} style={{ borderRadius: 999 }}>Thực đơn</Button>
+                    <Button size='small' aria-label='Tạo lịch mua sắm từ món đã chọn' disabled={!canCreateFromDishes} icon={<ShoppingCartOutlined />} onClick={() => setCreationModal('shoppingList')} style={{ borderRadius: 999 }}>Mua sắm</Button>
+                </Stack> : undefined}
+            >
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 8 }}>
                     {sourceOptions.map(option => {
                         const active = source === option.value;
                         return <button
@@ -294,7 +329,7 @@ const NutritionCalculatorModalContent: React.FunctionComponent = () => {
                             aria-pressed={active}
                             style={{
                                 minWidth: 0,
-                                minHeight: 82,
+                                minHeight: 76,
                                 display: 'flex',
                                 flexDirection: 'column',
                                 alignItems: 'center',
@@ -316,7 +351,10 @@ const NutritionCalculatorModalContent: React.FunctionComponent = () => {
                     })}
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr)', gap: 10, alignItems: 'start' }}>
+                <Box style={{ border: '1px solid #eef2f7', borderRadius: 8, background: '#fbfcfe', padding: 10, marginTop: 10 }}>
+                    <Typography.Text strong style={{ display: 'block', color: '#111827', fontSize: 12, lineHeight: '16px', marginBottom: 7 }}>
+                        {source === 'dishes' ? 'Món cần tính' : source === 'shoppingLists' ? 'Lịch mua sắm cần tính' : 'Thực đơn cần tính'}
+                    </Typography.Text>
                     {source === 'dishes' && <Select
                         showSearch
                         mode='multiple'
@@ -347,44 +385,41 @@ const NutritionCalculatorModalContent: React.FunctionComponent = () => {
                         style={{ width: '100%' }}>
                         {scheduledMeals.map(item => <Option key={item.id} value={item.id}>{getMealLabel(item)}</Option>)}
                     </Select>}
-                </div>
+                </Box>
 
-                {source === 'dishes' && <Box style={{ marginTop: 10 }}>
+                {source === 'dishes' && <Box style={{ border: '1px solid #f3f4f6', borderRadius: 8, background: '#fff', padding: 10, marginTop: 10 }}>
+                    <Typography.Text strong style={{ display: 'block', color: '#111827', fontSize: 12, lineHeight: '16px', marginBottom: 7 }}>Khẩu phần từng món</Typography.Text>
                     <DishServingSelector selectedDishIds={selectedDishIds} dishes={dishes} value={selectedDishServings} onChange={setSelectedDishServings} />
                 </Box>}
-            </div>
-        </div>
+            </CalculatorPanel>
 
-        <Box style={{ padding: '0 13px 13px' }}>
-            {aggregate.results.length === 0 ? <Box style={{ border: '1px dashed #d9d9d9', borderRadius: 8, padding: 18, textAlign: 'center', background: '#fafafa' }}>
+            {aggregate.results.length === 0 ? <Box style={{ border: '1px dashed #d9d9d9', borderRadius: 8, padding: 24, textAlign: 'center', background: '#fafafa' }}>
                 <Typography.Text type='secondary'>Chưa có dữ liệu để tính.</Typography.Text>
-            </Box> : <Stack direction='column' align='stretch' gap={12}>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(118px, 1fr))', gap: 8 }}>
-                    {primaryMetricKeys.map(key => <Box key={key} style={{ border: '1px solid #eef2f7', borderRadius: 8, background: '#fff', padding: 10, minWidth: 0 }}>
-                        <Typography.Text type='secondary' style={{ display: 'block', fontSize: 11, lineHeight: '15px' }}>{NutritionGoalHelper.getNutrientLabel(key)}</Typography.Text>
-                        <Typography.Text strong style={{ display: 'block', fontSize: 17, lineHeight: '23px', color: key === 'calories' ? '#d46b08' : '#0f172a', overflowWrap: 'anywhere' }}>
-                            {NutritionGoalHelper.formatNutrientValue(key, aggregate.total[key])}
-                        </Typography.Text>
-                        <Typography.Text type='secondary' style={{ display: 'block', fontSize: 11, lineHeight: '15px' }}>{NutritionGoalHelper.formatNutrientValue(key, aggregate.perServing[key])} / phần</Typography.Text>
-                    </Box>)}
-                    <Box style={{ border: '1px solid #e6f4ff', borderRadius: 8, background: '#f7fbff', padding: 10, minWidth: 0 }}>
-                        <Typography.Text type='secondary' style={{ display: 'block', fontSize: 11, lineHeight: '15px' }}>Độ phủ</Typography.Text>
-                        <Stack align='center' gap={8} style={{ marginTop: 2 }}>
-                            <Progress type='circle' size={40} percent={aggregate.coveragePercent} strokeColor={aggregate.coveragePercent >= 80 ? '#13a8a8' : '#faad14'} />
-                            <div style={{ minWidth: 0 }}>
-                                <Typography.Text strong style={{ display: 'block', lineHeight: '18px' }}>{aggregate.coveredIngredientCount}/{aggregate.ingredientCount}</Typography.Text>
-                                <Typography.Text type='secondary' style={{ display: 'block', fontSize: 11 }}>nguyên liệu</Typography.Text>
-                            </div>
-                        </Stack>
-                    </Box>
-                </div>
+            </Box> : <>
+                <CalculatorPanel title='Tổng quan dinh dưỡng' subtitle='Các chỉ số chính theo tổng đã chọn và trung bình mỗi phần.' icon={<PieChartOutlined />} tone='#7436dc' action={<Tag color={aggregate.coveragePercent >= 80 ? 'green' : 'gold'} style={{ marginInlineEnd: 0 }}>{aggregate.coveragePercent}% phủ dữ liệu</Tag>}>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(118px, 1fr))', gap: 8 }}>
+                        {primaryMetricKeys.map(key => <CalculatorMetricTile
+                            key={key}
+                            label={NutritionGoalHelper.getNutrientLabel(key)}
+                            value={NutritionGoalHelper.formatNutrientValue(key, aggregate.total[key])}
+                            detail={`${NutritionGoalHelper.formatNutrientValue(key, aggregate.perServing[key])} / phần`}
+                            tone={key === 'calories' ? '#d46b08' : key === 'protein' ? '#1677ff' : key === 'fiber' ? '#389e0d' : '#0f172a'}
+                        />)}
+                        <Box style={{ border: '1px solid #e6f4ff', borderRadius: 8, background: '#f7fbff', padding: 10, minWidth: 0 }}>
+                            <Typography.Text type='secondary' style={{ display: 'block', fontSize: 11, lineHeight: '15px' }}>Độ phủ</Typography.Text>
+                            <Stack align='center' gap={8} style={{ marginTop: 2 }}>
+                                <Progress type='circle' size={40} percent={aggregate.coveragePercent} strokeColor={aggregate.coveragePercent >= 80 ? '#13a8a8' : '#faad14'} />
+                                <div style={{ minWidth: 0 }}>
+                                    <Typography.Text strong style={{ display: 'block', lineHeight: '18px' }}>{aggregate.coveredIngredientCount}/{aggregate.ingredientCount}</Typography.Text>
+                                    <Typography.Text type='secondary' style={{ display: 'block', fontSize: 11 }}>nguyên liệu</Typography.Text>
+                                </div>
+                            </Stack>
+                        </Box>
+                    </div>
+                </CalculatorPanel>
 
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(260px, 100%), 1fr))', gap: 10, alignItems: 'start' }}>
-                    <Box style={{ border: '1px solid #f0f0f0', borderRadius: 8, background: '#fff', padding: 10, minWidth: 0 }}>
-                        <Stack justify='space-between' align='center' gap={8} style={{ marginBottom: 8 }}>
-                            <Typography.Text strong>Chi tiết lượt món</Typography.Text>
-                            <Tag color='cyan' style={{ marginInlineEnd: 0 }}>{aggregate.results.length} lượt</Tag>
-                        </Stack>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(280px, 100%), 1fr))', gap: 12, alignItems: 'start' }}>
+                    <CalculatorPanel title='Chi tiết lượt món' subtitle='Món nào đang đóng góp vào phép tính hiện tại.' icon={<UnorderedListOutlined />} tone='#0958d9' action={<Tag color='blue' style={{ marginInlineEnd: 0 }}>{aggregate.results.length} lượt</Tag>}>
                         <Stack direction='column' align='stretch' gap={7} style={{ maxHeight: 280, overflowY: 'auto', paddingRight: 2 }}>
                             {aggregate.results.map(result => <div key={result.entry.key} style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) auto', gap: 8, alignItems: 'center', border: '1px solid #f3f4f6', borderRadius: 8, padding: '8px 9px', background: '#fcfcfd' }}>
                                 <div style={{ minWidth: 0 }}>
@@ -397,10 +432,9 @@ const NutritionCalculatorModalContent: React.FunctionComponent = () => {
                                 </Stack>
                             </div>)}
                         </Stack>
-                    </Box>
+                    </CalculatorPanel>
 
-                    <Box style={{ border: '1px solid #f0f0f0', borderRadius: 8, background: '#fff', padding: 10, minWidth: 0 }}>
-                        <Typography.Text strong style={{ display: 'block', marginBottom: 8 }}>Mục tiêu gần nhất</Typography.Text>
+                    <CalculatorPanel title='Mục tiêu gần nhất' subtitle='Mục tiêu nutrition khớp nhất với lựa chọn hiện tại.' icon={<CheckCircleOutlined />} tone='#389e0d'>
                         {topGoalMatches.length === 0 ? <Typography.Text type='secondary' style={{ fontSize: 12 }}>Chưa có mục tiêu.</Typography.Text> : <Stack direction='column' align='stretch' gap={7}>
                             {topGoalMatches.map(({ goal, match }) => <div key={goal.id} style={{ border: `1px solid ${goal.color ?? '#13a8a8'}24`, borderRadius: 8, padding: 8, background: `${goal.color ?? '#13a8a8'}0d` }}>
                                 <Stack justify='space-between' align='center' gap={8}>
@@ -410,17 +444,13 @@ const NutritionCalculatorModalContent: React.FunctionComponent = () => {
                                 <Typography.Text type='secondary' style={{ display: 'block', fontSize: 11, lineHeight: '15px', marginTop: 3 }}>{match.matchedCriteriaCount}/{match.totalCriteriaCount} tiêu chí</Typography.Text>
                             </div>)}
                         </Stack>}
-                    </Box>
+                    </CalculatorPanel>
                 </div>
 
-                <Box style={{ border: '1px solid #f0f0f0', borderRadius: 8, background: '#fff', padding: 10 }}>
-                    <Stack justify='space-between' align='center' gap={8} style={{ marginBottom: 8 }}>
-                        <Typography.Text strong>Toàn bộ chỉ số</Typography.Text>
-                        <Space size={6} wrap>
-                            {aggregate.hasNutrition && <Tag color='green' icon={<CheckCircleOutlined />} style={{ marginInlineEnd: 0 }}>Có dữ liệu</Tag>}
-                            {(aggregate.missingNutritionIngredientIds.length > 0 || aggregate.missingConversionIngredientIds.length > 0) && <Tag color='gold' icon={<WarningOutlined />} style={{ marginInlineEnd: 0 }}>Thiếu {aggregate.missingNutritionIngredientIds.length + aggregate.missingConversionIngredientIds.length}</Tag>}
-                        </Space>
-                    </Stack>
+                <CalculatorPanel title='Toàn bộ chỉ số' subtitle='Bảng đầy đủ để kiểm tra các chỉ số ngoài nhóm chính.' icon={<FireOutlined />} tone='#d48806' action={<Space size={6} wrap>
+                    {aggregate.hasNutrition && <Tag color='green' icon={<CheckCircleOutlined />} style={{ marginInlineEnd: 0 }}>Có dữ liệu</Tag>}
+                    {(aggregate.missingNutritionIngredientIds.length > 0 || aggregate.missingConversionIngredientIds.length > 0) && <Tag color='gold' icon={<WarningOutlined />} style={{ marginInlineEnd: 0 }}>Thiếu {aggregate.missingNutritionIngredientIds.length + aggregate.missingConversionIngredientIds.length}</Tag>}
+                </Space>}>
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(132px, 1fr))', gap: 7 }}>
                         {NutritionGoalHelper.nutrientOptions.map(option => <div key={option.value} style={{ border: '1px solid #f3f4f6', borderRadius: 8, padding: '7px 8px', background: '#fcfcfd', minWidth: 0 }}>
                             <Typography.Text type='secondary' style={{ display: 'block', fontSize: 11, lineHeight: '15px' }}>{option.label}</Typography.Text>
@@ -430,8 +460,8 @@ const NutritionCalculatorModalContent: React.FunctionComponent = () => {
                     {aggregate.sourceNames.length > 0 && <Typography.Text type='secondary' style={{ display: 'block', marginTop: 8, fontSize: 11, lineHeight: '15px' }}>
                         Nguồn: {aggregate.sourceNames.slice(0, 4).join(', ')}{aggregate.sourceNames.length > 4 ? ` +${aggregate.sourceNames.length - 4}` : ''}
                     </Typography.Text>}
-                </Box>
-            </Stack>}
+                </CalculatorPanel>
+            </>}
         </Box>
 
         <Modal
@@ -471,7 +501,7 @@ const NutritionCalculatorModalContent: React.FunctionComponent = () => {
                 />
             </DeferredModalContent>
         </Modal>
-    </Box>;
+    </>;
 };
 
 export const NutritionCalculatorWidget: React.FunctionComponent = () => {
@@ -499,7 +529,7 @@ export const NutritionCalculatorWidget: React.FunctionComponent = () => {
             onCancel={() => setOpen(false)}
             footer={null}
             width='min(980px, calc(100vw - 24px))'
-            bodyStyle={{ maxHeight: 'calc(100vh - 128px)', overflowY: 'auto' }}
+            bodyStyle={{ maxHeight: 'calc(100vh - 128px)', overflowY: 'auto', padding: '22px 18px 18px' }}
             destroyOnClose
         >
             <DeferredModalContent active={open} minHeight={520}>

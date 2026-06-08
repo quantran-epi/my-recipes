@@ -1,4 +1,4 @@
-import { DeleteOutlined, EditOutlined, PlusOutlined, ReloadOutlined } from '@ant-design/icons';
+import { CheckCircleOutlined, DeleteOutlined, EditOutlined, PlusOutlined, ReloadOutlined } from '@ant-design/icons';
 import { NutritionGoalHelper } from '@common/Helpers/NutritionGoalHelper';
 import { Button } from '@components/Button';
 import { Image } from '@components/Image';
@@ -53,6 +53,82 @@ const validateGoal = (goal: NutritionGoal): string | null => {
 };
 
 const normalizeNumber = (value: number | null): number | undefined => typeof value === 'number' && Number.isFinite(value) ? Math.round(value * 10) / 10 : undefined;
+
+const getCriterionTone = (nutrient: NutritionGoalNutrientKey): string => {
+    if (nutrient === 'calories') return '#d46b08';
+    if (nutrient === 'protein') return '#1677ff';
+    if (nutrient === 'fiber') return '#389e0d';
+    if (nutrient === 'fat' || nutrient === 'saturatedFat') return '#fa8c16';
+    if (nutrient === 'sugar' || nutrient === 'sodium' || nutrient === 'cholesterol') return '#cf1322';
+    return '#13a8a8';
+};
+
+const getCriterionDirectionLabel = (criterion: NutritionGoalCriterion): string => {
+    if (criterion.direction === 'at_most') return 'Tối đa';
+    if (criterion.direction === 'between') return 'Khoảng';
+    return 'Tối thiểu';
+};
+
+const getCriterionValueLabel = (criterion: NutritionGoalCriterion): string => {
+    if (criterion.direction === 'at_most') return NutritionGoalHelper.formatNutrientValue(criterion.nutrient, criterion.max);
+    if (criterion.direction === 'between') return `${NutritionGoalHelper.formatNutrientValue(criterion.nutrient, criterion.min)} - ${NutritionGoalHelper.formatNutrientValue(criterion.nutrient, criterion.max)}`;
+    return NutritionGoalHelper.formatNutrientValue(criterion.nutrient, criterion.min);
+};
+
+const getGoalMixLabel = (goal: NutritionGoal): string => {
+    const minimumCount = goal.criteria.filter(item => item.direction === 'at_least').length;
+    const maximumCount = goal.criteria.filter(item => item.direction === 'at_most').length;
+    const rangeCount = goal.criteria.filter(item => item.direction === 'between').length;
+    return [`${goal.criteria.length} tiêu chí`, minimumCount > 0 ? `${minimumCount} tối thiểu` : '', maximumCount > 0 ? `${maximumCount} tối đa` : '', rangeCount > 0 ? `${rangeCount} khoảng` : ''].filter(Boolean).join(' · ');
+};
+
+const GoalCriterionTile: React.FunctionComponent<{ criterion: NutritionGoalCriterion }> = ({ criterion }) => {
+    const tone = getCriterionTone(criterion.nutrient);
+    return <Box style={{ border: `1px solid ${tone}22`, borderRadius: 8, background: `${tone}08`, padding: 9, minWidth: 0 }}>
+        <Stack justify='space-between' align='flex-start' gap={6} style={{ marginBottom: 5 }}>
+            <Typography.Text style={{ color: '#111827', fontSize: 12, lineHeight: '16px', fontWeight: 760, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{NutritionGoalHelper.getNutrientLabel(criterion.nutrient)}</Typography.Text>
+            <span style={{ flexShrink: 0, borderRadius: 999, padding: '1px 7px', background: '#fff', color: tone, border: `1px solid ${tone}26`, fontSize: 10, lineHeight: '15px', fontWeight: 800 }}>{getCriterionDirectionLabel(criterion)}</span>
+        </Stack>
+        <Typography.Text strong style={{ display: 'block', color: tone, fontSize: 15, lineHeight: '20px', overflowWrap: 'anywhere' }}>{getCriterionValueLabel(criterion)}</Typography.Text>
+        <Typography.Text type='secondary' style={{ display: 'block', fontSize: 10, lineHeight: '14px', marginTop: 1 }}>/ khẩu phần</Typography.Text>
+    </Box>;
+};
+
+const NutritionGoalCard: React.FunctionComponent<{ goal: NutritionGoal; isAdmin: boolean; onEdit: (goal: NutritionGoal) => void; onDelete: (goal: NutritionGoal) => void }> = ({ goal, isAdmin, onEdit, onDelete }) => {
+    const tone = goal.color ?? '#7436dc';
+    return <Box style={{ border: `1px solid ${tone}22`, borderRadius: 8, background: '#fff', boxShadow: '0 12px 28px rgba(74,48,130,0.09)', minWidth: 0, overflow: 'hidden' }}>
+        <div style={{ height: 4, background: `linear-gradient(90deg, ${tone} 0%, #13a8a8 100%)` }} />
+        <div style={{ padding: 12 }}>
+            <Stack justify='space-between' align='flex-start' gap={10} style={{ marginBottom: 10 }}>
+                <Stack align='flex-start' gap={9} style={{ minWidth: 0 }}>
+                    <span style={{ width: 38, height: 38, borderRadius: 8, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', color: tone, background: `${tone}14`, border: `1px solid ${tone}24`, flexShrink: 0 }}><Image src={NutritionPlanIcon} preview={false} width={24} alt="" /></span>
+                    <div style={{ minWidth: 0 }}>
+                        <Stack align='center' gap={6} wrap='wrap' style={{ marginBottom: 2 }}>
+                            <Typography.Text strong style={{ display: 'block', fontSize: 16, lineHeight: '21px', color: '#111827', overflowWrap: 'anywhere' }}>{goal.name}</Typography.Text>
+                            <Tag color='purple' style={{ marginInlineEnd: 0 }}>{goal.criteria.length} tiêu chí</Tag>
+                        </Stack>
+                        <Typography.Text type='secondary' style={{ display: 'block', fontSize: 12, lineHeight: '16px' }}>{goal.description || 'Chưa có mô tả mục tiêu.'}</Typography.Text>
+                    </div>
+                </Stack>
+                {isAdmin && <Stack gap={4} style={{ flexShrink: 0 }}>
+                    <Button type='text' aria-label={`Sửa ${goal.name}`} icon={<EditOutlined />} onClick={() => onEdit(goal)} style={{ width: 32, height: 32, borderRadius: 8, paddingInline: 0, color: tone }} />
+                    <Button type='text' danger aria-label={`Xoá ${goal.name}`} icon={<DeleteOutlined />} onClick={() => onDelete(goal)} style={{ width: 32, height: 32, borderRadius: 8, paddingInline: 0 }} />
+                </Stack>}
+            </Stack>
+
+            <Box style={{ border: `1px solid ${tone}16`, borderRadius: 8, background: `${tone}08`, padding: '8px 9px', marginBottom: 10 }}>
+                <Stack align='center' gap={7}>
+                    <CheckCircleOutlined style={{ color: tone, flexShrink: 0 }} />
+                    <Typography.Text style={{ color: '#2f2545', fontSize: 11, lineHeight: '15px', fontWeight: 700 }}>{getGoalMixLabel(goal)}</Typography.Text>
+                </Stack>
+            </Box>
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(136px, 1fr))', gap: 8 }}>
+                {goal.criteria.map(criterion => <GoalCriterionTile key={criterion.id} criterion={criterion} />)}
+            </div>
+        </div>
+    </Box>;
+};
 
 export const NutritionGoalsScreen = () => {
     const dispatch = useDispatch();
@@ -174,27 +250,8 @@ export const NutritionGoalsScreen = () => {
             <Typography.Text type='secondary' style={{ fontSize: 12, lineHeight: '17px' }}>Bạn có thể xem mục tiêu. Đăng nhập admin để thêm, sửa hoặc xoá mục tiêu dùng chung.</Typography.Text>
         </Box>}
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: 12 }}>
-            {goals.map(goal => (
-                <Box key={goal.id} style={{ border: `1px solid ${goal.color ?? '#7436dc'}22`, borderRadius: 8, background: '#fff', padding: 12, boxShadow: '0 10px 24px rgba(74,48,130,0.08)', minWidth: 0 }}>
-                    <Stack justify='space-between' align='flex-start' gap={8} style={{ marginBottom: 8 }}>
-                        <Stack align='flex-start' gap={9} style={{ minWidth: 0 }}>
-                            <span style={{ width: 36, height: 36, borderRadius: 8, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', color: goal.color ?? '#7436dc', background: `${goal.color ?? '#7436dc'}14`, border: `1px solid ${goal.color ?? '#7436dc'}24`, flexShrink: 0 }}><Image src={NutritionPlanIcon} preview={false} width={24} alt="" /></span>
-                            <div style={{ minWidth: 0 }}>
-                                <Typography.Text strong style={{ display: 'block', fontSize: 16, lineHeight: '21px', color: '#111827', overflowWrap: 'anywhere' }}>{goal.name}</Typography.Text>
-                                {goal.description && <Typography.Text type='secondary' style={{ display: 'block', fontSize: 12, lineHeight: '16px', marginTop: 2 }}>{goal.description}</Typography.Text>}
-                            </div>
-                        </Stack>
-                        {isAdmin && <Stack gap={4} style={{ flexShrink: 0 }}>
-                            <Button type='text' aria-label={`Sửa ${goal.name}`} icon={<EditOutlined />} onClick={() => openEdit(goal)} style={{ width: 32, height: 32, borderRadius: 8, paddingInline: 0 }} />
-                            <Button type='text' danger aria-label={`Xoá ${goal.name}`} icon={<DeleteOutlined />} onClick={() => confirmDelete(goal)} style={{ width: 32, height: 32, borderRadius: 8, paddingInline: 0 }} />
-                        </Stack>}
-                    </Stack>
-                    <Stack wrap='wrap' gap={6}>
-                        {goal.criteria.map(criterion => <Tag key={criterion.id} color='purple' style={{ marginInlineEnd: 0, maxWidth: '100%', whiteSpace: 'normal' }}>{NutritionGoalHelper.formatCriterion(criterion)}</Tag>)}
-                    </Stack>
-                </Box>
-            ))}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(320px, 100%), 1fr))', gap: 12 }}>
+            {goals.map(goal => <NutritionGoalCard key={goal.id} goal={goal} isAdmin={isAdmin} onEdit={openEdit} onDelete={confirmDelete} />)}
         </div>
 
         <Modal

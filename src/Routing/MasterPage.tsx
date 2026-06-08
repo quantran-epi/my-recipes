@@ -1,4 +1,4 @@
-import { CloudDownloadOutlined, CloudUploadOutlined, DatabaseOutlined, ExportOutlined, HistoryOutlined, ImportOutlined, LockOutlined, MenuOutlined, UnlockOutlined, FireOutlined, QuestionCircleOutlined, SearchOutlined, LoadingOutlined, SyncOutlined, SettingOutlined } from "@ant-design/icons";
+import { CloudDownloadOutlined, CloudUploadOutlined, DatabaseOutlined, ExportOutlined, HistoryOutlined, ImportOutlined, LockOutlined, MedicineBoxOutlined, MenuOutlined, UnlockOutlined, FireOutlined, QuestionCircleOutlined, SearchOutlined, LoadingOutlined, SyncOutlined, SettingOutlined } from "@ant-design/icons";
 import { ObjectPropertyHelper } from "@common/Helpers/ObjectProperty";
 import { getStorageString, setStorageString } from "@common/Storage/AppStorage";
 import { SharedSyncModal } from "@components/AppInitializer/SharedSyncModal";
@@ -453,7 +453,7 @@ const SidebarDrawer = ({ buttonStyle }: { buttonStyle?: React.CSSProperties }) =
                             Dữ liệu & sao lưu
                         </Button>
                         <Button
-                            icon={<Image src={MedicalRecordIcon} preview={false} width={18} alt="" />}
+                            icon={<MedicineBoxOutlined />}
                             block
                             onClick={() => onNavigate(RootRoutes.AuthorizedRoutes.SyncBackupHealth())}
                         >

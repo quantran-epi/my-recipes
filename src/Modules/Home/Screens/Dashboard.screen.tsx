@@ -1,5 +1,6 @@
 import { BarChartOutlined, CalendarOutlined, CheckCircleOutlined, ClockCircleOutlined, DollarCircleOutlined, FireOutlined, RightOutlined, ShoppingCartOutlined, WarningOutlined } from '@ant-design/icons';
 import { CostEstimateHelper, CostEstimateSummary } from '@common/Helpers/CostEstimateHelper';
+import { DateHelpers } from '@common/Helpers/DateHelper';
 import { IngredientPriceHelper } from '@common/Helpers/IngredientPriceHelper';
 import { IngredientUnitHelper } from '@common/Helpers/IngredientUnitHelper';
 import { InventoryHelper } from '@common/Helpers/InventoryHelper';
@@ -520,7 +521,7 @@ export const DashboardScreen = () => {
     const weekOverview = useMemo(() => Array.from({ length: 7 }).map((_, index) => {
         const date = today().add(index, 'day');
         return {
-            label: index === 0 ? 'Hôm nay' : date.format('dd'),
+            label: index === 0 ? 'Hôm nay' : DateHelpers.capitalizeWeekdayLabel(date.format('dd')),
             dateLabel: date.format('DD/MM'),
             mealCount: scheduledMeals.filter(item => moment(item.plannedDate).isSame(date, 'day')).length,
             shoppingCount: openShoppingLists.filter(item => item.plannedDate && moment(item.plannedDate).isSame(date, 'day')).length,

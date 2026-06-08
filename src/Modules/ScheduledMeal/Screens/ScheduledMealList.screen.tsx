@@ -74,11 +74,11 @@ const getMondayStart = (value: Dayjs) => value.startOf("week").startOf("day");
 const getTemplateScope = (template: WeeklyMealTemplate): MealTemplateScope => template.scope ?? (template.days.length > 1 ? 'week' : 'day');
 
 const topToolCardStyle: React.CSSProperties = {
-    background: "#fff",
-    border: "1px solid #f0f0f0",
-    borderRadius: 0,
-    padding: 10,
-    boxShadow: "0 2px 8px rgba(0,0,0,0.04)",
+    background: "linear-gradient(135deg, #ffffff 0%, #fbf9ff 100%)",
+    border: "1px solid rgba(116,54,220,0.10)",
+    borderRadius: 8,
+    padding: 8,
+    boxShadow: "0 8px 20px rgba(74,48,130,0.06)",
 };
 
 const topActionRowStyle: React.CSSProperties = {
@@ -90,12 +90,20 @@ const topActionRowStyle: React.CSSProperties = {
 
 const topActionButtonStyle: React.CSSProperties = {
     width: "100%",
+    height: 36,
     minWidth: 0,
     whiteSpace: "nowrap",
     display: "inline-flex",
     alignItems: "center",
     justifyContent: "center",
-    fontWeight: 700,
+    fontSize: 12,
+    lineHeight: "16px",
+    fontWeight: 560,
+    borderRadius: 8,
+    color: "#3f315f",
+    borderColor: "rgba(116,54,220,0.14)",
+    background: "rgba(255,255,255,0.86)",
+    boxShadow: "none",
 };
 
 const dayNavigatorCardStyle: React.CSSProperties = {
@@ -132,6 +140,11 @@ const scheduledMealCss = `
 .scheduled-meal-day-arrow:hover {
     border-color: rgba(116,54,220,0.30) !important;
     transform: translateY(-1px);
+}
+.scheduled-meal-top-action:hover {
+    border-color: rgba(116,54,220,0.28) !important;
+    color: #5e2bbf !important;
+    background: #fff !important;
 }
 `;
 
@@ -252,11 +265,11 @@ export const ScheduledMealListScreen = () => {
             <Box style={{ padding: "4px 0 0", marginBottom: 8 }}>
                 <Box style={topToolCardStyle}>
                     <div style={topActionRowStyle}>
-                        <Button icon={<CalendarOutlined />} onClick={_onOpenTemplateApply} style={topActionButtonStyle}>
+                        <Button className="scheduled-meal-top-action" size="small" icon={<CalendarOutlined />} onClick={_onOpenTemplateApply} style={topActionButtonStyle}>
                             Từ mẫu
                         </Button>
                         <Tooltip title="Tạo danh sách mua theo khoảng ngày">
-                            <Button icon={<ShoppingCartOutlined />} onClick={_onOpenRangeShopping} style={topActionButtonStyle}>
+                            <Button className="scheduled-meal-top-action" size="small" icon={<ShoppingCartOutlined />} onClick={_onOpenRangeShopping} style={topActionButtonStyle}>
                                 Tạo giỏ
                             </Button>
                         </Tooltip>
@@ -274,19 +287,19 @@ export const ScheduledMealListScreen = () => {
                         style={dayArrowButtonStyle}
                     />
                     <div style={{ minWidth: 0, textAlign: "center" }}>
-                        <Typography.Text strong style={{ display: "block", color: "#111827", fontSize: 18, lineHeight: "24px", overflowWrap: "anywhere" }}>
+                        <Typography.Text strong style={{ display: "block", color: "#111827", fontSize: 18, lineHeight: "24px", overflowWrap: "anywhere", textTransform: "capitalize" }}>
                             {DateHelpers.formatWithCapitalizedWeekday(selectedDate, "dddd, DD/MM/YYYY")}
                         </Typography.Text>
                         <Space size={5} wrap style={{ justifyContent: "center", marginTop: 4 }}>
                             <span style={{ padding: "1px 8px", borderRadius: 999, background: selectedDayStatus.background, color: selectedDayStatus.color, border: `1px solid ${selectedDayStatus.border}`, fontSize: 11, lineHeight: "18px", fontWeight: 700 }}>{selectedDayStatus.label}</span>
                             <Typography.Text type="secondary" style={{ fontSize: 12 }}>{mealsToday.length} thực đơn</Typography.Text>
                         </Space>
-                        <Space size={6} wrap style={{ justifyContent: "center", marginTop: 8 }}>
-                            <Button onClick={() => setCalendarVisible(value => !value)} icon={<CalendarOutlined />} style={{ borderRadius: 999, fontWeight: 650 }}>
+                        <div style={{ minHeight: 32, display: "flex", alignItems: "center", justifyContent: "center", gap: 6, marginTop: 8, flexWrap: "nowrap" }}>
+                            <Button onClick={() => setCalendarVisible(value => !value)} icon={<CalendarOutlined />} style={{ width: 102, borderRadius: 999, fontWeight: 650, flexShrink: 0, whiteSpace: "nowrap" }}>
                                 {calendarVisible ? "Ẩn lịch" : "Chọn ngày"}
                             </Button>
-                            {!dayjs(selectedDate).isSame(dayjs(), "day") && <Button onClick={_goToday} style={{ borderRadius: 999, fontWeight: 650 }}>Hôm nay</Button>}
-                        </Space>
+                            {!dayjs(selectedDate).isSame(dayjs(), "day") && <Button onClick={_goToday} style={{ width: 82, borderRadius: 999, fontWeight: 650, flexShrink: 0, whiteSpace: "nowrap" }}>Hôm nay</Button>}
+                        </div>
                     </div>
                     <Button
                         aria-label="Ngày sau"

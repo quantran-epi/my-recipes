@@ -22,10 +22,12 @@
     "react": "^18.2.0",
     "react-copy-to-clipboard": "^5.1.0",
     "react-dom": "^18.2.0",
+    "react-is": "18.3.1",
     "react-redux": "^9.1.0",
     "react-router-dom": "^6.22.3",
     "react-scripts": "5.0.1",
     "react-window": "^2.2.7",
+    "recharts": "^3.8.1",
     "redux-persist": "^6.0.0",
     "redux-thunk": "^3.1.0",
     "reselect": "^5.1.0",
@@ -45,8 +47,8 @@
     "workbox-streams": "^6.6.0"
   },
   "scripts": {
-    "start": "node ./node_modules/@craco/craco/dist/bin/craco start",
-    "build": "node ./node_modules/@craco/craco/dist/bin/craco build GENERATE_SOURCEMAP=false",
+    "start": "FAST_REFRESH=false NODE_OPTIONS=--max-old-space-size=4096 node ./node_modules/@craco/craco/dist/bin/craco start",
+    "build": "GENERATE_SOURCEMAP=false node ./node_modules/@craco/craco/dist/bin/craco build",
     "test": "react-scripts test",
     "test:e2e": "playwright test",
     "test:e2e:report": "playwright show-report",

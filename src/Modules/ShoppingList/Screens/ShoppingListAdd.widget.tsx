@@ -1,3 +1,4 @@
+import { DateHelpers } from "@common/Helpers/DateHelper"
 import { ObjectPropertyHelper } from "@common/Helpers/ObjectProperty"
 import { Button } from "@components/Button"
 import { DatePicker } from "@components/Form/DatePicker"
@@ -12,7 +13,6 @@ import { addShoppingList, generateIngredient } from "@store/Reducers/ShoppingLis
 import { selectDishes, selectIngredients, selectInventory, selectInventoryHealthConfig, selectScheduledMeals, selectShoppingListNameHistory, selectShoppingLists } from "@store/Selectors"
 import { AutoComplete } from "antd"
 import dayjs from "dayjs"
-import moment from "moment"
 import React, { FunctionComponent, useEffect, useMemo, useState } from "react"
 import { useDispatch, useSelector } from "react-redux"
 
@@ -166,7 +166,7 @@ export const ShoppingListAddWidget: FunctionComponent<ShoppingListAddWidgetProps
                         return option?.children?.toString().toLowerCase().includes(inputValue.toLowerCase());
                     }}
                     style={{ width: '100%' }}>
-                    {scheduledMeals.map(meal => <Option key={meal.id} value={meal.id}>{meal.name}-{moment(meal.plannedDate).format("DD/MM/YYYY")}</Option>)}
+                    {scheduledMeals.map(meal => <Option key={meal.id} value={meal.id}>{meal.name} - {DateHelpers.formatWithCapitalizedWeekday(meal.plannedDate, "ddd, DD/MM/YYYY")}</Option>)}
                 </Select>
             </SmartForm.Item>
             <SmartForm.Item {...addShoppingListForm.itemDefinitions.plannedDate}>

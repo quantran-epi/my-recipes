@@ -1,5 +1,6 @@
-import { BarChartOutlined, CalendarOutlined, CheckCircleOutlined, ClockCircleOutlined, DollarCircleOutlined, FireOutlined, QuestionCircleOutlined, ShoppingCartOutlined, TagsOutlined, WarningOutlined } from '@ant-design/icons';
+import { BarChartOutlined, CalendarOutlined, CheckCircleOutlined, ClockCircleOutlined, DollarCircleOutlined, FireOutlined, QuestionCircleOutlined, WarningOutlined } from '@ant-design/icons';
 import { CostEstimateHelper, CostEstimateSummary } from '@common/Helpers/CostEstimateHelper';
+import { DateHelpers } from '@common/Helpers/DateHelper';
 import { DishNutritionHelper, DishNutritionSummary } from '@common/Helpers/DishNutritionHelper';
 import { IngredientNutritionHelper } from '@common/Helpers/IngredientNutritionHelper';
 import { IngredientPriceHelper } from '@common/Helpers/IngredientPriceHelper';
@@ -18,11 +19,12 @@ import { Dishes } from '@store/Models/Dishes';
 import { Ingredient, IngredientInventory, IngredientUnit, InventoryBatch } from '@store/Models/Ingredient';
 import { InventoryHealthConfig } from '@store/Models/SharedConfig';
 import { ShoppingList, ShoppingListIngredientGroup } from '@store/Models/ShoppingList';
-import { selectCookingSessions, selectDishes, selectIngredients, selectIngredientsById, selectInventory, selectInventoryHealthConfig, selectScheduledMeals, selectShoppingLists } from '@store/Selectors';
+import { selectDishes, selectIngredients, selectIngredientsById, selectInventory, selectInventoryHealthConfig, selectScheduledMeals, selectShoppingLists } from '@store/Selectors';
 import moment from 'moment';
 import React, { useMemo } from 'react';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
+import { Bar, BarChart, CartesianGrid, Cell, Legend, Pie, PieChart, ResponsiveContainer, Tooltip as ChartTooltip, XAxis, YAxis } from 'recharts';
 
 type UrgentInventoryItem = {
     ingredientId: string;
@@ -37,6 +39,9 @@ type ShoppingCostRow = {
     id: string;
     name: string;
     progress: number;
+    doneCount: number;
+    totalCount: number;
+    remainingCount: number;
     costLabel: string;
     value: number;
 }
@@ -83,10 +88,6 @@ const formatHeaderDateLabel = (value = new Date()): string => {
     const day = String(value.getDate()).padStart(2, '0');
     const month = String(value.getMonth() + 1).padStart(2, '0');
     return `${day}, ${month} ${value.getFullYear()}`;
-}
-
-const isSameDay = (value?: Date | string | null): boolean => {
-    return Boolean(value) && moment(value).isSame(today(), 'day');
 }
 
 const truncateName = (value: string, maxLength = 24): string => {
@@ -241,6 +242,69 @@ const createEmptyAnalyticsExpensiveMetrics = (): AnalyticsExpensiveMetrics => ({
     nutrition: createEmptyNutritionAnalytics(),
 });
 
+const chartPalette = ['#7436dc', '#1677ff', '#389e0d', '#fa8c16', '#eb2f96', '#13a8a8', '#d48806', '#531dab'];
+const chartGridColor = '#f0edf8';
+const chartAxisStyle = { fontSize: 11, fill: '#6b7280' };
+const chartTooltipStyle: React.CSSProperties = {
+    borderRadius: 8,
+    border: '1px solid #e5e7eb',
+    boxShadow: '0 10px 24px rgba(15,23,42,0.12)',
+    fontSize: 12,
+};
+
+const analyticsHelp = {
+    decisionSignals: [
+        'Nó là gì: nhóm tín hiệu ưu tiên, gom các điểm đáng hành động nhất từ toàn bộ dữ liệu bếp thay vì lặp lại số tổng quan trên dashboard.',
+        'Cách lấy dữ liệu: ngày bận nhất lấy từ thực đơn và lịch mua trong 7 ngày tới; danh sách tốn nhất lấy từ các lịch mua chưa hoàn tất và giá nguyên liệu; rủi ro hao hụt lấy từ lô tồn kho gần hết hạn; cân bằng bữa lấy từ món đã lên lịch trong 14 ngày; lỗ hổng dinh dưỡng lấy từ số món có thể tính nutrition.',
+        'Dùng để làm gì: mở trang phân tích là biết ngay hôm nay nên xử lý việc nào trước: dời bớt lịch nấu, kiểm tra ngân sách mua, dùng nguyên liệu sắp hỏng, cân lại bữa ăn, hoặc bổ sung dữ liệu dinh dưỡng cho món còn thiếu.',
+    ],
+    planLoad: [
+        'Nó là gì: biểu đồ tải chuẩn bị cho 7 ngày tới, không chỉ đếm sự kiện mà cho thấy ngày nào có cả thực đơn lẫn mua sắm dồn cùng lúc.',
+        'Cách lấy dữ liệu: app quét toàn bộ thực đơn theo `plannedDate` và các lịch mua sắm chưa hoàn tất có `plannedDate`, gom theo từng ngày từ hôm nay đến 6 ngày sau. Cột tím là số thực đơn, cột xanh là số lịch mua sắm trong cùng ngày.',
+        'Dùng để làm gì: nếu một ngày có cột cao, đó là ngày dễ quá tải. Bạn có thể chuẩn bị nguyên liệu trước, chuyển bớt lịch mua sang ngày khác, hoặc tạo shopping list sớm để tránh đến bữa mới phát hiện thiếu đồ.',
+    ],
+    mealBalance: [
+        'Nó là gì: phân tích độ lệch giữa bữa sáng, trưa và tối trong 14 ngày tới, giúp nhìn ra khung bữa nào đang được lên lịch quá nhiều hoặc bị bỏ trống.',
+        'Cách lấy dữ liệu: app lấy các thực đơn từ hôm nay đến trước ngày thứ 15, sau đó cộng số món trong `breakfast`, `lunch`, và `dinner`. Một món xuất hiện trong nhiều bữa được tính theo số lượt lên lịch, vì đây là phân tích tải nấu thực tế.',
+        'Dùng để làm gì: nếu bữa tối cao hơn hẳn, bạn có thể chuẩn bị món batch-cook hoặc chuyển món nhẹ sang bữa trưa. Nếu bữa sáng thấp, đó là dấu hiệu cần thêm món nhanh hoặc món chuẩn bị trước.',
+    ],
+    inventoryCoverage: [
+        'Nó là gì: phân tích độ phủ tồn kho theo nhóm nguyên liệu, cho biết nhóm nào có nhiều món đang sẵn và nhóm nào có nhiều khoảng trống cần bổ sung.',
+        'Cách lấy dữ liệu: app duyệt danh sách nguyên liệu dùng chung, nhóm theo `category`, rồi kiểm tra tồn kho cá nhân. Nguyên liệu được tính là có sẵn nếu là loại luôn có sẵn hoặc có ít nhất một lô còn số lượng lớn hơn 0.',
+        'Dùng để làm gì: dùng biểu đồ này trước khi lên thực đơn theo tuần. Nhóm thiếu nhiều là nơi dễ gây thiếu đồ khi nấu; nhóm đang phủ tốt là nhóm nên ưu tiên chọn món để tận dụng đồ đã có.',
+    ],
+    expiryRisk: [
+        'Nó là gì: danh sách rủi ro hao hụt, tập trung vào các lô nguyên liệu đã quá hạn hoặc sắp hết hạn theo ngưỡng cấu hình tồn kho.',
+        'Cách lấy dữ liệu: app kiểm tra từng batch tồn kho còn số lượng, tính ngày hết hạn bằng thông tin batch, shelf-life của nguyên liệu và cấu hình bảo quản. Những lô rơi vào ngưỡng khẩn cấp được sắp xếp từ nguy hiểm nhất đến ít nguy hiểm hơn.',
+        'Dùng để làm gì: đây là danh sách nên xem trước khi quyết định nấu gì. Mở nguyên liệu ở đầu danh sách để nấu trước, điều chỉnh số lượng, hoặc loại bỏ lô đã hỏng nhằm giữ tồn kho sạch và giảm lãng phí.',
+    ],
+    shoppingBudget: [
+        'Nó là gì: phân tích áp lực ngân sách cho các lịch mua sắm đang mở, tập trung vào phần còn cần mua thay vì tổng nguyên liệu ban đầu.',
+        'Cách lấy dữ liệu: app lấy tối đa 6 lịch mua chưa hoàn tất theo thứ tự ngày, tính nguyên liệu còn thiếu sau khi trừ tồn kho hiện có, rồi dùng dữ liệu giá nguyên liệu để ước tính chi phí. Tiến độ phần trăm lấy từ số nhóm nguyên liệu đã đánh dấu xong.',
+        'Dùng để làm gì: dùng để biết danh sách nào nên kiểm tra lại trước khi đi chợ. Danh sách có chi phí cao nhưng tiến độ thấp nên được rà soát giá, thay món hoặc kiểm tra tồn kho trước khi mua.',
+    ],
+    dataQuality: [
+        'Nó là gì: phân tích chất lượng dữ liệu món ăn, đo xem dữ liệu hiện tại có đủ tin cậy để dùng cho lập kế hoạch, gợi ý và dinh dưỡng hay chưa.',
+        'Cách lấy dữ liệu: app so sánh tỷ lệ món đã hoàn thiện hồ sơ, tỷ lệ món có thể tính dinh dưỡng, tỷ lệ nguyên liệu có thông tin nutrition và số nguồn tham chiếu nutrition đang được dùng.',
+        'Dùng để làm gì: nếu tỷ lệ thấp, các gợi ý món và nutrition calculator sẽ kém chính xác. Hãy bổ sung nguyên liệu, đơn vị quy đổi hoặc nutrition source cho nhóm món quan trọng trước khi dùng dữ liệu để ra quyết định ăn uống.',
+    ],
+    nutritionProfile: [
+        'Nó là gì: hồ sơ dinh dưỡng khẩu phần trung bình của các món có dữ liệu, quy đổi các chỉ số về thang tham chiếu để dễ so sánh trong cùng một biểu đồ.',
+        'Cách lấy dữ liệu: app tính nutrition per serving cho từng món đã hoàn thiện nếu có dữ liệu dinh dưỡng, lấy trung bình kcal, đạm, tinh bột, béo và chất xơ. Các thanh phần trăm là tỷ lệ so với ngưỡng hiển thị nội bộ, còn nhãn bên dưới giữ giá trị thật.',
+        'Dùng để làm gì: dùng để hiểu xu hướng cookbook hiện tại đang thiên về năng lượng, đạm, tinh bột hay chất xơ. Nếu trung bình kcal hoặc béo cao, cân nhắc thêm món nhẹ; nếu chất xơ thấp, thêm rau, đậu hoặc ngũ cốc vào thực đơn.',
+    ],
+    nutritionRanking: [
+        'Nó là gì: bảng xếp hạng món theo mục tiêu dinh dưỡng cụ thể: giàu đạm, nhiều chất xơ và nhẹ kcal.',
+        'Cách lấy dữ liệu: app dùng cùng kết quả nutrition per serving, sắp xếp món theo protein giảm dần, fiber giảm dần và calories tăng dần. Chỉ các món có dữ liệu nutrition đủ để tính mới xuất hiện ở đây.',
+        'Dùng để làm gì: khi lập thực đơn, dùng nhóm giàu đạm cho bữa cần no lâu, nhóm nhiều chất xơ để tăng rau/chất xơ, và nhóm nhẹ kcal cho ngày muốn ăn nhẹ hơn mà vẫn dựa trên món thật trong cookbook.',
+    ],
+    inventorySuggestions: [
+        'Nó là gì: phân tích món nên nấu dựa trên độ khớp với tồn kho hiện tại, không phải danh sách món phổ biến chung chung.',
+        'Cách lấy dữ liệu: app chấm điểm từng món bằng DishScorer, so nguyên liệu món cần với tồn kho cá nhân, nguyên liệu thiếu và cấu hình tồn kho/hết hạn. Điểm cao nghĩa là món tận dụng được nhiều thứ đang có.',
+        'Dùng để làm gì: dùng khi không biết nấu gì hoặc muốn giảm mua thêm. Món có điểm khớp cao giúp dùng đồ sẵn có, giảm thiếu nguyên liệu giữa chừng và hạn chế để nguyên liệu tồn lâu.',
+    ],
+};
+
 const analyticsCss = `
 .analytics-section-card {
     transition: border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
@@ -251,7 +315,7 @@ const analyticsCss = `
 }
 `;
 
-const SectionCard: React.FunctionComponent<{ title: string; subtitle: string; helpText: string; icon: React.ReactNode; tone: string; children: React.ReactNode }> = ({ title, subtitle, helpText, icon, tone, children }) => {
+const SectionCard: React.FunctionComponent<{ title: string; subtitle: string; helpText: string | string[]; icon: React.ReactNode; tone: string; children: React.ReactNode }> = ({ title, subtitle, helpText, icon, tone, children }) => {
     const [showHelp, setShowHelp] = React.useState(false);
 
     return <section className='analytics-section-card' style={{ border: '1px solid rgba(116,54,220,0.10)', borderRadius: 8, background: '#fff', boxShadow: '0 10px 28px rgba(74,48,130,0.09)', overflow: 'hidden' }}>
@@ -286,45 +350,45 @@ const SectionCard: React.FunctionComponent<{ title: string; subtitle: string; he
                     <QuestionCircleOutlined />
                 </button>
             </Stack>
-            {showHelp && <Box style={{ marginBottom: 12, padding: '9px 10px', borderRadius: 8, border: `1px solid ${tone}24`, background: `${tone}0d` }}>
-                <Typography.Text style={{ display: 'block', color: '#2f2545', fontSize: 12, lineHeight: '17px' }}>{helpText}</Typography.Text>
+            {showHelp && <Box style={{ marginBottom: 12, padding: '10px 11px', borderRadius: 8, border: `1px solid ${tone}24`, background: `${tone}0d` }}>
+                {(Array.isArray(helpText) ? helpText : [helpText]).map((line, index) => <Typography.Text key={index} style={{ display: 'block', color: '#2f2545', fontSize: 12, lineHeight: '18px', marginTop: index === 0 ? 0 : 7 }}>{line}</Typography.Text>)}
             </Box>}
             {children}
         </div>
     </section>;
 }
 
-const StatCard: React.FunctionComponent<{ label: string; value: string | number; detail: string; tone: string; icon: React.ReactNode }> = ({ label, value, detail, tone, icon }) => {
-    return <Box style={{ borderRadius: 8, background: '#fff', border: '1px solid rgba(255,255,255,0.70)', padding: 11, boxShadow: '0 10px 22px rgba(34,17,83,0.16)', minWidth: 0 }}>
-        <Stack align='flex-start' gap={8}>
-            <span style={{ width: 32, height: 32, borderRadius: 8, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', color: tone, background: `${tone}14`, flexShrink: 0 }}>{icon}</span>
-            <div style={{ minWidth: 0 }}>
-                <Typography.Text strong style={{ display: 'block', color: tone, fontSize: 20, lineHeight: '24px' }}>{value}</Typography.Text>
-                <Typography.Text style={{ display: 'block', color: '#111827', fontSize: 12, lineHeight: '16px', fontWeight: 750 }}>{label}</Typography.Text>
-                <Typography.Text type='secondary' style={{ display: 'block', fontSize: 11, lineHeight: '15px', marginTop: 2 }}>{detail}</Typography.Text>
-            </div>
-        </Stack>
+const ChartFrame: React.FunctionComponent<{ height?: number; children: React.ReactNode }> = ({ height = 188, children }) => {
+    return <Box style={{ height, minWidth: 0, border: '1px solid rgba(116,54,220,0.08)', borderRadius: 8, background: '#fff', padding: '8px 6px 4px', overflow: 'hidden' }}>
+        {children}
     </Box>;
 }
 
-const HorizontalBar: React.FunctionComponent<{ label: string; value: number; max: number; color: string; detail?: string }> = ({ label, value, max, color, detail }) => {
-    const width = Math.max(4, Math.round(value / Math.max(1, max) * 100));
-    return <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) auto', gap: 10, alignItems: 'center' }}>
-        <div style={{ minWidth: 0 }}>
-            <Stack justify='space-between' gap={8} style={{ marginBottom: 4 }}>
-                <Typography.Text style={{ fontSize: 12, lineHeight: '16px', color: '#2f2545', fontWeight: 650, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{label}</Typography.Text>
-                <Typography.Text type='secondary' style={{ fontSize: 11, lineHeight: '15px', whiteSpace: 'nowrap' }}>{detail ?? value}</Typography.Text>
-            </Stack>
-            <div style={{ height: 8, borderRadius: 999, background: '#f0edf8', overflow: 'hidden' }}>
-                <div style={{ height: '100%', width: `${width}%`, borderRadius: 999, background: color, boxShadow: `0 6px 14px ${color}33` }} />
-            </div>
-        </div>
-    </div>;
+const ChartSummaryRow: React.FunctionComponent<{ items: Array<{ label: string; value: string | number; color: string }> }> = ({ items }) => {
+    return <Stack wrap='wrap' gap={6} style={{ marginTop: 8 }}>
+        {items.map(item => <span key={item.label} style={{ borderRadius: 999, padding: '3px 8px', background: `${item.color}12`, color: item.color, border: `1px solid ${item.color}24`, fontSize: 11, lineHeight: '16px', fontWeight: 700, whiteSpace: 'nowrap' }}>
+            {item.label}: {item.value}
+        </span>)}
+    </Stack>;
 }
 
 const EmptyAnalytics: React.FunctionComponent<{ text: string }> = ({ text }) => {
     return <Box style={{ padding: '20px 8px', borderRadius: 8, border: '1px dashed rgba(116,54,220,0.16)', background: '#fbf9ff' }}>
         <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description={<Typography.Text type='secondary'>{text}</Typography.Text>} />
+    </Box>;
+}
+
+const InsightCard: React.FunctionComponent<{ title: string; value: string; detail: string; icon: React.ReactNode; tone: string; actionLabel?: string; onOpen?: () => void }> = ({ title, value, detail, icon, tone, actionLabel, onOpen }) => {
+    return <Box style={{ border: `1px solid ${tone}1f`, borderRadius: 8, background: '#fff', padding: 11, minWidth: 0, boxShadow: '0 8px 20px rgba(15,23,42,0.06)' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: actionLabel && onOpen ? '32px minmax(0, 1fr) auto' : '32px minmax(0, 1fr)', gap: 9, alignItems: 'start', marginBottom: 8 }}>
+            <span style={{ width: 32, height: 32, borderRadius: 8, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', color: tone, background: `${tone}14`, border: `1px solid ${tone}24`, flexShrink: 0 }}>{icon}</span>
+            <div style={{ minWidth: 0 }}>
+                <Typography.Text type='secondary' style={{ display: 'block', fontSize: 11, lineHeight: '15px' }}>{title}</Typography.Text>
+                <Typography.Text strong style={{ display: 'block', color: '#111827', fontSize: 15, lineHeight: '19px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{value}</Typography.Text>
+            </div>
+            {actionLabel && onOpen && <Button size='small' onClick={onOpen} style={{ height: 28, padding: '0 9px', borderRadius: 999, color: tone, borderColor: `${tone}33`, fontWeight: 650, fontSize: 11, lineHeight: '16px', alignSelf: 'center' }}>{actionLabel}</Button>}
+        </div>
+        <Typography.Text type='secondary' style={{ display: 'block', fontSize: 12, lineHeight: '17px', minHeight: 34 }}>{detail}</Typography.Text>
     </Box>;
 }
 
@@ -337,24 +401,20 @@ export const DashboardAnalyticsScreen = () => {
     const inventoryConfig = useSelector(selectInventoryHealthConfig);
     const shoppingLists = useSelector(selectShoppingLists);
     const scheduledMeals = useSelector(selectScheduledMeals);
-    const cookingSessions = useSelector(selectCookingSessions);
     useScreenTitle({ value: 'Phân tích', deps: [] });
 
     const openRoute = React.useCallback((href: string) => {
         React.startTransition(() => navigate(href));
     }, [navigate]);
 
-    const activeSessions = useMemo(() => cookingSessions.filter(item => item.status === 'cooking'), [cookingSessions]);
-    const todayMeals = useMemo(() => scheduledMeals.filter(item => isSameDay(item.plannedDate)), [scheduledMeals]);
     const openShoppingLists = useMemo(() => shoppingLists
         .filter(item => !item.completedAt)
         .sort((a, b) => moment(a.plannedDate ?? a.createdDate).valueOf() - moment(b.plannedDate ?? b.createdDate).valueOf()), [shoppingLists]);
-    const todayShoppingLists = useMemo(() => openShoppingLists.filter(item => isSameDay(item.plannedDate)), [openShoppingLists]);
     const urgentInventory = useMemo(() => buildUrgentInventory(inventoryItems, ingredientsById, inventoryConfig), [inventoryItems, ingredientsById, inventoryConfig]);
     const weekOverview = useMemo(() => Array.from({ length: 7 }).map((_, index) => {
         const date = today().add(index, 'day');
         return {
-            label: index === 0 ? 'Hôm nay' : date.format('dd'),
+            label: index === 0 ? 'Hôm nay' : DateHelpers.capitalizeWeekdayLabel(date.format('dd')),
             dateLabel: date.format('DD/MM'),
             mealCount: scheduledMeals.filter(item => moment(item.plannedDate).isSame(date, 'day')).length,
             shoppingCount: openShoppingLists.filter(item => item.plannedDate && moment(item.plannedDate).isSame(date, 'day')).length,
@@ -383,13 +443,6 @@ export const DashboardAnalyticsScreen = () => {
         }, {} as Record<string, { category: string; total: number; stocked: number }>);
         return Object.values(rows).sort((a, b) => b.total - a.total).slice(0, 8);
     }, [ingredients, inventoryItems]);
-    const dishTagRows = useMemo(() => {
-        const tagCounts = dishes.flatMap(item => item.tags ?? []).reduce((result, tag) => {
-            result[tag] = (result[tag] ?? 0) + 1;
-            return result;
-        }, {} as Record<string, number>);
-        return Object.entries(tagCounts).map(([tag, count]) => ({ tag, count })).sort((a, b) => b.count - a.count).slice(0, 8);
-    }, [dishes]);
     const calculateExpensiveMetrics = React.useCallback((): AnalyticsExpensiveMetrics => {
         const totalOpenShoppingCost = CostEstimateHelper.emptySummary();
         const shoppingCosts = openShoppingLists.slice(0, 6).map(list => {
@@ -400,6 +453,9 @@ export const DashboardAnalyticsScreen = () => {
                 id: list.id,
                 name: list.name,
                 progress: progress.percent,
+                doneCount: progress.done,
+                totalCount: progress.total,
+                remainingCount: Math.max(0, progress.total - progress.done),
                 costLabel: formatCostSummary(summary),
                 value: CostEstimateHelper.hasPrice(summary) ? Math.max(summary.min, summary.max) : 0,
             };
@@ -417,162 +473,310 @@ export const DashboardAnalyticsScreen = () => {
     });
     const { shoppingCosts, totalOpenShoppingCost, suggestions, nutrition } = expensiveMetrics;
 
-    const todayDishCount = todayMeals.reduce((sum, meal) => sum + Object.values(meal.meals).flat().length, 0);
     const completedDishes = dishes.filter(item => item.isCompleted).length;
     const dishCompletePercent = dishes.length > 0 ? Math.round(completedDishes / dishes.length * 100) : 0;
     const urgentExpiredCount = urgentInventory.filter(item => item.daysLeft < 0).length;
     const stockedIngredientCount = Object.entries(inventoryItems).filter(([, inventory]) => (inventory.batches ?? []).some(batch => batch.amount > 0)).length;
-    const weekMax = Math.max(1, ...weekOverview.map(item => item.mealCount + item.shoppingCount));
-    const mealSlotMax = Math.max(1, mealSlotCounts.breakfast, mealSlotCounts.lunch, mealSlotCounts.dinner);
-    const categoryMax = Math.max(1, ...inventoryByCategory.map(item => item.total));
-    const tagMax = Math.max(1, ...dishTagRows.map(item => item.count));
-    const shoppingCostMax = Math.max(1, ...shoppingCosts.map(item => item.value));
+    const stockedIngredientPercent = ingredients.length > 0 ? Math.round(stockedIngredientCount / ingredients.length * 100) : 0;
     const topProteinMax = Math.max(1, ...nutrition.topProtein.map(item => item.protein));
     const topFiberMax = Math.max(1, ...nutrition.topFiber.map(item => item.fiber));
     const lightCalorieMax = Math.max(1, ...nutrition.lightCalories.map(item => item.calories));
+    const mealSlotChartData = [
+        { name: 'Sáng', value: mealSlotCounts.breakfast, fill: '#1677ff' },
+        { name: 'Trưa', value: mealSlotCounts.lunch, fill: '#7436dc' },
+        { name: 'Tối', value: mealSlotCounts.dinner, fill: '#fa8c16' },
+    ];
+    const inventoryCategoryChartData = inventoryByCategory.map(item => ({
+        name: truncateName(item.category, 13),
+        stockedPercent: item.total > 0 ? Math.round(item.stocked / item.total * 100) : 0,
+        missingPercent: item.total > 0 ? Math.round(Math.max(0, item.total - item.stocked) / item.total * 100) : 0,
+        stockedLabel: `${item.stocked}/${item.total}`,
+        missingLabel: `${Math.max(0, item.total - item.stocked)}/${item.total}`,
+        total: item.total,
+    }));
+    const shoppingCostChartData = shoppingCosts.map(item => ({
+        name: truncateName(item.name, 14),
+        value: item.value,
+        progress: item.progress,
+        costLabel: item.costLabel,
+        remainingCount: item.remainingCount,
+    }));
+    const expiryRiskChartData = [
+        { name: 'Quá hạn', value: urgentInventory.filter(item => item.daysLeft < 0).length, fill: '#cf1322' },
+        { name: 'Hôm nay', value: urgentInventory.filter(item => item.daysLeft === 0).length, fill: '#fa541c' },
+        { name: '1-3 ngày', value: urgentInventory.filter(item => item.daysLeft > 0).length, fill: '#fa8c16' },
+    ].filter(item => item.value > 0);
+    const expiryRiskPieData = expiryRiskChartData.length > 0 ? expiryRiskChartData : [{ name: 'Không rủi ro', value: 1, fill: '#b7eb8f' }];
+    const dataQualityChartData = [
+        { name: 'Hồ sơ món', percent: dishCompletePercent, label: `${completedDishes}/${dishes.length} món`, fill: '#389e0d' },
+        { name: 'Món có nutrition', percent: nutrition.dishCoveragePercent, label: `${nutrition.dishWithNutritionCount}/${nutrition.dishScopeCount} món`, fill: '#7436dc' },
+        { name: 'NL có nutrition', percent: nutrition.ingredientCoveragePercent, label: `${nutrition.ingredientWithNutritionCount}/${ingredients.length} nguyên liệu`, fill: '#1677ff' },
+    ];
+    const nutritionAverageChartData = [
+        { name: 'Kcal', percent: Math.min(100, Math.round(nutrition.averageCalories / 800 * 100)), label: DishNutritionHelper.formatCalories(nutrition.averageCalories), fill: '#7436dc' },
+        { name: 'Đạm', percent: Math.min(100, Math.round(nutrition.averageProtein / 36 * 100)), label: DishNutritionHelper.formatGram(nutrition.averageProtein), fill: '#1677ff' },
+        { name: 'Tinh bột', percent: Math.min(100, Math.round(nutrition.averageCarbs / 80 * 100)), label: DishNutritionHelper.formatGram(nutrition.averageCarbs), fill: '#fa8c16' },
+        { name: 'Béo', percent: Math.min(100, Math.round(nutrition.averageFat / 42 * 100)), label: DishNutritionHelper.formatGram(nutrition.averageFat), fill: '#d46b08' },
+        { name: 'Xơ', percent: Math.min(100, Math.round(nutrition.averageFiber / 12 * 100)), label: DishNutritionHelper.formatGram(nutrition.averageFiber), fill: '#389e0d' },
+    ];
+    const busiestPlanDay = [...weekOverview]
+        .map(item => ({ ...item, total: item.mealCount + item.shoppingCount }))
+        .sort((a, b) => b.total - a.total)[0];
+    const highestShoppingCost = [...shoppingCosts].sort((a, b) => b.value - a.value)[0];
+    const mealSlotFocus = [...mealSlotChartData].sort((a, b) => b.value - a.value)[0];
+    const nutritionGapCount = Math.max(0, nutrition.dishScopeCount - nutrition.dishWithNutritionCount);
 
     const NutritionRankGroup = ({ title, rows, tone, max, format, barValue }: { title: string; rows: NutritionDishRow[]; tone: string; max: number; format: (row: NutritionDishRow) => string; barValue: (row: NutritionDishRow) => number }) => {
-        return <div style={{ minWidth: 0 }}>
+        return <Box style={{ minWidth: 0, width: '100%', border: `1px solid ${tone}20`, borderRadius: 8, background: `${tone}08`, padding: 9, boxSizing: 'border-box' }}>
             <Typography.Text strong style={{ display: 'block', color: '#111827', fontSize: 13, lineHeight: '17px', marginBottom: 8 }}>{title}</Typography.Text>
             <Stack direction='column' align='stretch' gap={8}>
                 {rows.map(row => {
                     const width = Math.max(5, Math.round(barValue(row) / Math.max(1, max) * 100));
-                    return <button key={`${title}-${row.id}`} type='button' onClick={() => openRoute(RootRoutes.AuthorizedRoutes.DishesRoutes.ManageIngredient(row.id))} style={{ border: '1px solid rgba(116,54,220,0.10)', borderRadius: 8, background: '#fff', padding: '9px 10px', textAlign: 'left', cursor: 'pointer', boxShadow: '0 6px 16px rgba(74,48,130,0.06)' }}>
-                        <Stack justify='space-between' gap={8} align='flex-start'>
-                            <div style={{ minWidth: 0 }}>
+                    return <button key={`${title}-${row.id}`} type='button' onClick={() => openRoute(RootRoutes.AuthorizedRoutes.DishesRoutes.ManageIngredient(row.id))} style={{ width: '100%', minWidth: 0, boxSizing: 'border-box', border: '1px solid rgba(116,54,220,0.10)', borderRadius: 8, background: '#fff', padding: '9px 10px', textAlign: 'left', cursor: 'pointer', boxShadow: '0 6px 16px rgba(74,48,130,0.06)' }}>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) 82px', gap: 8, alignItems: 'start' }}>
+                            <div style={{ minWidth: 0, width: '100%' }}>
                                 <Typography.Text strong style={{ display: 'block', color: '#111827', fontSize: 12, lineHeight: '16px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{row.name}</Typography.Text>
                                 <Typography.Text type='secondary' style={{ display: 'block', fontSize: 10, lineHeight: '14px', marginTop: 2 }}>{row.coveragePercent}% dữ liệu</Typography.Text>
                             </div>
-                            <span style={{ borderRadius: 999, padding: '2px 8px', background: `${tone}14`, color: tone, fontSize: 11, lineHeight: '16px', fontWeight: 800, whiteSpace: 'nowrap' }}>{format(row)}</span>
-                        </Stack>
+                            <span style={{ width: 82, boxSizing: 'border-box', borderRadius: 999, padding: '2px 7px', background: `${tone}14`, color: tone, fontSize: 11, lineHeight: '16px', fontWeight: 800, whiteSpace: 'nowrap', textAlign: 'center', overflow: 'hidden', textOverflow: 'ellipsis' }}>{format(row)}</span>
+                        </div>
                         <div style={{ height: 6, borderRadius: 999, background: '#f0edf8', overflow: 'hidden', marginTop: 8 }}>
                             <div style={{ height: '100%', width: `${width}%`, borderRadius: 999, background: tone, boxShadow: `0 6px 14px ${tone}33` }} />
                         </div>
                     </button>;
                 })}
             </Stack>
-        </div>;
+        </Box>;
     };
 
     return <Box data-testid='dashboard-analytics' style={{ display: 'flex', flexDirection: 'column', gap: 12, padding: '0 0 14px', maxWidth: 980, margin: '0 auto' }}>
         <style>{analyticsCss}</style>
-        <Box style={{ borderRadius: 8, padding: 14, background: 'linear-gradient(135deg, #8f46f7 0%, #7436dc 58%, #5e2bbf 100%)', color: '#fff', boxShadow: '0 18px 36px rgba(74,48,130,0.24)' }}>
-            <Stack justify='space-between' align='flex-start' gap={10} style={{ marginBottom: 6 }}>
+        <Box style={{ padding: '2px 2px 0' }}>
+            <Stack justify='space-between' align='flex-start' gap={10}>
                 <div style={{ minWidth: 0 }}>
-                    <Typography.Text style={{ display: 'block', color: 'rgba(255,255,255,0.82)', fontSize: 12, lineHeight: '16px', fontWeight: 650 }}>My Recipes</Typography.Text>
-                    <Typography.Text strong style={{ display: 'block', color: '#fff', fontSize: 22, lineHeight: '28px' }}>Phân tích bếp nhà</Typography.Text>
+                    <Typography.Text style={{ display: 'block', color: '#7436dc', fontSize: 12, lineHeight: '16px', fontWeight: 700 }}>My Recipes</Typography.Text>
+                    <Typography.Text strong style={{ display: 'block', color: '#111827', fontSize: 22, lineHeight: '28px' }}>Phân tích bếp nhà</Typography.Text>
+                    <Typography.Text type='secondary' style={{ display: 'block', fontSize: 12, lineHeight: '17px', marginTop: 3 }}>Dữ liệu để quyết định nên nấu gì, mua gì và bổ sung gì trong vài ngày tới.</Typography.Text>
                 </div>
                 <Stack align='center' gap={6} style={{ flexShrink: 0 }}>
-                    <span style={{ borderRadius: 999, padding: '5px 10px', background: 'rgba(255,255,255,0.16)', border: '1px solid rgba(255,255,255,0.22)', color: '#fff', fontSize: 11, fontWeight: 750, whiteSpace: 'nowrap' }}>{formatHeaderDateLabel()}</span>
-                    <Button onClick={() => openRoute(RootRoutes.AuthorizedRoutes.Root())} style={{ borderRadius: 999, background: '#fff', borderColor: '#fff', color: '#5e2bbf', fontWeight: 750, display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>Tổng quan</Button>
+                    <span style={{ borderRadius: 999, padding: '5px 10px', background: '#fbf9ff', border: '1px solid rgba(116,54,220,0.14)', color: '#5e2bbf', fontSize: 11, fontWeight: 750, whiteSpace: 'nowrap' }}>{formatHeaderDateLabel()}</span>
                 </Stack>
             </Stack>
-            <Typography.Text style={{ display: 'block', color: 'rgba(255,255,255,0.78)', fontSize: 12, lineHeight: '17px', marginBottom: 12 }}>Dữ liệu thực đơn, mua sắm, tồn kho và món ăn trong một màn hình.</Typography.Text>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(156px, 1fr))', gap: 8 }}>
-                <StatCard label='Việc hôm nay' value={todayMeals.length + todayShoppingLists.length + activeSessions.length + urgentInventory.length} detail={`${todayDishCount} món trong thực đơn`} tone='#7436dc' icon={<CalendarOutlined />} />
-                <StatCard label='Mua sắm mở' value={openShoppingLists.length} detail={expensiveMetricsPending ? 'Đang tính chi phí...' : formatCostSummary(totalOpenShoppingCost)} tone='#0958d9' icon={<ShoppingCartOutlined />} />
-                <StatCard label='Kho cần chú ý' value={urgentInventory.length} detail={`${urgentExpiredCount} lô đã quá hạn`} tone={urgentExpiredCount > 0 ? '#cf1322' : '#fa8c16'} icon={<WarningOutlined />} />
-                <StatCard label='Món hoàn thiện' value={`${dishCompletePercent}%`} detail={`${completedDishes}/${dishes.length} món`} tone='#389e0d' icon={<CheckCircleOutlined />} />
-            </div>
         </Box>
 
+        <SectionCard title='Tín hiệu quyết định' subtitle='Những điểm nên nhìn trước khi lên lịch nấu hoặc đi chợ.' helpText={analyticsHelp.decisionSignals} icon={<QuestionCircleOutlined />} tone='#13a8a8'>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))', gap: 9 }}>
+                <InsightCard
+                    title='Ngày bận nhất 7 ngày tới'
+                    value={busiestPlanDay?.total > 0 ? `${busiestPlanDay.label} · ${busiestPlanDay.dateLabel}` : 'Chưa có tải lớn'}
+                    detail={busiestPlanDay?.total > 0 ? `${busiestPlanDay.mealCount} thực đơn và ${busiestPlanDay.shoppingCount} danh sách mua sắm.` : 'Lịch tuần tới đang nhẹ, có thể lên thêm thực đơn.'}
+                    icon={<CalendarOutlined />}
+                    tone='#7436dc'
+                    actionLabel='Mở'
+                    onOpen={() => openRoute(RootRoutes.AuthorizedRoutes.ScheduledMealRoutes.List())}
+                />
+                <InsightCard
+                    title='Danh sách tốn nhất'
+                    value={expensiveMetricsPending ? 'Đang tính...' : highestShoppingCost ? truncateName(highestShoppingCost.name, 22) : 'Chưa có chi phí'}
+                    detail={highestShoppingCost ? `${highestShoppingCost.costLabel} · tiến độ ${highestShoppingCost.progress}%. Tổng đang mở: ${formatCostSummary(totalOpenShoppingCost)}.` : 'Không có danh sách mua sắm đang mở hoặc chưa đủ giá.'}
+                    icon={<DollarCircleOutlined />}
+                    tone='#0958d9'
+                    actionLabel='Mở'
+                    onOpen={() => openRoute(RootRoutes.AuthorizedRoutes.ShoppingListRoutes.List())}
+                />
+                <InsightCard
+                    title='Rủi ro hao hụt'
+                    value={urgentInventory[0] ? urgentInventory[0].ingredientName : 'Kho ổn'}
+                    detail={urgentInventory[0] ? `${InventoryHelper.expiryBadge(urgentInventory[0].daysLeft)?.label ?? 'Cần xem'} · hạn ${urgentInventory[0].expiresAtLabel}.` : 'Không có nguyên liệu hết hạn hoặc sắp hết hạn trong ngưỡng cấu hình.'}
+                    icon={<WarningOutlined />}
+                    tone={urgentExpiredCount > 0 ? '#cf1322' : '#fa8c16'}
+                    actionLabel={urgentInventory[0] ? 'Mở' : undefined}
+                    onOpen={urgentInventory[0] ? () => openRoute(RootRoutes.AuthorizedRoutes.IngredientRoutes.Detail(urgentInventory[0].ingredientId)) : undefined}
+                />
+                <InsightCard
+                    title='Cân bằng bữa'
+                    value={mealSlotFocus?.value > 0 ? `${mealSlotFocus.name} nhiều nhất` : 'Chưa có nhịp bữa'}
+                    detail={mealSlotFocus?.value > 0 ? `${mealSlotFocus.value} món đã lên lịch trong 14 ngày tới, nên kiểm tra các bữa còn lại.` : 'Chưa đủ lịch để thấy bữa nào đang bị lệch.'}
+                    icon={<ClockCircleOutlined />}
+                    tone={mealSlotFocus?.fill ?? '#1677ff'}
+                />
+                <InsightCard
+                    title='Lỗ hổng dinh dưỡng'
+                    value={expensiveMetricsPending ? 'Đang tính...' : nutritionGapCount > 0 ? `${nutritionGapCount} món thiếu` : 'Dữ liệu ổn'}
+                    detail={nutritionGapCount > 0 ? `${nutrition.dishWithNutritionCount}/${nutrition.dishScopeCount} món có thể phân tích dinh dưỡng.` : 'Các món trong phạm vi phân tích đã có dữ liệu dinh dưỡng.'}
+                    icon={<CheckCircleOutlined />}
+                    tone={nutritionGapCount > 0 ? '#d48806' : '#389e0d'}
+                    actionLabel='Mở'
+                    onOpen={() => openRoute(RootRoutes.AuthorizedRoutes.NutritionGoals())}
+                />
+            </div>
+        </SectionCard>
+
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 12 }}>
-            <SectionCard title='Kế hoạch 7 ngày' subtitle='Thực đơn và danh sách mua sắm sắp tới.' helpText='Dùng để nhìn nhanh tuần tới có ngày nào nhiều việc bếp: cột tím là thực đơn, cột xanh là danh sách mua sắm. Ngày cột cao hơn cần chuẩn bị nhiều hơn.' icon={<BarChartOutlined />} tone='#7436dc'>
-                <div style={{ display: 'grid', gridTemplateColumns: `repeat(${weekOverview.length}, minmax(0, 1fr))`, gap: 8, alignItems: 'end', minHeight: 156 }}>
-                    {weekOverview.map(item => {
-                        const total = item.mealCount + item.shoppingCount;
-                        const height = Math.max(12, Math.round(total / weekMax * 100));
-                        const mealHeight = total > 0 ? Math.max(6, Math.round(item.mealCount / total * height)) : 0;
-                        const shoppingHeight = total > 0 ? Math.max(6, height - mealHeight) : 0;
-                        return <div key={item.dateLabel} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, minWidth: 0 }}>
-                            <div style={{ height: 108, display: 'flex', alignItems: 'flex-end' }}>
-                                <div style={{ width: 22, height, borderRadius: 999, overflow: 'hidden', background: '#f1eef8', boxShadow: total > 0 ? '0 8px 16px rgba(116,54,220,0.18)' : 'none' }}>
-                                    {shoppingHeight > 0 && <div style={{ height: shoppingHeight, background: '#48a6ff' }} />}
-                                    {mealHeight > 0 && <div style={{ height: mealHeight, background: 'linear-gradient(180deg, #8f46f7 0%, #7436dc 100%)' }} />}
-                                </div>
-                            </div>
-                            <Typography.Text style={{ fontSize: 11, lineHeight: '14px', color: '#6b7280', whiteSpace: 'nowrap' }}>{item.label}</Typography.Text>
-                            <Typography.Text style={{ fontSize: 10, lineHeight: '13px', color: '#9ca3af', whiteSpace: 'nowrap' }}>{item.dateLabel}</Typography.Text>
-                        </div>;
-                    })}
-                </div>
-                <Stack wrap='wrap' gap={6} style={{ marginTop: 8 }}>
-                    <Tag color='purple' style={{ marginInlineEnd: 0 }}>Thực đơn</Tag>
-                    <Tag color='blue' style={{ marginInlineEnd: 0 }}>Mua sắm</Tag>
-                </Stack>
+            <SectionCard title='Áp lực chuẩn bị 7 ngày' subtitle='Ngày nào đang dồn cả nấu ăn và mua sắm.' helpText={analyticsHelp.planLoad} icon={<BarChartOutlined />} tone='#7436dc'>
+                <ChartFrame height={190}>
+                    <ResponsiveContainer width='100%' height='100%'>
+                        <BarChart data={weekOverview} margin={{ top: 8, right: 4, left: -18, bottom: 0 }}>
+                            <CartesianGrid stroke={chartGridColor} vertical={false} />
+                            <XAxis dataKey='label' tick={chartAxisStyle} axisLine={false} tickLine={false} interval={0} />
+                            <YAxis allowDecimals={false} tick={chartAxisStyle} axisLine={false} tickLine={false} width={30} />
+                            <ChartTooltip contentStyle={chartTooltipStyle} formatter={(value: any, name: any) => [value, name]} labelFormatter={(label) => `${label}`} />
+                            <Legend wrapperStyle={{ fontSize: 11 }} />
+                            <Bar dataKey='mealCount' name='Thực đơn' stackId='plan' fill='#7436dc' radius={[6, 6, 0, 0]} />
+                            <Bar dataKey='shoppingCount' name='Mua sắm' stackId='plan' fill='#1677ff' radius={[6, 6, 0, 0]} />
+                        </BarChart>
+                    </ResponsiveContainer>
+                </ChartFrame>
+                <ChartSummaryRow items={weekOverview.map(item => ({ label: item.dateLabel, value: item.mealCount + item.shoppingCount, color: item.mealCount + item.shoppingCount > 0 ? '#7436dc' : '#8c8c8c' }))} />
             </SectionCard>
 
-            <SectionCard title='Nhịp bữa ăn' subtitle='Các món đã lên lịch trong 14 ngày tới.' helpText='Dùng để xem bữa sáng, trưa hay tối đang được lên lịch nhiều nhất, giúp cân bằng kế hoạch nấu ăn và tránh dồn quá nhiều món vào một khung bữa.' icon={<ClockCircleOutlined />} tone='#1677ff'>
-                <Stack direction='column' align='stretch' gap={11}>
-                    <HorizontalBar label='Bữa sáng' value={mealSlotCounts.breakfast} max={mealSlotMax} color='#48a6ff' detail={`${mealSlotCounts.breakfast} món`} />
-                    <HorizontalBar label='Bữa trưa' value={mealSlotCounts.lunch} max={mealSlotMax} color='#8f46f7' detail={`${mealSlotCounts.lunch} món`} />
-                    <HorizontalBar label='Bữa tối' value={mealSlotCounts.dinner} max={mealSlotMax} color='#fa8c16' detail={`${mealSlotCounts.dinner} món`} />
-                </Stack>
+            <SectionCard title='Cân bằng bữa 14 ngày' subtitle='Bữa nào đang được lên lịch nhiều hoặc ít bất thường.' helpText={analyticsHelp.mealBalance} icon={<ClockCircleOutlined />} tone='#1677ff'>
+                <ChartFrame height={176}>
+                    <ResponsiveContainer width='100%' height='100%'>
+                        <BarChart data={mealSlotChartData} layout='vertical' margin={{ top: 6, right: 18, left: 8, bottom: 0 }}>
+                            <CartesianGrid stroke={chartGridColor} horizontal={false} />
+                            <XAxis type='number' allowDecimals={false} tick={chartAxisStyle} axisLine={false} tickLine={false} />
+                            <YAxis type='category' dataKey='name' tick={chartAxisStyle} axisLine={false} tickLine={false} width={42} />
+                            <ChartTooltip contentStyle={chartTooltipStyle} formatter={(value: any) => [`${value} món`, 'Số món']} />
+                            <Bar dataKey='value' radius={[0, 8, 8, 0]}>
+                                {mealSlotChartData.map(item => <Cell key={item.name} fill={item.fill} />)}
+                            </Bar>
+                        </BarChart>
+                    </ResponsiveContainer>
+                </ChartFrame>
+                <ChartSummaryRow items={mealSlotChartData.map(item => ({ label: item.name, value: `${item.value} món`, color: item.fill }))} />
             </SectionCard>
         </div>
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 12 }}>
-            <SectionCard title='Sức khoẻ tồn kho' subtitle={`${stockedIngredientCount} nguyên liệu đang có lô trong kho.`} helpText='Dùng để biết nhóm nguyên liệu nào có nhiều dữ liệu nhất và trong mỗi nhóm đang có bao nhiêu nguyên liệu còn sẵn trong kho.' icon={<WarningOutlined />} tone='#fa8c16'>
-                {inventoryByCategory.length === 0 ? <EmptyAnalytics text='Chưa có dữ liệu nguyên liệu để phân tích kho.' /> : <Stack direction='column' align='stretch' gap={10}>
-                    {inventoryByCategory.map((item, index) => <HorizontalBar
-                        key={item.category}
-                        label={item.category}
-                        value={item.total}
-                        max={categoryMax}
-                        color={['#7436dc', '#48a6ff', '#52c41a', '#fa8c16', '#eb2f96', '#13c2c2', '#fadb14', '#722ed1'][index % 8]}
-                        detail={`${item.stocked}/${item.total} có sẵn`}
-                    />)}
-                </Stack>}
+            <SectionCard title='Độ phủ kho theo nhóm' subtitle={`${stockedIngredientPercent}% nguyên liệu có tồn kho hoặc luôn có sẵn.`} helpText={analyticsHelp.inventoryCoverage} icon={<BarChartOutlined />} tone='#fa8c16'>
+                {inventoryByCategory.length === 0 ? <EmptyAnalytics text='Chưa có dữ liệu nguyên liệu để phân tích kho.' /> : <>
+                    <ChartFrame height={220}>
+                        <ResponsiveContainer width='100%' height='100%'>
+                            <BarChart data={inventoryCategoryChartData} layout='vertical' margin={{ top: 6, right: 18, left: 10, bottom: 0 }}>
+                                <CartesianGrid stroke={chartGridColor} horizontal={false} />
+                                <XAxis type='number' domain={[0, 100]} allowDecimals={false} tick={chartAxisStyle} axisLine={false} tickLine={false} tickFormatter={(value) => `${value}%`} />
+                                <YAxis type='category' dataKey='name' tick={chartAxisStyle} axisLine={false} tickLine={false} width={76} />
+                                <ChartTooltip contentStyle={chartTooltipStyle} formatter={(value: any, name: any, props: any) => {
+                                    const isStocked = props?.dataKey === 'stockedPercent';
+                                    const label = isStocked ? props?.payload?.stockedLabel : props?.payload?.missingLabel;
+                                    return [`${value}% · ${label}`, isStocked ? 'Có sẵn' : 'Cần bổ sung'];
+                                }} />
+                                <Legend wrapperStyle={{ fontSize: 11 }} />
+                                <Bar dataKey='stockedPercent' name='Có sẵn' stackId='inventory' fill='#389e0d' radius={[0, 8, 8, 0]} />
+                                <Bar dataKey='missingPercent' name='Cần bổ sung' stackId='inventory' fill='#fa8c16' radius={[0, 8, 8, 0]} />
+                            </BarChart>
+                        </ResponsiveContainer>
+                    </ChartFrame>
+                    <ChartSummaryRow items={inventoryByCategory.slice(0, 4).map((item, index) => ({ label: item.category, value: `${item.stocked}/${item.total}`, color: chartPalette[index % chartPalette.length] }))} />
+                </>}
             </SectionCard>
 
-            <SectionCard title='Nguyên liệu khẩn cấp' subtitle='Các lô hết hạn hoặc còn tối đa 3 ngày.' helpText='Dùng để ưu tiên xử lý nguyên liệu sắp hết hạn hoặc đã quá hạn, từ đó quyết định nên nấu món nào trước hoặc bỏ lô nào khỏi kho.' icon={<WarningOutlined />} tone={urgentExpiredCount > 0 ? '#cf1322' : '#fa8c16'}>
-                {urgentInventory.length === 0 ? <EmptyAnalytics text='Không có nguyên liệu sắp hết hạn.' /> : <Stack direction='column' align='stretch' gap={8}>
-                    {urgentInventory.slice(0, 6).map(item => {
-                        const badge = InventoryHelper.expiryBadge(item.daysLeft);
-                        const tone = item.daysLeft < 0 ? '#cf1322' : item.daysLeft <= 1 ? '#fa541c' : '#fa8c16';
-                        return <button key={`${item.ingredientId}-${item.expiresAtLabel}-${item.amount}`} type='button' onClick={() => openRoute(RootRoutes.AuthorizedRoutes.IngredientRoutes.Detail(item.ingredientId))} style={{ border: '1px solid rgba(116,54,220,0.10)', borderRadius: 8, background: '#fff', padding: '9px 10px', textAlign: 'left', cursor: 'pointer', boxShadow: '0 6px 18px rgba(74,48,130,0.06)' }}>
-                            <Stack justify='space-between' gap={8}>
-                                <div style={{ minWidth: 0 }}>
-                                    <Typography.Text strong style={{ display: 'block', lineHeight: '18px', color: '#111827', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{item.ingredientName}</Typography.Text>
-                                    <Typography.Text type='secondary' style={{ display: 'block', fontSize: 11, lineHeight: '15px' }}>{IngredientUnitHelper.formatAmount(item.amount)} {item.unit} · hạn {item.expiresAtLabel}</Typography.Text>
-                                </div>
-                                {badge && <Tag color={item.daysLeft < 0 ? 'red' : item.daysLeft <= 1 ? 'volcano' : 'orange'} style={{ marginInlineEnd: 0, color: tone }}>{badge.label}</Tag>}
-                            </Stack>
-                        </button>;
-                    })}
+            <SectionCard title='Rủi ro hết hạn tồn kho' subtitle='Các lô đã quá hạn hoặc sắp hết hạn theo cấu hình kho.' helpText={analyticsHelp.expiryRisk} icon={<WarningOutlined />} tone={urgentExpiredCount > 0 ? '#cf1322' : '#fa8c16'}>
+                {urgentInventory.length === 0 ? <EmptyAnalytics text='Không có nguyên liệu sắp hết hạn.' /> : <Stack direction='column' align='stretch' gap={10}>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'minmax(118px, 0.8fr) minmax(0, 1.2fr)', gap: 10, alignItems: 'stretch' }}>
+                        <ChartFrame height={176}>
+                            <ResponsiveContainer width='100%' height='100%'>
+                                <PieChart>
+                                    <Pie data={expiryRiskPieData} dataKey='value' nameKey='name' innerRadius={38} outerRadius={62} paddingAngle={3}>
+                                        {expiryRiskPieData.map(item => <Cell key={item.name} fill={item.fill} />)}
+                                    </Pie>
+                                    <ChartTooltip contentStyle={chartTooltipStyle} formatter={(value: any) => [`${value} lô`, 'Rủi ro']} />
+                                    <Legend wrapperStyle={{ fontSize: 11 }} />
+                                </PieChart>
+                            </ResponsiveContainer>
+                        </ChartFrame>
+                        <Box style={{ border: '1px solid rgba(250,140,22,0.16)', borderRadius: 8, background: '#fffaf2', padding: 11, minWidth: 0 }}>
+                            <Typography.Text strong style={{ display: 'block', color: urgentExpiredCount > 0 ? '#cf1322' : '#fa8c16', fontSize: 24, lineHeight: '29px' }}>{urgentInventory.length}</Typography.Text>
+                            <Typography.Text type='secondary' style={{ display: 'block', fontSize: 12, lineHeight: '16px' }}>lô cần xử lý trong ngưỡng cấu hình</Typography.Text>
+                            <ChartSummaryRow items={expiryRiskChartData.map(item => ({ label: item.name, value: item.value, color: item.fill }))} />
+                        </Box>
+                    </div>
+                    <Stack direction='column' align='stretch' gap={8}>
+                        {urgentInventory.slice(0, 6).map(item => {
+                            const badge = InventoryHelper.expiryBadge(item.daysLeft);
+                            const tone = item.daysLeft < 0 ? '#cf1322' : item.daysLeft <= 1 ? '#fa541c' : '#fa8c16';
+                            return <button key={`${item.ingredientId}-${item.expiresAtLabel}-${item.amount}`} type='button' onClick={() => openRoute(RootRoutes.AuthorizedRoutes.IngredientRoutes.Detail(item.ingredientId))} style={{ border: '1px solid rgba(116,54,220,0.10)', borderRadius: 8, background: '#fff', padding: '9px 10px', textAlign: 'left', cursor: 'pointer', boxShadow: '0 6px 18px rgba(74,48,130,0.06)' }}>
+                                <Stack justify='space-between' gap={8}>
+                                    <div style={{ minWidth: 0 }}>
+                                        <Typography.Text strong style={{ display: 'block', lineHeight: '18px', color: '#111827', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{item.ingredientName}</Typography.Text>
+                                        <Typography.Text type='secondary' style={{ display: 'block', fontSize: 11, lineHeight: '15px' }}>{IngredientUnitHelper.formatAmount(item.amount)} {item.unit} · hạn {item.expiresAtLabel}</Typography.Text>
+                                    </div>
+                                    {badge && <Tag color={item.daysLeft < 0 ? 'red' : item.daysLeft <= 1 ? 'volcano' : 'orange'} style={{ marginInlineEnd: 0, color: tone }}>{badge.label}</Tag>}
+                                </Stack>
+                            </button>;
+                        })}
+                    </Stack>
                 </Stack>}
             </SectionCard>
         </div>
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 12 }}>
-            <SectionCard title='Chi phí mua sắm' subtitle='Ước tính các danh sách đang mở, ưu tiên theo ngày.' helpText='Dùng để xem danh sách mua sắm nào có chi phí dự kiến cao hơn và tiến độ mua của từng danh sách, giúp ưu tiên ngân sách trước khi đi chợ.' icon={<DollarCircleOutlined />} tone='#0958d9'>
+            <SectionCard title='Áp lực ngân sách mua sắm' subtitle='Danh sách nào còn tốn tiền và còn nhiều món chưa mua.' helpText={analyticsHelp.shoppingBudget} icon={<DollarCircleOutlined />} tone='#0958d9'>
                 {expensiveMetricsPending ? <EmptyAnalytics text='Đang tính chi phí mua sắm...' /> : shoppingCosts.length === 0 ? <EmptyAnalytics text='Không có danh sách mua sắm đang mở.' /> : <Stack direction='column' align='stretch' gap={10}>
-                    {shoppingCosts.map(item => <HorizontalBar key={item.id} label={truncateName(item.name, 26)} value={item.value} max={shoppingCostMax} color='#0958d9' detail={`${item.costLabel} · ${item.progress}%`} />)}
+                    <ChartFrame height={206}>
+                        <ResponsiveContainer width='100%' height='100%'>
+                            <BarChart data={shoppingCostChartData} layout='vertical' margin={{ top: 6, right: 20, left: 12, bottom: 0 }}>
+                                <CartesianGrid stroke={chartGridColor} horizontal={false} />
+                                <XAxis type='number' tick={chartAxisStyle} axisLine={false} tickLine={false} tickFormatter={(value) => `${Math.round(Number(value) / 1000)}k`} />
+                                <YAxis type='category' dataKey='name' tick={chartAxisStyle} axisLine={false} tickLine={false} width={88} />
+                                <ChartTooltip contentStyle={chartTooltipStyle} formatter={(value: any, name: any, props: any) => [props?.payload?.costLabel ?? value, name === 'value' ? 'Chi phí' : name]} />
+                                <Bar dataKey='value' name='Chi phí' fill='#0958d9' radius={[0, 8, 8, 0]} />
+                            </BarChart>
+                        </ResponsiveContainer>
+                    </ChartFrame>
+                    <ChartSummaryRow items={shoppingCosts.slice(0, 4).map(item => ({ label: truncateName(item.name, 14), value: `${item.remainingCount} cần mua`, color: item.progress >= 100 ? '#389e0d' : '#0958d9' }))} />
+                    <Stack direction='column' align='stretch' gap={7}>
+                        {shoppingCosts.slice(0, 4).map(item => <button key={item.id} type='button' onClick={() => openRoute(RootRoutes.AuthorizedRoutes.ShoppingListRoutes.Detail(item.id))} style={{ border: '1px solid rgba(9,88,217,0.12)', borderRadius: 8, background: '#fff', padding: '9px 10px', textAlign: 'left', cursor: 'pointer' }}>
+                            <Stack justify='space-between' gap={8} align='flex-start'>
+                                <div style={{ minWidth: 0 }}>
+                                    <Typography.Text strong style={{ display: 'block', color: '#111827', fontSize: 12, lineHeight: '16px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{item.name}</Typography.Text>
+                                    <Typography.Text type='secondary' style={{ display: 'block', fontSize: 11, lineHeight: '15px', marginTop: 2 }}>{item.doneCount}/{item.totalCount} đã mua · còn {item.remainingCount} nhóm</Typography.Text>
+                                </div>
+                                <span style={{ flexShrink: 0, borderRadius: 999, padding: '2px 8px', background: '#e6f4ff', color: '#0958d9', border: '1px solid #bae0ff', fontSize: 11, lineHeight: '16px', fontWeight: 800 }}>{item.costLabel}</span>
+                            </Stack>
+                            <div style={{ height: 6, borderRadius: 999, background: '#e6f4ff', overflow: 'hidden', marginTop: 8 }}>
+                                <div style={{ height: '100%', width: `${Math.max(3, item.progress)}%`, borderRadius: 999, background: item.progress >= 100 ? '#389e0d' : '#0958d9' }} />
+                            </div>
+                        </button>)}
+                    </Stack>
                     <Button onClick={() => openRoute(RootRoutes.AuthorizedRoutes.ShoppingListRoutes.List())} style={{ borderRadius: 999, color: '#0958d9', borderColor: 'rgba(9,88,217,0.30)', fontWeight: 700 }}>Mở mua sắm</Button>
                 </Stack>}
             </SectionCard>
 
-            <SectionCard title='Tình trạng món ăn' subtitle='Độ hoàn thiện và nhóm món đang nổi bật.' helpText='Dùng để theo dõi tỷ lệ món đã hoàn thiện thông tin và nhóm tag món ăn đang nhiều nhất, giúp biết phần dữ liệu món nào cần bổ sung.' icon={<TagsOutlined />} tone='#389e0d'>
-                <div style={{ display: 'grid', gridTemplateColumns: '112px minmax(0, 1fr)', gap: 14, alignItems: 'center' }}>
-                    <div style={{ width: 112, height: 112, borderRadius: '50%', background: `conic-gradient(#389e0d 0 ${dishCompletePercent}%, #f0edf8 ${dishCompletePercent}% 100%)`, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 10px 22px rgba(56,158,13,0.14)' }}>
-                        <div style={{ width: 72, height: 72, borderRadius: '50%', background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column' }}>
-                            <Typography.Text strong style={{ color: '#389e0d', fontSize: 20, lineHeight: '24px' }}>{dishCompletePercent}%</Typography.Text>
-                            <Typography.Text type='secondary' style={{ fontSize: 10, lineHeight: '13px' }}>hoàn thiện</Typography.Text>
-                        </div>
+            <SectionCard title='Chất lượng dữ liệu món ăn' subtitle='Dữ liệu đã đủ tin cậy cho gợi ý, nutrition và lập kế hoạch chưa.' helpText={analyticsHelp.dataQuality} icon={<CheckCircleOutlined />} tone='#389e0d'>
+                <Stack direction='column' align='stretch' gap={10}>
+                    <ChartFrame height={210}>
+                        <ResponsiveContainer width='100%' height='100%'>
+                            <BarChart data={dataQualityChartData} layout='vertical' margin={{ top: 6, right: 18, left: 10, bottom: 0 }}>
+                                <CartesianGrid stroke={chartGridColor} horizontal={false} />
+                                <XAxis type='number' domain={[0, 100]} tick={chartAxisStyle} axisLine={false} tickLine={false} tickFormatter={(value) => `${value}%`} />
+                                <YAxis type='category' dataKey='name' tick={chartAxisStyle} axisLine={false} tickLine={false} width={92} />
+                                <ChartTooltip contentStyle={chartTooltipStyle} formatter={(value: any, name: any, props: any) => [props?.payload?.label ?? `${value}%`, 'Độ phủ']} />
+                                <Bar dataKey='percent' name='Độ phủ' radius={[0, 8, 8, 0]}>
+                                    {dataQualityChartData.map(item => <Cell key={item.name} fill={item.fill} />)}
+                                </Bar>
+                            </BarChart>
+                        </ResponsiveContainer>
+                    </ChartFrame>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(118px, 1fr))', gap: 8 }}>
+                        {dataQualityChartData.map(item => <Box key={item.name} style={{ border: `1px solid ${item.fill}20`, borderRadius: 8, background: `${item.fill}08`, padding: 10, minWidth: 0 }}>
+                            <Typography.Text strong style={{ display: 'block', color: item.fill, fontSize: 20, lineHeight: '24px' }}>{item.percent}%</Typography.Text>
+                            <Typography.Text style={{ display: 'block', color: '#111827', fontSize: 12, lineHeight: '16px', fontWeight: 700 }}>{item.name}</Typography.Text>
+                            <Typography.Text type='secondary' style={{ display: 'block', fontSize: 11, lineHeight: '15px', marginTop: 2 }}>{item.label}</Typography.Text>
+                        </Box>)}
+                        <Box style={{ border: '1px solid rgba(19,168,168,0.18)', borderRadius: 8, background: '#f0fffd', padding: 10, minWidth: 0 }}>
+                            <Typography.Text strong style={{ display: 'block', color: '#13a8a8', fontSize: 20, lineHeight: '24px' }}>{nutrition.sourceCount}</Typography.Text>
+                            <Typography.Text style={{ display: 'block', color: '#111827', fontSize: 12, lineHeight: '16px', fontWeight: 700 }}>Nguồn nutrition</Typography.Text>
+                            <Typography.Text type='secondary' style={{ display: 'block', fontSize: 11, lineHeight: '15px', marginTop: 2 }}>nguồn tham chiếu đang được dùng</Typography.Text>
+                        </Box>
                     </div>
-                    <Stack direction='column' align='stretch' gap={8}>
-                        <HorizontalBar label='Đã hoàn thiện' value={completedDishes} max={Math.max(1, dishes.length)} color='#389e0d' detail={`${completedDishes} món`} />
-                        <HorizontalBar label='Cần cập nhật' value={Math.max(0, dishes.length - completedDishes)} max={Math.max(1, dishes.length)} color='#d46b08' detail={`${Math.max(0, dishes.length - completedDishes)} món`} />
-                    </Stack>
-                </div>
-                <Stack direction='column' align='stretch' gap={8} style={{ marginTop: 14 }}>
-                    {dishTagRows.length === 0 ? <Typography.Text type='secondary' style={{ fontSize: 12 }}>Chưa có tag món ăn để phân tích.</Typography.Text> : dishTagRows.map((item, index) => <HorizontalBar key={item.tag} label={item.tag} value={item.count} max={tagMax} color={['#7436dc', '#48a6ff', '#52c41a', '#fa8c16', '#eb2f96', '#13c2c2', '#fadb14', '#722ed1'][index % 8]} detail={`${item.count} món`} />)}
                 </Stack>
             </SectionCard>
         </div>
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 12 }}>
-            <SectionCard title='Dinh dưỡng món ăn' subtitle={`${nutrition.dishWithNutritionCount}/${nutrition.dishScopeCount} món tính được dinh dưỡng.`} helpText='Dùng để biết dữ liệu món ăn đã đủ để phân tích dinh dưỡng chưa và khẩu phần trung bình đang nhiều năng lượng, đạm, béo hay chất xơ.' icon={<BarChartOutlined />} tone='#7436dc'>
+            <SectionCard title='Hồ sơ dinh dưỡng khẩu phần' subtitle={`${nutrition.dishWithNutritionCount}/${nutrition.dishScopeCount} món tính được dinh dưỡng.`} helpText={analyticsHelp.nutritionProfile} icon={<BarChartOutlined />} tone='#7436dc'>
                 {expensiveMetricsPending ? <EmptyAnalytics text='Đang tính dữ liệu dinh dưỡng...' /> : nutrition.dishWithNutritionCount === 0 ? <EmptyAnalytics text='Chưa có món nào đủ dữ liệu dinh dưỡng để phân tích.' /> : <>
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(118px, 1fr))', gap: 8, marginBottom: 12 }}>
                         <div style={{ borderRadius: 8, background: '#fbf9ff', border: '1px solid #ece5ff', padding: 10 }}>
@@ -588,18 +792,25 @@ export const DashboardAnalyticsScreen = () => {
                             <Typography.Text type='secondary' style={{ display: 'block', fontSize: 11, lineHeight: '15px' }}>nguồn tham chiếu</Typography.Text>
                         </div>
                     </div>
-                    <Stack direction='column' align='stretch' gap={10}>
-                        <HorizontalBar label='Kcal trung bình' value={nutrition.averageCalories} max={800} color='#7436dc' detail={DishNutritionHelper.formatCalories(nutrition.averageCalories)} />
-                        <HorizontalBar label='Đạm trung bình' value={nutrition.averageProtein} max={36} color='#1677ff' detail={DishNutritionHelper.formatGram(nutrition.averageProtein)} />
-                        <HorizontalBar label='Tinh bột trung bình' value={nutrition.averageCarbs} max={80} color='#fa8c16' detail={DishNutritionHelper.formatGram(nutrition.averageCarbs)} />
-                        <HorizontalBar label='Béo trung bình' value={nutrition.averageFat} max={42} color='#d46b08' detail={DishNutritionHelper.formatGram(nutrition.averageFat)} />
-                        <HorizontalBar label='Chất xơ trung bình' value={nutrition.averageFiber} max={12} color='#389e0d' detail={DishNutritionHelper.formatGram(nutrition.averageFiber)} />
-                    </Stack>
+                    <ChartFrame height={218}>
+                        <ResponsiveContainer width='100%' height='100%'>
+                            <BarChart data={nutritionAverageChartData} layout='vertical' margin={{ top: 6, right: 18, left: 8, bottom: 0 }}>
+                                <CartesianGrid stroke={chartGridColor} horizontal={false} />
+                                <XAxis type='number' domain={[0, 100]} tick={chartAxisStyle} axisLine={false} tickLine={false} tickFormatter={(value) => `${value}%`} />
+                                <YAxis type='category' dataKey='name' tick={chartAxisStyle} axisLine={false} tickLine={false} width={58} />
+                                <ChartTooltip contentStyle={chartTooltipStyle} formatter={(value: any, name: any, props: any) => [props?.payload?.label ?? `${value}%`, name === 'percent' ? 'Trung bình' : name]} />
+                                <Bar dataKey='percent' name='Trung bình' radius={[0, 8, 8, 0]}>
+                                    {nutritionAverageChartData.map(item => <Cell key={item.name} fill={item.fill} />)}
+                                </Bar>
+                            </BarChart>
+                        </ResponsiveContainer>
+                    </ChartFrame>
+                    <ChartSummaryRow items={nutritionAverageChartData.map(item => ({ label: item.name, value: item.label, color: item.fill }))} />
                 </>}
             </SectionCard>
 
-            <SectionCard title='Xếp hạng dinh dưỡng' subtitle='Các món nổi bật theo mục tiêu ăn uống.' helpText='Dùng để chọn nhanh món giàu đạm, nhiều chất xơ hoặc nhẹ năng lượng hơn khi lập thực đơn hay cần gợi ý nấu ăn.' icon={<FireOutlined />} tone='#d48806'>
-                {expensiveMetricsPending ? <EmptyAnalytics text='Đang xếp hạng món theo dinh dưỡng...' /> : nutrition.dishWithNutritionCount === 0 ? <EmptyAnalytics text='Chưa có đủ dữ liệu để xếp hạng dinh dưỡng.' /> : <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(190px, 1fr))', gap: 10 }}>
+            <SectionCard title='Xếp hạng món theo mục tiêu' subtitle='Các món nổi bật theo đạm, chất xơ và kcal.' helpText={analyticsHelp.nutritionRanking} icon={<FireOutlined />} tone='#d48806'>
+                {expensiveMetricsPending ? <EmptyAnalytics text='Đang xếp hạng món theo dinh dưỡng...' /> : nutrition.dishWithNutritionCount === 0 ? <EmptyAnalytics text='Chưa có đủ dữ liệu để xếp hạng dinh dưỡng.' /> : <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(230px, 100%), 1fr))', gap: 10, alignItems: 'stretch' }}>
                     {nutrition.topProtein.length > 0 && <NutritionRankGroup title='Giàu đạm' rows={nutrition.topProtein} tone='#1677ff' max={topProteinMax} format={row => DishNutritionHelper.formatGram(row.protein)} barValue={row => row.protein} />}
                     {nutrition.topFiber.length > 0 && <NutritionRankGroup title='Nhiều chất xơ' rows={nutrition.topFiber} tone='#389e0d' max={topFiberMax} format={row => DishNutritionHelper.formatGram(row.fiber)} barValue={row => row.fiber} />}
                     {nutrition.lightCalories.length > 0 && <NutritionRankGroup title='Nhẹ kcal' rows={nutrition.lightCalories} tone='#7436dc' max={lightCalorieMax} format={row => DishNutritionHelper.formatCalories(row.calories)} barValue={row => Math.max(1, lightCalorieMax - row.calories + 1)} />}
@@ -607,7 +818,7 @@ export const DashboardAnalyticsScreen = () => {
             </SectionCard>
         </div>
 
-        <SectionCard title='Gợi ý từ dữ liệu hiện tại' subtitle='Món phù hợp với tồn kho và nguyên liệu cần dùng sớm.' helpText='Dùng để chọn món nên nấu dựa trên nguyên liệu đang có, nguyên liệu thiếu và mức độ khớp với tồn kho hiện tại.' icon={<FireOutlined />} tone='#389e0d'>
+        <SectionCard title='Món nên nấu để dùng kho' subtitle='Món phù hợp với tồn kho và nguyên liệu cần dùng sớm.' helpText={analyticsHelp.inventorySuggestions} icon={<FireOutlined />} tone='#389e0d'>
             {expensiveMetricsPending ? <EmptyAnalytics text='Đang tính gợi ý món...' /> : suggestions.length === 0 ? <EmptyAnalytics text='Chưa có đủ dữ liệu để gợi ý món.' /> : <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(190px, 1fr))', gap: 8 }}>
                 {suggestions.map(item => {
                     const matchPercent = Math.round(item.score * 100);
