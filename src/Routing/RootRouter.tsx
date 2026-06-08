@@ -1,6 +1,7 @@
 import {
     BrowserRouter, Route, Routes
 } from "react-router-dom";
+import React from "react";
 import { RootRoutes } from "./RootRoutes";
 import { IngredientRouter } from "@modules/Ingredient/Routing/IngredientRouter";
 import { IngredientDetailScreen } from "@modules/Ingredient/Screens/IngredientDetail.screen";
@@ -22,6 +23,11 @@ import { ScheduledMealRouter } from "@modules/ScheduledMeal/Routing/ScheduledMea
 import { ScheduledMealListScreen } from "@modules/ScheduledMeal/Screens/ScheduledMealList.screen";
 import { DishExpensePlannerScreen } from "@modules/Dishes/Screens/DishExpensePlanner.screen";
 
+const UserGuideTourScreen = React.lazy(() => import("@modules/Home/Screens/UserGuideTour.screen"));
+const UserGuideWelcomeScreen = React.lazy(() => import("@modules/Home/Screens/UserGuideWelcome.screen"));
+
+const RouteLoadingFallback = () => <div style={{ padding: 12, color: '#6b6478', fontSize: 13 }}>Đang mở hướng dẫn...</div>;
+
 export const RootRouter = () => {
     return <BrowserRouter basename="/my-recipes">
         <Routes>
@@ -30,6 +36,8 @@ export const RootRouter = () => {
                 <Route path={RootRoutes.AuthorizedRoutes.Analytics()} element={<DashboardAnalyticsScreen />} />
                 <Route path={RootRoutes.AuthorizedRoutes.NutritionGoals()} element={<NutritionGoalsScreen />} />
                 <Route path={RootRoutes.AuthorizedRoutes.UserGuide()} element={<UserGuideScreen />} />
+                <Route path={RootRoutes.AuthorizedRoutes.UserGuideWelcome()} element={<React.Suspense fallback={<RouteLoadingFallback />}><UserGuideWelcomeScreen /></React.Suspense>} />
+                <Route path={RootRoutes.AuthorizedRoutes.UserGuideTour()} element={<React.Suspense fallback={<RouteLoadingFallback />}><UserGuideTourScreen /></React.Suspense>} />
                 <Route path={RootRoutes.AuthorizedRoutes.Templates()} element={<TemplatesScreen />} />
                 <Route path={RootRoutes.AuthorizedRoutes.SyncBackupHealth()} element={<SyncBackupHealthScreen />} />
                 <Route path={RootRoutes.AuthorizedRoutes.ExpensePlanner()} element={<DishExpensePlannerScreen />} />

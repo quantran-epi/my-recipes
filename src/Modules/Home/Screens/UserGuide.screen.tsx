@@ -302,6 +302,8 @@ const GUIDE_FLOWS: GuideFlow[] = [
 
 const GUIDE_PROGRESS_STORAGE_KEY = 'my-recipes-user-guide-progress-v1';
 
+const TOUR_GUIDE_PAGE_KEYS = new Set(['start', 'ingredients', 'dishes', 'suggestions', 'shopping', 'meals']);
+
 const getGuidePage = (key: string | null): GuidePage => GUIDE_PAGES.find(item => item.key === key) ?? GUIDE_PAGES[0];
 
 const getGuideFlow = (key: string | null): GuideFlow => GUIDE_FLOWS.find(item => item.key === key) ?? GUIDE_FLOWS[0];
@@ -438,6 +440,8 @@ export const UserGuideScreen: React.FC = () => {
     const activePageStepIds = React.useMemo(() => getPageStepIds(activePage), [activePage]);
     const activeFlowPages = React.useMemo(() => activeFlow.pageKeys.map(key => getGuidePage(key)), [activeFlow]);
     const activeFlowStepIds = React.useMemo(() => activeFlowPages.flatMap(getPageStepIds), [activeFlowPages]);
+    const activeFlowTourKey = React.useMemo(() => activeFlow.pageKeys.find(key => TOUR_GUIDE_PAGE_KEYS.has(key)) ?? 'start', [activeFlow]);
+    const activePageHasTour = TOUR_GUIDE_PAGE_KEYS.has(activePage.key);
     const completedActiveSteps = activePageStepIds.filter(id => completedStepSet.has(id)).length;
     const completedFlowSteps = activeFlowStepIds.filter(id => completedStepSet.has(id)).length;
     const activePagePercent = activePageStepIds.length > 0 ? Math.round(completedActiveSteps / activePageStepIds.length * 100) : 0;
@@ -481,6 +485,10 @@ export const UserGuideScreen: React.FC = () => {
         updateCompletedSteps([]);
     }, [updateCompletedSteps]);
 
+    const openTour = React.useCallback((key: string) => {
+        navigate(RootRoutes.AuthorizedRoutes.UserGuideTour({ item: key }));
+    }, [navigate]);
+
     const previousPage = activeIndex > 0 ? GUIDE_PAGES[activeIndex - 1] : undefined;
     const nextPage = activeIndex < GUIDE_PAGES.length - 1 ? GUIDE_PAGES[activeIndex + 1] : undefined;
 
@@ -491,16 +499,17 @@ export const UserGuideScreen: React.FC = () => {
                 <div style={{ minWidth: 0 }}>
                     <Typography.Text style={{ display: 'block', color: '#7436dc', fontSize: 12, lineHeight: '16px', fontWeight: 750 }}>My Recipes</Typography.Text>
                     <Typography.Text strong style={{ display: 'block', color: '#111827', fontSize: 22, lineHeight: '28px' }}>Hướng dẫn tương tác</Typography.Text>
-                    <Typography.Text type='secondary' style={{ display: 'block', fontSize: 12, lineHeight: '17px', marginTop: 3 }}>Chọn lộ trình, tick từng bước và mở nhanh màn hình liên quan.</Typography.Text>
+                    <Typography.Text type='secondary' style={{ display: 'block', fontSize: 12, lineHeight: '17px', marginTop: 3 }}>Chọn guide item, bắt đầu tour riêng và học bằng popup highlight trên màn hình mô phỏng.</Typography.Text>
                 </div>
                 <Stack align='center' gap={8} wrap='wrap' style={{ flexShrink: 0 }}>
+                    <Button icon={<PlayCircleOutlined />} onClick={() => openTour('start')} style={{ borderRadius: 999, color: '#7436dc', borderColor: 'rgba(116,54,220,0.28)', fontWeight: 750 }}>Daily tour</Button>
                     <Tag color='purple' style={{ marginInlineEnd: 0 }}>{GUIDE_PAGES.length} trang</Tag>
                     <Tag color='green' style={{ marginInlineEnd: 0 }}>{completedStepIds.length}/{allStepIds.length} bước</Tag>
                 </Stack>
             </Stack>
             <div className='user-guide-progress-grid' style={{ marginTop: 12 }}>
                 <div style={{ minWidth: 0 }}>
-                    <Typography.Text strong style={{ display: 'block', color: '#111827', fontSize: 12, lineHeight: '16px', marginBottom: 5 }}>Tiến độ toàn bộ hướng dẫn</Typography.Text>
+                    <Typography.Text strong style={{ display: 'block', color: '#111827', fontSize: 12, lineHeight: '16px', marginBottom: 5 }}>Tiến độ checklist đọc nhanh</Typography.Text>
                     <Progress percent={overallPercent} size='small' strokeColor='#7436dc' trailColor='rgba(116,54,220,0.12)' />
                 </div>
                 <Button icon={<ReloadOutlined />} onClick={resetAllProgress} disabled={completedStepIds.length === 0} style={{ borderRadius: 999, color: '#7436dc', borderColor: 'rgba(116,54,220,0.28)' }}>Làm lại</Button>
@@ -516,7 +525,10 @@ export const UserGuideScreen: React.FC = () => {
                         <Typography.Text type='secondary' style={{ display: 'block', fontSize: 11, lineHeight: '15px', marginTop: 2 }}>{activeFlow.description}</Typography.Text>
                     </div>
                 </Stack>
-                <Tag color={activeFlowPercent === 100 ? 'green' : 'blue'} style={{ marginInlineEnd: 0 }}>{activeFlowPercent}%</Tag>
+                <Stack align='center' gap={7} wrap='wrap' style={{ flexShrink: 0 }}>
+                    <Tag color={activeFlowPercent === 100 ? 'green' : 'blue'} style={{ marginInlineEnd: 0 }}>{activeFlowPercent}%</Tag>
+                    <Button size='small' icon={<PlayCircleOutlined />} onClick={() => openTour(activeFlowTourKey)} style={{ borderRadius: 999, color: activeFlow.tone, borderColor: `${activeFlow.tone}33` }}>Start tour</Button>
+                </Stack>
             </Stack>
             <div className='user-guide-flow-grid'>
                 {GUIDE_FLOWS.map(flow => {
@@ -597,7 +609,12 @@ export const UserGuideScreen: React.FC = () => {
                                 <Typography.Text type='secondary' style={{ display: 'block', fontSize: 12, lineHeight: '17px', marginTop: 2 }}>{activePage.subtitle}</Typography.Text>
                             </div>
                         </Stack>
-                        {activePage.actionPath && activePage.actionLabel && <div className='user-guide-action-wrap' style={{ flexShrink: 0 }}><Button type='primary' onClick={() => navigate(activePage.actionPath!)} style={{ borderRadius: 999, background: activePage.tone, borderColor: activePage.tone, fontWeight: 750 }}>{activePage.actionLabel}</Button></div>}
+                        <div className='user-guide-action-wrap' style={{ flexShrink: 0 }}>
+                            <Stack gap={7} wrap='wrap' justify='flex-end'>
+                                {activePageHasTour && <Button type='primary' icon={<PlayCircleOutlined />} onClick={() => openTour(activePage.key)} style={{ borderRadius: 999, background: activePage.tone, borderColor: activePage.tone, fontWeight: 750 }}>Bắt đầu tour</Button>}
+                                {activePage.actionPath && activePage.actionLabel && <Button onClick={() => navigate(activePage.actionPath!)} style={{ borderRadius: 999, color: activePage.tone, borderColor: `${activePage.tone}33`, fontWeight: 700 }}>{activePage.actionLabel}</Button>}
+                            </Stack>
+                        </div>
                     </Stack>
 
                     <Box style={{ border: `1px solid ${activePage.tone}18`, borderRadius: 8, background: `${activePage.tone}08`, padding: 11, marginBottom: 12 }}>
@@ -609,7 +626,7 @@ export const UserGuideScreen: React.FC = () => {
                     </Box>
 
                     <Stack justify='space-between' align='center' gap={8} wrap='wrap' style={{ marginBottom: 10 }}>
-                        <Typography.Text strong style={{ color: '#111827', fontSize: 13, lineHeight: '18px' }}>Các bước thực hiện</Typography.Text>
+                        <Typography.Text strong style={{ color: '#111827', fontSize: 13, lineHeight: '18px' }}>Checklist đọc nhanh</Typography.Text>
                         <Stack gap={6} wrap='wrap' justify='flex-end'>
                             <Button size='small' disabled={activePagePercent === 100} onClick={completeActivePage} style={{ borderRadius: 999, color: activePage.tone, borderColor: `${activePage.tone}33` }}>Xong trang</Button>
                             <Button size='small' disabled={completedActiveSteps === 0} onClick={resetActivePage} style={{ borderRadius: 999 }}>Làm lại trang</Button>

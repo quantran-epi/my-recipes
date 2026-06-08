@@ -24,6 +24,7 @@ import { CookingSessionWidget } from "@modules/Dishes/Screens/CookingSession.wid
 import { CookingHistoryWidget } from "@modules/Dishes/Screens/CookingHistory.widget";
 import { GistBackupWidget } from "@components/GistBackupWidget";
 import { GlobalSearchScreen } from "@modules/Home/Screens/GlobalSearch.screen";
+import { isUserGuideWelcomeComplete } from "@modules/Home/Screens/UserGuideOnboardingStorage";
 import { selectCookingSessions, selectCurrentFeatureName, selectDishesById, selectInventoryHealthConfig } from "@store/Selectors";
 import { Flex, Input as AntInput, Layout, Divider, InputNumber } from "antd";
 import React, { useState } from "react";
@@ -141,6 +142,13 @@ export const MasterPage = () => {
     const location = useLocation();
     const navigate = useNavigate();
     const appShellNavigation = useAppShellNavigationController(location.pathname, navigate);
+
+    React.useEffect(() => {
+        const welcomeRoute = RootRoutes.AuthorizedRoutes.UserGuideWelcome();
+        if (location.pathname === welcomeRoute) return;
+        if (isUserGuideWelcomeComplete()) return;
+        navigate(welcomeRoute, { replace: true });
+    }, [location.pathname, navigate]);
 
     React.useEffect(() => {
         const content = document.getElementById("app-content");

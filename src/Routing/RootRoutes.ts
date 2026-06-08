@@ -28,6 +28,15 @@ type NutritionGoalsRouteParams = {
     scheduledMeals?: string[];
 }
 
+type UserGuideRouteParams = {
+    page?: string;
+    flow?: string;
+}
+
+type UserGuideTourRouteParams = {
+    item?: string;
+}
+
 const NutritionGoals = (params?: NutritionGoalsRouteParams) => {
     if (!params) return RouteHelpers.CreateRoute('/nutrition-goals');
 
@@ -41,11 +50,30 @@ const NutritionGoals = (params?: NutritionGoalsRouteParams) => {
     return RouteHelpers.CreateRoute('/nutrition-goals', [], Object.keys(query).length > 0 ? query : undefined);
 }
 
+const UserGuide = (params?: UserGuideRouteParams) => {
+    if (!params) return RouteHelpers.CreateRoute('/guide');
+
+    const query: Record<string, string> = {};
+    if (params.page) query.page = params.page;
+    if (params.flow) query.flow = params.flow;
+
+    return RouteHelpers.CreateRoute('/guide', [], Object.keys(query).length > 0 ? query : undefined);
+}
+
+const UserGuideTour = (params?: UserGuideTourRouteParams) => {
+    if (!params?.item) return RouteHelpers.CreateRoute('/guide/tour');
+    return RouteHelpers.CreateRoute('/guide/tour', [], { item: params.item });
+}
+
+const UserGuideWelcome = () => RouteHelpers.CreateRoute('/guide/welcome');
+
 const AuthorizedRoutes = {
     Root: () => "/",
     Analytics: () => RouteHelpers.CreateRoute('/analytics'),
     NutritionGoals,
-    UserGuide: () => RouteHelpers.CreateRoute('/guide'),
+    UserGuide,
+    UserGuideTour,
+    UserGuideWelcome,
     Templates: () => RouteHelpers.CreateRoute('/templates'),
     SyncBackupHealth: () => RouteHelpers.CreateRoute('/sync-backup-health'),
     ExpensePlanner,

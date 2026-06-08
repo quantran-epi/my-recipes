@@ -4,8 +4,8 @@ milestone: v1.0
 milestone_name: milestone
 status: ready
 stopped_at: Completed 04-02-PLAN.md
-last_updated: "2026-06-08T13:58:39Z"
-last_activity: 2026-06-08 -- Completed quick task 260608-t07: interactive user guide experience
+last_updated: "2026-06-08T14:22:37Z"
+last_activity: 2026-06-08 -- Completed quick task 260608-h2t: isolated interactive tour guide and first-use welcome
 progress:
   total_phases: 5
   completed_phases: 4
@@ -28,7 +28,7 @@ See: .planning/PROJECT.md (updated 2026-06-05)
 Phase: 5 (release-gate-and-product-guardrails) — READY
 Plan: Not started
 Status: Phase 04 complete; ready for Phase 05
-Last activity: 2026-06-08 -- Completed quick task 260608-t07: interactive user guide experience
+Last activity: 2026-06-08 -- Completed quick task 260608-h2t: isolated interactive tour guide and first-use welcome
 
 Progress: [████████░░] 80%
 
@@ -36,6 +36,7 @@ Progress: [████████░░] 80%
 
 | Date | Task | Artifact |
 |------|------|----------|
+| 2026-06-08 | Isolated interactive tour guide and first-use welcome | `.planning/quick/260608-h2t-isolated-interactive-tour-guide/260608-h2t-SUMMARY.md` |
 | 2026-06-08 | Interactive user guide experience | `.planning/quick/260608-t07-create-interactive-user-guide-experience/260608-t07-SUMMARY.md` |
 | 2026-06-08 | Analytics expense help and calculator deep links | `.planning/quick/260608-sk4-redesign-analytics-expense-summary-help-/260608-sk4-SUMMARY.md` |
 | 2026-06-08 | Mobile scheduled meal and nutrition suggester fixes | `.planning/quick/260608-s7j-fix-mobile-scheduled-meal-date-button-wr/260608-s7j-SUMMARY.md` |
