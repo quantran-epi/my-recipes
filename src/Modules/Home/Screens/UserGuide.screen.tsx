@@ -489,6 +489,10 @@ export const UserGuideScreen: React.FC = () => {
         navigate(RootRoutes.AuthorizedRoutes.UserGuideTour({ item: key }));
     }, [navigate]);
 
+    const openWelcome = React.useCallback(() => {
+        navigate(RootRoutes.AuthorizedRoutes.UserGuideWelcome());
+    }, [navigate]);
+
     const previousPage = activeIndex > 0 ? GUIDE_PAGES[activeIndex - 1] : undefined;
     const nextPage = activeIndex < GUIDE_PAGES.length - 1 ? GUIDE_PAGES[activeIndex + 1] : undefined;
 
@@ -502,6 +506,7 @@ export const UserGuideScreen: React.FC = () => {
                     <Typography.Text type='secondary' style={{ display: 'block', fontSize: 12, lineHeight: '17px', marginTop: 3 }}>Chọn guide item, bắt đầu tour riêng và học bằng popup highlight trên màn hình mô phỏng.</Typography.Text>
                 </div>
                 <Stack align='center' gap={8} wrap='wrap' style={{ flexShrink: 0 }}>
+                    <Button icon={<BookOutlined />} onClick={openWelcome} style={{ borderRadius: 999, color: '#7436dc', borderColor: 'rgba(116,54,220,0.28)', fontWeight: 750 }}>Xem giới thiệu</Button>
                     <Button icon={<PlayCircleOutlined />} onClick={() => openTour('start')} style={{ borderRadius: 999, color: '#7436dc', borderColor: 'rgba(116,54,220,0.28)', fontWeight: 750 }}>Daily tour</Button>
                     <Tag color='purple' style={{ marginInlineEnd: 0 }}>{GUIDE_PAGES.length} trang</Tag>
                     <Tag color='green' style={{ marginInlineEnd: 0 }}>{completedStepIds.length}/{allStepIds.length} bước</Tag>
