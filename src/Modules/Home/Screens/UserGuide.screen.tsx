@@ -255,6 +255,69 @@ const GUIDE_PAGES: GuidePage[] = [
 
 const getGuidePage = (key: string | null): GuidePage => GUIDE_PAGES.find(item => item.key === key) ?? GUIDE_PAGES[0];
 
+const userGuideCss = `
+.user-guide-layout {
+    display: grid;
+    grid-template-columns: minmax(min(260px, 100%), 0.78fr) minmax(0, 1.72fr);
+    gap: 12px;
+    align-items: start;
+}
+.user-guide-mobile-picker {
+    display: none;
+}
+.user-guide-desktop-nav {
+    display: block;
+}
+@media (max-width: 760px) {
+    .user-guide-page {
+        max-width: 100% !important;
+        padding: 0 0 96px !important;
+    }
+    .user-guide-layout {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        width: 100%;
+        min-width: 0;
+    }
+    .user-guide-desktop-nav {
+        display: none;
+    }
+    .user-guide-mobile-picker {
+        display: block;
+        position: sticky;
+        top: 0;
+        z-index: 5;
+    }
+    .user-guide-hero,
+    .user-guide-content-panel {
+        box-shadow: 0 8px 18px rgba(74,48,130,0.07) !important;
+    }
+    .user-guide-content-header {
+        flex-direction: column !important;
+        align-items: stretch !important;
+    }
+    .user-guide-content-heading {
+        align-items: flex-start !important;
+    }
+    .user-guide-action-wrap {
+        width: 100%;
+    }
+    .user-guide-action-wrap button {
+        width: 100%;
+    }
+}
+@media (max-width: 420px) {
+    .user-guide-step-row {
+        gap: 7px !important;
+    }
+    .user-guide-step-number {
+        width: 24px !important;
+        height: 24px !important;
+    }
+}
+`;
+
 export const UserGuideScreen: React.FC = () => {
     const navigate = useNavigate();
     const [searchParams, setSearchParams] = useSearchParams();
@@ -269,8 +332,9 @@ export const UserGuideScreen: React.FC = () => {
     const previousPage = activeIndex > 0 ? GUIDE_PAGES[activeIndex - 1] : undefined;
     const nextPage = activeIndex < GUIDE_PAGES.length - 1 ? GUIDE_PAGES[activeIndex + 1] : undefined;
 
-    return <Box data-testid='user-guide-page' style={{ display: 'flex', flexDirection: 'column', gap: 12, padding: '0 0 14px', maxWidth: 1040, margin: '0 auto' }}>
-        <Box style={{ borderRadius: 8, padding: 14, background: 'linear-gradient(135deg, #ffffff 0%, #f6fffb 48%, #fbf9ff 100%)', border: '1px solid rgba(116,54,220,0.12)', boxShadow: '0 12px 28px rgba(74,48,130,0.08)' }}>
+    return <Box data-testid='user-guide-page' className='user-guide-page' style={{ display: 'flex', flexDirection: 'column', gap: 12, padding: '0 0 14px', maxWidth: 1040, margin: '0 auto' }}>
+        <style>{userGuideCss}</style>
+        <Box className='user-guide-hero' style={{ borderRadius: 8, padding: 14, background: 'linear-gradient(135deg, #ffffff 0%, #f6fffb 48%, #fbf9ff 100%)', border: '1px solid rgba(116,54,220,0.12)', boxShadow: '0 12px 28px rgba(74,48,130,0.08)' }}>
             <Stack justify='space-between' align='flex-start' gap={12} wrap='wrap'>
                 <div style={{ minWidth: 0 }}>
                     <Typography.Text style={{ display: 'block', color: '#7436dc', fontSize: 12, lineHeight: '16px', fontWeight: 750 }}>My Recipes</Typography.Text>
@@ -281,8 +345,20 @@ export const UserGuideScreen: React.FC = () => {
             </Stack>
         </Box>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'minmax(min(260px, 100%), 0.78fr) minmax(0, 1.72fr)', gap: 12, alignItems: 'start' }}>
-            <Box style={{ border: '1px solid rgba(116,54,220,0.12)', borderRadius: 8, background: '#fff', padding: 10, boxShadow: '0 10px 24px rgba(15,23,42,0.06)' }}>
+        <Box className='user-guide-mobile-picker' style={{ border: `1px solid ${activePage.tone}22`, borderRadius: 8, background: '#fff', padding: 10, boxShadow: '0 8px 18px rgba(15,23,42,0.08)' }}>
+            <Typography.Text strong style={{ display: 'block', color: '#111827', fontSize: 12, lineHeight: '16px', marginBottom: 6 }}>Trang hướng dẫn</Typography.Text>
+            <select
+                aria-label='Chọn trang hướng dẫn'
+                value={activePage.key}
+                onChange={event => selectPage(event.target.value)}
+                style={{ width: '100%', height: 38, borderRadius: 8, border: `1px solid ${activePage.tone}33`, background: `${activePage.tone}08`, color: '#111827', fontSize: 13, fontWeight: 700, padding: '0 10px' }}
+            >
+                {GUIDE_PAGES.map((page, index) => <option key={page.key} value={page.key}>{index + 1}. {page.title}</option>)}
+            </select>
+        </Box>
+
+        <div className='user-guide-layout'>
+            <Box className='user-guide-desktop-nav' style={{ border: '1px solid rgba(116,54,220,0.12)', borderRadius: 8, background: '#fff', padding: 10, boxShadow: '0 10px 24px rgba(15,23,42,0.06)' }}>
                 <Typography.Text strong style={{ display: 'block', color: '#111827', fontSize: 13, lineHeight: '18px', marginBottom: 8 }}>Trang hướng dẫn</Typography.Text>
                 <Stack direction='column' align='stretch' gap={7}>
                     {GUIDE_PAGES.map((page, index) => {
@@ -300,18 +376,18 @@ export const UserGuideScreen: React.FC = () => {
                 </Stack>
             </Box>
 
-            <Box style={{ border: `1px solid ${activePage.tone}22`, borderRadius: 8, background: '#fff', boxShadow: '0 12px 30px rgba(74,48,130,0.09)', overflow: 'hidden' }}>
+            <Box className='user-guide-content-panel' style={{ border: `1px solid ${activePage.tone}22`, borderRadius: 8, background: '#fff', boxShadow: '0 12px 30px rgba(74,48,130,0.09)', overflow: 'hidden', width: '100%', minWidth: 0 }}>
                 <div style={{ height: 5, background: `linear-gradient(90deg, ${activePage.tone} 0%, #13a8a8 100%)` }} />
                 <div style={{ padding: 14 }}>
-                    <Stack justify='space-between' align='flex-start' gap={12} wrap='wrap' style={{ marginBottom: 12 }}>
-                        <Stack align='flex-start' gap={10} style={{ minWidth: 0 }}>
+                    <Stack className='user-guide-content-header' justify='space-between' align='flex-start' gap={12} wrap='wrap' style={{ marginBottom: 12 }}>
+                        <Stack className='user-guide-content-heading' align='flex-start' gap={10} style={{ minWidth: 0 }}>
                             <span style={{ width: 42, height: 42, borderRadius: 8, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', color: activePage.tone, background: `${activePage.tone}12`, border: `1px solid ${activePage.tone}24`, flexShrink: 0, fontSize: 18 }}>{activePage.icon}</span>
                             <div style={{ minWidth: 0 }}>
                                 <Typography.Text strong style={{ display: 'block', color: '#111827', fontSize: 20, lineHeight: '26px' }}>{activePage.title}</Typography.Text>
                                 <Typography.Text type='secondary' style={{ display: 'block', fontSize: 12, lineHeight: '17px', marginTop: 2 }}>{activePage.subtitle}</Typography.Text>
                             </div>
                         </Stack>
-                        {activePage.actionPath && activePage.actionLabel && <Button type='primary' onClick={() => navigate(activePage.actionPath!)} style={{ borderRadius: 999, background: activePage.tone, borderColor: activePage.tone, fontWeight: 750 }}>{activePage.actionLabel}</Button>}
+                        {activePage.actionPath && activePage.actionLabel && <div className='user-guide-action-wrap' style={{ flexShrink: 0 }}><Button type='primary' onClick={() => navigate(activePage.actionPath!)} style={{ borderRadius: 999, background: activePage.tone, borderColor: activePage.tone, fontWeight: 750 }}>{activePage.actionLabel}</Button></div>}
                     </Stack>
 
                     <Box style={{ border: `1px solid ${activePage.tone}18`, borderRadius: 8, background: `${activePage.tone}08`, padding: 11, marginBottom: 12 }}>
@@ -320,8 +396,8 @@ export const UserGuideScreen: React.FC = () => {
 
                     <Stack direction='column' align='stretch' gap={9}>
                         {activePage.steps.map((step, index) => <Box key={`${activePage.key}-${step.title}`} style={{ border: '1px solid #eef2f7', borderRadius: 8, background: '#fcfcfd', padding: 10 }}>
-                            <Stack align='flex-start' gap={9}>
-                                <span style={{ width: 26, height: 26, borderRadius: 999, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', color: '#fff', background: activePage.tone, fontSize: 12, lineHeight: '16px', fontWeight: 800, flexShrink: 0 }}>{index + 1}</span>
+                            <Stack className='user-guide-step-row' align='flex-start' gap={9}>
+                                <span className='user-guide-step-number' style={{ width: 26, height: 26, borderRadius: 999, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', color: '#fff', background: activePage.tone, fontSize: 12, lineHeight: '16px', fontWeight: 800, flexShrink: 0 }}>{index + 1}</span>
                                 <div style={{ minWidth: 0 }}>
                                     <Typography.Text strong style={{ display: 'block', color: '#111827', fontSize: 13, lineHeight: '18px' }}>{step.title}</Typography.Text>
                                     <Typography.Text type='secondary' style={{ display: 'block', fontSize: 12, lineHeight: '17px', marginTop: 2 }}>{step.desc}</Typography.Text>

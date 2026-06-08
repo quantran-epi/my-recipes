@@ -132,11 +132,11 @@ const dayArrowButtonStyle: React.CSSProperties = {
 const dayPickerControlRowStyle: React.CSSProperties = {
     minHeight: 28,
     display: "grid",
-    gridTemplateColumns: "minmax(0, 84px) minmax(0, 72px)",
+    gridTemplateColumns: "32px minmax(0, 72px)",
     justifyContent: "center",
     alignItems: "center",
     gap: 6,
-    width: "min(100%, 164px)",
+    width: "min(100%, 110px)",
     margin: "7px auto 0",
 };
 
@@ -156,10 +156,19 @@ const dayPickerButtonStyle: React.CSSProperties = {
     overflow: "hidden",
 };
 
+const dayPickerIconButtonStyle: React.CSSProperties = {
+    ...dayPickerButtonStyle,
+    width: 32,
+    paddingInline: 0,
+    display: "inline-flex",
+    alignItems: "center",
+    justifyContent: "center",
+};
+
 const dayPickerSingleControlRowStyle: React.CSSProperties = {
     ...dayPickerControlRowStyle,
-    gridTemplateColumns: "minmax(0, 84px)",
-    width: "min(100%, 84px)",
+    gridTemplateColumns: "32px",
+    width: 32,
 };
 
 const scheduledMealCss = `
@@ -328,9 +337,13 @@ export const ScheduledMealListScreen = () => {
                             <Typography.Text type="secondary" style={{ fontSize: 12 }}>{mealsToday.length} thực đơn</Typography.Text>
                         </Space>
                         <div style={dayjs(selectedDate).isSame(dayjs(), "day") ? dayPickerSingleControlRowStyle : dayPickerControlRowStyle}>
-                            <Button size="small" onClick={() => setCalendarVisible(value => !value)} icon={<CalendarOutlined />} style={dayPickerButtonStyle}>
-                                <span style={{ display: "block", minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{calendarVisible ? "Ẩn" : "Ngày"}</span>
-                            </Button>
+                            <Button
+                                aria-label={calendarVisible ? "Ẩn lịch" : "Chọn ngày"}
+                                size="small"
+                                onClick={() => setCalendarVisible(value => !value)}
+                                icon={<CalendarOutlined />}
+                                style={dayPickerIconButtonStyle}
+                            />
                             {!dayjs(selectedDate).isSame(dayjs(), "day") && <Button size="small" onClick={_goToday} style={dayPickerButtonStyle}>Hôm nay</Button>}
                         </div>
                     </div>

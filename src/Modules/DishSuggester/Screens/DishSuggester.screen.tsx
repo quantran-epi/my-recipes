@@ -1,4 +1,4 @@
-import { BarChartOutlined, BulbOutlined, CalculatorOutlined, ClockCircleOutlined, DownOutlined, LeftOutlined, RightOutlined, SettingOutlined, ShoppingCartOutlined, ThunderboltOutlined } from "@ant-design/icons";
+import { BarChartOutlined, BulbOutlined, CalculatorOutlined, ClockCircleOutlined, LeftOutlined, MinusOutlined, PlusOutlined, SettingOutlined, ShoppingCartOutlined, ThunderboltOutlined } from "@ant-design/icons";
 import { DishDurationHelper } from "@common/Helpers/DishDurationHelper";
 import { DishNutritionHelper, DishNutritionSummary } from "@common/Helpers/DishNutritionHelper";
 import { NutritionGoalHelper, NutritionGoalMatch } from "@common/Helpers/NutritionGoalHelper";
@@ -9,7 +9,6 @@ import { Space } from "@components/Layout/Space";
 import { Stack } from "@components/Layout/Stack";
 import { DeferredModalContent, Modal } from "@components/Modal";
 import { Tag } from "@components/Tag";
-import { Tooltip } from "@components/Tootip";
 import { Typography } from "@components/Typography";
 import { useScheduledCalculation, useToggle } from "@hooks";
 import { DishScorer, ScoredDish, ScoredDishGroup } from "../Helpers/DishScorer";
@@ -265,7 +264,7 @@ export const DishSuggesterScreen: React.FC<DishSuggesterScreenProps> = ({ open, 
         );
     }, []);
 
-    const _toggleNutritionDetails = React.useCallback((dishId: string, event: React.MouseEvent<HTMLElement>) => {
+    const _toggleNutritionDetails = React.useCallback((dishId: string, event: React.SyntheticEvent<HTMLElement>) => {
         event.stopPropagation();
         setExpandedNutritionDishIds(prev => {
             const next = new Set(prev);
@@ -359,31 +358,23 @@ export const DishSuggesterScreen: React.FC<DishSuggesterScreenProps> = ({ open, 
 
         return <Stack gap={8} align="center" style={{ marginLeft: "auto", flexShrink: 0 }}>
             <Typography.Text data-testid="dish-suggester-selected-count" style={selectedCountStyle(dishIds.length)}>({dishIds.length})</Typography.Text>
-            <Tooltip title={`Tạo lịch mua (${dishIds.length})`}>
-                <span>
-                    <Button
-                        type="primary"
-                        disabled={disabled}
-                        aria-label={`Tạo lịch mua cho ${dishIds.length} món`}
-                        data-testid="dish-suggester-create-shopping-list-button"
-                        icon={<ShoppingCartOutlined />}
-                        onClick={toggleShoppingListAdd.show}
-                        style={actionButtonStyle}
-                    />
-                </span>
-            </Tooltip>
-            <Tooltip title={`Tính chi phí (${dishIds.length})`}>
-                <span>
-                    <Button
-                        disabled={disabled}
-                        aria-label={`Mở kế hoạch chi phí cho ${dishIds.length} món`}
-                        data-testid="dish-suggester-expense-planner-button"
-                        icon={<CalculatorOutlined />}
-                        onClick={() => _onOpenExpensePlanner(dishIds)}
-                        style={actionButtonStyle}
-                    />
-                </span>
-            </Tooltip>
+            <Button
+                type="primary"
+                disabled={disabled}
+                aria-label={`Tạo lịch mua cho ${dishIds.length} món`}
+                data-testid="dish-suggester-create-shopping-list-button"
+                icon={<ShoppingCartOutlined />}
+                onClick={toggleShoppingListAdd.show}
+                style={actionButtonStyle}
+            />
+            <Button
+                disabled={disabled}
+                aria-label={`Mở kế hoạch chi phí cho ${dishIds.length} món`}
+                data-testid="dish-suggester-expense-planner-button"
+                icon={<CalculatorOutlined />}
+                onClick={() => _onOpenExpensePlanner(dishIds)}
+                style={actionButtonStyle}
+            />
         </Stack>;
     };
 
@@ -601,13 +592,21 @@ export const DishSuggesterScreen: React.FC<DishSuggesterScreenProps> = ({ open, 
                                     )}
                                 </>}
                             </Box>
-                            <Button
-                                type="text"
-                                icon={expanded ? <DownOutlined /> : <RightOutlined />}
+                            <div
+                                role="button"
+                                tabIndex={0}
                                 onClick={(event) => _toggleNutritionDetails(item.dish.id, event)}
+                                onKeyDown={(event) => {
+                                    if (event.key === "Enter" || event.key === " ") {
+                                        event.preventDefault();
+                                        _toggleNutritionDetails(item.dish.id, event);
+                                    }
+                                }}
                                 aria-label={`${expanded ? "Ẩn" : "Xem"} dinh dưỡng của ${item.dish.name}`}
-                                style={{ width: 34, height: 34, paddingInline: 0, borderRadius: 999, color: item.tone }}
-                            />
+                                style={{ padding: "4px 6px", cursor: "pointer", color: "#aaa", flexShrink: 0, marginTop: 8 }}
+                            >
+                                {expanded ? <MinusOutlined /> : <PlusOutlined />}
+                            </div>
                         </div>
                     </div>;
                 })}

@@ -4,8 +4,8 @@ milestone: v1.0
 milestone_name: milestone
 status: ready
 stopped_at: Completed 04-02-PLAN.md
-last_updated: "2026-06-08T00:02:05Z"
-last_activity: 2026-06-08 -- Completed quick task 260608-9kl: dish duration UI and data polish
+last_updated: "2026-06-08T13:22:34Z"
+last_activity: 2026-06-08 -- Completed quick task 260608-s7j: mobile scheduled meal and nutrition suggester fixes
 progress:
   total_phases: 5
   completed_phases: 4
@@ -28,7 +28,7 @@ See: .planning/PROJECT.md (updated 2026-06-05)
 Phase: 5 (release-gate-and-product-guardrails) — READY
 Plan: Not started
 Status: Phase 04 complete; ready for Phase 05
-Last activity: 2026-06-08 -- Completed quick task 260608-9kl: dish duration UI and data polish
+Last activity: 2026-06-08 -- Completed quick task 260608-s7j: mobile scheduled meal and nutrition suggester fixes
 
 Progress: [████████░░] 80%
 
@@ -36,6 +36,7 @@ Progress: [████████░░] 80%
 
 | Date | Task | Artifact |
 |------|------|----------|
+| 2026-06-08 | Mobile scheduled meal and nutrition suggester fixes | `.planning/quick/260608-s7j-fix-mobile-scheduled-meal-date-button-wr/260608-s7j-SUMMARY.md` |
 | 2026-06-08 | Dish duration UI and data polish | `.planning/quick/260608-9kl-reorganize-dish-duration-ui-ux-and-durat/260608-9kl-SUMMARY.md` |
 | 2026-06-08 | Nutrition suggestor and detail layout polish | `.planning/quick/260608-9df-fix-nutrition-suggestor-expansion-dish-d/260608-9df-SUMMARY.md` |
 | 2026-06-07 | List and nutrition suggestor performance fixes | `.planning/quick/260607-wl9-fix-remaining-list-search-lag-simplify-i/260607-wl9-SUMMARY.md` |
@@ -48,6 +49,9 @@ Progress: [████████░░] 80%
 | 2026-06-07 | Template preview, edit, and shopping apply | `.planning/quick/260607-tpe-template-preview-edit-apply/260607-tpe-SUMMARY.md` |
 | 2026-06-07 | Template creator modals | `.planning/quick/260607-tcm-template-creator-modals/260607-tcm-SUMMARY.md` |
 | 2026-06-07 | Calendar and template workflow update | `.planning/quick/260607-ctw-calendar-template-workflows/260607-ctw-SUMMARY.md` |
+| 2026-06-07 | Serving controls and dashboard UX polish | `.planning/quick/270607-sdu-serving-dashboard-ux-polish/270607-sdu-SUMMARY.md` |
+| 2026-06-07 | Scheduled meal servings and shopping list defaults | `.planning/quick/270607-sms-scheduled-meal-servings-shopping-list-name/270607-sms-SUMMARY.md` |
+| 2026-06-06 | Latest bottom tab navigation wins during slow route loading | `.planning/quick/260606-ltw-latest-bottom-tab-navigation-wins/260606-ltw-SUMMARY.md` |
 | 2026-06-06 | House nav, personal auto sync, bottom tab, and stats polish | `.planning/quick/260606-hse-house-nav-personal-autosync-tab-polish/260606-hse-SUMMARY.md` |
 | 2026-06-06 | Fix first shared sync labels | `.planning/quick/260606-fss-fix-first-sync-labels/260606-fss-SUMMARY.md` |
 | 2026-06-06 | IndexedDB storage and split sync | `.planning/quick/260606-idb-indexeddb-split-sync/260606-idb-SUMMARY.md` |
