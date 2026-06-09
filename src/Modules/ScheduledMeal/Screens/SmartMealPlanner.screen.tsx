@@ -1,5 +1,6 @@
 import { BarChartOutlined, CalendarOutlined, CheckCircleOutlined, DollarCircleOutlined, PlusOutlined, TeamOutlined, ThunderboltOutlined } from '@ant-design/icons';
 import { CostEstimateHelper } from '@common/Helpers/CostEstimateHelper';
+import { DateHelpers } from '@common/Helpers/DateHelper';
 import { DishDurationHelper } from '@common/Helpers/DishDurationHelper';
 import { DishNutritionHelper } from '@common/Helpers/DishNutritionHelper';
 import { HouseholdSuitabilityHelper } from '@common/Helpers/HouseholdSuitabilityHelper';
@@ -24,7 +25,7 @@ import dayjs, { Dayjs } from 'dayjs';
 import { nanoid } from 'nanoid';
 import React, { useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import MealsIcon from '../../../../assets/icons/meals.png';
+import DietPlanIcon from '../../../../assets/icons/diet-plan.png';
 
 type PlannerScope = 'day' | 'week';
 type MealSlot = 'breakfast' | 'lunch' | 'dinner';
@@ -54,7 +55,7 @@ const mealSlotMeta: Record<MealSlot, { label: string; tone: string; background: 
 
 const pageCss = `
 .smart-planner-page {
-    max-width: 1120px;
+    width: min(1180px, calc(100vw - 24px));
     margin: 0 auto;
     padding: 0 0 96px;
 }
@@ -68,8 +69,14 @@ const pageCss = `
 }
 .smart-planner-grid {
     display: grid;
-    grid-template-columns: minmax(260px, 340px) minmax(0, 1fr);
+    grid-template-columns: minmax(0, 1fr);
     gap: 12px;
+}
+.smart-planner-controls {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 12px;
+    align-items: end;
 }
 .smart-planner-panel {
     border-radius: 8px;
@@ -78,9 +85,17 @@ const pageCss = `
     box-shadow: 0 10px 24px rgba(15,23,42,0.06);
     padding: 12px;
 }
-@media (max-width: 860px) {
-    .smart-planner-grid {
-        grid-template-columns: minmax(0, 1fr);
+.smart-planner-title {
+    display: block;
+    color: #111827;
+    font-size: 24px;
+    line-height: 30px;
+    overflow-wrap: anywhere;
+}
+@media (max-width: 560px) {
+    .smart-planner-title {
+        font-size: 21px;
+        line-height: 27px;
     }
 }
 `;
@@ -113,7 +128,7 @@ const getSlotScore = (dish: Dishes, slot: MealSlot): { score: number; reason?: s
 };
 
 export const SmartMealPlannerScreen: React.FC = () => {
-    useScreenTitle({ value: 'Smart Meal Planner', deps: [] });
+    useScreenTitle({ value: 'Lập thực đơn', deps: [] });
     const dispatch = useDispatch();
     const message = useMessage();
     const dishes = useSelector(selectDishes);
@@ -240,7 +255,7 @@ export const SmartMealPlannerScreen: React.FC = () => {
             };
             const dishIds = [...meals.breakfast, ...meals.lunch, ...meals.dinner];
             if (dishIds.length === 0) return;
-            const name = `Smart Meal Planner - ${day.date.format('DD/MM')}`;
+            const name = `Thực đơn thông minh - ${day.date.format('DD/MM')}`;
             const dishServings = dishIds.reduce((result, dishId) => ({ ...result, [dishId]: targetServings }), {} as Record<string, number>);
             dispatch(addScheduledMeal({
                 id: `smart-${nanoid(10)}`,
@@ -286,11 +301,11 @@ export const SmartMealPlannerScreen: React.FC = () => {
             <Stack justify='space-between' align='center' gap={12} wrap='wrap'>
                 <Stack align='center' gap={10} style={{ minWidth: 0 }}>
                     <span style={{ width: 44, height: 44, borderRadius: 12, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', background: '#e6fffb', color: '#13a8a8', border: '1px solid #87e8de', flexShrink: 0 }}>
-                        <Image src={MealsIcon} preview={false} width={26} alt='' />
+                        <Image src={DietPlanIcon} preview={false} width={27} alt='' />
                     </span>
-                    <div style={{ minWidth: 0 }}>
-                        <Typography.Text style={{ display: 'block', color: '#13a8a8', fontSize: 12, lineHeight: '16px', fontWeight: 800 }}>Smart Meal Planner</Typography.Text>
-                        <Typography.Text strong style={{ display: 'block', color: '#111827', fontSize: 24, lineHeight: '31px' }}>Lập thực đơn thông minh</Typography.Text>
+                    <div style={{ minWidth: 0, flex: '1 1 260px' }}>
+                        <Typography.Text style={{ display: 'block', color: '#13a8a8', fontSize: 12, lineHeight: '16px', fontWeight: 800 }}>Lập thực đơn</Typography.Text>
+                        <Typography.Text strong className='smart-planner-title'>Thực đơn thông minh</Typography.Text>
                         <Typography.Text type='secondary' style={{ display: 'block', fontSize: 12, lineHeight: '18px', marginTop: 3 }}>Gợi ý bữa ngày hoặc tuần theo ngân sách, dinh dưỡng và khẩu vị từng thành viên.</Typography.Text>
                     </div>
                 </Stack>
@@ -300,7 +315,7 @@ export const SmartMealPlannerScreen: React.FC = () => {
 
         <div className='smart-planner-grid'>
             <Box className='smart-planner-panel'>
-                <Stack direction='column' gap={12}>
+                <div className='smart-planner-controls'>
                     <div>
                         <Typography.Text strong style={{ display: 'block', marginBottom: 6 }}>Khoảng lập</Typography.Text>
                         <Segmented block value={scope} onChange={value => setScope(value as PlannerScope)} options={[{ value: 'day', label: 'Một ngày' }, { value: 'week', label: 'Một tuần' }]} />
@@ -311,7 +326,7 @@ export const SmartMealPlannerScreen: React.FC = () => {
                     </div>
                     <div>
                         <Typography.Text strong style={{ display: 'block', marginBottom: 6 }}><DollarCircleOutlined /> Ngân sách mỗi ngày</Typography.Text>
-                        <InputNumber min={0} step={10000} value={dailyBudget} addonAfter='VND' onChange={value => setDailyBudget(Number(value ?? 0))} style={{ width: '100%' }} />
+                        <InputNumber min={0} step={10000} value={dailyBudget} addonAfter='đ' onChange={value => setDailyBudget(Number(value ?? 0))} style={{ width: '100%' }} />
                     </div>
                     <div>
                         <Typography.Text strong style={{ display: 'block', marginBottom: 6 }}><BarChartOutlined /> Mục tiêu dinh dưỡng</Typography.Text>
@@ -332,7 +347,7 @@ export const SmartMealPlannerScreen: React.FC = () => {
                             <Tag color='cyan' style={{ marginRight: 0 }}>{selectedMembers.length || members.length} thành viên</Tag>
                         </Stack>
                     </Box>
-                </Stack>
+                </div>
             </Box>
 
             <Box className='smart-planner-panel'>
@@ -340,7 +355,7 @@ export const SmartMealPlannerScreen: React.FC = () => {
                     {plannedDays.map(day => <Box key={day.date.format('YYYY-MM-DD')} style={{ border: '1px solid rgba(19,168,168,0.12)', borderRadius: 8, padding: 10, background: '#fff' }}>
                         <Stack align='center' gap={8} style={{ marginBottom: 10 }}>
                             <CalendarOutlined style={{ color: '#13a8a8' }} />
-                            <Typography.Text strong style={{ color: '#111827', fontSize: 15 }}>{day.date.format('dddd, DD/MM/YYYY')}</Typography.Text>
+                            <Typography.Text strong style={{ color: '#111827', fontSize: 15 }}>{DateHelpers.formatWithCapitalizedWeekday(day.date.toDate(), 'dddd, DD/MM/YYYY')}</Typography.Text>
                         </Stack>
                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(190px, 1fr))', gap: 8 }}>
                             {(['breakfast', 'lunch', 'dinner'] as MealSlot[]).map(slot => <div key={slot}>

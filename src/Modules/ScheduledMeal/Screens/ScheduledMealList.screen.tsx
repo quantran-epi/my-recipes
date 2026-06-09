@@ -636,25 +636,27 @@ export const ScheduledMealItem = ({ item, selected, dishNameById, onDelete }: { 
 
     const MealRow = ({ icon, label, dishIds, color, background, border }: { icon: string; label: string; dishIds: string[]; color: string; background: string; border: string }) => (
         <Box style={{ border: `1px solid ${border}`, borderRadius: 8, background, padding: "8px 9px", minWidth: 0 }}>
-            <div style={{ display: "grid", gridTemplateColumns: "auto minmax(0, 1fr) auto auto", gap: 7, alignItems: "center", marginBottom: 6 }}>
+            <div style={{ display: "grid", gridTemplateColumns: "auto minmax(0, 1fr) auto", gap: 7, alignItems: "center", marginBottom: 6 }}>
                 <Image src={icon} preview={false} width={15} style={{ marginBottom: 2 }} />
                 <Typography.Text strong style={{ fontSize: 13, color, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{label}</Typography.Text>
                 <Typography.Text type="secondary" style={{ fontSize: 11, whiteSpace: "nowrap" }}>{dishIds.length} món</Typography.Text>
-                <Button size="small" disabled={dishIds.length === 0} icon={<FireOutlined />} onClick={() => _openCooking(`Nấu bữa ${label} - ${item.name}`, dishIds)} style={{ color: dishIds.length > 0 ? '#fa8c16' : undefined, paddingInline: 8 }}>
-                    Nấu
-                </Button>
             </div>
             {dishIds.length === 0 ? (
                 <Typography.Text type="secondary" style={{ display: "block", fontSize: 12, lineHeight: "18px" }}>Chưa chọn</Typography.Text>
             ) : (
-                <Stack wrap="wrap" gap={4}>
-                    {dishIds.slice(0, 3).map((id, index) => (
-                        <Tag key={`${id}-${index}`} style={{ maxWidth: "100%", fontSize: 11, padding: "1px 7px", margin: 0, borderRadius: 10, overflow: "hidden", textOverflow: "ellipsis" }}>
-                            {_dishLabel(id)}
-                        </Tag>
-                    ))}
-                    {dishIds.length > 3 && <Tag style={{ fontSize: 11, padding: "1px 7px", margin: 0, borderRadius: 10 }}>+{dishIds.length - 3}</Tag>}
-                </Stack>
+                <>
+                    <Stack wrap="wrap" gap={4}>
+                        {dishIds.slice(0, 3).map((id, index) => (
+                            <Tag key={`${id}-${index}`} style={{ maxWidth: "100%", fontSize: 11, padding: "1px 7px", margin: 0, borderRadius: 10, overflow: "hidden", textOverflow: "ellipsis" }}>
+                                {_dishLabel(id)}
+                            </Tag>
+                        ))}
+                        {dishIds.length > 3 && <Tag style={{ fontSize: 11, padding: "1px 7px", margin: 0, borderRadius: 10 }}>+{dishIds.length - 3}</Tag>}
+                    </Stack>
+                    <Button size="small" disabled={dishIds.length === 0} icon={<FireOutlined />} onClick={() => _openCooking(`Nấu bữa ${label} - ${item.name}`, dishIds)} style={{ marginTop: 7, color: '#fa8c16', paddingInline: 10 }}>
+                        Nấu bữa {label.toLowerCase()}
+                    </Button>
+                </>
             )}
         </Box>
     );
@@ -672,7 +674,7 @@ export const ScheduledMealItem = ({ item, selected, dishNameById, onDelete }: { 
                 <div style={{ display: "grid", gridTemplateColumns: "5px minmax(0, 1fr)", background: `linear-gradient(90deg, ${railColor}14 0%, rgba(255,255,255,0.96) 74%)`, borderBottom: "1px solid rgba(116,54,220,0.09)" }}>
                     <div style={{ background: railColor }} />
                     <div style={{ padding: "12px 12px 10px", minWidth: 0 }}>
-                    <div style={{ display: "grid", gridTemplateColumns: "minmax(0, 1fr) auto", gap: 8, alignItems: "start" }}>
+                    <div style={{ display: "grid", gridTemplateColumns: "minmax(0, 1fr)", gap: 8, alignItems: "start" }}>
                         <Stack gap={7} align="flex-start" style={{ minWidth: 0 }}>
                             <Checkbox checked={selected} onChange={_onToggleSelect} style={{ marginTop: 2, marginRight: 0 }} />
                             <div style={{ minWidth: 0 }}>
@@ -690,14 +692,14 @@ export const ScheduledMealItem = ({ item, selected, dishNameById, onDelete }: { 
                             </div>
                         </Stack>
 
-                        <Stack gap={4} align="center">
-                            <Button disabled={allDishIds.length === 0} icon={<FireOutlined />} onClick={() => _openCooking(`Nấu thực đơn - ${item.name}`, allDishIds)} style={{ color: allDishIds.length > 0 ? '#fa8c16' : undefined }}>
-                                Nấu
+                        <Stack gap={6} align="center" wrap="wrap" style={{ marginTop: 8 }}>
+                            <Button size="small" disabled={allDishIds.length === 0} icon={<FireOutlined />} onClick={() => _openCooking(`Nấu thực đơn - ${item.name}`, allDishIds)} style={{ color: allDishIds.length > 0 ? '#fa8c16' : undefined }}>
+                                Nấu thực đơn
                             </Button>
-                            <Button disabled={allDishIds.length === 0} icon={<RestOutlined />} onClick={() => setCompletionOpen(true)} style={{ color: allDishIds.length > 0 ? '#52c41a' : undefined }}>
-                                Hoàn tất
+                            <Button size="small" disabled={allDishIds.length === 0} icon={<RestOutlined />} onClick={() => setCompletionOpen(true)} style={{ color: allDishIds.length > 0 ? '#52c41a' : undefined }}>
+                                Hoàn tất bữa
                             </Button>
-                            <Button onClick={toggleMealModal.show}>Chi tiết</Button>
+                            <Button size="small" onClick={toggleMealModal.show}>Chi tiết</Button>
                             <Dropdown menu={{
                                 items: [
                                     { label: "Sao chép", key: "copy", icon: <CopyOutlined /> },
@@ -707,7 +709,7 @@ export const ScheduledMealItem = ({ item, selected, dishNameById, onDelete }: { 
                                 ],
                                 onClick: _onMoreActionClick,
                             }} placement="bottomRight">
-                                <Button type="text" icon={<HolderOutlined />} style={{ width: 34, paddingInline: 0 }} />
+                                <Button size="small" type="text" icon={<HolderOutlined />} style={{ width: 34, paddingInline: 0 }} />
                             </Dropdown>
                         </Stack>
                     </div>

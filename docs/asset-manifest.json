@@ -1,11 +1,12 @@
 {
   "files": {
     "main.css": "/my-recipes/static/css/main.87da95ed.css",
-    "main.js": "/my-recipes/static/js/main.b8b8d70c.js",
+    "main.js": "/my-recipes/static/js/main.e0325e79.js",
     "static/js/672.fee78994.chunk.js": "/my-recipes/static/js/672.fee78994.chunk.js",
     "static/js/720.313fb913.chunk.js": "/my-recipes/static/js/720.313fb913.chunk.js",
     "static/js/206.82a4e427.chunk.js": "/my-recipes/static/js/206.82a4e427.chunk.js",
     "static/media/noodles.png": "/my-recipes/static/media/noodles.db502210854831dbe3a0.png",
+    "static/media/family.png": "/my-recipes/static/media/family.3e6bb461b35300c729e9.png",
     "static/media/budget.png": "/my-recipes/static/media/budget.9a0121f5eb55c9f69d1b.png",
     "static/media/diet.png": "/my-recipes/static/media/diet.7e11e8c1d026384f9d62.png",
     "static/media/logo.png": "/my-recipes/static/media/logo.343efc60b8b70dd39875.png",
@@ -18,6 +19,7 @@
     "static/media/night.png": "/my-recipes/static/media/night.1bfbd92981bc5bc48482.png",
     "static/media/cooking.png": "/my-recipes/static/media/cooking.74b847a79919accf12c1.png",
     "static/media/layout.png": "/my-recipes/static/media/layout.5cf9cee6f365d76d7b7b.png",
+    "static/media/diet-plan.png": "/my-recipes/static/media/diet-plan.f1e61a0af3923d052cea.png",
     "static/media/done.png": "/my-recipes/static/media/done.815a1f74cff7ec5e25c2.png",
     "static/media/vegetable.png": "/my-recipes/static/media/vegetable.165d06b94cb28a23e3f0.png",
     "static/media/medical-record.png": "/my-recipes/static/media/medical-record.d0b400dce31a7c3a573a.png",
@@ -35,6 +37,6 @@
   },
   "entrypoints": [
     "static/css/main.87da95ed.css",
-    "static/js/main.b8b8d70c.js"
+    "static/js/main.e0325e79.js"
   ]
 }

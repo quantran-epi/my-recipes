@@ -1,5 +1,6 @@
-import { DeleteOutlined, PlusOutlined, TeamOutlined, UserOutlined } from '@ant-design/icons';
+import { DeleteOutlined, PlusOutlined, UserOutlined } from '@ant-design/icons';
 import { Button } from '@components/Button';
+import { Image } from '@components/Image';
 import { Box } from '@components/Layout/Box';
 import { Stack } from '@components/Layout/Stack';
 import { useMessage } from '@components/Message';
@@ -13,12 +14,13 @@ import { Empty, Input, InputNumber, Popconfirm, Select } from 'antd';
 import { nanoid } from 'nanoid';
 import React, { useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import FamilyIcon from '../../../../assets/icons/family.png';
 
 const MEMBER_COLORS = ['#1677ff', '#52c41a', '#fa8c16', '#eb2f96', '#722ed1', '#13a8a8', '#f5222d', '#2f54eb'];
 
 const pageCss = `
 .household-page {
-    max-width: 1040px;
+    width: min(1180px, calc(100vw - 24px));
     margin: 0 auto;
     padding: 0 0 96px;
 }
@@ -32,7 +34,7 @@ const pageCss = `
 }
 .household-layout {
     display: grid;
-    grid-template-columns: minmax(240px, 320px) minmax(0, 1fr);
+    grid-template-columns: minmax(0, 1fr);
     gap: 12px;
 }
 .household-panel {
@@ -47,13 +49,13 @@ const pageCss = `
     border: 1px solid #e8edf7;
     background: #fff;
     border-radius: 8px;
-    min-height: 58px;
-    padding: 9px 10px;
+    min-height: 72px;
+    padding: 11px 12px;
     text-align: left;
     cursor: pointer;
     display: grid;
-    grid-template-columns: 34px minmax(0, 1fr) auto;
-    gap: 9px;
+    grid-template-columns: 42px minmax(0, 1fr) auto;
+    gap: 11px;
     align-items: center;
 }
 .household-member-button.active {
@@ -61,16 +63,19 @@ const pageCss = `
     background: #f0f7ff;
     box-shadow: 0 8px 18px rgba(22,119,255,0.10);
 }
-@media (max-width: 820px) {
-    .household-layout {
-        grid-template-columns: minmax(0, 1fr);
-    }
+.household-member-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 8px;
+}
+.household-editor-panel {
+    background: linear-gradient(180deg, #ffffff 0%, #fbfdff 100%);
 }
 `;
 
 const fieldGridStyle: React.CSSProperties = {
     display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
     gap: 10,
 };
 
@@ -157,8 +162,8 @@ export const HouseholdProfilesScreen: React.FC = () => {
         <Box className='household-hero'>
             <Stack justify='space-between' align='center' gap={12} wrap='wrap'>
                 <Stack align='center' gap={10} style={{ minWidth: 0 }}>
-                    <span style={{ width: 44, height: 44, borderRadius: 12, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', background: '#e6f4ff', color: '#1677ff', border: '1px solid #91caff', flexShrink: 0 }}>
-                        <TeamOutlined style={{ fontSize: 22 }} />
+                    <span style={{ width: 44, height: 44, borderRadius: 12, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', background: '#e6f4ff', border: '1px solid #91caff', flexShrink: 0 }}>
+                        <Image src={FamilyIcon} preview={false} width={27} alt='' />
                     </span>
                     <div style={{ minWidth: 0 }}>
                         <Typography.Text style={{ display: 'block', color: '#1677ff', fontSize: 12, lineHeight: '16px', fontWeight: 800 }}>Nhà mình</Typography.Text>
@@ -176,12 +181,12 @@ export const HouseholdProfilesScreen: React.FC = () => {
                     <Typography.Text strong>{members.length} thành viên</Typography.Text>
                     <Tag color='blue' style={{ marginRight: 0 }}>{selectedMemberIds.length || members.length} đang dùng</Tag>
                 </Stack>
-                {members.length === 0 ? <Empty description='Chưa có hồ sơ thành viên' image={Empty.PRESENTED_IMAGE_SIMPLE} /> : <Stack direction='column' gap={8}>
+                {members.length === 0 ? <Empty description='Chưa có hồ sơ thành viên' image={Empty.PRESENTED_IMAGE_SIMPLE} /> : <div className='household-member-list'>
                     {members.map(member => {
                         const active = activeMember?.id === member.id;
                         const selected = selectedSet.has(member.id) || selectedMemberIds.length === 0;
                         return <button key={member.id} type='button' className={`household-member-button${active ? ' active' : ''}`} onClick={() => setActiveMemberId(member.id)}>
-                            <span style={{ width: 34, height: 34, borderRadius: 12, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', background: `${member.color ?? '#1677ff'}18`, color: member.color ?? '#1677ff', border: `1px solid ${member.color ?? '#1677ff'}30` }}>
+                            <span style={{ width: 42, height: 42, borderRadius: 14, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', background: `${member.color ?? '#1677ff'}18`, color: member.color ?? '#1677ff', border: `1px solid ${member.color ?? '#1677ff'}30` }}>
                                 <UserOutlined />
                             </span>
                             <span style={{ minWidth: 0 }}>
@@ -193,10 +198,10 @@ export const HouseholdProfilesScreen: React.FC = () => {
                             <Tag color={selected ? 'green' : 'default'} style={{ marginRight: 0 }}>{selected ? 'Dùng' : 'Tắt'}</Tag>
                         </button>;
                     })}
-                </Stack>}
+                </div>}
             </Box>
 
-            <Box className='household-panel'>
+            <Box className='household-panel household-editor-panel'>
                 {!activeMember ? <Box style={{ minHeight: 260, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                     <Empty description='Chọn hoặc thêm một thành viên để chỉnh hồ sơ' image={Empty.PRESENTED_IMAGE_SIMPLE} />
                 </Box> : <Stack direction='column' gap={14}>

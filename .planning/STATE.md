@@ -3,9 +3,9 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: ready
-stopped_at: Completed quick task 260609-rqm
-last_updated: "2026-06-09T13:22:13Z"
-last_activity: 2026-06-09 -- Completed quick task 260609-rqm: Household profiles page, dish suitability, scheduled meal cooking, smart meal planner
+stopped_at: Completed quick task 260609-uix
+last_updated: "2026-06-09T13:44:35Z"
+last_activity: 2026-06-09 -- Completed quick task 260609-uix: Fix household, planner, scheduled meal UI regressions
 progress:
   total_phases: 5
   completed_phases: 4
@@ -28,7 +28,7 @@ See: .planning/PROJECT.md (updated 2026-06-05)
 Phase: 5 (release-gate-and-product-guardrails) — READY
 Plan: Not started
 Status: Phase 04 complete; ready for Phase 05
-Last activity: 2026-06-09 -- Completed quick task 260609-rqm: Household profiles page, dish suitability, scheduled meal cooking, smart meal planner
+Last activity: 2026-06-09 -- Completed quick task 260609-uix: Fix household, planner, scheduled meal UI regressions
 
 Progress: [████████░░] 80%
 
@@ -36,6 +36,7 @@ Progress: [████████░░] 80%
 
 | Date | Task | Artifact |
 |------|------|----------|
+| 2026-06-09 | Fix household, planner, scheduled meal UI regressions | `.planning/quick/260609-uix-fix-household-planner-ui/260609-uix-SUMMARY.md` |
 | 2026-06-09 | Household profiles page, dish suitability, scheduled meal cooking, smart meal planner | `.planning/quick/260609-rqm-household-profiles-page-dish-suitability/260609-rqm-SUMMARY.md` |
 | 2026-06-09 | Deploy app | `.planning/quick/260609-qua-deploy-app/260609-qua-SUMMARY.md` |
 | 2026-06-09 | Implement Cook Now and household profiles understanding | `.planning/quick/260609-q9o-implement-docs-cook-now-household-profil/260609-q9o-SUMMARY.md` |
