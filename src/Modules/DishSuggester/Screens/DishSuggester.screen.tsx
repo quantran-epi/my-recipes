@@ -1,4 +1,4 @@
-import { BarChartOutlined, BulbOutlined, CalculatorOutlined, ClockCircleOutlined, ExportOutlined, FireOutlined, LeftOutlined, MinusOutlined, PieChartOutlined, PlusOutlined, SettingOutlined, ShoppingCartOutlined, ThunderboltOutlined } from "@ant-design/icons";
+import { BarChartOutlined, BulbOutlined, CalculatorOutlined, ClockCircleOutlined, DeleteOutlined, ExportOutlined, FireOutlined, LeftOutlined, MinusOutlined, PieChartOutlined, PlusOutlined, SettingOutlined, ShoppingCartOutlined, TeamOutlined, ThunderboltOutlined, UserAddOutlined } from "@ant-design/icons";
 import { DishDurationHelper } from "@common/Helpers/DishDurationHelper";
 import { DishNutritionHelper, DishNutritionSummary } from "@common/Helpers/DishNutritionHelper";
 import { NutritionGoalHelper, NutritionGoalMatch } from "@common/Helpers/NutritionGoalHelper";
@@ -12,8 +12,8 @@ import { Tag } from "@components/Tag";
 import { Typography } from "@components/Typography";
 import { useScheduledCalculation, useToggle } from "@hooks";
 import { DishScorer, ScoredDish, ScoredDishGroup } from "../Helpers/DishScorer";
-import { selectDishes, selectHouseholdPreferenceProfile, selectIngredients, selectIngredientsById, selectInventory, selectInventoryHealthConfig, selectNutritionGoals } from "@store/Selectors";
-import { InputNumber, Select, Spin } from "antd";
+import { selectDishes, selectHouseholdMembers, selectHouseholdPreferenceProfile, selectIngredients, selectIngredientsById, selectInventory, selectInventoryHealthConfig, selectNutritionGoals, selectSelectedHouseholdMemberIds, selectSelectedHouseholdMembers } from "@store/Selectors";
+import { Input, InputNumber, Select, Spin } from "antd";
 import React, { useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
@@ -32,7 +32,8 @@ import { IngredientUnitHelper } from "@common/Helpers/IngredientUnitHelper";
 import { Collapse } from "antd";
 import { RootRoutes } from "@routing/RootRoutes";
 import { NutritionGoal as SharedNutritionGoal } from "@store/Models/SharedConfig";
-import { updateHouseholdPreferenceProfile } from "@store/Reducers/AppContextReducer";
+import { HouseholdMemberProfile, removeHouseholdMemberProfile, setSelectedHouseholdMemberIds, upsertHouseholdMemberProfile } from "@store/Reducers/AppContextReducer";
+import { nanoid } from "nanoid";
 
 type Mode = "cookNow" | "ingredients" | "inventory" | "duration" | "nutrition";
 type SuggesterActionMode = "navigate" | "modal";
@@ -109,6 +110,9 @@ export const DishSuggesterScreen: React.FC<DishSuggesterScreenProps> = ({ open, 
     const inventoryConfig = useSelector(selectInventoryHealthConfig);
     const nutritionGoals = useSelector(selectNutritionGoals);
     const householdPreferenceProfile = useSelector(selectHouseholdPreferenceProfile);
+    const householdMembers = useSelector(selectHouseholdMembers);
+    const selectedHouseholdMemberIds = useSelector(selectSelectedHouseholdMemberIds);
+    const selectedHouseholdMembers = useSelector(selectSelectedHouseholdMembers);
 
     const [mode, setMode] = useState<Mode>(initialMode ?? "ingredients");
     const [step, setStep] = useState(0);
@@ -137,6 +141,7 @@ export const DishSuggesterScreen: React.FC<DishSuggesterScreenProps> = ({ open, 
     const [durationSearchIds, setDurationSearchIds] = useState<string[]>([]);
     const [nutritionGoalId, setNutritionGoalId] = useState<string>(nutritionGoals[0]?.id ?? "");
     const [expandedNutritionDishIds, setExpandedNutritionDishIds] = useState<Set<string>>(() => new Set());
+    const [editingMemberId, setEditingMemberId] = useState<string>();
 
     React.useEffect(() => {
         if (nutritionGoals.length === 0) {
@@ -147,6 +152,11 @@ export const DishSuggesterScreen: React.FC<DishSuggesterScreenProps> = ({ open, 
             setNutritionGoalId(nutritionGoals[0].id);
         }
     }, [nutritionGoals, nutritionGoalId]);
+
+    React.useEffect(() => {
+        if (editingMemberId && householdMembers.some(member => member.id === editingMemberId)) return;
+        setEditingMemberId(selectedHouseholdMembers[0]?.id ?? householdMembers[0]?.id);
+    }, [editingMemberId, householdMembers, selectedHouseholdMembers]);
 
     const selectedNutritionGoal = useMemo<SharedNutritionGoal | undefined>(() => {
         return nutritionGoals.find(goal => goal.id === nutritionGoalId) ?? nutritionGoals[0];
@@ -161,6 +171,16 @@ export const DishSuggesterScreen: React.FC<DishSuggesterScreenProps> = ({ open, 
         dishes.forEach(dish => dish.tags?.forEach(tag => tags.add(tag)));
         return Array.from(tags).map(tag => ({ value: tag, label: tag }));
     }, [dishes]);
+
+    const dishOptions = useMemo(() => dishes
+        .slice()
+        .sort((a, b) => a.name.localeCompare(b.name))
+        .map(dish => ({ value: dish.id, label: dish.name })), [dishes]);
+
+    const ingredientOptions = useMemo(() => allIngredients
+        .slice()
+        .sort((a, b) => a.name.localeCompare(b.name))
+        .map(ingredient => ({ value: ingredient.id, label: ingredient.name })), [allIngredients]);
 
     const inventoryIngredientIds = useMemo(() => {
         if (!open) return [];
@@ -337,24 +357,43 @@ export const DishSuggesterScreen: React.FC<DishSuggesterScreenProps> = ({ open, 
         setMaxMinutes(value);
     }, []);
 
-    const _updateHouseholdPreferenceProfile = React.useCallback((patch: Partial<typeof householdPreferenceProfile>) => {
+    const _onSelectedHouseholdMembersChange = React.useCallback((memberIds: string[]) => {
         setSelectedDishIds([]);
-        dispatch(updateHouseholdPreferenceProfile(patch));
+        dispatch(setSelectedHouseholdMemberIds(memberIds));
     }, [dispatch]);
 
-    const _onPreferredTagsChange = React.useCallback((tags: string[]) => {
-        _updateHouseholdPreferenceProfile({
-            preferredTags: tags,
-            avoidedTags: householdPreferenceProfile.avoidedTags.filter(tag => !tags.includes(tag)),
-        });
-    }, [_updateHouseholdPreferenceProfile, householdPreferenceProfile.avoidedTags]);
+    const _onCreateHouseholdMember = React.useCallback(() => {
+        const id = nanoid(8);
+        const now = new Date().toISOString();
+        const member: HouseholdMemberProfile = {
+            id,
+            name: `Người ${householdMembers.length + 1}`,
+            color: ["#1677ff", "#52c41a", "#fa8c16", "#eb2f96", "#722ed1"][householdMembers.length % 5],
+            favoriteDishIds: [],
+            avoidedDishIds: [],
+            favoriteIngredientIds: [],
+            avoidedIngredientIds: [],
+            preferredTags: [],
+            avoidedTags: [],
+            portionPreference: 1,
+            createdAt: now,
+            updatedAt: now,
+        };
+        dispatch(upsertHouseholdMemberProfile(member));
+        dispatch(setSelectedHouseholdMemberIds(Array.from(new Set([...selectedHouseholdMemberIds, id]))));
+        setEditingMemberId(id);
+        setSelectedDishIds([]);
+    }, [dispatch, householdMembers.length, selectedHouseholdMemberIds]);
 
-    const _onAvoidedTagsChange = React.useCallback((tags: string[]) => {
-        _updateHouseholdPreferenceProfile({
-            avoidedTags: tags,
-            preferredTags: householdPreferenceProfile.preferredTags.filter(tag => !tags.includes(tag)),
-        });
-    }, [_updateHouseholdPreferenceProfile, householdPreferenceProfile.preferredTags]);
+    const _updateHouseholdMember = React.useCallback((member: HouseholdMemberProfile, patch: Partial<HouseholdMemberProfile>) => {
+        setSelectedDishIds([]);
+        dispatch(upsertHouseholdMemberProfile({ ...member, ...patch }));
+    }, [dispatch]);
+
+    const _removeHouseholdMember = React.useCallback((memberId: string) => {
+        setSelectedDishIds([]);
+        dispatch(removeHouseholdMemberProfile(memberId));
+    }, [dispatch]);
 
     const _onNext = () => setStep(1);
     const _onBack = () => setStep(0);
@@ -557,85 +596,183 @@ export const DishSuggesterScreen: React.FC<DishSuggesterScreenProps> = ({ open, 
         </div>
     );
 
-    const HouseholdPreferencePanel = () => (
-        <Box style={{ padding: 12, borderRadius: 8, background: "#f7fffb", border: "1px solid #b7eb8f", marginBottom: 12 }}>
+    const HouseholdPreferencePanel = () => {
+        const editingMember = householdMembers.find(member => member.id === editingMemberId);
+        const effectiveMemberCount = selectedHouseholdMembers.length || householdMembers.length;
+
+        return <Box style={{ padding: 12, borderRadius: 8, background: "#f7fffb", border: "1px solid #b7eb8f", marginBottom: 12 }}>
             <Stack justify="space-between" align="center" gap={8} style={{ marginBottom: 10 }}>
                 <Stack gap={7} align="center" style={{ minWidth: 0 }}>
-                    <FireOutlined style={{ color: "#389e0d" }} />
-                    <Typography.Text strong style={{ color: "#1f7a31" }}>Nhà mình thích gì?</Typography.Text>
+                    <TeamOutlined style={{ color: "#389e0d" }} />
+                    <Typography.Text strong style={{ color: "#1f7a31" }}>Nhà mình</Typography.Text>
                 </Stack>
-                <Tag color="green" style={{ marginRight: 0 }}>{householdPreferenceProfile.servingCount} khẩu phần</Tag>
+                <Stack gap={5} align="center">
+                    <Tag color="green" style={{ marginRight: 0 }}>{householdPreferenceProfile.servingCount} phần</Tag>
+                    <Tag color="blue" style={{ marginRight: 0 }}>{effectiveMemberCount} người</Tag>
+                </Stack>
             </Stack>
 
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(126px, 1fr))", gap: 8, marginBottom: 10 }}>
-                <Box style={{ minWidth: 0 }}>
-                    <Typography.Text type="secondary" style={{ display: "block", fontSize: 11, lineHeight: "15px", marginBottom: 4 }}>Khẩu phần</Typography.Text>
-                    <InputNumber
-                        min={1}
-                        max={24}
-                        value={householdPreferenceProfile.servingCount}
-                        onChange={value => _updateHouseholdPreferenceProfile({ servingCount: Number(value ?? 2) })}
-                        style={{ width: "100%" }}
-                    />
-                </Box>
-                <Box style={{ minWidth: 0 }}>
-                    <Typography.Text type="secondary" style={{ display: "block", fontSize: 11, lineHeight: "15px", marginBottom: 4 }}>Tối đa</Typography.Text>
-                    <InputNumber
-                        min={5}
-                        max={480}
-                        step={5}
-                        addonAfter="phút"
-                        value={householdPreferenceProfile.maxCookMinutes}
-                        onChange={value => _updateHouseholdPreferenceProfile({ maxCookMinutes: Number(value ?? 45) })}
-                        style={{ width: "100%" }}
-                    />
-                </Box>
-                <Box style={{ minWidth: 0 }}>
-                    <Typography.Text type="secondary" style={{ display: "block", fontSize: 11, lineHeight: "15px", marginBottom: 4 }}>Mua thêm</Typography.Text>
-                    <InputNumber
-                        min={0}
-                        max={10000000}
-                        step={10000}
-                        addonAfter="đ"
-                        value={householdPreferenceProfile.maxExtraCost}
-                        onChange={value => _updateHouseholdPreferenceProfile({ maxExtraCost: Number(value ?? 0) })}
-                        style={{ width: "100%" }}
-                    />
-                </Box>
-            </div>
+            {householdMembers.length === 0 ? <Box style={{ border: "1px dashed #b7eb8f", borderRadius: 8, padding: 12, background: "#fff", textAlign: "center" }}>
+                <Typography.Text type="secondary" style={{ display: "block", marginBottom: 8 }}>Chưa có thành viên.</Typography.Text>
+                <Button type="primary" icon={<UserAddOutlined />} onClick={_onCreateHouseholdMember}>Thêm thành viên</Button>
+            </Box> : <>
+                <Select
+                    mode="multiple"
+                    allowClear
+                    size="small"
+                    maxTagCount="responsive"
+                    placeholder="Tất cả thành viên"
+                    value={selectedHouseholdMemberIds}
+                    onChange={_onSelectedHouseholdMembersChange}
+                    options={householdMembers.map(member => ({ value: member.id, label: member.name }))}
+                    style={{ width: "100%", marginBottom: 8 }}
+                />
 
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(172px, 1fr))", gap: 8 }}>
-                <Select
-                    allowClear
-                    size="small"
-                    placeholder="Ăn theo mục tiêu"
-                    value={householdPreferenceProfile.nutritionGoalId}
-                    onChange={value => _updateHouseholdPreferenceProfile({ nutritionGoalId: value })}
-                    options={nutritionGoals.map(goal => ({ value: goal.id, label: goal.name }))}
-                />
-                <Select
-                    mode="multiple"
-                    allowClear
-                    size="small"
-                    maxTagCount="responsive"
-                    placeholder="Món nhà thích"
-                    value={householdPreferenceProfile.preferredTags}
-                    onChange={_onPreferredTagsChange}
-                    options={allDishTagOptions}
-                />
-                <Select
-                    mode="multiple"
-                    allowClear
-                    size="small"
-                    maxTagCount="responsive"
-                    placeholder="Ít chọn món này"
-                    value={householdPreferenceProfile.avoidedTags}
-                    onChange={_onAvoidedTagsChange}
-                    options={allDishTagOptions}
-                />
-            </div>
-        </Box>
-    );
+                <Stack wrap="wrap" gap={6} style={{ marginBottom: 10 }}>
+                    {householdMembers.map(member => {
+                        const active = editingMember?.id === member.id;
+                        return <button
+                            key={member.id}
+                            type="button"
+                            onClick={() => setEditingMemberId(member.id)}
+                            style={{
+                                border: active ? `2px solid ${member.color ?? "#389e0d"}` : "1px solid #d9f7be",
+                                background: active ? "#f6ffed" : "#fff",
+                                borderRadius: 18,
+                                padding: "4px 9px",
+                                cursor: "pointer",
+                                display: "inline-flex",
+                                alignItems: "center",
+                                gap: 6,
+                                minHeight: 30,
+                            }}
+                        >
+                            <span style={{ width: 8, height: 8, borderRadius: 99, background: member.color ?? "#389e0d", flexShrink: 0 }} />
+                            <span style={{ fontSize: 12, fontWeight: 700, color: active ? "#1f7a31" : "#31412f" }}>{member.name}</span>
+                        </button>;
+                    })}
+                    <Button size="small" icon={<UserAddOutlined />} onClick={_onCreateHouseholdMember}>Thêm</Button>
+                </Stack>
+
+                {editingMember && <Box style={{ border: "1px solid #d9f7be", borderRadius: 8, background: "#fff", padding: 10 }}>
+                    <div style={{ display: "grid", gridTemplateColumns: "minmax(0, 1fr) 96px 106px", gap: 8, marginBottom: 8 }}>
+                        <Input
+                            size="small"
+                            value={editingMember.name}
+                            onChange={event => _updateHouseholdMember(editingMember, { name: event.target.value })}
+                            placeholder="Tên"
+                        />
+                        <InputNumber
+                            size="small"
+                            min={0.5}
+                            max={12}
+                            step={0.5}
+                            value={editingMember.portionPreference ?? 1}
+                            addonAfter="phần"
+                            onChange={value => _updateHouseholdMember(editingMember, { portionPreference: Number(value ?? 1) })}
+                            style={{ width: "100%" }}
+                        />
+                        <InputNumber
+                            size="small"
+                            min={5}
+                            max={480}
+                            step={5}
+                            value={editingMember.maxCookMinutes}
+                            addonAfter="phút"
+                            placeholder="Tối đa"
+                            onChange={value => _updateHouseholdMember(editingMember, { maxCookMinutes: value === null ? undefined : Number(value) })}
+                            style={{ width: "100%" }}
+                        />
+                    </div>
+
+                    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: 8 }}>
+                        <Select
+                            allowClear
+                            size="small"
+                            placeholder="Mục tiêu dinh dưỡng"
+                            value={editingMember.nutritionGoalId}
+                            onChange={value => _updateHouseholdMember(editingMember, { nutritionGoalId: value })}
+                            options={nutritionGoals.map(goal => ({ value: goal.id, label: goal.name }))}
+                        />
+                        <Select
+                            mode="multiple"
+                            allowClear
+                            size="small"
+                            maxTagCount="responsive"
+                            placeholder="Món thích"
+                            value={editingMember.favoriteDishIds}
+                            onChange={ids => _updateHouseholdMember(editingMember, { favoriteDishIds: ids, avoidedDishIds: editingMember.avoidedDishIds.filter(id => !ids.includes(id)) })}
+                            options={dishOptions}
+                        />
+                        <Select
+                            mode="multiple"
+                            allowClear
+                            size="small"
+                            maxTagCount="responsive"
+                            placeholder="Món tránh"
+                            value={editingMember.avoidedDishIds}
+                            onChange={ids => _updateHouseholdMember(editingMember, { avoidedDishIds: ids, favoriteDishIds: editingMember.favoriteDishIds.filter(id => !ids.includes(id)) })}
+                            options={dishOptions}
+                        />
+                        <Select
+                            mode="multiple"
+                            allowClear
+                            size="small"
+                            maxTagCount="responsive"
+                            placeholder="Nguyên liệu thích"
+                            value={editingMember.favoriteIngredientIds}
+                            onChange={ids => _updateHouseholdMember(editingMember, { favoriteIngredientIds: ids, avoidedIngredientIds: editingMember.avoidedIngredientIds.filter(id => !ids.includes(id)) })}
+                            options={ingredientOptions}
+                        />
+                        <Select
+                            mode="multiple"
+                            allowClear
+                            size="small"
+                            maxTagCount="responsive"
+                            placeholder="Nguyên liệu tránh"
+                            value={editingMember.avoidedIngredientIds}
+                            onChange={ids => _updateHouseholdMember(editingMember, { avoidedIngredientIds: ids, favoriteIngredientIds: editingMember.favoriteIngredientIds.filter(id => !ids.includes(id)) })}
+                            options={ingredientOptions}
+                        />
+                        <Select
+                            mode="multiple"
+                            allowClear
+                            size="small"
+                            maxTagCount="responsive"
+                            placeholder="Kiểu món thích"
+                            value={editingMember.preferredTags}
+                            onChange={tags => _updateHouseholdMember(editingMember, { preferredTags: tags, avoidedTags: editingMember.avoidedTags.filter(tag => !tags.includes(tag)) })}
+                            options={allDishTagOptions}
+                        />
+                        <Select
+                            mode="multiple"
+                            allowClear
+                            size="small"
+                            maxTagCount="responsive"
+                            placeholder="Kiểu món tránh"
+                            value={editingMember.avoidedTags}
+                            onChange={tags => _updateHouseholdMember(editingMember, { avoidedTags: tags, preferredTags: editingMember.preferredTags.filter(tag => !tags.includes(tag)) })}
+                            options={allDishTagOptions}
+                        />
+                    </div>
+
+                    <Input.TextArea
+                        value={editingMember.notes}
+                        onChange={event => _updateHouseholdMember(editingMember, { notes: event.target.value })}
+                        placeholder="Ghi chú"
+                        autoSize={{ minRows: 2, maxRows: 4 }}
+                        style={{ marginTop: 8 }}
+                    />
+
+                    <Stack justify="flex-end" style={{ marginTop: 8 }}>
+                        <Button size="small" danger icon={<DeleteOutlined />} onClick={() => _removeHouseholdMember(editingMember.id)}>
+                            Xóa hồ sơ
+                        </Button>
+                    </Stack>
+                </Box>}
+            </>}
+        </Box>;
+    };
 
     const NutritionMetric = ({ label, value, tone }: { label: string; value: string; tone: string }) => (
         <div style={{ minWidth: 0, border: `1px solid ${tone}22`, borderRadius: 8, background: `${tone}0d`, padding: "6px 7px" }}>

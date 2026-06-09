@@ -4,13 +4,13 @@ import { Stack } from "@components/Layout/Stack";
 import { useMessage } from "@components/Message";
 import { Tag } from "@components/Tag";
 import { Typography } from "@components/Typography";
-import { CookingSession } from "@store/Models/CookingSession";
+import { CookingSession, CookingSessionMemberFeedback } from "@store/Models/CookingSession";
 import { InventoryHelper } from "@common/Helpers/InventoryHelper";
 import { IngredientUnitHelper } from "@common/Helpers/IngredientUnitHelper";
 import { addLeftoverTrackerItem } from "@store/Reducers/AppContextReducer";
-import { cancelCooking, finishCooking } from "@store/Reducers/CookingSessionReducer";
+import { cancelCooking, finishCooking, setCookingMemberFeedback } from "@store/Reducers/CookingSessionReducer";
 import { deductInventory } from "@store/Reducers/InventoryReducer";
-import { selectDishes, selectDishesById, selectIngredientsById, selectInventory, selectInventoryHealthConfig } from "@store/Selectors";
+import { selectDishes, selectDishesById, selectHouseholdMembers, selectIngredientsById, selectInventory, selectInventoryHealthConfig } from "@store/Selectors";
 import moment from "moment";
 import 'moment/locale/vi';
 import { nanoid } from "nanoid";
@@ -33,10 +33,15 @@ export const FinishCookingWidget: React.FunctionComponent<FinishCookingWidgetPro
     const ingredientsById = useSelector(selectIngredientsById);
     const inventoryItems = useSelector(selectInventory);
     const inventoryConfig = useSelector(selectInventoryHealthConfig);
+    const householdMembers = useSelector(selectHouseholdMembers);
     const [leftoverPortions, setLeftoverPortions] = useState<number>(0);
     const [eatInDays, setEatInDays] = useState<number>(2);
+    const [memberFeedback, setMemberFeedback] = useState<Record<string, CookingSessionMemberFeedback>>(session.memberFeedback ?? {});
 
     const dish = dishesById.get(session.dishId);
+    const sessionIngredientStatusById = useMemo(() => new Map((session.ingredients ?? []).map(item => [item.ingredientId, item.status])), [session.ingredients]);
+    const sessionMemberIdSet = useMemo(() => new Set(session.householdMemberIds ?? []), [session.householdMemberIds]);
+    const cookingMembers = useMemo(() => householdMembers.filter(member => sessionMemberIdSet.has(member.id)), [householdMembers, sessionMemberIdSet]);
 
     const deductions = useMemo(() => {
         if (!dish) return [];
@@ -52,9 +57,11 @@ export const FinishCookingWidget: React.FunctionComponent<FinishCookingWidgetPro
             grouped[amt.ingredientId].total += val;
         });
         return Object.entries(grouped)
-            .filter(([id]) => inventoryItems[id] != null && !InventoryHelper.isAlwaysAvailable(ingredientsById.get(id)))
+            .filter(([id]) => inventoryItems[id] != null
+                && !InventoryHelper.isAlwaysAvailable(ingredientsById.get(id))
+                && sessionIngredientStatusById.get(id) !== 'skipped')
             .map(([id, { total, unit, name }]) => ({ id, total, unit, name }));
-    }, [dish, allDishes, ingredientsById, inventoryItems, session.targetServings]);
+    }, [dish, allDishes, ingredientsById, inventoryItems, session.targetServings, sessionIngredientStatusById]);
 
     const _onFinish = () => {
         deductions.forEach(d => dispatch(deductInventory({
@@ -76,6 +83,9 @@ export const FinishCookingWidget: React.FunctionComponent<FinishCookingWidgetPro
                 status: 'available',
             }));
         }
+        Object.entries(memberFeedback).forEach(([memberId, feedback]) => {
+            dispatch(setCookingMemberFeedback({ sessionId: session.id, memberId, feedback }));
+        });
         dispatch(finishCooking(session.id));
         message.success(leftoverPortions > 0 ? "Đã lưu món còn lại" : "Đã hoàn thành phiên nấu");
         onDone();
@@ -111,6 +121,26 @@ export const FinishCookingWidget: React.FunctionComponent<FinishCookingWidgetPro
                 </div>
             ))}
         </div>
+
+        {cookingMembers.length > 0 && <div style={{ margin: '12px 0', padding: 10, border: '1px solid #d6e4ff', borderRadius: 8, background: '#f8fbff' }}>
+            <Typography.Text strong style={{ display: 'block', fontSize: 13 }}>Mọi người thấy sao?</Typography.Text>
+            <Stack direction="column" style={{ gap: 7, marginTop: 8 }}>
+                {cookingMembers.map(member => <div key={member.id} style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) 132px', gap: 8, alignItems: 'center' }}>
+                    <Typography.Text style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{member.name}</Typography.Text>
+                    <Select
+                        size="small"
+                        value={memberFeedback[member.id]}
+                        placeholder="Chọn"
+                        onChange={(value) => setMemberFeedback(current => ({ ...current, [member.id]: value }))}
+                        options={[
+                            { value: 'liked', label: 'Thích' },
+                            { value: 'neutral', label: 'Bình thường' },
+                            { value: 'disliked', label: 'Không hợp' },
+                        ]}
+                    />
+                </div>)}
+            </Stack>
+        </div>}
 
         <div style={{ margin: '12px 0', padding: 10, border: '1px solid #e8f5e9', borderRadius: 8, background: '#f6ffed' }}>
             <Typography.Text strong style={{ display: 'block', fontSize: 13 }}>Còn món sau bữa?</Typography.Text>

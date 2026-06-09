@@ -4,7 +4,7 @@
  */
 import { RootState } from "@store/Store";
 import { DEFAULT_SHARED_CONFIG, normalizeSharedConfig } from "@store/Models/SharedConfig";
-import { normalizeHouseholdPreferenceProfile } from "@store/Reducers/AppContextReducer";
+import { buildHouseholdPreferenceProfile, getSelectedHouseholdMembers, normalizeHouseholdMembers } from "@store/Reducers/AppContextReducer";
 import { createSelector } from "reselect";
 
 // ── Shared (admin-published) ─────────────────────────────────────────────────
@@ -52,7 +52,22 @@ export const selectWeeklyMealTemplates = (state: RootState) => state.personal.ap
 export const selectShoppingListTemplates = (state: RootState) => state.personal.appContext.shoppingListTemplates ?? [];
 export const selectIngredientPriceMemory = (state: RootState) => state.personal.appContext.ingredientPriceMemory ?? {};
 export const selectIngredientPriceHistory = (state: RootState) => state.personal.appContext.ingredientPriceHistory ?? {};
-export const selectHouseholdPreferenceProfile = (state: RootState) => normalizeHouseholdPreferenceProfile(state.personal.appContext.householdPreferenceProfile);
+export const selectHouseholdMembers = createSelector(
+    [selectAppContext],
+    appContext => normalizeHouseholdMembers(appContext.householdMembers)
+);
+
+export const selectSelectedHouseholdMemberIds = (state: RootState) => state.personal.appContext.selectedHouseholdMemberIds ?? [];
+
+export const selectSelectedHouseholdMembers = createSelector(
+    [selectHouseholdMembers, selectSelectedHouseholdMemberIds],
+    (members, selectedIds) => getSelectedHouseholdMembers(members, selectedIds)
+);
+
+export const selectHouseholdPreferenceProfile = createSelector(
+    [selectAppContext, selectSelectedHouseholdMembers],
+    (appContext, selectedMembers) => buildHouseholdPreferenceProfile(appContext.householdPreferenceProfile, selectedMembers)
+);
 export const selectLeftoverTrackerItems = (state: RootState) => state.personal.appContext.leftoverTrackerItems ?? [];
 
 export const selectShoppingListsById = createSelector(

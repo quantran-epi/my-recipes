@@ -116,6 +116,22 @@ export const DishSuggestionItem: React.FC<DishSuggestionItemProps> = ({ scored, 
                         </div>
                     )}
 
+                    {scored.householdWarnings && scored.householdWarnings.length > 0 && (
+                        <Stack wrap="wrap" gap={4}>
+                            {scored.householdWarnings.map(warning => (
+                                <Tag key={warning} color="volcano" style={{ fontSize: 10, lineHeight: "16px", padding: "0 6px", marginBottom: 0, marginRight: 0, maxWidth: "100%", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{warning}</Tag>
+                            ))}
+                        </Stack>
+                    )}
+
+                    {scored.householdMatches && scored.householdMatches.length > 0 && (
+                        <Stack wrap="wrap" gap={4}>
+                            {scored.householdMatches.map(match => (
+                                <Tag key={match} color="green" style={{ fontSize: 10, lineHeight: "16px", padding: "0 6px", marginBottom: 0, marginRight: 0, maxWidth: "100%", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{match}</Tag>
+                            ))}
+                        </Stack>
+                    )}
+
                     {/* Tags row */}
                     {scored.dish.tags?.length > 0 && (
                         <Stack wrap="wrap" gap={3}>

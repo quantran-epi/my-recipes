@@ -26,6 +26,8 @@ export type ScoredDish = {
     totalMinutes?: number;
     preferenceMatchedTags?: string[];
     preferenceAvoidedTags?: string[];
+    householdMatches?: string[];
+    householdWarnings?: string[];
 }
 
 export type ScoredDishUrgentIngredient = {
@@ -210,13 +212,24 @@ const scoreInventoryDishes = (
 
 const getPreferenceScore = (dish: Dishes, profile: HouseholdPreferenceProfile) => {
     const tags = dish.tags ?? [];
+    const dishIngredientIds = Array.from(new Set((dish.ingredients ?? []).map(item => item.ingredientId)));
     const preferred = profile.preferredTags.filter(tag => tags.includes(tag));
     const avoided = profile.avoidedTags.filter(tag => tags.includes(tag));
+    const favoriteDish = (profile.favoriteDishIds ?? []).includes(dish.id);
+    const avoidedDish = (profile.avoidedDishIds ?? []).includes(dish.id);
+    const favoriteIngredients = (profile.favoriteIngredientIds ?? []).filter(id => dishIngredientIds.includes(id));
+    const avoidedIngredients = (profile.avoidedIngredientIds ?? []).filter(id => dishIngredientIds.includes(id));
     const preferredScore = profile.preferredTags.length > 0 ? preferred.length / profile.preferredTags.length : 1;
+    const favoriteBoost = (favoriteDish ? 0.28 : 0) + Math.min(0.18, favoriteIngredients.length * 0.06);
+    const avoidPenalty = (avoidedDish ? 0.45 : 0) + avoided.length * 0.3 + Math.min(0.35, avoidedIngredients.length * 0.12);
     return {
-        score: clamp01(0.65 + preferredScore * 0.35 - avoided.length * 0.3),
+        score: clamp01(0.65 + preferredScore * 0.35 + favoriteBoost - avoidPenalty),
         preferred,
         avoided,
+        favoriteDish,
+        avoidedDish,
+        favoriteIngredients,
+        avoidedIngredients,
     };
 };
 
@@ -248,8 +261,11 @@ const getCookNowReasons = (
     ];
     if (totalMinutes > 0) reasons.push(DishDurationHelper.formatMinutes(totalMinutes));
     if (scored.extraShoppingCost) reasons.push(`Mua thêm ~ ${IngredientPriceHelper.formatRange(scored.extraShoppingCost)}`);
-    if (preference.preferred.length > 0) reasons.push(`Nhà thích ${preference.preferred.slice(0, 2).join(", ")}`);
-    if (preference.avoided.length > 0) reasons.push(`Ít chọn ${preference.avoided.slice(0, 2).join(", ")}`);
+    if (preference.favoriteDish) reasons.push("Có người thích món này");
+    if (preference.preferred.length > 0) reasons.push(`Hợp ${preference.preferred.slice(0, 2).join(", ")}`);
+    if (preference.avoidedDish) reasons.push("Có người tránh món này");
+    if (preference.avoided.length > 0) reasons.push(`Cân nhắc ${preference.avoided.slice(0, 2).join(", ")}`);
+    if (profile.memberNames?.length) reasons.push(profile.memberNames.slice(0, 2).join(", "));
     if (nutritionGoal) reasons.push(nutritionGoal.name);
     return reasons.slice(0, 5);
 };
@@ -332,6 +348,16 @@ export const DishScorer = {
                     totalMinutes,
                     preferenceMatchedTags: preference.preferred,
                     preferenceAvoidedTags: preference.avoided,
+                    householdMatches: [
+                        ...(preference.favoriteDish ? ["Món yêu thích"] : []),
+                        ...preference.preferred.map(tag => `Thích ${tag}`),
+                        ...(preference.favoriteIngredients.length > 0 ? [`Thích ${preference.favoriteIngredients.length} nguyên liệu`] : []),
+                    ],
+                    householdWarnings: [
+                        ...(preference.avoidedDish ? ["Có người tránh món này"] : []),
+                        ...preference.avoided.map(tag => `Tránh ${tag}`),
+                        ...(preference.avoidedIngredients.length > 0 ? [`Tránh ${preference.avoidedIngredients.length} nguyên liệu`] : []),
+                    ],
                     cookNowReasons: getCookNowReasons(scored, totalMinutes, profile, preference, nutritionGoal),
                 } as ScoredDish;
             })
