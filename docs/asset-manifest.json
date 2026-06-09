@@ -1,10 +1,9 @@
 {
   "files": {
     "main.css": "/my-recipes/static/css/main.87da95ed.css",
-    "main.js": "/my-recipes/static/js/main.03a91d36.js",
+    "main.js": "/my-recipes/static/js/main.9f759908.js",
     "static/js/672.f90d8a96.chunk.js": "/my-recipes/static/js/672.f90d8a96.chunk.js",
     "static/js/720.54545863.chunk.js": "/my-recipes/static/js/720.54545863.chunk.js",
-    "static/js/724.c5faffd0.chunk.js": "/my-recipes/static/js/724.c5faffd0.chunk.js",
     "static/js/206.82a4e427.chunk.js": "/my-recipes/static/js/206.82a4e427.chunk.js",
     "static/media/noodles.png": "/my-recipes/static/media/noodles.db502210854831dbe3a0.png",
     "static/media/budget.png": "/my-recipes/static/media/budget.9a0121f5eb55c9f69d1b.png",
@@ -36,6 +35,6 @@
   },
   "entrypoints": [
     "static/css/main.87da95ed.css",
-    "static/js/main.03a91d36.js"
+    "static/js/main.9f759908.js"
   ]
 }

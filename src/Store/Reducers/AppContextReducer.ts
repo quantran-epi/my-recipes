@@ -1,4 +1,5 @@
 import { PayloadAction, createSlice } from '@reduxjs/toolkit'
+import { IngredientPriceCurrency, IngredientUnit } from '@store/Models/Ingredient';
 import { ScheduledMeal } from '@store/Models/ScheduledMeal';
 
 export type WeeklyMealTemplateDay = {
@@ -26,6 +27,15 @@ export type ShoppingListTemplate = {
     updatedAt: string;
 }
 
+export type IngredientPriceMemory = {
+    ingredientId: string;
+    price: number;
+    amount: number;
+    unit: IngredientUnit;
+    currency: IngredientPriceCurrency;
+    updatedAt: string;
+}
+
 export interface AppContextState {
     loading: boolean;
     currentFeatureName: string;
@@ -33,6 +43,7 @@ export interface AppContextState {
     scheduledMealNameHistory: string[];
     weeklyMealTemplates?: WeeklyMealTemplate[];
     shoppingListTemplates?: ShoppingListTemplate[];
+    ingredientPriceMemory?: Record<string, IngredientPriceMemory>;
 }
 
 const initialState: AppContextState = {
@@ -41,7 +52,8 @@ const initialState: AppContextState = {
     shoppingListNameHistory: [],
     scheduledMealNameHistory: [],
     weeklyMealTemplates: [],
-    shoppingListTemplates: []
+    shoppingListTemplates: [],
+    ingredientPriceMemory: {},
 }
 
 const rememberName = (current: string[] | undefined, name: string): string[] => {
@@ -80,6 +92,13 @@ export const appContextSlice = createSlice({
         },
         removeShoppingListTemplate: (state, action: PayloadAction<string>) => {
             state.shoppingListTemplates = (state.shoppingListTemplates ?? []).filter(item => item.id !== action.payload);
+        },
+        rememberIngredientPrice: (state, action: PayloadAction<IngredientPriceMemory>) => {
+            const current = state.ingredientPriceMemory ?? {};
+            state.ingredientPriceMemory = {
+                ...current,
+                [action.payload.ingredientId]: action.payload,
+            };
         }
     }
 })
@@ -92,6 +111,7 @@ export const {
     removeWeeklyMealTemplate,
     upsertShoppingListTemplate,
     removeShoppingListTemplate,
+    rememberIngredientPrice,
 } = appContextSlice.actions
 
 export default appContextSlice.reducer
