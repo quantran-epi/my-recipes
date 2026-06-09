@@ -1,6 +1,6 @@
 import {
     CalendarOutlined, CopyOutlined, DeleteOutlined, EditOutlined,
-    HolderOutlined, LeftOutlined, PlusOutlined, RightOutlined, ShoppingCartOutlined
+    FireOutlined, HolderOutlined, LeftOutlined, PlusOutlined, RestOutlined, RightOutlined, ShoppingCartOutlined
 } from "@ant-design/icons";
 import { DateHelpers } from "@common/Helpers/DateHelper";
 import { Badge } from "@components/Badge";
@@ -39,6 +39,7 @@ import { ShoppingListAddWidget } from "@modules/ShoppingList/Screens/ShoppingLis
 import { Checkbox } from "@components/Form/Checkbox";
 import { CheckboxChangeEvent } from "antd/es/checkbox";
 import { RootRoutes } from "@routing/RootRoutes";
+import { MealCompletionLeftoverModal, ScheduledMealCookingModal, getScheduledMealDishIds } from "./ScheduledMealCooking.widget";
 
 const getMealDateKey = (value: Date | string) => moment(value).format("YYYY-MM-DD");
 
@@ -198,6 +199,8 @@ export const ScheduledMealListScreen = () => {
     const [selectedRange, setSelectedRange] = useState<[Dayjs, Dayjs] | null>(null);
     const [shoppingRangeMealIds, setShoppingRangeMealIds] = useState<string[]>([]);
     const [shoppingRangeOpen, setShoppingRangeOpen] = useState(false);
+    const [dayCookingOpen, setDayCookingOpen] = useState(false);
+    const [dayCookingToken, setDayCookingToken] = useState(0);
     const [templateModalOpen, setTemplateModalOpen] = useState(false);
     const [templateApplyMode, setTemplateApplyMode] = useState<MealTemplateScope>('day');
     const [templateApplyWeek, setTemplateApplyWeek] = useState<Dayjs>(getMondayStart(dayjs()));
@@ -274,6 +277,15 @@ export const ScheduledMealListScreen = () => {
     };
 
     const mealsToday = _findScheduledMealsByDate(selectedDate);
+    const allDayDishIds = useMemo(() => getScheduledMealDishIds(mealsToday.flatMap(meal => [
+        ...meal.meals.breakfast,
+        ...meal.meals.lunch,
+        ...meal.meals.dinner,
+    ])), [mealsToday]);
+    const allDayDishServings = useMemo(() => mealsToday.reduce((result, meal) => ({
+        ...result,
+        ...(meal.dishServings ?? {}),
+    }), {} as Record<string, number>), [mealsToday]);
     const availableTemplates = useMemo(() => mealTemplates.filter(template => getTemplateScope(template) === templateApplyMode), [mealTemplates, templateApplyMode]);
     const selectedTemplate = availableTemplates.find(template => template.id === selectedTemplateId) ?? availableTemplates[0];
     const _applySelectedTemplate = () => {
@@ -300,6 +312,11 @@ export const ScheduledMealListScreen = () => {
         : dayjs(selectedDate).isBefore(dayjs(), "day")
             ? { label: "Đã qua", color: "#8c8c8c", background: "#fafafa", border: "#d9d9d9" }
             : { label: "Sắp tới", color: "#389e0d", background: "#f6ffed", border: "#b7eb8f" };
+
+    const _onStartDayCooking = () => {
+        setDayCookingToken(Date.now());
+        setDayCookingOpen(true);
+    };
 
     return (
         <React.Fragment>
@@ -383,7 +400,12 @@ export const ScheduledMealListScreen = () => {
                             {moment(selectedDate).format("DD/MM/YYYY")} · {mealsToday.length} thực đơn
                         </Typography.Text>
                     </div>
-                    <Button onClick={toggleAddModal.show} icon={<PlusOutlined />}>Thêm</Button>
+                    <Stack gap={6} align="center">
+                        <Button disabled={allDayDishIds.length === 0} onClick={_onStartDayCooking} icon={<FireOutlined />} style={{ color: allDayDishIds.length > 0 ? '#fa8c16' : undefined }}>
+                            Nấu ngày
+                        </Button>
+                        <Button onClick={toggleAddModal.show} icon={<PlusOutlined />}>Thêm</Button>
+                    </Stack>
                 </Box>
             </Box>
 
@@ -414,6 +436,15 @@ export const ScheduledMealListScreen = () => {
                     <ScheduledMealAddWidget date={selectedDate} onDone={toggleAddModal.hide} />
                 </DeferredModalContent>
             </Modal>
+
+            <ScheduledMealCookingModal
+                open={dayCookingOpen}
+                title={`Nấu cả ngày - ${moment(selectedDate).format("DD/MM/YYYY")}`}
+                dishIds={allDayDishIds}
+                dishServings={allDayDishServings}
+                autoStartToken={dayCookingToken}
+                onClose={() => setDayCookingOpen(false)}
+            />
 
             {/* Range picker modal */}
             <Modal
@@ -544,6 +575,10 @@ export const ScheduledMealItem = ({ item, selected, dishNameById, onDelete }: { 
     const toggleMealModal = useToggle({ defaultValue: false });
     const toggleCopyModal = useToggle({ defaultValue: false });
     const toggleDeleteConfirm = useToggle({ defaultValue: false });
+    const [cookingOpen, setCookingOpen] = useState(false);
+    const [cookingToken, setCookingToken] = useState(0);
+    const [cookingScope, setCookingScope] = useState<{ title: string; dishIds: string[] }>({ title: '', dishIds: [] });
+    const [completionOpen, setCompletionOpen] = useState(false);
     const [copyDate, setCopyDate] = useState<Dayjs | null>(null);
     const dispatch = useDispatch();
 
@@ -578,6 +613,12 @@ export const ScheduledMealItem = ({ item, selected, dishNameById, onDelete }: { 
         }
     };
 
+    const _openCooking = (title: string, dishIds: string[]) => {
+        setCookingScope({ title, dishIds: getScheduledMealDishIds(dishIds) });
+        setCookingToken(Date.now());
+        setCookingOpen(true);
+    };
+
     const mealGroups = [
         { icon: MorningIcon, label: "Sáng", dishIds: item.meals.breakfast, color: "#faad14", background: "#fffbe6", border: "#ffe58f" },
         { icon: NoonIcon, label: "Trưa", dishIds: item.meals.lunch, color: "#d46b08", background: "#fff7e6", border: "#ffd591" },
@@ -595,10 +636,13 @@ export const ScheduledMealItem = ({ item, selected, dishNameById, onDelete }: { 
 
     const MealRow = ({ icon, label, dishIds, color, background, border }: { icon: string; label: string; dishIds: string[]; color: string; background: string; border: string }) => (
         <Box style={{ border: `1px solid ${border}`, borderRadius: 8, background, padding: "8px 9px", minWidth: 0 }}>
-            <div style={{ display: "grid", gridTemplateColumns: "auto minmax(0, 1fr) auto", gap: 7, alignItems: "center", marginBottom: 6 }}>
+            <div style={{ display: "grid", gridTemplateColumns: "auto minmax(0, 1fr) auto auto", gap: 7, alignItems: "center", marginBottom: 6 }}>
                 <Image src={icon} preview={false} width={15} style={{ marginBottom: 2 }} />
                 <Typography.Text strong style={{ fontSize: 13, color, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{label}</Typography.Text>
                 <Typography.Text type="secondary" style={{ fontSize: 11, whiteSpace: "nowrap" }}>{dishIds.length} món</Typography.Text>
+                <Button size="small" disabled={dishIds.length === 0} icon={<FireOutlined />} onClick={() => _openCooking(`Nấu bữa ${label} - ${item.name}`, dishIds)} style={{ color: dishIds.length > 0 ? '#fa8c16' : undefined, paddingInline: 8 }}>
+                    Nấu
+                </Button>
             </div>
             {dishIds.length === 0 ? (
                 <Typography.Text type="secondary" style={{ display: "block", fontSize: 12, lineHeight: "18px" }}>Chưa chọn</Typography.Text>
@@ -647,6 +691,12 @@ export const ScheduledMealItem = ({ item, selected, dishNameById, onDelete }: { 
                         </Stack>
 
                         <Stack gap={4} align="center">
+                            <Button disabled={allDishIds.length === 0} icon={<FireOutlined />} onClick={() => _openCooking(`Nấu thực đơn - ${item.name}`, allDishIds)} style={{ color: allDishIds.length > 0 ? '#fa8c16' : undefined }}>
+                                Nấu
+                            </Button>
+                            <Button disabled={allDishIds.length === 0} icon={<RestOutlined />} onClick={() => setCompletionOpen(true)} style={{ color: allDishIds.length > 0 ? '#52c41a' : undefined }}>
+                                Hoàn tất
+                            </Button>
                             <Button onClick={toggleMealModal.show}>Chi tiết</Button>
                             <Dropdown menu={{
                                 items: [
@@ -670,6 +720,22 @@ export const ScheduledMealItem = ({ item, selected, dishNameById, onDelete }: { 
                     </div>
                 </div>
             </Box>
+
+            <ScheduledMealCookingModal
+                open={cookingOpen}
+                title={cookingScope.title}
+                dishIds={cookingScope.dishIds}
+                dishServings={item.dishServings}
+                autoStartToken={cookingToken}
+                onClose={() => setCookingOpen(false)}
+            />
+
+            <MealCompletionLeftoverModal
+                open={completionOpen}
+                title={`Hoàn tất bữa - ${item.name}`}
+                dishIds={allDishIds}
+                onClose={() => setCompletionOpen(false)}
+            />
 
             {/* Edit */}
             {toggleEditModal.value && <Modal

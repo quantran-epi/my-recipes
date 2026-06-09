@@ -95,6 +95,8 @@ const headerVisualByFeatureName: Record<string, HeaderVisual> = {
     "Nguyên liệu": { tone: "#389e0d", shadow: "rgba(44,128,56,0.22)" },
     "Món ăn": { tone: "#fa541c", shadow: "rgba(190,79,30,0.22)" },
     "Nấu gì?": { tone: "#13a8a8", shadow: "rgba(19,130,130,0.22)" },
+    "Nhà mình": { tone: "#1677ff", shadow: "rgba(22,88,210,0.23)" },
+    "Smart Meal Planner": { tone: "#13a8a8", shadow: "rgba(19,130,130,0.22)" },
     "Thực đơn": { tone: "#1677ff", shadow: "rgba(22,88,210,0.23)" },
     "Lịch mua sắm": { tone: "#0958d9", shadow: "rgba(9,88,217,0.24)" },
     "Tính chi phí": { tone: "#d46b08", shadow: "rgba(180,92,18,0.23)" },
@@ -111,6 +113,8 @@ const getHeaderVisualByPath = (pathname: string): HeaderVisual | null => {
     if (pathname.includes("/ingredient")) return headerVisualByFeatureName["Nguyên liệu"];
     if (pathname.includes("/dishes")) return headerVisualByFeatureName["Món ăn"];
     if (pathname.includes("/dish-suggester")) return headerVisualByFeatureName["Nấu gì?"];
+    if (pathname.includes("/household")) return headerVisualByFeatureName["Nhà mình"];
+    if (pathname.includes("/smart-meal-planner")) return headerVisualByFeatureName["Smart Meal Planner"];
     if (pathname.includes("/scheduledMeal")) return headerVisualByFeatureName["Thực đơn"];
     if (pathname.includes("/shoppingList")) return headerVisualByFeatureName["Lịch mua sắm"];
     if (pathname.includes("/expense-planner")) return headerVisualByFeatureName["Tính chi phí"];
@@ -216,6 +220,8 @@ export const MasterPage = () => {
             case "Phân tích": return MonitorIcon;
             case "Dinh dưỡng": return NutritionPlanIcon;
             case "Mẫu dùng lại": return LayoutIcon;
+            case "Nhà mình": return HouseIcon;
+            case "Smart Meal Planner": return MealsIcon;
             case "Sức khỏe dữ liệu": return MedicalRecordIcon;
             case 'Tổng quan': return HouseIcon;
             default: return null;
@@ -450,6 +456,8 @@ const SidebarDrawer = ({ buttonStyle }: { buttonStyle?: React.CSSProperties }) =
         { key: 'nutritionGoals', href: RootRoutes.AuthorizedRoutes.NutritionGoals(), icon: NutritionPlanIcon, label: 'Dinh dưỡng' },
         { key: 'templates', href: RootRoutes.AuthorizedRoutes.Templates(), icon: LayoutIcon, label: 'Mẫu dùng lại' },
         { key: 'dishSuggester', href: RootRoutes.AuthorizedRoutes.DishSuggester(), icon: SuggesterIcon, label: 'Nấu gì?' },
+        { key: 'household', href: RootRoutes.AuthorizedRoutes.HouseholdProfiles(), icon: HouseIcon, label: 'Nhà mình' },
+        { key: 'smartMealPlanner', href: RootRoutes.AuthorizedRoutes.SmartMealPlanner(), icon: MealsIcon, label: 'Smart Meal Planner' },
         { key: 'ingredients', href: RootRoutes.AuthorizedRoutes.IngredientRoutes.List(), icon: IngredientIcon, label: 'Nguyên liệu' },
         { key: 'dishes', href: RootRoutes.AuthorizedRoutes.DishesRoutes.List(), icon: DishesIcon, label: 'Món ăn' },
         { key: 'expensePlanner', href: RootRoutes.AuthorizedRoutes.ExpensePlanner(), icon: BudgetIcon, label: 'Tính chi phí' },
@@ -944,6 +952,7 @@ const CookingPill = () => {
             destroyOnClose
             onCancel={() => setCookingModalOpen(false)}
             footer={null}
+            width="min(760px, calc(100vw - 24px))"
         >
             <DeferredModalContent active={cookingModalOpen} minHeight={220}>
                 {cookingModalOpen && focusedDish ? (

@@ -334,7 +334,7 @@ export const CookingSessionWidget: React.FunctionComponent<CookingSessionWidgetP
         const currentStepDone = completedStepSet.has(currentIndex);
 
         return <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-            <div style={{ display: "grid", gridTemplateColumns: "minmax(0, 1fr) 178px", gap: 10, alignItems: "center" }}>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 10, alignItems: "center" }}>
                 <Box style={{ minWidth: 0 }}>
                     <Typography.Text strong style={{ display: "block", lineHeight: "18px" }}>{dish.name}</Typography.Text>
                     <Typography.Text type="secondary" style={{ display: "block", fontSize: 12, lineHeight: "16px" }}>
@@ -345,17 +345,6 @@ export const CookingSessionWidget: React.FunctionComponent<CookingSessionWidgetP
             </div>
 
             <Progress percent={progress} size="small" style={{ marginBottom: 0 }} showInfo strokeColor="#fa8c16" />
-
-            <FamilyNotesPanel />
-
-            {lackingIngredientIds.length > 0 && <Box style={{ background: '#fff7e6', border: '1px solid #ffd591', borderRadius: 8, padding: '8px 12px', fontSize: 12, color: '#d46b08' }}>
-                Thiếu {lackingIngredientIds.length} nguyên liệu. Có thể đánh dấu bỏ qua hoặc thay thế trước khi hoàn thành.
-            </Box>}
-
-            <Box style={{ border: "1px solid #f0f0f0", borderRadius: 8, padding: 10, background: "#fff" }}>
-                <Typography.Text strong style={{ display: "block", marginBottom: 6, fontSize: 13 }}>Nguyên liệu</Typography.Text>
-                <IngredientChecklist interactive />
-            </Box>
 
             <Box style={{ background: "#fffbe6", border: "1px solid #ffd591", borderRadius: 8, padding: "16px 14px" }}>
                 <Typography.Text type="secondary" style={{ display: "block", fontSize: 12, lineHeight: "16px", marginBottom: 8 }}>
@@ -373,6 +362,17 @@ export const CookingSessionWidget: React.FunctionComponent<CookingSessionWidgetP
                 >
                     {currentStepDone ? "Đã xong bước này" : "Đánh dấu xong"}
                 </Button>
+            </Box>
+
+            <FamilyNotesPanel />
+
+            {lackingIngredientIds.length > 0 && <Box style={{ background: '#fff7e6', border: '1px solid #ffd591', borderRadius: 8, padding: '8px 12px', fontSize: 12, color: '#d46b08' }}>
+                Thiếu {lackingIngredientIds.length} nguyên liệu. Có thể đánh dấu bỏ qua hoặc thay thế trước khi hoàn thành.
+            </Box>}
+
+            <Box style={{ border: "1px solid #f0f0f0", borderRadius: 8, padding: 10, background: "#fff" }}>
+                <Typography.Text strong style={{ display: "block", marginBottom: 6, fontSize: 13 }}>Nguyên liệu</Typography.Text>
+                <IngredientChecklist interactive />
             </Box>
 
             <Input.TextArea

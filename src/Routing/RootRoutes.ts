@@ -71,6 +71,8 @@ const AuthorizedRoutes = {
     Root: () => "/",
     Analytics: () => RouteHelpers.CreateRoute('/analytics'),
     DishSuggester: () => RouteHelpers.CreateRoute('/dish-suggester'),
+    HouseholdProfiles: () => RouteHelpers.CreateRoute('/household'),
+    SmartMealPlanner: () => RouteHelpers.CreateRoute('/smart-meal-planner'),
     NutritionGoals,
     UserGuide,
     UserGuideTour,

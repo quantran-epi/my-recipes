@@ -1,6 +1,7 @@
-import { BarChartOutlined, BulbOutlined, CalculatorOutlined, ClockCircleOutlined, DeleteOutlined, ExportOutlined, FireOutlined, LeftOutlined, MinusOutlined, PieChartOutlined, PlusOutlined, SettingOutlined, ShoppingCartOutlined, TeamOutlined, ThunderboltOutlined, UserAddOutlined } from "@ant-design/icons";
+import { BarChartOutlined, BulbOutlined, CalculatorOutlined, ClockCircleOutlined, ExportOutlined, LeftOutlined, MinusOutlined, PieChartOutlined, PlusOutlined, SettingOutlined, ShoppingCartOutlined, TeamOutlined, ThunderboltOutlined } from "@ant-design/icons";
 import { DishDurationHelper } from "@common/Helpers/DishDurationHelper";
 import { DishNutritionHelper, DishNutritionSummary } from "@common/Helpers/DishNutritionHelper";
+import { HouseholdSuitabilityHelper } from "@common/Helpers/HouseholdSuitabilityHelper";
 import { NutritionGoalHelper, NutritionGoalMatch } from "@common/Helpers/NutritionGoalHelper";
 import { Button } from "@components/Button";
 import { Image } from "@components/Image";
@@ -12,8 +13,8 @@ import { Tag } from "@components/Tag";
 import { Typography } from "@components/Typography";
 import { useScheduledCalculation, useToggle } from "@hooks";
 import { DishScorer, ScoredDish, ScoredDishGroup } from "../Helpers/DishScorer";
-import { selectDishes, selectHouseholdMembers, selectHouseholdPreferenceProfile, selectIngredients, selectIngredientsById, selectInventory, selectInventoryHealthConfig, selectNutritionGoals, selectSelectedHouseholdMemberIds, selectSelectedHouseholdMembers } from "@store/Selectors";
-import { Input, InputNumber, Select, Spin } from "antd";
+import { selectDishes, selectHouseholdMembers, selectIngredients, selectIngredientsById, selectInventory, selectInventoryHealthConfig, selectNutritionGoals, selectSelectedHouseholdMemberIds } from "@store/Selectors";
+import { InputNumber, Select, Spin } from "antd";
 import React, { useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
@@ -26,16 +27,15 @@ import { NutritionCalculatorModalContent, type NutritionCalculatorInitialSelecti
 import ShoppingListIcon from "../../../../assets/icons/shoppingList.png";
 import NoodlesIcon from "../../../../assets/icons/noodles.png";
 import DietIcon from "../../../../assets/icons/diet.png";
-import { DISH_TAGS, Dishes } from "@store/Models/Dishes";
+import { Dishes } from "@store/Models/Dishes";
 import { InventoryHelper } from "@common/Helpers/InventoryHelper";
 import { IngredientUnitHelper } from "@common/Helpers/IngredientUnitHelper";
 import { Collapse } from "antd";
 import { RootRoutes } from "@routing/RootRoutes";
 import { NutritionGoal as SharedNutritionGoal } from "@store/Models/SharedConfig";
-import { HouseholdMemberProfile, removeHouseholdMemberProfile, setSelectedHouseholdMemberIds, upsertHouseholdMemberProfile } from "@store/Reducers/AppContextReducer";
-import { nanoid } from "nanoid";
+import { setSelectedHouseholdMemberIds } from "@store/Reducers/AppContextReducer";
 
-type Mode = "cookNow" | "ingredients" | "inventory" | "duration" | "nutrition";
+type Mode = "ingredients" | "inventory" | "duration" | "nutrition";
 type SuggesterActionMode = "navigate" | "modal";
 
 type NutritionSuggestion = {
@@ -109,10 +109,8 @@ export const DishSuggesterScreen: React.FC<DishSuggesterScreenProps> = ({ open, 
     const inventory = useSelector(selectInventory);
     const inventoryConfig = useSelector(selectInventoryHealthConfig);
     const nutritionGoals = useSelector(selectNutritionGoals);
-    const householdPreferenceProfile = useSelector(selectHouseholdPreferenceProfile);
     const householdMembers = useSelector(selectHouseholdMembers);
     const selectedHouseholdMemberIds = useSelector(selectSelectedHouseholdMemberIds);
-    const selectedHouseholdMembers = useSelector(selectSelectedHouseholdMembers);
 
     const [mode, setMode] = useState<Mode>(initialMode ?? "ingredients");
     const [step, setStep] = useState(0);
@@ -135,13 +133,13 @@ export const DishSuggesterScreen: React.FC<DishSuggesterScreenProps> = ({ open, 
     const toggleShoppingListAdd = useToggle();
     const toggleExpensePlanner = useToggle();
     const toggleNutritionCalculator = useToggle();
+    const toggleSuitabilityModal = useToggle();
 
     const [maxMinutes, setMaxMinutes] = useState<number>(30);
     const [fridgeSearchIds, setFridgeSearchIds] = useState<string[]>([]);
     const [durationSearchIds, setDurationSearchIds] = useState<string[]>([]);
     const [nutritionGoalId, setNutritionGoalId] = useState<string>(nutritionGoals[0]?.id ?? "");
     const [expandedNutritionDishIds, setExpandedNutritionDishIds] = useState<Set<string>>(() => new Set());
-    const [editingMemberId, setEditingMemberId] = useState<string>();
 
     React.useEffect(() => {
         if (nutritionGoals.length === 0) {
@@ -153,34 +151,9 @@ export const DishSuggesterScreen: React.FC<DishSuggesterScreenProps> = ({ open, 
         }
     }, [nutritionGoals, nutritionGoalId]);
 
-    React.useEffect(() => {
-        if (editingMemberId && householdMembers.some(member => member.id === editingMemberId)) return;
-        setEditingMemberId(selectedHouseholdMembers[0]?.id ?? householdMembers[0]?.id);
-    }, [editingMemberId, householdMembers, selectedHouseholdMembers]);
-
     const selectedNutritionGoal = useMemo<SharedNutritionGoal | undefined>(() => {
         return nutritionGoals.find(goal => goal.id === nutritionGoalId) ?? nutritionGoals[0];
     }, [nutritionGoalId, nutritionGoals]);
-
-    const cookNowNutritionGoal = useMemo<SharedNutritionGoal | undefined>(() => {
-        return nutritionGoals.find(goal => goal.id === householdPreferenceProfile.nutritionGoalId);
-    }, [householdPreferenceProfile.nutritionGoalId, nutritionGoals]);
-
-    const allDishTagOptions = useMemo(() => {
-        const tags = new Set<string>(DISH_TAGS);
-        dishes.forEach(dish => dish.tags?.forEach(tag => tags.add(tag)));
-        return Array.from(tags).map(tag => ({ value: tag, label: tag }));
-    }, [dishes]);
-
-    const dishOptions = useMemo(() => dishes
-        .slice()
-        .sort((a, b) => a.name.localeCompare(b.name))
-        .map(dish => ({ value: dish.id, label: dish.name })), [dishes]);
-
-    const ingredientOptions = useMemo(() => allIngredients
-        .slice()
-        .sort((a, b) => a.name.localeCompare(b.name))
-        .map(ingredient => ({ value: ingredient.id, label: ingredient.name })), [allIngredients]);
 
     const inventoryIngredientIds = useMemo(() => {
         if (!open) return [];
@@ -214,17 +187,6 @@ export const DishSuggesterScreen: React.FC<DishSuggesterScreenProps> = ({ open, 
     });
     const inventoryScored = inventorySuggestions.scored;
     const inventoryGroups = inventorySuggestions.groups;
-
-    const calculateCookNowSuggestions = React.useCallback((): DishSuggestionCalculation => {
-        const scored = DishScorer.scoreCookNow(dishes, inventory as any, dishes, allIngredients, householdPreferenceProfile, inventoryConfig, cookNowNutritionGoal);
-        return { scored, groups: DishScorer.groupCookNow(scored) };
-    }, [allIngredients, cookNowNutritionGoal, dishes, householdPreferenceProfile, inventory, inventoryConfig]);
-    const { value: cookNowSuggestions, pending: cookNowSuggestionsPending } = useScheduledCalculation(calculateCookNowSuggestions, {
-        enabled: open && mode === "cookNow",
-        initialValue: createEmptyDishSuggestionCalculation,
-    });
-    const cookNowScored = cookNowSuggestions.scored;
-    const cookNowGroups = cookNowSuggestions.groups;
 
     const filteredInventoryGroups = useMemo(() => {
         if (fridgeSearchIds.length === 0) return inventoryGroups;
@@ -304,9 +266,9 @@ export const DishSuggesterScreen: React.FC<DishSuggesterScreenProps> = ({ open, 
     }), [selectedDishIds]);
 
     const selectedScored = useMemo(() => {
-        const source = mode === "cookNow" ? cookNowScored : mode === "inventory" ? inventoryScored : ingredientScored;
+        const source = mode === "inventory" ? inventoryScored : ingredientScored;
         return source.filter(s => selectedDishIds.includes(s.dish.id));
-    }, [mode, cookNowScored, inventoryScored, ingredientScored, selectedDishIds]);
+    }, [mode, inventoryScored, ingredientScored, selectedDishIds]);
 
     const missingIngredientIds = useMemo(() => {
         const ids = new Set<string>();
@@ -358,41 +320,7 @@ export const DishSuggesterScreen: React.FC<DishSuggesterScreenProps> = ({ open, 
     }, []);
 
     const _onSelectedHouseholdMembersChange = React.useCallback((memberIds: string[]) => {
-        setSelectedDishIds([]);
         dispatch(setSelectedHouseholdMemberIds(memberIds));
-    }, [dispatch]);
-
-    const _onCreateHouseholdMember = React.useCallback(() => {
-        const id = nanoid(8);
-        const now = new Date().toISOString();
-        const member: HouseholdMemberProfile = {
-            id,
-            name: `Người ${householdMembers.length + 1}`,
-            color: ["#1677ff", "#52c41a", "#fa8c16", "#eb2f96", "#722ed1"][householdMembers.length % 5],
-            favoriteDishIds: [],
-            avoidedDishIds: [],
-            favoriteIngredientIds: [],
-            avoidedIngredientIds: [],
-            preferredTags: [],
-            avoidedTags: [],
-            portionPreference: 1,
-            createdAt: now,
-            updatedAt: now,
-        };
-        dispatch(upsertHouseholdMemberProfile(member));
-        dispatch(setSelectedHouseholdMemberIds(Array.from(new Set([...selectedHouseholdMemberIds, id]))));
-        setEditingMemberId(id);
-        setSelectedDishIds([]);
-    }, [dispatch, householdMembers.length, selectedHouseholdMemberIds]);
-
-    const _updateHouseholdMember = React.useCallback((member: HouseholdMemberProfile, patch: Partial<HouseholdMemberProfile>) => {
-        setSelectedDishIds([]);
-        dispatch(upsertHouseholdMemberProfile({ ...member, ...patch }));
-    }, [dispatch]);
-
-    const _removeHouseholdMember = React.useCallback((memberId: string) => {
-        setSelectedDishIds([]);
-        dispatch(removeHouseholdMemberProfile(memberId));
     }, [dispatch]);
 
     const _onNext = () => setStep(1);
@@ -408,7 +336,7 @@ export const DishSuggesterScreen: React.FC<DishSuggesterScreenProps> = ({ open, 
 
     const _onModeChange = (m: Mode) => {
         setMode(m);
-        setStep(m === "inventory" || m === "cookNow" ? 1 : 0);
+        setStep(m === "inventory" ? 1 : 0);
         setSelectedDishIds([]);
         setExpandedNutritionDishIds(new Set());
         setFridgeSearchIds([]);
@@ -468,7 +396,7 @@ export const DishSuggesterScreen: React.FC<DishSuggesterScreenProps> = ({ open, 
         marginTop: 12,
         display: "flex",
         alignItems: "center",
-        justifyContent: mode !== "inventory" && mode !== "cookNow" ? "space-between" : "flex-end",
+        justifyContent: mode !== "inventory" ? "space-between" : "flex-end",
         gap: 12,
     };
 
@@ -492,6 +420,14 @@ export const DishSuggesterScreen: React.FC<DishSuggesterScreenProps> = ({ open, 
                 data-testid="dish-suggester-expense-planner-button"
                 icon={<CalculatorOutlined />}
                 onClick={() => _onOpenExpensePlanner(dishIds)}
+                style={actionButtonStyle}
+            />
+            <Button
+                disabled={disabled}
+                aria-label={`Đánh giá độ phù hợp của ${dishIds.length} món cho nhà mình`}
+                data-testid="dish-suggester-suitability-button"
+                icon={<TeamOutlined />}
+                onClick={toggleSuitabilityModal.show}
                 style={actionButtonStyle}
             />
             <Button
@@ -542,7 +478,7 @@ export const DishSuggesterScreen: React.FC<DishSuggesterScreenProps> = ({ open, 
                 </Box>
             )}
             <div style={footerRowStyle}>
-                {mode !== "inventory" && mode !== "cookNow" && (
+                {mode !== "inventory" && (
                     <Button onClick={_onBack} icon={<LeftOutlined />} style={{ borderRadius: 20 }}>
                         Quay lại
                     </Button>
@@ -555,12 +491,11 @@ export const DishSuggesterScreen: React.FC<DishSuggesterScreenProps> = ({ open, 
     const ModeTabs = () => (
         <div style={{
             display: "grid",
-            gridTemplateColumns: "repeat(5, minmax(0, 1fr))",
+            gridTemplateColumns: "repeat(4, minmax(0, 1fr))",
             gap: 6,
             marginBottom: 16,
         }}>
             {([
-                { key: "cookNow" as Mode, label: "Nấu ngay", icon: <FireOutlined /> },
                 { key: "ingredients" as Mode, label: "Nguyên liệu", icon: <BulbOutlined /> },
                 { key: "inventory" as Mode, label: "Tủ lạnh", icon: <ThunderboltOutlined /> },
                 { key: "duration" as Mode, label: "Thời gian", icon: <ClockCircleOutlined /> },
@@ -595,184 +530,6 @@ export const DishSuggesterScreen: React.FC<DishSuggesterScreenProps> = ({ open, 
             ))}
         </div>
     );
-
-    const HouseholdPreferencePanel = () => {
-        const editingMember = householdMembers.find(member => member.id === editingMemberId);
-        const effectiveMemberCount = selectedHouseholdMembers.length || householdMembers.length;
-
-        return <Box style={{ padding: 12, borderRadius: 8, background: "#f7fffb", border: "1px solid #b7eb8f", marginBottom: 12 }}>
-            <Stack justify="space-between" align="center" gap={8} style={{ marginBottom: 10 }}>
-                <Stack gap={7} align="center" style={{ minWidth: 0 }}>
-                    <TeamOutlined style={{ color: "#389e0d" }} />
-                    <Typography.Text strong style={{ color: "#1f7a31" }}>Nhà mình</Typography.Text>
-                </Stack>
-                <Stack gap={5} align="center">
-                    <Tag color="green" style={{ marginRight: 0 }}>{householdPreferenceProfile.servingCount} phần</Tag>
-                    <Tag color="blue" style={{ marginRight: 0 }}>{effectiveMemberCount} người</Tag>
-                </Stack>
-            </Stack>
-
-            {householdMembers.length === 0 ? <Box style={{ border: "1px dashed #b7eb8f", borderRadius: 8, padding: 12, background: "#fff", textAlign: "center" }}>
-                <Typography.Text type="secondary" style={{ display: "block", marginBottom: 8 }}>Chưa có thành viên.</Typography.Text>
-                <Button type="primary" icon={<UserAddOutlined />} onClick={_onCreateHouseholdMember}>Thêm thành viên</Button>
-            </Box> : <>
-                <Select
-                    mode="multiple"
-                    allowClear
-                    size="small"
-                    maxTagCount="responsive"
-                    placeholder="Tất cả thành viên"
-                    value={selectedHouseholdMemberIds}
-                    onChange={_onSelectedHouseholdMembersChange}
-                    options={householdMembers.map(member => ({ value: member.id, label: member.name }))}
-                    style={{ width: "100%", marginBottom: 8 }}
-                />
-
-                <Stack wrap="wrap" gap={6} style={{ marginBottom: 10 }}>
-                    {householdMembers.map(member => {
-                        const active = editingMember?.id === member.id;
-                        return <button
-                            key={member.id}
-                            type="button"
-                            onClick={() => setEditingMemberId(member.id)}
-                            style={{
-                                border: active ? `2px solid ${member.color ?? "#389e0d"}` : "1px solid #d9f7be",
-                                background: active ? "#f6ffed" : "#fff",
-                                borderRadius: 18,
-                                padding: "4px 9px",
-                                cursor: "pointer",
-                                display: "inline-flex",
-                                alignItems: "center",
-                                gap: 6,
-                                minHeight: 30,
-                            }}
-                        >
-                            <span style={{ width: 8, height: 8, borderRadius: 99, background: member.color ?? "#389e0d", flexShrink: 0 }} />
-                            <span style={{ fontSize: 12, fontWeight: 700, color: active ? "#1f7a31" : "#31412f" }}>{member.name}</span>
-                        </button>;
-                    })}
-                    <Button size="small" icon={<UserAddOutlined />} onClick={_onCreateHouseholdMember}>Thêm</Button>
-                </Stack>
-
-                {editingMember && <Box style={{ border: "1px solid #d9f7be", borderRadius: 8, background: "#fff", padding: 10 }}>
-                    <div style={{ display: "grid", gridTemplateColumns: "minmax(0, 1fr) 96px 106px", gap: 8, marginBottom: 8 }}>
-                        <Input
-                            size="small"
-                            value={editingMember.name}
-                            onChange={event => _updateHouseholdMember(editingMember, { name: event.target.value })}
-                            placeholder="Tên"
-                        />
-                        <InputNumber
-                            size="small"
-                            min={0.5}
-                            max={12}
-                            step={0.5}
-                            value={editingMember.portionPreference ?? 1}
-                            addonAfter="phần"
-                            onChange={value => _updateHouseholdMember(editingMember, { portionPreference: Number(value ?? 1) })}
-                            style={{ width: "100%" }}
-                        />
-                        <InputNumber
-                            size="small"
-                            min={5}
-                            max={480}
-                            step={5}
-                            value={editingMember.maxCookMinutes}
-                            addonAfter="phút"
-                            placeholder="Tối đa"
-                            onChange={value => _updateHouseholdMember(editingMember, { maxCookMinutes: value === null ? undefined : Number(value) })}
-                            style={{ width: "100%" }}
-                        />
-                    </div>
-
-                    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: 8 }}>
-                        <Select
-                            allowClear
-                            size="small"
-                            placeholder="Mục tiêu dinh dưỡng"
-                            value={editingMember.nutritionGoalId}
-                            onChange={value => _updateHouseholdMember(editingMember, { nutritionGoalId: value })}
-                            options={nutritionGoals.map(goal => ({ value: goal.id, label: goal.name }))}
-                        />
-                        <Select
-                            mode="multiple"
-                            allowClear
-                            size="small"
-                            maxTagCount="responsive"
-                            placeholder="Món thích"
-                            value={editingMember.favoriteDishIds}
-                            onChange={ids => _updateHouseholdMember(editingMember, { favoriteDishIds: ids, avoidedDishIds: editingMember.avoidedDishIds.filter(id => !ids.includes(id)) })}
-                            options={dishOptions}
-                        />
-                        <Select
-                            mode="multiple"
-                            allowClear
-                            size="small"
-                            maxTagCount="responsive"
-                            placeholder="Món tránh"
-                            value={editingMember.avoidedDishIds}
-                            onChange={ids => _updateHouseholdMember(editingMember, { avoidedDishIds: ids, favoriteDishIds: editingMember.favoriteDishIds.filter(id => !ids.includes(id)) })}
-                            options={dishOptions}
-                        />
-                        <Select
-                            mode="multiple"
-                            allowClear
-                            size="small"
-                            maxTagCount="responsive"
-                            placeholder="Nguyên liệu thích"
-                            value={editingMember.favoriteIngredientIds}
-                            onChange={ids => _updateHouseholdMember(editingMember, { favoriteIngredientIds: ids, avoidedIngredientIds: editingMember.avoidedIngredientIds.filter(id => !ids.includes(id)) })}
-                            options={ingredientOptions}
-                        />
-                        <Select
-                            mode="multiple"
-                            allowClear
-                            size="small"
-                            maxTagCount="responsive"
-                            placeholder="Nguyên liệu tránh"
-                            value={editingMember.avoidedIngredientIds}
-                            onChange={ids => _updateHouseholdMember(editingMember, { avoidedIngredientIds: ids, favoriteIngredientIds: editingMember.favoriteIngredientIds.filter(id => !ids.includes(id)) })}
-                            options={ingredientOptions}
-                        />
-                        <Select
-                            mode="multiple"
-                            allowClear
-                            size="small"
-                            maxTagCount="responsive"
-                            placeholder="Kiểu món thích"
-                            value={editingMember.preferredTags}
-                            onChange={tags => _updateHouseholdMember(editingMember, { preferredTags: tags, avoidedTags: editingMember.avoidedTags.filter(tag => !tags.includes(tag)) })}
-                            options={allDishTagOptions}
-                        />
-                        <Select
-                            mode="multiple"
-                            allowClear
-                            size="small"
-                            maxTagCount="responsive"
-                            placeholder="Kiểu món tránh"
-                            value={editingMember.avoidedTags}
-                            onChange={tags => _updateHouseholdMember(editingMember, { avoidedTags: tags, preferredTags: editingMember.preferredTags.filter(tag => !tags.includes(tag)) })}
-                            options={allDishTagOptions}
-                        />
-                    </div>
-
-                    <Input.TextArea
-                        value={editingMember.notes}
-                        onChange={event => _updateHouseholdMember(editingMember, { notes: event.target.value })}
-                        placeholder="Ghi chú"
-                        autoSize={{ minRows: 2, maxRows: 4 }}
-                        style={{ marginTop: 8 }}
-                    />
-
-                    <Stack justify="flex-end" style={{ marginTop: 8 }}>
-                        <Button size="small" danger icon={<DeleteOutlined />} onClick={() => _removeHouseholdMember(editingMember.id)}>
-                            Xóa hồ sơ
-                        </Button>
-                    </Stack>
-                </Box>}
-            </>}
-        </Box>;
-    };
 
     const NutritionMetric = ({ label, value, tone }: { label: string; value: string; tone: string }) => (
         <div style={{ minWidth: 0, border: `1px solid ${tone}22`, borderRadius: 8, background: `${tone}0d`, padding: "6px 7px" }}>
@@ -922,38 +679,6 @@ export const DishSuggesterScreen: React.FC<DishSuggesterScreenProps> = ({ open, 
 
     const content = <>
             <ModeTabs />
-
-            {/* -- Mode: cook now -- */}
-            {mode === "cookNow" && (
-                <>
-                    <HouseholdPreferencePanel />
-                    {inventoryIngredientIds.length === 0 ? (
-                        <Box style={{ textAlign: "center", padding: "30px 0" }}>
-                            <Typography.Text type="secondary">Tủ lạnh trống — hãy cập nhật tồn kho trước</Typography.Text>
-                        </Box>
-                    ) : cookNowSuggestionsPending ? (
-                        <PendingCalculationBox text="Đang xếp hạng món nấu ngay..." />
-                    ) : cookNowGroups.length === 0 ? (
-                        <Box style={{ textAlign: "center", padding: "30px 0" }}>
-                            <Typography.Text type="secondary">Chưa tìm thấy món hợp khẩu vị nhà và tủ lạnh hiện tại.</Typography.Text>
-                        </Box>
-                    ) : (
-                        <>
-                            <Stack wrap="wrap" gap={6} style={{ marginBottom: 10 }}>
-                                <Tag color="green" style={{ marginRight: 0 }}>{cookNowScored.filter(item => item.missingIngredientIds.length === 0).length} nấu ngay</Tag>
-                                <Tag color="blue" style={{ marginRight: 0 }}>≤ {householdPreferenceProfile.maxCookMinutes} phút</Tag>
-                                {cookNowNutritionGoal && <Tag color="purple" style={{ marginRight: 0 }}>{cookNowNutritionGoal.name}</Tag>}
-                            </Stack>
-                            <DishSuggestionList
-                                groups={cookNowGroups}
-                                selectedDishIds={selectedDishIds}
-                                onToggle={_toggleDish}
-                            />
-                        </>
-                    )}
-                    <ResultsFooter dishIds={selectedDishIds} pending={cookNowSuggestionsPending} />
-                </>
-            )}
 
             {/* ── Mode: ingredients ── */}
             {mode === "ingredients" && step === 0 && (
@@ -1335,7 +1060,7 @@ export const DishSuggesterScreen: React.FC<DishSuggesterScreenProps> = ({ open, 
                     dishIds={selectedDishIds}
                     alreadyHaveIngredientIds={
                         mode === "ingredients" ? selectedIngredientIds :
-                        mode === "inventory" || mode === "cookNow" ? matchedIngredientIds : []
+                        mode === "inventory" ? matchedIngredientIds : []
                     }
                     onDone={() => {
                         toggleShoppingListAdd.hide();
@@ -1377,6 +1102,74 @@ export const DishSuggesterScreen: React.FC<DishSuggesterScreenProps> = ({ open, 
         </DeferredModalContent>
     </Modal> : null;
 
+    const suitabilityMembers = selectedHouseholdMemberIds.length > 0
+        ? householdMembers.filter(member => selectedHouseholdMemberIds.includes(member.id))
+        : householdMembers;
+    const suitabilityResults = selectedDishesForActions.map(dish => HouseholdSuitabilityHelper.evaluateDishForMembers(dish, suitabilityMembers, dishes, ingredientsById, nutritionGoals));
+    const suitabilityModal = toggleSuitabilityModal.value ? <Modal
+        open={toggleSuitabilityModal.value}
+        onCancel={toggleSuitabilityModal.hide}
+        footer={null}
+        destroyOnClose={false}
+        width='min(860px, calc(100vw - 24px))'
+        title={<Space><TeamOutlined />Độ phù hợp với nhà mình</Space>}
+        bodyStyle={{ maxHeight: 'calc(100vh - 128px)', overflowY: 'auto', padding: '18px' }}
+    >
+        <DeferredModalContent active={toggleSuitabilityModal.value} minHeight={240}>
+            {householdMembers.length === 0 ? <Box style={{ textAlign: 'center', padding: '26px 0' }}>
+                <Typography.Text type='secondary' style={{ display: 'block', marginBottom: 10 }}>Chưa có hồ sơ thành viên để đánh giá.</Typography.Text>
+                <Button type='primary' icon={<TeamOutlined />} onClick={() => { navigate(RootRoutes.AuthorizedRoutes.HouseholdProfiles()); toggleSuitabilityModal.hide(); if (!pageInline) _onClose(); }}>
+                    Mở Nhà mình
+                </Button>
+            </Box> : selectedDishesForActions.length === 0 ? <Box style={{ textAlign: 'center', padding: '26px 0' }}>
+                <Typography.Text type='secondary'>Chọn ít nhất một món để đánh giá.</Typography.Text>
+            </Box> : <Stack direction='column' gap={12}>
+                <Box style={{ border: '1px solid #e6f4ff', borderRadius: 8, background: '#f8fbff', padding: 10 }}>
+                    <Typography.Text strong style={{ display: 'block', fontSize: 12, marginBottom: 6 }}>Thành viên dùng để đánh giá</Typography.Text>
+                    <Select
+                        mode='multiple'
+                        allowClear
+                        maxTagCount='responsive'
+                        value={selectedHouseholdMemberIds}
+                        placeholder='Tất cả thành viên'
+                        onChange={_onSelectedHouseholdMembersChange}
+                        options={householdMembers.map(member => ({ value: member.id, label: member.name }))}
+                        style={{ width: '100%' }}
+                    />
+                </Box>
+
+                {suitabilityResults.map(result => <Box key={result.dish.id} style={{ border: '1px solid rgba(15,23,42,0.08)', borderRadius: 8, background: '#fff', padding: 12 }}>
+                    <Stack justify='space-between' align='flex-start' gap={10} style={{ marginBottom: 10 }}>
+                        <div style={{ minWidth: 0 }}>
+                            <Typography.Text strong style={{ display: 'block', color: '#111827', fontSize: 16, lineHeight: '21px', overflowWrap: 'anywhere' }}>{result.dish.name}</Typography.Text>
+                            <Typography.Text type='secondary' style={{ display: 'block', fontSize: 12, lineHeight: '17px' }}>{result.positiveCount} điểm hợp · {result.warningCount} lưu ý</Typography.Text>
+                        </div>
+                        <Tag color={result.averageScore >= 76 ? 'green' : result.averageScore >= 58 ? 'blue' : 'volcano'} style={{ marginRight: 0 }}>{result.averageScore}%</Tag>
+                    </Stack>
+
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))', gap: 8 }}>
+                        {result.members.map(memberResult => <Box key={memberResult.member.id} style={{ border: `1px solid ${memberResult.tone === 'warning' ? '#ffd591' : memberResult.tone === 'success' ? '#b7eb8f' : '#d6e4ff'}`, borderRadius: 8, background: memberResult.tone === 'warning' ? '#fff7e6' : memberResult.tone === 'success' ? '#f6ffed' : '#f8fbff', padding: 9, minWidth: 0 }}>
+                            <Stack justify='space-between' align='center' gap={8} style={{ marginBottom: 6 }}>
+                                <Stack align='center' gap={6} style={{ minWidth: 0 }}>
+                                    <span style={{ width: 9, height: 9, borderRadius: 99, background: memberResult.member.color ?? '#1677ff', flexShrink: 0 }} />
+                                    <Typography.Text strong style={{ display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{memberResult.member.name}</Typography.Text>
+                                </Stack>
+                                <Tag color={memberResult.tone === 'warning' ? 'orange' : memberResult.tone === 'success' ? 'green' : 'blue'} style={{ marginRight: 0 }}>{memberResult.score}%</Tag>
+                            </Stack>
+                            {memberResult.positives.length > 0 && <Stack wrap='wrap' gap={4} style={{ marginBottom: 5 }}>
+                                {memberResult.positives.map(item => <Tag key={item} color='green' style={{ marginRight: 0 }}>{item}</Tag>)}
+                            </Stack>}
+                            {memberResult.warnings.length > 0 && <Stack wrap='wrap' gap={4} style={{ marginBottom: 5 }}>
+                                {memberResult.warnings.map(item => <Tag key={item} color='volcano' style={{ marginRight: 0 }}>{item}</Tag>)}
+                            </Stack>}
+                            {memberResult.notes.length > 0 && <Typography.Text type='secondary' style={{ display: 'block', fontSize: 11, lineHeight: '16px' }}>{memberResult.notes.join(' · ')}</Typography.Text>}
+                        </Box>)}
+                    </div>
+                </Box>)}
+            </Stack>}
+        </DeferredModalContent>
+    </Modal> : null;
+
     if (previewInline || pageInline) {
         return <Box data-testid={pageInline ? "dish-suggester-page-content" : "dish-suggester-inline-preview"} style={{ height: pageInline ? undefined : "100%", minHeight: 0, overflowY: "auto", padding: pageInline ? 0 : 12, background: "#fff" }}>
             <Stack align="center" gap={8} style={{ marginBottom: 12 }}>
@@ -1387,6 +1180,7 @@ export const DishSuggesterScreen: React.FC<DishSuggesterScreenProps> = ({ open, 
             {shoppingListModal}
             {expensePlannerModal}
             {nutritionCalculatorModal}
+            {suitabilityModal}
         </Box>;
     }
 
@@ -1417,5 +1211,6 @@ export const DishSuggesterScreen: React.FC<DishSuggesterScreenProps> = ({ open, 
         {shoppingListModal}
         {expensePlannerModal}
         {nutritionCalculatorModal}
+        {suitabilityModal}
     </>;
 };
