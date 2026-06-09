@@ -120,7 +120,9 @@ export const ScheduledMealAddWidget = ({ date, initialName, initialMeals, initia
         <SmartForm.Item {...addScheduledMealForm.itemDefinitions.plannedDate}>
             <DatePicker style={{ width: "100%" }} placeholder="Chọn ngày" format={"DD/MM/YYYY"} />
         </SmartForm.Item>
-        <ScheduledMealEstimateSummary dishIds={selectedDishIds} dishServings={dishServings} title="Ước tính ngày này" maxRows={4} />
+        <div style={{ marginBottom: 14 }}>
+            <ScheduledMealEstimateSummary dishIds={selectedDishIds} dishServings={dishServings} title="Ước tính ngày này" maxRows={4} />
+        </div>
         <Stack fullwidth justify="flex-end">
             <Button onClick={_onSave}>Lưu</Button>
         </Stack>

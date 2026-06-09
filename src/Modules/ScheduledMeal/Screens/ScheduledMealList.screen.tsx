@@ -111,11 +111,11 @@ const dayNavigatorCardStyle: React.CSSProperties = {
     gridTemplateColumns: "42px minmax(0, 1fr) 42px",
     gap: 8,
     alignItems: "center",
-    border: "1px solid rgba(116,54,220,0.10)",
+    border: "1px solid rgba(116,54,220,0.18)",
     borderRadius: 8,
-    background: "linear-gradient(135deg, #ffffff 0%, #fbf9ff 100%)",
+    background: "linear-gradient(135deg, #f3efff 0%, #eaf6ff 54%, #ffffff 100%)",
     padding: 10,
-    boxShadow: "0 10px 28px rgba(74,48,130,0.09)",
+    boxShadow: "0 14px 32px rgba(74,48,130,0.14), inset 0 1px 0 rgba(255,255,255,0.78)",
 };
 
 const dayArrowButtonStyle: React.CSSProperties = {

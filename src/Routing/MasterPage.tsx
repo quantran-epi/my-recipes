@@ -80,6 +80,54 @@ const headerActionButtonStyle: React.CSSProperties = {
     boxShadow: "inset 0 1px 0 rgba(255,255,255,0.18)",
 };
 
+type HeaderVisual = {
+    tone: string;
+    shadow: string;
+}
+
+const defaultHeaderVisual: HeaderVisual = {
+    tone: "#8d46f6",
+    shadow: "rgba(95,43,191,0.22)",
+};
+
+const headerVisualByFeatureName: Record<string, HeaderVisual> = {
+    "Tổng quan": { tone: "#7436dc", shadow: "rgba(95,43,191,0.24)" },
+    "Nguyên liệu": { tone: "#389e0d", shadow: "rgba(44,128,56,0.22)" },
+    "Món ăn": { tone: "#fa541c", shadow: "rgba(190,79,30,0.22)" },
+    "Nấu gì?": { tone: "#13a8a8", shadow: "rgba(19,130,130,0.22)" },
+    "Thực đơn": { tone: "#1677ff", shadow: "rgba(22,88,210,0.23)" },
+    "Lịch mua sắm": { tone: "#0958d9", shadow: "rgba(9,88,217,0.24)" },
+    "Tính chi phí": { tone: "#d46b08", shadow: "rgba(180,92,18,0.23)" },
+    "Phân tích": { tone: "#2f54eb", shadow: "rgba(47,84,235,0.23)" },
+    "Dinh dưỡng": { tone: "#13a8a8", shadow: "rgba(19,130,130,0.22)" },
+    "Mẫu dùng lại": { tone: "#fa8c16", shadow: "rgba(196,105,22,0.22)" },
+    "Sức khỏe dữ liệu": { tone: "#cf1322", shadow: "rgba(176,32,48,0.22)" },
+    "Hướng dẫn": { tone: "#8f46f7", shadow: "rgba(95,43,191,0.22)" },
+    "Tour hướng dẫn": { tone: "#8f46f7", shadow: "rgba(95,43,191,0.22)" },
+    "Chào mừng": { tone: "#8f46f7", shadow: "rgba(95,43,191,0.22)" },
+};
+
+const getHeaderVisualByPath = (pathname: string): HeaderVisual | null => {
+    if (pathname.includes("/ingredient")) return headerVisualByFeatureName["Nguyên liệu"];
+    if (pathname.includes("/dishes")) return headerVisualByFeatureName["Món ăn"];
+    if (pathname.includes("/dish-suggester")) return headerVisualByFeatureName["Nấu gì?"];
+    if (pathname.includes("/scheduledMeal")) return headerVisualByFeatureName["Thực đơn"];
+    if (pathname.includes("/shoppingList")) return headerVisualByFeatureName["Lịch mua sắm"];
+    if (pathname.includes("/expense-planner")) return headerVisualByFeatureName["Tính chi phí"];
+    if (pathname.includes("/analytics")) return headerVisualByFeatureName["Phân tích"];
+    if (pathname.includes("/nutrition-goals")) return headerVisualByFeatureName["Dinh dưỡng"];
+    if (pathname.includes("/templates")) return headerVisualByFeatureName["Mẫu dùng lại"];
+    if (pathname.includes("/sync-backup-health")) return headerVisualByFeatureName["Sức khỏe dữ liệu"];
+    if (pathname.includes("/guide")) return headerVisualByFeatureName["Hướng dẫn"];
+    return null;
+};
+
+const getHeaderVisual = (featureName: string, pathname: string): HeaderVisual => {
+    return getHeaderVisualByPath(pathname) ?? headerVisualByFeatureName[featureName] ?? defaultHeaderVisual;
+};
+
+const createHeaderBackground = (visual: HeaderVisual) => `linear-gradient(135deg, ${visual.tone} 0%, #7436dc 58%, #5e2bbf 100%)`;
+
 const getHeaderDateLabel = () => {
     const date = new Date();
     const day = String(date.getDate()).padStart(2, "0");
@@ -142,6 +190,7 @@ export const MasterPage = () => {
     const location = useLocation();
     const navigate = useNavigate();
     const appShellNavigation = useAppShellNavigationController(location.pathname, navigate);
+    const headerVisual = getHeaderVisual(currentFeatureName, location.pathname);
 
     React.useEffect(() => {
         const welcomeRoute = RootRoutes.AuthorizedRoutes.UserGuideWelcome();
@@ -179,9 +228,9 @@ export const MasterPage = () => {
                 height: 76,
                 lineHeight: "normal",
                 padding: "10px 12px 12px",
-                background: "linear-gradient(135deg, #8d46f6 0%, #7436dc 58%, #5e2bbf 100%)",
+                background: createHeaderBackground(headerVisual),
                 borderBottom: 0,
-                boxShadow: "0 12px 26px rgba(95, 43, 191, 0.22)",
+                boxShadow: `0 12px 26px ${headerVisual.shadow}`,
                 color: "#fff",
                 zIndex: 10,
             }}>
