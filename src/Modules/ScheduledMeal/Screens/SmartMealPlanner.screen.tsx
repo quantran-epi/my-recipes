@@ -1,4 +1,4 @@
-import { BarChartOutlined, CalendarOutlined, CheckCircleOutlined, DollarCircleOutlined, PlusOutlined, TeamOutlined, ThunderboltOutlined } from '@ant-design/icons';
+import { BarChartOutlined, CalendarOutlined, CheckCircleOutlined, DollarCircleOutlined, QuestionCircleOutlined, TeamOutlined, ThunderboltOutlined } from '@ant-design/icons';
 import { CostEstimateHelper } from '@common/Helpers/CostEstimateHelper';
 import { DateHelpers } from '@common/Helpers/DateHelper';
 import { DishDurationHelper } from '@common/Helpers/DishDurationHelper';
@@ -20,7 +20,7 @@ import { ScheduledMeal } from '@store/Models/ScheduledMeal';
 import { rememberScheduledMealName } from '@store/Reducers/AppContextReducer';
 import { addScheduledMeal } from '@store/Reducers/ScheduledMealReducer';
 import { selectDishes, selectHouseholdMembers, selectIngredients, selectIngredientsById, selectNutritionGoals, selectSelectedHouseholdMemberIds } from '@store/Selectors';
-import { DatePicker, Empty, InputNumber, Select, Segmented } from 'antd';
+import { DatePicker, Empty, InputNumber, Select, Segmented, Spin } from 'antd';
 import dayjs, { Dayjs } from 'dayjs';
 import { nanoid } from 'nanoid';
 import React, { useMemo, useState } from 'react';
@@ -77,6 +77,23 @@ const pageCss = `
     grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
     gap: 12px;
     align-items: end;
+}
+.smart-planner-field-label {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 6px;
+}
+.smart-planner-field-help {
+    border: 1px solid rgba(19,168,168,0.12);
+    border-radius: 8px;
+    background: #f6ffed;
+    color: #52616b;
+    font-size: 12px;
+    line-height: 17px;
+    padding: 7px 9px;
+    margin: 7px 0 0;
 }
 .smart-planner-panel {
     border-radius: 8px;
@@ -143,6 +160,10 @@ export const SmartMealPlannerScreen: React.FC = () => {
     const [nutritionGoalId, setNutritionGoalId] = useState<string | undefined>(() => nutritionGoals[0]?.id);
     const [memberIds, setMemberIds] = useState<string[]>(() => selectedHouseholdMemberIds);
     const [criteria, setCriteria] = useState<CriteriaKey[]>(['budget', 'nutrition', 'member']);
+    const [plannedDays, setPlannedDays] = useState<PlannedDay[]>([]);
+    const [hasSuggested, setHasSuggested] = useState(false);
+    const [isSuggesting, setIsSuggesting] = useState(false);
+    const [openHelpKey, setOpenHelpKey] = useState<string>();
 
     React.useEffect(() => {
         if (!nutritionGoalId && nutritionGoals[0]?.id) setNutritionGoalId(nutritionGoals[0].id);
@@ -158,7 +179,12 @@ export const SmartMealPlannerScreen: React.FC = () => {
     const dayCount = scope === 'week' ? 7 : 1;
     const targetServings = Math.max(1, Math.round(selectedMembers.reduce((sum, member) => sum + (member.portionPreference ?? 1), 0) || 2));
 
-    const plannedDays = useMemo<PlannedDay[]>(() => {
+    const _clearSuggestions = React.useCallback(() => {
+        setPlannedDays([]);
+        setHasSuggested(false);
+    }, []);
+
+    const _buildPlan = React.useCallback((): PlannedDay[] => {
         const usedDishIds = new Set<string>();
         const enabledCriteria = new Set(criteria);
 
@@ -245,6 +271,15 @@ export const SmartMealPlannerScreen: React.FC = () => {
 
     const plannedDishCount = plannedDays.reduce((sum, day) => sum + (day.breakfast ? 1 : 0) + (day.lunch ? 1 : 0) + (day.dinner ? 1 : 0), 0);
 
+    const _suggestMeals = () => {
+        setIsSuggesting(true);
+        setHasSuggested(true);
+        window.setTimeout(() => {
+            setPlannedDays(_buildPlan());
+            setIsSuggesting(false);
+        }, 250);
+    };
+
     const _createScheduledMeals = () => {
         let created = 0;
         plannedDays.forEach(day => {
@@ -270,6 +305,16 @@ export const SmartMealPlannerScreen: React.FC = () => {
         });
         message.success(`Đã tạo ${created} thực đơn`);
     };
+
+    const _toggleHelp = (key: string) => setOpenHelpKey(current => current === key ? undefined : key);
+
+    const PlannerFieldLabel = ({ helpKey, label, children }: { helpKey: string; label: React.ReactNode; children: React.ReactNode }) => <>
+        <div className='smart-planner-field-label'>
+            <Typography.Text strong>{label}</Typography.Text>
+            <Button type='text' aria-label={`Giải thích ${String(label)}`} icon={<QuestionCircleOutlined />} onClick={() => _toggleHelp(helpKey)} style={{ width: 28, height: 28, paddingInline: 0, borderRadius: 999, color: openHelpKey === helpKey ? '#13a8a8' : '#6b7280' }} />
+        </div>
+        {openHelpKey === helpKey && <div className='smart-planner-field-help'>{children}</div>}
+    </>;
 
     const PlannerDishCard = ({ item, slot }: { item?: PlannedDish; slot: MealSlot }) => {
         const meta = mealSlotMeta[slot];
@@ -309,7 +354,6 @@ export const SmartMealPlannerScreen: React.FC = () => {
                         <Typography.Text type='secondary' style={{ display: 'block', fontSize: 12, lineHeight: '18px', marginTop: 3 }}>Gợi ý bữa ngày hoặc tuần theo ngân sách, dinh dưỡng và khẩu vị từng thành viên.</Typography.Text>
                     </div>
                 </Stack>
-                <Button type='primary' icon={<PlusOutlined />} disabled={plannedDishCount === 0} onClick={_createScheduledMeals}>Tạo thực đơn</Button>
             </Stack>
         </Box>
 
@@ -317,41 +361,44 @@ export const SmartMealPlannerScreen: React.FC = () => {
             <Box className='smart-planner-panel'>
                 <div className='smart-planner-controls'>
                     <div>
-                        <Typography.Text strong style={{ display: 'block', marginBottom: 6 }}>Khoảng lập</Typography.Text>
-                        <Segmented block value={scope} onChange={value => setScope(value as PlannerScope)} options={[{ value: 'day', label: 'Một ngày' }, { value: 'week', label: 'Một tuần' }]} />
+                        <PlannerFieldLabel helpKey='scope' label='Khoảng lập'>Chọn gợi ý cho một ngày hoặc cả tuần. Một tuần sẽ tạo 7 ngày liên tiếp từ ngày bắt đầu.</PlannerFieldLabel>
+                        <Segmented block value={scope} onChange={value => { setScope(value as PlannerScope); _clearSuggestions(); }} options={[{ value: 'day', label: 'Một ngày' }, { value: 'week', label: 'Một tuần' }]} />
                     </div>
                     <div>
-                        <Typography.Text strong style={{ display: 'block', marginBottom: 6 }}>Ngày bắt đầu</Typography.Text>
-                        <DatePicker value={startDate} onChange={value => value && setStartDate(value.startOf('day'))} format='DD/MM/YYYY' style={{ width: '100%' }} />
+                        <PlannerFieldLabel helpKey='date' label='Ngày bắt đầu'>Ngày đầu tiên để gợi ý thực đơn. Nếu chọn một tuần, các ngày sau sẽ tự chạy tiếp từ ngày này.</PlannerFieldLabel>
+                        <DatePicker value={startDate} onChange={value => { if (value) { setStartDate(value.startOf('day')); _clearSuggestions(); } }} format='DD/MM/YYYY' style={{ width: '100%' }} />
                     </div>
                     <div>
-                        <Typography.Text strong style={{ display: 'block', marginBottom: 6 }}><DollarCircleOutlined /> Ngân sách mỗi ngày</Typography.Text>
-                        <InputNumber min={0} step={10000} value={dailyBudget} addonAfter='đ' onChange={value => setDailyBudget(Number(value ?? 0))} style={{ width: '100%' }} />
+                        <PlannerFieldLabel helpKey='budget' label={<><DollarCircleOutlined /> Ngân sách mỗi ngày</>}>Mỗi ngày được chia tương đối cho sáng, trưa và tối. Món vượt ngân sách sẽ bị giảm điểm.</PlannerFieldLabel>
+                        <InputNumber min={0} step={10000} value={dailyBudget} addonAfter='đ' onChange={value => { setDailyBudget(Number(value ?? 0)); _clearSuggestions(); }} style={{ width: '100%' }} />
                     </div>
                     <div>
-                        <Typography.Text strong style={{ display: 'block', marginBottom: 6 }}><BarChartOutlined /> Mục tiêu dinh dưỡng</Typography.Text>
-                        <Select allowClear value={nutritionGoalId} onChange={setNutritionGoalId} options={nutritionGoals.map(goal => ({ value: goal.id, label: goal.name }))} placeholder='Chọn mục tiêu' style={{ width: '100%' }} />
+                        <PlannerFieldLabel helpKey='nutrition' label={<><BarChartOutlined /> Mục tiêu dinh dưỡng</>}>Nếu bật tiêu chí dinh dưỡng, món gần với mục tiêu đã chọn sẽ được ưu tiên hơn.</PlannerFieldLabel>
+                        <Select allowClear value={nutritionGoalId} onChange={value => { setNutritionGoalId(value); _clearSuggestions(); }} options={nutritionGoals.map(goal => ({ value: goal.id, label: goal.name }))} placeholder='Chọn mục tiêu' style={{ width: '100%' }} />
                     </div>
                     <div>
-                        <Typography.Text strong style={{ display: 'block', marginBottom: 6 }}><TeamOutlined /> Thành viên ăn cùng</Typography.Text>
-                        <Select mode='multiple' allowClear maxTagCount='responsive' value={memberIds} onChange={setMemberIds} options={members.map(member => ({ value: member.id, label: member.name }))} placeholder='Tất cả thành viên' style={{ width: '100%' }} />
+                        <PlannerFieldLabel helpKey='members' label={<><TeamOutlined /> Thành viên ăn cùng</>}>Chọn người ăn cùng để tính khẩu phần, món thích, món tránh và mục tiêu riêng của từng người.</PlannerFieldLabel>
+                        <Select mode='multiple' allowClear maxTagCount='responsive' value={memberIds} onChange={value => { setMemberIds(value); _clearSuggestions(); }} options={members.map(member => ({ value: member.id, label: member.name }))} placeholder='Tất cả thành viên' style={{ width: '100%' }} />
                     </div>
                     <div>
-                        <Typography.Text strong style={{ display: 'block', marginBottom: 6 }}><ThunderboltOutlined /> Tiêu chí ưu tiên</Typography.Text>
-                        <Select mode='multiple' value={criteria} onChange={setCriteria} options={criteriaOptions} style={{ width: '100%' }} />
+                        <PlannerFieldLabel helpKey='criteria' label={<><ThunderboltOutlined /> Tiêu chí ưu tiên</>}>Bật hoặc tắt tiêu chí chấm điểm. Có thể ưu tiên ngân sách, dinh dưỡng, khẩu vị nhà mình hoặc kết hợp cả ba.</PlannerFieldLabel>
+                        <Select mode='multiple' value={criteria} onChange={value => { setCriteria(value); _clearSuggestions(); }} options={criteriaOptions} style={{ width: '100%' }} />
                     </div>
                     <Box style={{ border: '1px solid #e6fffb', background: '#f6ffed', borderRadius: 8, padding: 10 }}>
                         <Stack wrap='wrap' gap={6}>
-                            <Tag color='green' style={{ marginRight: 0 }}>{plannedDishCount} lượt món</Tag>
                             <Tag color='blue' style={{ marginRight: 0 }}>{targetServings} phần/bữa</Tag>
                             <Tag color='cyan' style={{ marginRight: 0 }}>{selectedMembers.length || members.length} thành viên</Tag>
+                            {hasSuggested && <Tag color='green' style={{ marginRight: 0 }}>{plannedDishCount} lượt món</Tag>}
                         </Stack>
                     </Box>
+                    <Button type='primary' icon={<ThunderboltOutlined />} loading={isSuggesting} disabled={dishes.length === 0} onClick={_suggestMeals}>Gợi ý thực đơn</Button>
                 </div>
             </Box>
 
             <Box className='smart-planner-panel'>
-                {dishes.length === 0 ? <Empty description='Chưa có món ăn để lập thực đơn' /> : <Stack direction='column' gap={12}>
+                {dishes.length === 0 ? <Empty description='Chưa có món ăn để lập thực đơn' /> : isSuggesting ? <Box style={{ minHeight: 220, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <Spin tip='Đang gợi ý thực đơn...' />
+                </Box> : !hasSuggested ? <Empty description='Chọn tiêu chí rồi nhấn Gợi ý thực đơn' image={Empty.PRESENTED_IMAGE_SIMPLE} /> : <Stack direction='column' gap={12}>
                     {plannedDays.map(day => <Box key={day.date.format('YYYY-MM-DD')} style={{ border: '1px solid rgba(19,168,168,0.12)', borderRadius: 8, padding: 10, background: '#fff' }}>
                         <Stack align='center' gap={8} style={{ marginBottom: 10 }}>
                             <CalendarOutlined style={{ color: '#13a8a8' }} />
@@ -364,7 +411,7 @@ export const SmartMealPlannerScreen: React.FC = () => {
                             </div>)}
                         </div>
                     </Box>)}
-                    <Button fullwidth type='primary' icon={<CheckCircleOutlined />} disabled={plannedDishCount === 0} onClick={_createScheduledMeals}>Tạo {scope === 'week' ? 'thực đơn tuần' : 'thực đơn ngày'}</Button>
+                    <Button fullwidth type='primary' icon={<CheckCircleOutlined />} disabled={plannedDishCount === 0} onClick={_createScheduledMeals}>Áp dụng {scope === 'week' ? 'thực đơn tuần' : 'thực đơn ngày'}</Button>
                 </Stack>}
             </Box>
         </div>

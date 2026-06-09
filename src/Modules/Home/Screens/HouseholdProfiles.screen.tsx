@@ -89,27 +89,38 @@ const pageCss = `
 .household-editor-panel {
     background: linear-gradient(180deg, #ffffff 0%, #fbfdff 100%);
 }
+.household-editor-panel > * {
+    width: 100%;
+}
+.household-editor-panel .ant-space,
+.household-editor-panel .ant-space-item {
+    width: 100%;
+}
 .household-editor-actions {
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto;
     gap: 10px;
     align-items: center;
-    min-width: min(100%, 420px);
+    width: 100%;
+    justify-items: end;
 }
 .household-editor-switch {
     display: grid;
-    grid-template-columns: auto minmax(0, 1fr);
+    grid-template-columns: minmax(0, 1fr) auto;
     gap: 9px;
     align-items: center;
     border: 1px solid rgba(22,119,255,0.12);
     border-radius: 8px;
     background: #fff;
     padding: 8px 10px;
+    width: min(100%, 360px);
+    justify-self: end;
 }
 .household-field-list {
     display: grid;
     grid-template-columns: minmax(0, 1fr);
     gap: 10px;
+    width: 100%;
 }
 .household-field-row {
     display: grid;
@@ -118,6 +129,18 @@ const pageCss = `
     align-items: start;
     border-top: 1px solid rgba(15,23,42,0.06);
     padding-top: 10px;
+    width: 100%;
+}
+.household-field-control {
+    min-width: 0;
+    width: 100%;
+}
+.household-field-control .ant-input,
+.household-field-control .ant-select,
+.household-field-control .ant-input-number,
+.household-field-control .ant-input-number-group-wrapper,
+.household-field-control textarea {
+    width: 100% !important;
 }
 .household-field-row:first-child {
     border-top: 0;
@@ -134,6 +157,13 @@ const pageCss = `
         grid-template-columns: auto minmax(0, 1fr);
         align-items: center;
         min-width: 0;
+    }
+    .household-editor-actions {
+        justify-items: stretch;
+    }
+    .household-editor-switch {
+        grid-template-columns: minmax(0, 1fr) auto;
+        width: 100%;
     }
 }
 `;
@@ -290,11 +320,11 @@ export const HouseholdProfilesScreen: React.FC = () => {
                         </Stack>
                         <div className='household-editor-actions'>
                             <div className='household-editor-switch'>
-                                <Switch checked={activeMemberSelected} onChange={checked => _setMemberSelected(activeMember.id, checked)} />
                                 <span style={{ minWidth: 0 }}>
                                     <Typography.Text strong style={{ display: 'block', color: '#111827', fontSize: 12, lineHeight: '16px' }}>{activeMemberSelected ? 'Đang dùng khi gợi ý' : 'Tạm bỏ qua khi gợi ý'}</Typography.Text>
                                     <Typography.Text type='secondary' style={{ display: 'block', fontSize: 11, lineHeight: '15px' }}>Gợi ý món và thực đơn sẽ {activeMemberSelected ? 'tính' : 'không tính'} người này.</Typography.Text>
                                 </span>
+                                <Switch checked={activeMemberSelected} onChange={checked => _setMemberSelected(activeMember.id, checked)} />
                             </div>
                             <Popconfirm title='Xoá hồ sơ này?' okText='Xoá' cancelText='Huỷ' okButtonProps={{ danger: true }} onConfirm={() => _removeMember(activeMember)}>
                                 <Button danger icon={<DeleteOutlined />}>Xoá</Button>
@@ -305,15 +335,15 @@ export const HouseholdProfilesScreen: React.FC = () => {
                     <div className='household-field-list'>
                         <div className='household-field-row'>
                             <FieldLabel>Tên</FieldLabel>
-                            <Input value={activeMember.name} onChange={event => _updateMember(activeMember, { name: event.target.value })} placeholder='Tên thành viên' />
+                            <div className='household-field-control'><Input value={activeMember.name} onChange={event => _updateMember(activeMember, { name: event.target.value })} placeholder='Tên thành viên' /></div>
                         </div>
                         <div className='household-field-row'>
                             <FieldLabel>Khẩu phần thường ăn</FieldLabel>
-                            <InputNumber min={0.5} max={12} step={0.5} value={activeMember.portionPreference ?? 1} addonAfter='phần' onChange={value => _updateMember(activeMember, { portionPreference: Number(value ?? 1) })} style={{ width: '100%' }} />
+                            <div className='household-field-control'><InputNumber min={0.5} max={12} step={0.5} value={activeMember.portionPreference ?? 1} addonAfter='phần' onChange={value => _updateMember(activeMember, { portionPreference: Number(value ?? 1) })} style={{ width: '100%' }} /></div>
                         </div>
                         <div className='household-field-row'>
                             <FieldLabel>Mục tiêu dinh dưỡng</FieldLabel>
-                            <Select allowClear placeholder='Chọn mục tiêu' value={activeMember.nutritionGoalId} onChange={value => _updateMember(activeMember, { nutritionGoalId: value })} options={nutritionGoals.map(goal => ({ value: goal.id, label: goal.name }))} style={{ width: '100%' }} />
+                            <div className='household-field-control'><Select allowClear placeholder='Chọn mục tiêu' value={activeMember.nutritionGoalId} onChange={value => _updateMember(activeMember, { nutritionGoalId: value })} options={nutritionGoals.map(goal => ({ value: goal.id, label: goal.name }))} style={{ width: '100%' }} /></div>
                         </div>
                     </div>
 
@@ -327,33 +357,33 @@ export const HouseholdProfilesScreen: React.FC = () => {
                     <div className='household-field-list'>
                         <div className='household-field-row'>
                             <FieldLabel>Món thích</FieldLabel>
-                            <Select mode='multiple' allowClear maxTagCount='responsive' value={activeMember.favoriteDishIds} onChange={ids => _updateMember(activeMember, { favoriteDishIds: ids, avoidedDishIds: activeMember.avoidedDishIds.filter(id => !ids.includes(id)) })} options={dishOptions} style={{ width: '100%' }} placeholder='Chọn món' />
+                            <div className='household-field-control'><Select mode='multiple' allowClear maxTagCount='responsive' value={activeMember.favoriteDishIds} onChange={ids => _updateMember(activeMember, { favoriteDishIds: ids, avoidedDishIds: activeMember.avoidedDishIds.filter(id => !ids.includes(id)) })} options={dishOptions} style={{ width: '100%' }} placeholder='Chọn món' /></div>
                         </div>
                         <div className='household-field-row'>
                             <FieldLabel>Món tránh</FieldLabel>
-                            <Select mode='multiple' allowClear maxTagCount='responsive' value={activeMember.avoidedDishIds} onChange={ids => _updateMember(activeMember, { avoidedDishIds: ids, favoriteDishIds: activeMember.favoriteDishIds.filter(id => !ids.includes(id)) })} options={dishOptions} style={{ width: '100%' }} placeholder='Chọn món' />
+                            <div className='household-field-control'><Select mode='multiple' allowClear maxTagCount='responsive' value={activeMember.avoidedDishIds} onChange={ids => _updateMember(activeMember, { avoidedDishIds: ids, favoriteDishIds: activeMember.favoriteDishIds.filter(id => !ids.includes(id)) })} options={dishOptions} style={{ width: '100%' }} placeholder='Chọn món' /></div>
                         </div>
                         <div className='household-field-row'>
                             <FieldLabel>Nguyên liệu thích</FieldLabel>
-                            <Select mode='multiple' allowClear maxTagCount='responsive' value={activeMember.favoriteIngredientIds} onChange={ids => _updateMember(activeMember, { favoriteIngredientIds: ids, avoidedIngredientIds: activeMember.avoidedIngredientIds.filter(id => !ids.includes(id)) })} options={ingredientOptions} style={{ width: '100%' }} placeholder='Chọn nguyên liệu' />
+                            <div className='household-field-control'><Select mode='multiple' allowClear maxTagCount='responsive' value={activeMember.favoriteIngredientIds} onChange={ids => _updateMember(activeMember, { favoriteIngredientIds: ids, avoidedIngredientIds: activeMember.avoidedIngredientIds.filter(id => !ids.includes(id)) })} options={ingredientOptions} style={{ width: '100%' }} placeholder='Chọn nguyên liệu' /></div>
                         </div>
                         <div className='household-field-row'>
                             <FieldLabel>Nguyên liệu tránh</FieldLabel>
-                            <Select mode='multiple' allowClear maxTagCount='responsive' value={activeMember.avoidedIngredientIds} onChange={ids => _updateMember(activeMember, { avoidedIngredientIds: ids, favoriteIngredientIds: activeMember.favoriteIngredientIds.filter(id => !ids.includes(id)) })} options={ingredientOptions} style={{ width: '100%' }} placeholder='Chọn nguyên liệu' />
+                            <div className='household-field-control'><Select mode='multiple' allowClear maxTagCount='responsive' value={activeMember.avoidedIngredientIds} onChange={ids => _updateMember(activeMember, { avoidedIngredientIds: ids, favoriteIngredientIds: activeMember.favoriteIngredientIds.filter(id => !ids.includes(id)) })} options={ingredientOptions} style={{ width: '100%' }} placeholder='Chọn nguyên liệu' /></div>
                         </div>
                         <div className='household-field-row'>
                             <FieldLabel>Kiểu món thích</FieldLabel>
-                            <Select mode='multiple' allowClear maxTagCount='responsive' value={activeMember.preferredTags} onChange={tags => _updateMember(activeMember, { preferredTags: tags, avoidedTags: activeMember.avoidedTags.filter(tag => !tags.includes(tag)) })} options={tagOptions} style={{ width: '100%' }} placeholder='Chọn tag' />
+                            <div className='household-field-control'><Select mode='multiple' allowClear maxTagCount='responsive' value={activeMember.preferredTags} onChange={tags => _updateMember(activeMember, { preferredTags: tags, avoidedTags: activeMember.avoidedTags.filter(tag => !tags.includes(tag)) })} options={tagOptions} style={{ width: '100%' }} placeholder='Chọn tag' /></div>
                         </div>
                         <div className='household-field-row'>
                             <FieldLabel>Kiểu món tránh</FieldLabel>
-                            <Select mode='multiple' allowClear maxTagCount='responsive' value={activeMember.avoidedTags} onChange={tags => _updateMember(activeMember, { avoidedTags: tags, preferredTags: activeMember.preferredTags.filter(tag => !tags.includes(tag)) })} options={tagOptions} style={{ width: '100%' }} placeholder='Chọn tag' />
+                            <div className='household-field-control'><Select mode='multiple' allowClear maxTagCount='responsive' value={activeMember.avoidedTags} onChange={tags => _updateMember(activeMember, { avoidedTags: tags, preferredTags: activeMember.preferredTags.filter(tag => !tags.includes(tag)) })} options={tagOptions} style={{ width: '100%' }} placeholder='Chọn tag' /></div>
                         </div>
                     </div>
 
                     <div>
                         <FieldLabel>Ghi chú riêng</FieldLabel>
-                        <Input.TextArea value={activeMember.notes} onChange={event => _updateMember(activeMember, { notes: event.target.value })} placeholder='Ví dụ: ăn ít cay, không đậu phộng, khẩu phần trẻ em...' autoSize={{ minRows: 3, maxRows: 6 }} />
+                        <div className='household-field-control'><Input.TextArea value={activeMember.notes} onChange={event => _updateMember(activeMember, { notes: event.target.value })} placeholder='Ví dụ: ăn ít cay, không đậu phộng, khẩu phần trẻ em...' autoSize={{ minRows: 3, maxRows: 6 }} /></div>
                     </div>
                 </Stack>}
             </Box>

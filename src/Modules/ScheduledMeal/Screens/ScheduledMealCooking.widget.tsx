@@ -1,19 +1,17 @@
-import { CheckCircleOutlined, FireOutlined, PlusOutlined, RestOutlined } from '@ant-design/icons';
+import { CheckCircleOutlined, FireOutlined, RestOutlined } from '@ant-design/icons';
 import { DishServingHelper } from '@common/Helpers/DishServingHelper';
 import { Button } from '@components/Button';
 import { Box } from '@components/Layout/Box';
 import { Stack } from '@components/Layout/Stack';
 import { useMessage } from '@components/Message';
 import { DeferredModalContent, Modal } from '@components/Modal';
-import { Tag } from '@components/Tag';
 import { Typography } from '@components/Typography';
 import { CookingSessionWidget } from '@modules/Dishes/Screens/CookingSession.widget';
-import { DishImageWidget } from '@modules/Dishes/Screens/DishesManageIngredient/DishImage.widget';
 import { Dishes } from '@store/Models/Dishes';
 import { addLeftoverTrackerItem } from '@store/Reducers/AppContextReducer';
 import { startCooking } from '@store/Reducers/CookingSessionReducer';
 import { selectCookingSessions, selectDishes, selectDishesById, selectSelectedHouseholdMembers } from '@store/Selectors';
-import { Input, InputNumber, Select } from 'antd';
+import { Input, InputNumber, Select, Switch } from 'antd';
 import dayjs from 'dayjs';
 import { nanoid } from 'nanoid';
 import React, { useMemo, useState } from 'react';
@@ -40,7 +38,7 @@ type ScheduledMealCookingModalProps = {
     onClose: () => void;
 }
 
-export const ScheduledMealCookingModal: React.FC<ScheduledMealCookingModalProps> = ({ open, title, dishIds, dishServings, autoStartToken, onClose }) => {
+export const ScheduledMealCookingModal: React.FC<ScheduledMealCookingModalProps> = ({ open, title, dishIds, dishServings, onClose }) => {
     const dispatch = useDispatch();
     const allDishes = useSelector(selectDishes);
     const dishesById = useSelector(selectDishesById);
@@ -48,7 +46,6 @@ export const ScheduledMealCookingModal: React.FC<ScheduledMealCookingModalProps>
     const selectedMembers = useSelector(selectSelectedHouseholdMembers);
     const [focusedDishId, setFocusedDishId] = useState<string>();
     const [cookingOpen, setCookingOpen] = useState(false);
-    const startedTokenRef = React.useRef<number | undefined>();
     const uniqueDishIds = useMemo(() => getScheduledMealDishIds(dishIds), [dishIds]);
     const activeSessionByDishId = useMemo(() => new Map(sessions.filter(session => session.status === 'cooking').map(session => [session.dishId, session])), [sessions]);
     const finishedDishIds = useMemo(() => new Set(sessions.filter(session => session.status === 'finished').map(session => session.dishId)), [sessions]);
@@ -68,16 +65,6 @@ export const ScheduledMealCookingModal: React.FC<ScheduledMealCookingModalProps>
             householdMemberIds: selectedMembers.map(member => member.id),
         }));
     }, [activeSessionByDishId, allDishes, dishServings, dishesById, dispatch, finishedDishIds, selectedMembers]);
-
-    const _startAll = React.useCallback(() => {
-        uniqueDishIds.forEach(dishId => _startDish(dishId));
-    }, [_startDish, uniqueDishIds]);
-
-    React.useEffect(() => {
-        if (!open || autoStartToken === undefined || startedTokenRef.current === autoStartToken) return;
-        startedTokenRef.current = autoStartToken;
-        _startAll();
-    }, [_startAll, autoStartToken, open]);
 
     const _openDish = (dishId: string) => {
         const hasActive = activeSessionByDishId.has(dishId);
@@ -103,36 +90,22 @@ export const ScheduledMealCookingModal: React.FC<ScheduledMealCookingModalProps>
                 {uniqueDishIds.length === 0 ? <Box style={{ textAlign: 'center', padding: '26px 0' }}>
                     <Typography.Text type='secondary'>Bữa này chưa có món để nấu.</Typography.Text>
                 </Box> : <Stack direction='column' gap={10}>
-                    <Box style={{ border: '1px solid #ffe7ba', borderRadius: 8, background: '#fff7e6', padding: 10 }}>
-                        <Stack justify='space-between' align='center' gap={10} wrap='wrap'>
-                            <div style={{ minWidth: 0 }}>
-                                <Typography.Text strong style={{ display: 'block', color: '#ad4e00' }}>{uniqueDishIds.length} món trong lượt nấu</Typography.Text>
-                                <Typography.Text type='secondary' style={{ display: 'block', fontSize: 12 }}>Mở từng món, hoàn thành món nào xong món đó. Món còn lại có thể tiếp tục sau.</Typography.Text>
-                            </div>
-                            <Button type='primary' icon={<FireOutlined />} onClick={_startAll} style={{ background: '#fa8c16', borderColor: '#fa8c16' }}>Bắt đầu / tiếp tục tất cả</Button>
-                        </Stack>
-                    </Box>
-
                     {uniqueDishIds.map(dishId => {
                         const dish = dishesById.get(dishId);
                         const session = activeSessionByDishId.get(dishId);
                         const finished = finishedDishIds.has(dishId);
-                        const progress = session?.steps?.length
-                            ? Math.round(((session.completedStepIndexes?.length ?? 0) / session.steps.length) * 100)
-                            : session ? 100 : 0;
+                        const statusLabel = session?.steps?.length
+                            ? `Đang nấu · bước ${(session.currentStepIndex ?? 0) + 1}/${session.steps.length}`
+                            : session ? 'Đang nấu' : finished ? 'Đã xong' : 'Chưa bắt đầu';
                         if (!dish) return null;
                         return <Box key={dishId} style={{ border: '1px solid rgba(15,23,42,0.08)', borderRadius: 8, background: '#fff', padding: 10 }}>
-                            <div style={{ display: 'grid', gridTemplateColumns: '48px minmax(0, 1fr) auto', gap: 10, alignItems: 'center' }}>
-                                <DishImageWidget src={dish.image} width={48} height={48} borderRadius={8} fallbackIconSize={24} showBrokenLabel={false} />
+                            <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) auto', gap: 12, alignItems: 'center' }}>
                                 <div style={{ minWidth: 0 }}>
                                     <Typography.Text strong style={{ display: 'block', color: '#111827', lineHeight: '19px', overflowWrap: 'anywhere' }}>{dish.name}</Typography.Text>
-                                    <Stack wrap='wrap' gap={5} style={{ marginTop: 5 }}>
-                                        {session ? <Tag color='orange' style={{ marginRight: 0 }}>Đang nấu {progress}%</Tag> : finished ? <Tag color='green' style={{ marginRight: 0 }}>Đã xong</Tag> : <Tag style={{ marginRight: 0 }}>Chưa bắt đầu</Tag>}
-                                        {dishServings?.[dishId] && <Tag color='blue' style={{ marginRight: 0 }}>{dishServings[dishId]} phần</Tag>}
-                                    </Stack>
+                                    <Typography.Text type='secondary' style={{ display: 'block', fontSize: 12, lineHeight: '17px', marginTop: 2 }}>{statusLabel}{dishServings?.[dishId] ? ` · ${dishServings[dishId]} phần` : ''}</Typography.Text>
                                 </div>
-                                <Button icon={session ? <FireOutlined /> : finished ? <PlusOutlined /> : <FireOutlined />} onClick={() => _openDish(dishId)}>
-                                    {session ? 'Tiếp tục' : finished ? 'Nấu lại' : 'Nấu'}
+                                <Button icon={<FireOutlined />} onClick={() => _openDish(dishId)} style={{ minWidth: 104 }}>
+                                    {session ? 'Tiếp tục' : finished ? 'Nấu lại' : 'Bắt đầu'}
                                 </Button>
                             </div>
                         </Box>;
@@ -164,40 +137,62 @@ type MealCompletionLeftoverModalProps = {
     onClose: () => void;
 }
 
+type LeftoverDishDraft = {
+    enabled: boolean;
+    portions: number;
+    eatInDays: number;
+    note: string;
+}
+
 export const MealCompletionLeftoverModal: React.FC<MealCompletionLeftoverModalProps> = ({ open, title, dishIds, onClose }) => {
     const dispatch = useDispatch();
     const message = useMessage();
     const dishesById = useSelector(selectDishesById);
     const uniqueDishIds = useMemo(() => getScheduledMealDishIds(dishIds), [dishIds]);
-    const [selectedDishId, setSelectedDishId] = useState<string>();
-    const [portions, setPortions] = useState<number>(1);
-    const [eatInDays, setEatInDays] = useState<number>(2);
-    const [note, setNote] = useState('');
+    const [drafts, setDrafts] = useState<Record<string, LeftoverDishDraft>>({});
 
     React.useEffect(() => {
         if (!open) return;
-        setSelectedDishId(current => current && uniqueDishIds.includes(current) ? current : uniqueDishIds[0]);
-        setPortions(1);
-        setEatInDays(2);
-        setNote('');
+        setDrafts(Object.fromEntries(uniqueDishIds.map(id => [id, { enabled: false, portions: 1, eatInDays: 2, note: '' }])));
     }, [open, uniqueDishIds]);
 
-    const selectedDish = selectedDishId ? dishesById.get(selectedDishId) : undefined;
-    const _save = () => {
-        if (!selectedDish || portions <= 0) return;
-        dispatch(addLeftoverTrackerItem({
-            id: nanoid(10),
-            dishId: selectedDish.id,
-            dishName: selectedDish.name,
-            portions,
-            storedAt: new Date().toISOString(),
-            eatBy: dayjs().add(eatInDays, 'day').endOf('day').toISOString(),
-            note: note.trim() || undefined,
-            status: 'available',
+    const _updateDraft = (dishId: string, patch: Partial<LeftoverDishDraft>) => {
+        setDrafts(current => ({
+            ...current,
+            [dishId]: {
+                enabled: false,
+                portions: 1,
+                eatInDays: 2,
+                note: '',
+                ...(current[dishId] ?? {}),
+                ...patch,
+            },
         }));
-        message.success('Đã lưu món còn lại');
+    };
+
+    const _save = () => {
+        let saved = 0;
+        uniqueDishIds.forEach(dishId => {
+            const dish = dishesById.get(dishId);
+            const draft = drafts[dishId];
+            if (!dish || !draft?.enabled || draft.portions <= 0) return;
+            dispatch(addLeftoverTrackerItem({
+                id: nanoid(10),
+                dishId: dish.id,
+                dishName: dish.name,
+                portions: draft.portions,
+                storedAt: new Date().toISOString(),
+                eatBy: dayjs().add(draft.eatInDays, 'day').endOf('day').toISOString(),
+                note: draft.note.trim() || undefined,
+                status: 'available',
+            }));
+            saved += 1;
+        });
+        message.success(saved > 0 ? `Đã lưu ${saved} món còn lại` : 'Đã hoàn tất bữa ăn');
         onClose();
     };
+
+    const enabledCount = uniqueDishIds.filter(dishId => drafts[dishId]?.enabled).length;
 
     return <Modal
         open={open}
@@ -211,25 +206,32 @@ export const MealCompletionLeftoverModal: React.FC<MealCompletionLeftoverModalPr
             {uniqueDishIds.length === 0 ? <Box style={{ textAlign: 'center', padding: '24px 0' }}>
                 <Typography.Text type='secondary'>Không có món để lưu phần còn lại.</Typography.Text>
             </Box> : <Stack direction='column' gap={10}>
-                <div>
-                    <Typography.Text strong style={{ display: 'block', fontSize: 12, marginBottom: 5 }}>Món còn lại</Typography.Text>
-                    <Select value={selectedDishId} onChange={setSelectedDishId} options={uniqueDishIds.map(id => ({ value: id, label: dishesById.get(id)?.name ?? id }))} style={{ width: '100%' }} />
-                </div>
-                <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) 160px', gap: 8 }}>
-                    <div>
-                        <Typography.Text strong style={{ display: 'block', fontSize: 12, marginBottom: 5 }}>Số phần</Typography.Text>
-                        <InputNumber min={0.5} max={99} step={0.5} value={portions} addonAfter='phần' onChange={value => setPortions(Number(value ?? 0))} style={{ width: '100%' }} />
-                    </div>
-                    <div>
-                        <Typography.Text strong style={{ display: 'block', fontSize: 12, marginBottom: 5 }}>Ăn trước</Typography.Text>
-                        <Select value={eatInDays} onChange={setEatInDays} options={[{ value: 1, label: 'Ngày mai' }, { value: 2, label: '2 ngày' }, { value: 3, label: '3 ngày' }, { value: 5, label: '5 ngày' }]} style={{ width: '100%' }} />
-                    </div>
-                </div>
-                <div>
-                    <Typography.Text strong style={{ display: 'block', fontSize: 12, marginBottom: 5 }}>Ghi chú</Typography.Text>
-                    <Input.TextArea value={note} onChange={event => setNote(event.target.value)} placeholder='Ví dụ: để hộp ngăn mát, phần cho bữa trưa mai...' autoSize={{ minRows: 2, maxRows: 4 }} />
-                </div>
-                <Button fullwidth type='primary' icon={<CheckCircleOutlined />} disabled={!selectedDish || portions <= 0} onClick={_save}>Lưu món còn lại</Button>
+                {uniqueDishIds.map(dishId => {
+                    const dish = dishesById.get(dishId);
+                    const draft = drafts[dishId] ?? { enabled: false, portions: 1, eatInDays: 2, note: '' };
+                    if (!dish) return null;
+                    return <Box key={dishId} style={{ border: '1px solid rgba(15,23,42,0.08)', borderRadius: 8, background: '#fff', padding: 10 }}>
+                        <Stack justify='space-between' align='center' gap={10}>
+                            <Typography.Text strong style={{ minWidth: 0, overflowWrap: 'anywhere' }}>{dish.name}</Typography.Text>
+                            <Switch checked={draft.enabled} checkedChildren='Còn' unCheckedChildren='Hết' onChange={checked => _updateDraft(dishId, { enabled: checked })} />
+                        </Stack>
+                        {draft.enabled && <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(140px, 170px)', gap: 8, marginTop: 10 }}>
+                            <div>
+                                <Typography.Text strong style={{ display: 'block', fontSize: 12, marginBottom: 5 }}>Số phần còn</Typography.Text>
+                                <InputNumber min={0.5} max={99} step={0.5} value={draft.portions} addonAfter='phần' onChange={value => _updateDraft(dishId, { portions: Number(value ?? 0) })} style={{ width: '100%' }} />
+                            </div>
+                            <div>
+                                <Typography.Text strong style={{ display: 'block', fontSize: 12, marginBottom: 5 }}>Ăn trước</Typography.Text>
+                                <Select value={draft.eatInDays} onChange={value => _updateDraft(dishId, { eatInDays: value })} options={[{ value: 1, label: 'Ngày mai' }, { value: 2, label: '2 ngày' }, { value: 3, label: '3 ngày' }, { value: 5, label: '5 ngày' }]} style={{ width: '100%' }} />
+                            </div>
+                            <div style={{ gridColumn: '1 / -1' }}>
+                                <Typography.Text strong style={{ display: 'block', fontSize: 12, marginBottom: 5 }}>Ghi chú</Typography.Text>
+                                <Input.TextArea value={draft.note} onChange={event => _updateDraft(dishId, { note: event.target.value })} placeholder='Ví dụ: để hộp ngăn mát, phần cho bữa trưa mai...' autoSize={{ minRows: 2, maxRows: 4 }} />
+                            </div>
+                        </div>}
+                    </Box>;
+                })}
+                <Button fullwidth type='primary' icon={<CheckCircleOutlined />} onClick={_save}>{enabledCount > 0 ? `Lưu ${enabledCount} món còn lại` : 'Hoàn tất, không còn dư'}</Button>
             </Stack>}
         </DeferredModalContent>
     </Modal>;
