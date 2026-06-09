@@ -83,13 +83,14 @@ export const ScheduledMealCookingModal: React.FC<ScheduledMealCookingModalProps>
             onCancel={onClose}
             footer={null}
             destroyOnClose={false}
-            width='min(820px, calc(100vw - 24px))'
+            width='min(900px, calc(100vw - 24px))'
             style={{ top: 34 }}
+            bodyStyle={{ width: '100%', boxSizing: 'border-box' }}
         >
             <DeferredModalContent active={open} minHeight={260}>
                 {uniqueDishIds.length === 0 ? <Box style={{ textAlign: 'center', padding: '26px 0' }}>
                     <Typography.Text type='secondary'>Bữa này chưa có món để nấu.</Typography.Text>
-                </Box> : <Stack direction='column' gap={10}>
+                </Box> : <div style={{ display: 'flex', flexDirection: 'column', gap: 10, width: '100%' }}>
                     {uniqueDishIds.map(dishId => {
                         const dish = dishesById.get(dishId);
                         const session = activeSessionByDishId.get(dishId);
@@ -98,7 +99,7 @@ export const ScheduledMealCookingModal: React.FC<ScheduledMealCookingModalProps>
                             ? `Đang nấu · bước ${(session.currentStepIndex ?? 0) + 1}/${session.steps.length}`
                             : session ? 'Đang nấu' : finished ? 'Đã xong' : 'Chưa bắt đầu';
                         if (!dish) return null;
-                        return <Box key={dishId} style={{ border: '1px solid rgba(15,23,42,0.08)', borderRadius: 8, background: '#fff', padding: 10 }}>
+                        return <Box key={dishId} style={{ width: '100%', boxSizing: 'border-box', border: '1px solid rgba(15,23,42,0.08)', borderRadius: 8, background: '#fff', padding: 10 }}>
                             <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) auto', gap: 12, alignItems: 'center' }}>
                                 <div style={{ minWidth: 0 }}>
                                     <Typography.Text strong style={{ display: 'block', color: '#111827', lineHeight: '19px', overflowWrap: 'anywhere' }}>{dish.name}</Typography.Text>
@@ -110,7 +111,7 @@ export const ScheduledMealCookingModal: React.FC<ScheduledMealCookingModalProps>
                             </div>
                         </Box>;
                     })}
-                </Stack>}
+                </div>}
             </DeferredModalContent>
         </Modal>
 
@@ -200,21 +201,22 @@ export const MealCompletionLeftoverModal: React.FC<MealCompletionLeftoverModalPr
         onCancel={onClose}
         footer={null}
         destroyOnClose
-        width='min(560px, calc(100vw - 24px))'
+        width='min(660px, calc(100vw - 24px))'
+        bodyStyle={{ width: '100%', boxSizing: 'border-box' }}
     >
         <DeferredModalContent active={open} minHeight={180}>
             {uniqueDishIds.length === 0 ? <Box style={{ textAlign: 'center', padding: '24px 0' }}>
                 <Typography.Text type='secondary'>Không có món để lưu phần còn lại.</Typography.Text>
-            </Box> : <Stack direction='column' gap={10}>
+            </Box> : <div style={{ display: 'flex', flexDirection: 'column', gap: 10, width: '100%' }}>
                 {uniqueDishIds.map(dishId => {
                     const dish = dishesById.get(dishId);
                     const draft = drafts[dishId] ?? { enabled: false, portions: 1, eatInDays: 2, note: '' };
                     if (!dish) return null;
-                    return <Box key={dishId} style={{ border: '1px solid rgba(15,23,42,0.08)', borderRadius: 8, background: '#fff', padding: 10 }}>
-                        <Stack justify='space-between' align='center' gap={10}>
+                    return <Box key={dishId} style={{ width: '100%', boxSizing: 'border-box', border: '1px solid rgba(15,23,42,0.08)', borderRadius: 8, background: '#fff', padding: 10 }}>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) auto', gap: 10, alignItems: 'center', width: '100%' }}>
                             <Typography.Text strong style={{ minWidth: 0, overflowWrap: 'anywhere' }}>{dish.name}</Typography.Text>
                             <Switch checked={draft.enabled} checkedChildren='Còn' unCheckedChildren='Hết' onChange={checked => _updateDraft(dishId, { enabled: checked })} />
-                        </Stack>
+                        </div>
                         {draft.enabled && <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(140px, 170px)', gap: 8, marginTop: 10 }}>
                             <div>
                                 <Typography.Text strong style={{ display: 'block', fontSize: 12, marginBottom: 5 }}>Số phần còn</Typography.Text>
@@ -232,7 +234,7 @@ export const MealCompletionLeftoverModal: React.FC<MealCompletionLeftoverModalPr
                     </Box>;
                 })}
                 <Button fullwidth type='primary' icon={<CheckCircleOutlined />} onClick={_save}>{enabledCount > 0 ? `Lưu ${enabledCount} món còn lại` : 'Hoàn tất, không còn dư'}</Button>
-            </Stack>}
+            </div>}
         </DeferredModalContent>
     </Modal>;
 };

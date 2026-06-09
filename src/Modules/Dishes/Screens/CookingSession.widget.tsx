@@ -32,7 +32,7 @@ import {
     selectInventory,
     selectSelectedHouseholdMembers,
 } from "@store/Selectors";
-import { Space, Switch } from "antd";
+import { Progress, Space, Switch } from "antd";
 import React, { useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
@@ -206,6 +206,7 @@ export const CookingSessionWidget: React.FunctionComponent<CookingSessionWidgetP
 
         const isLast = currentIndex === totalSteps - 1;
         const currentStepDone = completedStepSet.has(currentIndex);
+        const stepProgressPercent = totalSteps > 0 ? Math.round(((currentIndex + 1) / totalSteps) * 100) : 0;
 
         return <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
             <div style={{ border: '1px solid #f0f0f0', borderRadius: 8, background: '#fafafa', padding: 10 }}>
@@ -219,6 +220,7 @@ export const CookingSessionWidget: React.FunctionComponent<CookingSessionWidgetP
                     <Typography.Text strong style={{ fontSize: 13 }}>Bước {currentIndex + 1}/{totalSteps}</Typography.Text>
                     <Button aria-label="Bước sau" icon={<ArrowRightOutlined />} disabled={isLast} onClick={_onNext} style={{ width: 38, paddingInline: 0 }} />
                 </Stack>
+                <Progress percent={stepProgressPercent} showInfo={false} strokeColor="#fa8c16" trailColor="rgba(250,140,22,0.16)" style={{ marginBottom: 10 }} />
                 <Typography.Text style={{ fontSize: 16, lineHeight: "24px", display: "block", overflowWrap: "anywhere" }}>
                     {sessionSteps[currentIndex]}
                 </Typography.Text>

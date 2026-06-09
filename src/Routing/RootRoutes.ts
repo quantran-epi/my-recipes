@@ -37,6 +37,18 @@ type UserGuideTourRouteParams = {
     item?: string;
 }
 
+type SmartMealPlannerRouteParams = {
+    date?: Date | string;
+}
+
+const formatDateParam = (date: Date | string): string => {
+    if (typeof date === 'string') return date;
+    const year = date.getFullYear();
+    const month = `${date.getMonth() + 1}`.padStart(2, '0');
+    const day = `${date.getDate()}`.padStart(2, '0');
+    return `${year}-${month}-${day}`;
+}
+
 const NutritionGoals = (params?: NutritionGoalsRouteParams) => {
     if (!params) return RouteHelpers.CreateRoute('/nutrition-goals');
 
@@ -67,12 +79,17 @@ const UserGuideTour = (params?: UserGuideTourRouteParams) => {
 
 const UserGuideWelcome = () => RouteHelpers.CreateRoute('/guide/welcome');
 
+const SmartMealPlanner = (params?: SmartMealPlannerRouteParams) => {
+    if (!params?.date) return RouteHelpers.CreateRoute('/smart-meal-planner');
+    return RouteHelpers.CreateRoute('/smart-meal-planner', [], { date: formatDateParam(params.date) });
+}
+
 const AuthorizedRoutes = {
     Root: () => "/",
     Analytics: () => RouteHelpers.CreateRoute('/analytics'),
     DishSuggester: () => RouteHelpers.CreateRoute('/dish-suggester'),
     HouseholdProfiles: () => RouteHelpers.CreateRoute('/household'),
-    SmartMealPlanner: () => RouteHelpers.CreateRoute('/smart-meal-planner'),
+    SmartMealPlanner,
     NutritionGoals,
     UserGuide,
     UserGuideTour,

@@ -80,6 +80,7 @@ const pageCss = `
     justify-items: end;
     gap: 4px;
     min-width: 132px;
+    width: 100%;
 }
 .household-member-list {
     display: flex;
@@ -115,6 +116,22 @@ const pageCss = `
     padding: 8px 10px;
     width: min(100%, 360px);
     justify-self: end;
+}
+.household-editor-heading {
+    display: grid;
+    grid-template-columns: 42px minmax(0, 1fr);
+    gap: 10px;
+    align-items: center;
+    min-width: 0;
+    width: 100%;
+    text-align: left;
+}
+.household-color-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+    width: 100%;
 }
 .household-field-list {
     display: grid;
@@ -153,10 +170,9 @@ const pageCss = `
         grid-template-columns: minmax(0, 1fr);
     }
     .household-member-toggle {
-        justify-items: start;
-        grid-template-columns: auto minmax(0, 1fr);
-        align-items: center;
+        justify-items: end;
         min-width: 0;
+        width: 100%;
     }
     .household-editor-actions {
         justify-items: stretch;
@@ -309,7 +325,7 @@ export const HouseholdProfilesScreen: React.FC = () => {
                     <Empty description='Chọn hoặc thêm một thành viên để chỉnh hồ sơ' image={Empty.PRESENTED_IMAGE_SIMPLE} />
                 </Box> : <Stack direction='column' gap={14}>
                     <Stack justify='space-between' align='flex-start' gap={10} wrap='wrap'>
-                        <Stack align='center' gap={10} style={{ minWidth: 0 }}>
+                        <div className='household-editor-heading'>
                             <span style={{ width: 42, height: 42, borderRadius: 14, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', background: `${activeMember.color ?? '#1677ff'}18`, color: activeMember.color ?? '#1677ff', border: `1px solid ${activeMember.color ?? '#1677ff'}30`, flexShrink: 0 }}>
                                 <UserOutlined style={{ fontSize: 20 }} />
                             </span>
@@ -317,7 +333,7 @@ export const HouseholdProfilesScreen: React.FC = () => {
                                 <Typography.Text strong style={{ display: 'block', color: '#111827', fontSize: 18, lineHeight: '24px', overflowWrap: 'anywhere' }}>{activeMember.name}</Typography.Text>
                                 <Typography.Text type='secondary' style={{ display: 'block', fontSize: 12, lineHeight: '17px' }}>Tự lưu khi chỉnh sửa</Typography.Text>
                             </div>
-                        </Stack>
+                        </div>
                         <div className='household-editor-actions'>
                             <div className='household-editor-switch'>
                                 <span style={{ minWidth: 0 }}>
@@ -349,9 +365,9 @@ export const HouseholdProfilesScreen: React.FC = () => {
 
                     <div>
                         <FieldLabel>Màu hồ sơ</FieldLabel>
-                        <Stack wrap='wrap' gap={8}>
+                        <div className='household-color-list'>
                             {MEMBER_COLORS.map(color => <button key={color} type='button' aria-label={`Chọn màu ${color}`} onClick={() => _updateMember(activeMember, { color })} style={{ width: 32, height: 32, borderRadius: 12, border: activeMember.color === color ? '3px solid #111827' : '1px solid #d9d9d9', background: color, cursor: 'pointer' }} />)}
-                        </Stack>
+                        </div>
                     </div>
 
                     <div className='household-field-list'>

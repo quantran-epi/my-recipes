@@ -25,6 +25,7 @@ import dayjs, { Dayjs } from 'dayjs';
 import { nanoid } from 'nanoid';
 import React, { useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { useSearchParams } from 'react-router-dom';
 import DietPlanIcon from '../../../../assets/icons/diet-plan.png';
 
 type PlannerScope = 'day' | 'week';
@@ -125,6 +126,11 @@ const criteriaOptions: Array<{ value: CriteriaKey; label: string }> = [
 
 const clamp = (value: number) => Math.max(0, Math.min(100, Math.round(value)));
 
+const parseRouteDate = (value: string | null): Dayjs => {
+    const parsed = value ? dayjs(value) : dayjs();
+    return (parsed.isValid() ? parsed : dayjs()).startOf('day');
+};
+
 const getAverageCost = (dish: Dishes, ingredients, dishes: Dishes[]) => {
     const estimate = CostEstimateHelper.estimateDish(dish, ingredients, dishes);
     if (!CostEstimateHelper.hasPrice(estimate.total)) return null;
@@ -148,6 +154,7 @@ export const SmartMealPlannerScreen: React.FC = () => {
     useScreenTitle({ value: 'Lập thực đơn', deps: [] });
     const dispatch = useDispatch();
     const message = useMessage();
+    const [searchParams] = useSearchParams();
     const dishes = useSelector(selectDishes);
     const ingredients = useSelector(selectIngredients);
     const ingredientsById = useSelector(selectIngredientsById);
@@ -155,7 +162,8 @@ export const SmartMealPlannerScreen: React.FC = () => {
     const selectedHouseholdMemberIds = useSelector(selectSelectedHouseholdMemberIds);
     const nutritionGoals = useSelector(selectNutritionGoals);
     const [scope, setScope] = useState<PlannerScope>('day');
-    const [startDate, setStartDate] = useState<Dayjs>(() => dayjs().startOf('day'));
+    const routeDateValue = searchParams.get('date');
+    const [startDate, setStartDate] = useState<Dayjs>(() => parseRouteDate(routeDateValue));
     const [dailyBudget, setDailyBudget] = useState<number>(150000);
     const [nutritionGoalId, setNutritionGoalId] = useState<string | undefined>(() => nutritionGoals[0]?.id);
     const [memberIds, setMemberIds] = useState<string[]>(() => selectedHouseholdMemberIds);
@@ -183,6 +191,15 @@ export const SmartMealPlannerScreen: React.FC = () => {
         setPlannedDays([]);
         setHasSuggested(false);
     }, []);
+
+    React.useEffect(() => {
+        const routeDate = parseRouteDate(routeDateValue);
+        setStartDate(current => {
+            if (current.isSame(routeDate, 'day')) return current;
+            _clearSuggestions();
+            return routeDate;
+        });
+    }, [routeDateValue, _clearSuggestions]);
 
     const _buildPlan = React.useCallback((): PlannedDay[] => {
         const usedDishIds = new Set<string>();

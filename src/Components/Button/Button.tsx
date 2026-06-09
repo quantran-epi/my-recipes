@@ -18,6 +18,11 @@ export const Button: FunctionComponent<IButtonProps> = ({
 }) => {
     const _styles = (): React.CSSProperties => {
         return {
+            display: "inline-flex",
+            alignItems: "center",
+            justifyContent: "center",
+            borderRadius: 999,
+            fontWeight: 650,
             backgroundColor: color,
             borderColor: color,
             ...style

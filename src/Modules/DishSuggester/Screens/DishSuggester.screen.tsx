@@ -381,6 +381,15 @@ export const DishSuggesterScreen: React.FC<DishSuggesterScreenProps> = ({ open, 
         justifyContent: "center",
     };
 
+    const backIconButtonStyle: React.CSSProperties = {
+        width: 40,
+        height: 40,
+        minWidth: 40,
+        paddingInline: 0,
+        borderRadius: 999,
+        color: "#595959",
+    };
+
     const selectedCountStyle = (count: number): React.CSSProperties => ({
         minWidth: 28,
         textAlign: "right",
@@ -479,9 +488,7 @@ export const DishSuggesterScreen: React.FC<DishSuggesterScreenProps> = ({ open, 
             )}
             <div style={footerRowStyle}>
                 {mode !== "inventory" && (
-                    <Button onClick={_onBack} icon={<LeftOutlined />} style={{ borderRadius: 20 }}>
-                        Quay lại
-                    </Button>
+                    <Button aria-label="Quay lại" onClick={_onBack} icon={<LeftOutlined />} style={backIconButtonStyle} />
                 )}
                 <ResultsActions dishIds={dishIds} pending={pending} />
             </div>
@@ -986,9 +993,7 @@ export const DishSuggesterScreen: React.FC<DishSuggesterScreenProps> = ({ open, 
                         </>
                     )}
                     <Stack justify="space-between" style={{ marginTop: 12 }}>
-                        <Button onClick={_onBack} icon={<LeftOutlined />} style={{ borderRadius: 20 }}>
-                            Quay lại
-                        </Button>
+                        <Button aria-label="Quay lại" onClick={_onBack} icon={<LeftOutlined />} style={backIconButtonStyle} />
                         <ResultsActions dishIds={selectedDishIds} pending={durationPending} />
                     </Stack>
                 </>
@@ -1031,9 +1036,7 @@ export const DishSuggesterScreen: React.FC<DishSuggesterScreenProps> = ({ open, 
                         : renderNutritionSuggestionList()
                     }
                     <Stack justify="space-between" style={{ marginTop: 12 }}>
-                        <Button onClick={_onBack} icon={<LeftOutlined />} style={{ borderRadius: 20 }}>
-                            Quay lại
-                        </Button>
+                        <Button aria-label="Quay lại" onClick={_onBack} icon={<LeftOutlined />} style={backIconButtonStyle} />
                         <ResultsActions dishIds={selectedDishIds} pending={nutritionPending} />
                     </Stack>
                 </>

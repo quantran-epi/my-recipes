@@ -12,7 +12,7 @@ export const DateHelpers = {
     },
     capitalizeWeekdayLabel: (value: string): string => {
         const formatted = value.replace(weekdayPattern, capitalizeMatch);
-        return weekdayPresencePattern.test(value) ? capitalizeFirstCharacter(formatted) : formatted;
+        return capitalizeFirstCharacter(weekdayPresencePattern.test(value) ? formatted : value);
     },
     formatWithCapitalizedWeekday: (value: any, format: string): string => {
         return DateHelpers.capitalizeWeekdayLabel(moment(value).format(format));

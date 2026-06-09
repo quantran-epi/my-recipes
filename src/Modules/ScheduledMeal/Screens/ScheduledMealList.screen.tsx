@@ -332,6 +332,7 @@ export const ScheduledMealListScreen = () => {
         : dayjs(selectedDate).isBefore(dayjs(), "day")
             ? { label: "Đã qua", color: "#8c8c8c", background: "#fafafa", border: "#d9d9d9" }
             : { label: "Sắp tới", color: "#389e0d", background: "#f6ffed", border: "#b7eb8f" };
+    const smartPlannerForSelectedDate = RootRoutes.AuthorizedRoutes.SmartMealPlanner({ date: selectedDate });
 
     const _onStartDayCooking = () => {
         setDayCookingToken(Date.now());
@@ -345,7 +346,7 @@ export const ScheduledMealListScreen = () => {
                 <Box style={topToolCardStyle}>
                     <div style={topActionRowStyle}>
                         <Tooltip title="Tự gợi ý thực đơn theo ngân sách, dinh dưỡng và nhà mình">
-                            <Button className="scheduled-meal-top-action" icon={<Image src={DietPlanIcon} preview={false} width={18} alt="" />} onClick={() => navigate(RootRoutes.AuthorizedRoutes.SmartMealPlanner())} style={topActionButtonStyle}>
+                            <Button className="scheduled-meal-top-action" icon={<Image src={DietPlanIcon} preview={false} width={18} alt="" />} onClick={() => navigate(smartPlannerForSelectedDate)} style={topActionButtonStyle}>
                                 Gợi ý
                             </Button>
                         </Tooltip>
@@ -426,7 +427,7 @@ export const ScheduledMealListScreen = () => {
                     </div>
                     <Stack gap={6} align="center" style={{ flexShrink: 0 }}>
                         <Tooltip title="Lập thực đơn thông minh">
-                            <Button aria-label="Lập thực đơn thông minh" onClick={() => navigate(RootRoutes.AuthorizedRoutes.SmartMealPlanner())} icon={<Image src={DietPlanIcon} preview={false} width={19} alt="" />} style={daySummaryIconButtonStyle} />
+                            <Button aria-label="Lập thực đơn thông minh" onClick={() => navigate(smartPlannerForSelectedDate)} icon={<Image src={DietPlanIcon} preview={false} width={19} alt="" />} style={daySummaryIconButtonStyle} />
                         </Tooltip>
                         <Tooltip title="Nấu cả ngày">
                             <Button aria-label="Nấu cả ngày" disabled={allDayDishIds.length === 0} onClick={_onStartDayCooking} icon={<FireOutlined />} style={{ ...daySummaryIconButtonStyle, color: allDayDishIds.length > 0 ? '#fa8c16' : undefined }} />
