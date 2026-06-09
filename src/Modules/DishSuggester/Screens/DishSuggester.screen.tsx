@@ -87,7 +87,7 @@ const createEmptyNutritionDishCalculation = (): NutritionDishCalculation => ({
 });
 
 const getNutritionReason = (summary: DishNutritionSummary, match: NutritionGoalMatch): string => {
-    return `${match.matchedCriteriaCount}/${match.totalCriteriaCount} tiêu chí · ${DishNutritionHelper.formatCalories(summary.perServing.calories)} · ${summary.coveragePercent}% dữ liệu`;
+    return `${match.matchedCriteriaCount}/${match.totalCriteriaCount} điều hợp · ${DishNutritionHelper.formatCalories(summary.perServing.calories)}`;
 };
 
 const PendingCalculationBox: React.FunctionComponent<{ text: string }> = ({ text }) => {
@@ -562,7 +562,7 @@ export const DishSuggesterScreen: React.FC<DishSuggesterScreenProps> = ({ open, 
             <Stack justify="space-between" align="center" gap={8} style={{ marginBottom: 10 }}>
                 <Stack gap={7} align="center" style={{ minWidth: 0 }}>
                     <FireOutlined style={{ color: "#389e0d" }} />
-                    <Typography.Text strong style={{ color: "#1f7a31" }}>Hồ sơ nhà</Typography.Text>
+                    <Typography.Text strong style={{ color: "#1f7a31" }}>Nhà mình thích gì?</Typography.Text>
                 </Stack>
                 <Tag color="green" style={{ marginRight: 0 }}>{householdPreferenceProfile.servingCount} khẩu phần</Tag>
             </Stack>
@@ -608,7 +608,7 @@ export const DishSuggesterScreen: React.FC<DishSuggesterScreenProps> = ({ open, 
                 <Select
                     allowClear
                     size="small"
-                    placeholder="Mục tiêu dinh dưỡng"
+                    placeholder="Ăn theo mục tiêu"
                     value={householdPreferenceProfile.nutritionGoalId}
                     onChange={value => _updateHouseholdPreferenceProfile({ nutritionGoalId: value })}
                     options={nutritionGoals.map(goal => ({ value: goal.id, label: goal.name }))}
@@ -618,7 +618,7 @@ export const DishSuggesterScreen: React.FC<DishSuggesterScreenProps> = ({ open, 
                     allowClear
                     size="small"
                     maxTagCount="responsive"
-                    placeholder="Ưu tiên tag"
+                    placeholder="Món nhà thích"
                     value={householdPreferenceProfile.preferredTags}
                     onChange={_onPreferredTagsChange}
                     options={allDishTagOptions}
@@ -628,7 +628,7 @@ export const DishSuggesterScreen: React.FC<DishSuggesterScreenProps> = ({ open, 
                     allowClear
                     size="small"
                     maxTagCount="responsive"
-                    placeholder="Hạn chế tag"
+                    placeholder="Ít chọn món này"
                     value={householdPreferenceProfile.avoidedTags}
                     onChange={_onAvoidedTagsChange}
                     options={allDishTagOptions}
@@ -683,7 +683,7 @@ export const DishSuggesterScreen: React.FC<DishSuggesterScreenProps> = ({ open, 
                             <span style={{ width: 9, height: 9, borderRadius: 99, background: tone, marginTop: 5, flexShrink: 0 }} />
                             <div style={{ minWidth: 0 }}>
                                 <Typography.Text strong style={{ display: "block", color: active ? tone : "#111827", fontSize: 13, lineHeight: "17px", overflowWrap: "anywhere" }}>{goal.name}</Typography.Text>
-                                <Typography.Text type="secondary" style={{ display: "block", fontSize: 11, lineHeight: "15px" }}>{goal.criteria.length} tiêu chí</Typography.Text>
+                                <Typography.Text type="secondary" style={{ display: "block", fontSize: 11, lineHeight: "15px" }}>{goal.criteria.length} điều cần theo</Typography.Text>
                             </div>
                         </Stack>
                     </button>;
@@ -707,7 +707,7 @@ export const DishSuggesterScreen: React.FC<DishSuggesterScreenProps> = ({ open, 
                 value={goal.id}
                 onChange={_onNutritionGoalChange}
                 style={{ width: "100%", marginBottom: 10 }}
-                options={nutritionGoals.map(item => ({ value: item.id, label: `${item.name} - ${item.criteria.length} tiêu chí` }))}
+                options={nutritionGoals.map(item => ({ value: item.id, label: `${item.name} - ${item.criteria.length} điều` }))}
             />
             <Box style={{ maxHeight: 430, overflowY: "auto", paddingRight: 2 }}>
                 {nutritionSuggestions.map(item => {
@@ -756,7 +756,7 @@ export const DishSuggesterScreen: React.FC<DishSuggesterScreenProps> = ({ open, 
                                     </div>
                                     {(item.nutrition.missingNutritionIngredientIds.length > 0 || item.nutrition.missingConversionIngredientIds.length > 0) && (
                                         <Typography.Text type="secondary" style={{ display: "block", fontSize: 10, lineHeight: "14px", marginTop: 8 }}>
-                                            Thiếu dữ liệu/quy đổi cho {item.nutrition.missingNutritionIngredientIds.length + item.nutrition.missingConversionIngredientIds.length} nguyên liệu.
+                                            Cần bổ sung thông tin cho {item.nutrition.missingNutritionIngredientIds.length + item.nutrition.missingConversionIngredientIds.length} nguyên liệu.
                                         </Typography.Text>
                                     )}
                                 </>}
@@ -798,7 +798,7 @@ export const DishSuggesterScreen: React.FC<DishSuggesterScreenProps> = ({ open, 
                         <PendingCalculationBox text="Đang xếp hạng món nấu ngay..." />
                     ) : cookNowGroups.length === 0 ? (
                         <Box style={{ textAlign: "center", padding: "30px 0" }}>
-                            <Typography.Text type="secondary">Chưa tìm thấy món hợp hồ sơ nhà và tồn kho hiện tại</Typography.Text>
+                            <Typography.Text type="secondary">Chưa tìm thấy món hợp khẩu vị nhà và tủ lạnh hiện tại.</Typography.Text>
                         </Box>
                     ) : (
                         <>
@@ -1157,7 +1157,7 @@ export const DishSuggesterScreen: React.FC<DishSuggesterScreenProps> = ({ open, 
                         ? <PendingCalculationBox text="Đang tính gợi ý dinh dưỡng..." />
                         : nutritionSuggestions.length === 0
                         ? <Box style={{ textAlign: "center", padding: "32px 0" }}>
-                            <Typography.Text type="secondary">Chưa có món nào khớp mục tiêu hoặc chưa đủ dữ liệu dinh dưỡng</Typography.Text>
+                            <Typography.Text type="secondary">Chưa có món nào hợp mục tiêu. Bạn có thể bổ sung dinh dưỡng cho món sau.</Typography.Text>
                             <Button
                                 type="text"
                                 icon={<SettingOutlined />}

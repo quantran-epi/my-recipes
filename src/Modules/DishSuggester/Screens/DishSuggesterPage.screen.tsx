@@ -55,7 +55,7 @@ export const DishSuggesterPageScreen: React.FC = () => {
                 <div style={{ minWidth: 0 }}>
                     <Typography.Text style={{ display: 'block', color: '#7436dc', fontSize: 12, lineHeight: '16px', fontWeight: 800 }}>My Recipes</Typography.Text>
                     <Typography.Text strong style={{ display: 'block', color: '#111827', fontSize: 24, lineHeight: '31px' }}>Nấu gì hôm nay?</Typography.Text>
-                    <Typography.Text type='secondary' style={{ display: 'block', fontSize: 12, lineHeight: '18px', marginTop: 3 }}>Ưu tiên món nấu ngay theo tủ lạnh, thời gian, ngân sách mua thêm và khẩu vị nhà. Các hành động bên dưới mở modal ngay trong trang này.</Typography.Text>
+                    <Typography.Text type='secondary' style={{ display: 'block', fontSize: 12, lineHeight: '18px', marginTop: 3 }}>Chọn món hợp với tủ lạnh, thời gian rảnh, số người ăn và khẩu vị nhà mình.</Typography.Text>
                 </div>
             </Stack>
         </Box>

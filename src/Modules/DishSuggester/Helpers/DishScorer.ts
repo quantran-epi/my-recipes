@@ -248,8 +248,8 @@ const getCookNowReasons = (
     ];
     if (totalMinutes > 0) reasons.push(DishDurationHelper.formatMinutes(totalMinutes));
     if (scored.extraShoppingCost) reasons.push(`Mua thêm ~ ${IngredientPriceHelper.formatRange(scored.extraShoppingCost)}`);
-    if (preference.preferred.length > 0) reasons.push(`Hợp ${preference.preferred.slice(0, 2).join(", ")}`);
-    if (preference.avoided.length > 0) reasons.push(`Tránh ${preference.avoided.slice(0, 2).join(", ")}`);
+    if (preference.preferred.length > 0) reasons.push(`Nhà thích ${preference.preferred.slice(0, 2).join(", ")}`);
+    if (preference.avoided.length > 0) reasons.push(`Ít chọn ${preference.avoided.slice(0, 2).join(", ")}`);
     if (nutritionGoal) reasons.push(nutritionGoal.name);
     return reasons.slice(0, 5);
 };

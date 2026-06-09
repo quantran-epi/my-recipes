@@ -1,4 +1,4 @@
-import { BarChartOutlined, CalendarOutlined, CheckCircleOutlined, ClockCircleOutlined, DollarCircleOutlined, FireOutlined, RightOutlined, ShoppingCartOutlined, WarningOutlined } from '@ant-design/icons';
+import { BarChartOutlined, CalendarOutlined, CheckCircleOutlined, ClockCircleOutlined, DeleteOutlined, DollarCircleOutlined, FireOutlined, RightOutlined, ShoppingCartOutlined, WarningOutlined } from '@ant-design/icons';
 import { CostEstimateHelper, CostEstimateSummary } from '@common/Helpers/CostEstimateHelper';
 import { DateHelpers } from '@common/Helpers/DateHelper';
 import { IngredientPriceHelper } from '@common/Helpers/IngredientPriceHelper';
@@ -18,10 +18,11 @@ import { InventoryHealthConfig } from '@store/Models/SharedConfig';
 import { CookingSession } from '@store/Models/CookingSession';
 import { ScheduledMeal } from '@store/Models/ScheduledMeal';
 import { ShoppingList, ShoppingListIngredientGroup } from '@store/Models/ShoppingList';
-import { selectCookingSessions, selectDishes, selectIngredients, selectIngredientsById, selectInventory, selectInventoryHealthConfig, selectScheduledMeals, selectShoppingLists } from '@store/Selectors';
+import { selectCookingSessions, selectDishes, selectIngredients, selectIngredientsById, selectInventory, selectInventoryHealthConfig, selectLeftoverTrackerItems, selectScheduledMeals, selectShoppingLists } from '@store/Selectors';
+import { LeftoverTrackerItem, discardLeftoverItem, eatLeftoverPortion, finishLeftoverItem } from '@store/Reducers/AppContextReducer';
 import moment from 'moment';
 import React, { useMemo } from 'react';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 
 type UrgentInventoryItem = {
@@ -307,7 +308,7 @@ const DashboardHero: React.FunctionComponent<{
             <Typography.Text style={{ display: 'block', color: 'rgba(255,255,255,0.78)', fontSize: 12, lineHeight: '17px', marginTop: 2 }}>{item.description}</Typography.Text>
             {item.tags && <Stack wrap='wrap' gap={5} style={{ marginTop: 8 }}>{item.tags}</Stack>}
         </Box>
-        <div style={{ position: 'relative', display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 8 }}>
+        <div style={{ position: 'relative', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(82px, 1fr))', gap: 8 }}>
             {metrics.map(metric => {
                 const active = activeMetric?.key === metric.key;
                 return <button
@@ -440,13 +441,14 @@ const UrgentRow: React.FunctionComponent<{ item: UrgentInventoryItem; onOpen: ()
 const SuggestionRow: React.FunctionComponent<{ item: ScoredDish; onOpen: () => void }> = ({ item, onOpen }) => {
     const matchPercent = Math.round(item.score * 100);
     const accent = matchPercent >= 100 ? '#389e0d' : matchPercent >= 50 ? '#d48806' : '#d46b08';
+    const matchLabel = matchPercent >= 100 ? 'Đủ đồ' : matchPercent >= 50 ? 'Gần đủ' : 'Cần mua';
     return <ActionRow
         testId={`dashboard-suggestion-${item.dish.id}`}
         title={item.dish.name}
         description={`${item.matchedIngredientIds.length} đủ · ${item.partialIngredientIds?.length ?? 0} còn một phần · ${item.missingIngredientIds.length} thiếu`}
         accent={accent}
         icon={<FireOutlined />}
-        right={<Tag color={matchPercent >= 100 ? 'green' : matchPercent >= 50 ? 'gold' : 'orange'} style={{ marginInlineEnd: 0 }}>{matchPercent}%</Tag>}
+        right={<Tag color={matchPercent >= 100 ? 'green' : matchPercent >= 50 ? 'gold' : 'orange'} style={{ marginInlineEnd: 0 }}>{matchLabel}</Tag>}
         tags={<>
             {(item.urgentIngredients?.length ?? 0) > 0 && <Tag color='volcano' style={{ marginInlineEnd: 0 }}>Cần dùng sớm</Tag>}
             {item.extraShoppingCost && <Tag color='blue' style={{ marginInlineEnd: 0 }}>Mua thêm {IngredientPriceHelper.formatRange(item.extraShoppingCost)}</Tag>}
@@ -497,8 +499,51 @@ const CookingRow: React.FunctionComponent<{ item: CookingSession; onOpen: () => 
     />;
 }
 
+const LeftoverRow: React.FunctionComponent<{
+    item: LeftoverTrackerItem;
+    onOpen: () => void;
+    onEatOne: () => void;
+    onFinish: () => void;
+    onDiscard: () => void;
+}> = ({ item, onOpen, onEatOne, onFinish, onDiscard }) => {
+    const daysLeft = item.eatBy ? moment(item.eatBy).startOf('day').diff(today(), 'day') : null;
+    const accent = daysLeft !== null && daysLeft < 0 ? '#cf1322' : daysLeft !== null && daysLeft <= 1 ? '#fa8c16' : '#389e0d';
+    const eatByLabel = daysLeft === null
+        ? 'Ăn khi tiện'
+        : daysLeft < 0
+        ? 'Quá ngày ngon nhất'
+        : daysLeft === 0
+        ? 'Nên ăn hôm nay'
+        : daysLeft === 1
+        ? 'Nên ăn ngày mai'
+        : `Nên ăn trong ${daysLeft} ngày`;
+
+    return <Box style={{ border: '1px solid rgba(116,54,220,0.10)', borderRadius: 8, background: '#fff', overflow: 'hidden', boxShadow: '0 6px 18px rgba(74,48,130,0.07)' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '5px minmax(0, 1fr)', minWidth: 0 }}>
+            <div style={{ background: accent }} />
+            <div style={{ padding: '10px 11px', minWidth: 0 }}>
+                <Stack justify='space-between' align='flex-start' gap={8}>
+                    <button type='button' onClick={onOpen} style={{ minWidth: 0, flex: 1, border: 0, background: 'transparent', padding: 0, textAlign: 'left', cursor: 'pointer' }}>
+                        <Typography.Text strong style={{ display: 'block', color: '#111827', fontSize: 14.5, lineHeight: '20px', overflowWrap: 'anywhere' }}>
+                            <FireOutlined style={{ color: accent, marginRight: 6 }} />{item.dishName}
+                        </Typography.Text>
+                        <Typography.Text type='secondary' style={{ display: 'block', fontSize: 12.5, lineHeight: '17px', marginTop: 2 }}>{item.portions} phần còn lại · {eatByLabel}</Typography.Text>
+                    </button>
+                    <Tag color={daysLeft !== null && daysLeft < 0 ? 'red' : daysLeft !== null && daysLeft <= 1 ? 'orange' : 'green'} style={{ marginInlineEnd: 0, flexShrink: 0 }}>{item.portions} phần</Tag>
+                </Stack>
+                <Stack wrap='wrap' gap={6} style={{ marginTop: 9 }}>
+                    <Button size='small' onClick={onEatOne} style={{ borderRadius: 999 }}>Ăn 1 phần</Button>
+                    <Button size='small' onClick={onFinish} style={{ borderRadius: 999 }}>Đã hết</Button>
+                    <Button size='small' icon={<DeleteOutlined />} danger onClick={onDiscard} style={{ borderRadius: 999 }}>Bỏ</Button>
+                </Stack>
+            </div>
+        </div>
+    </Box>;
+}
+
 export const DashboardScreen = () => {
     const navigate = useNavigate();
+    const dispatch = useDispatch();
     const openRoute = React.useCallback((href: string) => {
         React.startTransition(() => navigate(href));
     }, [navigate]);
@@ -510,6 +555,7 @@ export const DashboardScreen = () => {
     const shoppingLists = useSelector(selectShoppingLists);
     const scheduledMeals = useSelector(selectScheduledMeals);
     const cookingSessions = useSelector(selectCookingSessions);
+    const leftoverItems = useSelector(selectLeftoverTrackerItems);
     useScreenTitle({ value: 'Tổng quan', deps: [] });
 
     const activeSessions = useMemo(() => cookingSessions.filter(item => item.status === 'cooking'), [cookingSessions]);
@@ -518,6 +564,9 @@ export const DashboardScreen = () => {
         .filter(item => !item.completedAt)
         .sort((a, b) => moment(a.plannedDate ?? a.createdDate).valueOf() - moment(b.plannedDate ?? b.createdDate).valueOf()), [shoppingLists]);
     const todayShoppingLists = useMemo(() => openShoppingLists.filter(item => isSameDay(item.plannedDate)), [openShoppingLists]);
+    const availableLeftovers = useMemo(() => leftoverItems
+        .filter(item => item.status === 'available' && item.portions > 0)
+        .sort((a, b) => moment(a.eatBy ?? a.storedAt).valueOf() - moment(b.eatBy ?? b.storedAt).valueOf()), [leftoverItems]);
     const weekOverview = useMemo(() => Array.from({ length: 7 }).map((_, index) => {
         const date = today().add(index, 'day');
         return {
@@ -552,6 +601,7 @@ export const DashboardScreen = () => {
     const stockedBatchCount = Object.values(inventoryItems).reduce((sum, inventory) => sum + (inventory.batches ?? []).filter(batch => batch.amount > 0).length, 0);
     const firstUrgentInventory = urgentInventory[0];
     const firstActiveSession = activeSessions[0];
+    const firstLeftover = availableLeftovers[0];
     const firstTodayShoppingList = todayShoppingLists[0];
     const firstTodayMeal = todayMeals[0];
     const firstSuggestion = suggestions[0];
@@ -574,6 +624,15 @@ export const DashboardScreen = () => {
                 tone: '#fa8c16',
                 onOpen: () => openRoute(RootRoutes.AuthorizedRoutes.DishesRoutes.ManageIngredient(firstActiveSession.dishId)),
             }
+            : firstLeftover
+            ? {
+                icon: <FireOutlined />,
+                title: 'Ăn món còn lại',
+                description: `${firstLeftover.dishName} · còn ${firstLeftover.portions} phần`,
+                actionLabel: 'Mở món',
+                tone: '#389e0d',
+                onOpen: () => openRoute(RootRoutes.AuthorizedRoutes.DishesRoutes.ManageIngredient(firstLeftover.dishId)),
+            }
             : firstTodayShoppingList
                 ? {
                     icon: <ShoppingCartOutlined />,
@@ -595,8 +654,8 @@ export const DashboardScreen = () => {
                     : firstSuggestion
                         ? {
                             icon: <FireOutlined />,
-                            title: 'Có món phù hợp với tồn kho',
-                            description: `${firstSuggestion.dish.name} · khớp ${Math.round(firstSuggestion.score * 100)}% nguyên liệu`,
+                            title: 'Có món hợp với tủ lạnh',
+                            description: `${firstSuggestion.dish.name} · nhiều nguyên liệu đã có sẵn`,
                             actionLabel: 'Mở món',
                             tone: '#389e0d',
                             onOpen: () => openRoute(RootRoutes.AuthorizedRoutes.DishesRoutes.ManageIngredient(firstSuggestion.dish.id)),
@@ -610,7 +669,7 @@ export const DashboardScreen = () => {
                             onOpen: () => openRoute(RootRoutes.AuthorizedRoutes.DishesRoutes.List()),
                         };
     const dateLabel = formatHeaderDateLabel();
-    const todayActionCount = todayMeals.length + todayShoppingLists.length + activeSessions.length + urgentInventory.length;
+    const todayActionCount = todayMeals.length + todayShoppingLists.length + activeSessions.length + urgentInventory.length + availableLeftovers.length;
     const heroMetrics: DashboardHeroMetric[] = [
         {
             key: 'meals',
@@ -637,6 +696,18 @@ export const DashboardScreen = () => {
             emptyText: 'Không có danh sách mua sắm đang mở.',
             actionLabel: 'Mở mua sắm',
             onOpen: () => openRoute(RootRoutes.AuthorizedRoutes.ShoppingListRoutes.List()),
+        },
+        {
+            key: 'leftovers',
+            label: 'Món còn',
+            value: availableLeftovers.length,
+            detail: `${availableLeftovers.reduce((sum, item) => sum + item.portions, 0)} phần`,
+            tone: '#389e0d',
+            detailTitle: 'Món nên ăn sớm',
+            detailItems: availableLeftovers.slice(0, 3).map(item => `${item.dishName}: ${item.portions} phần`),
+            emptyText: 'Chưa có món còn lại sau bữa ăn.',
+            actionLabel: 'Mở món ăn',
+            onOpen: () => openRoute(RootRoutes.AuthorizedRoutes.DishesRoutes.List()),
         },
         {
             key: 'inventory',
@@ -682,6 +753,25 @@ export const DashboardScreen = () => {
         </Section>
 
         <Section
+            title='Món còn sau bữa ăn'
+            subtitle='Nhớ ăn món đã nấu trước khi không còn ngon.'
+            icon={<FireOutlined />}
+            tone='#389e0d'
+            action={<Button type='link' onClick={() => openRoute(RootRoutes.AuthorizedRoutes.DishesRoutes.List())}>Mở món ăn</Button>}
+        >
+            {availableLeftovers.length === 0
+                ? <EmptySection text='Chưa có món còn lại. Khi hoàn thành nấu, bạn có thể lưu số phần còn lại ở bước cuối.' />
+                : availableLeftovers.slice(0, 5).map(item => <LeftoverRow
+                    key={item.id}
+                    item={item}
+                    onOpen={() => openRoute(RootRoutes.AuthorizedRoutes.DishesRoutes.ManageIngredient(item.dishId))}
+                    onEatOne={() => dispatch(eatLeftoverPortion(item.id))}
+                    onFinish={() => dispatch(finishLeftoverItem(item.id))}
+                    onDiscard={() => dispatch(discardLeftoverItem(item.id))}
+                />)}
+        </Section>
+
+        <Section
             title='Nguyên liệu cần dùng sớm'
             subtitle='Ưu tiên nguyên liệu hết hạn hoặc còn tối đa 3 ngày.'
             icon={<WarningOutlined />}
@@ -703,7 +793,7 @@ export const DashboardScreen = () => {
             {expensiveMetricsPending
                 ? <EmptySection text='Đang tính gợi ý từ tồn kho...' />
                 : suggestions.length === 0
-                ? <EmptySection text='Chưa có đủ dữ liệu tồn kho để gợi ý món.' />
+                ? <EmptySection text='Chưa có đủ thông tin trong kho để gợi ý món.' />
                 : suggestions.map(item => <SuggestionRow key={item.dish.id} item={item} onOpen={() => openRoute(RootRoutes.AuthorizedRoutes.DishesRoutes.ManageIngredient(item.dish.id))} />)}
         </Section>
 
@@ -719,7 +809,7 @@ export const DashboardScreen = () => {
                 : openShoppingLists.slice(0, 5).map(item => <ShoppingListRow key={item.id} item={item} cost={expensiveMetricsPending ? '...' : shoppingListCosts[item.id] ?? '0đ'} onOpen={() => openRoute(RootRoutes.AuthorizedRoutes.ShoppingListRoutes.Detail(item.id))} />)}
         </Section>
 
-        <Section title='Tổng quan dữ liệu' subtitle='Tình trạng dữ liệu chính trong app.' icon={<CheckCircleOutlined />} tone='#722ed1'>
+        <Section title='Sổ tay bếp' subtitle='Những phần nên hoàn thiện để app gợi ý tốt hơn.' icon={<CheckCircleOutlined />} tone='#722ed1'>
             <Box style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(190px, 1fr))', gap: 10 }}>
                 <DataMetric icon={<CheckCircleOutlined />} label='Món đã hoàn thiện' value={completedDishes.length} detail='Đã bật trạng thái hoàn thiện' tone='#389e0d' />
                 <DataMetric icon={<ClockCircleOutlined />} label='Món chưa hoàn thiện' value={incompleteDishes.length} detail={incompleteDishes.length > 0 ? `Chưa bật hoàn thiện: ${formatNamePreview(incompleteDishes.map(item => item.name), 'Không có món nào', 'món khác')}` : 'Không có món cần cập nhật'} tone='#d46b08' />

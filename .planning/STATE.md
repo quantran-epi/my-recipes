@@ -3,9 +3,9 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: ready
-stopped_at: Completed quick task 260609-lhh
-last_updated: "2026-06-09T08:48:35Z"
-last_activity: 2026-06-09 -- Completed quick task 260609-lhh: cook now mode, household preferences, shopping and analytics polish
+stopped_at: Completed quick task 260609-mas
+last_updated: "2026-06-09T09:17:53Z"
+last_activity: 2026-06-09 -- Completed quick task 260609-mas: user-friendly copy and leftover tracker
 progress:
   total_phases: 5
   completed_phases: 4
@@ -28,7 +28,7 @@ See: .planning/PROJECT.md (updated 2026-06-05)
 Phase: 5 (release-gate-and-product-guardrails) — READY
 Plan: Not started
 Status: Phase 04 complete; ready for Phase 05
-Last activity: 2026-06-09 -- Completed quick task 260609-lhh: cook now mode, household preferences, shopping and analytics polish
+Last activity: 2026-06-09 -- Completed quick task 260609-mas: user-friendly copy and leftover tracker
 
 Progress: [████████░░] 80%
 
@@ -36,6 +36,7 @@ Progress: [████████░░] 80%
 
 | Date | Task | Artifact |
 |------|------|----------|
+| 2026-06-09 | User-friendly copy and leftover tracker | `.planning/quick/260609-mas-remove-technical-user-facing-description/260609-mas-SUMMARY.md` |
 | 2026-06-09 | Cook now mode, household preferences, shopping and analytics polish | `.planning/quick/260609-lhh-remove-duplicate-expanded-shopping-updat/260609-lhh-SUMMARY.md` |
 | 2026-06-09 | Shopping price history UX and analytics | `.planning/quick/260609-kew-redesign-shopping-list-bought-price-ux-a/260609-kew-SUMMARY.md` |
 | 2026-06-09 | Remove receipt OCR and add price memory | `.planning/quick/260609-jgx-remove-receipt-ocr-and-paste-import-add-/260609-jgx-SUMMARY.md` |

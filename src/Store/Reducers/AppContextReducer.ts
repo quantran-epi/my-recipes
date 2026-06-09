@@ -51,6 +51,20 @@ export type HouseholdPreferenceProfile = {
     nutritionGoalId?: string;
 }
 
+export type LeftoverTrackerItemStatus = 'available' | 'finished' | 'discarded';
+
+export type LeftoverTrackerItem = {
+    id: string;
+    dishId: string;
+    dishName: string;
+    portions: number;
+    storedAt: string;
+    eatBy?: string;
+    note?: string;
+    cookingSessionId?: string;
+    status: LeftoverTrackerItemStatus;
+}
+
 export const DEFAULT_HOUSEHOLD_PREFERENCE_PROFILE: HouseholdPreferenceProfile = {
     servingCount: 2,
     maxCookMinutes: 45,
@@ -69,6 +83,7 @@ export interface AppContextState {
     ingredientPriceMemory?: Record<string, IngredientPriceMemory>;
     ingredientPriceHistory?: Record<string, IngredientPriceHistoryEntry[]>;
     householdPreferenceProfile?: HouseholdPreferenceProfile;
+    leftoverTrackerItems?: LeftoverTrackerItem[];
 }
 
 const initialState: AppContextState = {
@@ -81,6 +96,7 @@ const initialState: AppContextState = {
     ingredientPriceMemory: {},
     ingredientPriceHistory: {},
     householdPreferenceProfile: DEFAULT_HOUSEHOLD_PREFERENCE_PROFILE,
+    leftoverTrackerItems: [],
 }
 
 const rememberName = (current: string[] | undefined, name: string): string[] => {
@@ -119,6 +135,12 @@ export const normalizeHouseholdPreferenceProfile = (profile?: Partial<HouseholdP
     avoidedTags: normalizeTagList(profile?.avoidedTags),
     nutritionGoalId: profile?.nutritionGoalId?.trim() || undefined,
 });
+
+const normalizePortions = (value: unknown): number => {
+    const parsed = Number(value);
+    if (!Number.isFinite(parsed) || parsed <= 0) return 0;
+    return Math.round(parsed * 10) / 10;
+}
 
 export const appContextSlice = createSlice({
     name: 'appContext',
@@ -176,6 +198,27 @@ export const appContextSlice = createSlice({
                 ...(state.householdPreferenceProfile ?? DEFAULT_HOUSEHOLD_PREFERENCE_PROFILE),
                 ...action.payload,
             });
+        },
+        addLeftoverTrackerItem: (state, action: PayloadAction<LeftoverTrackerItem>) => {
+            const portions = normalizePortions(action.payload.portions);
+            if (portions <= 0) return;
+            const current = state.leftoverTrackerItems ?? [];
+            const nextItem: LeftoverTrackerItem = { ...action.payload, portions, status: 'available' };
+            state.leftoverTrackerItems = [nextItem, ...current]
+                .slice(0, 80);
+        },
+        eatLeftoverPortion: (state, action: PayloadAction<string>) => {
+            state.leftoverTrackerItems = (state.leftoverTrackerItems ?? []).map(item => {
+                if (item.id !== action.payload || item.status !== 'available') return item;
+                const portions = Math.max(0, normalizePortions(item.portions - 1));
+                return { ...item, portions, status: portions > 0 ? 'available' : 'finished' };
+            });
+        },
+        finishLeftoverItem: (state, action: PayloadAction<string>) => {
+            state.leftoverTrackerItems = (state.leftoverTrackerItems ?? []).map(item => item.id === action.payload ? { ...item, portions: 0, status: 'finished' } : item);
+        },
+        discardLeftoverItem: (state, action: PayloadAction<string>) => {
+            state.leftoverTrackerItems = (state.leftoverTrackerItems ?? []).map(item => item.id === action.payload ? { ...item, status: 'discarded' } : item);
         }
     }
 })
@@ -190,6 +233,10 @@ export const {
     removeShoppingListTemplate,
     rememberIngredientPrice,
     updateHouseholdPreferenceProfile,
+    addLeftoverTrackerItem,
+    eatLeftoverPortion,
+    finishLeftoverItem,
+    discardLeftoverItem,
 } = appContextSlice.actions
 
 export default appContextSlice.reducer
