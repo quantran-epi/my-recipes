@@ -4,7 +4,7 @@
  * Only personal slices are backed up — shared data is never included.
  */
 import { message } from "antd";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import { useSelector } from "react-redux";
 import { countCollection, hashString, stableJson } from "@common/Helpers/SyncDataHelper";
 import { createPersistRoot, getStorageString, removeStorageItem, setStorageString } from "@common/Storage/AppStorage";
@@ -60,6 +60,64 @@ export type PersonalBackupHealth = {
     pendingLocalParts: PersonalPartKey[];
     localCounts: Record<PersonalPartKey, number>;
 }
+
+export type PersonalSyncOperation = "push" | "pull" | "auto";
+
+export type PersonalSyncStatus = {
+    isSyncing: boolean;
+    operation: PersonalSyncOperation | null;
+    label: string;
+    startedAt: number | null;
+}
+
+const personalSyncLabels: Record<PersonalSyncOperation, string> = {
+    push: "Đang sao lưu dữ liệu cá nhân",
+    pull: "Đang khôi phục dữ liệu cá nhân",
+    auto: "Đang đồng bộ dữ liệu cá nhân",
+};
+
+const emptyPersonalSyncStatus: PersonalSyncStatus = {
+    isSyncing: false,
+    operation: null,
+    label: "",
+    startedAt: null,
+};
+
+const personalSyncListeners = new Set<() => void>();
+const activePersonalSyncOperations = new Map<symbol, { operation: PersonalSyncOperation; startedAt: number }>();
+let personalSyncStatus = emptyPersonalSyncStatus;
+
+const emitPersonalSyncStatus = () => personalSyncListeners.forEach(listener => listener());
+
+const getPersonalSyncStatus = () => personalSyncStatus;
+
+const subscribePersonalSyncStatus = (listener: () => void) => {
+    personalSyncListeners.add(listener);
+    return () => personalSyncListeners.delete(listener);
+};
+
+const refreshPersonalSyncStatus = () => {
+    const active = Array.from(activePersonalSyncOperations.values()).sort((a, b) => b.startedAt - a.startedAt)[0];
+    personalSyncStatus = active
+        ? {
+            isSyncing: true,
+            operation: active.operation,
+            label: personalSyncLabels[active.operation],
+            startedAt: active.startedAt,
+        }
+        : emptyPersonalSyncStatus;
+    emitPersonalSyncStatus();
+};
+
+const startPersonalSyncStatus = (operation: PersonalSyncOperation) => {
+    const token = Symbol(operation);
+    activePersonalSyncOperations.set(token, { operation, startedAt: Date.now() });
+    refreshPersonalSyncStatus();
+    return () => {
+        activePersonalSyncOperations.delete(token);
+        refreshPersonalSyncStatus();
+    };
+};
 
 const personalPartKeys = Object.keys(PERSONAL_PART_FILES) as PersonalPartKey[];
 
@@ -277,6 +335,8 @@ export interface UseGistBackupResult {
     isPushing: boolean;
     isPulling: boolean;
     isTesting: boolean;
+    isSyncingPersonalData: boolean;
+    personalSyncStatus: PersonalSyncStatus;
     lastBackupAt: string | null;
 }
 
@@ -287,6 +347,7 @@ export const useGistBackup = (): UseGistBackupResult => {
     const [isPulling, setIsPulling] = useState(false);
     const [isTesting, setIsTesting] = useState(false);
     const [lastBackupAt, setLastBackupAt] = useState<string | null>(null);
+    const personalSyncStatusSnapshot = useSyncExternalStore(subscribePersonalSyncStatus, getPersonalSyncStatus, getPersonalSyncStatus);
 
     const appContext = useSelector(selectAppContext);
     const inventory = useSelector(selectInventory);
@@ -345,6 +406,7 @@ export const useGistBackup = (): UseGistBackupResult => {
         }
 
         setIsPushing(true);
+        const stopSyncStatus = startPersonalSyncStatus("push");
         const key = "gist-push";
         message.loading({ content: "Đang sao lưu dữ liệu cá nhân lên Gist...", key, duration: 0 });
         try {
@@ -377,6 +439,7 @@ export const useGistBackup = (): UseGistBackupResult => {
             message.error({ content: "Sao lưu thất bại: " + err?.message, key, duration: 5 });
         } finally {
             setIsPushing(false);
+            stopSyncStatus();
         }
     };
 
@@ -390,6 +453,7 @@ export const useGistBackup = (): UseGistBackupResult => {
             return;
         }
         setIsPulling(true);
+        const stopSyncStatus = startPersonalSyncStatus("pull");
         const key = "gist-pull";
         message.loading({ content: "Đang khôi phục dữ liệu từ Gist...", key, duration: 0 });
         try {
@@ -414,6 +478,7 @@ export const useGistBackup = (): UseGistBackupResult => {
             message.error({ content: "Khôi phục thất bại: " + err?.message, key, duration: 5 });
         } finally {
             setIsPulling(false);
+            stopSyncStatus();
         }
     };
 
@@ -422,6 +487,7 @@ export const useGistBackup = (): UseGistBackupResult => {
         const targetToken = gistToken.trim();
         if (!targetGistId || !targetToken || !navigator.onLine) return false;
 
+        const stopSyncStatus = startPersonalSyncStatus("auto");
         try {
             const gistJson = await getGist(targetGistId, targetToken);
             const manifestFile = await readGistFile(gistJson, PERSONAL_MANIFEST_FILE_NAME, targetToken);
@@ -520,6 +586,8 @@ export const useGistBackup = (): UseGistBackupResult => {
             return true;
         } catch {
             return false;
+        } finally {
+            stopSyncStatus();
         }
     }, [gistId, gistToken, personalSlices]);
 
@@ -607,6 +675,8 @@ export const useGistBackup = (): UseGistBackupResult => {
         inspectPersonalBackupHealth,
         testGistConfig,
         isPushing, isPulling, isTesting,
+        isSyncingPersonalData: personalSyncStatusSnapshot.isSyncing,
+        personalSyncStatus: personalSyncStatusSnapshot,
         lastBackupAt,
     };
 };
