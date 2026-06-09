@@ -1,4 +1,4 @@
-import { BarChartOutlined, BulbOutlined, CalculatorOutlined, ClockCircleOutlined, ExportOutlined, LeftOutlined, MinusOutlined, PieChartOutlined, PlusOutlined, SettingOutlined, ShoppingCartOutlined, ThunderboltOutlined } from "@ant-design/icons";
+import { BarChartOutlined, BulbOutlined, CalculatorOutlined, ClockCircleOutlined, ExportOutlined, FireOutlined, LeftOutlined, MinusOutlined, PieChartOutlined, PlusOutlined, SettingOutlined, ShoppingCartOutlined, ThunderboltOutlined } from "@ant-design/icons";
 import { DishDurationHelper } from "@common/Helpers/DishDurationHelper";
 import { DishNutritionHelper, DishNutritionSummary } from "@common/Helpers/DishNutritionHelper";
 import { NutritionGoalHelper, NutritionGoalMatch } from "@common/Helpers/NutritionGoalHelper";
@@ -12,10 +12,10 @@ import { Tag } from "@components/Tag";
 import { Typography } from "@components/Typography";
 import { useScheduledCalculation, useToggle } from "@hooks";
 import { DishScorer, ScoredDish, ScoredDishGroup } from "../Helpers/DishScorer";
-import { selectDishes, selectIngredients, selectIngredientsById, selectInventory, selectInventoryHealthConfig, selectNutritionGoals } from "@store/Selectors";
+import { selectDishes, selectHouseholdPreferenceProfile, selectIngredients, selectIngredientsById, selectInventory, selectInventoryHealthConfig, selectNutritionGoals } from "@store/Selectors";
 import { InputNumber, Select, Spin } from "antd";
 import React, { useMemo, useState } from "react";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { IngredientPickerWidget } from "./IngredientPicker.widget";
 import { DishSuggestionList } from "./DishSuggestionList.widget";
@@ -26,14 +26,15 @@ import { NutritionCalculatorModalContent, type NutritionCalculatorInitialSelecti
 import ShoppingListIcon from "../../../../assets/icons/shoppingList.png";
 import NoodlesIcon from "../../../../assets/icons/noodles.png";
 import DietIcon from "../../../../assets/icons/diet.png";
-import { Dishes } from "@store/Models/Dishes";
+import { DISH_TAGS, Dishes } from "@store/Models/Dishes";
 import { InventoryHelper } from "@common/Helpers/InventoryHelper";
 import { IngredientUnitHelper } from "@common/Helpers/IngredientUnitHelper";
 import { Collapse } from "antd";
 import { RootRoutes } from "@routing/RootRoutes";
 import { NutritionGoal as SharedNutritionGoal } from "@store/Models/SharedConfig";
+import { updateHouseholdPreferenceProfile } from "@store/Reducers/AppContextReducer";
 
-type Mode = "ingredients" | "inventory" | "duration" | "nutrition";
+type Mode = "cookNow" | "ingredients" | "inventory" | "duration" | "nutrition";
 type SuggesterActionMode = "navigate" | "modal";
 
 type NutritionSuggestion = {
@@ -100,12 +101,14 @@ const PendingCalculationBox: React.FunctionComponent<{ text: string }> = ({ text
 
 export const DishSuggesterScreen: React.FC<DishSuggesterScreenProps> = ({ open, onClose, initialMode, initialIngredientIds, previewInline, pageInline, actionMode = "navigate" }) => {
     const navigate = useNavigate();
+    const dispatch = useDispatch();
     const dishes = useSelector(selectDishes);
     const allIngredients = useSelector(selectIngredients);
     const ingredientsById = useSelector(selectIngredientsById);
     const inventory = useSelector(selectInventory);
     const inventoryConfig = useSelector(selectInventoryHealthConfig);
     const nutritionGoals = useSelector(selectNutritionGoals);
+    const householdPreferenceProfile = useSelector(selectHouseholdPreferenceProfile);
 
     const [mode, setMode] = useState<Mode>(initialMode ?? "ingredients");
     const [step, setStep] = useState(0);
@@ -149,6 +152,16 @@ export const DishSuggesterScreen: React.FC<DishSuggesterScreenProps> = ({ open, 
         return nutritionGoals.find(goal => goal.id === nutritionGoalId) ?? nutritionGoals[0];
     }, [nutritionGoalId, nutritionGoals]);
 
+    const cookNowNutritionGoal = useMemo<SharedNutritionGoal | undefined>(() => {
+        return nutritionGoals.find(goal => goal.id === householdPreferenceProfile.nutritionGoalId);
+    }, [householdPreferenceProfile.nutritionGoalId, nutritionGoals]);
+
+    const allDishTagOptions = useMemo(() => {
+        const tags = new Set<string>(DISH_TAGS);
+        dishes.forEach(dish => dish.tags?.forEach(tag => tags.add(tag)));
+        return Array.from(tags).map(tag => ({ value: tag, label: tag }));
+    }, [dishes]);
+
     const inventoryIngredientIds = useMemo(() => {
         if (!open) return [];
         return Object.entries(inventory)
@@ -181,6 +194,17 @@ export const DishSuggesterScreen: React.FC<DishSuggesterScreenProps> = ({ open, 
     });
     const inventoryScored = inventorySuggestions.scored;
     const inventoryGroups = inventorySuggestions.groups;
+
+    const calculateCookNowSuggestions = React.useCallback((): DishSuggestionCalculation => {
+        const scored = DishScorer.scoreCookNow(dishes, inventory as any, dishes, allIngredients, householdPreferenceProfile, inventoryConfig, cookNowNutritionGoal);
+        return { scored, groups: DishScorer.groupCookNow(scored) };
+    }, [allIngredients, cookNowNutritionGoal, dishes, householdPreferenceProfile, inventory, inventoryConfig]);
+    const { value: cookNowSuggestions, pending: cookNowSuggestionsPending } = useScheduledCalculation(calculateCookNowSuggestions, {
+        enabled: open && mode === "cookNow",
+        initialValue: createEmptyDishSuggestionCalculation,
+    });
+    const cookNowScored = cookNowSuggestions.scored;
+    const cookNowGroups = cookNowSuggestions.groups;
 
     const filteredInventoryGroups = useMemo(() => {
         if (fridgeSearchIds.length === 0) return inventoryGroups;
@@ -260,9 +284,9 @@ export const DishSuggesterScreen: React.FC<DishSuggesterScreenProps> = ({ open, 
     }), [selectedDishIds]);
 
     const selectedScored = useMemo(() => {
-        const source = mode === "inventory" ? inventoryScored : ingredientScored;
+        const source = mode === "cookNow" ? cookNowScored : mode === "inventory" ? inventoryScored : ingredientScored;
         return source.filter(s => selectedDishIds.includes(s.dish.id));
-    }, [mode, inventoryScored, ingredientScored, selectedDishIds]);
+    }, [mode, cookNowScored, inventoryScored, ingredientScored, selectedDishIds]);
 
     const missingIngredientIds = useMemo(() => {
         const ids = new Set<string>();
@@ -313,6 +337,25 @@ export const DishSuggesterScreen: React.FC<DishSuggesterScreenProps> = ({ open, 
         setMaxMinutes(value);
     }, []);
 
+    const _updateHouseholdPreferenceProfile = React.useCallback((patch: Partial<typeof householdPreferenceProfile>) => {
+        setSelectedDishIds([]);
+        dispatch(updateHouseholdPreferenceProfile(patch));
+    }, [dispatch]);
+
+    const _onPreferredTagsChange = React.useCallback((tags: string[]) => {
+        _updateHouseholdPreferenceProfile({
+            preferredTags: tags,
+            avoidedTags: householdPreferenceProfile.avoidedTags.filter(tag => !tags.includes(tag)),
+        });
+    }, [_updateHouseholdPreferenceProfile, householdPreferenceProfile.avoidedTags]);
+
+    const _onAvoidedTagsChange = React.useCallback((tags: string[]) => {
+        _updateHouseholdPreferenceProfile({
+            avoidedTags: tags,
+            preferredTags: householdPreferenceProfile.preferredTags.filter(tag => !tags.includes(tag)),
+        });
+    }, [_updateHouseholdPreferenceProfile, householdPreferenceProfile.preferredTags]);
+
     const _onNext = () => setStep(1);
     const _onBack = () => setStep(0);
 
@@ -326,7 +369,7 @@ export const DishSuggesterScreen: React.FC<DishSuggesterScreenProps> = ({ open, 
 
     const _onModeChange = (m: Mode) => {
         setMode(m);
-        setStep(m === "inventory" ? 1 : 0);
+        setStep(m === "inventory" || m === "cookNow" ? 1 : 0);
         setSelectedDishIds([]);
         setExpandedNutritionDishIds(new Set());
         setFridgeSearchIds([]);
@@ -386,7 +429,7 @@ export const DishSuggesterScreen: React.FC<DishSuggesterScreenProps> = ({ open, 
         marginTop: 12,
         display: "flex",
         alignItems: "center",
-        justifyContent: mode !== "inventory" ? "space-between" : "flex-end",
+        justifyContent: mode !== "inventory" && mode !== "cookNow" ? "space-between" : "flex-end",
         gap: 12,
     };
 
@@ -460,7 +503,7 @@ export const DishSuggesterScreen: React.FC<DishSuggesterScreenProps> = ({ open, 
                 </Box>
             )}
             <div style={footerRowStyle}>
-                {mode !== "inventory" && (
+                {mode !== "inventory" && mode !== "cookNow" && (
                     <Button onClick={_onBack} icon={<LeftOutlined />} style={{ borderRadius: 20 }}>
                         Quay lại
                     </Button>
@@ -473,11 +516,12 @@ export const DishSuggesterScreen: React.FC<DishSuggesterScreenProps> = ({ open, 
     const ModeTabs = () => (
         <div style={{
             display: "grid",
-            gridTemplateColumns: "repeat(4, minmax(0, 1fr))",
+            gridTemplateColumns: "repeat(5, minmax(0, 1fr))",
             gap: 6,
             marginBottom: 16,
         }}>
             {([
+                { key: "cookNow" as Mode, label: "Nấu ngay", icon: <FireOutlined /> },
                 { key: "ingredients" as Mode, label: "Nguyên liệu", icon: <BulbOutlined /> },
                 { key: "inventory" as Mode, label: "Tủ lạnh", icon: <ThunderboltOutlined /> },
                 { key: "duration" as Mode, label: "Thời gian", icon: <ClockCircleOutlined /> },
@@ -511,6 +555,86 @@ export const DishSuggesterScreen: React.FC<DishSuggesterScreenProps> = ({ open, 
                 </button>
             ))}
         </div>
+    );
+
+    const HouseholdPreferencePanel = () => (
+        <Box style={{ padding: 12, borderRadius: 8, background: "#f7fffb", border: "1px solid #b7eb8f", marginBottom: 12 }}>
+            <Stack justify="space-between" align="center" gap={8} style={{ marginBottom: 10 }}>
+                <Stack gap={7} align="center" style={{ minWidth: 0 }}>
+                    <FireOutlined style={{ color: "#389e0d" }} />
+                    <Typography.Text strong style={{ color: "#1f7a31" }}>Hồ sơ nhà</Typography.Text>
+                </Stack>
+                <Tag color="green" style={{ marginRight: 0 }}>{householdPreferenceProfile.servingCount} khẩu phần</Tag>
+            </Stack>
+
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(126px, 1fr))", gap: 8, marginBottom: 10 }}>
+                <Box style={{ minWidth: 0 }}>
+                    <Typography.Text type="secondary" style={{ display: "block", fontSize: 11, lineHeight: "15px", marginBottom: 4 }}>Khẩu phần</Typography.Text>
+                    <InputNumber
+                        min={1}
+                        max={24}
+                        value={householdPreferenceProfile.servingCount}
+                        onChange={value => _updateHouseholdPreferenceProfile({ servingCount: Number(value ?? 2) })}
+                        style={{ width: "100%" }}
+                    />
+                </Box>
+                <Box style={{ minWidth: 0 }}>
+                    <Typography.Text type="secondary" style={{ display: "block", fontSize: 11, lineHeight: "15px", marginBottom: 4 }}>Tối đa</Typography.Text>
+                    <InputNumber
+                        min={5}
+                        max={480}
+                        step={5}
+                        addonAfter="phút"
+                        value={householdPreferenceProfile.maxCookMinutes}
+                        onChange={value => _updateHouseholdPreferenceProfile({ maxCookMinutes: Number(value ?? 45) })}
+                        style={{ width: "100%" }}
+                    />
+                </Box>
+                <Box style={{ minWidth: 0 }}>
+                    <Typography.Text type="secondary" style={{ display: "block", fontSize: 11, lineHeight: "15px", marginBottom: 4 }}>Mua thêm</Typography.Text>
+                    <InputNumber
+                        min={0}
+                        max={10000000}
+                        step={10000}
+                        addonAfter="đ"
+                        value={householdPreferenceProfile.maxExtraCost}
+                        onChange={value => _updateHouseholdPreferenceProfile({ maxExtraCost: Number(value ?? 0) })}
+                        style={{ width: "100%" }}
+                    />
+                </Box>
+            </div>
+
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(172px, 1fr))", gap: 8 }}>
+                <Select
+                    allowClear
+                    size="small"
+                    placeholder="Mục tiêu dinh dưỡng"
+                    value={householdPreferenceProfile.nutritionGoalId}
+                    onChange={value => _updateHouseholdPreferenceProfile({ nutritionGoalId: value })}
+                    options={nutritionGoals.map(goal => ({ value: goal.id, label: goal.name }))}
+                />
+                <Select
+                    mode="multiple"
+                    allowClear
+                    size="small"
+                    maxTagCount="responsive"
+                    placeholder="Ưu tiên tag"
+                    value={householdPreferenceProfile.preferredTags}
+                    onChange={_onPreferredTagsChange}
+                    options={allDishTagOptions}
+                />
+                <Select
+                    mode="multiple"
+                    allowClear
+                    size="small"
+                    maxTagCount="responsive"
+                    placeholder="Hạn chế tag"
+                    value={householdPreferenceProfile.avoidedTags}
+                    onChange={_onAvoidedTagsChange}
+                    options={allDishTagOptions}
+                />
+            </div>
+        </Box>
     );
 
     const NutritionMetric = ({ label, value, tone }: { label: string; value: string; tone: string }) => (
@@ -661,6 +785,38 @@ export const DishSuggesterScreen: React.FC<DishSuggesterScreenProps> = ({ open, 
 
     const content = <>
             <ModeTabs />
+
+            {/* -- Mode: cook now -- */}
+            {mode === "cookNow" && (
+                <>
+                    <HouseholdPreferencePanel />
+                    {inventoryIngredientIds.length === 0 ? (
+                        <Box style={{ textAlign: "center", padding: "30px 0" }}>
+                            <Typography.Text type="secondary">Tủ lạnh trống — hãy cập nhật tồn kho trước</Typography.Text>
+                        </Box>
+                    ) : cookNowSuggestionsPending ? (
+                        <PendingCalculationBox text="Đang xếp hạng món nấu ngay..." />
+                    ) : cookNowGroups.length === 0 ? (
+                        <Box style={{ textAlign: "center", padding: "30px 0" }}>
+                            <Typography.Text type="secondary">Chưa tìm thấy món hợp hồ sơ nhà và tồn kho hiện tại</Typography.Text>
+                        </Box>
+                    ) : (
+                        <>
+                            <Stack wrap="wrap" gap={6} style={{ marginBottom: 10 }}>
+                                <Tag color="green" style={{ marginRight: 0 }}>{cookNowScored.filter(item => item.missingIngredientIds.length === 0).length} nấu ngay</Tag>
+                                <Tag color="blue" style={{ marginRight: 0 }}>≤ {householdPreferenceProfile.maxCookMinutes} phút</Tag>
+                                {cookNowNutritionGoal && <Tag color="purple" style={{ marginRight: 0 }}>{cookNowNutritionGoal.name}</Tag>}
+                            </Stack>
+                            <DishSuggestionList
+                                groups={cookNowGroups}
+                                selectedDishIds={selectedDishIds}
+                                onToggle={_toggleDish}
+                            />
+                        </>
+                    )}
+                    <ResultsFooter dishIds={selectedDishIds} pending={cookNowSuggestionsPending} />
+                </>
+            )}
 
             {/* ── Mode: ingredients ── */}
             {mode === "ingredients" && step === 0 && (
@@ -1042,7 +1198,7 @@ export const DishSuggesterScreen: React.FC<DishSuggesterScreenProps> = ({ open, 
                     dishIds={selectedDishIds}
                     alreadyHaveIngredientIds={
                         mode === "ingredients" ? selectedIngredientIds :
-                        mode === "inventory" ? matchedIngredientIds : []
+                        mode === "inventory" || mode === "cookNow" ? matchedIngredientIds : []
                     }
                     onDone={() => {
                         toggleShoppingListAdd.hide();

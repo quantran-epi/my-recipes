@@ -1334,10 +1334,7 @@ const ShoppingListIngredientPanelItem: React.FunctionComponent<ShoppingListIngre
             </div>
 
             {expanded && <Box style={{ padding: "0 12px 10px 40px", borderTop: "1px solid #f0f0f0" }}>
-                <Stack justify="space-between" align="center" gap={8} style={{ marginTop: 8, marginBottom: 7 }}>
-                    <Typography.Text type="secondary" style={{ fontSize: 12 }}>Cần cho từng món</Typography.Text>
-                    {canEditBoughtInfo && <Button size="small" icon={<DollarOutlined />} onClick={_openBoughtModal} style={compactSmallButtonStyle}>Cập nhật mua</Button>}
-                </Stack>
+                <Typography.Text type="secondary" style={{ display: "block", fontSize: 12, marginTop: 8, marginBottom: 7 }}>Cần cho từng món</Typography.Text>
                 <List
                     size="small"
                     dataSource={props.item.amounts}

@@ -55,12 +55,12 @@ export const DishSuggesterPageScreen: React.FC = () => {
                 <div style={{ minWidth: 0 }}>
                     <Typography.Text style={{ display: 'block', color: '#7436dc', fontSize: 12, lineHeight: '16px', fontWeight: 800 }}>My Recipes</Typography.Text>
                     <Typography.Text strong style={{ display: 'block', color: '#111827', fontSize: 24, lineHeight: '31px' }}>Nấu gì hôm nay?</Typography.Text>
-                    <Typography.Text type='secondary' style={{ display: 'block', fontSize: 12, lineHeight: '18px', marginTop: 3 }}>Chọn món theo nguyên liệu, tủ lạnh, thời gian hoặc mục tiêu dinh dưỡng. Các hành động bên dưới mở modal ngay trong trang này.</Typography.Text>
+                    <Typography.Text type='secondary' style={{ display: 'block', fontSize: 12, lineHeight: '18px', marginTop: 3 }}>Ưu tiên món nấu ngay theo tủ lạnh, thời gian, ngân sách mua thêm và khẩu vị nhà. Các hành động bên dưới mở modal ngay trong trang này.</Typography.Text>
                 </div>
             </Stack>
         </Box>
         <Box className='dish-suggester-page-panel'>
-            <DishSuggesterScreen open={true} onClose={() => undefined} initialMode='inventory' pageInline actionMode='modal' />
+            <DishSuggesterScreen open={true} onClose={() => undefined} initialMode='cookNow' pageInline actionMode='modal' />
         </Box>
     </Box>;
 };

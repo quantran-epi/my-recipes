@@ -968,10 +968,10 @@ export const DashboardAnalyticsScreen = () => {
 
                     <ChartFrame height={190}>
                         <ResponsiveContainer width='100%' height='100%'>
-                            <BarChart data={priceHistoryDayChartData} margin={{ top: 8, right: 8, left: -18, bottom: 0 }}>
+                            <BarChart data={priceHistoryDayChartData} margin={{ top: 8, right: 8, left: 4, bottom: 0 }}>
                                 <CartesianGrid stroke={chartGridColor} vertical={false} />
                                 <XAxis dataKey='label' tick={chartAxisStyle} axisLine={false} tickLine={false} interval={2} />
-                                <YAxis tick={chartAxisStyle} axisLine={false} tickLine={false} width={36} tickFormatter={(value) => `${Math.round(Number(value) / 1000)}k`} />
+                                <YAxis tick={chartAxisStyle} axisLine={false} tickLine={false} width={54} tickMargin={6} tickFormatter={(value) => `${Math.round(Number(value) / 1000)}k`} />
                                 <ChartTooltip contentStyle={chartTooltipStyle} formatter={(value: any, name: any, props: any) => [props?.payload?.valueLabel ?? value, 'Tiền đã lưu']} labelFormatter={(label) => `Ngày ${label}`} />
                                 <Bar dataKey='value' name='Tiền đã lưu' fill='#722ed1' radius={[7, 7, 0, 0]} />
                             </BarChart>

@@ -4,6 +4,7 @@
  */
 import { RootState } from "@store/Store";
 import { DEFAULT_SHARED_CONFIG, normalizeSharedConfig } from "@store/Models/SharedConfig";
+import { normalizeHouseholdPreferenceProfile } from "@store/Reducers/AppContextReducer";
 import { createSelector } from "reselect";
 
 // ── Shared (admin-published) ─────────────────────────────────────────────────
@@ -51,6 +52,7 @@ export const selectWeeklyMealTemplates = (state: RootState) => state.personal.ap
 export const selectShoppingListTemplates = (state: RootState) => state.personal.appContext.shoppingListTemplates ?? [];
 export const selectIngredientPriceMemory = (state: RootState) => state.personal.appContext.ingredientPriceMemory ?? {};
 export const selectIngredientPriceHistory = (state: RootState) => state.personal.appContext.ingredientPriceHistory ?? {};
+export const selectHouseholdPreferenceProfile = (state: RootState) => normalizeHouseholdPreferenceProfile(state.personal.appContext.householdPreferenceProfile);
 
 export const selectShoppingListsById = createSelector(
     [selectShoppingLists],

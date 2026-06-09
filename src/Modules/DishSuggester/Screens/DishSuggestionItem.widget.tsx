@@ -23,8 +23,9 @@ export const DishSuggestionItem: React.FC<DishSuggestionItemProps> = ({ scored, 
 
     const _name = (id: string) => ingredientsById.get(id)?.name ?? id;
 
-    const pct = Math.round(scored.score * 100);
-    const scoreColor = pct >= 100 ? "#52c41a" : pct >= 50 ? "#faad14" : "#fa8c16";
+    const pct = Math.round((scored.cookNowScore ?? scored.score) * 100);
+    const inventoryPct = Math.round(scored.score * 100);
+    const scoreColor = pct >= 80 ? "#52c41a" : pct >= 58 ? "#1677ff" : pct >= 45 ? "#faad14" : "#fa8c16";
     const partialIngredients = scored.partialIngredientIds ?? [];
     const urgentIngredients = scored.urgentIngredients ?? [];
     const ingredientDetails = scored.ingredientDetails ?? [];
@@ -86,9 +87,17 @@ export const DishSuggestionItem: React.FC<DishSuggestionItemProps> = ({ scored, 
                             padding: "2px 8px", borderRadius: 12, fontSize: 12, fontWeight: 700,
                             background: scoreColor + "22", color: scoreColor, flexShrink: 0, whiteSpace: "nowrap",
                         }}>
-                            {pct}%
+                            {scored.cookNowScore !== undefined ? `Hợp ${pct}%` : `${pct}%`}
                         </div>
                     </div>
+
+                    {scored.cookNowReasons && scored.cookNowReasons.length > 0 && (
+                        <Stack wrap="wrap" gap={4}>
+                            {scored.cookNowReasons.map(reason => (
+                                <Tag key={reason} color="blue" style={{ fontSize: 10, lineHeight: "16px", padding: "0 6px", marginBottom: 0, marginRight: 0, maxWidth: "100%", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{reason}</Tag>
+                            ))}
+                        </Stack>
+                    )}
 
                     {urgentIngredients.length > 0 && (
                         <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
@@ -116,7 +125,7 @@ export const DishSuggestionItem: React.FC<DishSuggestionItemProps> = ({ scored, 
                     {/* Ingredient mini summary */}
                     <div style={{ display: "flex", flexWrap: "wrap", gap: "4px 8px", marginTop: 1 }}>
                         <Typography.Text style={{ fontSize: 11, color: "#52c41a", whiteSpace: "nowrap" }}>
-                            ✓ {scored.matchedIngredientIds.length} có sẵn
+                            ✓ {scored.matchedIngredientIds.length} có sẵn{scored.cookNowScore !== undefined ? ` · ${inventoryPct}% kho` : ""}
                         </Typography.Text>
                         {scored.missingIngredientIds.length > 0 && (
                             <Typography.Text style={{ fontSize: 11, color: "#ff4d4f", whiteSpace: "nowrap" }}>
