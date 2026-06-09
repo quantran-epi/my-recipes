@@ -36,6 +36,12 @@ export type IngredientPriceMemory = {
     updatedAt: string;
 }
 
+export type IngredientPriceHistoryEntry = IngredientPriceMemory & {
+    id: string;
+    shoppingListId?: string;
+    shoppingListName?: string;
+}
+
 export interface AppContextState {
     loading: boolean;
     currentFeatureName: string;
@@ -44,6 +50,7 @@ export interface AppContextState {
     weeklyMealTemplates?: WeeklyMealTemplate[];
     shoppingListTemplates?: ShoppingListTemplate[];
     ingredientPriceMemory?: Record<string, IngredientPriceMemory>;
+    ingredientPriceHistory?: Record<string, IngredientPriceHistoryEntry[]>;
 }
 
 const initialState: AppContextState = {
@@ -54,6 +61,7 @@ const initialState: AppContextState = {
     weeklyMealTemplates: [],
     shoppingListTemplates: [],
     ingredientPriceMemory: {},
+    ingredientPriceHistory: {},
 }
 
 const rememberName = (current: string[] | undefined, name: string): string[] => {
@@ -93,11 +101,26 @@ export const appContextSlice = createSlice({
         removeShoppingListTemplate: (state, action: PayloadAction<string>) => {
             state.shoppingListTemplates = (state.shoppingListTemplates ?? []).filter(item => item.id !== action.payload);
         },
-        rememberIngredientPrice: (state, action: PayloadAction<IngredientPriceMemory>) => {
+        rememberIngredientPrice: (state, action: PayloadAction<IngredientPriceHistoryEntry>) => {
             const current = state.ingredientPriceMemory ?? {};
             state.ingredientPriceMemory = {
                 ...current,
-                [action.payload.ingredientId]: action.payload,
+                [action.payload.ingredientId]: {
+                    ingredientId: action.payload.ingredientId,
+                    price: action.payload.price,
+                    amount: action.payload.amount,
+                    unit: action.payload.unit,
+                    currency: action.payload.currency,
+                    updatedAt: action.payload.updatedAt,
+                },
+            };
+            const history = state.ingredientPriceHistory ?? {};
+            const existing = history[action.payload.ingredientId] ?? [];
+            state.ingredientPriceHistory = {
+                ...history,
+                [action.payload.ingredientId]: [action.payload, ...existing.filter(item => item.id !== action.payload.id)]
+                    .sort((a, b) => new Date(b.updatedAt).valueOf() - new Date(a.updatedAt).valueOf())
+                    .slice(0, 60),
             };
         }
     }

@@ -50,6 +50,7 @@ export const selectScheduledMealNameHistory = (state: RootState) => state.person
 export const selectWeeklyMealTemplates = (state: RootState) => state.personal.appContext.weeklyMealTemplates ?? [];
 export const selectShoppingListTemplates = (state: RootState) => state.personal.appContext.shoppingListTemplates ?? [];
 export const selectIngredientPriceMemory = (state: RootState) => state.personal.appContext.ingredientPriceMemory ?? {};
+export const selectIngredientPriceHistory = (state: RootState) => state.personal.appContext.ingredientPriceHistory ?? {};
 
 export const selectShoppingListsById = createSelector(
     [selectShoppingLists],

@@ -1,4 +1,4 @@
-import { CheckCircleOutlined, DollarOutlined, MinusOutlined, PlusOutlined, QuestionCircleOutlined, ShoppingCartOutlined, WarningOutlined } from "@ant-design/icons";
+import { CheckCircleOutlined, DollarOutlined, EditOutlined, HistoryOutlined, MinusOutlined, PlusOutlined, QuestionCircleOutlined, ShoppingCartOutlined, WarningOutlined } from "@ant-design/icons";
 import { Button } from "@components/Button";
 import { Checkbox } from "@components/Form/Checkbox";
 import { DatePicker } from "@components/Form/DatePicker";
@@ -21,8 +21,8 @@ import { CostEstimateHelper, CostEstimateSummary } from "@common/Helpers/CostEst
 import { ShoppingList, ShoppingListCompletionImport, ShoppingListIngredientAmount, ShoppingListIngredientGroup } from "@store/Models/ShoppingList";
 import { completeShoppingList, setIngredientBoughtAmount, toggleDoneIngredientAmount, toggleDoneIngredientGroup } from "@store/Reducers/ShoppingListReducer";
 import { setInventory } from "@store/Reducers/InventoryReducer";
-import { IngredientPriceMemory, rememberIngredientPrice } from "@store/Reducers/AppContextReducer";
-import { selectDishes, selectDishesById, selectIngredientPriceMemory, selectIngredients, selectIngredientsById, selectInventory, selectScheduledMealsById } from "@store/Selectors";
+import { IngredientPriceHistoryEntry, IngredientPriceMemory, rememberIngredientPrice } from "@store/Reducers/AppContextReducer";
+import { selectDishes, selectDishesById, selectIngredientPriceHistory, selectIngredientPriceMemory, selectIngredients, selectIngredientsById, selectInventory, selectScheduledMealsById } from "@store/Selectors";
 import { Divider, InputNumber, Space, Spin, Tabs } from "antd";
 import { CheckboxChangeEvent } from "antd/es/checkbox";
 import { groupBy } from "lodash";
@@ -342,6 +342,26 @@ const estimateRememberedPriceForTarget = (
 const formatPriceMemoryLine = (memory: IngredientPriceMemory): string => {
     const dateLabel = memory.updatedAt ? moment(memory.updatedAt).format("DD/MM") : "gần nhất";
     return `${IngredientPriceHelper.formatCurrency(memory.price)} / ${IngredientUnitHelper.formatAmount(memory.amount)}${memory.unit} · ${dateLabel}`;
+}
+
+const compactSmallButtonStyle: React.CSSProperties = {
+    height: 30,
+    padding: "0 10px",
+    lineHeight: "18px",
+    display: "inline-flex",
+    alignItems: "center",
+    justifyContent: "center",
+    borderRadius: 999,
+    fontSize: 12,
+    fontWeight: 650,
+};
+
+const asHistoryEntry = (memory: IngredientPriceMemory | undefined): IngredientPriceHistoryEntry | undefined => {
+    if (!memory) return undefined;
+    return {
+        ...memory,
+        id: `memory-${memory.ingredientId}-${memory.updatedAt}`,
+    };
 }
 
 const getShoppingListIngredientPriceEstimate = (
@@ -899,7 +919,10 @@ const ShoppingListIngredientPanelItem: React.FunctionComponent<ShoppingListIngre
     const ingredientsById = useSelector(selectIngredientsById);
     const inventoryItems = useSelector(selectInventory);
     const ingredientPriceMemory = useSelector(selectIngredientPriceMemory);
+    const ingredientPriceHistory = useSelector(selectIngredientPriceHistory);
     const [expanded, setExpanded] = useState(false);
+    const toggleBoughtModal = useToggle();
+    const [priceEditorOpen, setPriceEditorOpen] = useState(false);
 
     const ingredient = ingredientsById.get(props.item.ingredientId);
     const inventory = inventoryItems[props.item.ingredientId];
@@ -912,6 +935,8 @@ const ShoppingListIngredientPanelItem: React.FunctionComponent<ShoppingListIngre
     const boughtUnitOptions = Array.from(new Set([...inventoryUnits, boughtUnit]));
     const boughtPriceTarget = getBoughtPriceTarget(props.item, ingredient, status, boughtUnit);
     const priceMemory = ingredientPriceMemory[props.item.ingredientId];
+    const priceHistory = ingredientPriceHistory[props.item.ingredientId] ?? [];
+    const displayPriceHistory = priceHistory.length > 0 ? priceHistory : [asHistoryEntry(priceMemory)].filter(Boolean) as IngredientPriceHistoryEntry[];
     const rememberedPriceForTarget = estimateRememberedPriceForTarget(priceMemory, ingredient, boughtPriceTarget);
     const targetPriceEstimate = boughtPriceTarget.amount > 0
         ? IngredientPriceHelper.estimateForAmount(ingredient, boughtPriceTarget.amount, boughtPriceTarget.unit)
@@ -936,7 +961,8 @@ const ShoppingListIngredientPanelItem: React.FunctionComponent<ShoppingListIngre
         }));
 
         if (isChecked) {
-            setExpanded(true);
+            setPriceEditorOpen(!props.item.boughtEstimatedCost);
+            toggleBoughtModal.show();
         }
 
         if (isChecked && !props.item.boughtAmount && status.needToBuy > 0) {
@@ -988,8 +1014,9 @@ const ShoppingListIngredientPanelItem: React.FunctionComponent<ShoppingListIngre
             ingredientGroupId: props.item.id,
             boughtAmount,
             boughtUnit,
-            boughtEstimatedCost: boughtAmount ? props.item.boughtEstimatedCost : undefined,
+            boughtEstimatedCost: undefined,
         }));
+        setPriceEditorOpen(true);
         _syncDoneWithBoughtAmount(boughtAmount, boughtUnit);
     }
 
@@ -1002,7 +1029,21 @@ const ShoppingListIngredientPanelItem: React.FunctionComponent<ShoppingListIngre
             boughtUnit: unit,
             boughtEstimatedCost: undefined,
         }));
+        setPriceEditorOpen(true);
         _syncDoneWithBoughtAmount(props.item.boughtAmount, unit);
+    }
+
+    const _setBoughtAmount = (amount: number | undefined, unit: IngredientUnit = boughtUnit) => {
+        if (props.readonly) return;
+        dispatch(setIngredientBoughtAmount({
+            shoppingListId: props.shoppingList.id,
+            ingredientGroupId: props.item.id,
+            boughtAmount: amount,
+            boughtUnit: unit,
+            boughtEstimatedCost: undefined,
+        }));
+        setPriceEditorOpen(true);
+        _syncDoneWithBoughtAmount(amount, unit);
     }
 
     const _applyPaidPrice = (price: number | undefined) => {
@@ -1020,14 +1061,18 @@ const ShoppingListIngredientPanelItem: React.FunctionComponent<ShoppingListIngre
             boughtEstimatedCost: { min: normalizedPrice, max: normalizedPrice, currency: "VND" },
         }));
         dispatch(rememberIngredientPrice({
+            id: nanoid(10),
             ingredientId: props.item.ingredientId,
             price: normalizedPrice,
             amount: boughtPriceTarget.amount,
             unit: boughtPriceTarget.unit,
             currency: "VND",
             updatedAt: new Date().toISOString(),
+            shoppingListId: props.shoppingList.id,
+            shoppingListName: props.shoppingList.name,
         }));
         setDraftPrice(normalizedPrice);
+        setPriceEditorOpen(false);
         message.success("Đã lưu giá mua gần nhất");
     }
 
@@ -1080,18 +1125,149 @@ const ShoppingListIngredientPanelItem: React.FunctionComponent<ShoppingListIngre
         </div>;
     }
 
-    const showPaidPriceEditor = !props.readonly
-        && !status.isAlwaysAvailable
-        && (props.item.isDone || (props.item.boughtAmount ?? 0) > 0)
-        && boughtPriceTarget.amount > 0;
+    const hasSavedPrice = Boolean(props.item.boughtEstimatedCost);
     const rememberedPriceMatchesTarget = Boolean(priceMemory
         && priceMemory.amount === boughtPriceTarget.amount
         && priceMemory.unit === boughtPriceTarget.unit);
     const estimatedPriceButtons = targetPriceEstimate
         ? Array.from(new Set([targetPriceEstimate.min, targetPriceEstimate.max].filter(value => value > 0)))
         : [];
+    const canEditBoughtInfo = !props.readonly && !status.isAlwaysAvailable;
+    const currentPriceLabel = props.item.boughtEstimatedCost ? IngredientPriceHelper.formatRange(props.item.boughtEstimatedCost) : "Chưa lưu giá";
 
-    return <List.Item data-testid={`shopping-list-ingredient-${props.item.ingredientId}`} style={{ padding: 0, borderBottom: "none" }} actions={[]}>
+    const _openBoughtModal = (event?: React.MouseEvent<HTMLElement>) => {
+        event?.stopPropagation();
+        setPriceEditorOpen(!hasSavedPrice);
+        toggleBoughtModal.show();
+    }
+
+    const boughtInfoModal = <Modal
+        style={{ top: 35 }}
+        width={620}
+        open={toggleBoughtModal.value}
+        title={<Space size={8}><DollarOutlined /><span>Mua thực tế</span></Space>}
+        destroyOnClose={false}
+        onCancel={toggleBoughtModal.hide}
+        footer={<div style={{ display: "flex", justifyContent: "flex-end", width: "100%" }}>
+            <Button size="small" onClick={toggleBoughtModal.hide} style={compactSmallButtonStyle}>Đóng</Button>
+        </div>}
+    >
+        <div style={{ display: "flex", flexDirection: "column", gap: 12 }} data-testid={`shopping-list-bought-modal-${props.item.ingredientId}`}>
+            <Box style={{ padding: "11px 12px", border: "1px solid #efe7ff", borderRadius: 8, background: "linear-gradient(135deg, #fff 0%, #fbf8ff 100%)" }}>
+                <div style={{ display: "grid", gridTemplateColumns: "minmax(0, 1fr) auto", gap: 10, alignItems: "start" }}>
+                    <div style={{ minWidth: 0 }}>
+                        <Typography.Text strong style={{ display: "block", fontSize: 16, lineHeight: "21px", color: "#111827", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                            {_getIngredientNameById(props.item.ingredientId)}
+                        </Typography.Text>
+                        <Typography.Text type="secondary" style={{ display: "block", fontSize: 12, lineHeight: "18px", marginTop: 2 }}>
+                            Cần {IngredientUnitHelper.formatAmount(status.totalRequired)}{status.unit}
+                            {status.inStock > 0 ? ` · có ${IngredientUnitHelper.formatAmount(status.inStock)}${status.unit}` : ""}
+                        </Typography.Text>
+                    </div>
+                    <span style={{ borderRadius: 999, padding: "3px 9px", border: "1px solid #d3adf7", background: "#f9f0ff", color: "#722ed1", fontSize: 12, lineHeight: "18px", fontWeight: 800, whiteSpace: "nowrap" }}>
+                        {currentPriceLabel}
+                    </span>
+                </div>
+            </Box>
+
+            <Box style={{ padding: "11px 12px", border: "1px solid #f0f0f0", borderRadius: 8, background: "#fff" }}>
+                <Stack justify="space-between" align="flex-start" gap={8} style={{ marginBottom: 10 }}>
+                    <Box>
+                        <Typography.Text strong style={{ display: "block", fontSize: 13, lineHeight: "18px" }}>Lượng đã mua</Typography.Text>
+                        <Typography.Text type="secondary" style={{ display: "block", fontSize: 12, lineHeight: "17px" }}>Nhập đúng lượng thực tế để nhập kho và tính chi phí.</Typography.Text>
+                    </Box>
+                    {props.item.boughtAmount && <Tag color="purple" style={{ marginInlineEnd: 0 }}>{IngredientUnitHelper.formatAmount(props.item.boughtAmount)}{boughtUnit}</Tag>}
+                </Stack>
+                <div style={{ display: "grid", gridTemplateColumns: "minmax(0, 1fr) 92px", gap: 8, alignItems: "center", marginBottom: 8 }}>
+                    <InputNumber
+                        min={0}
+                        size="small"
+                        value={props.item.boughtAmount}
+                        disabled={!canEditBoughtInfo}
+                        onChange={_onBoughtAmountChange}
+                        style={{ width: "100%" }}
+                    />
+                    <Select size="small" value={boughtUnit} disabled={!canEditBoughtInfo} onChange={_onBoughtUnitChange} style={{ width: "100%" }}>
+                        {boughtUnitOptions.map(unit => <Option key={unit} value={unit}>{unit}</Option>)}
+                    </Select>
+                </div>
+                {canEditBoughtInfo && <Space wrap size={6}>
+                    {status.needToBuy > 0 && <Button size="small" style={compactSmallButtonStyle} onClick={() => _setBoughtAmount(status.needToBuy, status.unit)}>Đủ cần {IngredientUnitHelper.formatAmount(status.needToBuy)}{status.unit}</Button>}
+                    {status.totalRequired > 0 && <Button size="small" style={compactSmallButtonStyle} onClick={() => _setBoughtAmount(status.totalRequired, status.unit)}>Tổng công thức</Button>}
+                    <Button size="small" style={compactSmallButtonStyle} onClick={() => _setBoughtAmount(undefined, boughtUnit)}>Xóa lượng</Button>
+                </Space>}
+            </Box>
+
+            <Box style={{ padding: "11px 12px", border: "1px solid #efe7ff", borderRadius: 8, background: "#fff" }}>
+                <Stack justify="space-between" align="flex-start" gap={8} style={{ marginBottom: 10 }}>
+                    <Box style={{ minWidth: 0 }}>
+                        <Space size={6} align="center">
+                            <DollarOutlined style={{ color: "#722ed1" }} />
+                            <Typography.Text strong style={{ fontSize: 13 }}>Giá hôm nay</Typography.Text>
+                        </Space>
+                        <Typography.Text type="secondary" style={{ display: "block", fontSize: 12, lineHeight: "17px", marginTop: 2 }}>
+                            {boughtPriceTarget.amount > 0 ? `${IngredientUnitHelper.formatAmount(boughtPriceTarget.amount)}${boughtPriceTarget.unit} đã mua` : "Nhập lượng đã mua trước khi lưu giá."}
+                        </Typography.Text>
+                    </Box>
+                    {hasSavedPrice && !priceEditorOpen && canEditBoughtInfo && <Button size="small" icon={<EditOutlined />} style={compactSmallButtonStyle} onClick={() => setPriceEditorOpen(true)}>Sửa giá</Button>}
+                </Stack>
+
+                {hasSavedPrice && !priceEditorOpen && <Box style={{ padding: "9px 10px", borderRadius: 8, border: "1px solid #d3adf7", background: "#f9f0ff", marginBottom: displayPriceHistory.length > 0 ? 10 : 0 }}>
+                    <Typography.Text strong style={{ display: "block", color: "#722ed1", fontSize: 14, lineHeight: "19px" }}>{currentPriceLabel}</Typography.Text>
+                    <Typography.Text type="secondary" style={{ display: "block", fontSize: 12, lineHeight: "17px", marginTop: 2 }}>
+                        Đã lưu cho {IngredientUnitHelper.formatAmount(boughtPriceTarget.amount)}{boughtPriceTarget.unit}. Lần sau có thể chọn cùng giá hoặc cùng đơn giá.
+                    </Typography.Text>
+                </Box>}
+
+                {priceEditorOpen && canEditBoughtInfo && <Box style={{ marginBottom: displayPriceHistory.length > 0 ? 10 : 0 }}>
+                    {priceMemory && <Typography.Text type="secondary" style={{ display: "block", fontSize: 12, lineHeight: "17px", marginBottom: 7 }}>
+                        Lần trước: {formatPriceMemoryLine(priceMemory)}
+                    </Typography.Text>}
+                    <Space wrap size={6} style={{ marginBottom: 8 }}>
+                        {rememberedPriceForTarget && <Button size="small" icon={<DollarOutlined />} style={compactSmallButtonStyle} onClick={() => _applyPaidPrice(rememberedPriceForTarget)}>
+                            {rememberedPriceMatchesTarget ? "Cùng giá" : "Cùng đơn giá"}
+                        </Button>}
+                        {estimatedPriceButtons.map((value, index) => <Button key={value} size="small" style={compactSmallButtonStyle} onClick={() => setDraftPrice(value)}>
+                            {index === 0 ? "Giá thấp" : "Giá cao"} {IngredientPriceHelper.formatCurrency(value)}
+                        </Button>)}
+                    </Space>
+                    <div style={{ display: "grid", gridTemplateColumns: "minmax(0, 1fr) auto auto", gap: 6, alignItems: "center" }}>
+                        <InputNumber
+                            min={0}
+                            size="small"
+                            placeholder="Giá đã trả"
+                            value={draftPrice}
+                            onChange={(value) => setDraftPrice(typeof value === "number" ? value : undefined)}
+                            style={{ width: "100%" }}
+                        />
+                        <Button size="small" type="primary" style={compactSmallButtonStyle} onClick={() => _applyPaidPrice(draftPrice)}>Lưu</Button>
+                        {props.item.boughtEstimatedCost && <Button size="small" style={compactSmallButtonStyle} onClick={_clearPaidPrice}>Xóa</Button>}
+                    </div>
+                </Box>}
+
+                {displayPriceHistory.length > 0 && <Box>
+                    <Space size={6} align="center" style={{ marginBottom: 7 }}>
+                        <HistoryOutlined style={{ color: "#8c8c8c" }} />
+                        <Typography.Text type="secondary" style={{ fontSize: 12 }}>Lịch sử giá gần đây</Typography.Text>
+                    </Space>
+                    <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                        {displayPriceHistory.slice(0, 5).map(entry => <div key={entry.id} style={{ display: "grid", gridTemplateColumns: "minmax(0, 1fr) auto", gap: 8, alignItems: "center", padding: "8px 9px", border: "1px solid #f0f0f0", borderRadius: 8, background: "#fafafa" }}>
+                            <div style={{ minWidth: 0 }}>
+                                <Typography.Text strong style={{ display: "block", fontSize: 12, lineHeight: "16px", color: "#111827" }}>{IngredientPriceHelper.formatCurrency(entry.price)}</Typography.Text>
+                                <Typography.Text type="secondary" style={{ display: "block", fontSize: 11, lineHeight: "15px", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                                    {IngredientUnitHelper.formatAmount(entry.amount)}{entry.unit}{entry.shoppingListName ? ` · ${entry.shoppingListName}` : ""}
+                                </Typography.Text>
+                            </div>
+                            <Typography.Text type="secondary" style={{ fontSize: 11, lineHeight: "15px", whiteSpace: "nowrap" }}>{moment(entry.updatedAt).format("DD/MM/YY")}</Typography.Text>
+                        </div>)}
+                    </div>
+                </Box>}
+            </Box>
+        </div>
+    </Modal>;
+
+    return <React.Fragment>
+    <List.Item data-testid={`shopping-list-ingredient-${props.item.ingredientId}`} style={{ padding: 0, borderBottom: "none" }} actions={[]}>
         <div
             style={{
                 width: "100%",
@@ -1147,93 +1323,45 @@ const ShoppingListIngredientPanelItem: React.FunctionComponent<ShoppingListIngre
                         </div>
                     </div>
                 </div>
-                <div style={{ padding: "4px 6px", color: "#aaa", flexShrink: 0, marginTop: 3 }}>
-                    {expanded ? <MinusOutlined /> : <PlusOutlined />}
+                <div style={{ display: "flex", alignItems: "center", gap: 4, flexShrink: 0 }}>
+                    {canEditBoughtInfo && <Button size="small" icon={<DollarOutlined />} onClick={_openBoughtModal} style={{ ...compactSmallButtonStyle, color: hasSavedPrice ? "#722ed1" : "#595959", borderColor: hasSavedPrice ? "#d3adf7" : "#d9d9d9" }}>
+                        {hasSavedPrice ? "Giá" : "Mua"}
+                    </Button>}
+                    <div style={{ padding: "4px 4px", color: "#aaa", flexShrink: 0 }}>
+                        {expanded ? <MinusOutlined /> : <PlusOutlined />}
+                    </div>
                 </div>
             </div>
 
             {expanded && <Box style={{ padding: "0 12px 10px 40px", borderTop: "1px solid #f0f0f0" }}>
-                {!props.readonly && !status.isAlwaysAvailable && (
-                    <Box style={{ marginTop: 8, marginBottom: 8 }}>
-                        <div style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "5px 7px", background: "#fafafa", border: "1px solid #f0f0f0", borderRadius: 18 }}>
-                            <Typography.Text type="secondary" style={{ fontSize: 12, whiteSpace: "nowrap" }}>Đã mua</Typography.Text>
-                            <InputNumber
-                                min={0}
-                                size="small"
-                                value={props.item.boughtAmount}
-                                onChange={_onBoughtAmountChange}
-                                style={{ width: 88 }}
-                            />
-                            <Select size="small" value={boughtUnit} onChange={_onBoughtUnitChange} style={{ width: 76 }}>
-                                {boughtUnitOptions.map(unit => <Option key={unit} value={unit}>{unit}</Option>)}
-                            </Select>
-                        </div>
-                    </Box>
-                )}
-                {showPaidPriceEditor && <Box style={{ marginTop: 8, marginBottom: 10 }}>
-                    <div style={{ width: "100%", boxSizing: "border-box", padding: "10px", border: "1px solid #efe7ff", borderRadius: 8, background: "linear-gradient(135deg, #fff 0%, #fbf8ff 100%)" }}>
-                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 8, marginBottom: 8, flexWrap: "wrap" }}>
-                            <Box style={{ minWidth: 0 }}>
-                                <Space size={6} align="center">
-                                    <DollarOutlined style={{ color: "#722ed1" }} />
-                                    <Typography.Text strong style={{ fontSize: 13 }}>Giá hôm nay</Typography.Text>
-                                </Space>
-                                <Typography.Text type="secondary" style={{ display: "block", fontSize: 12, lineHeight: "18px", marginTop: 2 }}>
-                                    {IngredientUnitHelper.formatAmount(boughtPriceTarget.amount)}{boughtPriceTarget.unit} đã mua
-                                </Typography.Text>
-                            </Box>
-                            {priceMemory && <Typography.Text type="secondary" style={{ fontSize: 12, lineHeight: "18px", textAlign: "right" }}>
-                                Lần trước: {formatPriceMemoryLine(priceMemory)}
-                            </Typography.Text>}
-                        </div>
-
-                        <Space wrap size={6} style={{ marginBottom: 8 }}>
-                            {rememberedPriceForTarget && <Button size="small" icon={<DollarOutlined />} onClick={() => _applyPaidPrice(rememberedPriceForTarget)}>
-                                {rememberedPriceMatchesTarget ? "Cùng giá" : "Cùng đơn giá"}
-                            </Button>}
-                            {estimatedPriceButtons.map((value, index) => <Button key={value} size="small" onClick={() => setDraftPrice(value)}>
-                                {index === 0 ? "Giá thấp" : "Giá cao"} {IngredientPriceHelper.formatCurrency(value)}
-                            </Button>)}
-                        </Space>
-
-                        <div style={{ display: "grid", gridTemplateColumns: "minmax(0, 1fr) auto auto", gap: 6, alignItems: "center" }}>
-                            <InputNumber
-                                min={0}
-                                size="small"
-                                placeholder="Giá đã trả"
-                                value={draftPrice}
-                                onChange={(value) => setDraftPrice(typeof value === "number" ? value : undefined)}
-                                style={{ width: "100%" }}
-                            />
-                            <Button size="small" type="primary" onClick={() => _applyPaidPrice(draftPrice)}>Lưu</Button>
-                            {props.item.boughtEstimatedCost && <Button size="small" onClick={_clearPaidPrice}>Xóa</Button>}
-                        </div>
-                    </div>
-                </Box>}
+                <Stack justify="space-between" align="center" gap={8} style={{ marginTop: 8, marginBottom: 7 }}>
+                    <Typography.Text type="secondary" style={{ fontSize: 12 }}>Cần cho từng món</Typography.Text>
+                    {canEditBoughtInfo && <Button size="small" icon={<DollarOutlined />} onClick={_openBoughtModal} style={compactSmallButtonStyle}>Cập nhật mua</Button>}
+                </Stack>
                 <List
                     size="small"
                     dataSource={props.item.amounts}
-                    renderItem={(item) => <List.Item style={{ padding: "4px 0" }}>
-                        <List.Item.Meta
-                            description={<Space wrap>
-                                <Typography.Text>{item.amount} {item.unit} ({item?.dish.name})</Typography.Text>
+                    renderItem={(item) => <List.Item style={{ padding: "4px 0", borderBottom: "none" }}>
+                        <div style={{ width: "100%", boxSizing: "border-box", padding: "8px 9px", border: "1px solid #f0f0f0", borderRadius: 8, background: "#fff" }}>
+                            <Stack justify="space-between" align="flex-start" gap={8}>
+                                <div style={{ minWidth: 0 }}>
+                                    <Typography.Text strong style={{ display: "block", fontSize: 12, lineHeight: "17px", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{item?.dish.name}</Typography.Text>
+                                    <Typography.Text type="secondary" style={{ display: "block", fontSize: 11, lineHeight: "15px", marginTop: 2 }}>{item.amount} {item.unit}</Typography.Text>
+                                </div>
                                 <Stack.Compact>
                                     {!item.required && <Tooltip title="Tùy chọn"><Tag color="gold" icon={<QuestionCircleOutlined />} /></Tooltip>}
-                                    {item.meal && _getDateFromNow(item) > 0 && <Tooltip
-                                        title={_getDateFromNowDisplayText(item)}>
-                                        <Tag color="blue">{`${_getDateFromNow(item)}d`}</Tag>
-                                    </Tooltip>}
-                                    {item.meal && _getDateFromNow(item) < 0 && <Tooltip
-                                        title={_getDateFromNowDisplayText(item)}>
-                                        <Tag color="volcano">{`${Math.abs(_getDateFromNow(item))}d`}</Tag>
-                                    </Tooltip>}
+                                    {item.meal && _getDateFromNow(item) > 0 && <Tooltip title={_getDateFromNowDisplayText(item)}><Tag color="blue">{`${_getDateFromNow(item)}d`}</Tag></Tooltip>}
+                                    {item.meal && _getDateFromNow(item) < 0 && <Tooltip title={_getDateFromNowDisplayText(item)}><Tag color="volcano">{`${Math.abs(_getDateFromNow(item))}d`}</Tag></Tooltip>}
                                 </Stack.Compact>
-                            </Space>} />
+                            </Stack>
+                        </div>
                     </List.Item>}
                 />
             </Box>}
         </div>
     </List.Item>
+    {boughtInfoModal}
+    </React.Fragment>
 }
 
 type ShoppingListIngredientItemProps = {

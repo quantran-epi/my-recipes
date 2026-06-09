@@ -19,7 +19,8 @@ import { Dishes } from '@store/Models/Dishes';
 import { Ingredient, IngredientInventory, IngredientUnit, InventoryBatch } from '@store/Models/Ingredient';
 import { InventoryHealthConfig } from '@store/Models/SharedConfig';
 import { ShoppingList, ShoppingListIngredientGroup } from '@store/Models/ShoppingList';
-import { selectDishes, selectIngredients, selectIngredientsById, selectInventory, selectInventoryHealthConfig, selectScheduledMeals, selectShoppingLists } from '@store/Selectors';
+import { IngredientPriceHistoryEntry, IngredientPriceMemory } from '@store/Reducers/AppContextReducer';
+import { selectDishes, selectIngredientPriceHistory, selectIngredientPriceMemory, selectIngredients, selectIngredientsById, selectInventory, selectInventoryHealthConfig, selectScheduledMeals, selectShoppingLists } from '@store/Selectors';
 import moment from 'moment';
 import React, { useMemo } from 'react';
 import { useSelector } from 'react-redux';
@@ -73,6 +74,40 @@ type NutritionAnalytics = {
     topProtein: NutritionDishRow[];
     topFiber: NutritionDishRow[];
     lightCalories: NutritionDishRow[];
+}
+
+type PriceHistoryRecentRow = {
+    id: string;
+    ingredientId: string;
+    ingredientName: string;
+    price: number;
+    amount: number;
+    unit: IngredientUnit;
+    updatedAt: string;
+    shoppingListName?: string;
+}
+
+type PriceTrendRow = {
+    ingredientId: string;
+    ingredientName: string;
+    latestPrice: number;
+    previousPrice: number;
+    latestUnitPrice: number;
+    previousUnitPrice: number;
+    unit: IngredientUnit;
+    changePercent: number;
+    historyCount: number;
+    updatedAt: string;
+}
+
+type PriceHistoryAnalytics = {
+    entryCount: number;
+    ingredientCount: number;
+    totalRecordedSpend: number;
+    last14DaysSpend: number;
+    dayChartData: Array<{ label: string; value: number; count: number }>;
+    recentEntries: PriceHistoryRecentRow[];
+    trendRows: PriceTrendRow[];
 }
 
 type AnalyticsExpensiveMetrics = {
@@ -164,6 +199,102 @@ const buildNutritionAnalytics = (dishes: Dishes[], ingredients: Ingredient[], in
         topProtein: [...rows].sort((a, b) => b.protein - a.protein).slice(0, 5),
         topFiber: [...rows].sort((a, b) => b.fiber - a.fiber).slice(0, 5),
         lightCalories: [...rows].filter(row => row.calories > 0).sort((a, b) => a.calories - b.calories).slice(0, 5),
+    };
+}
+
+const flattenPriceHistory = (
+    history: Record<string, IngredientPriceHistoryEntry[]>,
+    memory: Record<string, IngredientPriceMemory>,
+): IngredientPriceHistoryEntry[] => {
+    const rows = Object.values(history).flatMap(items => items ?? []);
+    Object.values(memory).forEach(item => {
+        const hasSameSavedPrice = rows.some(row => row.ingredientId === item.ingredientId
+            && row.updatedAt === item.updatedAt
+            && row.price === item.price
+            && row.amount === item.amount
+            && row.unit === item.unit);
+        if (!hasSameSavedPrice) {
+            rows.push({
+                ...item,
+                id: `memory-${item.ingredientId}-${item.updatedAt}`,
+            });
+        }
+    });
+    return rows.filter(item => item.price > 0 && item.amount > 0);
+}
+
+const getPriceUnitValue = (entry: IngredientPriceHistoryEntry, ingredient: Ingredient | undefined): { value: number; unit: IngredientUnit } => {
+    const unit = IngredientUnitHelper.getBaseUnit(ingredient, [entry.unit]);
+    const amount = IngredientUnitHelper.toBaseAmount(ingredient, entry.amount, entry.unit, unit) ?? entry.amount;
+    return { value: amount > 0 ? entry.price / amount : 0, unit };
+}
+
+const formatUnitPrice = (value: number, unit: IngredientUnit): string => {
+    if (!isFinite(value) || value <= 0) return `0đ/${unit}`;
+    const price = value >= 1 ? IngredientPriceHelper.formatCurrency(value) : `${Math.round(value * 10) / 10}đ`;
+    return `${price}/${unit}`;
+}
+
+const buildPriceHistoryAnalytics = (
+    history: Record<string, IngredientPriceHistoryEntry[]>,
+    memory: Record<string, IngredientPriceMemory>,
+    ingredientsById: Map<string, Ingredient>,
+): PriceHistoryAnalytics => {
+    const entries = flattenPriceHistory(history, memory)
+        .sort((a, b) => moment(b.updatedAt).valueOf() - moment(a.updatedAt).valueOf());
+    const grouped = entries.reduce((result, entry) => {
+        result[entry.ingredientId] = [...(result[entry.ingredientId] ?? []), entry];
+        return result;
+    }, {} as Record<string, IngredientPriceHistoryEntry[]>);
+    const dayChartData = Array.from({ length: 14 }).map((_, index) => {
+        const date = today().subtract(13 - index, 'days');
+        const dayEntries = entries.filter(item => moment(item.updatedAt).isSame(date, 'day'));
+        return {
+            label: date.format('DD/MM'),
+            value: dayEntries.reduce((sum, item) => sum + item.price, 0),
+            count: dayEntries.length,
+        };
+    });
+    const trendRows = Object.entries(grouped).flatMap(([ingredientId, rows]) => {
+        const sortedRows = [...rows].sort((a, b) => moment(b.updatedAt).valueOf() - moment(a.updatedAt).valueOf());
+        if (sortedRows.length < 2) return [];
+        const ingredient = ingredientsById.get(ingredientId);
+        const latest = sortedRows[0];
+        const previous = sortedRows.slice(1).find(item => item.unit === latest.unit) ?? sortedRows[1];
+        const latestUnit = getPriceUnitValue(latest, ingredient);
+        const previousUnit = getPriceUnitValue(previous, ingredient);
+        if (previousUnit.value <= 0 || latestUnit.value <= 0) return [];
+        return [{
+            ingredientId,
+            ingredientName: ingredient?.name ?? ingredientId,
+            latestPrice: latest.price,
+            previousPrice: previous.price,
+            latestUnitPrice: latestUnit.value,
+            previousUnitPrice: previousUnit.value,
+            unit: latestUnit.unit,
+            changePercent: Math.round((latestUnit.value - previousUnit.value) / previousUnit.value * 100),
+            historyCount: sortedRows.length,
+            updatedAt: latest.updatedAt,
+        }];
+    }).sort((a, b) => Math.abs(b.changePercent) - Math.abs(a.changePercent)).slice(0, 5);
+
+    return {
+        entryCount: entries.length,
+        ingredientCount: Object.keys(grouped).length,
+        totalRecordedSpend: entries.reduce((sum, item) => sum + item.price, 0),
+        last14DaysSpend: dayChartData.reduce((sum, item) => sum + item.value, 0),
+        dayChartData,
+        recentEntries: entries.slice(0, 6).map(entry => ({
+            id: entry.id,
+            ingredientId: entry.ingredientId,
+            ingredientName: ingredientsById.get(entry.ingredientId)?.name ?? entry.ingredientId,
+            price: entry.price,
+            amount: entry.amount,
+            unit: entry.unit,
+            updatedAt: entry.updatedAt,
+            shoppingListName: entry.shoppingListName,
+        })),
+        trendRows,
     };
 }
 
@@ -282,6 +413,11 @@ const analyticsHelp = {
         'Nó là gì: phân tích áp lực ngân sách cho các lịch mua sắm đang mở, tập trung vào phần còn cần mua thay vì tổng nguyên liệu ban đầu.',
         'Cách lấy dữ liệu: app lấy tối đa 6 lịch mua chưa hoàn tất theo thứ tự ngày, tính nguyên liệu còn thiếu sau khi trừ tồn kho hiện có, rồi dùng dữ liệu giá nguyên liệu để ước tính chi phí. Tiến độ phần trăm lấy từ số nhóm nguyên liệu đã đánh dấu xong.',
         'Dùng để làm gì: dùng để biết danh sách nào nên kiểm tra lại trước khi đi chợ. Danh sách có chi phí cao nhưng tiến độ thấp nên được rà soát giá, thay món hoặc kiểm tra tồn kho trước khi mua.',
+    ],
+    priceHistory: [
+        'Nó là gì: lịch sử giá mua thực tế bạn nhập khi đánh dấu nguyên liệu đã mua, khác với giá tham khảo trong hồ sơ nguyên liệu.',
+        'Cách lấy dữ liệu: mỗi lần lưu giá trong lịch mua sắm, app lưu giá đã trả, lượng mua, đơn vị, ngày lưu và tên danh sách mua vào dữ liệu cá nhân. Analytics gom dữ liệu này theo 14 ngày gần nhất và so lần mua mới nhất với lần trước của cùng nguyên liệu.',
+        'Dùng để làm gì: xem tiền đã ghi nhận gần đây, phát hiện nguyên liệu nào đang tăng hoặc giảm giá theo đơn giá, và quyết định nên mua ít, đổi món, hoặc cập nhật lại giá tham khảo nếu giá thị trường đã thay đổi.',
     ],
     dataQuality: [
         'Nó là gì: phân tích chất lượng dữ liệu món ăn, đo xem dữ liệu hiện tại có đủ tin cậy để dùng cho lập kế hoạch, gợi ý và dinh dưỡng hay chưa.',
@@ -463,6 +599,8 @@ export const DashboardAnalyticsScreen = () => {
     const inventoryConfig = useSelector(selectInventoryHealthConfig);
     const shoppingLists = useSelector(selectShoppingLists);
     const scheduledMeals = useSelector(selectScheduledMeals);
+    const ingredientPriceMemory = useSelector(selectIngredientPriceMemory);
+    const ingredientPriceHistory = useSelector(selectIngredientPriceHistory);
     useScreenTitle({ value: 'Phân tích', deps: [] });
 
     const openRoute = React.useCallback((href: string) => {
@@ -534,6 +672,7 @@ export const DashboardAnalyticsScreen = () => {
         initialValue: createEmptyAnalyticsExpensiveMetrics,
     });
     const { shoppingCosts, totalOpenShoppingCost, suggestions, nutrition } = expensiveMetrics;
+    const priceHistoryAnalytics = useMemo(() => buildPriceHistoryAnalytics(ingredientPriceHistory, ingredientPriceMemory, ingredientsById), [ingredientPriceHistory, ingredientPriceMemory, ingredientsById]);
 
     const completedDishes = dishes.filter(item => item.isCompleted).length;
     const dishCompletePercent = dishes.length > 0 ? Math.round(completedDishes / dishes.length * 100) : 0;
@@ -581,6 +720,11 @@ export const DashboardAnalyticsScreen = () => {
         { name: 'Béo', percent: Math.min(100, Math.round(nutrition.averageFat / 42 * 100)), label: DishNutritionHelper.formatGram(nutrition.averageFat), fill: '#d46b08' },
         { name: 'Xơ', percent: Math.min(100, Math.round(nutrition.averageFiber / 12 * 100)), label: DishNutritionHelper.formatGram(nutrition.averageFiber), fill: '#389e0d' },
     ];
+    const priceHistoryDayChartData = priceHistoryAnalytics.dayChartData.map(item => ({
+        ...item,
+        valueLabel: IngredientPriceHelper.formatCurrency(item.value),
+    }));
+    const priceHistoryHasData = priceHistoryAnalytics.entryCount > 0;
     const busiestPlanDay = [...weekOverview]
         .map(item => ({ ...item, total: item.mealCount + item.shoppingCount }))
         .sort((a, b) => b.total - a.total)[0];
@@ -803,6 +947,76 @@ export const DashboardAnalyticsScreen = () => {
                     </div>
                     <Button onClick={() => openRoute(RootRoutes.AuthorizedRoutes.ShoppingListRoutes.List())} style={{ borderRadius: 999, color: '#0958d9', borderColor: 'rgba(9,88,217,0.30)', fontWeight: 700 }}>Mở mua sắm</Button>
                 </div>}
+            </SectionCard>
+
+            <SectionCard title='Lịch sử giá mua' subtitle={priceHistoryHasData ? `${priceHistoryAnalytics.entryCount} lần lưu giá cho ${priceHistoryAnalytics.ingredientCount} nguyên liệu.` : 'Lưu giá khi đánh dấu mua xong để app phân tích biến động.'} helpText={analyticsHelp.priceHistory} icon={<DollarCircleOutlined />} tone='#722ed1'>
+                {!priceHistoryHasData ? <EmptyAnalytics text='Chưa có lịch sử giá mua. Mở danh sách mua sắm, đánh dấu nguyên liệu đã mua và lưu giá hôm nay để bắt đầu.' /> : <Stack direction='column' align='stretch' gap={10}>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(118px, 1fr))', gap: 8 }}>
+                        <Box style={{ border: '1px solid rgba(114,46,209,0.18)', borderRadius: 8, background: '#fbf9ff', padding: 10, minWidth: 0 }}>
+                            <Typography.Text strong style={{ display: 'block', color: '#722ed1', fontSize: 20, lineHeight: '24px' }}>{IngredientPriceHelper.formatCurrency(priceHistoryAnalytics.last14DaysSpend)}</Typography.Text>
+                            <Typography.Text type='secondary' style={{ display: 'block', fontSize: 11, lineHeight: '15px' }}>đã ghi nhận 14 ngày</Typography.Text>
+                        </Box>
+                        <Box style={{ border: '1px solid rgba(19,168,168,0.18)', borderRadius: 8, background: '#f0fffd', padding: 10, minWidth: 0 }}>
+                            <Typography.Text strong style={{ display: 'block', color: '#13a8a8', fontSize: 20, lineHeight: '24px' }}>{priceHistoryAnalytics.ingredientCount}</Typography.Text>
+                            <Typography.Text type='secondary' style={{ display: 'block', fontSize: 11, lineHeight: '15px' }}>nguyên liệu có giá thật</Typography.Text>
+                        </Box>
+                        <Box style={{ border: '1px solid rgba(250,140,22,0.18)', borderRadius: 8, background: '#fff7e6', padding: 10, minWidth: 0 }}>
+                            <Typography.Text strong style={{ display: 'block', color: '#d46b08', fontSize: 20, lineHeight: '24px' }}>{IngredientPriceHelper.formatCurrency(priceHistoryAnalytics.totalRecordedSpend)}</Typography.Text>
+                            <Typography.Text type='secondary' style={{ display: 'block', fontSize: 11, lineHeight: '15px' }}>tổng đã từng ghi nhận</Typography.Text>
+                        </Box>
+                    </div>
+
+                    <ChartFrame height={190}>
+                        <ResponsiveContainer width='100%' height='100%'>
+                            <BarChart data={priceHistoryDayChartData} margin={{ top: 8, right: 8, left: -18, bottom: 0 }}>
+                                <CartesianGrid stroke={chartGridColor} vertical={false} />
+                                <XAxis dataKey='label' tick={chartAxisStyle} axisLine={false} tickLine={false} interval={2} />
+                                <YAxis tick={chartAxisStyle} axisLine={false} tickLine={false} width={36} tickFormatter={(value) => `${Math.round(Number(value) / 1000)}k`} />
+                                <ChartTooltip contentStyle={chartTooltipStyle} formatter={(value: any, name: any, props: any) => [props?.payload?.valueLabel ?? value, 'Tiền đã lưu']} labelFormatter={(label) => `Ngày ${label}`} />
+                                <Bar dataKey='value' name='Tiền đã lưu' fill='#722ed1' radius={[7, 7, 0, 0]} />
+                            </BarChart>
+                        </ResponsiveContainer>
+                    </ChartFrame>
+                    <ChartSummaryRow items={priceHistoryAnalytics.dayChartData.filter(item => item.count > 0).slice(-4).map(item => ({ label: item.label, value: `${item.count} giá`, color: '#722ed1' }))} />
+
+                    {priceHistoryAnalytics.trendRows.length > 0 && <Box style={{ border: '1px solid rgba(114,46,209,0.12)', borderRadius: 8, background: '#fff', padding: 10 }}>
+                        <Typography.Text strong style={{ display: 'block', fontSize: 13, lineHeight: '18px', marginBottom: 8 }}>Biến động đơn giá</Typography.Text>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 7 }}>
+                            {priceHistoryAnalytics.trendRows.map(row => {
+                                const tone = row.changePercent > 0 ? '#cf1322' : row.changePercent < 0 ? '#389e0d' : '#8c8c8c';
+                                return <div key={row.ingredientId} style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) auto', gap: 8, alignItems: 'center', padding: '8px 9px', border: '1px solid #f0f0f0', borderRadius: 8, background: '#fafafa' }}>
+                                    <div style={{ minWidth: 0 }}>
+                                        <Typography.Text strong style={{ display: 'block', fontSize: 12, lineHeight: '16px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{row.ingredientName}</Typography.Text>
+                                        <Typography.Text type='secondary' style={{ display: 'block', fontSize: 11, lineHeight: '15px' }}>
+                                            {formatUnitPrice(row.previousUnitPrice, row.unit)} → {formatUnitPrice(row.latestUnitPrice, row.unit)}
+                                        </Typography.Text>
+                                    </div>
+                                    <span style={{ borderRadius: 999, padding: '2px 8px', background: `${tone}12`, color: tone, border: `1px solid ${tone}24`, fontSize: 11, lineHeight: '16px', fontWeight: 800, whiteSpace: 'nowrap' }}>
+                                        {row.changePercent > 0 ? '+' : ''}{row.changePercent}%
+                                    </span>
+                                </div>;
+                            })}
+                        </div>
+                    </Box>}
+
+                    <Box style={{ border: '1px solid rgba(114,46,209,0.12)', borderRadius: 8, background: '#fff', padding: 10 }}>
+                        <Typography.Text strong style={{ display: 'block', fontSize: 13, lineHeight: '18px', marginBottom: 8 }}>Giá vừa lưu</Typography.Text>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 7 }}>
+                            {priceHistoryAnalytics.recentEntries.map(entry => <div key={entry.id} style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) auto', gap: 8, alignItems: 'center', padding: '8px 9px', border: '1px solid #f0f0f0', borderRadius: 8, background: '#fafafa' }}>
+                                <div style={{ minWidth: 0 }}>
+                                    <Typography.Text strong style={{ display: 'block', fontSize: 12, lineHeight: '16px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{entry.ingredientName}</Typography.Text>
+                                    <Typography.Text type='secondary' style={{ display: 'block', fontSize: 11, lineHeight: '15px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                        {IngredientUnitHelper.formatAmount(entry.amount)}{entry.unit}{entry.shoppingListName ? ` · ${entry.shoppingListName}` : ''}
+                                    </Typography.Text>
+                                </div>
+                                <div style={{ textAlign: 'right', minWidth: 72 }}>
+                                    <Typography.Text strong style={{ display: 'block', color: '#722ed1', fontSize: 12, lineHeight: '16px' }}>{IngredientPriceHelper.formatCurrency(entry.price)}</Typography.Text>
+                                    <Typography.Text type='secondary' style={{ display: 'block', fontSize: 10, lineHeight: '14px' }}>{moment(entry.updatedAt).format('DD/MM/YY')}</Typography.Text>
+                                </div>
+                            </div>)}
+                        </div>
+                    </Box>
+                </Stack>}
             </SectionCard>
 
             <SectionCard title='Chất lượng dữ liệu món ăn' subtitle='Dữ liệu đã đủ tin cậy cho gợi ý, nutrition và lập kế hoạch chưa.' helpText={analyticsHelp.dataQuality} icon={<CheckCircleOutlined />} tone='#389e0d'>
