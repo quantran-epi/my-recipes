@@ -200,14 +200,13 @@ export const IngredientInventoryWidget: React.FC<IngredientInventoryWidgetProps>
                                     okButtonProps={{ danger: true }}
                                     onConfirm={() => _discardExpiredBatch(batch)}
                                 >
-                                    <Button size="small" danger type="primary">
+                                    <Button danger type="primary">
                                         Bỏ lô hết hạn
                                     </Button>
                                 </Popconfirm>
                             )}
                             {batches.length > 1 && (
                                 <Button
-                                    size="small"
                                     danger
                                     type="text"
                                     icon={<DeleteOutlined />}
@@ -339,7 +338,6 @@ export const IngredientInventoryWidget: React.FC<IngredientInventoryWidgetProps>
                                 </Typography.Text>
                                 {isExpiringSoon && onSuggest && totalAmount > 0 && (
                                     <Button
-                                        size="small"
                                         type="primary"
                                         danger
                                         icon={<BulbOutlined />}

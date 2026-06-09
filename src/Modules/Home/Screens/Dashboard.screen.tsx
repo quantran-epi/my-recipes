@@ -532,9 +532,9 @@ const LeftoverRow: React.FunctionComponent<{
                     <Tag color={daysLeft !== null && daysLeft < 0 ? 'red' : daysLeft !== null && daysLeft <= 1 ? 'orange' : 'green'} style={{ marginInlineEnd: 0, flexShrink: 0 }}>{item.portions} phần</Tag>
                 </Stack>
                 <Stack wrap='wrap' gap={6} style={{ marginTop: 9 }}>
-                    <Button size='small' onClick={onEatOne} style={{ borderRadius: 999 }}>Ăn 1 phần</Button>
-                    <Button size='small' onClick={onFinish} style={{ borderRadius: 999 }}>Đã hết</Button>
-                    <Button size='small' icon={<DeleteOutlined />} danger onClick={onDiscard} style={{ borderRadius: 999 }}>Bỏ</Button>
+                    <Button onClick={onEatOne} style={{ borderRadius: 999 }}>Ăn 1 phần</Button>
+                    <Button onClick={onFinish} style={{ borderRadius: 999 }}>Đã hết</Button>
+                    <Button icon={<DeleteOutlined />} danger onClick={onDiscard} style={{ borderRadius: 999 }}>Bỏ</Button>
                 </Stack>
             </div>
         </div>

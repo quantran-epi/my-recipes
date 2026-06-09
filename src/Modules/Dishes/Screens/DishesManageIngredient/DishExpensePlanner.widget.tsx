@@ -332,10 +332,10 @@ export const DishExpensePlannerWidget: React.FunctionComponent<DishExpensePlanne
                                 onChange={(value) => _onServingChange(item.dish.id, value)}
                                 style={{ width: 178, flex: "0 0 auto" }}
                             />
-                            {allowDishSelection && <Button size="small" type="link" onClick={() => setPreviewDish({ dish: item.dish, servings: item.servings })} style={{ paddingInline: 0 }}>
+                            {allowDishSelection && <Button type="link" onClick={() => setPreviewDish({ dish: item.dish, servings: item.servings })} style={{ paddingInline: 0 }}>
                                 Chi tiết
                             </Button>}
-                            {allowDishSelection && <Button size="small" type="text" danger onClick={() => _onRemoveDish(item.dish.id)}>
+                            {allowDishSelection && <Button type="text" danger onClick={() => _onRemoveDish(item.dish.id)}>
                                 Gỡ
                             </Button>}
                         </div>)}

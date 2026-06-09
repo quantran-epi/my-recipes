@@ -1,10 +1,11 @@
 import React, { FunctionComponent, useCallback } from 'react';
 import { Button as AntButton, ButtonProps as AntButtonProps } from 'antd';
 
-interface IButtonProps extends Omit<AntButtonProps, "type"> {
+interface IButtonProps extends Omit<AntButtonProps, "type" | "size"> {
     color?: string;
     fullwidth?: boolean;
     type?: AntButtonProps["type"] | "secondary";
+    size?: Exclude<AntButtonProps["size"], "small">;
 }
 
 export const Button: FunctionComponent<IButtonProps> = ({
@@ -12,6 +13,7 @@ export const Button: FunctionComponent<IButtonProps> = ({
     color,
     fullwidth = false,
     type,
+    size,
     ...props
 }) => {
     const _styles = (): React.CSSProperties => {
@@ -23,9 +25,9 @@ export const Button: FunctionComponent<IButtonProps> = ({
     }
 
     const _getType = useCallback(() => {
-        if (type == "secondary") return "primary";
+        if (type === "secondary") return "primary";
         return type;
     }, [type])
 
-    return <AntButton type={_getType()} block={fullwidth} style={_styles()} {...props} />
+    return <AntButton type={_getType()} size={size} block={fullwidth} style={_styles()} {...props} />
 }

@@ -109,7 +109,7 @@ export const ScheduledMealMealPlanner: React.FunctionComponent<ScheduledMealMeal
                             <Typography.Text type="secondary" style={{ display: "block", fontSize: 12, lineHeight: "16px" }}>{dishIds.length} món · {totalServings} phần</Typography.Text>
                         </div>
                     </Stack>
-                    <Button size="small" icon={<PlusOutlined />} onClick={() => setAddingMeal(addingMeal === section.key ? null : section.key)}>Thêm món</Button>
+                    <Button icon={<PlusOutlined />} onClick={() => setAddingMeal(addingMeal === section.key ? null : section.key)}>Thêm món</Button>
                 </Stack>
 
                 {addingMeal === section.key && <Box style={{ marginBottom: 9 }}>
@@ -147,7 +147,7 @@ export const ScheduledMealMealPlanner: React.FunctionComponent<ScheduledMealMeal
                                         <Tag color={scale === 1 ? "green" : scale > 1 ? "orange" : "blue"} style={{ marginInlineEnd: 0 }}>{scale === 1 ? "Giữ nguyên" : `${scale.toFixed(1)}x`}</Tag>
                                     </Stack>
                                 </div>
-                                <Button type="text" size="small" danger icon={<DeleteOutlined />} onClick={() => _onRemoveDish(section.key, dishId)} style={{ width: 32, paddingInline: 0 }} />
+                                <Button type="text" danger icon={<DeleteOutlined />} onClick={() => _onRemoveDish(section.key, dishId)} style={{ width: 32, paddingInline: 0 }} />
                             </div>
                             <div style={{ display: "grid", gridTemplateColumns: "minmax(0, 1fr)", gap: 7, marginTop: 8 }}>
                                 <ServingSizeInput

@@ -120,7 +120,7 @@ export const DishesReadonlyDetailWidget: React.FunctionComponent<DishesReadonlyD
                         Đang tính {targetServings} phần · gốc {baseServings} phần
                     </Typography.Text>
                 </div>
-                <Button size='small' type='link' onClick={() => setShowServingPicker(value => !value)} style={{ paddingInline: 0, whiteSpace: 'nowrap' }}>
+                <Button type='link' onClick={() => setShowServingPicker(value => !value)} style={{ paddingInline: 0, whiteSpace: 'nowrap' }}>
                     {showServingPicker ? 'Ẩn' : 'Đổi' }
                 </Button>
             </div>

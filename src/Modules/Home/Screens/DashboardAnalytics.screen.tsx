@@ -522,7 +522,7 @@ const InsightCard: React.FunctionComponent<{ title: string; value: string; detai
                 <Typography.Text type='secondary' style={{ display: 'block', fontSize: 11, lineHeight: '15px' }}>{title}</Typography.Text>
                 <Typography.Text strong style={{ display: 'block', color: '#111827', fontSize: 15, lineHeight: '19px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{value}</Typography.Text>
             </div>
-            {actionLabel && onOpen && <Button size='small' onClick={onOpen} style={{ height: 28, padding: '0 9px', borderRadius: 999, color: tone, borderColor: `${tone}33`, fontWeight: 650, fontSize: 11, lineHeight: '16px', alignSelf: 'center' }}>{actionLabel}</Button>}
+            {actionLabel && onOpen && <Button onClick={onOpen} style={{ height: 28, padding: '0 9px', borderRadius: 999, color: tone, borderColor: `${tone}33`, fontWeight: 650, fontSize: 11, lineHeight: '16px', alignSelf: 'center' }}>{actionLabel}</Button>}
         </div>
         <Typography.Text type='secondary' style={{ display: 'block', fontSize: 12, lineHeight: '17px', minHeight: 34 }}>{detail}</Typography.Text>
     </Box>;
@@ -584,8 +584,8 @@ const ExpenseSignalCard: React.FunctionComponent<{
         </Box>}
 
         <Stack gap={6} wrap='wrap' justify='flex-end'>
-            {highestShoppingCost && onOpenHighest && <Button size='small' onClick={onOpenHighest} style={{ height: 28, padding: '0 9px', borderRadius: 999, color: '#0958d9', borderColor: 'rgba(9,88,217,0.30)', fontWeight: 650, fontSize: 11 }}>Mở cao nhất</Button>}
-            <Button size='small' onClick={onOpenShopping} style={{ height: 28, padding: '0 9px', borderRadius: 999, color: '#0958d9', borderColor: 'rgba(9,88,217,0.30)', fontWeight: 650, fontSize: 11 }}>Mua sắm</Button>
+            {highestShoppingCost && onOpenHighest && <Button onClick={onOpenHighest} style={{ height: 28, padding: '0 9px', borderRadius: 999, color: '#0958d9', borderColor: 'rgba(9,88,217,0.30)', fontWeight: 650, fontSize: 11 }}>Mở cao nhất</Button>}
+            <Button onClick={onOpenShopping} style={{ height: 28, padding: '0 9px', borderRadius: 999, color: '#0958d9', borderColor: 'rgba(9,88,217,0.30)', fontWeight: 650, fontSize: 11 }}>Mua sắm</Button>
         </Stack>
     </Box>;
 }

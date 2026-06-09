@@ -89,7 +89,7 @@ export const DishCostEstimateWidget: React.FunctionComponent<DishCostEstimateWid
                         <Image src={BudgetIcon} preview={false} width={20} />
                         <Typography.Text strong>Chi phí ước tính</Typography.Text>
                     </div>
-                    <Button size="small" type="link" onClick={() => setPlannerOpen(true)} style={{ marginLeft: "auto", paddingInline: 0, whiteSpace: "nowrap", flexShrink: 0 }}>
+                    <Button type="link" onClick={() => setPlannerOpen(true)} style={{ marginLeft: "auto", paddingInline: 0, whiteSpace: "nowrap", flexShrink: 0 }}>
                         Chi tiết
                     </Button>
                 </div>

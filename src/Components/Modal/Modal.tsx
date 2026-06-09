@@ -1,12 +1,18 @@
 import { FastModalShell } from "@components/FastOverlay";
 import { Button as AntButton, Modal as AntModal, Spin } from "antd";
-import type { ModalProps } from "antd";
+import type { ButtonProps as AntButtonProps, ModalProps } from "antd";
 import React from "react";
 
-type AppModalProps = ModalProps & {
+export type AppModalButtonProps = Omit<AntButtonProps, "size"> & {
+    size?: Exclude<AntButtonProps["size"], "small">;
+};
+
+type AppModalProps = Omit<ModalProps, "okButtonProps" | "cancelButtonProps"> & {
     onClose?: () => void;
     bodyStyle?: React.CSSProperties;
     headerActions?: React.ReactNode;
+    okButtonProps?: AppModalButtonProps;
+    cancelButtonProps?: AppModalButtonProps;
 };
 
 type AppModalComponent = React.FunctionComponent<AppModalProps> & Pick<typeof AntModal, "useModal" | "confirm" | "destroyAll" | "info" | "success" | "error" | "warning">;
@@ -16,6 +22,15 @@ const defaultFooterStyle: React.CSSProperties = {
     alignItems: "center",
     justifyContent: "flex-end",
     gap: 8,
+};
+
+const normalizeButtonProps = (buttonProps?: AppModalButtonProps): AppModalButtonProps | undefined => {
+    if ((buttonProps as AntButtonProps | undefined)?.size === "small") {
+        const { size, ...rest } = buttonProps as AntButtonProps;
+        return rest as AppModalButtonProps;
+    }
+
+    return buttonProps;
 };
 
 const ModalBase: React.FunctionComponent<AppModalProps> = ({
@@ -44,6 +59,8 @@ const ModalBase: React.FunctionComponent<AppModalProps> = ({
     confirmLoading,
 }) => {
     const isOpen = Boolean(open);
+    const safeCancelButtonProps = normalizeButtonProps(cancelButtonProps);
+    const safeOkButtonProps = normalizeButtonProps(okButtonProps);
 
     const _onCancel = React.useCallback((event?: React.MouseEvent<HTMLButtonElement>) => {
         onCancel?.(event as React.MouseEvent<HTMLButtonElement>);
@@ -61,8 +78,8 @@ const ModalBase: React.FunctionComponent<AppModalProps> = ({
 
     const footerNode: React.ReactNode = typeof footer === "function" ? null : footer === undefined ? (
         <div style={defaultFooterStyle}>
-            <AntButton {...cancelButtonProps} onClick={_onCancel}>{cancelText}</AntButton>
-            <AntButton type="primary" {...okButtonProps} loading={confirmLoading} onClick={_onOk}>{okText}</AntButton>
+            <AntButton {...safeCancelButtonProps} onClick={_onCancel}>{cancelText}</AntButton>
+            <AntButton type="primary" {...safeOkButtonProps} loading={confirmLoading} onClick={_onOk}>{okText}</AntButton>
         </div>
     ) : footer;
 

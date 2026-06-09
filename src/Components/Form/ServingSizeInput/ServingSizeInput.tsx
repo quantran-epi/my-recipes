@@ -42,6 +42,7 @@ export const ServingSizeInput: React.FunctionComponent<ServingSizeInputProps> = 
     inputStyle,
 }) => {
     const currentValue = normalize(value, min, max);
+    const buttonSize = size === "large" ? "large" : "middle";
 
     const _onChange = (nextValue: unknown) => {
         onChange?.(normalize(nextValue, min, max));
@@ -57,7 +58,7 @@ export const ServingSizeInput: React.FunctionComponent<ServingSizeInputProps> = 
             icon={<MinusOutlined />}
             disabled={disabled || currentValue <= min}
             onClick={() => _onStep(-1)}
-            size={size}
+            size={buttonSize}
             style={{ flex: "0 0 auto", width: size === "small" ? 28 : 32, paddingInline: 0 }}
         />
         <InputNumber
@@ -78,7 +79,7 @@ export const ServingSizeInput: React.FunctionComponent<ServingSizeInputProps> = 
             icon={<PlusOutlined />}
             disabled={disabled || (typeof max === "number" && currentValue >= max)}
             onClick={() => _onStep(1)}
-            size={size}
+            size={buttonSize}
             style={{ flex: "0 0 auto", width: size === "small" ? 28 : 32, paddingInline: 0 }}
         />
     </div>

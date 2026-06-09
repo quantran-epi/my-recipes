@@ -1,10 +1,10 @@
 import { Input } from "@components/Form/Input";
 import { useMessage } from "@components/Message";
 import { useToggle } from "@hooks";
-import { ButtonProps } from "antd";
 import { ModalStaticFunctions } from "antd/es/modal/confirm";
 import React, { useContext, useEffect, useRef, useState } from "react";
 import { Modal } from "./Modal";
+import type { AppModalButtonProps } from "./Modal";
 
 type PromptFuncProps = {
     title?: string;
@@ -12,8 +12,8 @@ type PromptFuncProps = {
     onCancel?: () => void;
     require?: boolean;
     requireMessage?: string;
-    okButtonProps?: ButtonProps;
-    cancelButtonProps?: ButtonProps;
+    okButtonProps?: AppModalButtonProps;
+    cancelButtonProps?: AppModalButtonProps;
     okText?: string;
     cancelText?: string;
     width?: string | number;

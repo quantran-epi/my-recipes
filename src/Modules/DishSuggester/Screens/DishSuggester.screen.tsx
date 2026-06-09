@@ -826,7 +826,6 @@ export const DishSuggesterScreen: React.FC<DishSuggesterScreenProps> = ({ open, 
                                 {[15, 30, 45, 60, 90].map(m => (
                                     <Button
                                         key={m}
-                                        size="small"
                                         type={maxMinutes === m ? "primary" : "default"}
                                         onClick={() => _onMaxMinutesChange(m)}
                                         style={{ borderRadius: 14 }}

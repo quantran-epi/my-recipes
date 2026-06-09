@@ -136,9 +136,9 @@ export const IngredientItem: React.FunctionComponent<IngredientItemProps> = (pro
     }
 
     const actions = [
-        <Button size="small" icon={<EditOutlined />} onClick={_onEdit} />,
+        <Button icon={<EditOutlined />} onClick={_onEdit} />,
         <Popconfirm title="Xóa?" onConfirm={() => props.onDelete(props.dish, props.ingredientAmount)}>
-            <Button size="small" danger icon={<DeleteOutlined />} />
+            <Button danger icon={<DeleteOutlined />} />
         </Popconfirm>
     ]
 
@@ -146,7 +146,7 @@ export const IngredientItem: React.FunctionComponent<IngredientItemProps> = (pro
         <Image src={FoodPrepareIcon} preview={false} width={18} style={{ marginBottom: 3 }} />
         <Typography.Text>Sơ chế nguyên liệu</Typography.Text>
     </Space>} content={<List dataSource={props.ingredientAmount.prepare} size="small" renderItem={(item) => <List.Item>{item}</List.Item>} />}>
-        <Button size="small" icon={<ProjectOutlined />} />
+        <Button icon={<ProjectOutlined />} />
     </Popover>);
 
     return <React.Fragment>

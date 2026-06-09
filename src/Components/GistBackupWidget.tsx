@@ -126,7 +126,7 @@ export const GistBackupWidget: React.FC = () => {
                                     <DatabaseOutlined style={{ color: "#1677ff" }} />
                                     <Typography.Text strong style={{ fontSize: 12 }}>Dung lượng dữ liệu</Typography.Text>
                                 </Flex>
-                                <Button size="small" type="text" icon={<ReloadOutlined />} onClick={_refreshDataSize} />
+                                <Button type="text" icon={<ReloadOutlined />} onClick={_refreshDataSize} />
                             </Flex>
                             <Flex vertical gap={2} style={{ marginTop: 6 }}>
                                 <Typography.Text type="secondary" style={{ fontSize: 11 }}>Cá nhân: {formatBytes(localDataSize.personal)}</Typography.Text>
@@ -147,12 +147,11 @@ export const GistBackupWidget: React.FC = () => {
                             onChange={e => setLocalToken(e.target.value)}
                         />
                         {!isSaved && (
-                            <Button size="small" type="dashed" block onClick={_onSave}>
+                            <Button type="dashed" block onClick={_onSave}>
                                 Lưu cấu hình
                             </Button>
                         )}
                         <Button
-                            size="small"
                             loading={isTesting}
                             disabled={!localGistId.trim() || !localToken.trim()}
                             onClick={_onTestConfig}
@@ -162,7 +161,6 @@ export const GistBackupWidget: React.FC = () => {
                         </Button>
                         <Flex gap={8}>
                             <Button
-                                size="small"
                                 icon={<CloudUploadOutlined />}
                                 loading={isPushing}
                                 disabled={!gistId || !gistToken}
@@ -172,7 +170,6 @@ export const GistBackupWidget: React.FC = () => {
                                 Sao lưu
                             </Button>
                             <Button
-                                size="small"
                                 icon={<CloudDownloadOutlined />}
                                 loading={isPulling}
                                 disabled={!gistId || !gistToken}

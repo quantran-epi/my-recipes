@@ -348,8 +348,8 @@ export const NutritionCalculatorModalContent: React.FunctionComponent<{ initialS
                 icon={<CalculatorOutlined />}
                 tone='#13a8a8'
                 action={source === 'dishes' ? <Stack gap={6} wrap='wrap' justify='flex-end'>
-                    <Button size='small' aria-label='Tạo thực đơn từ món đã chọn' disabled={!canCreateFromDishes} icon={<CalendarOutlined />} onClick={() => setCreationModal('scheduledMeal')} style={{ borderRadius: 999 }}>Thực đơn</Button>
-                    <Button size='small' aria-label='Tạo lịch mua sắm từ món đã chọn' disabled={!canCreateFromDishes} icon={<ShoppingCartOutlined />} onClick={() => setCreationModal('shoppingList')} style={{ borderRadius: 999 }}>Mua sắm</Button>
+                    <Button aria-label='Tạo thực đơn từ món đã chọn' disabled={!canCreateFromDishes} icon={<CalendarOutlined />} onClick={() => setCreationModal('scheduledMeal')} style={{ borderRadius: 999 }}>Thực đơn</Button>
+                    <Button aria-label='Tạo lịch mua sắm từ món đã chọn' disabled={!canCreateFromDishes} icon={<ShoppingCartOutlined />} onClick={() => setCreationModal('shoppingList')} style={{ borderRadius: 999 }}>Mua sắm</Button>
                 </Stack> : undefined}
             >
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 8 }}>

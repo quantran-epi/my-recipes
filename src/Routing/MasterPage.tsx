@@ -556,7 +556,7 @@ const SidebarDrawer = ({ buttonStyle }: { buttonStyle?: React.CSSProperties }) =
                                         <LockOutlined style={{ color: "#52c41a" }} />
                                         <Typography.Text style={{ fontSize: 13, color: "#52c41a", fontWeight: 500 }}>Đang ở chế độ Admin</Typography.Text>
                                     </Flex>
-                                    <Button size="small" type="text" danger onClick={onLock}>Khoá</Button>
+                                    <Button type="text" danger onClick={onLock}>Khoá</Button>
                                 </Flex>
                                 <Typography.Text type="secondary" style={{ fontSize: 11, paddingLeft: 2 }}>
                                     Nhấn "Khoá" để thoát chế độ admin và ẩn các công cụ quản trị.
@@ -1276,14 +1276,14 @@ export const DataBackup = ({ onImportCloud }: { onImportCloud?: () => Promise<vo
 
     return <React.Fragment>
         <Space>
-            <Button size="small" icon={<ExportOutlined />} onClick={async () => {
+            <Button icon={<ExportOutlined />} onClick={async () => {
                 setExportedData(await getStorageString("persist:personal") ?? "");
                 toggleShowData.show();
             }}>Export</Button>
 
-            <Button size="small" icon={<ImportOutlined />} onClick={toggleImportData.show}>Import</Button>
+            <Button icon={<ImportOutlined />} onClick={toggleImportData.show}>Import</Button>
 
-            <Button size="small" loading={toggleImportingCloud.value} icon={<CloudDownloadOutlined />} onClick={_onImportCloud}>Import cloud</Button>
+            <Button loading={toggleImportingCloud.value} icon={<CloudDownloadOutlined />} onClick={_onImportCloud}>Import cloud</Button>
         </Space>
 
         <Modal title="Export — dữ liệu cá nhân" open={toggleShowData.value} onCancel={toggleShowData.hide} footer={null}>

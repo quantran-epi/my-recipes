@@ -126,7 +126,7 @@ export const IngredientPickerWidget: React.FC<IngredientPickerWidgetProps> = ({ 
                         <Typography.Text style={{ fontSize: 12, color: "#389e0d" }}>
                             ✓ Đã chọn <strong>{selectedIds.length}</strong> nguyên liệu
                         </Typography.Text>
-                        <Button size="small" type="link" danger style={{ padding: 0, height: "auto", fontSize: 12 }} onClick={() => onChange([])}>
+                        <Button type="link" danger style={{ padding: 0, height: "auto", fontSize: 12 }} onClick={() => onChange([])}>
                             Bỏ hết
                         </Button>
                     </Stack>

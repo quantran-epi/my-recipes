@@ -1,5 +1,6 @@
 import { LinkOutlined, UploadOutlined } from "@ant-design/icons";
-import { Button, Input, Radio, Space } from "antd";
+import { Button } from "@components/Button";
+import { Input, Radio, Space } from "antd";
 import React, { useRef, useState } from "react";
 
 interface ImageInputProps {

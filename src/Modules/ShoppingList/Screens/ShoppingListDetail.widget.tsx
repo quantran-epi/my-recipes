@@ -1149,7 +1149,7 @@ const ShoppingListIngredientPanelItem: React.FunctionComponent<ShoppingListIngre
         destroyOnClose={false}
         onCancel={toggleBoughtModal.hide}
         footer={<div style={{ display: "flex", justifyContent: "flex-end", width: "100%" }}>
-            <Button size="small" onClick={toggleBoughtModal.hide} style={compactSmallButtonStyle}>Đóng</Button>
+            <Button onClick={toggleBoughtModal.hide} style={compactSmallButtonStyle}>Đóng</Button>
         </div>}
     >
         <div style={{ display: "flex", flexDirection: "column", gap: 12 }} data-testid={`shopping-list-bought-modal-${props.item.ingredientId}`}>
@@ -1192,9 +1192,9 @@ const ShoppingListIngredientPanelItem: React.FunctionComponent<ShoppingListIngre
                     </Select>
                 </div>
                 {canEditBoughtInfo && <Space wrap size={6}>
-                    {status.needToBuy > 0 && <Button size="small" style={compactSmallButtonStyle} onClick={() => _setBoughtAmount(status.needToBuy, status.unit)}>Đủ cần {IngredientUnitHelper.formatAmount(status.needToBuy)}{status.unit}</Button>}
-                    {status.totalRequired > 0 && <Button size="small" style={compactSmallButtonStyle} onClick={() => _setBoughtAmount(status.totalRequired, status.unit)}>Tổng công thức</Button>}
-                    <Button size="small" style={compactSmallButtonStyle} onClick={() => _setBoughtAmount(undefined, boughtUnit)}>Xóa lượng</Button>
+                    {status.needToBuy > 0 && <Button style={compactSmallButtonStyle} onClick={() => _setBoughtAmount(status.needToBuy, status.unit)}>Đủ cần {IngredientUnitHelper.formatAmount(status.needToBuy)}{status.unit}</Button>}
+                    {status.totalRequired > 0 && <Button style={compactSmallButtonStyle} onClick={() => _setBoughtAmount(status.totalRequired, status.unit)}>Tổng công thức</Button>}
+                    <Button style={compactSmallButtonStyle} onClick={() => _setBoughtAmount(undefined, boughtUnit)}>Xóa lượng</Button>
                 </Space>}
             </Box>
 
@@ -1209,7 +1209,7 @@ const ShoppingListIngredientPanelItem: React.FunctionComponent<ShoppingListIngre
                             {boughtPriceTarget.amount > 0 ? `${IngredientUnitHelper.formatAmount(boughtPriceTarget.amount)}${boughtPriceTarget.unit} đã mua` : "Nhập lượng đã mua trước khi lưu giá."}
                         </Typography.Text>
                     </Box>
-                    {hasSavedPrice && !priceEditorOpen && canEditBoughtInfo && <Button size="small" icon={<EditOutlined />} style={compactSmallButtonStyle} onClick={() => setPriceEditorOpen(true)}>Sửa giá</Button>}
+                    {hasSavedPrice && !priceEditorOpen && canEditBoughtInfo && <Button icon={<EditOutlined />} style={compactSmallButtonStyle} onClick={() => setPriceEditorOpen(true)}>Sửa giá</Button>}
                 </Stack>
 
                 {hasSavedPrice && !priceEditorOpen && <Box style={{ padding: "9px 10px", borderRadius: 8, border: "1px solid #d3adf7", background: "#f9f0ff", marginBottom: displayPriceHistory.length > 0 ? 10 : 0 }}>
@@ -1224,10 +1224,10 @@ const ShoppingListIngredientPanelItem: React.FunctionComponent<ShoppingListIngre
                         Lần trước: {formatPriceMemoryLine(priceMemory)}
                     </Typography.Text>}
                     <Space wrap size={6} style={{ marginBottom: 8 }}>
-                        {rememberedPriceForTarget && <Button size="small" icon={<DollarOutlined />} style={compactSmallButtonStyle} onClick={() => _applyPaidPrice(rememberedPriceForTarget)}>
+                        {rememberedPriceForTarget && <Button icon={<DollarOutlined />} style={compactSmallButtonStyle} onClick={() => _applyPaidPrice(rememberedPriceForTarget)}>
                             {rememberedPriceMatchesTarget ? "Cùng giá" : "Cùng đơn giá"}
                         </Button>}
-                        {estimatedPriceButtons.map((value, index) => <Button key={value} size="small" style={compactSmallButtonStyle} onClick={() => setDraftPrice(value)}>
+                        {estimatedPriceButtons.map((value, index) => <Button key={value} style={compactSmallButtonStyle} onClick={() => setDraftPrice(value)}>
                             {index === 0 ? "Giá thấp" : "Giá cao"} {IngredientPriceHelper.formatCurrency(value)}
                         </Button>)}
                     </Space>
@@ -1240,8 +1240,8 @@ const ShoppingListIngredientPanelItem: React.FunctionComponent<ShoppingListIngre
                             onChange={(value) => setDraftPrice(typeof value === "number" ? value : undefined)}
                             style={{ width: "100%" }}
                         />
-                        <Button size="small" type="primary" style={compactSmallButtonStyle} onClick={() => _applyPaidPrice(draftPrice)}>Lưu</Button>
-                        {props.item.boughtEstimatedCost && <Button size="small" style={compactSmallButtonStyle} onClick={_clearPaidPrice}>Xóa</Button>}
+                        <Button type="primary" style={compactSmallButtonStyle} onClick={() => _applyPaidPrice(draftPrice)}>Lưu</Button>
+                        {props.item.boughtEstimatedCost && <Button style={compactSmallButtonStyle} onClick={_clearPaidPrice}>Xóa</Button>}
                     </div>
                 </Box>}
 
@@ -1324,7 +1324,7 @@ const ShoppingListIngredientPanelItem: React.FunctionComponent<ShoppingListIngre
                     </div>
                 </div>
                 <div style={{ display: "flex", alignItems: "center", gap: 4, flexShrink: 0 }}>
-                    {canEditBoughtInfo && <Button size="small" icon={<DollarOutlined />} onClick={_openBoughtModal} style={{ ...compactSmallButtonStyle, color: hasSavedPrice ? "#722ed1" : "#595959", borderColor: hasSavedPrice ? "#d3adf7" : "#d9d9d9" }}>
+                    {canEditBoughtInfo && <Button icon={<DollarOutlined />} onClick={_openBoughtModal} style={{ ...compactSmallButtonStyle, color: hasSavedPrice ? "#722ed1" : "#595959", borderColor: hasSavedPrice ? "#d3adf7" : "#d9d9d9" }}>
                         {hasSavedPrice ? "Giá" : "Mua"}
                     </Button>}
                     <div style={{ padding: "4px 4px", color: "#aaa", flexShrink: 0 }}>

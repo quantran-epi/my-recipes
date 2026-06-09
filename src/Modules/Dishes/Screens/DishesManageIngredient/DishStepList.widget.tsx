@@ -168,7 +168,7 @@ export const StepItem: React.FunctionComponent<StepItemProps> = (props) => {
                 ],
                 onClick: _onMoreActionClick
             }} placement="bottom">
-                <Button size="small" icon={<HolderOutlined />} />
+                <Button icon={<HolderOutlined />} />
             </Dropdown>
         </Stack>
         <Modal open={toggleEditStepToDishes.value} title={<Stack gap={0} direction="column" align="flex-start">
