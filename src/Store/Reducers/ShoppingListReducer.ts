@@ -1,7 +1,7 @@
 import type { PayloadAction } from '@reduxjs/toolkit';
 import { createSlice } from '@reduxjs/toolkit';
 import { DishIngredientAmountMealMeta, Dishes } from '@store/Models/Dishes';
-import { Ingredient, IngredientInventory, IngredientUnit } from '@store/Models/Ingredient';
+import { Ingredient, IngredientInventory, IngredientPriceCurrency, IngredientUnit } from '@store/Models/Ingredient';
 import { ScheduledMeal } from '@store/Models/ScheduledMeal';
 import { ShoppingList, ShoppingListCompletionImport, ShoppingListIngredientAmount, ShoppingListIngredientGroup } from '@store/Models/ShoppingList';
 import { InventoryHealthConfig } from '@store/Models/SharedConfig';
@@ -42,6 +42,11 @@ export type ShoppingListSetIngredientBoughtAmountParams = {
     ingredientGroupId: string;
     boughtAmount?: number;
     boughtUnit?: IngredientUnit;
+    boughtEstimatedCost?: {
+        min: number;
+        max: number;
+        currency: IngredientPriceCurrency;
+    };
 }
 
 export type ShoppingListCompleteParams = {
@@ -242,6 +247,7 @@ export const ShoppingListSlice = createSlice({
                                     ...ingre,
                                     boughtAmount: action.payload.boughtAmount,
                                     boughtUnit: action.payload.boughtUnit,
+                                    boughtEstimatedCost: action.payload.boughtEstimatedCost,
                                 };
                             }
                             return ingre;

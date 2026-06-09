@@ -1,4 +1,4 @@
-import { CheckCircleOutlined, MinusOutlined, PlusOutlined, QuestionCircleOutlined, ShoppingCartOutlined, WarningOutlined } from "@ant-design/icons";
+import { CheckCircleOutlined, MinusOutlined, PlusOutlined, QuestionCircleOutlined, ScanOutlined, ShoppingCartOutlined, WarningOutlined } from "@ant-design/icons";
 import { Button } from "@components/Button";
 import { Checkbox } from "@components/Form/Checkbox";
 import { DatePicker } from "@components/Form/DatePicker";
@@ -40,6 +40,7 @@ import { DishesReadonlyDetailModal } from "@modules/Dishes/Screens/DishesManageI
 import { DateHelpers } from "@common/Helpers/DateHelper";
 import { Tag } from "@components/Tag";
 import { NumberHelpers } from "@common/Helpers/NumberHelpers";
+import { ReceiptImportApplyRow, ShoppingListReceiptImportWidget } from "./ShoppingListReceiptImport.widget";
 
 type ShoppingListDetailScreenProps = {
     shoppingList: ShoppingList;
@@ -64,6 +65,11 @@ type BoughtImportPlan = {
     ingredient?: Ingredient;
     amount: number;
     unit: IngredientUnit;
+    estimatedCost?: {
+        min: number;
+        max: number;
+        currency: "VND";
+    };
 }
 
 type ShoppingListIngredientPriceEstimate = {
@@ -154,6 +160,10 @@ const addActiveBoughtCost = (
 ): void => {
     const explicitBoughtAmount = group.boughtAmount ?? 0;
     if (explicitBoughtAmount > 0) {
+        if (group.boughtEstimatedCost) {
+            CostEstimateHelper.addRange(summary, group.boughtEstimatedCost);
+            return;
+        }
         CostEstimateHelper.addAmount(summary, ingredient, explicitBoughtAmount, group.boughtUnit ?? recipeStatus.unit);
         return;
     }
@@ -269,6 +279,7 @@ const getBoughtImportPlans = (
                 ingredient,
                 amount: explicitBoughtAmount,
                 unit: defaultUnit,
+                estimatedCost: group.boughtEstimatedCost,
             });
             return plans;
         }
@@ -322,6 +333,7 @@ export const ShoppingListDetailWidget: React.FunctionComponent<ShoppingListDetai
     const scheduledMealsById = useSelector(selectScheduledMealsById);
     const toggleMealModal = useToggle();
     const toggleCompletionReview = useToggle();
+    const toggleReceiptImport = useToggle();
     const [selectedMeal, setSelectedMeal] = useState<string>();
     const [completionReviewValues, setCompletionReviewValues] = useState<CompletionReviewValues>({});
     const [activeTab, setActiveTab] = useState("ingredients");
@@ -377,7 +389,7 @@ export const ShoppingListDetailWidget: React.FunctionComponent<ShoppingListDetai
             const review = completionReviewValues[plan.ingredientId] ?? {};
             const hasReviewStorage = Object.prototype.hasOwnProperty.call(review, "preservationCondition");
             const preservationCondition = hasReviewStorage ? review.preservationCondition : plan.ingredient?.preservationCondition;
-            const estimatedCost = IngredientPriceHelper.estimateForAmount(plan.ingredient, plan.amount, plan.unit);
+            const estimatedCost = plan.estimatedCost ?? IngredientPriceHelper.estimateForAmount(plan.ingredient, plan.amount, plan.unit);
             dispatch(setInventory({
                 ingredientId: plan.ingredientId,
                 inventory: {
@@ -423,6 +435,49 @@ export const ShoppingListDetailWidget: React.FunctionComponent<ShoppingListDetai
         toggleCompletionReview.show();
     }
 
+    const _applyReceiptImport = (rows: ReceiptImportApplyRow[]) => {
+        if (props.shoppingList.completedAt) return;
+        if (rows.length === 0) {
+            message.warning("Chưa có dòng hóa đơn hợp lệ để áp dụng");
+            return;
+        }
+
+        const groupedRows = rows.reduce((result, row) => {
+            result[row.ingredientGroupId] = [...(result[row.ingredientGroupId] ?? []), row];
+            return result;
+        }, {} as Record<string, ReceiptImportApplyRow[]>);
+
+        Object.entries(groupedRows).forEach(([ingredientGroupId, groupRows]) => {
+            const group = props.shoppingList.ingredients.find(item => item.id === ingredientGroupId);
+            if (!group) return;
+            const ingredient = ingredientsById.get(group.ingredientId);
+            const inventory = inventoryItems[group.ingredientId];
+            const status = getIngredientGroupStatus(group, ingredient, inventory);
+            const boughtUnit = status.unit;
+            const boughtAmount = InventoryHelper.roundAmount(groupRows.reduce((sum, row) => {
+                const converted = IngredientUnitHelper.toBaseAmount(ingredient, row.amount, row.unit, boughtUnit);
+                return sum + (converted ?? row.amount);
+            }, 0));
+            const totalPrice = groupRows.reduce((sum, row) => sum + (row.price ?? 0), 0);
+            const shouldMarkDone = status.needToBuy > 0 ? boughtAmount >= status.needToBuy : boughtAmount > 0;
+
+            dispatch(setIngredientBoughtAmount({
+                shoppingListId: props.shoppingList.id,
+                ingredientGroupId,
+                boughtAmount,
+                boughtUnit,
+                boughtEstimatedCost: totalPrice > 0 ? { min: totalPrice, max: totalPrice, currency: "VND" } : undefined,
+            }));
+            dispatch(toggleDoneIngredientGroup({
+                shoppingListId: props.shoppingList.id,
+                ingredientGroupId,
+                isDone: shouldMarkDone,
+            }));
+        });
+
+        message.success(`Đã áp dụng ${rows.length} dòng hóa đơn vào lịch mua sắm`);
+    }
+
     const _patchCompletionReviewValue = (ingredientId: string, patch: CompletionReviewValue) => {
         setCompletionReviewValues(prev => ({
             ...prev,
@@ -450,14 +505,23 @@ export const ShoppingListDetailWidget: React.FunctionComponent<ShoppingListDetai
                                     Đã hoàn tất {moment(props.shoppingList.completedAt).format("DD/MM/YYYY HH:mm")}
                                 </Typography.Text>
                             </Space>
-                            : <Button
-                                type="primary"
-                                icon={<ShoppingCartOutlined />}
-                                disabled={props.shoppingList.ingredients.length === 0}
-                                onClick={_onCompleteShoppingList}
-                            >
-                                Hoàn tất mua sắm
-                            </Button>}
+                            : <Space wrap size={6} style={{ justifyContent: "flex-end" }}>
+                                <Button
+                                    icon={<ScanOutlined />}
+                                    disabled={props.shoppingList.ingredients.length === 0}
+                                    onClick={toggleReceiptImport.show}
+                                >
+                                    Hóa đơn
+                                </Button>
+                                <Button
+                                    type="primary"
+                                    icon={<ShoppingCartOutlined />}
+                                    disabled={props.shoppingList.ingredients.length === 0}
+                                    onClick={_onCompleteShoppingList}
+                                >
+                                    Hoàn tất
+                                </Button>
+                            </Space>}
                     </Stack>
                     <Box>
                         {groupedIngredients.length > 1
@@ -542,6 +606,12 @@ export const ShoppingListDetailWidget: React.FunctionComponent<ShoppingListDetai
                 </DeferredModalContent>
             </Box>
         </Modal>
+        <ShoppingListReceiptImportWidget
+            open={toggleReceiptImport.value}
+            shoppingList={props.shoppingList}
+            onClose={toggleReceiptImport.hide}
+            onApply={_applyReceiptImport}
+        />
         <Modal
             style={{ top: 40 }}
             width={760}
@@ -582,7 +652,8 @@ const PurchaseCompletionReviewWidget: React.FunctionComponent<{
     onPatch: (ingredientId: string, patch: CompletionReviewValue) => void;
 }> = ({ plans, values, onPatch }) => {
     const total = plans.reduce((summary, plan) => {
-        CostEstimateHelper.addAmount(summary, plan.ingredient, plan.amount, plan.unit);
+        if (plan.estimatedCost) CostEstimateHelper.addRange(summary, plan.estimatedCost);
+        else CostEstimateHelper.addAmount(summary, plan.ingredient, plan.amount, plan.unit);
         return summary;
     }, CostEstimateHelper.emptySummary());
 
@@ -628,7 +699,7 @@ const PurchaseCompletionReviewWidget: React.FunctionComponent<{
                 const value = values[plan.ingredientId] ?? {};
                 const hasReviewStorage = Object.prototype.hasOwnProperty.call(value, "preservationCondition");
                 const preservationValue = hasReviewStorage ? value.preservationCondition : plan.ingredient?.preservationCondition;
-                const cost = IngredientPriceHelper.estimateForAmount(plan.ingredient, plan.amount, plan.unit);
+                const cost = plan.estimatedCost ?? IngredientPriceHelper.estimateForAmount(plan.ingredient, plan.amount, plan.unit);
 
                 return <List.Item style={{ padding: "6px 0", display: "block", borderBottom: "none" }}>
                     <div style={{
@@ -1012,6 +1083,7 @@ const ShoppingListIngredientPanelItem: React.FunctionComponent<ShoppingListIngre
                                 : status.inStock > 0 && _statusPill(`Có ${IngredientUnitHelper.formatAmount(status.inStock)}${status.unit}`, "green")}
                             {remainingToBuy > 0 && priceEstimate && _statusPill(`Mua ${IngredientUnitHelper.formatAmount(remainingToBuy)}${priceEstimate.unit}`, "orange")}
                             {props.item.boughtAmount > 0 && _statusPill(`Đã mua ${props.item.boughtAmount}${boughtUnit}`, "purple")}
+                            {props.item.boughtEstimatedCost && _statusPill(`Hóa đơn ${IngredientPriceHelper.formatRange(props.item.boughtEstimatedCost)}`, "gray")}
                             {status.inventoryCovered && !props.item.isDone && !status.isAlwaysAvailable && _statusPill("Đủ hàng", "green")}
                             {priceEstimate?.range && _statusPill(`~ ${IngredientPriceHelper.formatRange(priceEstimate.range)}`, "gray")}
                             {priceEstimate && !priceEstimate.range && _statusPill("Chưa có giá", "gray")}

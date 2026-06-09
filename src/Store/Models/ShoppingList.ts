@@ -13,6 +13,11 @@ export type ShoppingListIngredientGroup = {
     isDone: boolean;
     boughtAmount?: number;
     boughtUnit?: IngredientUnit;
+    boughtEstimatedCost?: {
+        min: number;
+        max: number;
+        currency: IngredientPriceCurrency;
+    };
 }
 
 export type ShoppingListCompletionImport = {
