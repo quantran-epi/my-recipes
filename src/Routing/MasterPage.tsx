@@ -33,7 +33,6 @@ import { useDispatch, useSelector } from "react-redux";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import LogoIcon from "../../assets/icons/logo.png";
 import HouseIcon from "../../assets/icons/house.png";
-import MealsIcon from "../../assets/icons/meals.png";
 import FamilyIcon from "../../assets/icons/family.png";
 import DietPlanIcon from "../../assets/icons/diet-plan.png";
 import DishesIcon from "../../assets/icons/noodles.png";
@@ -215,7 +214,7 @@ export const MasterPage = () => {
     const _featureIcon = () => {
         switch (currentFeatureName) {
             case "Món ăn": return DishesIcon;
-            case "Thực đơn": return MealsIcon;
+            case "Thực đơn": return DietPlanIcon;
             case "Lịch mua sắm": return ShoppingListIcon;
             case "Nguyên liệu": return IngredientIcon;
             case "Tính chi phí": return BudgetIcon;
@@ -459,12 +458,11 @@ const SidebarDrawer = ({ buttonStyle }: { buttonStyle?: React.CSSProperties }) =
         { key: 'templates', href: RootRoutes.AuthorizedRoutes.Templates(), icon: LayoutIcon, label: 'Mẫu dùng lại' },
         { key: 'dishSuggester', href: RootRoutes.AuthorizedRoutes.DishSuggester(), icon: SuggesterIcon, label: 'Nấu gì?' },
         { key: 'household', href: RootRoutes.AuthorizedRoutes.HouseholdProfiles(), icon: FamilyIcon, label: 'Nhà mình' },
-        { key: 'smartMealPlanner', href: RootRoutes.AuthorizedRoutes.SmartMealPlanner(), icon: DietPlanIcon, label: 'Lập thực đơn' },
         { key: 'ingredients', href: RootRoutes.AuthorizedRoutes.IngredientRoutes.List(), icon: IngredientIcon, label: 'Nguyên liệu' },
         { key: 'dishes', href: RootRoutes.AuthorizedRoutes.DishesRoutes.List(), icon: DishesIcon, label: 'Món ăn' },
         { key: 'expensePlanner', href: RootRoutes.AuthorizedRoutes.ExpensePlanner(), icon: BudgetIcon, label: 'Tính chi phí' },
         { key: 'shoppingList', href: RootRoutes.AuthorizedRoutes.ShoppingListRoutes.List(), icon: ShoppingListIcon, label: 'Lịch mua sắm' },
-        { key: 'meals', href: RootRoutes.AuthorizedRoutes.ScheduledMealRoutes.List(), icon: MealsIcon, label: 'Thực đơn' },
+        { key: 'meals', href: RootRoutes.AuthorizedRoutes.ScheduledMealRoutes.List(), icon: DietPlanIcon, label: 'Thực đơn' },
     ];
 
     return (
@@ -1177,7 +1175,7 @@ const BottomTabNavigator = () => {
                     onClick={() => onNavigate(mealsRoute)}
                 >
                     <span style={_sideIconShellStyles(mealsActive)}>
-                        <Image src={MealsIcon} preview={false} width={21} alt="" />
+                        <Image src={DietPlanIcon} preview={false} width={21} alt="" />
                     </span>
                     <Typography.Text style={_labelStyles(mealsActive)}>Thực đơn</Typography.Text>
                 </button>

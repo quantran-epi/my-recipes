@@ -3,9 +3,9 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: ready
-stopped_at: Completed quick task 260609-uix
-last_updated: "2026-06-09T13:44:35Z"
-last_activity: 2026-06-09 -- Completed quick task 260609-uix: Fix household, planner, scheduled meal UI regressions
+stopped_at: Completed quick task 260609-uxs
+last_updated: "2026-06-09T14:10:33Z"
+last_activity: 2026-06-09 -- Completed quick task 260609-uxs: Household and scheduled meal UI correction
 progress:
   total_phases: 5
   completed_phases: 4
@@ -28,7 +28,7 @@ See: .planning/PROJECT.md (updated 2026-06-05)
 Phase: 5 (release-gate-and-product-guardrails) — READY
 Plan: Not started
 Status: Phase 04 complete; ready for Phase 05
-Last activity: 2026-06-09 -- Completed quick task 260609-uix: Fix household, planner, scheduled meal UI regressions
+Last activity: 2026-06-09 -- Completed quick task 260609-uxs: Household and scheduled meal UI correction
 
 Progress: [████████░░] 80%
 
@@ -36,6 +36,7 @@ Progress: [████████░░] 80%
 
 | Date | Task | Artifact |
 |------|------|----------|
+| 2026-06-09 | Household and scheduled meal UI correction | `.planning/quick/260609-uxs-household-planner-scheduled-ui-fix/260609-uxs-SUMMARY.md` |
 | 2026-06-09 | Fix household, planner, scheduled meal UI regressions | `.planning/quick/260609-uix-fix-household-planner-ui/260609-uix-SUMMARY.md` |
 | 2026-06-09 | Household profiles page, dish suitability, scheduled meal cooking, smart meal planner | `.planning/quick/260609-rqm-household-profiles-page-dish-suitability/260609-rqm-SUMMARY.md` |
 | 2026-06-09 | Deploy app | `.planning/quick/260609-qua-deploy-app/260609-qua-SUMMARY.md` |

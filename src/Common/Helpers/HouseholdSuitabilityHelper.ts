@@ -1,4 +1,3 @@
-import { DishDurationHelper } from '@common/Helpers/DishDurationHelper';
 import { DishNutritionHelper } from '@common/Helpers/DishNutritionHelper';
 import { DishServingHelper } from '@common/Helpers/DishServingHelper';
 import { NutritionGoalHelper } from '@common/Helpers/NutritionGoalHelper';
@@ -90,16 +89,6 @@ export const HouseholdSuitabilityHelper = {
         if (avoidedIngredients.length > 0) {
             score -= Math.min(48, avoidedIngredients.length * 20);
             warnings.push(`Cần tránh ${avoidedIngredients.slice(0, 3).join(', ')}`);
-        }
-
-        if (member.maxCookMinutes) {
-            const totalMinutes = DishDurationHelper.getTotalMinutes(dish.duration);
-            if (totalMinutes > member.maxCookMinutes) {
-                score -= 10;
-                warnings.push(`Lâu hơn ${member.maxCookMinutes} phút`);
-            } else if (totalMinutes > 0) {
-                positives.push(`Vừa thời gian (${DishDurationHelper.formatMinutes(totalMinutes)})`);
-            }
         }
 
         const nutritionGoal = member.nutritionGoalId

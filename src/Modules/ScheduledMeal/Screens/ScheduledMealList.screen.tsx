@@ -1,6 +1,6 @@
 import {
     CalendarOutlined, CopyOutlined, DeleteOutlined, EditOutlined,
-    FireOutlined, HolderOutlined, LeftOutlined, PlusOutlined, RestOutlined, RightOutlined, ShoppingCartOutlined
+    FireOutlined, LeftOutlined, MoreOutlined, PlusOutlined, RestOutlined, RightOutlined, ShoppingCartOutlined
 } from "@ant-design/icons";
 import { DateHelpers } from "@common/Helpers/DateHelper";
 import { Badge } from "@components/Badge";
@@ -31,7 +31,7 @@ import { ScheduledMealEditWidget } from "./ScheduledMealEdit.widget";
 import MorningIcon from "../../../../assets/icons/sunrise.png";
 import NightIcon from "../../../../assets/icons/night.png";
 import NoonIcon from "../../../../assets/icons/time.png";
-import MealsIcon from "../../../../assets/icons/meals.png";
+import DietPlanIcon from "../../../../assets/icons/diet-plan.png";
 import { Image } from "@components/Image";
 import { Box } from "@components/Layout/Box";
 import { ShoppingListMealDetailWidget } from "@modules/ShoppingList/Screens/ShoppingListMealDetail.widget";
@@ -84,14 +84,14 @@ const topToolCardStyle: React.CSSProperties = {
 
 const topActionRowStyle: React.CSSProperties = {
     display: "grid",
-    gridTemplateColumns: "minmax(0, 1fr) minmax(0, 1fr)",
+    gridTemplateColumns: "repeat(auto-fit, minmax(104px, 1fr))",
     gap: 8,
     alignItems: "center",
 };
 
 const topActionButtonStyle: React.CSSProperties = {
     width: "100%",
-    height: 36,
+    height: 38,
     minWidth: 0,
     whiteSpace: "nowrap",
     display: "inline-flex",
@@ -155,6 +155,26 @@ const dayPickerButtonStyle: React.CSSProperties = {
     background: "rgba(255,255,255,0.86)",
     boxShadow: "none",
     overflow: "hidden",
+};
+
+const daySummaryIconButtonStyle: React.CSSProperties = {
+    width: 38,
+    height: 38,
+    paddingInline: 0,
+    borderRadius: 10,
+    display: "inline-flex",
+    alignItems: "center",
+    justifyContent: "center",
+};
+
+const mealItemMenuButtonStyle: React.CSSProperties = {
+    width: 36,
+    height: 36,
+    paddingInline: 0,
+    borderRadius: 10,
+    display: "inline-flex",
+    alignItems: "center",
+    justifyContent: "center",
 };
 
 const dayPickerIconButtonStyle: React.CSSProperties = {
@@ -324,11 +344,16 @@ export const ScheduledMealListScreen = () => {
             <Box style={{ padding: "4px 0 0", marginBottom: 8 }}>
                 <Box style={topToolCardStyle}>
                     <div style={topActionRowStyle}>
-                        <Button className="scheduled-meal-top-action" size="small" icon={<CalendarOutlined />} onClick={_onOpenTemplateApply} style={topActionButtonStyle}>
+                        <Tooltip title="Tự gợi ý thực đơn theo ngân sách, dinh dưỡng và nhà mình">
+                            <Button className="scheduled-meal-top-action" icon={<Image src={DietPlanIcon} preview={false} width={18} alt="" />} onClick={() => navigate(RootRoutes.AuthorizedRoutes.SmartMealPlanner())} style={topActionButtonStyle}>
+                                Gợi ý
+                            </Button>
+                        </Tooltip>
+                        <Button className="scheduled-meal-top-action" icon={<CalendarOutlined />} onClick={_onOpenTemplateApply} style={topActionButtonStyle}>
                             Từ mẫu
                         </Button>
                         <Tooltip title="Tạo danh sách mua theo khoảng ngày">
-                            <Button className="scheduled-meal-top-action" size="small" icon={<ShoppingCartOutlined />} onClick={_onOpenRangeShopping} style={topActionButtonStyle}>
+                            <Button className="scheduled-meal-top-action" icon={<ShoppingCartOutlined />} onClick={_onOpenRangeShopping} style={topActionButtonStyle}>
                                 Tạo giỏ
                             </Button>
                         </Tooltip>
@@ -356,12 +381,11 @@ export const ScheduledMealListScreen = () => {
                         <div style={dayjs(selectedDate).isSame(dayjs(), "day") ? dayPickerSingleControlRowStyle : dayPickerControlRowStyle}>
                             <Button
                                 aria-label={calendarVisible ? "Ẩn lịch" : "Chọn ngày"}
-                                size="small"
                                 onClick={() => setCalendarVisible(value => !value)}
                                 icon={<CalendarOutlined />}
                                 style={dayPickerIconButtonStyle}
                             />
-                            {!dayjs(selectedDate).isSame(dayjs(), "day") && <Button size="small" onClick={_goToday} style={dayPickerButtonStyle}>Hôm nay</Button>}
+                            {!dayjs(selectedDate).isSame(dayjs(), "day") && <Button onClick={_goToday} style={dayPickerButtonStyle}>Hôm nay</Button>}
                         </div>
                     </div>
                     <Button
@@ -400,11 +424,16 @@ export const ScheduledMealListScreen = () => {
                             {moment(selectedDate).format("DD/MM/YYYY")} · {mealsToday.length} thực đơn
                         </Typography.Text>
                     </div>
-                    <Stack gap={6} align="center">
-                        <Button disabled={allDayDishIds.length === 0} onClick={_onStartDayCooking} icon={<FireOutlined />} style={{ color: allDayDishIds.length > 0 ? '#fa8c16' : undefined }}>
-                            Nấu ngày
-                        </Button>
-                        <Button onClick={toggleAddModal.show} icon={<PlusOutlined />}>Thêm</Button>
+                    <Stack gap={6} align="center" style={{ flexShrink: 0 }}>
+                        <Tooltip title="Lập thực đơn thông minh">
+                            <Button aria-label="Lập thực đơn thông minh" onClick={() => navigate(RootRoutes.AuthorizedRoutes.SmartMealPlanner())} icon={<Image src={DietPlanIcon} preview={false} width={19} alt="" />} style={daySummaryIconButtonStyle} />
+                        </Tooltip>
+                        <Tooltip title="Nấu cả ngày">
+                            <Button aria-label="Nấu cả ngày" disabled={allDayDishIds.length === 0} onClick={_onStartDayCooking} icon={<FireOutlined />} style={{ ...daySummaryIconButtonStyle, color: allDayDishIds.length > 0 ? '#fa8c16' : undefined }} />
+                        </Tooltip>
+                        <Tooltip title="Thêm thực đơn">
+                            <Button aria-label="Thêm thực đơn" onClick={toggleAddModal.show} icon={<PlusOutlined />} style={daySummaryIconButtonStyle} />
+                        </Tooltip>
                     </Stack>
                 </Box>
             </Box>
@@ -425,7 +454,7 @@ export const ScheduledMealListScreen = () => {
             <Modal
                 open={toggleAddModal.value}
                 title={<Space>
-                    <Image src={MealsIcon} preview={false} width={24} style={{ marginBottom: 3 }} />
+                    <Image src={DietPlanIcon} preview={false} width={24} style={{ marginBottom: 3 }} />
                     Thêm thực đơn
                 </Space>}
                 destroyOnClose
@@ -542,7 +571,7 @@ export const ScheduledMealListScreen = () => {
             <Modal
                 open={shoppingRangeOpen}
                 title={<Space>
-                    <Image src={MealsIcon} preview={false} width={24} style={{ marginBottom: 3 }} />
+                    <Image src={DietPlanIcon} preview={false} width={24} style={{ marginBottom: 3 }} />
                     Tạo lịch mua sắm
                 </Space>}
                 destroyOnClose
@@ -605,18 +634,24 @@ export const ScheduledMealItem = ({ item, selected, dishNameById, onDelete }: { 
         setCopyDate(null);
     };
 
-    const _onMoreActionClick = (e) => {
-        switch (e.key) {
-            case "copy": toggleCopyModal.show(); break;
-            case "edit": toggleEditModal.show(); break;
-            case "delete": toggleDeleteConfirm.show(); break;
-        }
-    };
-
     const _openCooking = (title: string, dishIds: string[]) => {
         setCookingScope({ title, dishIds: getScheduledMealDishIds(dishIds) });
         setCookingToken(Date.now());
         setCookingOpen(true);
+    };
+
+    const _onMoreActionClick = (e) => {
+        switch (e.key) {
+            case "cook": _openCooking(`Nấu thực đơn - ${item.name}`, allDishIds); break;
+            case "cook-breakfast": _openCooking(`Nấu bữa sáng - ${item.name}`, item.meals.breakfast); break;
+            case "cook-lunch": _openCooking(`Nấu bữa trưa - ${item.name}`, item.meals.lunch); break;
+            case "cook-dinner": _openCooking(`Nấu bữa tối - ${item.name}`, item.meals.dinner); break;
+            case "complete": setCompletionOpen(true); break;
+            case "detail": toggleMealModal.show(); break;
+            case "copy": toggleCopyModal.show(); break;
+            case "edit": toggleEditModal.show(); break;
+            case "delete": toggleDeleteConfirm.show(); break;
+        }
     };
 
     const mealGroups = [
@@ -644,19 +679,14 @@ export const ScheduledMealItem = ({ item, selected, dishNameById, onDelete }: { 
             {dishIds.length === 0 ? (
                 <Typography.Text type="secondary" style={{ display: "block", fontSize: 12, lineHeight: "18px" }}>Chưa chọn</Typography.Text>
             ) : (
-                <>
-                    <Stack wrap="wrap" gap={4}>
-                        {dishIds.slice(0, 3).map((id, index) => (
-                            <Tag key={`${id}-${index}`} style={{ maxWidth: "100%", fontSize: 11, padding: "1px 7px", margin: 0, borderRadius: 10, overflow: "hidden", textOverflow: "ellipsis" }}>
-                                {_dishLabel(id)}
-                            </Tag>
-                        ))}
-                        {dishIds.length > 3 && <Tag style={{ fontSize: 11, padding: "1px 7px", margin: 0, borderRadius: 10 }}>+{dishIds.length - 3}</Tag>}
-                    </Stack>
-                    <Button size="small" disabled={dishIds.length === 0} icon={<FireOutlined />} onClick={() => _openCooking(`Nấu bữa ${label} - ${item.name}`, dishIds)} style={{ marginTop: 7, color: '#fa8c16', paddingInline: 10 }}>
-                        Nấu bữa {label.toLowerCase()}
-                    </Button>
-                </>
+                <Stack wrap="wrap" gap={4}>
+                    {dishIds.slice(0, 3).map((id, index) => (
+                        <Tag key={`${id}-${index}`} style={{ maxWidth: "100%", fontSize: 11, padding: "1px 7px", margin: 0, borderRadius: 10, overflow: "hidden", textOverflow: "ellipsis" }}>
+                            {_dishLabel(id)}
+                        </Tag>
+                    ))}
+                    {dishIds.length > 3 && <Tag style={{ fontSize: 11, padding: "1px 7px", margin: 0, borderRadius: 10 }}>+{dishIds.length - 3}</Tag>}
+                </Stack>
             )}
         </Box>
     );
@@ -674,9 +704,8 @@ export const ScheduledMealItem = ({ item, selected, dishNameById, onDelete }: { 
                 <div style={{ display: "grid", gridTemplateColumns: "5px minmax(0, 1fr)", background: `linear-gradient(90deg, ${railColor}14 0%, rgba(255,255,255,0.96) 74%)`, borderBottom: "1px solid rgba(116,54,220,0.09)" }}>
                     <div style={{ background: railColor }} />
                     <div style={{ padding: "12px 12px 10px", minWidth: 0 }}>
-                    <div style={{ display: "grid", gridTemplateColumns: "minmax(0, 1fr)", gap: 8, alignItems: "start" }}>
-                        <Stack gap={7} align="flex-start" style={{ minWidth: 0 }}>
-                            <Checkbox checked={selected} onChange={_onToggleSelect} style={{ marginTop: 2, marginRight: 0 }} />
+                        <div style={{ display: "grid", gridTemplateColumns: "auto minmax(0, 1fr) auto", gap: 8, alignItems: "start" }}>
+                            <Checkbox checked={selected} onChange={_onToggleSelect} style={{ marginTop: 4, marginRight: 0 }} />
                             <div style={{ minWidth: 0 }}>
                                 <Tooltip title={item.name}>
                                     <Typography.Paragraph style={{ marginBottom: 2, color: "#111827", fontWeight: 800, lineHeight: "22px", fontSize: 15.5 }} ellipsis={{ rows: 2 }}>
@@ -690,18 +719,15 @@ export const ScheduledMealItem = ({ item, selected, dishNameById, onDelete }: { 
                                     {uniqueDishCount !== totalDishCount && <Typography.Text type="secondary" style={{ fontSize: 12 }}>{uniqueDishCount} món khác nhau</Typography.Text>}
                                 </Space>
                             </div>
-                        </Stack>
-
-                        <Stack gap={6} align="center" wrap="wrap" style={{ marginTop: 8 }}>
-                            <Button size="small" disabled={allDishIds.length === 0} icon={<FireOutlined />} onClick={() => _openCooking(`Nấu thực đơn - ${item.name}`, allDishIds)} style={{ color: allDishIds.length > 0 ? '#fa8c16' : undefined }}>
-                                Nấu thực đơn
-                            </Button>
-                            <Button size="small" disabled={allDishIds.length === 0} icon={<RestOutlined />} onClick={() => setCompletionOpen(true)} style={{ color: allDishIds.length > 0 ? '#52c41a' : undefined }}>
-                                Hoàn tất bữa
-                            </Button>
-                            <Button size="small" onClick={toggleMealModal.show}>Chi tiết</Button>
                             <Dropdown menu={{
                                 items: [
+                                    { label: "Nấu thực đơn", key: "cook", icon: <FireOutlined />, disabled: allDishIds.length === 0 },
+                                    { label: "Nấu bữa sáng", key: "cook-breakfast", icon: <FireOutlined />, disabled: item.meals.breakfast.length === 0 },
+                                    { label: "Nấu bữa trưa", key: "cook-lunch", icon: <FireOutlined />, disabled: item.meals.lunch.length === 0 },
+                                    { label: "Nấu bữa tối", key: "cook-dinner", icon: <FireOutlined />, disabled: item.meals.dinner.length === 0 },
+                                    { label: "Hoàn tất bữa", key: "complete", icon: <RestOutlined />, disabled: allDishIds.length === 0 },
+                                    { label: "Chi tiết", key: "detail", icon: <CalendarOutlined /> },
+                                    { type: "divider" },
                                     { label: "Sao chép", key: "copy", icon: <CopyOutlined /> },
                                     { label: "Sửa", key: "edit", icon: <EditOutlined /> },
                                     { type: "divider" },
@@ -709,10 +735,9 @@ export const ScheduledMealItem = ({ item, selected, dishNameById, onDelete }: { 
                                 ],
                                 onClick: _onMoreActionClick,
                             }} placement="bottomRight">
-                                <Button size="small" type="text" icon={<HolderOutlined />} style={{ width: 34, paddingInline: 0 }} />
+                                <Button aria-label="Thao tác thực đơn" type="text" icon={<MoreOutlined />} style={mealItemMenuButtonStyle} />
                             </Dropdown>
-                        </Stack>
-                    </div>
+                        </div>
                     </div>
                 </div>
 
@@ -743,7 +768,7 @@ export const ScheduledMealItem = ({ item, selected, dishNameById, onDelete }: { 
             {toggleEditModal.value && <Modal
                 open={toggleEditModal.value}
                 title={<Space>
-                    <Image src={MealsIcon} preview={false} width={24} style={{ marginBottom: 3 }} />
+                    <Image src={DietPlanIcon} preview={false} width={24} style={{ marginBottom: 3 }} />
                     Sửa thực đơn
                 </Space>}
                 destroyOnClose
@@ -760,7 +785,7 @@ export const ScheduledMealItem = ({ item, selected, dishNameById, onDelete }: { 
                 style={{ top: 50 }}
                 open={toggleMealModal.value}
                 title={<Space>
-                    <Image src={MealsIcon} preview={false} width={24} style={{ marginBottom: 3 }} />
+                    <Image src={DietPlanIcon} preview={false} width={24} style={{ marginBottom: 3 }} />
                     Thực đơn
                 </Space>}
                 destroyOnClose

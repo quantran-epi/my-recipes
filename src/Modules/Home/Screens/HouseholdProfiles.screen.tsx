@@ -10,7 +10,7 @@ import { useScreenTitle } from '@hooks';
 import { DISH_TAGS } from '@store/Models/Dishes';
 import { HouseholdMemberProfile, removeHouseholdMemberProfile, setSelectedHouseholdMemberIds, upsertHouseholdMemberProfile } from '@store/Reducers/AppContextReducer';
 import { selectDishes, selectHouseholdMembers, selectIngredients, selectNutritionGoals, selectSelectedHouseholdMemberIds } from '@store/Selectors';
-import { Empty, Input, InputNumber, Popconfirm, Select } from 'antd';
+import { Empty, Input, InputNumber, Popconfirm, Select, Switch } from 'antd';
 import { nanoid } from 'nanoid';
 import React, { useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
@@ -44,40 +44,99 @@ const pageCss = `
     box-shadow: 0 10px 24px rgba(15,23,42,0.06);
     padding: 12px;
 }
-.household-member-button {
+.household-member-row {
     width: 100%;
     border: 1px solid #e8edf7;
     background: #fff;
     border-radius: 8px;
-    min-height: 72px;
-    padding: 11px 12px;
+    min-height: 76px;
+    padding: 10px 12px;
     text-align: left;
-    cursor: pointer;
     display: grid;
-    grid-template-columns: 42px minmax(0, 1fr) auto;
-    gap: 11px;
+    grid-template-columns: minmax(0, 1fr) minmax(132px, auto);
+    gap: 12px;
     align-items: center;
 }
-.household-member-button.active {
+.household-member-row.active {
     border-color: rgba(22,119,255,0.42);
     background: #f0f7ff;
     box-shadow: 0 8px 18px rgba(22,119,255,0.10);
 }
-.household-member-list {
+.household-member-main {
+    width: 100%;
+    border: 0;
+    background: transparent;
+    padding: 0;
+    text-align: left;
+    cursor: pointer;
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    grid-template-columns: 42px minmax(0, 1fr);
+    gap: 11px;
+    align-items: center;
+    font: inherit;
+}
+.household-member-toggle {
+    display: grid;
+    justify-items: end;
+    gap: 4px;
+    min-width: 132px;
+}
+.household-member-list {
+    display: flex;
+    flex-direction: column;
     gap: 8px;
 }
 .household-editor-panel {
     background: linear-gradient(180deg, #ffffff 0%, #fbfdff 100%);
 }
+.household-editor-actions {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 10px;
+    align-items: center;
+    min-width: min(100%, 420px);
+}
+.household-editor-switch {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 9px;
+    align-items: center;
+    border: 1px solid rgba(22,119,255,0.12);
+    border-radius: 8px;
+    background: #fff;
+    padding: 8px 10px;
+}
+.household-field-list {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 10px;
+}
+.household-field-row {
+    display: grid;
+    grid-template-columns: minmax(140px, 190px) minmax(0, 1fr);
+    gap: 12px;
+    align-items: start;
+    border-top: 1px solid rgba(15,23,42,0.06);
+    padding-top: 10px;
+}
+.household-field-row:first-child {
+    border-top: 0;
+    padding-top: 0;
+}
+@media (max-width: 700px) {
+    .household-member-row,
+    .household-editor-actions,
+    .household-field-row {
+        grid-template-columns: minmax(0, 1fr);
+    }
+    .household-member-toggle {
+        justify-items: start;
+        grid-template-columns: auto minmax(0, 1fr);
+        align-items: center;
+        min-width: 0;
+    }
+}
 `;
-
-const fieldGridStyle: React.CSSProperties = {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
-    gap: 10,
-};
 
 const FieldLabel: React.FC<{ children: React.ReactNode }> = ({ children }) => (
     <Typography.Text strong style={{ display: 'block', fontSize: 12, lineHeight: '16px', marginBottom: 5, color: '#374151' }}>{children}</Typography.Text>
@@ -100,7 +159,12 @@ export const HouseholdProfilesScreen: React.FC = () => {
     }, [activeMemberId, members]);
 
     const activeMember = members.find(member => member.id === activeMemberId);
-    const selectedSet = useMemo(() => new Set(selectedMemberIds), [selectedMemberIds]);
+    const effectiveSelectedMemberIds = useMemo(() => {
+        if (selectedMemberIds.length === 0) return members.map(member => member.id);
+        const memberIds = new Set(members.map(member => member.id));
+        return selectedMemberIds.filter(id => memberIds.has(id));
+    }, [members, selectedMemberIds]);
+    const selectedSet = useMemo(() => new Set(effectiveSelectedMemberIds), [effectiveSelectedMemberIds]);
 
     const dishOptions = useMemo(() => dishes
         .slice()
@@ -150,12 +214,16 @@ export const HouseholdProfilesScreen: React.FC = () => {
         message.success(`Đã xoá hồ sơ ${member.name}`);
     };
 
-    const _toggleSelectedMember = (memberId: string) => {
-        const next = selectedSet.has(memberId)
-            ? selectedMemberIds.filter(id => id !== memberId)
-            : [...selectedMemberIds, memberId];
+    const _setMemberSelected = (memberId: string, selected: boolean) => {
+        const baseIds = selectedMemberIds.length === 0 ? members.map(member => member.id) : effectiveSelectedMemberIds;
+        if (!selected && baseIds.length <= 1) return;
+        const next = selected
+            ? Array.from(new Set([...baseIds, memberId]))
+            : baseIds.filter(id => id !== memberId);
         dispatch(setSelectedHouseholdMemberIds(next));
     };
+
+    const activeMemberSelected = activeMember ? selectedSet.has(activeMember.id) : false;
 
     return <Box className='household-page' data-testid='household-profiles-page'>
         <style>{pageCss}</style>
@@ -179,24 +247,29 @@ export const HouseholdProfilesScreen: React.FC = () => {
             <Box className='household-panel'>
                 <Stack justify='space-between' align='center' style={{ marginBottom: 10 }}>
                     <Typography.Text strong>{members.length} thành viên</Typography.Text>
-                    <Tag color='blue' style={{ marginRight: 0 }}>{selectedMemberIds.length || members.length} đang dùng</Tag>
+                    <Tag color='blue' style={{ marginRight: 0 }}>{selectedSet.size} đang dùng</Tag>
                 </Stack>
                 {members.length === 0 ? <Empty description='Chưa có hồ sơ thành viên' image={Empty.PRESENTED_IMAGE_SIMPLE} /> : <div className='household-member-list'>
                     {members.map(member => {
                         const active = activeMember?.id === member.id;
-                        const selected = selectedSet.has(member.id) || selectedMemberIds.length === 0;
-                        return <button key={member.id} type='button' className={`household-member-button${active ? ' active' : ''}`} onClick={() => setActiveMemberId(member.id)}>
-                            <span style={{ width: 42, height: 42, borderRadius: 14, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', background: `${member.color ?? '#1677ff'}18`, color: member.color ?? '#1677ff', border: `1px solid ${member.color ?? '#1677ff'}30` }}>
-                                <UserOutlined />
-                            </span>
-                            <span style={{ minWidth: 0 }}>
-                                <Typography.Text strong style={{ display: 'block', color: '#111827', lineHeight: '18px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{member.name}</Typography.Text>
-                                <Typography.Text type='secondary' style={{ display: 'block', fontSize: 11, lineHeight: '15px' }}>
-                                    {(member.favoriteDishIds.length + member.favoriteIngredientIds.length + member.preferredTags.length)} thích · {(member.avoidedDishIds.length + member.avoidedIngredientIds.length + member.avoidedTags.length)} tránh
-                                </Typography.Text>
-                            </span>
-                            <Tag color={selected ? 'green' : 'default'} style={{ marginRight: 0 }}>{selected ? 'Dùng' : 'Tắt'}</Tag>
-                        </button>;
+                        const selected = selectedSet.has(member.id);
+                        return <div key={member.id} className={`household-member-row${active ? ' active' : ''}`}>
+                            <button type='button' className='household-member-main' onClick={() => setActiveMemberId(member.id)}>
+                                <span style={{ width: 42, height: 42, borderRadius: 14, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', background: `${member.color ?? '#1677ff'}18`, color: member.color ?? '#1677ff', border: `1px solid ${member.color ?? '#1677ff'}30` }}>
+                                    <UserOutlined />
+                                </span>
+                                <span style={{ minWidth: 0 }}>
+                                    <Typography.Text strong style={{ display: 'block', color: '#111827', lineHeight: '18px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{member.name}</Typography.Text>
+                                    <Typography.Text type='secondary' style={{ display: 'block', fontSize: 11, lineHeight: '15px' }}>
+                                        {(member.favoriteDishIds.length + member.favoriteIngredientIds.length + member.preferredTags.length)} thích · {(member.avoidedDishIds.length + member.avoidedIngredientIds.length + member.avoidedTags.length)} tránh
+                                    </Typography.Text>
+                                </span>
+                            </button>
+                            <div className='household-member-toggle'>
+                                <Switch checked={selected} onChange={checked => _setMemberSelected(member.id, checked)} />
+                                <Typography.Text type='secondary' style={{ fontSize: 11, lineHeight: '15px', textAlign: 'right' }}>{selected ? 'Tính khi gợi ý' : 'Tạm bỏ qua'}</Typography.Text>
+                            </div>
+                        </div>;
                     })}
                 </div>}
             </Box>
@@ -215,28 +288,30 @@ export const HouseholdProfilesScreen: React.FC = () => {
                                 <Typography.Text type='secondary' style={{ display: 'block', fontSize: 12, lineHeight: '17px' }}>Tự lưu khi chỉnh sửa</Typography.Text>
                             </div>
                         </Stack>
-                        <Stack gap={8}>
-                            <Button onClick={() => _toggleSelectedMember(activeMember.id)}>{selectedSet.has(activeMember.id) || selectedMemberIds.length === 0 ? 'Đang dùng' : 'Dùng khi gợi ý'}</Button>
+                        <div className='household-editor-actions'>
+                            <div className='household-editor-switch'>
+                                <Switch checked={activeMemberSelected} onChange={checked => _setMemberSelected(activeMember.id, checked)} />
+                                <span style={{ minWidth: 0 }}>
+                                    <Typography.Text strong style={{ display: 'block', color: '#111827', fontSize: 12, lineHeight: '16px' }}>{activeMemberSelected ? 'Đang dùng khi gợi ý' : 'Tạm bỏ qua khi gợi ý'}</Typography.Text>
+                                    <Typography.Text type='secondary' style={{ display: 'block', fontSize: 11, lineHeight: '15px' }}>Gợi ý món và thực đơn sẽ {activeMemberSelected ? 'tính' : 'không tính'} người này.</Typography.Text>
+                                </span>
+                            </div>
                             <Popconfirm title='Xoá hồ sơ này?' okText='Xoá' cancelText='Huỷ' okButtonProps={{ danger: true }} onConfirm={() => _removeMember(activeMember)}>
                                 <Button danger icon={<DeleteOutlined />}>Xoá</Button>
                             </Popconfirm>
-                        </Stack>
+                        </div>
                     </Stack>
 
-                    <div style={fieldGridStyle}>
-                        <div>
+                    <div className='household-field-list'>
+                        <div className='household-field-row'>
                             <FieldLabel>Tên</FieldLabel>
                             <Input value={activeMember.name} onChange={event => _updateMember(activeMember, { name: event.target.value })} placeholder='Tên thành viên' />
                         </div>
-                        <div>
+                        <div className='household-field-row'>
                             <FieldLabel>Khẩu phần thường ăn</FieldLabel>
                             <InputNumber min={0.5} max={12} step={0.5} value={activeMember.portionPreference ?? 1} addonAfter='phần' onChange={value => _updateMember(activeMember, { portionPreference: Number(value ?? 1) })} style={{ width: '100%' }} />
                         </div>
-                        <div>
-                            <FieldLabel>Thời gian nấu tối đa</FieldLabel>
-                            <InputNumber min={5} max={480} step={5} value={activeMember.maxCookMinutes} addonAfter='phút' placeholder='Không giới hạn' onChange={value => _updateMember(activeMember, { maxCookMinutes: value === null ? undefined : Number(value) })} style={{ width: '100%' }} />
-                        </div>
-                        <div>
+                        <div className='household-field-row'>
                             <FieldLabel>Mục tiêu dinh dưỡng</FieldLabel>
                             <Select allowClear placeholder='Chọn mục tiêu' value={activeMember.nutritionGoalId} onChange={value => _updateMember(activeMember, { nutritionGoalId: value })} options={nutritionGoals.map(goal => ({ value: goal.id, label: goal.name }))} style={{ width: '100%' }} />
                         </div>
@@ -249,28 +324,28 @@ export const HouseholdProfilesScreen: React.FC = () => {
                         </Stack>
                     </div>
 
-                    <div style={fieldGridStyle}>
-                        <div>
+                    <div className='household-field-list'>
+                        <div className='household-field-row'>
                             <FieldLabel>Món thích</FieldLabel>
                             <Select mode='multiple' allowClear maxTagCount='responsive' value={activeMember.favoriteDishIds} onChange={ids => _updateMember(activeMember, { favoriteDishIds: ids, avoidedDishIds: activeMember.avoidedDishIds.filter(id => !ids.includes(id)) })} options={dishOptions} style={{ width: '100%' }} placeholder='Chọn món' />
                         </div>
-                        <div>
+                        <div className='household-field-row'>
                             <FieldLabel>Món tránh</FieldLabel>
                             <Select mode='multiple' allowClear maxTagCount='responsive' value={activeMember.avoidedDishIds} onChange={ids => _updateMember(activeMember, { avoidedDishIds: ids, favoriteDishIds: activeMember.favoriteDishIds.filter(id => !ids.includes(id)) })} options={dishOptions} style={{ width: '100%' }} placeholder='Chọn món' />
                         </div>
-                        <div>
+                        <div className='household-field-row'>
                             <FieldLabel>Nguyên liệu thích</FieldLabel>
                             <Select mode='multiple' allowClear maxTagCount='responsive' value={activeMember.favoriteIngredientIds} onChange={ids => _updateMember(activeMember, { favoriteIngredientIds: ids, avoidedIngredientIds: activeMember.avoidedIngredientIds.filter(id => !ids.includes(id)) })} options={ingredientOptions} style={{ width: '100%' }} placeholder='Chọn nguyên liệu' />
                         </div>
-                        <div>
+                        <div className='household-field-row'>
                             <FieldLabel>Nguyên liệu tránh</FieldLabel>
                             <Select mode='multiple' allowClear maxTagCount='responsive' value={activeMember.avoidedIngredientIds} onChange={ids => _updateMember(activeMember, { avoidedIngredientIds: ids, favoriteIngredientIds: activeMember.favoriteIngredientIds.filter(id => !ids.includes(id)) })} options={ingredientOptions} style={{ width: '100%' }} placeholder='Chọn nguyên liệu' />
                         </div>
-                        <div>
+                        <div className='household-field-row'>
                             <FieldLabel>Kiểu món thích</FieldLabel>
                             <Select mode='multiple' allowClear maxTagCount='responsive' value={activeMember.preferredTags} onChange={tags => _updateMember(activeMember, { preferredTags: tags, avoidedTags: activeMember.avoidedTags.filter(tag => !tags.includes(tag)) })} options={tagOptions} style={{ width: '100%' }} placeholder='Chọn tag' />
                         </div>
-                        <div>
+                        <div className='household-field-row'>
                             <FieldLabel>Kiểu món tránh</FieldLabel>
                             <Select mode='multiple' allowClear maxTagCount='responsive' value={activeMember.avoidedTags} onChange={tags => _updateMember(activeMember, { avoidedTags: tags, preferredTags: activeMember.preferredTags.filter(tag => !tags.includes(tag)) })} options={tagOptions} style={{ width: '100%' }} placeholder='Chọn tag' />
                         </div>

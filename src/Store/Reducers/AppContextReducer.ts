@@ -71,7 +71,6 @@ export type HouseholdMemberProfile = {
     avoidedTags: string[];
     nutritionGoalId?: string;
     portionPreference?: number;
-    maxCookMinutes?: number;
     notes?: string;
     createdAt: string;
     updatedAt: string;
@@ -199,9 +198,6 @@ export const normalizeHouseholdMemberProfile = (profile: Partial<HouseholdMember
         portionPreference: profile.portionPreference === undefined || profile.portionPreference === null
             ? undefined
             : normalizePositiveDecimal(profile.portionPreference, 1, 12),
-        maxCookMinutes: profile.maxCookMinutes === undefined || profile.maxCookMinutes === null
-            ? undefined
-            : normalizePositiveNumber(profile.maxCookMinutes, DEFAULT_HOUSEHOLD_PREFERENCE_PROFILE.maxCookMinutes, 480),
         notes: profile.notes?.trim() || undefined,
         createdAt: profile.createdAt || now,
         updatedAt: profile.updatedAt || now,
@@ -234,15 +230,12 @@ export const buildHouseholdPreferenceProfile = (
     if (members.length === 0) return fallback;
 
     const portionTotal = members.reduce((sum, member) => sum + (member.portionPreference ?? 1), 0);
-    const maxCookMinutes = members
-        .map(member => member.maxCookMinutes)
-        .filter((value): value is number => typeof value === 'number' && value > 0);
     const nutritionGoalId = members.find(member => Boolean(member.nutritionGoalId))?.nutritionGoalId ?? fallback.nutritionGoalId;
 
     return normalizeHouseholdPreferenceProfile({
         ...fallback,
         servingCount: Math.max(1, Math.min(24, Math.round(portionTotal))),
-        maxCookMinutes: maxCookMinutes.length > 0 ? Math.min(...maxCookMinutes) : fallback.maxCookMinutes,
+        maxCookMinutes: fallback.maxCookMinutes,
         preferredTags: mergeUnique(...members.map(member => member.preferredTags)),
         avoidedTags: mergeUnique(...members.map(member => member.avoidedTags)),
         favoriteDishIds: mergeUnique(...members.map(member => member.favoriteDishIds)),
