@@ -19,7 +19,7 @@ export type SmartPlannerMealSlot = 'breakfast' | 'lunch' | 'dinner' | 'snack' | 
 export type PlannerMealSlot = 'breakfast' | 'lunch' | 'dinner';
 export type SmartPlannerShoppingMode = 'no_shopping' | 'small_top_up' | 'normal';
 export type SmartPlannerVarietyMode = 'familiar' | 'balanced' | 'more_variety';
-export type SmartPlannerPreset = 'balanced' | 'quick' | 'budget' | 'healthy' | 'family_fit' | 'use_inventory' | 'no_shopping' | 'more_variety';
+export type SmartPlannerPreset = 'balanced' | 'quick' | 'budget' | 'healthy' | 'family_fit' | 'use_inventory' | 'more_variety';
 export type SmartPlannerCriterion = 'budget' | 'nutrition' | 'member';
 
 export type SmartPlannerScoreDetail = {
@@ -232,7 +232,7 @@ const getPresetWeights = (preset: SmartPlannerPreset): PlannerWeights => {
     if (preset === 'budget') weights.budget += 0.18;
     if (preset === 'healthy') weights.nutrition += 0.18;
     if (preset === 'family_fit') weights.household += 0.18;
-    if (preset === 'use_inventory' || preset === 'no_shopping') weights.inventory += 0.20;
+    if (preset === 'use_inventory') weights.inventory += 0.20;
     if (preset === 'more_variety') weights.variety += 0.18;
     return normalizeWeights(weights);
 };

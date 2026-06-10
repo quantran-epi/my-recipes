@@ -1,4 +1,4 @@
-import { BarChartOutlined, CalendarOutlined, CheckCircleOutlined, DollarCircleOutlined, EyeOutlined, FilterOutlined, PlayCircleOutlined, QuestionCircleOutlined, ShoppingCartOutlined, StopOutlined, TeamOutlined, ThunderboltOutlined } from '@ant-design/icons';
+import { AppstoreOutlined, BarChartOutlined, CalendarOutlined, CheckCircleOutlined, ClockCircleOutlined, DollarCircleOutlined, EyeOutlined, FilterOutlined, HeartOutlined, PlayCircleOutlined, QuestionCircleOutlined, ShoppingCartOutlined, SlidersOutlined, StopOutlined, TeamOutlined, ThunderboltOutlined } from '@ant-design/icons';
 import { DateHelpers } from '@common/Helpers/DateHelper';
 import { DishDurationHelper } from '@common/Helpers/DishDurationHelper';
 import { DishServingHelper } from '@common/Helpers/DishServingHelper';
@@ -7,6 +7,7 @@ import { IngredientPriceHelper } from '@common/Helpers/IngredientPriceHelper';
 import { InventoryHelper } from '@common/Helpers/InventoryHelper';
 import { NutritionGoalHelper, type NutritionGoalMatch } from '@common/Helpers/NutritionGoalHelper';
 import { Button } from '@components/Button';
+import { Collapse } from '@components/Collapse';
 import { Image } from '@components/Image';
 import { Box } from '@components/Layout/Box';
 import { Stack } from '@components/Layout/Stack';
@@ -154,10 +155,98 @@ const pageCss = `
     gap: 12px;
 }
 .smart-planner-controls {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    display: flex;
+    flex-direction: column;
     gap: 12px;
+}
+.smart-planner-section {
+    border: 1px solid rgba(15,23,42,0.07);
+    border-radius: 10px;
+    background: #fff;
+    padding: 12px;
+}
+.smart-planner-section-title {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    color: #0f172a;
+    font-size: 13px;
+    font-weight: 700;
+    margin-bottom: 10px;
+}
+.smart-planner-section-title .anticon {
+    color: #13a8a8;
+}
+.smart-planner-primary {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+    gap: 10px;
     align-items: end;
+}
+.smart-planner-presets {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(134px, 1fr));
+    gap: 8px;
+}
+.smart-planner-preset {
+    text-align: left;
+    border: 1px solid rgba(15,23,42,0.1);
+    border-radius: 10px;
+    background: #fff;
+    padding: 9px 10px;
+    cursor: pointer;
+    transition: border-color .15s ease, background .15s ease, box-shadow .15s ease;
+}
+.smart-planner-preset:hover {
+    border-color: #87e8de;
+}
+.smart-planner-preset.is-active {
+    border-color: #13a8a8;
+    background: #e6fffb;
+    box-shadow: inset 0 0 0 1px #13a8a8;
+}
+.smart-planner-preset-name {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: #0f172a;
+    font-size: 13px;
+    font-weight: 600;
+}
+.smart-planner-preset-name .anticon {
+    color: #13a8a8;
+}
+.smart-planner-preset-hint {
+    display: block;
+    color: #64748b;
+    font-size: 11px;
+    line-height: 15px;
+    margin-top: 3px;
+}
+.smart-planner-adv-group + .smart-planner-adv-group {
+    margin-top: 14px;
+    padding-top: 14px;
+    border-top: 1px dashed rgba(15,23,42,0.1);
+}
+.smart-planner-adv-group-title {
+    color: #475569;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    margin: 0 0 9px;
+}
+.smart-planner-adv-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+    gap: 10px;
+    align-items: end;
+}
+.smart-planner-toggle-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
 }
 .smart-planner-field-label {
     display: flex;
@@ -224,15 +313,14 @@ const shoppingModeOptions: Array<{ value: SmartPlannerShoppingMode; label: strin
     { value: 'no_shopping', label: 'Không đi mua' },
 ];
 
-const presetOptions: Array<{ value: SmartPlannerPreset; label: string }> = [
-    { value: 'balanced', label: 'Cân bằng' },
-    { value: 'quick', label: 'Nhanh' },
-    { value: 'budget', label: 'Tiết kiệm' },
-    { value: 'healthy', label: 'Lành mạnh' },
-    { value: 'family_fit', label: 'Hợp gia đình' },
-    { value: 'use_inventory', label: 'Dùng đồ sẵn có' },
-    { value: 'no_shopping', label: 'Không đi mua' },
-    { value: 'more_variety', label: 'Đa dạng hơn' },
+const presetOptions: Array<{ value: SmartPlannerPreset; label: string; icon: React.ReactNode; hint: string }> = [
+    { value: 'balanced', label: 'Cân bằng', icon: <AppstoreOutlined />, hint: 'Cân đối mọi tiêu chí' },
+    { value: 'quick', label: 'Nhanh', icon: <ClockCircleOutlined />, hint: 'Ưu tiên món nấu nhanh' },
+    { value: 'budget', label: 'Tiết kiệm', icon: <DollarCircleOutlined />, hint: 'Ưu tiên chi phí thấp' },
+    { value: 'healthy', label: 'Lành mạnh', icon: <BarChartOutlined />, hint: 'Ưu tiên hợp dinh dưỡng' },
+    { value: 'family_fit', label: 'Hợp gia đình', icon: <TeamOutlined />, hint: 'Ưu tiên khẩu vị cả nhà' },
+    { value: 'use_inventory', label: 'Dùng đồ sẵn có', icon: <ShoppingCartOutlined />, hint: 'Ưu tiên đồ đang có trong kho' },
+    { value: 'more_variety', label: 'Đa dạng hơn', icon: <ThunderboltOutlined />, hint: 'Tăng đa dạng, tránh lặp món' },
 ];
 
 const varietyModeOptions: Array<{ value: SmartPlannerVarietyMode; label: string }> = [
@@ -470,14 +558,11 @@ export const SmartMealPlannerScreen: React.FC = () => {
 
     const _onShoppingModeChange = (value: SmartPlannerShoppingMode) => {
         setShoppingMode(value);
-        if (value === 'no_shopping') setPreset('no_shopping');
-        else if (preset === 'no_shopping') setPreset('balanced');
         _clearSuggestions();
     };
 
     const _onPresetChange = (value: SmartPlannerPreset) => {
         setPreset(value);
-        if (value === 'no_shopping') setShoppingMode('no_shopping');
         _clearSuggestions();
     };
 
@@ -994,91 +1079,138 @@ export const SmartMealPlannerScreen: React.FC = () => {
         <div className='smart-planner-grid'>
             <Box className='smart-planner-panel'>
                 <div className='smart-planner-controls'>
-                    <div>
-                        <PlannerFieldLabel helpKey='scope' label='Chế độ'>Chọn nấu ngay, lập một ngày hoặc lập cả tuần. Nấu ngay trả lời món tốt nhất lúc này; ngày/tuần tạo phương án để áp dụng vào lịch.</PlannerFieldLabel>
+                    <div className='smart-planner-section'>
+                        <div className='smart-planner-section-title'><AppstoreOutlined /> Bạn muốn lập gì?</div>
                         <Segmented block value={scope} onChange={value => { setScope(value as PlannerScope); _clearSuggestions(); }} options={plannerModeOptions} />
+                        <Typography.Text type='secondary' style={{ display: 'block', fontSize: 11, lineHeight: '16px', marginTop: 6 }}>
+                            {scope === 'cook_now' ? 'Gợi ý món tốt nhất để nấu ngay bây giờ.' : scope === 'day' ? 'Lập sáng, trưa, tối cho một ngày và áp vào lịch.' : 'Lập cả tuần với đa dạng món và xem trước mua sắm.'}
+                        </Typography.Text>
+                        <div className='smart-planner-primary' style={{ marginTop: 12 }}>
+                            {scope === 'cook_now' && <div>
+                                <PlannerFieldLabel helpKey='cook-now-slot' label='Bữa muốn nấu'>Bữa ăn giúp planner ưu tiên tag và thời gian phù hợp. Nếu chọn bất kỳ, món linh hoạt sẽ được giữ điểm tốt.</PlannerFieldLabel>
+                                <Select value={cookNowMealSlot} onChange={value => { setCookNowMealSlot(value); _clearSuggestions(); }} options={cookNowSlotOptions} style={{ width: '100%' }} />
+                            </div>}
+                            <div>
+                                <PlannerFieldLabel helpKey='date' label={scope === 'cook_now' ? 'Ngày' : 'Ngày bắt đầu'}>Ngày đầu tiên để gợi ý thực đơn. Nếu chọn một tuần, các ngày sau sẽ tự chạy tiếp từ ngày này.</PlannerFieldLabel>
+                                <DatePicker value={startDate} onChange={value => { if (value) { setStartDate(value.startOf('day')); _clearSuggestions(); } }} format='DD/MM/YYYY' style={{ width: '100%' }} />
+                            </div>
+                            <div>
+                                <PlannerFieldLabel helpKey='members' label={<><TeamOutlined /> Ăn cùng</>}>Chọn người ăn cùng để tính khẩu phần, món thích, món tránh và mục tiêu riêng của từng người.</PlannerFieldLabel>
+                                <Select mode='multiple' allowClear maxTagCount='responsive' value={memberIds} onChange={value => { setMemberIds(value); _clearSuggestions(); }} options={members.map(member => ({ value: member.id, label: member.name }))} placeholder='Tất cả thành viên' style={{ width: '100%' }} />
+                            </div>
+                        </div>
                     </div>
-                    {scope === 'cook_now' && <div>
-                        <PlannerFieldLabel helpKey='cook-now-slot' label='Bữa muốn nấu'>Bữa ăn giúp planner ưu tiên tag và thời gian phù hợp. Nếu chọn bất kỳ, món linh hoạt sẽ được giữ điểm tốt.</PlannerFieldLabel>
-                        <Select value={cookNowMealSlot} onChange={value => { setCookNowMealSlot(value); _clearSuggestions(); }} options={cookNowSlotOptions} style={{ width: '100%' }} />
-                    </div>}
-                    <div>
-                        <PlannerFieldLabel helpKey='date' label='Ngày bắt đầu'>Ngày đầu tiên để gợi ý thực đơn. Nếu chọn một tuần, các ngày sau sẽ tự chạy tiếp từ ngày này.</PlannerFieldLabel>
-                        <DatePicker value={startDate} onChange={value => { if (value) { setStartDate(value.startOf('day')); _clearSuggestions(); } }} format='DD/MM/YYYY' style={{ width: '100%' }} />
+
+                    <div className='smart-planner-section'>
+                        <div className='smart-planner-section-title'><ThunderboltOutlined /> Ưu tiên theo</div>
+                        <Typography.Text type='secondary' style={{ display: 'block', fontSize: 11, lineHeight: '16px', marginBottom: 10 }}>Chọn một mẫu là đủ cho hầu hết trường hợp. Mẫu chỉ đổi cách xếp hạng, không loại món nào.</Typography.Text>
+                        <div className='smart-planner-presets'>
+                            {presetOptions.map(option => <button
+                                key={option.value}
+                                type='button'
+                                aria-pressed={preset === option.value}
+                                className={`smart-planner-preset${preset === option.value ? ' is-active' : ''}`}
+                                onClick={() => _onPresetChange(option.value)}
+                            >
+                                <span className='smart-planner-preset-name'>{option.icon} {option.label}</span>
+                                <span className='smart-planner-preset-hint'>{option.hint}</span>
+                            </button>)}
+                        </div>
                     </div>
-                    <div>
-                        <PlannerFieldLabel helpKey='budget' label={<><DollarCircleOutlined /> Ngân sách mỗi ngày</>}>Ngân sách được kiểm tra trên tổng cả ngày. Sáng, trưa và tối có thể dùng số tiền khác nhau, miễn tổng chi phí ước tính của ngày phù hợp ngân sách.</PlannerFieldLabel>
-                        <InputNumber min={0} step={10000} value={dailyBudget} addonAfter='đ' onChange={value => { setDailyBudget(Number(value ?? 0)); _clearSuggestions(); }} style={{ width: '100%' }} />
-                    </div>
-                    {scope === 'week' && <div>
-                        <PlannerFieldLabel helpKey='weekly-budget' label={<><DollarCircleOutlined /> Ngân sách tuần</>}>Nếu đặt ngân sách tuần, phần tổng kết sẽ cảnh báo khi chi phí cần mua của cả tuần vượt mức này.</PlannerFieldLabel>
-                        <InputNumber min={0} step={50000} value={weeklyBudget} addonAfter='đ' onChange={value => { setWeeklyBudget(value === null ? undefined : Number(value)); _clearSuggestions(); }} placeholder='Không giới hạn' style={{ width: '100%' }} />
-                    </div>}
-                    <div>
-                        <PlannerFieldLabel helpKey='extra-spend' label='Mua thêm tối đa'>Dùng cho Nấu ngay và chế độ mua bổ sung ít để ưu tiên món cần mua ít sau khi trừ tồn kho.</PlannerFieldLabel>
-                        <InputNumber min={0} step={10000} value={maxExtraSpend} addonAfter='đ' onChange={value => { setMaxExtraSpend(value === null ? undefined : Number(value)); _clearSuggestions(); }} placeholder='Không giới hạn' style={{ width: '100%' }} />
-                    </div>
-                    <div>
-                        <PlannerFieldLabel helpKey='shopping-mode' label={<><ShoppingCartOutlined /> Cách mua sắm</>}>Không đi mua sẽ loại món thiếu nguyên liệu bắt buộc. Mua bổ sung ít ưu tiên phần cần mua thêm thấp.</PlannerFieldLabel>
-                        <Select value={shoppingMode} onChange={_onShoppingModeChange} options={shoppingModeOptions} style={{ width: '100%' }} />
-                    </div>
-                    <div>
-                        <PlannerFieldLabel helpKey='preset' label={<><ThunderboltOutlined /> Mẫu ưu tiên</>}>Mẫu ưu tiên chỉ đổi trọng số xếp hạng. Nếu chọn Không đi mua, app cũng chuyển Cách mua sắm sang Không đi mua để ràng buộc được nhìn thấy rõ.</PlannerFieldLabel>
-                        <Select value={preset} onChange={_onPresetChange} options={presetOptions} style={{ width: '100%' }} />
-                    </div>
-                    <div>
-                        <PlannerFieldLabel helpKey='variety' label='Độ đa dạng'>Càng đa dạng, planner càng trừ điểm món, nguyên liệu chính hoặc cách nấu bị lặp gần đây.</PlannerFieldLabel>
-                        <Select value={varietyMode} onChange={value => { setVarietyMode(value); _clearSuggestions(); }} options={varietyModeOptions} style={{ width: '100%' }} />
-                    </div>
-                    <Box style={{ border: '1px solid rgba(19,168,168,0.14)', background: '#f6ffed', borderRadius: 8, padding: 10 }}>
-                        <PlannerFieldLabel helpKey='inventory-aware' label={<><ShoppingCartOutlined /> Tính theo tủ lạnh</>}>Khi bật, ngân sách ưu tiên số tiền cần mua thêm sau khi trừ nguyên liệu đã có trong kho. Khi tắt, ngân sách dùng tổng chi phí món.</PlannerFieldLabel>
-                        <Stack justify='space-between' align='center' gap={8}>
-                            <Typography.Text style={{ fontSize: 12, lineHeight: '18px', color: '#334155' }}>{inventoryAwareBudget ? 'Đang dùng chi phí cần mua' : 'Đang dùng tổng chi phí món'}</Typography.Text>
-                            <Switch checked={inventoryAwareBudget} onChange={checked => { setInventoryAwareBudget(checked); _clearSuggestions(); }} />
-                        </Stack>
-                    </Box>
-                    <Box style={{ border: '1px solid rgba(19,168,168,0.14)', background: preferExpiring ? '#fff7e6' : '#f6ffed', borderRadius: 8, padding: 10 }}>
-                        <PlannerFieldLabel helpKey='prefer-expiring' label='Ưu tiên đồ sắp hết hạn'>Khi bật, món dùng nguyên liệu gần hết hạn trong kho sẽ được cộng điểm rõ hơn.</PlannerFieldLabel>
-                        <Stack justify='space-between' align='center' gap={8}>
-                            <Typography.Text style={{ fontSize: 12, lineHeight: '18px', color: '#334155' }}>{preferExpiring ? 'Đang ưu tiên dùng sớm' : 'Ưu tiên bình thường'}</Typography.Text>
-                            <Switch checked={preferExpiring} onChange={checked => { setPreferExpiring(checked); _clearSuggestions(); }} />
-                        </Stack>
-                    </Box>
-                    <div>
-                        <PlannerFieldLabel helpKey='nutrition' label={<><BarChartOutlined /> Mục tiêu dinh dưỡng</>}>Nếu bật tiêu chí dinh dưỡng, món gần với mục tiêu đã chọn sẽ được ưu tiên hơn.</PlannerFieldLabel>
-                        <Select allowClear value={nutritionGoalId} onChange={value => { setNutritionGoalId(value); _clearSuggestions(); }} options={nutritionGoals.map(goal => ({ value: goal.id, label: goal.name }))} placeholder='Chọn mục tiêu' style={{ width: '100%' }} />
-                    </div>
-                    <div>
-                        <PlannerFieldLabel helpKey='members' label={<><TeamOutlined /> Thành viên ăn cùng</>}>Chọn người ăn cùng để tính khẩu phần, món thích, món tránh và mục tiêu riêng của từng người.</PlannerFieldLabel>
-                        <Select mode='multiple' allowClear maxTagCount='responsive' value={memberIds} onChange={value => { setMemberIds(value); _clearSuggestions(); }} options={members.map(member => ({ value: member.id, label: member.name }))} placeholder='Tất cả thành viên' style={{ width: '100%' }} />
-                    </div>
-                    <div>
-                        <PlannerFieldLabel helpKey='criteria' label={<><ThunderboltOutlined /> Tiêu chí tính điểm</>}>Bật hoặc tắt nhóm dữ liệu được phép tham gia chấm điểm. Mẫu ưu tiên chỉ đổi trọng số của các tiêu chí đang bật; tiêu chí đã tắt sẽ không cộng hoặc trừ điểm.</PlannerFieldLabel>
-                        <Select mode='multiple' value={criteria} onChange={value => { setCriteria(value); _clearSuggestions(); }} options={criteriaOptions} style={{ width: '100%' }} />
-                    </div>
-                    <Box style={{ border: '1px solid rgba(15,23,42,0.08)', background: hardConstraintsEnabled ? '#fff7e6' : '#f8fafc', borderRadius: 8, padding: 10 }}>
-                        <PlannerFieldLabel helpKey='hard-constraints' label={<><FilterOutlined /> Ràng buộc cứng</>}>Khi bật, các điều kiện dưới đây là bộ lọc bắt buộc. Món không đạt sẽ bị loại hẳn, không chỉ bị trừ điểm.</PlannerFieldLabel>
-                        <Stack justify='space-between' align='center' gap={8}>
-                            <Typography.Text style={{ fontSize: 12, lineHeight: '18px', color: '#334155' }}>{hardConstraintsEnabled ? 'Đang lọc bắt buộc' : 'Đang tắt bộ lọc cứng'}</Typography.Text>
-                            <Switch checked={hardConstraintsEnabled} onChange={checked => { setHardConstraintsEnabled(checked); _clearSuggestions(); }} />
-                        </Stack>
-                    </Box>
-                    <div>
-                        <PlannerFieldLabel helpKey='max-time' label='Thời gian nấu tối đa'>Nếu ràng buộc cứng bật, món không có thời gian nấu hoặc vượt số phút này sẽ bị loại.</PlannerFieldLabel>
-                        <InputNumber disabled={!hardConstraintsEnabled && scope !== 'cook_now'} min={5} step={5} value={maxCookingMinutes} addonAfter='phút' onChange={value => { setMaxCookingMinutes(value === null ? undefined : Number(value)); _clearSuggestions(); }} placeholder='Không giới hạn' style={{ width: '100%' }} />
-                    </div>
-                    <div>
-                        <PlannerFieldLabel helpKey='avoid-ingredients' label='Tránh nguyên liệu'>Nếu ràng buộc cứng bật, món chứa bất kỳ nguyên liệu nào ở đây sẽ bị loại.</PlannerFieldLabel>
-                        <Select disabled={!hardConstraintsEnabled} mode='multiple' allowClear maxTagCount='responsive' value={avoidIngredientIds} onChange={value => { setAvoidIngredientIds(value); _clearSuggestions(); }} options={ingredientOptions} placeholder='Chọn nguyên liệu cần tránh' style={{ width: '100%' }} />
-                    </div>
-                    <div>
-                        <PlannerFieldLabel helpKey='expiring-ingredients' label='Bắt buộc đồ sắp hết hạn'>Nếu ràng buộc cứng bật, món phải dùng các nguyên liệu sắp hết hạn đã chọn.</PlannerFieldLabel>
-                        <Select disabled={!hardConstraintsEnabled} mode='multiple' allowClear maxTagCount='responsive' value={requiredExpiringIngredientIds} onChange={value => { setRequiredExpiringIngredientIds(value); _clearSuggestions(); }} options={expiringIngredientOptions} placeholder='Chọn nguyên liệu sắp hết hạn' style={{ width: '100%' }} />
-                    </div>
-                    <div>
-                        <PlannerFieldLabel helpKey='required-tags' label='Bắt buộc tag món'>Nếu ràng buộc cứng bật, món phải có các tag này. Có thể nhập tag như Vegetarian hoặc Low-carb nếu món đã dùng tag đó.</PlannerFieldLabel>
-                        <Select disabled={!hardConstraintsEnabled} mode='tags' allowClear maxTagCount='responsive' value={requiredTags} onChange={value => { setRequiredTags(value); _clearSuggestions(); }} options={tagOptions} placeholder='Ví dụ: Salad, Vegetarian, Low-carb' style={{ width: '100%' }} />
-                    </div>
+
+                    <Collapse
+                        ghost
+                        className='smart-planner-advanced'
+                        items={[{
+                            key: 'advanced',
+                            label: <span className='smart-planner-section-title' style={{ marginBottom: 0 }}><SlidersOutlined /> Tinh chỉnh nâng cao</span>,
+                            children: <>
+                                <div className='smart-planner-adv-group'>
+                                    <p className='smart-planner-adv-group-title'>Ngân sách</p>
+                                    <div className='smart-planner-adv-grid'>
+                                        <div>
+                                            <PlannerFieldLabel helpKey='budget' label={<><DollarCircleOutlined /> Ngân sách mỗi ngày</>}>Ngân sách được kiểm tra trên tổng cả ngày. Sáng, trưa và tối có thể dùng số tiền khác nhau, miễn tổng chi phí ước tính của ngày phù hợp ngân sách.</PlannerFieldLabel>
+                                            <InputNumber min={0} step={10000} value={dailyBudget} addonAfter='đ' onChange={value => { setDailyBudget(Number(value ?? 0)); _clearSuggestions(); }} style={{ width: '100%' }} />
+                                        </div>
+                                        {scope === 'week' && <div>
+                                            <PlannerFieldLabel helpKey='weekly-budget' label={<><DollarCircleOutlined /> Ngân sách tuần</>}>Nếu đặt ngân sách tuần, phần tổng kết sẽ cảnh báo khi chi phí cần mua của cả tuần vượt mức này.</PlannerFieldLabel>
+                                            <InputNumber min={0} step={50000} value={weeklyBudget} addonAfter='đ' onChange={value => { setWeeklyBudget(value === null ? undefined : Number(value)); _clearSuggestions(); }} placeholder='Không giới hạn' style={{ width: '100%' }} />
+                                        </div>}
+                                        <div>
+                                            <PlannerFieldLabel helpKey='extra-spend' label='Mua thêm tối đa'>Dùng cho Nấu ngay và chế độ mua bổ sung ít để ưu tiên món cần mua ít sau khi trừ tồn kho.</PlannerFieldLabel>
+                                            <InputNumber min={0} step={10000} value={maxExtraSpend} addonAfter='đ' onChange={value => { setMaxExtraSpend(value === null ? undefined : Number(value)); _clearSuggestions(); }} placeholder='Không giới hạn' style={{ width: '100%' }} />
+                                        </div>
+                                    </div>
+                                    <Box style={{ marginTop: 10 }}>
+                                        <PlannerFieldLabel helpKey='inventory-aware' label={<><ShoppingCartOutlined /> Tính ngân sách theo tủ lạnh</>}>Khi bật, ngân sách ưu tiên số tiền cần mua thêm sau khi trừ nguyên liệu đã có trong kho. Khi tắt, ngân sách dùng tổng chi phí món.</PlannerFieldLabel>
+                                        <div className='smart-planner-toggle-row'>
+                                            <Typography.Text style={{ fontSize: 12, lineHeight: '18px', color: '#334155' }}>{inventoryAwareBudget ? 'Đang dùng chi phí cần mua' : 'Đang dùng tổng chi phí món'}</Typography.Text>
+                                            <Switch checked={inventoryAwareBudget} onChange={checked => { setInventoryAwareBudget(checked); _clearSuggestions(); }} />
+                                        </div>
+                                    </Box>
+                                </div>
+
+                                <div className='smart-planner-adv-group'>
+                                    <p className='smart-planner-adv-group-title'>Sở thích &amp; cách mua</p>
+                                    <div className='smart-planner-adv-grid'>
+                                        <div>
+                                            <PlannerFieldLabel helpKey='shopping-mode' label={<><ShoppingCartOutlined /> Cách mua sắm</>}>Không đi mua sẽ loại món thiếu nguyên liệu bắt buộc. Mua bổ sung ít ưu tiên phần cần mua thêm thấp.</PlannerFieldLabel>
+                                            <Select value={shoppingMode} onChange={_onShoppingModeChange} options={shoppingModeOptions} style={{ width: '100%' }} />
+                                        </div>
+                                        <div>
+                                            <PlannerFieldLabel helpKey='variety' label='Độ đa dạng'>Càng đa dạng, planner càng trừ điểm món, nguyên liệu chính hoặc cách nấu bị lặp gần đây.</PlannerFieldLabel>
+                                            <Select value={varietyMode} onChange={value => { setVarietyMode(value); _clearSuggestions(); }} options={varietyModeOptions} style={{ width: '100%' }} />
+                                        </div>
+                                        <div>
+                                            <PlannerFieldLabel helpKey='nutrition' label={<><BarChartOutlined /> Mục tiêu dinh dưỡng</>}>Nếu bật tiêu chí dinh dưỡng, món gần với mục tiêu đã chọn sẽ được ưu tiên hơn.</PlannerFieldLabel>
+                                            <Select allowClear value={nutritionGoalId} onChange={value => { setNutritionGoalId(value); _clearSuggestions(); }} options={nutritionGoals.map(goal => ({ value: goal.id, label: goal.name }))} placeholder='Chọn mục tiêu' style={{ width: '100%' }} />
+                                        </div>
+                                        <div>
+                                            <PlannerFieldLabel helpKey='criteria' label={<><HeartOutlined /> Tiêu chí tính điểm</>}>Bật hoặc tắt nhóm dữ liệu được phép tham gia chấm điểm. Mẫu ưu tiên chỉ đổi trọng số của các tiêu chí đang bật; tiêu chí đã tắt sẽ không cộng hoặc trừ điểm.</PlannerFieldLabel>
+                                            <Select mode='multiple' value={criteria} onChange={value => { setCriteria(value); _clearSuggestions(); }} options={criteriaOptions} style={{ width: '100%' }} />
+                                        </div>
+                                    </div>
+                                    <Box style={{ marginTop: 10 }}>
+                                        <PlannerFieldLabel helpKey='prefer-expiring' label='Ưu tiên đồ sắp hết hạn'>Khi bật, món dùng nguyên liệu gần hết hạn trong kho sẽ được cộng điểm rõ hơn.</PlannerFieldLabel>
+                                        <div className='smart-planner-toggle-row'>
+                                            <Typography.Text style={{ fontSize: 12, lineHeight: '18px', color: '#334155' }}>{preferExpiring ? 'Đang ưu tiên dùng sớm' : 'Ưu tiên bình thường'}</Typography.Text>
+                                            <Switch checked={preferExpiring} onChange={checked => { setPreferExpiring(checked); _clearSuggestions(); }} />
+                                        </div>
+                                    </Box>
+                                </div>
+
+                                <div className='smart-planner-adv-group'>
+                                    <p className='smart-planner-adv-group-title'>Bộ lọc bắt buộc</p>
+                                    <Box style={{ border: '1px solid rgba(15,23,42,0.08)', background: hardConstraintsEnabled ? '#fff7e6' : '#f8fafc', borderRadius: 8, padding: 10 }}>
+                                        <PlannerFieldLabel helpKey='hard-constraints' label={<><FilterOutlined /> Bật bộ lọc bắt buộc</>}>Khi bật, các điều kiện dưới đây là bộ lọc bắt buộc. Món không đạt sẽ bị loại hẳn, không chỉ bị trừ điểm. Dị ứng và nguyên liệu chặn cứng từ hồ sơ gia đình luôn được áp dụng kể cả khi tắt bộ lọc này.</PlannerFieldLabel>
+                                        <div className='smart-planner-toggle-row'>
+                                            <Typography.Text style={{ fontSize: 12, lineHeight: '18px', color: '#334155' }}>{hardConstraintsEnabled ? 'Đang lọc bắt buộc' : 'Đang tắt bộ lọc cứng'}</Typography.Text>
+                                            <Switch checked={hardConstraintsEnabled} onChange={checked => { setHardConstraintsEnabled(checked); _clearSuggestions(); }} />
+                                        </div>
+                                    </Box>
+                                    {hardConstraintsEnabled && <div className='smart-planner-adv-grid' style={{ marginTop: 10 }}>
+                                        <div>
+                                            <PlannerFieldLabel helpKey='max-time' label='Thời gian nấu tối đa'>Món không có thời gian nấu hoặc vượt số phút này sẽ bị loại.</PlannerFieldLabel>
+                                            <InputNumber min={5} step={5} value={maxCookingMinutes} addonAfter='phút' onChange={value => { setMaxCookingMinutes(value === null ? undefined : Number(value)); _clearSuggestions(); }} placeholder='Không giới hạn' style={{ width: '100%' }} />
+                                        </div>
+                                        <div>
+                                            <PlannerFieldLabel helpKey='avoid-ingredients' label='Tránh nguyên liệu'>Món chứa bất kỳ nguyên liệu nào ở đây sẽ bị loại.</PlannerFieldLabel>
+                                            <Select mode='multiple' allowClear maxTagCount='responsive' value={avoidIngredientIds} onChange={value => { setAvoidIngredientIds(value); _clearSuggestions(); }} options={ingredientOptions} placeholder='Chọn nguyên liệu cần tránh' style={{ width: '100%' }} />
+                                        </div>
+                                        <div>
+                                            <PlannerFieldLabel helpKey='expiring-ingredients' label='Bắt buộc đồ sắp hết hạn'>Món phải dùng các nguyên liệu sắp hết hạn đã chọn.</PlannerFieldLabel>
+                                            <Select mode='multiple' allowClear maxTagCount='responsive' value={requiredExpiringIngredientIds} onChange={value => { setRequiredExpiringIngredientIds(value); _clearSuggestions(); }} options={expiringIngredientOptions} placeholder='Chọn nguyên liệu sắp hết hạn' style={{ width: '100%' }} />
+                                        </div>
+                                        <div>
+                                            <PlannerFieldLabel helpKey='required-tags' label='Bắt buộc tag món'>Món phải có các tag này. Có thể nhập tag như Vegetarian hoặc Low-carb nếu món đã dùng tag đó.</PlannerFieldLabel>
+                                            <Select mode='tags' allowClear maxTagCount='responsive' value={requiredTags} onChange={value => { setRequiredTags(value); _clearSuggestions(); }} options={tagOptions} placeholder='Ví dụ: Salad, Vegetarian, Low-carb' style={{ width: '100%' }} />
+                                        </div>
+                                    </div>}
+                                </div>
+                            </>,
+                        }]}
+                    />
+
                     <Box style={{ border: '1px solid #e6fffb', background: '#f6ffed', borderRadius: 8, padding: 10 }}>
                         <Stack wrap='wrap' gap={6}>
                             <Tag color='blue' style={{ marginRight: 0 }}>{targetServings} phần/bữa</Tag>
