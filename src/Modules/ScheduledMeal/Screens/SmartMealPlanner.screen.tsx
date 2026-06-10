@@ -1,4 +1,4 @@
-import { AppstoreOutlined, BarChartOutlined, CalendarOutlined, CheckCircleOutlined, ClockCircleOutlined, DollarCircleOutlined, EyeOutlined, FilterOutlined, HeartOutlined, PlayCircleOutlined, QuestionCircleOutlined, ShoppingCartOutlined, SlidersOutlined, StopOutlined, TeamOutlined, ThunderboltOutlined } from '@ant-design/icons';
+import { AppstoreOutlined, BarChartOutlined, CalendarOutlined, CheckCircleOutlined, ClockCircleOutlined, DollarCircleOutlined, ExclamationCircleOutlined, EyeOutlined, FilterOutlined, HeartOutlined, MoreOutlined, PlayCircleOutlined, QuestionCircleOutlined, ShoppingCartOutlined, SlidersOutlined, StopOutlined, TeamOutlined, ThunderboltOutlined } from '@ant-design/icons';
 import { DateHelpers } from '@common/Helpers/DateHelper';
 import { DishDurationHelper } from '@common/Helpers/DishDurationHelper';
 import { DishServingHelper } from '@common/Helpers/DishServingHelper';
@@ -8,12 +8,12 @@ import { InventoryHelper } from '@common/Helpers/InventoryHelper';
 import { NutritionGoalHelper, type NutritionGoalMatch } from '@common/Helpers/NutritionGoalHelper';
 import { Button } from '@components/Button';
 import { Collapse } from '@components/Collapse';
+import { Dropdown } from '@components/Dropdown';
 import { Image } from '@components/Image';
 import { Box } from '@components/Layout/Box';
 import { Stack } from '@components/Layout/Stack';
 import { useMessage } from '@components/Message';
 import { Modal } from '@components/Modal';
-import { Popover } from '@components/Popover';
 import { Tag } from '@components/Tag';
 import { Typography } from '@components/Typography';
 import { useScreenTitle } from '@hooks';
@@ -334,6 +334,130 @@ const pageCss = `
     line-height: 30px;
     overflow-wrap: anywhere;
 }
+.smart-planner-summary {
+    border: 1px solid rgba(19,168,168,0.18);
+    border-radius: 12px;
+    background: linear-gradient(180deg, #f0fdfa 0%, #ffffff 100%);
+    padding: 14px;
+}
+.smart-planner-summary-head {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+}
+.smart-planner-summary-score {
+    color: #0f766e;
+    font-size: 30px;
+    font-weight: 800;
+    line-height: 1;
+}
+.smart-planner-summary-verdict {
+    color: #0f172a;
+    font-size: 15px;
+    font-weight: 700;
+}
+.smart-planner-summary-caption {
+    color: #64748b;
+    font-size: 11px;
+    line-height: 14px;
+    margin-top: 2px;
+}
+.smart-planner-summary-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(96px, 1fr));
+    gap: 10px;
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid rgba(15,23,42,0.07);
+}
+.smart-planner-stat-label {
+    display: block;
+    color: #64748b;
+    font-size: 11px;
+    line-height: 14px;
+}
+.smart-planner-stat-value {
+    display: block;
+    color: #0f172a;
+    font-size: 15px;
+    font-weight: 700;
+    line-height: 20px;
+    margin-top: 2px;
+}
+.smart-planner-summary-warn {
+    display: flex;
+    align-items: flex-start;
+    gap: 6px;
+    color: #b45309;
+    font-size: 12px;
+    line-height: 17px;
+    margin-top: 11px;
+    padding-top: 11px;
+    border-top: 1px solid rgba(180,83,9,0.16);
+}
+.smart-planner-summary-warn .anticon {
+    margin-top: 2px;
+}
+.smart-planner-result-card {
+    border: 1px solid rgba(15,23,42,0.1);
+    border-radius: 10px;
+    background: #fff;
+    padding: 11px;
+    min-width: 0;
+}
+.smart-planner-result-main {
+    display: grid;
+    grid-template-columns: 48px minmax(0, 1fr) auto;
+    gap: 10px;
+    align-items: start;
+}
+.smart-planner-result-name {
+    color: #111827;
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 19px;
+    overflow-wrap: anywhere;
+}
+.smart-planner-result-facts {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px 8px;
+    color: #475569;
+    font-size: 12px;
+    line-height: 16px;
+    margin-top: 4px;
+}
+.smart-planner-result-facts .anticon {
+    color: #0f766e;
+    margin-right: 3px;
+}
+.smart-planner-result-reason {
+    display: block;
+    color: #64748b;
+    font-size: 11px;
+    line-height: 16px;
+    margin-top: 5px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+}
+.smart-planner-result-actions {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 10px;
+}
+.smart-planner-result-actions .smart-planner-result-primary {
+    flex: 1 1 auto;
+}
+.smart-planner-result-score {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
 @media (max-width: 560px) {
     .smart-planner-title {
         font-size: 21px;
@@ -398,6 +522,10 @@ const getImpactColor = (value: number): string => {
 };
 
 const getScoreColor = (score: number): string => score >= 76 ? 'green' : score >= 58 ? 'blue' : 'orange';
+
+const getScoreVerdict = (score: number): string => score >= 76 ? 'Thực đơn tốt' : score >= 58 ? 'Thực đơn ổn' : 'Cần cân nhắc';
+
+const getConfidenceVerdict = (value: number): string => value >= 76 ? `Cao (${Math.round(value)}%)` : value >= 50 ? `Vừa (${Math.round(value)}%)` : `Thấp (${Math.round(value)}%)`;
 
 const formatPercent = (value: number): string => `${Math.round(value)}%`;
 
@@ -740,28 +868,6 @@ export const SmartMealPlannerScreen: React.FC = () => {
         {openHelpKey === helpKey && <div className='smart-planner-field-help'>{children}</div>}
     </>;
 
-    const PlannerInfoTag = ({ color, title, description, children }: { color: string; title: React.ReactNode; description: React.ReactNode; children: React.ReactNode }) => <Popover
-        trigger='click'
-        placement='top'
-        title={title}
-        content={<Typography.Text style={{ display: 'block', maxWidth: 260, fontSize: 12, lineHeight: '18px' }}>{description}</Typography.Text>}
-    >
-        <span
-            role='button'
-            tabIndex={0}
-            onClick={event => event.stopPropagation()}
-            onKeyDown={event => {
-                if (event.key !== 'Enter' && event.key !== ' ') return;
-                event.preventDefault();
-                event.stopPropagation();
-                event.currentTarget.click();
-            }}
-            style={{ display: 'inline-flex', cursor: 'pointer' }}
-        >
-            <Tag color={color} style={{ marginRight: 0, cursor: 'pointer' }}>{children}</Tag>
-        </span>
-    </Popover>;
-
     const DetailSection = ({ title, description, children }: { title: React.ReactNode; description: React.ReactNode; children: React.ReactNode }) => <Box style={{ border: '1px solid rgba(15,23,42,0.08)', borderRadius: 8, padding: 12, background: '#fff' }}>
         <Typography.Text strong style={{ display: 'block', color: '#111827', fontSize: 14, lineHeight: '19px' }}>{title}</Typography.Text>
         <Typography.Text type='secondary' style={{ display: 'block', fontSize: 12, lineHeight: '18px', marginTop: 3 }}>{description}</Typography.Text>
@@ -786,41 +892,17 @@ export const SmartMealPlannerScreen: React.FC = () => {
             }}
             style={{ border: `1px solid ${meta.border}`, borderRadius: 8, padding: 10, background: meta.background, minWidth: 0, cursor: 'pointer' }}
         >
-            <div style={{ display: 'grid', gridTemplateColumns: '46px minmax(0, 1fr)', gap: 9, alignItems: 'start' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '46px minmax(0, 1fr) auto', gap: 9, alignItems: 'start' }}>
                 <DishImageWidget src={item.dish.image} width={46} height={46} borderRadius={8} fallbackIconSize={24} showBrokenLabel={false} />
                 <div style={{ minWidth: 0 }}>
-                    <Stack justify='space-between' align='flex-start' gap={8}>
-                        <Typography.Text strong style={{ display: 'block', color: '#111827', fontSize: 14, lineHeight: '19px', overflowWrap: 'anywhere' }}>{item.dish.name}</Typography.Text>
-                        <PlannerInfoTag
-                            color={getScoreColor(item.score)}
-                            title='Điểm gợi ý'
-                            description='Điểm tổng hợp dùng để xếp món trong thực đơn thông minh. Điểm này cộng trừ theo bữa ăn, thời gian nấu, tổng ngân sách ngày, dinh dưỡng, khẩu vị nhà mình và tránh lặp món.'
-                        >{item.score}%</PlannerInfoTag>
-                    </Stack>
-                    <Stack wrap='wrap' gap={5} style={{ marginTop: 6 }}>
-                        {item.costLabel && <PlannerInfoTag
-                            color='gold'
-                            title='Ước tính chi phí'
-                            description='Khoảng tiền ước tính từ giá nguyên liệu đã lưu cho món này. Nếu một số nguyên liệu chưa có giá, con số có thể thấp hơn thực tế.'
-                        >{item.costLabel}</PlannerInfoTag>}
-                        {item.shoppingCostLabel && <PlannerInfoTag
-                            color='green'
-                            title='Cần mua thêm'
-                            description='Số tiền ước tính cần mua thêm sau khi trừ nguyên liệu đang có trong kho. Nếu là 0đ, dữ liệu kho cho thấy món này đã đủ nguyên liệu.'
-                        >Mua {item.shoppingCostLabel}</PlannerInfoTag>}
-                        {item.nutritionLabel && <PlannerInfoTag
-                            color='cyan'
-                            title='Khớp mục tiêu dinh dưỡng'
-                            description={selectedNutritionGoal ? `${item.nutritionLabel} là số tiêu chí món này khớp trong mục tiêu "${selectedNutritionGoal.name}". App tính từ dữ liệu dinh dưỡng nguyên liệu và khẩu phần đang chọn.` : `${item.nutritionLabel} là số tiêu chí dinh dưỡng món này đang khớp trong mục tiêu đã chọn.`}
-                        >{item.nutritionLabel}</PlannerInfoTag>}
-                        {item.suitabilityScore !== undefined && <PlannerInfoTag
-                            color={item.suitabilityScore >= 70 ? 'green' : 'volcano'}
-                            title='Độ hợp nhà mình'
-                            description='Điểm trung bình cho các thành viên đang chọn, dựa trên món thích, món tránh, nguyên liệu thích/tránh, tag món và mục tiêu riêng của từng người.'
-                        >Nhà mình {item.suitabilityScore}%</PlannerInfoTag>}
-                    </Stack>
-                    {item.reasons.length > 0 && <Typography.Text type='secondary' style={{ display: 'block', fontSize: 11, lineHeight: '16px', marginTop: 6 }}>{item.reasons.join(' · ')}</Typography.Text>}
+                    <span className='smart-planner-result-name'>{item.dish.name}</span>
+                    <div className='smart-planner-result-facts'>
+                        {item.totalMinutes !== undefined && item.totalMinutes > 0 && <span><ClockCircleOutlined />{DishDurationHelper.formatMinutes(item.totalMinutes)}</span>}
+                        {item.shoppingCostLabel && <span><ShoppingCartOutlined />Mua {item.shoppingCostLabel}</span>}
+                    </div>
+                    {item.reasons.length > 0 && <span className='smart-planner-result-reason'>{item.reasons.join(' · ')}</span>}
                 </div>
+                <Tag color={getScoreColor(item.score)} style={{ marginRight: 0 }}>{item.score}%</Tag>
             </div>
         </Box>;
     };
@@ -844,47 +926,57 @@ export const SmartMealPlannerScreen: React.FC = () => {
             </div>
             <Tag color={getScoreColor(alternative.totalScore)} style={{ marginRight: 0 }}>{alternative.totalScore}%</Tag>
         </Stack>
-        <Stack wrap='wrap' gap={5} style={{ marginTop: 8 }}>
-            <Tag color='gold' style={{ marginRight: 0 }}>Tổng {alternative.totalCostLabel}</Tag>
-            <Tag color='green' style={{ marginRight: 0 }}>Cần mua {alternative.shoppingCostLabel}</Tag>
-            {alternative.nutritionScore !== undefined && <Tag color='cyan' style={{ marginRight: 0 }}>Dinh dưỡng {alternative.nutritionScore}%</Tag>}
-            {alternative.suitabilityScore !== undefined && <Tag color='blue' style={{ marginRight: 0 }}>Nhà mình {alternative.suitabilityScore}%</Tag>}
-        </Stack>
-        {alternative.reasons.length > 0 && <Typography.Text type='secondary' style={{ display: 'block', fontSize: 11, lineHeight: '16px', marginTop: 7 }}>{alternative.reasons.join(' · ')}</Typography.Text>}
+        <div className='smart-planner-result-facts' style={{ marginTop: 8 }}>
+            <span><DollarCircleOutlined />Tổng {alternative.totalCostLabel}</span>
+            <span><ShoppingCartOutlined />Cần mua {alternative.shoppingCostLabel}</span>
+        </div>
     </Box>;
 
     const CookNowRecommendationCard = ({ item, category }: { item?: SmartPlannerDishRecommendation; category?: SmartPlannerCookNowCategory }) => {
-        if (!item) return <Box style={{ border: '1px dashed rgba(15,23,42,0.14)', borderRadius: 8, background: '#fafafa', padding: 10, minHeight: 132 }}>
+        if (!item) return <Box style={{ border: '1px dashed rgba(15,23,42,0.14)', borderRadius: 10, background: '#fafafa', padding: 11, minHeight: 110 }}>
             <Typography.Text strong style={{ display: 'block', color: '#111827', fontSize: 13, lineHeight: '18px' }}>{category?.label ?? 'Gợi ý'}</Typography.Text>
             <Typography.Text type='secondary' style={{ display: 'block', fontSize: 12, lineHeight: '18px', marginTop: 6 }}>Chưa có món phù hợp</Typography.Text>
         </Box>;
 
-        return <Box style={{ border: '1px solid rgba(19,168,168,0.14)', borderRadius: 8, background: '#fff', padding: 10, minWidth: 0 }}>
-            {category && <Typography.Text strong style={{ display: 'block', color: '#13a8a8', fontSize: 12, lineHeight: '16px', marginBottom: 7 }}>{category.label}</Typography.Text>}
-            <div style={{ display: 'grid', gridTemplateColumns: '52px minmax(0, 1fr)', gap: 10, alignItems: 'start' }}>
-                <DishImageWidget src={item.dish.image} width={52} height={52} borderRadius={8} fallbackIconSize={26} showBrokenLabel={false} />
+        const moreActions = (key: string) => {
+            if (key === 'schedule') setScheduleSelection({ item, date: startDate, slot: _displaySlotFromCookNow() });
+            if (key === 'shop') setShoppingRecommendation(item);
+            if (key === 'detail') _openRecommendationDetail(item);
+            if (key === 'dismiss') _dismissRecommendation(item);
+        };
+
+        return <Box className='smart-planner-result-card'>
+            {category && <Typography.Text strong style={{ display: 'block', color: '#13a8a8', fontSize: 12, lineHeight: '16px', marginBottom: 8 }}>{category.label}</Typography.Text>}
+            <div className='smart-planner-result-main'>
+                <DishImageWidget src={item.dish.image} width={48} height={48} borderRadius={8} fallbackIconSize={24} showBrokenLabel={false} />
                 <div style={{ minWidth: 0 }}>
-                    <Stack justify='space-between' align='flex-start' gap={8}>
-                        <Typography.Text strong style={{ display: 'block', color: '#111827', fontSize: 14, lineHeight: '19px', overflowWrap: 'anywhere' }}>{item.dish.name}</Typography.Text>
-                        <Tag color={getScoreColor(item.score)} style={{ marginRight: 0 }}>{item.score}%</Tag>
-                    </Stack>
-                    <Stack wrap='wrap' gap={5} style={{ marginTop: 6 }}>
-                        {item.totalMinutes !== undefined && item.totalMinutes > 0 && <Tag color='blue' style={{ marginRight: 0 }}>{DishDurationHelper.formatMinutes(item.totalMinutes)}</Tag>}
-                        {item.shoppingCostLabel && <Tag color='green' style={{ marginRight: 0 }}>Mua {item.shoppingCostLabel}</Tag>}
-                        {item.nutritionLabel && <Tag color='cyan' style={{ marginRight: 0 }}>{item.nutritionLabel}</Tag>}
-                        {item.suitabilityScore !== undefined && <Tag color={item.suitabilityScore >= 70 ? 'green' : 'orange'} style={{ marginRight: 0 }}>Nhà mình {item.suitabilityScore}%</Tag>}
-                    </Stack>
-                    {item.reasons.length > 0 && <Typography.Text type='secondary' style={{ display: 'block', fontSize: 11, lineHeight: '16px', marginTop: 6 }}>{item.reasons.join(' · ')}</Typography.Text>}
-                    {(item.warnings ?? []).length > 0 && <Typography.Text type='secondary' style={{ display: 'block', color: '#ad4e00', fontSize: 11, lineHeight: '16px', marginTop: 4 }}>{(item.warnings ?? []).slice(0, 2).join(' · ')}</Typography.Text>}
+                    <span className='smart-planner-result-name'>{item.dish.name}</span>
+                    <div className='smart-planner-result-facts'>
+                        {item.totalMinutes !== undefined && item.totalMinutes > 0 && <span><ClockCircleOutlined />{DishDurationHelper.formatMinutes(item.totalMinutes)}</span>}
+                        {item.shoppingCostLabel && <span><ShoppingCartOutlined />Mua {item.shoppingCostLabel}</span>}
+                    </div>
+                    {item.reasons.length > 0 && <span className='smart-planner-result-reason'>{item.reasons.join(' · ')}</span>}
                 </div>
+                <Tag color={getScoreColor(item.score)} style={{ marginRight: 0 }}>{item.score}%</Tag>
             </div>
-            <Stack wrap='wrap' gap={6} style={{ marginTop: 10 }}>
-                <Button icon={<PlayCircleOutlined />} onClick={() => _startCookingRecommendation(item)}>Nấu</Button>
-                <Button icon={<CalendarOutlined />} onClick={() => setScheduleSelection({ item, date: startDate, slot: _displaySlotFromCookNow() })}>Lên lịch</Button>
-                <Button icon={<ShoppingCartOutlined />} disabled={(item.missingIngredientCount ?? 0) === 0} onClick={() => setShoppingRecommendation(item)}>Mua thiếu</Button>
-                <Button icon={<EyeOutlined />} onClick={() => _openRecommendationDetail(item)}>Chi tiết</Button>
-                <Button type='text' icon={<StopOutlined />} onClick={() => _dismissRecommendation(item)}>Ẩn</Button>
-            </Stack>
+            <div className='smart-planner-result-actions'>
+                <Button className='smart-planner-result-primary' type='primary' icon={<PlayCircleOutlined />} onClick={() => _startCookingRecommendation(item)}>Nấu</Button>
+                <Dropdown
+                    placement='bottomRight'
+                    menu={{
+                        onClick: ({ key }) => moreActions(key),
+                        items: [
+                            { key: 'schedule', label: 'Lên lịch', icon: <CalendarOutlined /> },
+                            { key: 'shop', label: 'Mua thiếu', icon: <ShoppingCartOutlined />, disabled: (item.missingIngredientCount ?? 0) === 0 },
+                            { key: 'detail', label: 'Chi tiết', icon: <EyeOutlined /> },
+                            { type: 'divider' },
+                            { key: 'dismiss', label: 'Ẩn món này', icon: <StopOutlined />, danger: true },
+                        ],
+                    }}
+                >
+                    <Button aria-label={`Thao tác cho ${item.dish.name}`} type='text' icon={<MoreOutlined />} />
+                </Dropdown>
+            </div>
         </Box>;
     };
 
@@ -1291,16 +1383,40 @@ export const SmartMealPlannerScreen: React.FC = () => {
                 {dishes.length === 0 ? <Empty description='Chưa có món ăn để lập thực đơn' /> : isSuggesting ? <Box style={{ minHeight: 220, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                     <Spin tip='Đang gợi ý thực đơn...' />
                 </Box> : !hasSuggested ? <Empty description='Chọn tiêu chí rồi nhấn Gợi ý' image={Empty.PRESENTED_IMAGE_SIMPLE} /> : <Stack direction='column' gap={12}>
-                    {planSummary && <Box style={{ border: '1px solid rgba(19,168,168,0.12)', borderRadius: 8, background: '#f6ffed', padding: 10 }}>
-                        <Stack wrap='wrap' gap={6}>
-                            <Tag color={getScoreColor(planSummary.totalScore)} style={{ marginRight: 0 }}>Điểm {planSummary.totalScore}%</Tag>
-                            <Tag color='gold' style={{ marginRight: 0 }}>Tổng {planSummary.totalCostLabel}</Tag>
-                            <Tag color='green' style={{ marginRight: 0 }}>Cần mua {planSummary.shoppingCostLabel}</Tag>
-                            {planSummary.averageNutritionScore !== undefined && <Tag color='cyan' style={{ marginRight: 0 }}>Dinh dưỡng {planSummary.averageNutritionScore}%</Tag>}
-                            {planSummary.averageHouseholdScore !== undefined && <Tag color='blue' style={{ marginRight: 0 }}>Nhà mình {planSummary.averageHouseholdScore}%</Tag>}
-                            <Tag color={planSummary.confidence >= 76 ? 'green' : 'orange'} style={{ marginRight: 0 }}>Tin cậy {planSummary.confidence}%</Tag>
-                        </Stack>
-                        {planSummary.warnings.length > 0 && <Typography.Text type='secondary' style={{ display: 'block', color: '#ad4e00', fontSize: 12, lineHeight: '18px', marginTop: 7 }}>{planSummary.warnings.slice(0, 4).join(' · ')}</Typography.Text>}
+                    {planSummary && <Box className='smart-planner-summary'>
+                        <div className='smart-planner-summary-head'>
+                            <span className='smart-planner-summary-score' style={{ color: getScoreColor(planSummary.totalScore) === 'orange' ? '#c2410c' : '#0f766e' }}>{planSummary.totalScore}%</span>
+                            <div style={{ minWidth: 0 }}>
+                                <div className='smart-planner-summary-verdict'>{getScoreVerdict(planSummary.totalScore)}</div>
+                                <div className='smart-planner-summary-caption'>Điểm thực đơn · {scope === 'week' ? 'cả tuần' : 'cả ngày'}</div>
+                            </div>
+                        </div>
+                        <div className='smart-planner-summary-stats'>
+                            <div>
+                                <span className='smart-planner-stat-label'>Tổng chi phí</span>
+                                <span className='smart-planner-stat-value'>{planSummary.totalCostLabel}</span>
+                            </div>
+                            <div>
+                                <span className='smart-planner-stat-label'>Cần mua thêm</span>
+                                <span className='smart-planner-stat-value'>{planSummary.shoppingCostLabel}</span>
+                            </div>
+                            {planSummary.averageNutritionScore !== undefined && <div>
+                                <span className='smart-planner-stat-label'>Dinh dưỡng</span>
+                                <span className='smart-planner-stat-value'>{planSummary.averageNutritionScore}%</span>
+                            </div>}
+                            {planSummary.averageHouseholdScore !== undefined && <div>
+                                <span className='smart-planner-stat-label'>Khẩu vị nhà</span>
+                                <span className='smart-planner-stat-value'>{planSummary.averageHouseholdScore}%</span>
+                            </div>}
+                            <div>
+                                <span className='smart-planner-stat-label'>Độ tin cậy</span>
+                                <span className='smart-planner-stat-value'>{getConfidenceVerdict(planSummary.confidence)}</span>
+                            </div>
+                        </div>
+                        {planSummary.warnings.length > 0 && <div className='smart-planner-summary-warn'>
+                            <ExclamationCircleOutlined />
+                            <span>{planSummary.warnings.slice(0, 4).join(' · ')}</span>
+                        </div>}
                     </Box>}
 
                     {scope === 'cook_now' ? <React.Fragment>
