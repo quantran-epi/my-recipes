@@ -235,6 +235,8 @@ export const HouseholdProfilesScreen: React.FC = () => {
             avoidedDishIds: [...activeMember.avoidedDishIds],
             favoriteIngredientIds: [...activeMember.favoriteIngredientIds],
             avoidedIngredientIds: [...activeMember.avoidedIngredientIds],
+            allergenIngredientIds: [...activeMember.allergenIngredientIds],
+            hardExcludedIngredientIds: [...activeMember.hardExcludedIngredientIds],
             preferredTags: [...activeMember.preferredTags],
             avoidedTags: [...activeMember.avoidedTags],
         });
@@ -274,6 +276,8 @@ export const HouseholdProfilesScreen: React.FC = () => {
             avoidedDishIds: [],
             favoriteIngredientIds: [],
             avoidedIngredientIds: [],
+            allergenIngredientIds: [],
+            hardExcludedIngredientIds: [],
             preferredTags: [],
             avoidedTags: [],
             portionPreference: 1,
@@ -348,7 +352,7 @@ export const HouseholdProfilesScreen: React.FC = () => {
                                 <span style={{ minWidth: 0 }}>
                                     <Typography.Text strong style={{ display: 'block', color: '#111827', lineHeight: '18px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{member.name}</Typography.Text>
                                     <Typography.Text type='secondary' style={{ display: 'block', fontSize: 11, lineHeight: '15px' }}>
-                                        {(member.favoriteDishIds.length + member.favoriteIngredientIds.length + member.preferredTags.length)} thích · {(member.avoidedDishIds.length + member.avoidedIngredientIds.length + member.avoidedTags.length)} tránh
+                                        {(member.favoriteDishIds.length + member.favoriteIngredientIds.length + member.preferredTags.length)} thích · {(member.avoidedDishIds.length + member.avoidedIngredientIds.length + member.avoidedTags.length)} tránh · {(member.allergenIngredientIds.length + member.hardExcludedIngredientIds.length)} chặn
                                     </Typography.Text>
                                 </span>
                             </button>
@@ -442,6 +446,30 @@ export const HouseholdProfilesScreen: React.FC = () => {
                                 const nextIds = ids ?? [];
                                 _updateDraftMember({ avoidedIngredientIds: nextIds, favoriteIngredientIds: draftMember.favoriteIngredientIds.filter(id => !nextIds.includes(id)) });
                             }} options={ingredientOptions} style={{ width: '100%' }} placeholder='Chọn nguyên liệu' /></div>
+                        </div>
+                        <div className='household-field-row'>
+                            <FieldLabel>Dị ứng</FieldLabel>
+                            <div className='household-field-control'><Select mode='multiple' allowClear maxTagCount='responsive' value={draftMember.allergenIngredientIds} onChange={ids => {
+                                const nextIds = ids ?? [];
+                                _updateDraftMember({
+                                    allergenIngredientIds: nextIds,
+                                    favoriteIngredientIds: draftMember.favoriteIngredientIds.filter(id => !nextIds.includes(id)),
+                                    avoidedIngredientIds: draftMember.avoidedIngredientIds.filter(id => !nextIds.includes(id)),
+                                    hardExcludedIngredientIds: draftMember.hardExcludedIngredientIds.filter(id => !nextIds.includes(id)),
+                                });
+                            }} options={ingredientOptions} style={{ width: '100%' }} placeholder='Chọn nguyên liệu gây dị ứng' /></div>
+                        </div>
+                        <div className='household-field-row'>
+                            <FieldLabel>Nguyên liệu chặn cứng</FieldLabel>
+                            <div className='household-field-control'><Select mode='multiple' allowClear maxTagCount='responsive' value={draftMember.hardExcludedIngredientIds} onChange={ids => {
+                                const nextIds = ids ?? [];
+                                _updateDraftMember({
+                                    hardExcludedIngredientIds: nextIds,
+                                    favoriteIngredientIds: draftMember.favoriteIngredientIds.filter(id => !nextIds.includes(id)),
+                                    avoidedIngredientIds: draftMember.avoidedIngredientIds.filter(id => !nextIds.includes(id)),
+                                    allergenIngredientIds: draftMember.allergenIngredientIds.filter(id => !nextIds.includes(id)),
+                                });
+                            }} options={ingredientOptions} style={{ width: '100%' }} placeholder='Chọn nguyên liệu tuyệt đối không dùng' /></div>
                         </div>
                         <div className='household-field-row'>
                             <FieldLabel>Kiểu món thích</FieldLabel>

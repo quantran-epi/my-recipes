@@ -10,6 +10,7 @@ export type HouseholdMemberSuitability = {
     member: HouseholdMemberProfile;
     score: number;
     tone: 'success' | 'warning' | 'neutral';
+    blocked: boolean;
     positives: string[];
     warnings: string[];
     notes: string[];
@@ -21,6 +22,8 @@ export type HouseholdDishSuitability = {
     averageScore: number;
     warningCount: number;
     positiveCount: number;
+    hardBlockCount: number;
+    blocked: boolean;
 }
 
 const clampScore = (value: number) => Math.max(0, Math.min(100, Math.round(value)));
@@ -32,6 +35,24 @@ const getDishIngredientIds = (dish: Dishes, allDishes: Dishes[]): string[] => {
 };
 
 const getIngredientName = (ingredientsById: Map<string, Ingredient>, id: string) => ingredientsById.get(id)?.name ?? id;
+
+const getMemberHardBlockWarnings = (
+    ingredientIds: string[],
+    member: HouseholdMemberProfile,
+    ingredientsById: Map<string, Ingredient>,
+): string[] => {
+    const allergenNames = (member.allergenIngredientIds ?? [])
+        .filter(id => ingredientIds.includes(id))
+        .map(id => getIngredientName(ingredientsById, id));
+    const hardExcludedNames = (member.hardExcludedIngredientIds ?? [])
+        .filter(id => ingredientIds.includes(id))
+        .map(id => getIngredientName(ingredientsById, id));
+
+    return [
+        ...(allergenNames.length > 0 ? [`Dị ứng: ${allergenNames.slice(0, 3).join(', ')}`] : []),
+        ...(hardExcludedNames.length > 0 ? [`Chặn cứng: ${hardExcludedNames.slice(0, 3).join(', ')}`] : []),
+    ];
+};
 
 const getTone = (score: number, warningCount: number): HouseholdMemberSuitability['tone'] => {
     if (warningCount > 0 || score < 58) return 'warning';
@@ -53,6 +74,11 @@ export const HouseholdSuitabilityHelper = {
         const warnings: string[] = [];
         const notes: string[] = [];
         let score = 72;
+        const hardWarnings = getMemberHardBlockWarnings(ingredientIds, member, ingredientsById);
+        if (hardWarnings.length > 0) {
+            score = 0;
+            warnings.push(...hardWarnings);
+        }
 
         if (member.favoriteDishIds.includes(dish.id)) {
             score += 20;
@@ -111,11 +137,12 @@ export const HouseholdSuitabilityHelper = {
         }
         if (member.notes) notes.push(member.notes);
 
-        const finalScore = clampScore(score);
+        const finalScore = hardWarnings.length > 0 ? 0 : clampScore(score);
         return {
             member,
             score: finalScore,
             tone: getTone(finalScore, warnings.length),
+            blocked: hardWarnings.length > 0,
             positives: positives.slice(0, 4),
             warnings: warnings.slice(0, 4),
             notes: notes.slice(0, 3),
@@ -139,6 +166,19 @@ export const HouseholdSuitabilityHelper = {
             averageScore,
             warningCount: memberResults.reduce((sum, item) => sum + item.warnings.length, 0),
             positiveCount: memberResults.reduce((sum, item) => sum + item.positives.length, 0),
+            hardBlockCount: memberResults.filter(item => item.blocked).length,
+            blocked: memberResults.some(item => item.blocked),
         };
+    },
+
+    getHardBlockReasons(
+        dish: Dishes,
+        members: HouseholdMemberProfile[],
+        allDishes: Dishes[],
+        ingredientsById: Map<string, Ingredient>,
+    ): string[] {
+        const ingredientIds = getDishIngredientIds(dish, allDishes);
+        return members.flatMap(member => getMemberHardBlockWarnings(ingredientIds, member, ingredientsById)
+            .map(reason => `${member.name}: ${reason}`));
     },
 };

@@ -50,6 +50,8 @@ export type HouseholdPreferenceProfile = {
     avoidedDishIds?: string[];
     favoriteIngredientIds?: string[];
     avoidedIngredientIds?: string[];
+    allergenIngredientIds?: string[];
+    hardExcludedIngredientIds?: string[];
     preferredTags: string[];
     avoidedTags: string[];
     nutritionGoalId?: string;
@@ -67,6 +69,8 @@ export type HouseholdMemberProfile = {
     avoidedDishIds: string[];
     favoriteIngredientIds: string[];
     avoidedIngredientIds: string[];
+    allergenIngredientIds: string[];
+    hardExcludedIngredientIds: string[];
     preferredTags: string[];
     avoidedTags: string[];
     nutritionGoalId?: string;
@@ -173,6 +177,8 @@ export const normalizeHouseholdPreferenceProfile = (profile?: Partial<HouseholdP
     avoidedDishIds: normalizeStringList(profile?.avoidedDishIds),
     favoriteIngredientIds: normalizeStringList(profile?.favoriteIngredientIds),
     avoidedIngredientIds: normalizeStringList(profile?.avoidedIngredientIds),
+    allergenIngredientIds: normalizeStringList(profile?.allergenIngredientIds),
+    hardExcludedIngredientIds: normalizeStringList(profile?.hardExcludedIngredientIds),
     preferredTags: normalizeTagList(profile?.preferredTags),
     avoidedTags: normalizeTagList(profile?.avoidedTags),
     nutritionGoalId: profile?.nutritionGoalId?.trim() || undefined,
@@ -192,6 +198,8 @@ export const normalizeHouseholdMemberProfile = (profile: Partial<HouseholdMember
         avoidedDishIds: normalizeStringList(profile.avoidedDishIds),
         favoriteIngredientIds: normalizeStringList(profile.favoriteIngredientIds),
         avoidedIngredientIds: normalizeStringList(profile.avoidedIngredientIds),
+        allergenIngredientIds: normalizeStringList(profile.allergenIngredientIds),
+        hardExcludedIngredientIds: normalizeStringList(profile.hardExcludedIngredientIds),
         preferredTags: normalizeTagList(profile.preferredTags),
         avoidedTags: normalizeTagList(profile.avoidedTags),
         nutritionGoalId: profile.nutritionGoalId?.trim() || undefined,
@@ -242,6 +250,8 @@ export const buildHouseholdPreferenceProfile = (
         avoidedDishIds: mergeUnique(...members.map(member => member.avoidedDishIds)),
         favoriteIngredientIds: mergeUnique(...members.map(member => member.favoriteIngredientIds)),
         avoidedIngredientIds: mergeUnique(...members.map(member => member.avoidedIngredientIds)),
+        allergenIngredientIds: mergeUnique(...members.map(member => member.allergenIngredientIds)),
+        hardExcludedIngredientIds: mergeUnique(...members.map(member => member.hardExcludedIngredientIds)),
         nutritionGoalId,
         memberIds: members.map(member => member.id),
         memberNames: members.map(member => member.name),

@@ -1,10 +1,8 @@
-import { BarChartOutlined, CalendarOutlined, CheckCircleOutlined, DollarCircleOutlined, FilterOutlined, QuestionCircleOutlined, ShoppingCartOutlined, TeamOutlined, ThunderboltOutlined } from '@ant-design/icons';
-import { CostEstimateHelper } from '@common/Helpers/CostEstimateHelper';
+import { BarChartOutlined, CalendarOutlined, CheckCircleOutlined, DollarCircleOutlined, EyeOutlined, FilterOutlined, PlayCircleOutlined, QuestionCircleOutlined, ShoppingCartOutlined, StopOutlined, TeamOutlined, ThunderboltOutlined } from '@ant-design/icons';
 import { DateHelpers } from '@common/Helpers/DateHelper';
 import { DishDurationHelper } from '@common/Helpers/DishDurationHelper';
-import { DishNutritionHelper } from '@common/Helpers/DishNutritionHelper';
 import { DishServingHelper } from '@common/Helpers/DishServingHelper';
-import { HouseholdSuitabilityHelper, type HouseholdDishSuitability } from '@common/Helpers/HouseholdSuitabilityHelper';
+import type { HouseholdDishSuitability } from '@common/Helpers/HouseholdSuitabilityHelper';
 import { IngredientPriceHelper } from '@common/Helpers/IngredientPriceHelper';
 import { InventoryHelper } from '@common/Helpers/InventoryHelper';
 import { NutritionGoalHelper, type NutritionGoalMatch } from '@common/Helpers/NutritionGoalHelper';
@@ -19,12 +17,15 @@ import { Tag } from '@components/Tag';
 import { Typography } from '@components/Typography';
 import { useScreenTitle } from '@hooks';
 import { DishImageWidget } from '@modules/Dishes/Screens/DishesManageIngredient/DishImage.widget';
+import { ShoppingListAddWidget } from '@modules/ShoppingList/Screens/ShoppingListAdd.widget';
+import { SmartPlannerEngine, type SmartPlannerCookNowCategory, type SmartPlannerDishRecommendation, type SmartPlannerMealSlot, type SmartPlannerPlanResult, type SmartPlannerPlanSummary, type SmartPlannerPreset, type SmartPlannerShoppingMode, type SmartPlannerVarietyMode } from '@modules/ScheduledMeal/Helpers/SmartPlannerEngine';
 import { DISH_TAGS, Dishes } from '@store/Models/Dishes';
-import { Ingredient, IngredientInventory, IngredientUnit } from '@store/Models/Ingredient';
+import { IngredientUnit } from '@store/Models/Ingredient';
 import { ScheduledMeal } from '@store/Models/ScheduledMeal';
 import { rememberScheduledMealName } from '@store/Reducers/AppContextReducer';
-import { addScheduledMeal } from '@store/Reducers/ScheduledMealReducer';
-import { selectDishes, selectHouseholdMembers, selectIngredients, selectIngredientsById, selectInventory, selectInventoryHealthConfig, selectNutritionGoals, selectSelectedHouseholdMemberIds } from '@store/Selectors';
+import { startCooking } from '@store/Reducers/CookingSessionReducer';
+import { addScheduledMeal, editScheduledMeal } from '@store/Reducers/ScheduledMealReducer';
+import { selectCookingSessions, selectDishes, selectDishesById, selectHouseholdMembers, selectIngredients, selectIngredientsById, selectInventory, selectInventoryHealthConfig, selectNutritionGoals, selectScheduledMeals, selectSelectedHouseholdMemberIds } from '@store/Selectors';
 import { DatePicker, Empty, InputNumber, Select, Segmented, Spin, Switch } from 'antd';
 import dayjs, { Dayjs } from 'dayjs';
 import { nanoid } from 'nanoid';
@@ -33,7 +34,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useSearchParams } from 'react-router-dom';
 import DietPlanIcon from '../../../../assets/icons/diet-plan.png';
 
-type PlannerScope = 'day' | 'week';
+type PlannerScope = 'cook_now' | 'day' | 'week';
 type MealSlot = 'breakfast' | 'lunch' | 'dinner';
 type CriteriaKey = 'budget' | 'nutrition' | 'member';
 
@@ -57,12 +58,15 @@ type PlannedDish = {
     dish: Dishes;
     score: number;
     reasons: string[];
+    warnings?: string[];
     costLabel?: string;
     costAverage?: number;
     shoppingCostLabel?: string;
     shoppingCostAverage?: number;
     missingIngredientCount?: number;
+    missingRequiredIngredientCount?: number;
     missingRows?: ShoppingPreviewRow[];
+    missingIngredientRows?: ShoppingPreviewRow[];
     dayCostLabel?: string;
     dayCostAverage?: number;
     dayShoppingCostLabel?: string;
@@ -73,6 +77,8 @@ type PlannedDish = {
     nutritionMatch?: NutritionGoalMatch;
     suitabilityScore?: number;
     suitability?: HouseholdDishSuitability;
+    totalMinutes?: number;
+    urgentIngredientCount?: number;
     scoreDetails: PlannerScoreDetail[];
 }
 
@@ -114,6 +120,12 @@ type ShoppingPreviewSummary = {
     shoppingCostAverage: number;
     shoppingCostLabel: string;
     rows: ShoppingPreviewRow[];
+}
+
+type CookNowScheduleSelection = {
+    item: SmartPlannerDishRecommendation;
+    date: Dayjs;
+    slot: MealSlot;
 }
 
 const mealSlotMeta: Record<MealSlot, { label: string; tone: string; background: string; border: string }> = {
@@ -192,11 +204,42 @@ const criteriaOptions: Array<{ value: CriteriaKey; label: string }> = [
     { value: 'member', label: 'Khẩu vị nhà' },
 ];
 
-const ALTERNATIVE_COUNT = 3;
-const BASE_CANDIDATE_LIMIT = 18;
-const LOW_COST_CANDIDATE_LIMIT = 10;
+const plannerModeOptions: Array<{ value: PlannerScope; label: string }> = [
+    { value: 'cook_now', label: 'Nấu ngay' },
+    { value: 'day', label: 'Một ngày' },
+    { value: 'week', label: 'Một tuần' },
+];
 
-const clamp = (value: number) => Math.max(0, Math.min(100, Math.round(value)));
+const cookNowSlotOptions: Array<{ value: SmartPlannerMealSlot; label: string }> = [
+    { value: 'any', label: 'Bất kỳ' },
+    { value: 'breakfast', label: 'Sáng' },
+    { value: 'lunch', label: 'Trưa' },
+    { value: 'dinner', label: 'Tối' },
+    { value: 'snack', label: 'Ăn nhẹ' },
+];
+
+const shoppingModeOptions: Array<{ value: SmartPlannerShoppingMode; label: string }> = [
+    { value: 'normal', label: 'Đi mua bình thường' },
+    { value: 'small_top_up', label: 'Mua bổ sung ít' },
+    { value: 'no_shopping', label: 'Không đi mua' },
+];
+
+const presetOptions: Array<{ value: SmartPlannerPreset; label: string }> = [
+    { value: 'balanced', label: 'Cân bằng' },
+    { value: 'quick', label: 'Nhanh' },
+    { value: 'budget', label: 'Tiết kiệm' },
+    { value: 'healthy', label: 'Lành mạnh' },
+    { value: 'family_fit', label: 'Hợp gia đình' },
+    { value: 'use_inventory', label: 'Dùng đồ sẵn có' },
+    { value: 'no_shopping', label: 'Không đi mua' },
+    { value: 'more_variety', label: 'Đa dạng hơn' },
+];
+
+const varietyModeOptions: Array<{ value: SmartPlannerVarietyMode; label: string }> = [
+    { value: 'familiar', label: 'Quen thuộc' },
+    { value: 'balanced', label: 'Cân bằng' },
+    { value: 'more_variety', label: 'Đa dạng hơn' },
+];
 
 const formatImpact = (value: number): string => {
     const rounded = Math.round(value);
@@ -222,50 +265,6 @@ const parseRouteDate = (value: string | null): Dayjs => {
     return (parsed.isValid() ? parsed : dayjs()).startOf('day');
 };
 
-const getSummaryAverage = (summary: { min: number; max: number; pricedCount: number }, emptyValue?: number): number | undefined => {
-    if (summary.pricedCount <= 0) return emptyValue;
-    return (summary.min + summary.max) / 2;
-};
-
-const getDishIngredientIds = (dish: Dishes, dishes: Dishes[]): string[] => {
-    return Array.from(new Set(DishServingHelper.collectIngredientAmounts(dish, dishes).map(item => item.ingredientId)));
-};
-
-const getDishCostInfo = (
-    dish: Dishes,
-    ingredients: Ingredient[],
-    dishes: Dishes[],
-    targetServings: number,
-    inventoryItems: Record<string, IngredientInventory>,
-) => {
-    const amounts = DishServingHelper.collectIngredientAmounts(dish, dishes, { targetServings });
-    const estimate = CostEstimateHelper.estimateIngredientAmounts(amounts, ingredients, { inventoryItems });
-    const costAverage = getSummaryAverage(estimate.total);
-    const missingRows = estimate.rows
-        .filter(row => row.missingAmount > 0)
-        .map(row => {
-            const cost = IngredientPriceHelper.estimateForAmount(row.ingredient, row.missingAmount, row.unit);
-            return {
-                ingredientId: row.ingredientId,
-                name: row.ingredient?.name ?? row.ingredientId,
-                amount: row.missingAmount,
-                unit: row.unit,
-                costLabel: cost ? IngredientPriceHelper.formatRange(cost) : undefined,
-                costAverage: cost ? (cost.min + cost.max) / 2 : undefined,
-            } as ShoppingPreviewRow;
-        });
-    const shoppingCostAverage = missingRows.length === 0 ? 0 : getSummaryAverage(estimate.missing);
-
-    return {
-        costLabel: CostEstimateHelper.hasPrice(estimate.total) ? IngredientPriceHelper.formatRange(estimate.total) : undefined,
-        costAverage,
-        shoppingCostLabel: missingRows.length === 0 ? '0đ' : CostEstimateHelper.hasPrice(estimate.missing) ? IngredientPriceHelper.formatRange(estimate.missing) : undefined,
-        shoppingCostAverage,
-        missingIngredientCount: missingRows.length,
-        missingRows,
-    };
-};
-
 const aggregateShoppingRows = (rows: ShoppingPreviewRow[]): ShoppingPreviewRow[] => {
     const grouped = new Map<string, ShoppingPreviewRow>();
     rows.forEach(row => {
@@ -286,17 +285,14 @@ const aggregateShoppingRows = (rows: ShoppingPreviewRow[]): ShoppingPreviewRow[]
 
 const getAlternativeItems = (alternative: PlannedDayAlternative): PlannedDish[] => [alternative.breakfast, alternative.lunch, alternative.dinner].filter((item): item is PlannedDish => Boolean(item));
 
-const getSlotScore = (dish: Dishes, slot: MealSlot): { score: number; reason?: string } => {
-    const tags = dish.tags ?? [];
-    if (slot === 'breakfast') {
-        if (tags.includes('Ăn sáng')) return { score: 16, reason: 'hợp bữa sáng' };
-        const minutes = DishDurationHelper.getTotalMinutes(dish.duration);
-        if (minutes > 0 && minutes <= 25) return { score: 9, reason: 'nấu nhanh buổi sáng' };
-        return { score: -2 };
-    }
-    if (tags.includes('Món chính')) return { score: 12, reason: 'món chính' };
-    if (tags.includes('Canh') || tags.includes('Xào')) return { score: 7, reason: 'dễ ghép bữa' };
-    return { score: 0 };
+const collectAllSteps = (dish: Dishes, dishesById: Map<string, Dishes>, visited = new Set<string>()): string[] => {
+    if (visited.has(dish.id)) return [];
+    visited.add(dish.id);
+    const fromIncluded = (dish.includeDishes ?? []).flatMap(id => {
+        const included = dishesById.get(id);
+        return included ? collectAllSteps(included, dishesById, visited) : [];
+    });
+    return [...fromIncluded, ...(dish.steps ?? []).map(step => step.content)];
 };
 
 export const SmartMealPlannerScreen: React.FC = () => {
@@ -312,13 +308,23 @@ export const SmartMealPlannerScreen: React.FC = () => {
     const members = useSelector(selectHouseholdMembers);
     const selectedHouseholdMemberIds = useSelector(selectSelectedHouseholdMemberIds);
     const nutritionGoals = useSelector(selectNutritionGoals);
-    const [scope, setScope] = useState<PlannerScope>('day');
+    const scheduledMeals = useSelector(selectScheduledMeals);
+    const cookingSessions = useSelector(selectCookingSessions);
+    const dishesById = useSelector(selectDishesById);
+    const [scope, setScope] = useState<PlannerScope>('cook_now');
     const routeDateValue = searchParams.get('date');
     const [startDate, setStartDate] = useState<Dayjs>(() => parseRouteDate(routeDateValue));
     const [dailyBudget, setDailyBudget] = useState<number>(150000);
+    const [weeklyBudget, setWeeklyBudget] = useState<number | undefined>();
     const [inventoryAwareBudget, setInventoryAwareBudget] = useState(true);
     const [hardConstraintsEnabled, setHardConstraintsEnabled] = useState(false);
     const [maxCookingMinutes, setMaxCookingMinutes] = useState<number | undefined>();
+    const [maxExtraSpend, setMaxExtraSpend] = useState<number | undefined>(100000);
+    const [shoppingMode, setShoppingMode] = useState<SmartPlannerShoppingMode>('normal');
+    const [preset, setPreset] = useState<SmartPlannerPreset>('balanced');
+    const [varietyMode, setVarietyMode] = useState<SmartPlannerVarietyMode>('balanced');
+    const [preferExpiring, setPreferExpiring] = useState(false);
+    const [cookNowMealSlot, setCookNowMealSlot] = useState<SmartPlannerMealSlot>('any');
     const [avoidIngredientIds, setAvoidIngredientIds] = useState<string[]>([]);
     const [requiredExpiringIngredientIds, setRequiredExpiringIngredientIds] = useState<string[]>([]);
     const [requiredTags, setRequiredTags] = useState<string[]>([]);
@@ -326,11 +332,16 @@ export const SmartMealPlannerScreen: React.FC = () => {
     const [memberIds, setMemberIds] = useState<string[]>(() => selectedHouseholdMemberIds);
     const [criteria, setCriteria] = useState<CriteriaKey[]>(['budget', 'nutrition', 'member']);
     const [plannedDays, setPlannedDays] = useState<PlannedDay[]>([]);
+    const [rankedRecommendations, setRankedRecommendations] = useState<SmartPlannerDishRecommendation[]>([]);
+    const [planSummary, setPlanSummary] = useState<SmartPlannerPlanSummary>();
+    const [dismissedDishIds, setDismissedDishIds] = useState<string[]>([]);
     const [hasSuggested, setHasSuggested] = useState(false);
     const [isSuggesting, setIsSuggesting] = useState(false);
     const [openHelpKey, setOpenHelpKey] = useState<string>();
     const [detailSelection, setDetailSelection] = useState<PlannerDetailSelection>();
     const [shoppingPreviewOpen, setShoppingPreviewOpen] = useState(false);
+    const [scheduleSelection, setScheduleSelection] = useState<CookNowScheduleSelection>();
+    const [shoppingRecommendation, setShoppingRecommendation] = useState<SmartPlannerDishRecommendation>();
 
     React.useEffect(() => {
         if (!nutritionGoalId && nutritionGoals[0]?.id) setNutritionGoalId(nutritionGoals[0].id);
@@ -359,14 +370,18 @@ export const SmartMealPlannerScreen: React.FC = () => {
             const badge = InventoryHelper.expiryBadge(expiry?.daysLeft ?? null);
             return { value: ingredient.id, label: badge ? `${ingredient.name} (${badge.label})` : ingredient.name };
         }), [ingredients, inventoryConfig, inventoryItems]);
-    const dayCount = scope === 'week' ? 7 : 1;
     const targetServings = Math.max(1, Math.round(selectedMembers.reduce((sum, member) => sum + (member.portionPreference ?? 1), 0) || 2));
 
     const _clearSuggestions = React.useCallback(() => {
         setPlannedDays([]);
+        setRankedRecommendations([]);
+        setPlanSummary(undefined);
+        setDismissedDishIds([]);
         setHasSuggested(false);
         setDetailSelection(undefined);
         setShoppingPreviewOpen(false);
+        setScheduleSelection(undefined);
+        setShoppingRecommendation(undefined);
     }, []);
 
     React.useEffect(() => {
@@ -377,337 +392,6 @@ export const SmartMealPlannerScreen: React.FC = () => {
             return routeDate;
         });
     }, [routeDateValue, _clearSuggestions]);
-
-    const _buildPlan = React.useCallback((): PlannedDay[] => {
-        const usedDishIds = new Set<string>();
-        const enabledCriteria = new Set(criteria);
-
-        const passesHardConstraints = (dish: Dishes): boolean => {
-            if (!hardConstraintsEnabled) return true;
-            const dishIngredientIds = new Set(getDishIngredientIds(dish, dishes));
-            const dishTags = new Set(dish.tags ?? []);
-            const totalMinutes = DishDurationHelper.getTotalMinutes(dish.duration);
-
-            if (maxCookingMinutes && (totalMinutes <= 0 || totalMinutes > maxCookingMinutes)) return false;
-            if (avoidIngredientIds.length > 0 && avoidIngredientIds.some(id => dishIngredientIds.has(id))) return false;
-            if (requiredExpiringIngredientIds.length > 0 && requiredExpiringIngredientIds.some(id => !dishIngredientIds.has(id))) return false;
-            if (requiredTags.length > 0 && requiredTags.some(tag => !dishTags.has(tag))) return false;
-
-            return true;
-        };
-
-        const scoreDish = (dish: Dishes, slot: MealSlot): PlannedDish => {
-            const reasons: string[] = [];
-            const scoreDetails: PlannerScoreDetail[] = [{
-                label: 'Điểm nền',
-                value: '46 điểm',
-                impact: 46,
-                description: 'Mỗi món bắt đầu từ một điểm nền để món chưa có nhiều dữ liệu vẫn có thể được xếp hạng. Các tiêu chí bên dưới sẽ cộng hoặc trừ thêm vào điểm này.',
-            }];
-            let score = 46;
-            const slotScore = getSlotScore(dish, slot);
-            score += slotScore.score;
-            if (slotScore.reason) reasons.push(slotScore.reason);
-            scoreDetails.push({
-                label: 'Độ hợp bữa ăn',
-                value: slotScore.reason ? `${mealSlotMeta[slot].label}: ${slotScore.reason}` : `${mealSlotMeta[slot].label}: không có tag phù hợp rõ ràng`,
-                impact: slotScore.score,
-                description: 'So khớp món với bữa đang lập. Bữa sáng ưu tiên tag Ăn sáng hoặc món nấu nhanh; bữa trưa và tối ưu tiên món chính, canh hoặc món dễ ghép bữa.',
-            });
-
-            const minutes = DishDurationHelper.getTotalMinutes(dish.duration);
-            let durationImpact = 0;
-            if (minutes > 0 && minutes <= 45) durationImpact += 5;
-            if (minutes > 90) durationImpact -= 7;
-            score += durationImpact;
-            if (minutes > 0) reasons.push(DishDurationHelper.formatMinutes(minutes));
-            scoreDetails.push({
-                label: 'Thời gian nấu',
-                value: minutes > 0 ? DishDurationHelper.formatMinutes(minutes) : 'Chưa có thời gian nấu',
-                impact: durationImpact,
-                description: 'Món nấu trong 45 phút hoặc ít hơn được cộng điểm vì dễ đưa vào lịch hằng ngày. Món trên 90 phút bị trừ điểm vì khó dùng cho bữa thông thường.',
-            });
-
-            const cost = getDishCostInfo(dish, ingredients, dishes, targetServings, inventoryItems);
-            const costAverage = cost.costAverage;
-            if (!enabledCriteria.has('budget')) {
-                scoreDetails.push({
-                    label: 'Ngân sách',
-                    value: 'Không dùng để xếp hạng',
-                    impact: 0,
-                    description: 'Tiêu chí Ngân sách đang tắt, nên chi phí món không cộng hoặc trừ điểm gợi ý.',
-                });
-            }
-
-            let nutritionLabel: string | undefined;
-            let nutritionMatch: NutritionGoalMatch | undefined;
-            let nutritionGoalName: string | undefined;
-            if (enabledCriteria.has('nutrition') && selectedNutritionGoal) {
-                const nutrition = DishNutritionHelper.calculateDishNutrition(dish, dishes, ingredientsById, { targetServings });
-                if (nutrition.hasNutrition) {
-                    const match = NutritionGoalHelper.score(nutrition, selectedNutritionGoal);
-                    const nutritionImpact = Math.round(match.score * 20);
-                    score += nutritionImpact;
-                    nutritionLabel = `${match.matchedCriteriaCount}/${match.totalCriteriaCount} điều`;
-                    nutritionMatch = match;
-                    nutritionGoalName = selectedNutritionGoal.name;
-                    scoreDetails.push({
-                        label: 'Mục tiêu dinh dưỡng',
-                        value: `${nutritionLabel} (${formatRatioPercent(match.score)} gần mục tiêu)`,
-                        impact: nutritionImpact,
-                        description: `So sánh dinh dưỡng mỗi phần ăn với mục tiêu "${selectedNutritionGoal.name}". Điểm càng cao khi nhiều tiêu chí đạt và dữ liệu dinh dưỡng có độ phủ tốt.`,
-                    });
-                    if (match.score >= 0.7) reasons.push(selectedNutritionGoal.name);
-                } else {
-                    scoreDetails.push({
-                        label: 'Mục tiêu dinh dưỡng',
-                        value: `Thiếu dữ liệu cho ${selectedNutritionGoal.name}`,
-                        impact: 0,
-                        description: 'Món chưa có đủ dữ liệu dinh dưỡng từ nguyên liệu, nên tiêu chí này không cộng điểm cho món.',
-                    });
-                    reasons.push('thiếu dinh dưỡng');
-                }
-            } else {
-                scoreDetails.push({
-                    label: 'Mục tiêu dinh dưỡng',
-                    value: 'Không dùng để xếp hạng',
-                    impact: 0,
-                    description: 'Tiêu chí Dinh dưỡng đang tắt hoặc chưa chọn mục tiêu, nên dữ liệu dinh dưỡng không cộng hoặc trừ điểm gợi ý.',
-                });
-            }
-
-            let suitabilityScore: number | undefined;
-            let suitability: HouseholdDishSuitability | undefined;
-            if (enabledCriteria.has('member') && selectedMembers.length > 0) {
-                suitability = HouseholdSuitabilityHelper.evaluateDishForMembers(dish, selectedMembers, dishes, ingredientsById, nutritionGoals);
-                suitabilityScore = suitability.averageScore;
-                const suitabilityImpact = Math.round((suitability.averageScore - 50) * 0.35);
-                score += suitabilityImpact;
-                scoreDetails.push({
-                    label: 'Độ hợp nhà mình',
-                    value: `${suitability.averageScore}% trung bình cho ${selectedMembers.length} thành viên`,
-                    impact: suitabilityImpact,
-                    description: 'Tính trung bình từ hồ sơ các thành viên đang chọn, gồm món thích/tránh, nguyên liệu thích/tránh, tag món và mục tiêu dinh dưỡng riêng của từng người.',
-                });
-                if (suitability.warningCount > 0) reasons.push(`${suitability.warningCount} lưu ý nhà mình`);
-                else if (suitability.positiveCount > 0) reasons.push('hợp nhà mình');
-            } else {
-                scoreDetails.push({
-                    label: 'Độ hợp nhà mình',
-                    value: 'Không dùng để xếp hạng',
-                    impact: 0,
-                    description: 'Tiêu chí Khẩu vị nhà đang tắt hoặc chưa có thành viên, nên hồ sơ gia đình không cộng hoặc trừ điểm gợi ý.',
-                });
-            }
-
-            if (usedDishIds.has(dish.id)) {
-                score -= 42;
-                scoreDetails.push({
-                    label: 'Tránh lặp món',
-                    value: 'Món đã được chọn trong thực đơn này',
-                    impact: -42,
-                    description: 'Planner trừ mạnh nếu món đã xuất hiện ở bữa trước trong cùng lần gợi ý, để thực đơn đa dạng hơn.',
-                });
-            } else {
-                scoreDetails.push({
-                    label: 'Tránh lặp món',
-                    value: 'Chưa bị dùng trong thực đơn này',
-                    impact: 0,
-                    description: 'Món chưa xuất hiện trong các bữa đã chọn trước đó, nên không bị trừ điểm lặp món.',
-                });
-            }
-
-            return {
-                dish,
-                score: clamp(score),
-                reasons: Array.from(new Set(reasons)).slice(0, 4),
-                costLabel: cost.costLabel,
-                costAverage,
-                shoppingCostLabel: cost.shoppingCostLabel,
-                shoppingCostAverage: cost.shoppingCostAverage,
-                missingIngredientCount: cost.missingIngredientCount,
-                missingRows: cost.missingRows,
-                nutritionLabel,
-                nutritionGoalName,
-                nutritionMatch,
-                suitabilityScore,
-                suitability,
-                scoreDetails,
-            };
-        };
-
-        const getDailyBudgetScore = (items: PlannedDish[]) => {
-            const dayBudget = Math.max(1, dailyBudget);
-            const dayCostAverage = items.reduce((sum, item) => sum + (item.costAverage ?? 0), 0);
-            const dayShoppingCostAverage = items.reduce((sum, item) => sum + (item.shoppingCostAverage ?? 0), 0);
-            const budgetCostAverage = inventoryAwareBudget ? dayShoppingCostAverage : dayCostAverage;
-            const missingPriceCount = items.filter(item => (inventoryAwareBudget ? item.shoppingCostAverage : item.costAverage) === undefined).length;
-            const dayCostLabel = IngredientPriceHelper.formatCurrency(dayCostAverage);
-            const dayShoppingCostLabel = IngredientPriceHelper.formatCurrency(dayShoppingCostAverage);
-            const budgetCostLabel = inventoryAwareBudget ? dayShoppingCostLabel : dayCostLabel;
-            let impact = 0;
-            let reason = inventoryAwareBudget ? 'vừa ngân sách mua thêm' : 'vừa ngân sách ngày';
-            let description = inventoryAwareBudget
-                ? 'Chi phí cần mua thêm của cả ngày nằm trong ngân sách ngày, nên tổ hợp bữa này được ưu tiên. Món có tổng giá cao vẫn có thể hợp nếu trong nhà đã có phần lớn nguyên liệu.'
-                : 'Tổng chi phí ước tính của cả ngày nằm trong ngân sách ngày, nên tổ hợp bữa này được ưu tiên. Các bữa có thể dùng ngân sách không đều nhau miễn tổng ngày phù hợp.';
-
-            if (missingPriceCount === items.length) {
-                impact = -9;
-                reason = 'thiếu giá';
-                description = 'Cả ngày chưa đủ dữ liệu giá để kiểm tra ngân sách. Planner trừ điểm vì chưa chắc tổ hợp bữa này có nằm trong ngân sách ngày hay không.';
-            } else if (budgetCostAverage <= dayBudget) {
-                impact = 30;
-            } else {
-                impact = -Math.min(45, (budgetCostAverage / dayBudget - 1) * 35);
-                reason = inventoryAwareBudget ? 'vượt ngân sách mua thêm' : 'vượt ngân sách ngày';
-                description = inventoryAwareBudget
-                    ? 'Chi phí cần mua thêm của cả ngày cao hơn ngân sách ngày, nên tổ hợp bữa này bị trừ điểm theo mức vượt ngân sách.'
-                    : 'Tổng chi phí ước tính của cả ngày cao hơn ngân sách ngày, nên tổ hợp bữa này bị trừ điểm theo mức vượt ngân sách.';
-            }
-
-            if (missingPriceCount > 0 && missingPriceCount < items.length) {
-                impact -= Math.min(9, missingPriceCount * 3);
-                description += ` Có ${missingPriceCount} bữa thiếu dữ liệu giá, nên tổng ngày có thể thấp hơn thực tế.`;
-            }
-
-            return { dayBudget, dayCostAverage, dayCostLabel, dayShoppingCostAverage, dayShoppingCostLabel, budgetCostAverage, budgetCostLabel, impact, reason, description, missingPriceCount };
-        };
-
-        const applyDailyBudgetToDay = (itemsBySlot: Partial<Record<MealSlot, PlannedDish>>): Partial<Record<MealSlot, PlannedDish>> => {
-            if (!enabledCriteria.has('budget')) return itemsBySlot;
-            const slots: MealSlot[] = ['breakfast', 'lunch', 'dinner'];
-            const items = slots.map(slot => itemsBySlot[slot]).filter((item): item is PlannedDish => Boolean(item));
-            if (items.length === 0) return itemsBySlot;
-
-            const dailyBudgetScore = getDailyBudgetScore(items);
-            const perDishImpact = dailyBudgetScore.impact / items.length;
-
-            return slots.reduce((result, slot) => {
-                const item = itemsBySlot[slot];
-                if (!item) return result;
-                const itemCostLabel = item.costLabel ?? 'thiếu dữ liệu giá';
-                result[slot] = {
-                    ...item,
-                    score: clamp(item.score + perDishImpact),
-                    dayCostLabel: dailyBudgetScore.dayCostLabel,
-                    dayCostAverage: dailyBudgetScore.dayCostAverage,
-                    dayShoppingCostLabel: dailyBudgetScore.dayShoppingCostLabel,
-                    dayShoppingCostAverage: dailyBudgetScore.dayShoppingCostAverage,
-                    dayBudget: dailyBudgetScore.dayBudget,
-                    reasons: Array.from(new Set([...item.reasons, dailyBudgetScore.reason])).slice(0, 4),
-                    scoreDetails: [
-                        ...item.scoreDetails,
-                        {
-                            label: 'Ngân sách ngày',
-                            value: `${inventoryAwareBudget ? 'Cần mua' : 'Tổng ngày'} ${dailyBudgetScore.budgetCostLabel} / ngân sách ${IngredientPriceHelper.formatCurrency(dailyBudgetScore.dayBudget)}; món này ${itemCostLabel}`,
-                            impact: perDishImpact,
-                            description: dailyBudgetScore.description,
-                        },
-                    ],
-                };
-                return result;
-            }, {} as Partial<Record<MealSlot, PlannedDish>>);
-        };
-
-        const buildSlotCandidates = (slot: MealSlot): PlannedDish[] => {
-            const ranked = dishes
-                .filter(dish => dish.isCompleted !== false)
-                .filter(passesHardConstraints)
-                .map(dish => scoreDish(dish, slot))
-                .sort((a, b) => b.score - a.score || a.dish.name.localeCompare(b.dish.name));
-            const byId = new Map<string, PlannedDish>();
-            const addCandidate = (item: PlannedDish) => {
-                if (!byId.has(item.dish.id)) byId.set(item.dish.id, item);
-            };
-
-            ranked.slice(0, BASE_CANDIDATE_LIMIT).forEach(addCandidate);
-
-            if (enabledCriteria.has('budget')) {
-                ranked
-                    .filter(item => (inventoryAwareBudget ? item.shoppingCostAverage : item.costAverage) !== undefined)
-                    .sort((a, b) => ((inventoryAwareBudget ? a.shoppingCostAverage : a.costAverage) ?? Number.POSITIVE_INFINITY) - ((inventoryAwareBudget ? b.shoppingCostAverage : b.costAverage) ?? Number.POSITIVE_INFINITY))
-                    .slice(0, LOW_COST_CANDIDATE_LIMIT)
-                    .forEach(addCandidate);
-            }
-
-            return Array.from(byId.values()).sort((a, b) => b.score - a.score || a.dish.name.localeCompare(b.dish.name));
-        };
-
-        const buildAlternative = (itemsBySlot: Partial<Record<MealSlot, PlannedDish>>, index: number): PlannedDayAlternative => {
-            const withBudget = applyDailyBudgetToDay(itemsBySlot);
-            const items = (['breakfast', 'lunch', 'dinner'] as MealSlot[]).map(slot => withBudget[slot]).filter((item): item is PlannedDish => Boolean(item));
-            const totalCostAverage = items.reduce((sum, item) => sum + (item.costAverage ?? 0), 0);
-            const shoppingCostAverage = items.reduce((sum, item) => sum + (item.shoppingCostAverage ?? 0), 0);
-            const nutritionScores = items.map(item => item.nutritionMatch?.score).filter((value): value is number => value !== undefined);
-            const suitabilityScores = items.map(item => item.suitabilityScore).filter((value): value is number => value !== undefined);
-            const missingRows = aggregateShoppingRows(items.flatMap(item => item.missingRows ?? []));
-            return {
-                id: `alt-${index + 1}-${items.map(item => item.dish.id).join('-')}`,
-                label: `Phương án ${index + 1}`,
-                breakfast: withBudget.breakfast,
-                lunch: withBudget.lunch,
-                dinner: withBudget.dinner,
-                totalScore: clamp(items.reduce((sum, item) => sum + item.score, 0) / Math.max(1, items.length)),
-                totalCostAverage,
-                totalCostLabel: IngredientPriceHelper.formatCurrency(totalCostAverage),
-                shoppingCostAverage,
-                shoppingCostLabel: IngredientPriceHelper.formatCurrency(shoppingCostAverage),
-                nutritionScore: nutritionScores.length > 0 ? Math.round(nutritionScores.reduce((sum, value) => sum + value, 0) / nutritionScores.length * 100) : undefined,
-                suitabilityScore: suitabilityScores.length > 0 ? Math.round(suitabilityScores.reduce((sum, value) => sum + value, 0) / suitabilityScores.length) : undefined,
-                reasons: Array.from(new Set(items.flatMap(item => item.reasons))).slice(0, 5),
-                missingRows,
-            };
-        };
-
-        const pickDayAlternatives = (): PlannedDayAlternative[] => {
-            const breakfastCandidates = buildSlotCandidates('breakfast');
-            const lunchCandidates = buildSlotCandidates('lunch');
-            const dinnerCandidates = buildSlotCandidates('dinner');
-
-            const collectRankedCombos = (allowDuplicateDishes: boolean) => {
-                const combos: Array<{ itemsBySlot: Partial<Record<MealSlot, PlannedDish>>; score: number; overage: number; key: string }> = [];
-
-                breakfastCandidates.forEach(breakfast => {
-                    lunchCandidates.forEach(lunch => {
-                        dinnerCandidates.forEach(dinner => {
-                            const items = [breakfast, lunch, dinner].filter(Boolean);
-                            const ids = items.map(item => item.dish.id);
-                            if (!allowDuplicateDishes && new Set(ids).size !== ids.length) return;
-
-                            const dailyBudgetScore = enabledCriteria.has('budget') ? getDailyBudgetScore(items) : undefined;
-                            const score = items.reduce((sum, item) => sum + item.score, 0) + (dailyBudgetScore?.impact ?? 0);
-                            const overage = dailyBudgetScore ? Math.max(0, dailyBudgetScore.budgetCostAverage - dailyBudgetScore.dayBudget) : 0;
-                            combos.push({ itemsBySlot: { breakfast, lunch, dinner }, score, overage, key: ids.join('|') });
-                        });
-                    });
-                });
-
-                return combos.sort((a, b) => b.score - a.score || a.overage - b.overage);
-            };
-
-            const comboMap = new Map<string, { itemsBySlot: Partial<Record<MealSlot, PlannedDish>>; score: number; overage: number; key: string }>();
-            [...collectRankedCombos(false), ...collectRankedCombos(true)].forEach(combo => {
-                if (comboMap.size >= ALTERNATIVE_COUNT) return;
-                if (!comboMap.has(combo.key)) comboMap.set(combo.key, combo);
-            });
-
-            return Array.from(comboMap.values()).map((combo, index) => buildAlternative(combo.itemsBySlot, index));
-        };
-
-        return Array.from({ length: dayCount }).map((_, index) => {
-            const alternatives = pickDayAlternatives();
-            const picked = alternatives[0];
-            if (picked) getAlternativeItems(picked).forEach(item => usedDishIds.add(item.dish.id));
-            return {
-                date: startDate.add(index, 'day').startOf('day'),
-                alternatives,
-                selectedAlternativeId: picked?.id,
-                breakfast: picked?.breakfast,
-                lunch: picked?.lunch,
-                dinner: picked?.dinner,
-            };
-        });
-    }, [avoidIngredientIds, criteria, dailyBudget, dayCount, dishes, hardConstraintsEnabled, ingredients, ingredientsById, inventoryAwareBudget, inventoryItems, maxCookingMinutes, nutritionGoals, requiredExpiringIngredientIds, requiredTags, selectedMembers, selectedNutritionGoal, startDate, targetServings]);
 
     const plannedDishCount = plannedDays.reduce((sum, day) => sum + (day.breakfast ? 1 : 0) + (day.lunch ? 1 : 0) + (day.dinner ? 1 : 0), 0);
     const selectedAlternatives = useMemo(() => plannedDays
@@ -726,12 +410,60 @@ export const SmartMealPlannerScreen: React.FC = () => {
         };
     }, [selectedAlternatives]);
 
+    const _buildSmartPlannerResult = React.useCallback((): SmartPlannerPlanResult => SmartPlannerEngine.buildSmartPlannerResult({
+        scope,
+        startDate,
+        memberIds: selectedMembers.map(member => member.id),
+        mealSlots: scope === 'cook_now' ? [cookNowMealSlot] : ['breakfast', 'lunch', 'dinner'],
+        dailyBudget,
+        weeklyBudget,
+        maxExtraSpend,
+        maxCookMinutes: maxCookingMinutes,
+        strictTime: Boolean(maxCookingMinutes) && (hardConstraintsEnabled || scope === 'cook_now'),
+        shoppingMode,
+        nutritionGoalId,
+        preferExpiring,
+        varietyMode,
+        preset,
+        requiredTags: hardConstraintsEnabled ? requiredTags : [],
+        avoidedIngredientIds: hardConstraintsEnabled ? avoidIngredientIds : [],
+        requiredExpiringIngredientIds: hardConstraintsEnabled ? requiredExpiringIngredientIds : [],
+        criteria,
+        inventoryAwareBudget,
+        dishes,
+        ingredients,
+        ingredientsById,
+        inventoryItems,
+        inventoryConfig,
+        members: selectedMembers,
+        nutritionGoals,
+        scheduledMeals,
+        cookingSessions,
+    }), [avoidIngredientIds, cookNowMealSlot, cookingSessions, criteria, dailyBudget, dishes, hardConstraintsEnabled, ingredients, ingredientsById, inventoryAwareBudget, inventoryConfig, inventoryItems, maxCookingMinutes, maxExtraSpend, nutritionGoalId, nutritionGoals, preferExpiring, preset, requiredExpiringIngredientIds, requiredTags, scheduledMeals, scope, selectedMembers, shoppingMode, startDate, varietyMode, weeklyBudget]);
+
+    const visibleCookNowRecommendations = useMemo(() => {
+        const dismissed = new Set(dismissedDishIds);
+        return rankedRecommendations.filter(item => !dismissed.has(item.dish.id));
+    }, [dismissedDishIds, rankedRecommendations]);
+
+    const visibleCookNowCategories = useMemo(() => SmartPlannerEngine.buildCookNowCategories(visibleCookNowRecommendations), [visibleCookNowRecommendations]);
+
     const _suggestMeals = () => {
         setIsSuggesting(true);
         setHasSuggested(true);
         setShoppingPreviewOpen(false);
+        setScheduleSelection(undefined);
+        setShoppingRecommendation(undefined);
         window.setTimeout(() => {
-            setPlannedDays(_buildPlan());
+            const result = _buildSmartPlannerResult();
+            setPlanSummary(result.summary);
+            if (scope === 'cook_now') {
+                setPlannedDays([]);
+                setRankedRecommendations(result.rankedRecommendations ?? []);
+            } else {
+                setRankedRecommendations([]);
+                setPlannedDays((result.plannedDays ?? []) as PlannedDay[]);
+            }
             setIsSuggesting(false);
         }, 250);
     };
@@ -751,31 +483,98 @@ export const SmartMealPlannerScreen: React.FC = () => {
         }));
     };
 
+    const _appendToScheduledMeal = (date: Dayjs, itemsBySlot: Partial<Record<MealSlot, { dish: Dishes }>>): 'created' | 'updated' | 'empty' => {
+        const dishIds = (['breakfast', 'lunch', 'dinner'] as MealSlot[]).flatMap(slot => itemsBySlot[slot] ? [itemsBySlot[slot]!.dish.id] : []);
+        if (dishIds.length === 0) return 'empty';
+
+        const dishServings = dishIds.reduce((result, dishId) => ({ ...result, [dishId]: targetServings }), {} as Record<string, number>);
+        const existing = scheduledMeals.find(meal => dayjs(meal.plannedDate).isSame(date, 'day'));
+        if (existing) {
+            const nextMeals = (['breakfast', 'lunch', 'dinner'] as MealSlot[]).reduce((result, slot) => {
+                const current = existing.meals?.[slot] ?? [];
+                const nextDishId = itemsBySlot[slot]?.dish.id;
+                result[slot] = nextDishId ? Array.from(new Set([...current, nextDishId])) : current;
+                return result;
+            }, { breakfast: [], lunch: [], dinner: [] } as ScheduledMeal['meals']);
+            dispatch(editScheduledMeal({
+                ...existing,
+                meals: nextMeals,
+                dishServings: {
+                    ...(existing.dishServings ?? {}),
+                    ...dishServings,
+                },
+            }));
+            return 'updated';
+        }
+
+        const meals: ScheduledMeal['meals'] = {
+            breakfast: itemsBySlot.breakfast ? [itemsBySlot.breakfast.dish.id] : [],
+            lunch: itemsBySlot.lunch ? [itemsBySlot.lunch.dish.id] : [],
+            dinner: itemsBySlot.dinner ? [itemsBySlot.dinner.dish.id] : [],
+        };
+        const name = `Thực đơn thông minh - ${date.format('DD/MM')}`;
+        dispatch(addScheduledMeal({
+            id: `smart-${nanoid(10)}`,
+            name,
+            meals,
+            dishServings,
+            plannedDate: date.toDate(),
+            createdDate: new Date(),
+        }));
+        dispatch(rememberScheduledMealName(name));
+        return 'created';
+    };
+
     const _createScheduledMeals = () => {
         let created = 0;
+        let updated = 0;
         plannedDays.forEach(day => {
-            const meals: ScheduledMeal['meals'] = {
-                breakfast: day.breakfast ? [day.breakfast.dish.id] : [],
-                lunch: day.lunch ? [day.lunch.dish.id] : [],
-                dinner: day.dinner ? [day.dinner.dish.id] : [],
-            };
-            const dishIds = [...meals.breakfast, ...meals.lunch, ...meals.dinner];
-            if (dishIds.length === 0) return;
-            const name = `Thực đơn thông minh - ${day.date.format('DD/MM')}`;
-            const dishServings = dishIds.reduce((result, dishId) => ({ ...result, [dishId]: targetServings }), {} as Record<string, number>);
-            dispatch(addScheduledMeal({
-                id: `smart-${nanoid(10)}`,
-                name,
-                meals,
-                dishServings,
-                plannedDate: day.date.toDate(),
-                createdDate: new Date(),
-            }));
-            dispatch(rememberScheduledMealName(name));
-            created += 1;
+            const result = _appendToScheduledMeal(day.date, {
+                breakfast: day.breakfast,
+                lunch: day.lunch,
+                dinner: day.dinner,
+            });
+            if (result === 'created') created += 1;
+            if (result === 'updated') updated += 1;
         });
         setShoppingPreviewOpen(false);
-        message.success(`Đã tạo ${created} thực đơn`);
+        message.success(`Đã áp dụng ${created + updated} ngày (${created} mới, ${updated} cập nhật)`);
+    };
+
+    const _displaySlotFromCookNow = (): MealSlot => {
+        if (cookNowMealSlot === 'breakfast' || cookNowMealSlot === 'lunch' || cookNowMealSlot === 'dinner') return cookNowMealSlot;
+        return 'dinner';
+    };
+
+    const _openRecommendationDetail = (item: SmartPlannerDishRecommendation) => {
+        setDetailSelection({ item: item as PlannedDish, slot: _displaySlotFromCookNow(), date: startDate });
+    };
+
+    const _startCookingRecommendation = (item: SmartPlannerDishRecommendation) => {
+        const ingredientIds = Array.from(new Set(DishServingHelper.collectIngredientAmounts(item.dish, dishes, { targetServings }).map(row => row.ingredientId)));
+        dispatch(startCooking({
+            dishId: item.dish.id,
+            dishName: item.dish.name,
+            baseServings: DishServingHelper.getBaseServings(item.dish),
+            targetServings,
+            steps: collectAllSteps(item.dish, dishesById),
+            ingredientIds,
+            householdMemberIds: selectedMembers.map(member => member.id),
+        }));
+        message.success(`Đã bắt đầu nấu ${item.dish.name}`);
+    };
+
+    const _scheduleCookNowSelection = () => {
+        if (!scheduleSelection) return;
+        const itemsBySlot: Partial<Record<MealSlot, { dish: Dishes }>> = { [scheduleSelection.slot]: scheduleSelection.item };
+        const result = _appendToScheduledMeal(scheduleSelection.date, itemsBySlot);
+        setScheduleSelection(undefined);
+        if (result === 'updated') message.success('Đã thêm món vào thực đơn có sẵn');
+        if (result === 'created') message.success('Đã tạo thực đơn từ gợi ý');
+    };
+
+    const _dismissRecommendation = (item: SmartPlannerDishRecommendation) => {
+        setDismissedDishIds(current => Array.from(new Set([...current, item.dish.id])));
     };
 
     const _toggleHelp = (key: string) => setOpenHelpKey(current => current === key ? undefined : key);
@@ -901,6 +700,41 @@ export const SmartMealPlannerScreen: React.FC = () => {
         {alternative.reasons.length > 0 && <Typography.Text type='secondary' style={{ display: 'block', fontSize: 11, lineHeight: '16px', marginTop: 7 }}>{alternative.reasons.join(' · ')}</Typography.Text>}
     </Box>;
 
+    const CookNowRecommendationCard = ({ item, category }: { item?: SmartPlannerDishRecommendation; category?: SmartPlannerCookNowCategory }) => {
+        if (!item) return <Box style={{ border: '1px dashed rgba(15,23,42,0.14)', borderRadius: 8, background: '#fafafa', padding: 10, minHeight: 132 }}>
+            <Typography.Text strong style={{ display: 'block', color: '#111827', fontSize: 13, lineHeight: '18px' }}>{category?.label ?? 'Gợi ý'}</Typography.Text>
+            <Typography.Text type='secondary' style={{ display: 'block', fontSize: 12, lineHeight: '18px', marginTop: 6 }}>Chưa có món phù hợp</Typography.Text>
+        </Box>;
+
+        return <Box style={{ border: '1px solid rgba(19,168,168,0.14)', borderRadius: 8, background: '#fff', padding: 10, minWidth: 0 }}>
+            {category && <Typography.Text strong style={{ display: 'block', color: '#13a8a8', fontSize: 12, lineHeight: '16px', marginBottom: 7 }}>{category.label}</Typography.Text>}
+            <div style={{ display: 'grid', gridTemplateColumns: '52px minmax(0, 1fr)', gap: 10, alignItems: 'start' }}>
+                <DishImageWidget src={item.dish.image} width={52} height={52} borderRadius={8} fallbackIconSize={26} showBrokenLabel={false} />
+                <div style={{ minWidth: 0 }}>
+                    <Stack justify='space-between' align='flex-start' gap={8}>
+                        <Typography.Text strong style={{ display: 'block', color: '#111827', fontSize: 14, lineHeight: '19px', overflowWrap: 'anywhere' }}>{item.dish.name}</Typography.Text>
+                        <Tag color={getScoreColor(item.score)} style={{ marginRight: 0 }}>{item.score}%</Tag>
+                    </Stack>
+                    <Stack wrap='wrap' gap={5} style={{ marginTop: 6 }}>
+                        {item.totalMinutes !== undefined && item.totalMinutes > 0 && <Tag color='blue' style={{ marginRight: 0 }}>{DishDurationHelper.formatMinutes(item.totalMinutes)}</Tag>}
+                        {item.shoppingCostLabel && <Tag color='green' style={{ marginRight: 0 }}>Mua {item.shoppingCostLabel}</Tag>}
+                        {item.nutritionLabel && <Tag color='cyan' style={{ marginRight: 0 }}>{item.nutritionLabel}</Tag>}
+                        {item.suitabilityScore !== undefined && <Tag color={item.suitabilityScore >= 70 ? 'green' : 'orange'} style={{ marginRight: 0 }}>Nhà mình {item.suitabilityScore}%</Tag>}
+                    </Stack>
+                    {item.reasons.length > 0 && <Typography.Text type='secondary' style={{ display: 'block', fontSize: 11, lineHeight: '16px', marginTop: 6 }}>{item.reasons.join(' · ')}</Typography.Text>}
+                    {(item.warnings ?? []).length > 0 && <Typography.Text type='secondary' style={{ display: 'block', color: '#ad4e00', fontSize: 11, lineHeight: '16px', marginTop: 4 }}>{(item.warnings ?? []).slice(0, 2).join(' · ')}</Typography.Text>}
+                </div>
+            </div>
+            <Stack wrap='wrap' gap={6} style={{ marginTop: 10 }}>
+                <Button icon={<PlayCircleOutlined />} onClick={() => _startCookingRecommendation(item)}>Nấu</Button>
+                <Button icon={<CalendarOutlined />} onClick={() => setScheduleSelection({ item, date: startDate, slot: _displaySlotFromCookNow() })}>Lên lịch</Button>
+                <Button icon={<ShoppingCartOutlined />} disabled={(item.missingIngredientCount ?? 0) === 0} onClick={() => setShoppingRecommendation(item)}>Mua thiếu</Button>
+                <Button icon={<EyeOutlined />} onClick={() => _openRecommendationDetail(item)}>Chi tiết</Button>
+                <Button type='text' icon={<StopOutlined />} onClick={() => _dismissRecommendation(item)}>Ẩn</Button>
+            </Stack>
+        </Box>;
+    };
+
     const suggestionDetailModal = detailSelection ? <Modal
         open={Boolean(detailSelection)}
         onCancel={() => setDetailSelection(undefined)}
@@ -941,6 +775,15 @@ export const SmartMealPlannerScreen: React.FC = () => {
                     </Box>)}
                 </Stack>
             </DetailSection>
+
+            {(detailSelection.item.warnings ?? []).length > 0 && <DetailSection
+                title='Lưu ý và dữ liệu thiếu'
+                description='Các cảnh báo này làm giảm độ tin cậy hoặc điểm gợi ý, nhưng không phải ràng buộc an toàn đã bị chặn trước đó.'
+            >
+                <Stack wrap='wrap' gap={6}>
+                    {(detailSelection.item.warnings ?? []).map(warning => <Tag key={warning} color='orange' style={{ marginRight: 0 }}>{warning}</Tag>)}
+                </Stack>
+            </DetailSection>}
 
             {detailSelection.item.nutritionMatch && <DetailSection
                 title={`Dinh dưỡng: ${detailSelection.item.nutritionGoalName}`}
@@ -1066,10 +909,60 @@ export const SmartMealPlannerScreen: React.FC = () => {
         </Stack>
     </Modal> : null;
 
+    const scheduleCookNowModal = scheduleSelection ? <Modal
+        open={Boolean(scheduleSelection)}
+        onCancel={() => setScheduleSelection(undefined)}
+        title='Lên lịch món gợi ý'
+        width={520}
+        destroyOnClose
+        footer={<Stack justify='flex-end' gap={8}>
+            <Button onClick={() => setScheduleSelection(undefined)}>Hủy</Button>
+            <Button type='primary' icon={<CalendarOutlined />} onClick={_scheduleCookNowSelection}>Lên lịch</Button>
+        </Stack>}
+    >
+        <Stack direction='column' gap={12} style={{ width: '100%' }}>
+            <Box style={{ border: '1px solid rgba(15,23,42,0.08)', borderRadius: 8, background: '#f8fafc', padding: 10 }}>
+                <Typography.Text strong style={{ display: 'block', color: '#111827', lineHeight: '20px' }}>{scheduleSelection.item.dish.name}</Typography.Text>
+                <Typography.Text type='secondary' style={{ display: 'block', fontSize: 12, lineHeight: '18px', marginTop: 3 }}>{targetServings} phần · {scheduleSelection.item.shoppingCostLabel ? `mua thêm ${scheduleSelection.item.shoppingCostLabel}` : 'chưa có chi phí mua thêm'}</Typography.Text>
+            </Box>
+            <div>
+                <Typography.Text strong style={{ display: 'block', marginBottom: 6 }}>Ngày</Typography.Text>
+                <DatePicker value={scheduleSelection.date} onChange={value => value && setScheduleSelection(current => current ? { ...current, date: value.startOf('day') } : current)} format='DD/MM/YYYY' style={{ width: '100%' }} />
+            </div>
+            <div>
+                <Typography.Text strong style={{ display: 'block', marginBottom: 6 }}>Bữa</Typography.Text>
+                <Segmented block value={scheduleSelection.slot} onChange={value => setScheduleSelection(current => current ? { ...current, slot: value as MealSlot } : current)} options={([
+                    { value: 'breakfast', label: 'Sáng' },
+                    { value: 'lunch', label: 'Trưa' },
+                    { value: 'dinner', label: 'Tối' },
+                ] as Array<{ value: MealSlot; label: string }>)} />
+            </div>
+        </Stack>
+    </Modal> : null;
+
+    const recommendationShoppingModal = shoppingRecommendation ? <Modal
+        open={Boolean(shoppingRecommendation)}
+        onCancel={() => setShoppingRecommendation(undefined)}
+        title='Tạo lịch mua sắm'
+        width={620}
+        destroyOnClose
+        footer={null}
+    >
+        <ShoppingListAddWidget
+            date={startDate.toDate()}
+            initialName={`Mua cho ${shoppingRecommendation.dish.name}`}
+            dishIds={[shoppingRecommendation.dish.id]}
+            initialDishServings={{ [shoppingRecommendation.dish.id]: targetServings }}
+            onDone={() => setShoppingRecommendation(undefined)}
+        />
+    </Modal> : null;
+
     return <Box className='smart-planner-page' data-testid='smart-meal-planner-page'>
         <style>{pageCss}</style>
         {suggestionDetailModal}
         {shoppingPreviewModal}
+        {scheduleCookNowModal}
+        {recommendationShoppingModal}
         <Box className='smart-planner-hero'>
             <Stack justify='space-between' align='center' gap={12} wrap='wrap'>
                 <Stack align='center' gap={10} style={{ minWidth: 0 }}>
@@ -1079,7 +972,7 @@ export const SmartMealPlannerScreen: React.FC = () => {
                     <div style={{ minWidth: 0, flex: '1 1 260px' }}>
                         <Typography.Text style={{ display: 'block', color: '#13a8a8', fontSize: 12, lineHeight: '16px', fontWeight: 800 }}>Lập thực đơn</Typography.Text>
                         <Typography.Text strong className='smart-planner-title'>Thực đơn thông minh</Typography.Text>
-                        <Typography.Text type='secondary' style={{ display: 'block', fontSize: 12, lineHeight: '18px', marginTop: 3 }}>Gợi ý bữa ngày hoặc tuần theo ngân sách, dinh dưỡng và khẩu vị từng thành viên.</Typography.Text>
+                        <Typography.Text type='secondary' style={{ display: 'block', fontSize: 12, lineHeight: '18px', marginTop: 3 }}>Gợi ý món nấu ngay, bữa ngày hoặc tuần theo ngân sách, dinh dưỡng, tồn kho và khẩu vị từng thành viên.</Typography.Text>
                     </div>
                 </Stack>
             </Stack>
@@ -1089,9 +982,13 @@ export const SmartMealPlannerScreen: React.FC = () => {
             <Box className='smart-planner-panel'>
                 <div className='smart-planner-controls'>
                     <div>
-                        <PlannerFieldLabel helpKey='scope' label='Khoảng lập'>Chọn gợi ý cho một ngày hoặc cả tuần. Một tuần sẽ tạo 7 ngày liên tiếp từ ngày bắt đầu.</PlannerFieldLabel>
-                        <Segmented block value={scope} onChange={value => { setScope(value as PlannerScope); _clearSuggestions(); }} options={[{ value: 'day', label: 'Một ngày' }, { value: 'week', label: 'Một tuần' }]} />
+                        <PlannerFieldLabel helpKey='scope' label='Chế độ'>Chọn nấu ngay, lập một ngày hoặc lập cả tuần. Nấu ngay trả lời món tốt nhất lúc này; ngày/tuần tạo phương án để áp dụng vào lịch.</PlannerFieldLabel>
+                        <Segmented block value={scope} onChange={value => { setScope(value as PlannerScope); _clearSuggestions(); }} options={plannerModeOptions} />
                     </div>
+                    {scope === 'cook_now' && <div>
+                        <PlannerFieldLabel helpKey='cook-now-slot' label='Bữa muốn nấu'>Bữa ăn giúp planner ưu tiên tag và thời gian phù hợp. Nếu chọn bất kỳ, món linh hoạt sẽ được giữ điểm tốt.</PlannerFieldLabel>
+                        <Segmented block value={cookNowMealSlot} onChange={value => { setCookNowMealSlot(value as SmartPlannerMealSlot); _clearSuggestions(); }} options={cookNowSlotOptions} />
+                    </div>}
                     <div>
                         <PlannerFieldLabel helpKey='date' label='Ngày bắt đầu'>Ngày đầu tiên để gợi ý thực đơn. Nếu chọn một tuần, các ngày sau sẽ tự chạy tiếp từ ngày này.</PlannerFieldLabel>
                         <DatePicker value={startDate} onChange={value => { if (value) { setStartDate(value.startOf('day')); _clearSuggestions(); } }} format='DD/MM/YYYY' style={{ width: '100%' }} />
@@ -1100,11 +997,38 @@ export const SmartMealPlannerScreen: React.FC = () => {
                         <PlannerFieldLabel helpKey='budget' label={<><DollarCircleOutlined /> Ngân sách mỗi ngày</>}>Ngân sách được kiểm tra trên tổng cả ngày. Sáng, trưa và tối có thể dùng số tiền khác nhau, miễn tổng chi phí ước tính của ngày phù hợp ngân sách.</PlannerFieldLabel>
                         <InputNumber min={0} step={10000} value={dailyBudget} addonAfter='đ' onChange={value => { setDailyBudget(Number(value ?? 0)); _clearSuggestions(); }} style={{ width: '100%' }} />
                     </div>
+                    {scope === 'week' && <div>
+                        <PlannerFieldLabel helpKey='weekly-budget' label={<><DollarCircleOutlined /> Ngân sách tuần</>}>Nếu đặt ngân sách tuần, phần tổng kết sẽ cảnh báo khi chi phí cần mua của cả tuần vượt mức này.</PlannerFieldLabel>
+                        <InputNumber min={0} step={50000} value={weeklyBudget} addonAfter='đ' onChange={value => { setWeeklyBudget(value === null ? undefined : Number(value)); _clearSuggestions(); }} placeholder='Không giới hạn' style={{ width: '100%' }} />
+                    </div>}
+                    <div>
+                        <PlannerFieldLabel helpKey='extra-spend' label='Mua thêm tối đa'>Dùng cho Nấu ngay và chế độ mua bổ sung ít để ưu tiên món cần mua ít sau khi trừ tồn kho.</PlannerFieldLabel>
+                        <InputNumber min={0} step={10000} value={maxExtraSpend} addonAfter='đ' onChange={value => { setMaxExtraSpend(value === null ? undefined : Number(value)); _clearSuggestions(); }} placeholder='Không giới hạn' style={{ width: '100%' }} />
+                    </div>
+                    <div>
+                        <PlannerFieldLabel helpKey='shopping-mode' label={<><ShoppingCartOutlined /> Cách mua sắm</>}>Không đi mua sẽ loại món thiếu nguyên liệu bắt buộc. Mua bổ sung ít ưu tiên phần cần mua thêm thấp.</PlannerFieldLabel>
+                        <Select value={shoppingMode} onChange={value => { setShoppingMode(value); if (value === 'no_shopping') setPreset('no_shopping'); _clearSuggestions(); }} options={shoppingModeOptions} style={{ width: '100%' }} />
+                    </div>
+                    <div>
+                        <PlannerFieldLabel helpKey='preset' label={<><ThunderboltOutlined /> Kiểu ưu tiên</>}>Preset đổi trọng số chấm điểm mà không cần chỉnh từng tiêu chí.</PlannerFieldLabel>
+                        <Select value={preset} onChange={value => { setPreset(value); if (value === 'no_shopping') setShoppingMode('no_shopping'); _clearSuggestions(); }} options={presetOptions} style={{ width: '100%' }} />
+                    </div>
+                    <div>
+                        <PlannerFieldLabel helpKey='variety' label='Độ đa dạng'>Càng đa dạng, planner càng trừ điểm món, nguyên liệu chính hoặc cách nấu bị lặp gần đây.</PlannerFieldLabel>
+                        <Select value={varietyMode} onChange={value => { setVarietyMode(value); _clearSuggestions(); }} options={varietyModeOptions} style={{ width: '100%' }} />
+                    </div>
                     <Box style={{ border: '1px solid rgba(19,168,168,0.14)', background: '#f6ffed', borderRadius: 8, padding: 10 }}>
                         <PlannerFieldLabel helpKey='inventory-aware' label={<><ShoppingCartOutlined /> Tính theo tủ lạnh</>}>Khi bật, ngân sách ưu tiên số tiền cần mua thêm sau khi trừ nguyên liệu đã có trong kho. Khi tắt, ngân sách dùng tổng chi phí món.</PlannerFieldLabel>
                         <Stack justify='space-between' align='center' gap={8}>
                             <Typography.Text style={{ fontSize: 12, lineHeight: '18px', color: '#334155' }}>{inventoryAwareBudget ? 'Đang dùng chi phí cần mua' : 'Đang dùng tổng chi phí món'}</Typography.Text>
                             <Switch checked={inventoryAwareBudget} onChange={checked => { setInventoryAwareBudget(checked); _clearSuggestions(); }} />
+                        </Stack>
+                    </Box>
+                    <Box style={{ border: '1px solid rgba(19,168,168,0.14)', background: preferExpiring ? '#fff7e6' : '#f6ffed', borderRadius: 8, padding: 10 }}>
+                        <PlannerFieldLabel helpKey='prefer-expiring' label='Ưu tiên đồ sắp hết hạn'>Khi bật, món dùng nguyên liệu gần hết hạn trong kho sẽ được cộng điểm rõ hơn.</PlannerFieldLabel>
+                        <Stack justify='space-between' align='center' gap={8}>
+                            <Typography.Text style={{ fontSize: 12, lineHeight: '18px', color: '#334155' }}>{preferExpiring ? 'Đang ưu tiên dùng sớm' : 'Ưu tiên bình thường'}</Typography.Text>
+                            <Switch checked={preferExpiring} onChange={checked => { setPreferExpiring(checked); _clearSuggestions(); }} />
                         </Stack>
                     </Box>
                     <div>
@@ -1128,7 +1052,7 @@ export const SmartMealPlannerScreen: React.FC = () => {
                     </Box>
                     <div>
                         <PlannerFieldLabel helpKey='max-time' label='Thời gian nấu tối đa'>Nếu ràng buộc cứng bật, món không có thời gian nấu hoặc vượt số phút này sẽ bị loại.</PlannerFieldLabel>
-                        <InputNumber disabled={!hardConstraintsEnabled} min={5} step={5} value={maxCookingMinutes} addonAfter='phút' onChange={value => { setMaxCookingMinutes(value === null ? undefined : Number(value)); _clearSuggestions(); }} placeholder='Không giới hạn' style={{ width: '100%' }} />
+                        <InputNumber disabled={!hardConstraintsEnabled && scope !== 'cook_now'} min={5} step={5} value={maxCookingMinutes} addonAfter='phút' onChange={value => { setMaxCookingMinutes(value === null ? undefined : Number(value)); _clearSuggestions(); }} placeholder='Không giới hạn' style={{ width: '100%' }} />
                     </div>
                     <div>
                         <PlannerFieldLabel helpKey='avoid-ingredients' label='Tránh nguyên liệu'>Nếu ràng buộc cứng bật, món chứa bất kỳ nguyên liệu nào ở đây sẽ bị loại.</PlannerFieldLabel>
@@ -1146,35 +1070,61 @@ export const SmartMealPlannerScreen: React.FC = () => {
                         <Stack wrap='wrap' gap={6}>
                             <Tag color='blue' style={{ marginRight: 0 }}>{targetServings} phần/bữa</Tag>
                             <Tag color='cyan' style={{ marginRight: 0 }}>{selectedMembers.length || members.length} thành viên</Tag>
-                            {hasSuggested && <Tag color='green' style={{ marginRight: 0 }}>{plannedDishCount} lượt món</Tag>}
+                            {hasSuggested && <Tag color='green' style={{ marginRight: 0 }}>{scope === 'cook_now' ? visibleCookNowRecommendations.length : plannedDishCount} lượt món</Tag>}
                         </Stack>
                     </Box>
-                    <Button type='primary' icon={<ThunderboltOutlined />} loading={isSuggesting} disabled={dishes.length === 0} onClick={_suggestMeals}>Gợi ý thực đơn</Button>
+                    <Button type='primary' icon={<ThunderboltOutlined />} loading={isSuggesting} disabled={dishes.length === 0} onClick={_suggestMeals}>{scope === 'cook_now' ? 'Gợi ý món nấu ngay' : 'Gợi ý thực đơn'}</Button>
                 </div>
             </Box>
 
             <Box className='smart-planner-panel'>
                 {dishes.length === 0 ? <Empty description='Chưa có món ăn để lập thực đơn' /> : isSuggesting ? <Box style={{ minHeight: 220, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                     <Spin tip='Đang gợi ý thực đơn...' />
-                </Box> : !hasSuggested ? <Empty description='Chọn tiêu chí rồi nhấn Gợi ý thực đơn' image={Empty.PRESENTED_IMAGE_SIMPLE} /> : <Stack direction='column' gap={12}>
-                    {plannedDays.map(day => <Box key={day.date.format('YYYY-MM-DD')} style={{ border: '1px solid rgba(19,168,168,0.12)', borderRadius: 8, padding: 10, background: '#fff' }}>
-                        <Stack align='center' gap={8} style={{ marginBottom: 10 }}>
-                            <CalendarOutlined style={{ color: '#13a8a8' }} />
-                            <Typography.Text strong style={{ color: '#111827', fontSize: 15 }}>{DateHelpers.formatWithCapitalizedWeekday(day.date.toDate(), 'dddd, DD/MM/YYYY')}</Typography.Text>
+                </Box> : !hasSuggested ? <Empty description='Chọn tiêu chí rồi nhấn Gợi ý' image={Empty.PRESENTED_IMAGE_SIMPLE} /> : <Stack direction='column' gap={12}>
+                    {planSummary && <Box style={{ border: '1px solid rgba(19,168,168,0.12)', borderRadius: 8, background: '#f6ffed', padding: 10 }}>
+                        <Stack wrap='wrap' gap={6}>
+                            <Tag color={getScoreColor(planSummary.totalScore)} style={{ marginRight: 0 }}>Điểm {planSummary.totalScore}%</Tag>
+                            <Tag color='gold' style={{ marginRight: 0 }}>Tổng {planSummary.totalCostLabel}</Tag>
+                            <Tag color='green' style={{ marginRight: 0 }}>Cần mua {planSummary.shoppingCostLabel}</Tag>
+                            {planSummary.averageNutritionScore !== undefined && <Tag color='cyan' style={{ marginRight: 0 }}>Dinh dưỡng {planSummary.averageNutritionScore}%</Tag>}
+                            {planSummary.averageHouseholdScore !== undefined && <Tag color='blue' style={{ marginRight: 0 }}>Nhà mình {planSummary.averageHouseholdScore}%</Tag>}
+                            <Tag color={planSummary.confidence >= 76 ? 'green' : 'orange'} style={{ marginRight: 0 }}>Tin cậy {planSummary.confidence}%</Tag>
                         </Stack>
-                        {(day.alternatives?.length ?? 0) === 0 ? <Empty description='Không có phương án phù hợp ràng buộc' image={Empty.PRESENTED_IMAGE_SIMPLE} /> : <>
-                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))', gap: 8, marginBottom: 10 }}>
-                                {day.alternatives?.map(alternative => <PlannerAlternativeCard key={alternative.id} alternative={alternative} date={day.date} selected={alternative.id === day.selectedAlternativeId} />)}
+                        {planSummary.warnings.length > 0 && <Typography.Text type='secondary' style={{ display: 'block', color: '#ad4e00', fontSize: 12, lineHeight: '18px', marginTop: 7 }}>{planSummary.warnings.slice(0, 4).join(' · ')}</Typography.Text>}
+                    </Box>}
+
+                    {scope === 'cook_now' ? <React.Fragment>
+                        {visibleCookNowRecommendations.length === 0 ? <Empty description='Không có món phù hợp ràng buộc hiện tại' image={Empty.PRESENTED_IMAGE_SIMPLE} /> : <React.Fragment>
+                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(238px, 1fr))', gap: 10 }}>
+                                {visibleCookNowCategories.map(category => <CookNowRecommendationCard key={category.key} category={category} item={category.recommendation} />)}
                             </div>
-                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(190px, 1fr))', gap: 8 }}>
-                                {(['breakfast', 'lunch', 'dinner'] as MealSlot[]).map(slot => <div key={slot}>
-                                    <Typography.Text strong style={{ display: 'block', color: mealSlotMeta[slot].tone, fontSize: 12, lineHeight: '16px', marginBottom: 5 }}>{mealSlotMeta[slot].label}</Typography.Text>
-                                    <PlannerDishCard item={day[slot]} slot={slot} date={day.date} />
-                                </div>)}
-                            </div>
-                        </>}
-                    </Box>)}
-                    <Button fullwidth type='primary' icon={<CheckCircleOutlined />} disabled={plannedDishCount === 0} onClick={() => setShoppingPreviewOpen(true)}>Áp dụng {scope === 'week' ? 'thực đơn tuần' : 'thực đơn ngày'}</Button>
+                            <Box style={{ border: '1px solid rgba(15,23,42,0.08)', borderRadius: 8, background: '#fff', padding: 10 }}>
+                                <Typography.Text strong style={{ display: 'block', color: '#111827', fontSize: 14, lineHeight: '19px', marginBottom: 8 }}>Xếp hạng món phù hợp</Typography.Text>
+                                <Stack direction='column' gap={8} style={{ width: '100%' }}>
+                                    {visibleCookNowRecommendations.slice(0, 12).map(item => <CookNowRecommendationCard key={item.dish.id} item={item} />)}
+                                </Stack>
+                            </Box>
+                        </React.Fragment>}
+                    </React.Fragment> : <React.Fragment>
+                        {plannedDays.map(day => <Box key={day.date.format('YYYY-MM-DD')} style={{ border: '1px solid rgba(19,168,168,0.12)', borderRadius: 8, padding: 10, background: '#fff' }}>
+                            <Stack align='center' gap={8} style={{ marginBottom: 10 }}>
+                                <CalendarOutlined style={{ color: '#13a8a8' }} />
+                                <Typography.Text strong style={{ color: '#111827', fontSize: 15 }}>{DateHelpers.formatWithCapitalizedWeekday(day.date.toDate(), 'dddd, DD/MM/YYYY')}</Typography.Text>
+                            </Stack>
+                            {(day.alternatives?.length ?? 0) === 0 ? <Empty description='Không có phương án phù hợp ràng buộc' image={Empty.PRESENTED_IMAGE_SIMPLE} /> : <>
+                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))', gap: 8, marginBottom: 10 }}>
+                                    {day.alternatives?.map(alternative => <PlannerAlternativeCard key={alternative.id} alternative={alternative} date={day.date} selected={alternative.id === day.selectedAlternativeId} />)}
+                                </div>
+                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(190px, 1fr))', gap: 8 }}>
+                                    {(['breakfast', 'lunch', 'dinner'] as MealSlot[]).map(slot => <div key={slot}>
+                                        <Typography.Text strong style={{ display: 'block', color: mealSlotMeta[slot].tone, fontSize: 12, lineHeight: '16px', marginBottom: 5 }}>{mealSlotMeta[slot].label}</Typography.Text>
+                                        <PlannerDishCard item={day[slot]} slot={slot} date={day.date} />
+                                    </div>)}
+                                </div>
+                            </>}
+                        </Box>)}
+                        <Button fullwidth type='primary' icon={<CheckCircleOutlined />} disabled={plannedDishCount === 0} onClick={() => setShoppingPreviewOpen(true)}>Áp dụng {scope === 'week' ? 'thực đơn tuần' : 'thực đơn ngày'}</Button>
+                    </React.Fragment>}
                 </Stack>}
             </Box>
         </div>
