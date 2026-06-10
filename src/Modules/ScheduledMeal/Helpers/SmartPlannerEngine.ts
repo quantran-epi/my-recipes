@@ -423,7 +423,7 @@ const getHardBlockReasons = (dish: Dishes, input: BuildSmartPlannerInput, cost: 
     const tags = new Set(dish.tags ?? []);
     const hardSafetyReasons = HouseholdSuitabilityHelper.getHardBlockReasons(dish, input.members, input.dishes, input.ingredientsById);
     const blockers = [...hardSafetyReasons];
-    const shoppingMode = input.preset === 'no_shopping' ? 'no_shopping' : input.shoppingMode;
+    const shoppingMode = input.shoppingMode;
 
     if (shoppingMode === 'no_shopping' && cost.missingRequiredIngredientCount > 0) blockers.push('Thiếu nguyên liệu bắt buộc trong chế độ không đi mua');
     if (input.strictTime && input.maxCookMinutes && (minutes <= 0 || minutes > input.maxCookMinutes)) blockers.push('Vượt thời gian nấu tối đa');

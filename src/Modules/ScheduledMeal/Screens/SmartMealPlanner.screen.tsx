@@ -468,6 +468,19 @@ export const SmartMealPlannerScreen: React.FC = () => {
         }, 250);
     };
 
+    const _onShoppingModeChange = (value: SmartPlannerShoppingMode) => {
+        setShoppingMode(value);
+        if (value === 'no_shopping') setPreset('no_shopping');
+        else if (preset === 'no_shopping') setPreset('balanced');
+        _clearSuggestions();
+    };
+
+    const _onPresetChange = (value: SmartPlannerPreset) => {
+        setPreset(value);
+        if (value === 'no_shopping') setShoppingMode('no_shopping');
+        _clearSuggestions();
+    };
+
     const _selectAlternative = (date: Dayjs, alternativeId: string) => {
         setPlannedDays(days => days.map(day => {
             if (!day.date.isSame(date, 'day')) return day;
@@ -987,7 +1000,7 @@ export const SmartMealPlannerScreen: React.FC = () => {
                     </div>
                     {scope === 'cook_now' && <div>
                         <PlannerFieldLabel helpKey='cook-now-slot' label='Bữa muốn nấu'>Bữa ăn giúp planner ưu tiên tag và thời gian phù hợp. Nếu chọn bất kỳ, món linh hoạt sẽ được giữ điểm tốt.</PlannerFieldLabel>
-                        <Segmented block value={cookNowMealSlot} onChange={value => { setCookNowMealSlot(value as SmartPlannerMealSlot); _clearSuggestions(); }} options={cookNowSlotOptions} />
+                        <Select value={cookNowMealSlot} onChange={value => { setCookNowMealSlot(value); _clearSuggestions(); }} options={cookNowSlotOptions} style={{ width: '100%' }} />
                     </div>}
                     <div>
                         <PlannerFieldLabel helpKey='date' label='Ngày bắt đầu'>Ngày đầu tiên để gợi ý thực đơn. Nếu chọn một tuần, các ngày sau sẽ tự chạy tiếp từ ngày này.</PlannerFieldLabel>
@@ -1007,11 +1020,11 @@ export const SmartMealPlannerScreen: React.FC = () => {
                     </div>
                     <div>
                         <PlannerFieldLabel helpKey='shopping-mode' label={<><ShoppingCartOutlined /> Cách mua sắm</>}>Không đi mua sẽ loại món thiếu nguyên liệu bắt buộc. Mua bổ sung ít ưu tiên phần cần mua thêm thấp.</PlannerFieldLabel>
-                        <Select value={shoppingMode} onChange={value => { setShoppingMode(value); if (value === 'no_shopping') setPreset('no_shopping'); _clearSuggestions(); }} options={shoppingModeOptions} style={{ width: '100%' }} />
+                        <Select value={shoppingMode} onChange={_onShoppingModeChange} options={shoppingModeOptions} style={{ width: '100%' }} />
                     </div>
                     <div>
-                        <PlannerFieldLabel helpKey='preset' label={<><ThunderboltOutlined /> Kiểu ưu tiên</>}>Preset đổi trọng số chấm điểm mà không cần chỉnh từng tiêu chí.</PlannerFieldLabel>
-                        <Select value={preset} onChange={value => { setPreset(value); if (value === 'no_shopping') setShoppingMode('no_shopping'); _clearSuggestions(); }} options={presetOptions} style={{ width: '100%' }} />
+                        <PlannerFieldLabel helpKey='preset' label={<><ThunderboltOutlined /> Mẫu ưu tiên</>}>Mẫu ưu tiên chỉ đổi trọng số xếp hạng. Nếu chọn Không đi mua, app cũng chuyển Cách mua sắm sang Không đi mua để ràng buộc được nhìn thấy rõ.</PlannerFieldLabel>
+                        <Select value={preset} onChange={_onPresetChange} options={presetOptions} style={{ width: '100%' }} />
                     </div>
                     <div>
                         <PlannerFieldLabel helpKey='variety' label='Độ đa dạng'>Càng đa dạng, planner càng trừ điểm món, nguyên liệu chính hoặc cách nấu bị lặp gần đây.</PlannerFieldLabel>
@@ -1040,7 +1053,7 @@ export const SmartMealPlannerScreen: React.FC = () => {
                         <Select mode='multiple' allowClear maxTagCount='responsive' value={memberIds} onChange={value => { setMemberIds(value); _clearSuggestions(); }} options={members.map(member => ({ value: member.id, label: member.name }))} placeholder='Tất cả thành viên' style={{ width: '100%' }} />
                     </div>
                     <div>
-                        <PlannerFieldLabel helpKey='criteria' label={<><ThunderboltOutlined /> Tiêu chí ưu tiên</>}>Bật hoặc tắt tiêu chí chấm điểm. Có thể ưu tiên ngân sách, dinh dưỡng, khẩu vị nhà mình hoặc kết hợp cả ba.</PlannerFieldLabel>
+                        <PlannerFieldLabel helpKey='criteria' label={<><ThunderboltOutlined /> Tiêu chí tính điểm</>}>Bật hoặc tắt nhóm dữ liệu được phép tham gia chấm điểm. Mẫu ưu tiên chỉ đổi trọng số của các tiêu chí đang bật; tiêu chí đã tắt sẽ không cộng hoặc trừ điểm.</PlannerFieldLabel>
                         <Select mode='multiple' value={criteria} onChange={value => { setCriteria(value); _clearSuggestions(); }} options={criteriaOptions} style={{ width: '100%' }} />
                     </div>
                     <Box style={{ border: '1px solid rgba(15,23,42,0.08)', background: hardConstraintsEnabled ? '#fff7e6' : '#f8fafc', borderRadius: 8, padding: 10 }}>
