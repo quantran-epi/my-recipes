@@ -149,6 +149,7 @@ export type BuildSmartPlannerInput = {
     requiredExpiringIngredientIds: string[];
     criteria: SmartPlannerCriterion[];
     inventoryAwareBudget: boolean;
+    shuffleAlternatives?: boolean;
     dishes: Dishes[];
     ingredients: Ingredient[];
     ingredientsById: Map<string, Ingredient>;
@@ -191,6 +192,7 @@ const PLANNER_MEAL_SLOTS: PlannerMealSlot[] = ['breakfast', 'lunch', 'dinner'];
 const ALTERNATIVE_COUNT = 3;
 const BASE_CANDIDATE_LIMIT = 18;
 const LOW_COST_CANDIDATE_LIMIT = 10;
+const SHUFFLE_POOL_LIMIT = 24;
 const METHOD_TAGS = ['Nướng', 'Chiên', 'Hấp', 'Luộc', 'Xào', 'Salad'];
 
 const CATEGORY_DEFINITIONS: Array<Omit<SmartPlannerCookNowCategory, 'recommendation'>> = [
@@ -728,12 +730,39 @@ const buildPlannedDays = (input: BuildSmartPlannerInput, targetServings: number,
         };
 
         const comboMap = new Map<string, { itemsBySlot: Partial<Record<PlannerMealSlot, PlannedDish>>; score: number; overage: number; key: string }>();
-        [...collectRankedCombos(false), ...collectRankedCombos(true)].forEach(combo => {
-            if (comboMap.size >= ALTERNATIVE_COUNT) return;
-            if (!comboMap.has(combo.key)) comboMap.set(combo.key, combo);
-        });
 
-        return Array.from(comboMap.values()).map((combo, index) => buildAlternative(combo.itemsBySlot, index, input));
+        if (input.shuffleAlternatives) {
+            // Re-roll: keep the single best combo as an anchor, then fill the remaining
+            // slots by weighted random sampling from the viable pool (higher score = higher
+            // odds). This surfaces different valid combinations each generate without losing
+            // the top option or dropping into low-quality picks.
+            const pool = [...collectRankedCombos(false), ...collectRankedCombos(true)]
+                .filter((combo, index, all) => all.findIndex(other => other.key === combo.key) === index);
+            const best = pool[0];
+            if (best) comboMap.set(best.key, best);
+
+            const samplePool = pool.slice(1, SHUFFLE_POOL_LIMIT);
+            while (comboMap.size < ALTERNATIVE_COUNT && samplePool.length > 0) {
+                const totalWeight = samplePool.reduce((sum, combo) => sum + Math.max(1, combo.score), 0);
+                let roll = Math.random() * totalWeight;
+                let pickedIndex = samplePool.length - 1;
+                for (let i = 0; i < samplePool.length; i++) {
+                    roll -= Math.max(1, samplePool[i].score);
+                    if (roll <= 0) { pickedIndex = i; break; }
+                }
+                const [picked] = samplePool.splice(pickedIndex, 1);
+                if (!comboMap.has(picked.key)) comboMap.set(picked.key, picked);
+            }
+        } else {
+            [...collectRankedCombos(false), ...collectRankedCombos(true)].forEach(combo => {
+                if (comboMap.size >= ALTERNATIVE_COUNT) return;
+                if (!comboMap.has(combo.key)) comboMap.set(combo.key, combo);
+            });
+        }
+
+        return Array.from(comboMap.values())
+            .sort((a, b) => b.score - a.score || a.overage - b.overage)
+            .map((combo, index) => buildAlternative(combo.itemsBySlot, index, input));
     };
 
     return Array.from({ length: dayCount }).map((_, index) => {

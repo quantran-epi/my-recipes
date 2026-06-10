@@ -14,6 +14,7 @@ import { Box } from '@components/Layout/Box';
 import { Stack } from '@components/Layout/Stack';
 import { useMessage } from '@components/Message';
 import { Modal } from '@components/Modal';
+import { Popconfirm } from '@components/Popconfirm';
 import { Tag } from '@components/Tag';
 import { Typography } from '@components/Typography';
 import { useScreenTitle } from '@hooks';
@@ -340,10 +341,59 @@ const pageCss = `
     background: linear-gradient(180deg, #f0fdfa 0%, #ffffff 100%);
     padding: 14px;
 }
+.smart-planner-ranking-head {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 10px;
+    padding-bottom: 9px;
+    border-bottom: 2px solid #13a8a8;
+}
+.smart-planner-ranking-head .anticon {
+    color: #13a8a8;
+    font-size: 16px;
+}
+.smart-planner-ranking-title {
+    color: #0f172a;
+    font-size: 15px;
+    font-weight: 800;
+    letter-spacing: .01em;
+    margin-right: auto;
+}
+.smart-planner-preview .ant-space-vertical {
+    width: 100%;
+}
+.smart-planner-preview .ant-space-vertical > .ant-space-item {
+    width: 100%;
+}
 .smart-planner-summary-head {
     display: flex;
-    align-items: baseline;
-    gap: 10px;
+    align-items: center;
+    gap: 12px;
+}
+.smart-planner-summary-headtext {
+    min-width: 0;
+    flex: 1 1 auto;
+}
+.smart-planner-summary-help {
+    border: 1px solid rgba(19,168,168,0.16);
+    border-radius: 8px;
+    background: #f0fdfa;
+    color: #475569;
+    font-size: 12px;
+    line-height: 17px;
+    padding: 9px 11px;
+    margin-top: 11px;
+}
+.smart-planner-summary-help dt {
+    color: #0f172a;
+    font-weight: 700;
+}
+.smart-planner-summary-help dd {
+    margin: 0 0 7px;
+}
+.smart-planner-summary-help dd:last-child {
+    margin-bottom: 0;
 }
 .smart-planner-summary-score {
     color: #0f766e;
@@ -681,7 +731,7 @@ export const SmartMealPlannerScreen: React.FC = () => {
         };
     }, [selectedAlternatives]);
 
-    const _buildSmartPlannerResult = React.useCallback((): SmartPlannerPlanResult => SmartPlannerEngine.buildSmartPlannerResult({
+    const _buildSmartPlannerResult = React.useCallback((shuffleAlternatives = false): SmartPlannerPlanResult => SmartPlannerEngine.buildSmartPlannerResult({
         scope,
         startDate,
         memberIds: selectedMembers.map(member => member.id),
@@ -701,6 +751,7 @@ export const SmartMealPlannerScreen: React.FC = () => {
         requiredExpiringIngredientIds: hardConstraintsEnabled ? requiredExpiringIngredientIds : [],
         criteria,
         inventoryAwareBudget,
+        shuffleAlternatives,
         dishes,
         ingredients,
         ingredientsById,
@@ -719,14 +770,14 @@ export const SmartMealPlannerScreen: React.FC = () => {
 
     const visibleCookNowCategories = useMemo(() => SmartPlannerEngine.buildCookNowCategories(visibleCookNowRecommendations), [visibleCookNowRecommendations]);
 
-    const _suggestMeals = () => {
+    const _suggestMeals = (shuffleAlternatives = false) => {
         setIsSuggesting(true);
         setHasSuggested(true);
         setShoppingPreviewOpen(false);
         setScheduleSelection(undefined);
         setShoppingRecommendation(undefined);
         window.setTimeout(() => {
-            const result = _buildSmartPlannerResult();
+            const result = _buildSmartPlannerResult(shuffleAlternatives);
             setPlanSummary(result.summary);
             if (scope === 'cook_now') {
                 setPlannedDays([]);
@@ -942,7 +993,14 @@ export const SmartMealPlannerScreen: React.FC = () => {
             if (key === 'schedule') setScheduleSelection({ item, date: startDate, slot: _displaySlotFromCookNow() });
             if (key === 'shop') setShoppingRecommendation(item);
             if (key === 'detail') _openRecommendationDetail(item);
-            if (key === 'dismiss') _dismissRecommendation(item);
+            if (key === 'dismiss') Modal.confirm({
+                title: 'Ẩn món này khỏi gợi ý?',
+                content: `"${item.dish.name}" sẽ không xuất hiện trong các gợi ý nấu ngay của lần này. Bạn có thể gợi ý lại để hiện lại món.`,
+                okText: 'Ẩn món',
+                cancelText: 'Hủy',
+                okButtonProps: { danger: true },
+                onOk: () => _dismissRecommendation(item),
+            });
         };
 
         return <Box className='smart-planner-result-card'>
@@ -960,7 +1018,15 @@ export const SmartMealPlannerScreen: React.FC = () => {
                 <Tag color={getScoreColor(item.score)} style={{ marginRight: 0 }}>{item.score}%</Tag>
             </div>
             <div className='smart-planner-result-actions'>
-                <Button className='smart-planner-result-primary' type='primary' icon={<PlayCircleOutlined />} onClick={() => _startCookingRecommendation(item)}>Nấu</Button>
+                <Popconfirm
+                    title='Bắt đầu nấu món này?'
+                    description={`Sẽ tạo phiên nấu cho "${item.dish.name}". Bạn có thể theo dõi các bước nấu trong phiên này.`}
+                    okText='Bắt đầu'
+                    cancelText='Hủy'
+                    onConfirm={() => _startCookingRecommendation(item)}
+                >
+                    <Button className='smart-planner-result-primary' type='primary' icon={<PlayCircleOutlined />}>Nấu</Button>
+                </Popconfirm>
                 <Dropdown
                     placement='bottomRight'
                     menu={{
@@ -1104,7 +1170,7 @@ export const SmartMealPlannerScreen: React.FC = () => {
         </Stack>}
         bodyStyle={{ background: '#f8fafc' }}
     >
-        <Stack direction='column' gap={12} style={{ width: '100%' }}>
+        <Stack className='smart-planner-preview' direction='column' gap={12} style={{ width: '100%' }}>
             <Box style={{ border: '1px solid rgba(15,23,42,0.08)', borderRadius: 8, background: '#fff', padding: 12 }}>
                 <Stack wrap='wrap' gap={6}>
                     <Tag color='gold' style={{ marginRight: 0 }}>Tổng món {shoppingPreviewSummary.totalCostLabel}</Tag>
@@ -1375,7 +1441,7 @@ export const SmartMealPlannerScreen: React.FC = () => {
                             {hasSuggested && <Tag color='green' style={{ marginRight: 0 }}>{scope === 'cook_now' ? visibleCookNowRecommendations.length : plannedDishCount} lượt món</Tag>}
                         </Stack>
                     </Box>
-                    <Button type='primary' icon={<ThunderboltOutlined />} loading={isSuggesting} disabled={dishes.length === 0} onClick={_suggestMeals}>{scope === 'cook_now' ? 'Gợi ý món nấu ngay' : 'Gợi ý thực đơn'}</Button>
+                    <Button type='primary' icon={<ThunderboltOutlined />} loading={isSuggesting} disabled={dishes.length === 0} onClick={() => _suggestMeals()}>{scope === 'cook_now' ? 'Gợi ý món nấu ngay' : 'Gợi ý thực đơn'}</Button>
                 </div>
             </Box>
 
@@ -1386,10 +1452,11 @@ export const SmartMealPlannerScreen: React.FC = () => {
                     {planSummary && <Box className='smart-planner-summary'>
                         <div className='smart-planner-summary-head'>
                             <span className='smart-planner-summary-score' style={{ color: getScoreColor(planSummary.totalScore) === 'orange' ? '#c2410c' : '#0f766e' }}>{planSummary.totalScore}%</span>
-                            <div style={{ minWidth: 0 }}>
+                            <div className='smart-planner-summary-headtext'>
                                 <div className='smart-planner-summary-verdict'>{getScoreVerdict(planSummary.totalScore)}</div>
                                 <div className='smart-planner-summary-caption'>Điểm thực đơn · {scope === 'week' ? 'cả tuần' : 'cả ngày'}</div>
                             </div>
+                            <Button type='text' aria-label='Giải thích các chỉ số tổng kết' icon={<QuestionCircleOutlined />} onClick={() => _toggleHelp('summary')} style={{ width: 28, height: 28, paddingInline: 0, borderRadius: 999, color: openHelpKey === 'summary' ? '#13a8a8' : '#6b7280', flexShrink: 0 }} />
                         </div>
                         <div className='smart-planner-summary-stats'>
                             <div>
@@ -1413,6 +1480,20 @@ export const SmartMealPlannerScreen: React.FC = () => {
                                 <span className='smart-planner-stat-value'>{getConfidenceVerdict(planSummary.confidence)}</span>
                             </div>
                         </div>
+                        {openHelpKey === 'summary' && <dl className='smart-planner-summary-help'>
+                            <dt>Điểm thực đơn</dt>
+                            <dd>Điểm trung bình của các món đã chọn, tổng hợp từ mọi tiêu chí đang bật. Càng cao càng hợp các tiêu chí của bạn.</dd>
+                            <dt>Tổng chi phí</dt>
+                            <dd>Ước tính tiền nguyên liệu cho toàn bộ món trong {scope === 'week' ? 'cả tuần' : 'cả ngày'}, tính theo giá đã lưu.</dd>
+                            <dt>Cần mua thêm</dt>
+                            <dd>Phần tiền còn phải mua sau khi trừ nguyên liệu đang có trong kho.</dd>
+                            <dt>Dinh dưỡng</dt>
+                            <dd>Mức khớp trung bình với mục tiêu dinh dưỡng đã chọn. Chỉ hiện khi bật tiêu chí dinh dưỡng và đã chọn mục tiêu.</dd>
+                            <dt>Khẩu vị nhà</dt>
+                            <dd>Độ hợp trung bình với hồ sơ các thành viên đang chọn. Chỉ hiện khi bật tiêu chí khẩu vị nhà.</dd>
+                            <dt>Độ tin cậy</dt>
+                            <dd>Mức đầy đủ của dữ liệu (giá, dinh dưỡng, thời gian nấu). Thiếu dữ liệu làm giảm độ tin cậy dù điểm vẫn cao.</dd>
+                        </dl>}
                         {planSummary.warnings.length > 0 && <div className='smart-planner-summary-warn'>
                             <ExclamationCircleOutlined />
                             <span>{planSummary.warnings.slice(0, 4).join(' · ')}</span>
@@ -1425,13 +1506,21 @@ export const SmartMealPlannerScreen: React.FC = () => {
                                 {visibleCookNowCategories.map(category => <CookNowRecommendationCard key={category.key} category={category} item={category.recommendation} />)}
                             </div>
                             <Box style={{ border: '1px solid rgba(15,23,42,0.08)', borderRadius: 8, background: '#fff', padding: 10 }}>
-                                <Typography.Text strong style={{ display: 'block', color: '#111827', fontSize: 14, lineHeight: '19px', marginBottom: 8 }}>Xếp hạng món phù hợp</Typography.Text>
+                                <div className='smart-planner-ranking-head'>
+                                    <BarChartOutlined />
+                                    <span className='smart-planner-ranking-title'>Xếp hạng món phù hợp</span>
+                                    <Tag color='default' style={{ marginRight: 0 }}>{Math.min(12, visibleCookNowRecommendations.length)} món</Tag>
+                                </div>
                                 <Stack direction='column' gap={8} style={{ width: '100%' }}>
                                     {visibleCookNowRecommendations.slice(0, 12).map(item => <CookNowRecommendationCard key={item.dish.id} item={item} />)}
                                 </Stack>
                             </Box>
                         </React.Fragment>}
                     </React.Fragment> : <React.Fragment>
+                        <Stack justify='space-between' align='center' gap={8} wrap='wrap'>
+                            <Typography.Text type='secondary' style={{ fontSize: 12, lineHeight: '18px' }}>Mỗi ngày có vài phương án. Bấm đổi để bốc tổ hợp món hợp lệ khác.</Typography.Text>
+                            <Button icon={<ThunderboltOutlined />} loading={isSuggesting} onClick={() => _suggestMeals(true)}>Đổi phương án khác</Button>
+                        </Stack>
                         {plannedDays.map(day => <Box key={day.date.format('YYYY-MM-DD')} style={{ border: '1px solid rgba(19,168,168,0.12)', borderRadius: 8, padding: 10, background: '#fff' }}>
                             <Stack align='center' gap={8} style={{ marginBottom: 10 }}>
                                 <CalendarOutlined style={{ color: '#13a8a8' }} />
