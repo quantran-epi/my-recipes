@@ -20,7 +20,6 @@ import { Stack } from '@components/Layout/Stack';
 import { DeferredModalContent, Modal } from '@components/Modal';
 import { Tag } from '@components/Tag';
 import { Typography } from '@components/Typography';
-import { ScheduledMealAddWidget } from '@modules/ScheduledMeal/Screens/ScheduledMealAdd.widget';
 import { DishServingSelector, normalizeDishServings } from '@modules/ShoppingList/Screens/DishServingSelector.widget';
 import { ShoppingListAddWidget } from '@modules/ShoppingList/Screens/ShoppingListAdd.widget';
 import { RootRoutes } from '@routing/RootRoutes';
@@ -37,7 +36,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 
 export type NutritionCalculatorSource = 'dishes' | 'shoppingLists' | 'scheduledMeals';
 
-type CreationModal = 'scheduledMeal' | 'shoppingList' | null;
+type CreationModal = 'shoppingList' | null;
 
 export type NutritionCalculatorInitialSelection = {
     key: string;
@@ -79,8 +78,6 @@ const sourceOptions: Array<{ label: string; shortLabel: string; value: Nutrition
     { label: 'Lịch mua sắm', shortLabel: 'Mua sắm', value: 'shoppingLists', icon: <ShoppingCartOutlined />, description: 'Tính từ danh sách đang có', tone: '#0958d9', background: '#e6f4ff', border: '#91caff' },
     { label: 'Thực đơn', shortLabel: 'Thực đơn', value: 'scheduledMeals', icon: <CalendarOutlined />, description: 'Tổng hợp theo bữa đã lên', tone: '#13a8a8', background: '#e6fffb', border: '#87e8de' },
 ];
-
-const emptyMeals = (): ScheduledMeal['meals'] => ({ breakfast: [], lunch: [], dinner: [] });
 
 const getMealDishIds = (meal: ScheduledMeal): string[] => [
     ...(meal.meals.breakfast ?? []),
@@ -301,7 +298,6 @@ export const NutritionCalculatorModalContent: React.FunctionComponent<{ initialS
 
     const aggregate = useMemo(() => calculateAggregate(entries, dishes, dishesById, ingredientsById), [dishes, dishesById, entries, ingredientsById]);
     const selectedDishServingsForCreation = useMemo(() => normalizeDishServings(selectedDishIds, dishesById, selectedDishServings), [dishesById, selectedDishIds, selectedDishServings]);
-    const initialScheduledMeals = useMemo(() => ({ ...emptyMeals(), lunch: selectedDishIds }), [selectedDishIds]);
     const goalSummary = useMemo(() => toGoalSummary(aggregate), [aggregate]);
     const topGoalMatches = useMemo(() => goals
         .map((goal: NutritionGoal) => ({ goal, match: NutritionGoalHelper.score(goalSummary, goal) }))
@@ -348,8 +344,7 @@ export const NutritionCalculatorModalContent: React.FunctionComponent<{ initialS
                 icon={<CalculatorOutlined />}
                 tone='#13a8a8'
                 action={source === 'dishes' ? <Stack gap={6} wrap='wrap' justify='flex-end'>
-                    <Button aria-label='Tạo thực đơn từ món đã chọn' disabled={!canCreateFromDishes} icon={<CalendarOutlined />} onClick={() => setCreationModal('scheduledMeal')} style={{ borderRadius: 999 }}>Thực đơn</Button>
-                    <Button aria-label='Tạo lịch mua sắm từ món đã chọn' disabled={!canCreateFromDishes} icon={<ShoppingCartOutlined />} onClick={() => setCreationModal('shoppingList')} style={{ borderRadius: 999 }}>Mua sắm</Button>
+                    <Button aria-label='Tạo lịch mua sắm từ món đã chọn' disabled={!canCreateFromDishes} icon={<ShoppingCartOutlined />} onClick={() => setCreationModal('shoppingList')}>Mua sắm</Button>
                 </Stack> : undefined}
             >
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 8 }}>
@@ -496,25 +491,6 @@ export const NutritionCalculatorModalContent: React.FunctionComponent<{ initialS
                 </CalculatorPanel>
             </>}
         </Box>
-
-        <Modal
-            open={creationModal === 'scheduledMeal'}
-            title={<Space><CalendarOutlined />Tạo thực đơn</Space>}
-            onCancel={() => setCreationModal(null)}
-            footer={null}
-            destroyOnClose
-        >
-            <DeferredModalContent active={creationModal === 'scheduledMeal'} minHeight={260}>
-                <ScheduledMealAddWidget
-                    date={new Date()}
-                    initialName={`Dinh dưỡng ${dayjs().format('DD/MM')}`}
-                    initialMeals={initialScheduledMeals}
-                    initialDishServings={selectedDishServingsForCreation}
-                    onDone={() => setCreationModal(null)}
-                    onCreated={() => navigate(RootRoutes.AuthorizedRoutes.ScheduledMealRoutes.List())}
-                />
-            </DeferredModalContent>
-        </Modal>
 
         <Modal
             open={creationModal === 'shoppingList'}

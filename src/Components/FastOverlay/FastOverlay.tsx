@@ -44,7 +44,19 @@ const overlayMotionEase = "cubic-bezier(0.16, 1, 0.3, 1)";
 const backdropInAnimation = `my-recipes-fast-overlay-fade-in 120ms ${overlayMotionEase} both`;
 const modalInAnimation = `my-recipes-fast-modal-in 150ms ${overlayMotionEase} both`;
 const drawerInAnimation = `my-recipes-fast-drawer-in 150ms ${overlayMotionEase} both`;
-let overlayStackIndex = 0;
+let nextOverlayStackToken = 1;
+let activeOverlayStackTokens: number[] = [];
+
+const allocateOverlayStackToken = (): number => {
+    const token = nextOverlayStackToken;
+    nextOverlayStackToken += 1;
+    activeOverlayStackTokens = [...activeOverlayStackTokens, token];
+    return token;
+};
+
+const releaseOverlayStackToken = (token: number) => {
+    activeOverlayStackTokens = activeOverlayStackTokens.filter(item => item !== token);
+};
 
 const useBodyScrollLock = (locked: boolean) => {
     React.useEffect(() => {
@@ -69,16 +81,27 @@ const useEscapeClose = (open: boolean, onClose: () => void) => {
 };
 
 const useResolvedOverlayZIndex = (open: boolean, explicitZIndex: number | undefined, baseZIndex: number) => {
-    const autoZIndex = React.useRef<number>();
+    const stackToken = React.useRef<number>();
 
-    if (!open) {
-        autoZIndex.current = undefined;
-    } else if (explicitZIndex === undefined && autoZIndex.current === undefined) {
-        autoZIndex.current = baseZIndex + overlayStackIndex * 20;
-        overlayStackIndex += 1;
+    if (open && explicitZIndex === undefined && stackToken.current === undefined) {
+        stackToken.current = allocateOverlayStackToken();
     }
 
-    return explicitZIndex ?? autoZIndex.current ?? baseZIndex;
+    React.useEffect(() => {
+        if (!open || explicitZIndex !== undefined || stackToken.current === undefined) return;
+        const token = stackToken.current;
+
+        return () => {
+            releaseOverlayStackToken(token);
+            if (stackToken.current === token) stackToken.current = undefined;
+        };
+    }, [explicitZIndex, open]);
+
+    if (explicitZIndex !== undefined) return explicitZIndex;
+
+    const token = stackToken.current;
+    const stackIndex = token === undefined ? -1 : activeOverlayStackTokens.indexOf(token);
+    return baseZIndex + Math.max(0, stackIndex) * 20;
 };
 
 const overlayMotionStyles = <style>{`

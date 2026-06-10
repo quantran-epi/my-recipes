@@ -55,6 +55,8 @@ type CookingSessionWidgetProps = {
     onDone: () => void;
 }
 
+const COOKING_NESTED_MODAL_Z_INDEX = 4400;
+
 const collectAllSteps = (
     dish: Dishes,
     dishesById: Map<string, Dishes>,
@@ -318,7 +320,7 @@ export const CookingSessionWidget: React.FunctionComponent<CookingSessionWidgetP
             destroyOnClose
             onCancel={toggleShoppingList.hide}
             footer={null}
-            zIndex={2500}
+            zIndex={COOKING_NESTED_MODAL_Z_INDEX}
         >
             <DeferredModalContent active={toggleShoppingList.value}>
                 <ShoppingListAddWidget

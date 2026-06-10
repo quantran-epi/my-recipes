@@ -16,16 +16,40 @@ export const Button: FunctionComponent<IButtonProps> = ({
     size,
     ...props
 }) => {
+    const _isExplicitCircleButton = (): boolean => {
+        const hasChildren = React.Children.count(props.children) > 0;
+        const isEqualSize = style?.width !== undefined && style?.height !== undefined && style.width === style.height;
+        const requestedRadius = style?.borderRadius;
+
+        return Boolean(props.icon)
+            && !hasChildren
+            && isEqualSize
+            && (requestedRadius === 999 || requestedRadius === "999px" || requestedRadius === "50%");
+    }
+
+    const _getBorderRadius = (): React.CSSProperties["borderRadius"] => {
+        const requestedRadius = style?.borderRadius;
+
+        if (_isExplicitCircleButton()) return requestedRadius;
+        if (typeof requestedRadius === "number" && requestedRadius > 10) return 8;
+        if (typeof requestedRadius === "string") {
+            const parsedRadius = Number.parseFloat(requestedRadius);
+            if (requestedRadius === "50%" || requestedRadius === "999" || requestedRadius === "999px" || parsedRadius > 10) return 8;
+        }
+
+        return requestedRadius ?? 8;
+    }
+
     const _styles = (): React.CSSProperties => {
         return {
             display: "inline-flex",
             alignItems: "center",
             justifyContent: "center",
-            borderRadius: 999,
             fontWeight: 650,
             backgroundColor: color,
             borderColor: color,
-            ...style
+            ...style,
+            borderRadius: _getBorderRadius(),
         }
     }
 

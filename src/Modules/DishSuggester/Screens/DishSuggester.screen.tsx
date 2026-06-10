@@ -1125,7 +1125,7 @@ export const DishSuggesterScreen: React.FC<DishSuggesterScreenProps> = ({ open, 
                 </Button>
             </Box> : selectedDishesForActions.length === 0 ? <Box style={{ textAlign: 'center', padding: '26px 0' }}>
                 <Typography.Text type='secondary'>Chọn ít nhất một món để đánh giá.</Typography.Text>
-            </Box> : <Stack direction='column' gap={12}>
+            </Box> : <Stack direction='column' gap={12} style={{ width: '100%' }}>
                 <Box style={{ border: '1px solid #e6f4ff', borderRadius: 8, background: '#f8fbff', padding: 10 }}>
                     <Typography.Text strong style={{ display: 'block', fontSize: 12, marginBottom: 6 }}>Thành viên dùng để đánh giá</Typography.Text>
                     <Select
@@ -1140,7 +1140,7 @@ export const DishSuggesterScreen: React.FC<DishSuggesterScreenProps> = ({ open, 
                     />
                 </Box>
 
-                {suitabilityResults.map(result => <Box key={result.dish.id} style={{ border: '1px solid rgba(15,23,42,0.08)', borderRadius: 8, background: '#fff', padding: 12 }}>
+                {suitabilityResults.map(result => <Box key={result.dish.id} style={{ width: '100%', boxSizing: 'border-box', border: '1px solid rgba(15,23,42,0.08)', borderRadius: 8, background: '#fff', padding: 12 }}>
                     <Stack justify='space-between' align='flex-start' gap={10} style={{ marginBottom: 10 }}>
                         <div style={{ minWidth: 0 }}>
                             <Typography.Text strong style={{ display: 'block', color: '#111827', fontSize: 16, lineHeight: '21px', overflowWrap: 'anywhere' }}>{result.dish.name}</Typography.Text>
@@ -1149,8 +1149,8 @@ export const DishSuggesterScreen: React.FC<DishSuggesterScreenProps> = ({ open, 
                         <Tag color={result.averageScore >= 76 ? 'green' : result.averageScore >= 58 ? 'blue' : 'volcano'} style={{ marginRight: 0 }}>{result.averageScore}%</Tag>
                     </Stack>
 
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))', gap: 8 }}>
-                        {result.members.map(memberResult => <Box key={memberResult.member.id} style={{ border: `1px solid ${memberResult.tone === 'warning' ? '#ffd591' : memberResult.tone === 'success' ? '#b7eb8f' : '#d6e4ff'}`, borderRadius: 8, background: memberResult.tone === 'warning' ? '#fff7e6' : memberResult.tone === 'success' ? '#f6ffed' : '#f8fbff', padding: 9, minWidth: 0 }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr)', gap: 8 }}>
+                        {result.members.map(memberResult => <Box key={memberResult.member.id} style={{ width: '100%', boxSizing: 'border-box', border: `1px solid ${memberResult.tone === 'warning' ? '#ffd591' : memberResult.tone === 'success' ? '#b7eb8f' : '#d6e4ff'}`, borderRadius: 8, background: memberResult.tone === 'warning' ? '#fff7e6' : memberResult.tone === 'success' ? '#f6ffed' : '#f8fbff', padding: 9, minWidth: 0 }}>
                             <Stack justify='space-between' align='center' gap={8} style={{ marginBottom: 6 }}>
                                 <Stack align='center' gap={6} style={{ minWidth: 0 }}>
                                     <span style={{ width: 9, height: 9, borderRadius: 99, background: memberResult.member.color ?? '#1677ff', flexShrink: 0 }} />

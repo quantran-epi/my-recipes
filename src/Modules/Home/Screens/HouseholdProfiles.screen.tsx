@@ -1,4 +1,4 @@
-import { DeleteOutlined, PlusOutlined, UserOutlined } from '@ant-design/icons';
+import { DeleteOutlined, PlusOutlined, SaveOutlined, UserOutlined } from '@ant-design/icons';
 import { Button } from '@components/Button';
 import { Image } from '@components/Image';
 import { Box } from '@components/Layout/Box';
@@ -79,8 +79,9 @@ const pageCss = `
     display: grid;
     justify-items: end;
     gap: 4px;
-    min-width: 132px;
+    min-width: 112px;
     width: 100%;
+    justify-self: end;
 }
 .household-member-list {
     display: flex;
@@ -104,6 +105,12 @@ const pageCss = `
     align-items: center;
     width: 100%;
     justify-items: end;
+}
+.household-editor-action-buttons {
+    display: flex;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    gap: 8px;
 }
 .household-editor-switch {
     display: grid;
@@ -164,18 +171,27 @@ const pageCss = `
     padding-top: 0;
 }
 @media (max-width: 700px) {
-    .household-member-row,
     .household-editor-actions,
     .household-field-row {
         grid-template-columns: minmax(0, 1fr);
     }
+    .household-member-row {
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: 8px;
+    }
     .household-member-toggle {
         justify-items: end;
         min-width: 0;
-        width: 100%;
+        width: auto;
     }
     .household-editor-actions {
         justify-items: stretch;
+    }
+    .household-editor-action-buttons {
+        justify-content: stretch;
+    }
+    .household-editor-action-buttons .ant-btn {
+        flex: 1 1 120px;
     }
     .household-editor-switch {
         grid-template-columns: minmax(0, 1fr) auto;
@@ -198,6 +214,7 @@ export const HouseholdProfilesScreen: React.FC = () => {
     const ingredients = useSelector(selectIngredients);
     const nutritionGoals = useSelector(selectNutritionGoals);
     const [activeMemberId, setActiveMemberId] = useState<string | undefined>(() => members[0]?.id);
+    const [draftMember, setDraftMember] = useState<HouseholdMemberProfile | null>(null);
 
     React.useEffect(() => {
         if (activeMemberId && members.some(member => member.id === activeMemberId)) return;
@@ -205,6 +222,24 @@ export const HouseholdProfilesScreen: React.FC = () => {
     }, [activeMemberId, members]);
 
     const activeMember = members.find(member => member.id === activeMemberId);
+
+    React.useEffect(() => {
+        if (!activeMember) {
+            setDraftMember(null);
+            return;
+        }
+
+        setDraftMember({
+            ...activeMember,
+            favoriteDishIds: [...activeMember.favoriteDishIds],
+            avoidedDishIds: [...activeMember.avoidedDishIds],
+            favoriteIngredientIds: [...activeMember.favoriteIngredientIds],
+            avoidedIngredientIds: [...activeMember.avoidedIngredientIds],
+            preferredTags: [...activeMember.preferredTags],
+            avoidedTags: [...activeMember.avoidedTags],
+        });
+    }, [activeMember]);
+
     const effectiveSelectedMemberIds = useMemo(() => {
         if (selectedMemberIds.length === 0) return members.map(member => member.id);
         const memberIds = new Set(members.map(member => member.id));
@@ -251,8 +286,14 @@ export const HouseholdProfilesScreen: React.FC = () => {
         message.success('Đã thêm hồ sơ thành viên');
     };
 
-    const _updateMember = (member: HouseholdMemberProfile, patch: Partial<HouseholdMemberProfile>) => {
-        dispatch(upsertHouseholdMemberProfile({ ...member, ...patch }));
+    const _updateDraftMember = (patch: Partial<HouseholdMemberProfile>) => {
+        setDraftMember(current => current ? { ...current, ...patch } : current);
+    };
+
+    const _saveDraftMember = () => {
+        if (!draftMember) return;
+        dispatch(upsertHouseholdMemberProfile(draftMember));
+        message.success(`Đã lưu hồ sơ ${draftMember.name.trim() || 'thành viên'}`);
     };
 
     const _removeMember = (member: HouseholdMemberProfile) => {
@@ -321,17 +362,17 @@ export const HouseholdProfilesScreen: React.FC = () => {
             </Box>
 
             <Box className='household-panel household-editor-panel'>
-                {!activeMember ? <Box style={{ minHeight: 260, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                {!activeMember || !draftMember ? <Box style={{ minHeight: 260, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                     <Empty description='Chọn hoặc thêm một thành viên để chỉnh hồ sơ' image={Empty.PRESENTED_IMAGE_SIMPLE} />
                 </Box> : <Stack direction='column' gap={14}>
                     <Stack justify='space-between' align='flex-start' gap={10} wrap='wrap'>
                         <div className='household-editor-heading'>
-                            <span style={{ width: 42, height: 42, borderRadius: 14, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', background: `${activeMember.color ?? '#1677ff'}18`, color: activeMember.color ?? '#1677ff', border: `1px solid ${activeMember.color ?? '#1677ff'}30`, flexShrink: 0 }}>
+                            <span style={{ width: 42, height: 42, borderRadius: 14, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', background: `${draftMember.color ?? '#1677ff'}18`, color: draftMember.color ?? '#1677ff', border: `1px solid ${draftMember.color ?? '#1677ff'}30`, flexShrink: 0 }}>
                                 <UserOutlined style={{ fontSize: 20 }} />
                             </span>
                             <div style={{ minWidth: 0 }}>
-                                <Typography.Text strong style={{ display: 'block', color: '#111827', fontSize: 18, lineHeight: '24px', overflowWrap: 'anywhere' }}>{activeMember.name}</Typography.Text>
-                                <Typography.Text type='secondary' style={{ display: 'block', fontSize: 12, lineHeight: '17px' }}>Tự lưu khi chỉnh sửa</Typography.Text>
+                                <Typography.Text strong style={{ display: 'block', color: '#111827', fontSize: 18, lineHeight: '24px', overflowWrap: 'anywhere' }}>{draftMember.name || 'Thành viên'}</Typography.Text>
+                                <Typography.Text type='secondary' style={{ display: 'block', fontSize: 12, lineHeight: '17px' }}>Bấm Lưu sau khi chỉnh sửa</Typography.Text>
                             </div>
                         </div>
                         <div className='household-editor-actions'>
@@ -342,64 +383,85 @@ export const HouseholdProfilesScreen: React.FC = () => {
                                 </span>
                                 <Switch checked={activeMemberSelected} onChange={checked => _setMemberSelected(activeMember.id, checked)} />
                             </div>
-                            <Popconfirm title='Xoá hồ sơ này?' okText='Xoá' cancelText='Huỷ' okButtonProps={{ danger: true }} onConfirm={() => _removeMember(activeMember)}>
-                                <Button danger icon={<DeleteOutlined />}>Xoá</Button>
-                            </Popconfirm>
+                            <div className='household-editor-action-buttons'>
+                                <Button type='primary' icon={<SaveOutlined />} onClick={_saveDraftMember}>Lưu</Button>
+                                <Popconfirm title='Xoá hồ sơ này?' okText='Xoá' cancelText='Huỷ' okButtonProps={{ danger: true }} onConfirm={() => _removeMember(activeMember)}>
+                                    <Button danger icon={<DeleteOutlined />}>Xoá</Button>
+                                </Popconfirm>
+                            </div>
                         </div>
                     </Stack>
 
                     <div className='household-field-list'>
                         <div className='household-field-row'>
                             <FieldLabel>Tên</FieldLabel>
-                            <div className='household-field-control'><Input value={activeMember.name} onChange={event => _updateMember(activeMember, { name: event.target.value })} placeholder='Tên thành viên' /></div>
+                            <div className='household-field-control'><Input value={draftMember.name} onChange={event => _updateDraftMember({ name: event.target.value })} placeholder='Tên thành viên' /></div>
                         </div>
                         <div className='household-field-row'>
                             <FieldLabel>Khẩu phần thường ăn</FieldLabel>
-                            <div className='household-field-control'><InputNumber min={0.5} max={12} step={0.5} value={activeMember.portionPreference ?? 1} addonAfter='phần' onChange={value => _updateMember(activeMember, { portionPreference: Number(value ?? 1) })} style={{ width: '100%' }} /></div>
+                            <div className='household-field-control'><InputNumber min={0.5} max={12} step={0.5} value={draftMember.portionPreference ?? 1} addonAfter='phần' onChange={value => _updateDraftMember({ portionPreference: Number(value ?? 1) })} style={{ width: '100%' }} /></div>
                         </div>
                         <div className='household-field-row'>
                             <FieldLabel>Mục tiêu dinh dưỡng</FieldLabel>
-                            <div className='household-field-control'><Select allowClear placeholder='Chọn mục tiêu' value={activeMember.nutritionGoalId} onChange={value => _updateMember(activeMember, { nutritionGoalId: value })} options={nutritionGoals.map(goal => ({ value: goal.id, label: goal.name }))} style={{ width: '100%' }} /></div>
+                            <div className='household-field-control'><Select allowClear placeholder='Chọn mục tiêu' value={draftMember.nutritionGoalId} onChange={value => _updateDraftMember({ nutritionGoalId: value })} options={nutritionGoals.map(goal => ({ value: goal.id, label: goal.name }))} style={{ width: '100%' }} /></div>
                         </div>
                     </div>
 
                     <div>
                         <FieldLabel>Màu hồ sơ</FieldLabel>
                         <div className='household-color-list'>
-                            {MEMBER_COLORS.map(color => <button key={color} type='button' aria-label={`Chọn màu ${color}`} onClick={() => _updateMember(activeMember, { color })} style={{ width: 32, height: 32, borderRadius: 12, border: activeMember.color === color ? '3px solid #111827' : '1px solid #d9d9d9', background: color, cursor: 'pointer' }} />)}
+                            {MEMBER_COLORS.map(color => <button key={color} type='button' aria-label={`Chọn màu ${color}`} onClick={() => _updateDraftMember({ color })} style={{ width: 32, height: 32, borderRadius: 12, border: draftMember.color === color ? '3px solid #111827' : '1px solid #d9d9d9', background: color, cursor: 'pointer' }} />)}
                         </div>
                     </div>
 
                     <div className='household-field-list'>
                         <div className='household-field-row'>
                             <FieldLabel>Món thích</FieldLabel>
-                            <div className='household-field-control'><Select mode='multiple' allowClear maxTagCount='responsive' value={activeMember.favoriteDishIds} onChange={ids => _updateMember(activeMember, { favoriteDishIds: ids, avoidedDishIds: activeMember.avoidedDishIds.filter(id => !ids.includes(id)) })} options={dishOptions} style={{ width: '100%' }} placeholder='Chọn món' /></div>
+                            <div className='household-field-control'><Select mode='multiple' allowClear maxTagCount='responsive' value={draftMember.favoriteDishIds} onChange={ids => {
+                                const nextIds = ids ?? [];
+                                _updateDraftMember({ favoriteDishIds: nextIds, avoidedDishIds: draftMember.avoidedDishIds.filter(id => !nextIds.includes(id)) });
+                            }} options={dishOptions} style={{ width: '100%' }} placeholder='Chọn món' /></div>
                         </div>
                         <div className='household-field-row'>
                             <FieldLabel>Món tránh</FieldLabel>
-                            <div className='household-field-control'><Select mode='multiple' allowClear maxTagCount='responsive' value={activeMember.avoidedDishIds} onChange={ids => _updateMember(activeMember, { avoidedDishIds: ids, favoriteDishIds: activeMember.favoriteDishIds.filter(id => !ids.includes(id)) })} options={dishOptions} style={{ width: '100%' }} placeholder='Chọn món' /></div>
+                            <div className='household-field-control'><Select mode='multiple' allowClear maxTagCount='responsive' value={draftMember.avoidedDishIds} onChange={ids => {
+                                const nextIds = ids ?? [];
+                                _updateDraftMember({ avoidedDishIds: nextIds, favoriteDishIds: draftMember.favoriteDishIds.filter(id => !nextIds.includes(id)) });
+                            }} options={dishOptions} style={{ width: '100%' }} placeholder='Chọn món' /></div>
                         </div>
                         <div className='household-field-row'>
                             <FieldLabel>Nguyên liệu thích</FieldLabel>
-                            <div className='household-field-control'><Select mode='multiple' allowClear maxTagCount='responsive' value={activeMember.favoriteIngredientIds} onChange={ids => _updateMember(activeMember, { favoriteIngredientIds: ids, avoidedIngredientIds: activeMember.avoidedIngredientIds.filter(id => !ids.includes(id)) })} options={ingredientOptions} style={{ width: '100%' }} placeholder='Chọn nguyên liệu' /></div>
+                            <div className='household-field-control'><Select mode='multiple' allowClear maxTagCount='responsive' value={draftMember.favoriteIngredientIds} onChange={ids => {
+                                const nextIds = ids ?? [];
+                                _updateDraftMember({ favoriteIngredientIds: nextIds, avoidedIngredientIds: draftMember.avoidedIngredientIds.filter(id => !nextIds.includes(id)) });
+                            }} options={ingredientOptions} style={{ width: '100%' }} placeholder='Chọn nguyên liệu' /></div>
                         </div>
                         <div className='household-field-row'>
                             <FieldLabel>Nguyên liệu tránh</FieldLabel>
-                            <div className='household-field-control'><Select mode='multiple' allowClear maxTagCount='responsive' value={activeMember.avoidedIngredientIds} onChange={ids => _updateMember(activeMember, { avoidedIngredientIds: ids, favoriteIngredientIds: activeMember.favoriteIngredientIds.filter(id => !ids.includes(id)) })} options={ingredientOptions} style={{ width: '100%' }} placeholder='Chọn nguyên liệu' /></div>
+                            <div className='household-field-control'><Select mode='multiple' allowClear maxTagCount='responsive' value={draftMember.avoidedIngredientIds} onChange={ids => {
+                                const nextIds = ids ?? [];
+                                _updateDraftMember({ avoidedIngredientIds: nextIds, favoriteIngredientIds: draftMember.favoriteIngredientIds.filter(id => !nextIds.includes(id)) });
+                            }} options={ingredientOptions} style={{ width: '100%' }} placeholder='Chọn nguyên liệu' /></div>
                         </div>
                         <div className='household-field-row'>
                             <FieldLabel>Kiểu món thích</FieldLabel>
-                            <div className='household-field-control'><Select mode='multiple' allowClear maxTagCount='responsive' value={activeMember.preferredTags} onChange={tags => _updateMember(activeMember, { preferredTags: tags, avoidedTags: activeMember.avoidedTags.filter(tag => !tags.includes(tag)) })} options={tagOptions} style={{ width: '100%' }} placeholder='Chọn tag' /></div>
+                            <div className='household-field-control'><Select mode='multiple' allowClear maxTagCount='responsive' value={draftMember.preferredTags} onChange={tags => {
+                                const nextTags = tags ?? [];
+                                _updateDraftMember({ preferredTags: nextTags, avoidedTags: draftMember.avoidedTags.filter(tag => !nextTags.includes(tag)) });
+                            }} options={tagOptions} style={{ width: '100%' }} placeholder='Chọn tag' /></div>
                         </div>
                         <div className='household-field-row'>
                             <FieldLabel>Kiểu món tránh</FieldLabel>
-                            <div className='household-field-control'><Select mode='multiple' allowClear maxTagCount='responsive' value={activeMember.avoidedTags} onChange={tags => _updateMember(activeMember, { avoidedTags: tags, preferredTags: activeMember.preferredTags.filter(tag => !tags.includes(tag)) })} options={tagOptions} style={{ width: '100%' }} placeholder='Chọn tag' /></div>
+                            <div className='household-field-control'><Select mode='multiple' allowClear maxTagCount='responsive' value={draftMember.avoidedTags} onChange={tags => {
+                                const nextTags = tags ?? [];
+                                _updateDraftMember({ avoidedTags: nextTags, preferredTags: draftMember.preferredTags.filter(tag => !nextTags.includes(tag)) });
+                            }} options={tagOptions} style={{ width: '100%' }} placeholder='Chọn tag' /></div>
                         </div>
                     </div>
 
                     <div>
                         <FieldLabel>Ghi chú riêng</FieldLabel>
-                        <div className='household-field-control'><Input.TextArea value={activeMember.notes} onChange={event => _updateMember(activeMember, { notes: event.target.value })} placeholder='Ví dụ: ăn ít cay, không đậu phộng, khẩu phần trẻ em...' autoSize={{ minRows: 3, maxRows: 6 }} /></div>
+                        <div className='household-field-control'><Input.TextArea value={draftMember.notes} onChange={event => _updateDraftMember({ notes: event.target.value })} placeholder='Ví dụ: ăn ít cay, không đậu phộng, khẩu phần trẻ em...' autoSize={{ minRows: 3, maxRows: 6 }} /></div>
                     </div>
                 </Stack>}
             </Box>

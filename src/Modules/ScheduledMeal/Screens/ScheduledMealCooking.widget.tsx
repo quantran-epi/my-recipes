@@ -98,6 +98,11 @@ export const ScheduledMealCookingModal: React.FC<ScheduledMealCookingModalProps>
                         const statusLabel = session?.steps?.length
                             ? `Đang nấu · bước ${(session.currentStepIndex ?? 0) + 1}/${session.steps.length}`
                             : session ? 'Đang nấu' : finished ? 'Đã xong' : 'Chưa bắt đầu';
+                        const actionStyle: React.CSSProperties = session
+                            ? { minWidth: 104, background: '#1677ff', borderColor: '#1677ff', color: '#fff', boxShadow: '0 8px 18px rgba(22,119,255,0.20)' }
+                            : finished
+                                ? { minWidth: 104, color: '#389e0d', borderColor: 'rgba(56,158,13,0.35)', background: '#f6ffed' }
+                                : { minWidth: 104, color: '#fa8c16', borderColor: 'rgba(250,140,22,0.42)', background: '#fff7e6' };
                         if (!dish) return null;
                         return <Box key={dishId} style={{ width: '100%', boxSizing: 'border-box', border: '1px solid rgba(15,23,42,0.08)', borderRadius: 8, background: '#fff', padding: 10 }}>
                             <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) auto', gap: 12, alignItems: 'center' }}>
@@ -105,7 +110,7 @@ export const ScheduledMealCookingModal: React.FC<ScheduledMealCookingModalProps>
                                     <Typography.Text strong style={{ display: 'block', color: '#111827', lineHeight: '19px', overflowWrap: 'anywhere' }}>{dish.name}</Typography.Text>
                                     <Typography.Text type='secondary' style={{ display: 'block', fontSize: 12, lineHeight: '17px', marginTop: 2 }}>{statusLabel}{dishServings?.[dishId] ? ` · ${dishServings[dishId]} phần` : ''}</Typography.Text>
                                 </div>
-                                <Button icon={<FireOutlined />} onClick={() => _openDish(dishId)} style={{ minWidth: 104 }}>
+                                <Button type={session ? 'primary' : 'default'} icon={<FireOutlined />} onClick={() => _openDish(dishId)} style={actionStyle}>
                                     {session ? 'Tiếp tục' : finished ? 'Nấu lại' : 'Bắt đầu'}
                                 </Button>
                             </div>

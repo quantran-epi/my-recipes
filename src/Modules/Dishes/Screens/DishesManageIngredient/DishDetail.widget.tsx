@@ -30,6 +30,8 @@ type DishDetailWidgetProps = {
     dish: Dishes;
 }
 
+const DISH_DETAIL_NESTED_MODAL_Z_INDEX = 4300;
+
 export const DishesDetailWidget: React.FunctionComponent<DishDetailWidgetProps> = (props) => {
     const dishesById = useSelector(selectDishesById);
     const navigate = useNavigate();
@@ -116,7 +118,7 @@ export const DishesDetailWidget: React.FunctionComponent<DishDetailWidgetProps> 
                 <Image src={NoodlesIcon} preview={false} width={24} style={{ marginBottom: 3 }} />
                 {dish.name}
             </Space>
-        } destroyOnClose={true} onCancel={toggleDishesDetail.hide} footer={null} zIndex={2200}>
+        } destroyOnClose={true} onCancel={toggleDishesDetail.hide} footer={null} zIndex={DISH_DETAIL_NESTED_MODAL_Z_INDEX}>
             <DeferredModalContent active={toggleDishesDetail.value} minHeight={220}>
                 <DishesDetailWidget dish={dish} />
             </DeferredModalContent>
@@ -128,7 +130,7 @@ export const DishesDetailWidget: React.FunctionComponent<DishDetailWidgetProps> 
             destroyOnClose
             onCancel={toggleCooking.hide}
             footer={null}
-            zIndex={2300}
+            zIndex={DISH_DETAIL_NESTED_MODAL_Z_INDEX}
         >
             <DeferredModalContent active={toggleCooking.value}>
                 <CookingSessionWidget dish={props.dish} onDone={toggleCooking.hide} />
@@ -141,7 +143,7 @@ export const DishesDetailWidget: React.FunctionComponent<DishDetailWidgetProps> 
             destroyOnClose
             onCancel={toggleShoppingList.hide}
             footer={null}
-            zIndex={2300}
+            zIndex={DISH_DETAIL_NESTED_MODAL_Z_INDEX}
         >
             <DeferredModalContent active={toggleShoppingList.value}>
                 <ShoppingListAddWidget
