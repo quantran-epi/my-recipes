@@ -47,7 +47,9 @@ type PlannedDish = {
     reasons: string[];
     costLabel?: string;
     costAverage?: number;
-    mealBudget?: number;
+    dayCostLabel?: string;
+    dayCostAverage?: number;
+    dayBudget?: number;
     nutritionLabel?: string;
     nutritionGoalName?: string;
     nutritionMatch?: NutritionGoalMatch;
@@ -144,6 +146,9 @@ const criteriaOptions: Array<{ value: CriteriaKey; label: string }> = [
     { value: 'nutrition', label: 'Dinh dưỡng' },
     { value: 'member', label: 'Khẩu vị nhà' },
 ];
+
+const BASE_CANDIDATE_LIMIT = 32;
+const LOW_COST_CANDIDATE_LIMIT = 18;
 
 const clamp = (value: number) => Math.max(0, Math.min(100, Math.round(value)));
 
@@ -280,42 +285,8 @@ export const SmartMealPlannerScreen: React.FC = () => {
             });
 
             const cost = getAverageCost(dish, ingredients, dishes);
-            let costAverage: number | undefined;
-            let mealBudget: number | undefined;
-            if (enabledCriteria.has('budget')) {
-                mealBudget = Math.max(1, dailyBudget / 3);
-                if (cost) {
-                    costAverage = cost.average;
-                    if (cost.average <= mealBudget) {
-                        score += 17;
-                        scoreDetails.push({
-                            label: 'Ngân sách',
-                            value: `${IngredientPriceHelper.formatRange(cost)} so với mục tiêu ${IngredientPriceHelper.formatCurrency(mealBudget)}/bữa`,
-                            impact: 17,
-                            description: 'Món nằm trong phần ngân sách ước tính cho một bữa, nên được ưu tiên khi tiêu chí Ngân sách đang bật.',
-                        });
-                        reasons.push('vừa ngân sách');
-                    } else {
-                        const overBudgetImpact = -Math.min(24, (cost.average / mealBudget - 1) * 18);
-                        score += overBudgetImpact;
-                        scoreDetails.push({
-                            label: 'Ngân sách',
-                            value: `${IngredientPriceHelper.formatRange(cost)} so với mục tiêu ${IngredientPriceHelper.formatCurrency(mealBudget)}/bữa`,
-                            impact: overBudgetImpact,
-                            description: 'Món cao hơn phần ngân sách ước tính cho một bữa, nên bị trừ điểm theo mức vượt ngân sách.',
-                        });
-                    }
-                } else {
-                    score -= 3;
-                    scoreDetails.push({
-                        label: 'Ngân sách',
-                        value: 'Thiếu dữ liệu giá',
-                        impact: -3,
-                        description: 'Không đủ giá nguyên liệu để tính chi phí món này. App trừ nhẹ vì không chắc món có phù hợp ngân sách hay không.',
-                    });
-                    reasons.push('thiếu giá');
-                }
-            } else {
+            const costAverage = cost?.average;
+            if (!enabledCriteria.has('budget')) {
                 scoreDetails.push({
                     label: 'Ngân sách',
                     value: 'Không dùng để xếp hạng',
@@ -408,7 +379,6 @@ export const SmartMealPlannerScreen: React.FC = () => {
                 reasons: Array.from(new Set(reasons)).slice(0, 4),
                 costLabel: cost ? IngredientPriceHelper.formatRange(cost) : undefined,
                 costAverage,
-                mealBudget,
                 nutritionLabel,
                 nutritionGoalName,
                 nutritionMatch,
@@ -418,23 +388,137 @@ export const SmartMealPlannerScreen: React.FC = () => {
             };
         };
 
-        const pickDish = (slot: MealSlot): PlannedDish | undefined => {
+        const getDailyBudgetScore = (items: PlannedDish[]) => {
+            const dayBudget = Math.max(1, dailyBudget);
+            const dayCostAverage = items.reduce((sum, item) => sum + (item.costAverage ?? 0), 0);
+            const missingPriceCount = items.filter(item => item.costAverage === undefined).length;
+            const dayCostLabel = IngredientPriceHelper.formatCurrency(dayCostAverage);
+            let impact = 0;
+            let reason = 'vừa ngân sách ngày';
+            let description = 'Tổng chi phí ước tính của cả ngày nằm trong ngân sách ngày, nên tổ hợp bữa này được ưu tiên. Các bữa có thể dùng ngân sách không đều nhau miễn tổng ngày phù hợp.';
+
+            if (missingPriceCount === items.length) {
+                impact = -9;
+                reason = 'thiếu giá';
+                description = 'Cả ngày chưa đủ dữ liệu giá để kiểm tra ngân sách. Planner trừ điểm vì chưa chắc tổ hợp bữa này có nằm trong ngân sách ngày hay không.';
+            } else if (dayCostAverage <= dayBudget) {
+                impact = 30;
+            } else {
+                impact = -Math.min(45, (dayCostAverage / dayBudget - 1) * 35);
+                reason = 'vượt ngân sách ngày';
+                description = 'Tổng chi phí ước tính của cả ngày cao hơn ngân sách ngày, nên tổ hợp bữa này bị trừ điểm theo mức vượt ngân sách.';
+            }
+
+            if (missingPriceCount > 0 && missingPriceCount < items.length) {
+                impact -= Math.min(9, missingPriceCount * 3);
+                description += ` Có ${missingPriceCount} bữa thiếu dữ liệu giá, nên tổng ngày có thể thấp hơn thực tế.`;
+            }
+
+            return { dayBudget, dayCostAverage, dayCostLabel, impact, reason, description, missingPriceCount };
+        };
+
+        const applyDailyBudgetToDay = (itemsBySlot: Partial<Record<MealSlot, PlannedDish>>): Partial<Record<MealSlot, PlannedDish>> => {
+            if (!enabledCriteria.has('budget')) return itemsBySlot;
+            const slots: MealSlot[] = ['breakfast', 'lunch', 'dinner'];
+            const items = slots.map(slot => itemsBySlot[slot]).filter((item): item is PlannedDish => Boolean(item));
+            if (items.length === 0) return itemsBySlot;
+
+            const dailyBudgetScore = getDailyBudgetScore(items);
+            const perDishImpact = dailyBudgetScore.impact / items.length;
+
+            return slots.reduce((result, slot) => {
+                const item = itemsBySlot[slot];
+                if (!item) return result;
+                const itemCostLabel = item.costLabel ?? 'thiếu dữ liệu giá';
+                result[slot] = {
+                    ...item,
+                    score: clamp(item.score + perDishImpact),
+                    dayCostLabel: dailyBudgetScore.dayCostLabel,
+                    dayCostAverage: dailyBudgetScore.dayCostAverage,
+                    dayBudget: dailyBudgetScore.dayBudget,
+                    reasons: Array.from(new Set([...item.reasons, dailyBudgetScore.reason])).slice(0, 4),
+                    scoreDetails: [
+                        ...item.scoreDetails,
+                        {
+                            label: 'Ngân sách ngày',
+                            value: `Tổng ngày ${dailyBudgetScore.dayCostLabel} / ngân sách ${IngredientPriceHelper.formatCurrency(dailyBudgetScore.dayBudget)}; món này ${itemCostLabel}`,
+                            impact: perDishImpact,
+                            description: dailyBudgetScore.description,
+                        },
+                    ],
+                };
+                return result;
+            }, {} as Partial<Record<MealSlot, PlannedDish>>);
+        };
+
+        const buildSlotCandidates = (slot: MealSlot): PlannedDish[] => {
             const ranked = dishes
                 .filter(dish => dish.isCompleted !== false)
                 .map(dish => scoreDish(dish, slot))
                 .sort((a, b) => b.score - a.score || a.dish.name.localeCompare(b.dish.name));
-            const fresh = ranked.find(item => !usedDishIds.has(item.dish.id));
-            const picked = fresh ?? ranked[0];
-            if (picked) usedDishIds.add(picked.dish.id);
+            const byId = new Map<string, PlannedDish>();
+            const addCandidate = (item: PlannedDish) => {
+                if (!byId.has(item.dish.id)) byId.set(item.dish.id, item);
+            };
+
+            ranked.slice(0, BASE_CANDIDATE_LIMIT).forEach(addCandidate);
+
+            if (enabledCriteria.has('budget')) {
+                ranked
+                    .filter(item => item.costAverage !== undefined)
+                    .sort((a, b) => (a.costAverage ?? Number.POSITIVE_INFINITY) - (b.costAverage ?? Number.POSITIVE_INFINITY))
+                    .slice(0, LOW_COST_CANDIDATE_LIMIT)
+                    .forEach(addCandidate);
+            }
+
+            return Array.from(byId.values()).sort((a, b) => b.score - a.score || a.dish.name.localeCompare(b.dish.name));
+        };
+
+        const pickDayDishes = (): Partial<Record<MealSlot, PlannedDish>> => {
+            const breakfastCandidates = buildSlotCandidates('breakfast');
+            const lunchCandidates = buildSlotCandidates('lunch');
+            const dinnerCandidates = buildSlotCandidates('dinner');
+
+            const findBest = (allowDuplicateDishes: boolean) => {
+                let best: { itemsBySlot: Partial<Record<MealSlot, PlannedDish>>; score: number; overage: number } | undefined;
+
+                breakfastCandidates.forEach(breakfast => {
+                    lunchCandidates.forEach(lunch => {
+                        dinnerCandidates.forEach(dinner => {
+                            const items = [breakfast, lunch, dinner].filter(Boolean);
+                            const ids = items.map(item => item.dish.id);
+                            if (!allowDuplicateDishes && new Set(ids).size !== ids.length) return;
+
+                            const dailyBudgetScore = enabledCriteria.has('budget') ? getDailyBudgetScore(items) : undefined;
+                            const score = items.reduce((sum, item) => sum + item.score, 0) + (dailyBudgetScore?.impact ?? 0);
+                            const overage = dailyBudgetScore ? Math.max(0, dailyBudgetScore.dayCostAverage - dailyBudgetScore.dayBudget) : 0;
+                            if (!best || score > best.score || (score === best.score && overage < best.overage)) {
+                                best = { itemsBySlot: { breakfast, lunch, dinner }, score, overage };
+                            }
+                        });
+                    });
+                });
+
+                return best;
+            };
+
+            const best = findBest(false) ?? findBest(true);
+            const picked = applyDailyBudgetToDay(best?.itemsBySlot ?? {});
+            Object.values(picked).forEach(item => {
+                if (item) usedDishIds.add(item.dish.id);
+            });
             return picked;
         };
 
-        return Array.from({ length: dayCount }).map((_, index) => ({
-            date: startDate.add(index, 'day').startOf('day'),
-            breakfast: pickDish('breakfast'),
-            lunch: pickDish('lunch'),
-            dinner: pickDish('dinner'),
-        }));
+        return Array.from({ length: dayCount }).map((_, index) => {
+            const picked = pickDayDishes();
+            return {
+                date: startDate.add(index, 'day').startOf('day'),
+                breakfast: picked.breakfast,
+                lunch: picked.lunch,
+                dinner: picked.dinner,
+            };
+        });
     }, [criteria, dailyBudget, dayCount, dishes, ingredients, ingredientsById, nutritionGoals, selectedMembers, selectedNutritionGoal, startDate, targetServings]);
 
     const plannedDishCount = plannedDays.reduce((sum, day) => sum + (day.breakfast ? 1 : 0) + (day.lunch ? 1 : 0) + (day.dinner ? 1 : 0), 0);
@@ -538,7 +622,7 @@ export const SmartMealPlannerScreen: React.FC = () => {
                         <PlannerInfoTag
                             color={getScoreColor(item.score)}
                             title='Điểm gợi ý'
-                            description='Điểm tổng hợp dùng để xếp món trong thực đơn thông minh. Điểm này cộng trừ theo bữa ăn, thời gian nấu, ngân sách, dinh dưỡng, khẩu vị nhà mình và tránh lặp món.'
+                            description='Điểm tổng hợp dùng để xếp món trong thực đơn thông minh. Điểm này cộng trừ theo bữa ăn, thời gian nấu, tổng ngân sách ngày, dinh dưỡng, khẩu vị nhà mình và tránh lặp món.'
                         >{item.score}%</PlannerInfoTag>
                     </Stack>
                     <Stack wrap='wrap' gap={5} style={{ marginTop: 6 }}>
@@ -583,7 +667,7 @@ export const SmartMealPlannerScreen: React.FC = () => {
                         <Tag color='cyan' style={{ marginRight: 0 }}>{detailSelection.date.format('DD/MM/YYYY')}</Tag>
                     </Stack>
                     <Typography.Text strong style={{ display: 'block', color: '#111827', fontSize: 18, lineHeight: '24px', marginTop: 6, overflowWrap: 'anywhere' }}>{detailSelection.item.dish.name}</Typography.Text>
-                    <Typography.Text type='secondary' style={{ display: 'block', fontSize: 12, lineHeight: '18px', marginTop: 4 }}>Món này được xếp hạng cho bữa {mealSlotMeta[detailSelection.slot].label.toLowerCase()} bằng cách bắt đầu từ điểm nền, rồi cộng/trừ theo từng tiêu chí đang bật. Điểm cuối cùng được giới hạn trong khoảng 0-100.</Typography.Text>
+                    <Typography.Text type='secondary' style={{ display: 'block', fontSize: 12, lineHeight: '18px', marginTop: 4 }}>Món này được xếp hạng cho bữa {mealSlotMeta[detailSelection.slot].label.toLowerCase()} bằng cách bắt đầu từ điểm nền, rồi cộng/trừ theo từng tiêu chí đang bật. Ngân sách được tính theo tổng cả ngày, không chia đều cho từng bữa. Điểm cuối cùng được giới hạn trong khoảng 0-100.</Typography.Text>
                 </div>
             </Box>
 
@@ -697,7 +781,7 @@ export const SmartMealPlannerScreen: React.FC = () => {
                         <DatePicker value={startDate} onChange={value => { if (value) { setStartDate(value.startOf('day')); _clearSuggestions(); } }} format='DD/MM/YYYY' style={{ width: '100%' }} />
                     </div>
                     <div>
-                        <PlannerFieldLabel helpKey='budget' label={<><DollarCircleOutlined /> Ngân sách mỗi ngày</>}>Mỗi ngày được chia tương đối cho sáng, trưa và tối. Món vượt ngân sách sẽ bị giảm điểm.</PlannerFieldLabel>
+                        <PlannerFieldLabel helpKey='budget' label={<><DollarCircleOutlined /> Ngân sách mỗi ngày</>}>Ngân sách được kiểm tra trên tổng cả ngày. Sáng, trưa và tối có thể dùng số tiền khác nhau, miễn tổng chi phí ước tính của ngày phù hợp ngân sách.</PlannerFieldLabel>
                         <InputNumber min={0} step={10000} value={dailyBudget} addonAfter='đ' onChange={value => { setDailyBudget(Number(value ?? 0)); _clearSuggestions(); }} style={{ width: '100%' }} />
                     </div>
                     <div>
