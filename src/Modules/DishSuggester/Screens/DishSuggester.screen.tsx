@@ -1,19 +1,22 @@
-import { BarChartOutlined, BulbOutlined, CalculatorOutlined, ClockCircleOutlined, ExportOutlined, LeftOutlined, MinusOutlined, PieChartOutlined, PlusOutlined, SettingOutlined, ShoppingCartOutlined, TeamOutlined, ThunderboltOutlined } from "@ant-design/icons";
+import { BarChartOutlined, BulbOutlined, CalculatorOutlined, ClockCircleOutlined, ExportOutlined, FireOutlined, LeftOutlined, MinusOutlined, MoreOutlined, PieChartOutlined, PlusOutlined, SettingOutlined, ShoppingCartOutlined, TeamOutlined, ThunderboltOutlined } from "@ant-design/icons";
 import { DishDurationHelper } from "@common/Helpers/DishDurationHelper";
 import { DishNutritionHelper, DishNutritionSummary } from "@common/Helpers/DishNutritionHelper";
+import { DishServingHelper } from "@common/Helpers/DishServingHelper";
 import { HouseholdSuitabilityHelper } from "@common/Helpers/HouseholdSuitabilityHelper";
 import { NutritionGoalHelper, NutritionGoalMatch } from "@common/Helpers/NutritionGoalHelper";
 import { Button } from "@components/Button";
+import { Dropdown } from "@components/Dropdown";
 import { Image } from "@components/Image";
 import { Box } from "@components/Layout/Box";
 import { Space } from "@components/Layout/Space";
 import { Stack } from "@components/Layout/Stack";
+import { useMessage } from "@components/Message";
 import { DeferredModalContent, Modal } from "@components/Modal";
 import { Tag } from "@components/Tag";
 import { Typography } from "@components/Typography";
 import { useScheduledCalculation, useToggle } from "@hooks";
 import { DishScorer, ScoredDish, ScoredDishGroup } from "../Helpers/DishScorer";
-import { selectDishes, selectHouseholdMembers, selectIngredients, selectIngredientsById, selectInventory, selectInventoryHealthConfig, selectNutritionGoals, selectSelectedHouseholdMemberIds } from "@store/Selectors";
+import { selectDishes, selectDishesById, selectHouseholdMembers, selectIngredients, selectIngredientsById, selectInventory, selectInventoryHealthConfig, selectNutritionGoals, selectSelectedHouseholdMemberIds } from "@store/Selectors";
 import { InputNumber, Select, Spin } from "antd";
 import React, { useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -34,6 +37,7 @@ import { Collapse } from "antd";
 import { RootRoutes } from "@routing/RootRoutes";
 import { NutritionGoal as SharedNutritionGoal } from "@store/Models/SharedConfig";
 import { setSelectedHouseholdMemberIds } from "@store/Reducers/AppContextReducer";
+import { startCooking } from "@store/Reducers/CookingSessionReducer";
 
 type Mode = "ingredients" | "inventory" | "duration" | "nutrition";
 type SuggesterActionMode = "navigate" | "modal";
@@ -59,6 +63,16 @@ type DishSuggesterScreenProps = {
 
 const totalDurationMins = (dish: Dishes) => {
     return DishDurationHelper.getTotalMinutes(dish.duration);
+};
+
+const collectAllCookingSteps = (dish: Dishes, dishesById: Map<string, Dishes>, visited = new Set<string>()): string[] => {
+    if (visited.has(dish.id)) return [];
+    visited.add(dish.id);
+    const fromIncluded = (dish.includeDishes ?? []).flatMap(id => {
+        const included = dishesById.get(id);
+        return included ? collectAllCookingSteps(included, dishesById, visited) : [];
+    });
+    return [...fromIncluded, ...(dish.steps ?? []).map(step => step.content)];
 };
 
 type DishSuggestionCalculation = {
@@ -103,7 +117,9 @@ const PendingCalculationBox: React.FunctionComponent<{ text: string }> = ({ text
 export const DishSuggesterScreen: React.FC<DishSuggesterScreenProps> = ({ open, onClose, initialMode, initialIngredientIds, previewInline, pageInline, actionMode = "navigate" }) => {
     const navigate = useNavigate();
     const dispatch = useDispatch();
+    const message = useMessage();
     const dishes = useSelector(selectDishes);
+    const dishesById = useSelector(selectDishesById);
     const allIngredients = useSelector(selectIngredients);
     const ingredientsById = useSelector(selectIngredientsById);
     const inventory = useSelector(selectInventory);
@@ -370,6 +386,27 @@ export const DishSuggesterScreen: React.FC<DishSuggesterScreenProps> = ({ open, 
         _onClose();
     };
 
+    const _onStartCookingSession = (dishIds: string[]) => {
+        const targetDishes = dishIds
+            .map(id => dishesById.get(id))
+            .filter((dish): dish is Dishes => Boolean(dish));
+        if (targetDishes.length === 0) return;
+        const memberIds = selectedHouseholdMemberIds.length > 0 ? selectedHouseholdMemberIds : householdMembers.map(member => member.id);
+        targetDishes.forEach(dish => {
+            const ingredientIds = Array.from(new Set(DishServingHelper.collectIngredientAmounts(dish, dishes).map(row => row.ingredientId)));
+            dispatch(startCooking({
+                dishId: dish.id,
+                dishName: dish.name,
+                baseServings: DishServingHelper.getBaseServings(dish),
+                steps: collectAllCookingSteps(dish, dishesById),
+                ingredientIds,
+                householdMemberIds: memberIds,
+            }));
+        });
+        message.success(targetDishes.length === 1 ? `Đã bắt đầu nấu ${targetDishes[0].name}` : `Đã bắt đầu nấu ${targetDishes.length} món`);
+        if (!pageInline) _onClose();
+    };
+
     const actionButtonStyle: React.CSSProperties = {
         width: 40,
         height: 40,
@@ -417,36 +454,40 @@ export const DishSuggesterScreen: React.FC<DishSuggesterScreenProps> = ({ open, 
             <Button
                 type="primary"
                 disabled={disabled}
-                aria-label={`Tạo lịch mua cho ${dishIds.length} món`}
-                data-testid="dish-suggester-create-shopping-list-button"
-                icon={<ShoppingCartOutlined />}
-                onClick={toggleShoppingListAdd.show}
-                style={actionButtonStyle}
-            />
-            <Button
+                aria-label={`Bắt đầu nấu ${dishIds.length} món`}
+                data-testid="dish-suggester-start-cooking-button"
+                icon={<FireOutlined />}
+                onClick={() => _onStartCookingSession(dishIds)}
+            >
+                Nấu
+            </Button>
+            <Dropdown
+                placement="topRight"
+                trigger={["click"]}
                 disabled={disabled}
-                aria-label={`Mở kế hoạch chi phí cho ${dishIds.length} món`}
-                data-testid="dish-suggester-expense-planner-button"
-                icon={<CalculatorOutlined />}
-                onClick={() => _onOpenExpensePlanner(dishIds)}
-                style={actionButtonStyle}
-            />
-            <Button
-                disabled={disabled}
-                aria-label={`Đánh giá độ phù hợp của ${dishIds.length} món cho nhà mình`}
-                data-testid="dish-suggester-suitability-button"
-                icon={<TeamOutlined />}
-                onClick={toggleSuitabilityModal.show}
-                style={actionButtonStyle}
-            />
-            <Button
-                disabled={disabled}
-                aria-label={`Tính dinh dưỡng cho ${dishIds.length} món`}
-                data-testid="dish-suggester-nutrition-calculator-button"
-                icon={<PieChartOutlined />}
-                onClick={() => _onOpenNutritionCalculator(dishIds)}
-                style={actionButtonStyle}
-            />
+                menu={{
+                    onClick: ({ key }) => {
+                        if (key === "shopping") toggleShoppingListAdd.show();
+                        if (key === "expense") _onOpenExpensePlanner(dishIds);
+                        if (key === "suitability") toggleSuitabilityModal.show();
+                        if (key === "nutrition") _onOpenNutritionCalculator(dishIds);
+                    },
+                    items: [
+                        { key: "shopping", label: "Tạo lịch mua", icon: <ShoppingCartOutlined /> },
+                        { key: "expense", label: "Kế hoạch chi phí", icon: <CalculatorOutlined /> },
+                        { key: "suitability", label: "Độ hợp nhà mình", icon: <TeamOutlined /> },
+                        { key: "nutrition", label: "Tính dinh dưỡng", icon: <PieChartOutlined /> },
+                    ],
+                }}
+            >
+                <Button
+                    disabled={disabled}
+                    aria-label={`Thao tác khác cho ${dishIds.length} món`}
+                    data-testid="dish-suggester-more-actions-button"
+                    icon={<MoreOutlined />}
+                    style={actionButtonStyle}
+                />
+            </Dropdown>
         </Stack>;
     };
 
