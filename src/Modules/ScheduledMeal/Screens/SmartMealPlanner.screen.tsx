@@ -223,6 +223,61 @@ const pageCss = `
     line-height: 15px;
     margin-top: 3px;
 }
+.smart-planner-advanced.ant-collapse {
+    border: 1px solid rgba(15,23,42,0.08);
+    border-radius: 10px;
+    background: #fbfdfd;
+    overflow: hidden;
+}
+.smart-planner-advanced .ant-collapse-item {
+    border-bottom: none;
+}
+.smart-planner-advanced > .ant-collapse-item > .ant-collapse-header {
+    padding: 11px 14px;
+    align-items: center;
+    transition: background .15s ease;
+}
+.smart-planner-advanced > .ant-collapse-item > .ant-collapse-header:hover {
+    background: #f1f5f9;
+}
+.smart-planner-advanced > .ant-collapse-item-active > .ant-collapse-header {
+    background: #ecfdf5;
+    box-shadow: inset 0 -1px 0 rgba(15,23,42,0.06);
+}
+.smart-planner-advanced .ant-collapse-expand-icon {
+    color: #13a8a8;
+}
+.smart-planner-advanced > .ant-collapse-item > .ant-collapse-content > .ant-collapse-content-box {
+    padding: 14px;
+}
+.smart-planner-advanced-head {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+.smart-planner-advanced-title {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    color: #0f172a;
+    font-size: 13px;
+    font-weight: 700;
+}
+.smart-planner-advanced-title .anticon {
+    color: #13a8a8;
+}
+.smart-planner-advanced-sub {
+    color: #64748b;
+    font-size: 11px;
+    line-height: 15px;
+}
+.smart-planner-field-help ul {
+    margin: 6px 0 0;
+    padding-left: 18px;
+}
+.smart-planner-field-help li + li {
+    margin-top: 3px;
+}
 .smart-planner-adv-group + .smart-planner-adv-group {
     margin-top: 14px;
     padding-top: 14px;
@@ -1123,7 +1178,10 @@ export const SmartMealPlannerScreen: React.FC = () => {
                         className='smart-planner-advanced'
                         items={[{
                             key: 'advanced',
-                            label: <span className='smart-planner-section-title' style={{ marginBottom: 0 }}><SlidersOutlined /> Tinh chỉnh nâng cao</span>,
+                            label: <span className='smart-planner-advanced-head'>
+                                <span className='smart-planner-advanced-title'><SlidersOutlined /> Tinh chỉnh nâng cao</span>
+                                <span className='smart-planner-advanced-sub'>Ngân sách, cách mua, tiêu chí tính điểm và bộ lọc bắt buộc</span>
+                            </span>,
                             children: <>
                                 <div className='smart-planner-adv-group'>
                                     <p className='smart-planner-adv-group-title'>Ngân sách</p>
@@ -1166,7 +1224,14 @@ export const SmartMealPlannerScreen: React.FC = () => {
                                             <Select allowClear value={nutritionGoalId} onChange={value => { setNutritionGoalId(value); _clearSuggestions(); }} options={nutritionGoals.map(goal => ({ value: goal.id, label: goal.name }))} placeholder='Chọn mục tiêu' style={{ width: '100%' }} />
                                         </div>
                                         <div>
-                                            <PlannerFieldLabel helpKey='criteria' label={<><HeartOutlined /> Tiêu chí tính điểm</>}>Bật hoặc tắt nhóm dữ liệu được phép tham gia chấm điểm. Mẫu ưu tiên chỉ đổi trọng số của các tiêu chí đang bật; tiêu chí đã tắt sẽ không cộng hoặc trừ điểm.</PlannerFieldLabel>
+                                            <PlannerFieldLabel helpKey='criteria' label={<><HeartOutlined /> Tiêu chí tính điểm</>}>
+                                                Bật hoặc tắt nhóm dữ liệu được phép tham gia chấm điểm. Mẫu ưu tiên chỉ đổi trọng số của các tiêu chí đang bật; tiêu chí đã tắt giữ điểm trung tính, không cộng cũng không trừ.
+                                                <ul>
+                                                    <li><b>Ngân sách</b>: so chi phí món với ngân sách đang chọn. Khi bật tính theo tủ lạnh, chỉ tính phần cần mua thêm sau khi trừ tồn kho.</li>
+                                                    <li><b>Dinh dưỡng</b>: so dinh dưỡng mỗi phần với mục tiêu đã chọn. Cần chọn một mục tiêu dinh dưỡng thì tiêu chí này mới có tác dụng.</li>
+                                                    <li><b>Khẩu vị nhà</b>: chấm theo hồ sơ các thành viên đang chọn, món thích/tránh, dị ứng và phản hồi nấu ăn đã lưu. Cần chọn người ăn cùng.</li>
+                                                </ul>
+                                            </PlannerFieldLabel>
                                             <Select mode='multiple' value={criteria} onChange={value => { setCriteria(value); _clearSuggestions(); }} options={criteriaOptions} style={{ width: '100%' }} />
                                         </div>
                                     </div>
