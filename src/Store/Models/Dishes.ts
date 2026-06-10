@@ -55,4 +55,5 @@ export type Dishes = {
     duration: DishDuration;
     image?: string;
     tags?: string[];
+    isAccompaniment?: boolean;
 }

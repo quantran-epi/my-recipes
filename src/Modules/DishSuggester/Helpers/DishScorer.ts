@@ -138,6 +138,7 @@ const scoreInventoryDishes = (
     const amountsCache = new Map<string, DishesIngredientAmount[]>();
 
     return dishes
+        .filter(dish => dish.isAccompaniment !== true)
         .map(dish => {
             const amounts = collectAllIngredientAmounts(dish, dishById, amountsCache);
             const scale = getScale(dish);
@@ -279,6 +280,7 @@ export const DishScorer = {
         const selectedIngredientSet = new Set(selectedIngredientIds);
 
         return dishes
+            .filter(dish => dish.isAccompaniment !== true)
             .map(dish => {
                 const allRequired = collectAllIngredientIds(dish, dishById, ingredientIdsCache);
                 if (allRequired.length === 0) return null;

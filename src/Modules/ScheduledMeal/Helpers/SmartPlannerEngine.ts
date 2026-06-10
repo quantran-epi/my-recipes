@@ -572,6 +572,7 @@ const addUsage = (usage: UsageContext, dish: Dishes, allDishes: Dishes[]) => {
 
 const buildRecommendations = (input: BuildSmartPlannerInput, usage: UsageContext, targetServings: number, weights: PlannerWeights, slot: PlannerMealSlot | 'any'): PlannedDish[] => input.dishes
     .filter(dish => dish.isCompleted !== false)
+    .filter(dish => dish.isAccompaniment !== true)
     .map(dish => scoreDish(dish, slot, input, usage, targetServings, weights))
     .filter((item): item is PlannedDish => Boolean(item))
     .sort((a, b) => b.score - a.score || a.dish.name.localeCompare(b.dish.name));

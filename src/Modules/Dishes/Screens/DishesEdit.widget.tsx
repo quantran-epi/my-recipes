@@ -49,6 +49,7 @@ export const DishesEditWidget = ({ item, onDone }) => {
             ingredients: { name: ObjectPropertyHelper.nameof(defaultValues, e => e.ingredients), noMarkup: true },
             steps: { name: ObjectPropertyHelper.nameof(defaultValues, e => e.steps), noMarkup: true },
             isCompleted: { name: ObjectPropertyHelper.nameof(defaultValues, e => e.isCompleted) },
+            isAccompaniment: { name: ObjectPropertyHelper.nameof(defaultValues, e => e.isAccompaniment) },
             duration: { name: ObjectPropertyHelper.nameof(defaultValues, e => e.duration), noMarkup: true },
             image: { label: "Ảnh", name: ObjectPropertyHelper.nameof(defaultValues, e => e.image) },
             tags: { label: "Thể loại", name: ObjectPropertyHelper.nameof(defaultValues, e => e.tags) },
@@ -95,6 +96,9 @@ export const DishesEditWidget = ({ item, onDone }) => {
         </SmartForm.Item>
         <SmartForm.Item {...editDishesForm.itemDefinitions.isCompleted}>
             <Switch checkedChildren="Hoàn thiện" unCheckedChildren="Chưa hoàn thiện" />
+        </SmartForm.Item>
+        <SmartForm.Item {...editDishesForm.itemDefinitions.isAccompaniment} label="Món ăn kèm">
+            <Switch checkedChildren="Ăn kèm, không gợi ý riêng" unCheckedChildren="Món dùng độc lập" />
         </SmartForm.Item>
         <Stack fullwidth justify="flex-end">
             <Button onClick={_onSave}>Lưu</Button>

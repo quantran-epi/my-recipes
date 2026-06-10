@@ -5,6 +5,7 @@ import { ImageInput } from "@components/Form/ImageInput"
 import { Input, TextArea } from "@components/Form/Input"
 import { Select } from "@components/Form/Select"
 import { ServingSizeInput } from "@components/Form/ServingSizeInput"
+import { Switch } from "@components/Form/Switch"
 import { Box } from "@components/Layout/Box"
 import { Stack } from "@components/Layout/Stack"
 import { useMessage } from "@components/Message"
@@ -53,6 +54,7 @@ export const DishesAddWidget = () => {
             ingredients: { name: ObjectPropertyHelper.nameof(defaultValues, e => e.ingredients), noMarkup: true },
             steps: { name: ObjectPropertyHelper.nameof(defaultValues, e => e.steps), noMarkup: true },
             isCompleted: { name: ObjectPropertyHelper.nameof(defaultValues, e => e.isCompleted), noMarkup: true },
+            isAccompaniment: { name: ObjectPropertyHelper.nameof(defaultValues, e => e.isAccompaniment) },
             image: { label: "Ảnh", name: ObjectPropertyHelper.nameof(defaultValues, e => e.image) },
             duration: { name: ObjectPropertyHelper.nameof(defaultValues, e => e.duration), noMarkup: true },
             tags: { label: "Thể loại", name: ObjectPropertyHelper.nameof(defaultValues, e => e.tags) },
@@ -101,6 +103,9 @@ export const DishesAddWidget = () => {
         </SmartForm.Item>
         <SmartForm.Item {...addDishesForm.itemDefinitions.image}>
             <ImageInput />
+        </SmartForm.Item>
+        <SmartForm.Item {...addDishesForm.itemDefinitions.isAccompaniment} label="Món ăn kèm">
+            <Switch checkedChildren="Ăn kèm, không gợi ý riêng" unCheckedChildren="Món dùng độc lập" />
         </SmartForm.Item>
         <Stack fullwidth justify="flex-end">
             <Button onClick={_onSave}>Lưu</Button>
