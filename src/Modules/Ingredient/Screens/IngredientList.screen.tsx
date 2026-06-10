@@ -371,12 +371,12 @@ export const IngredientListScreen = () => {
             <Box style={topToolCardStyle}>
                 <Stack.Compact style={searchControlRowStyle}>
                     <DeferredSearchInput onCommit={_onSearchCommit} />
-                    {isAdmin && <Button onClick={_onAdd} icon={<PlusOutlined />} />}
+                    {isAdmin && <Button preserveAntdStyle onClick={_onAdd} icon={<PlusOutlined />} />}
                     <Tooltip title="Dùng trước hết hạn">
-                        <Button onClick={toggleUseFirst.show} icon={<FireOutlined style={{ color: "#ff4d4f" }} />} />
+                        <Button preserveAntdStyle onClick={toggleUseFirst.show} icon={<FireOutlined style={{ color: "#ff4d4f" }} />} />
                     </Tooltip>
                     <Tooltip title="Thống kê nguyên liệu">
-                        <Button onClick={toggleStats.show} icon={<BarChartOutlined style={{ color: "#1677ff" }} />} />
+                        <Button preserveAntdStyle onClick={toggleStats.show} icon={<BarChartOutlined style={{ color: "#1677ff" }} />} />
                     </Tooltip>
                 </Stack.Compact>
                 {searchPending && <Typography.Text type="secondary" style={{ display: "block", fontSize: 11, lineHeight: "15px", marginTop: 5 }}>Đang lọc danh sách...</Typography.Text>}

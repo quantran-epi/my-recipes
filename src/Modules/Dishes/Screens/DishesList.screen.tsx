@@ -425,7 +425,7 @@ export const DishesListScreen = () => {
             <Box style={topToolCardStyle}>
                 <Stack.Compact style={searchControlRowStyle}>
                     <DeferredSearchInput onCommit={_onSearchCommit} />
-                    {isAdmin && <Button onClick={toggleAddModal.show} icon={<PlusOutlined />} />}
+                    {isAdmin && <Button preserveAntdStyle onClick={toggleAddModal.show} icon={<PlusOutlined />} />}
                 </Stack.Compact>
                 {searchPending && <Typography.Text type="secondary" style={{ display: "block", fontSize: 11, lineHeight: "15px", marginTop: 5 }}>Đang lọc danh sách...</Typography.Text>}
                 <div style={filterRowStyle}>

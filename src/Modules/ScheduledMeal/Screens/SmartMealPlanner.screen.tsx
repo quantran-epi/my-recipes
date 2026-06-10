@@ -11,6 +11,7 @@ import { Image } from '@components/Image';
 import { Box } from '@components/Layout/Box';
 import { Stack } from '@components/Layout/Stack';
 import { useMessage } from '@components/Message';
+import { Popover } from '@components/Popover';
 import { Tag } from '@components/Tag';
 import { Typography } from '@components/Typography';
 import { useScreenTitle } from '@hooks';
@@ -333,6 +334,26 @@ export const SmartMealPlannerScreen: React.FC = () => {
         {openHelpKey === helpKey && <div className='smart-planner-field-help'>{children}</div>}
     </>;
 
+    const PlannerInfoTag = ({ color, title, description, children }: { color: string; title: React.ReactNode; description: React.ReactNode; children: React.ReactNode }) => <Popover
+        trigger='click'
+        placement='top'
+        title={title}
+        content={<Typography.Text style={{ display: 'block', maxWidth: 260, fontSize: 12, lineHeight: '18px' }}>{description}</Typography.Text>}
+    >
+        <span
+            role='button'
+            tabIndex={0}
+            onKeyDown={event => {
+                if (event.key !== 'Enter' && event.key !== ' ') return;
+                event.preventDefault();
+                event.currentTarget.click();
+            }}
+            style={{ display: 'inline-flex', cursor: 'pointer' }}
+        >
+            <Tag color={color} style={{ marginRight: 0, cursor: 'pointer' }}>{children}</Tag>
+        </span>
+    </Popover>;
+
     const PlannerDishCard = ({ item, slot }: { item?: PlannedDish; slot: MealSlot }) => {
         const meta = mealSlotMeta[slot];
         if (!item) return <Box style={{ border: `1px dashed ${meta.border}`, borderRadius: 8, padding: 10, background: '#fafafa' }}>
@@ -344,12 +365,28 @@ export const SmartMealPlannerScreen: React.FC = () => {
                 <div style={{ minWidth: 0 }}>
                     <Stack justify='space-between' align='flex-start' gap={8}>
                         <Typography.Text strong style={{ display: 'block', color: '#111827', fontSize: 14, lineHeight: '19px', overflowWrap: 'anywhere' }}>{item.dish.name}</Typography.Text>
-                        <Tag color={item.score >= 76 ? 'green' : item.score >= 58 ? 'blue' : 'orange'} style={{ marginRight: 0 }}>{item.score}%</Tag>
+                        <PlannerInfoTag
+                            color={item.score >= 76 ? 'green' : item.score >= 58 ? 'blue' : 'orange'}
+                            title='Điểm gợi ý'
+                            description='Điểm tổng hợp dùng để xếp món trong thực đơn thông minh. Điểm này cộng trừ theo bữa ăn, thời gian nấu, ngân sách, dinh dưỡng, khẩu vị nhà mình và tránh lặp món.'
+                        >{item.score}%</PlannerInfoTag>
                     </Stack>
                     <Stack wrap='wrap' gap={5} style={{ marginTop: 6 }}>
-                        {item.costLabel && <Tag color='gold' style={{ marginRight: 0 }}>{item.costLabel}</Tag>}
-                        {item.nutritionLabel && <Tag color='cyan' style={{ marginRight: 0 }}>{item.nutritionLabel}</Tag>}
-                        {item.suitabilityScore !== undefined && <Tag color={item.suitabilityScore >= 70 ? 'green' : 'volcano'} style={{ marginRight: 0 }}>Nhà mình {item.suitabilityScore}%</Tag>}
+                        {item.costLabel && <PlannerInfoTag
+                            color='gold'
+                            title='Ước tính chi phí'
+                            description='Khoảng tiền ước tính từ giá nguyên liệu đã lưu cho món này. Nếu một số nguyên liệu chưa có giá, con số có thể thấp hơn thực tế.'
+                        >{item.costLabel}</PlannerInfoTag>}
+                        {item.nutritionLabel && <PlannerInfoTag
+                            color='cyan'
+                            title='Khớp mục tiêu dinh dưỡng'
+                            description={selectedNutritionGoal ? `${item.nutritionLabel} là số tiêu chí món này khớp trong mục tiêu "${selectedNutritionGoal.name}". App tính từ dữ liệu dinh dưỡng nguyên liệu và khẩu phần đang chọn.` : `${item.nutritionLabel} là số tiêu chí dinh dưỡng món này đang khớp trong mục tiêu đã chọn.`}
+                        >{item.nutritionLabel}</PlannerInfoTag>}
+                        {item.suitabilityScore !== undefined && <PlannerInfoTag
+                            color={item.suitabilityScore >= 70 ? 'green' : 'volcano'}
+                            title='Độ hợp nhà mình'
+                            description='Điểm trung bình cho các thành viên đang chọn, dựa trên món thích, món tránh, nguyên liệu thích/tránh, tag món và mục tiêu riêng của từng người.'
+                        >Nhà mình {item.suitabilityScore}%</PlannerInfoTag>}
                     </Stack>
                     {item.reasons.length > 0 && <Typography.Text type='secondary' style={{ display: 'block', fontSize: 11, lineHeight: '16px', marginTop: 6 }}>{item.reasons.join(' · ')}</Typography.Text>}
                 </div>

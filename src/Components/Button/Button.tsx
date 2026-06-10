@@ -4,6 +4,7 @@ import { Button as AntButton, ButtonProps as AntButtonProps } from 'antd';
 interface IButtonProps extends Omit<AntButtonProps, "type" | "size"> {
     color?: string;
     fullwidth?: boolean;
+    preserveAntdStyle?: boolean;
     type?: AntButtonProps["type"] | "secondary";
     size?: Exclude<AntButtonProps["size"], "small">;
 }
@@ -12,6 +13,7 @@ export const Button: FunctionComponent<IButtonProps> = ({
     style,
     color,
     fullwidth = false,
+    preserveAntdStyle = false,
     type,
     size,
     ...props
@@ -41,6 +43,14 @@ export const Button: FunctionComponent<IButtonProps> = ({
     }
 
     const _styles = (): React.CSSProperties => {
+        if (preserveAntdStyle) {
+            return {
+                backgroundColor: color,
+                borderColor: color,
+                ...style,
+            };
+        }
+
         return {
             display: "inline-flex",
             alignItems: "center",

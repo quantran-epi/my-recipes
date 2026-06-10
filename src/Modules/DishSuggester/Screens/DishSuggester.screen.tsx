@@ -1125,7 +1125,7 @@ export const DishSuggesterScreen: React.FC<DishSuggesterScreenProps> = ({ open, 
                 </Button>
             </Box> : selectedDishesForActions.length === 0 ? <Box style={{ textAlign: 'center', padding: '26px 0' }}>
                 <Typography.Text type='secondary'>Chọn ít nhất một món để đánh giá.</Typography.Text>
-            </Box> : <Stack direction='column' gap={12} style={{ width: '100%' }}>
+            </Box> : <div style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'stretch', gap: 12 }}>
                 <Box style={{ border: '1px solid #e6f4ff', borderRadius: 8, background: '#f8fbff', padding: 10 }}>
                     <Typography.Text strong style={{ display: 'block', fontSize: 12, marginBottom: 6 }}>Thành viên dùng để đánh giá</Typography.Text>
                     <Select
@@ -1168,7 +1168,7 @@ export const DishSuggesterScreen: React.FC<DishSuggesterScreenProps> = ({ open, 
                         </Box>)}
                     </div>
                 </Box>)}
-            </Stack>}
+            </div>}
         </DeferredModalContent>
     </Modal> : null;
 

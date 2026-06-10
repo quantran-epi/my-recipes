@@ -307,11 +307,11 @@ export const ShoppingListScreen = () => {
             <Box style={topToolCardStyle}>
                 <Stack.Compact style={searchControlRowStyle}>
                     <Input allowClear data-testid="shopping-list-search-input" placeholder="Tìm kiếm" onChange={_onSearchChange} style={searchInputStyle} />
-                    <Button onClick={_onAdd} icon={<PlusOutlined />} />
+                    <Button preserveAntdStyle onClick={_onAdd} icon={<PlusOutlined />} />
                     <Tooltip title="Tạo từ mẫu">
-                        <Button onClick={_onOpenTemplateApply} icon={<FileTextOutlined />} />
+                        <Button preserveAntdStyle onClick={_onOpenTemplateApply} icon={<FileTextOutlined />} />
                     </Tooltip>
-                    <Button onClick={_onShowCalendar} icon={<CalendarOutlined />} />
+                    <Button preserveAntdStyle onClick={_onShowCalendar} icon={<CalendarOutlined />} />
                 </Stack.Compact>
                 <div style={filterRowStyle}>
                     {SHOPPING_LIST_STATUS_FILTERS.map(item => (
