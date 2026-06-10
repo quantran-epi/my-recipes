@@ -594,7 +594,6 @@ export const DashboardScreen = () => {
     const { suggestions, shoppingListCosts } = expensiveMetrics;
 
     const expiredCount = urgentInventory.filter(item => item.daysLeft < 0).length;
-    const todayDishCount = todayMeals.reduce((sum, meal) => sum + Object.values(meal.meals).flat().length, 0);
     const completedDishes = dishes.filter(item => item.isCompleted);
     const incompleteDishes = dishes.filter(item => !item.isCompleted);
     const stockedIngredientCount = Object.entries(inventoryItems).filter(([, inventory]) => (inventory.batches ?? []).some(batch => batch.amount > 0)).length;
@@ -669,20 +668,8 @@ export const DashboardScreen = () => {
                             onOpen: () => openRoute(RootRoutes.AuthorizedRoutes.DishesRoutes.List()),
                         };
     const dateLabel = formatHeaderDateLabel();
-    const todayActionCount = todayMeals.length + todayShoppingLists.length + activeSessions.length + urgentInventory.length + availableLeftovers.length;
+    const todayActionCount = todayShoppingLists.length + activeSessions.length + urgentInventory.length + availableLeftovers.length;
     const heroMetrics: DashboardHeroMetric[] = [
-        {
-            key: 'meals',
-            label: 'Thực đơn',
-            value: todayMeals.length,
-            detail: `${todayDishCount} món`,
-            tone: '#7436dc',
-            detailTitle: 'Thực đơn hôm nay',
-            detailItems: todayMeals.map(meal => `${meal.name}: ${Object.values(meal.meals).flat().length} món`),
-            emptyText: 'Chưa có thực đơn nào cho hôm nay.',
-            actionLabel: 'Mở thực đơn',
-            onOpen: () => openRoute(RootRoutes.AuthorizedRoutes.ScheduledMealRoutes.List()),
-        },
         {
             key: 'shopping',
             label: 'Mua sắm',
