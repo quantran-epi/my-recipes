@@ -4,369 +4,289 @@
   "dishChanges": [
     {
       "action": "added",
-      "id": "Mi xao bo-shared-20260611-v2",
-      "name": "Mì xào bò"
+      "id": "Bibimbap-shared-20260611-v3",
+      "name": "Bibimbap"
     },
     {
       "action": "added",
-      "id": "Mi xao hai san-shared-20260611-v2",
-      "name": "Mì xào hải sản"
+      "id": "Tteokbokki-shared-20260611-v3",
+      "name": "Tteokbokki"
     },
     {
       "action": "added",
-      "id": "Nui xao bo-shared-20260611-v2",
-      "name": "Nui xào bò"
+      "id": "Canh rong bien thit bo-shared-20260611-v3",
+      "name": "Canh rong biển thịt bò"
     },
     {
       "action": "added",
-      "id": "Nui nau suon-shared-20260611-v2",
-      "name": "Nui nấu sườn"
+      "id": "Ga sot cay Han-shared-20260611-v3",
+      "name": "Gà sốt cay Hàn"
     },
     {
       "action": "added",
-      "id": "Banh canh cha ca-shared-20260611-v2",
-      "name": "Bánh canh chả cá"
+      "id": "Com ca ri Nhat-shared-20260611-v3",
+      "name": "Cơm cà ri Nhật"
     },
     {
       "action": "added",
-      "id": "Hu tieu tom thit-shared-20260611-v2",
-      "name": "Hủ tiếu tôm thịt"
+      "id": "Mi ramen don gian-shared-20260611-v3",
+      "name": "Mì ramen đơn giản"
     },
     {
       "action": "added",
-      "id": "Mien ga-shared-20260611-v2",
-      "name": "Miến gà"
+      "id": "Com ga oyakodon-shared-20260611-v3",
+      "name": "Cơm gà oyakodon"
     },
     {
       "action": "added",
-      "id": "Com chien trung-shared-20260611-v2",
-      "name": "Cơm chiên trứng"
+      "id": "Sup miso-shared-20260611-v3",
+      "name": "Súp miso"
     },
     {
       "action": "added",
-      "id": "Com chien hai san-shared-20260611-v2",
-      "name": "Cơm chiên hải sản"
+      "id": "Tom yum-shared-20260611-v3",
+      "name": "Tom yum"
     },
     {
       "action": "added",
-      "id": "Ca hoi ap chao-shared-20260611-v2",
-      "name": "Cá hồi áp chảo"
+      "id": "Pad Thai-shared-20260611-v3",
+      "name": "Pad Thái"
     },
     {
       "action": "added",
-      "id": "Ca hoi sot bo chanh-shared-20260611-v2",
-      "name": "Cá hồi sốt bơ chanh"
+      "id": "Ca ri xanh ga-shared-20260611-v3",
+      "name": "Cà ri xanh gà"
     },
     {
       "action": "added",
-      "id": "Ca ngu kho thom-shared-20260611-v2",
-      "name": "Cá ngừ kho thơm"
+      "id": "Goi xoai tom kieu Thai-shared-20260611-v3",
+      "name": "Gỏi xoài tôm kiểu Thái"
     },
     {
       "action": "added",
-      "id": "Ngao hap sa-shared-20260611-v2",
-      "name": "Ngao hấp sả"
+      "id": "Mi Y bo bam-shared-20260611-v3",
+      "name": "Mì Ý bò bằm"
     },
     {
       "action": "added",
-      "id": "Muc chien gion-shared-20260611-v2",
-      "name": "Mực chiên giòn"
+      "id": "Nui sot kem ga nam-shared-20260611-v3",
+      "name": "Nui sốt kem gà nấm"
     },
     {
       "action": "added",
-      "id": "Cha ca sot ca chua-shared-20260611-v2",
-      "name": "Chả cá sốt cà chua"
+      "id": "Sandwich ca ngu-shared-20260611-v3",
+      "name": "Sandwich cá ngừ"
     },
     {
       "action": "added",
-      "id": "Lap xuong chien-shared-20260611-v2",
-      "name": "Lạp xưởng chiên"
+      "id": "Sup ga rau cu-shared-20260611-v3",
+      "name": "Súp gà rau củ"
     },
     {
       "action": "added",
-      "id": "Bo xao bong cai xanh-shared-20260611-v2",
-      "name": "Bò xào bông cải xanh"
+      "id": "Chao yen mach ga-shared-20260611-v3",
+      "name": "Cháo yến mạch gà"
     },
     {
       "action": "added",
-      "id": "Ga nuong mat ong-shared-20260611-v2",
-      "name": "Gà nướng mật ong"
+      "id": "Sup ga khoai tay-shared-20260611-v3",
+      "name": "Súp gà khoai tây"
     },
     {
       "action": "added",
-      "id": "Ca ri ga-shared-20260611-v2",
-      "name": "Cà ri gà"
+      "id": "Canh bi do dau phu-shared-20260611-v3",
+      "name": "Canh bí đỏ đậu phụ"
     },
     {
       "action": "added",
-      "id": "Dau phu kho nam-shared-20260611-v2",
-      "name": "Đậu phụ kho nấm"
+      "id": "Com mem ca hap-shared-20260611-v3",
+      "name": "Cơm mềm cá hấp"
     },
     {
       "action": "added",
-      "id": "Nam dui ga kho tieu-shared-20260611-v2",
-      "name": "Nấm đùi gà kho tiêu"
+      "id": "Banh flan-shared-20260611-v3",
+      "name": "Bánh flan"
     },
     {
       "action": "added",
-      "id": "Ca tim nuong mo hanh-shared-20260611-v2",
-      "name": "Cà tím nướng mỡ hành"
+      "id": "Che ba ba-shared-20260611-v3",
+      "name": "Chè bà ba"
     },
     {
       "action": "added",
-      "id": "Dau phu chien sa-shared-20260611-v2",
-      "name": "Đậu phụ chiên sả"
+      "id": "Xoi xoai cot dua-shared-20260611-v3",
+      "name": "Xôi xoài cốt dừa"
     },
     {
       "action": "added",
-      "id": "Bong cai xanh luoc-shared-20260611-v2",
-      "name": "Bông cải xanh luộc"
+      "id": "Rau cau dua-shared-20260611-v3",
+      "name": "Rau câu dừa"
     },
     {
       "action": "added",
-      "id": "Salad xa lach trung-shared-20260611-v2",
-      "name": "Salad xà lách trứng"
+      "id": "Pudding sua chua-shared-20260611-v3",
+      "name": "Pudding sữa chua"
     },
     {
       "action": "added",
-      "id": "Canh he dau phu-shared-20260611-v2",
-      "name": "Canh hẹ đậu phụ"
+      "id": "Che chuoi-shared-20260611-v3",
+      "name": "Chè chuối"
     },
     {
       "action": "added",
-      "id": "Canh ngao nau chua-shared-20260611-v2",
-      "name": "Canh ngao nấu chua"
+      "id": "Che khoai mon-shared-20260611-v3",
+      "name": "Chè khoai môn"
     },
     {
       "action": "added",
-      "id": "Canh cu sen suon-shared-20260611-v2",
-      "name": "Canh củ sen sườn"
+      "id": "Che nep cam cot dua-shared-20260611-v3",
+      "name": "Chè nếp cẩm cốt dừa"
     },
     {
       "action": "added",
-      "id": "Sup bi do-shared-20260611-v2",
-      "name": "Súp bí đỏ"
+      "id": "Sinh to xoai-shared-20260611-v3",
+      "name": "Sinh tố xoài"
     },
     {
       "action": "added",
-      "id": "Sup ga ngo nam-shared-20260611-v2",
-      "name": "Súp gà ngô nấm"
+      "id": "Nuoc ep dua hau-shared-20260611-v3",
+      "name": "Nước ép dưa hấu"
     },
     {
       "action": "added",
-      "id": "Khoai tay chien-shared-20260611-v2",
-      "name": "Khoai tây chiên"
+      "id": "Panna cotta dau-shared-20260611-v3",
+      "name": "Panna cotta dâu"
     },
     {
       "action": "added",
-      "id": "Banh chuoi ap chao-shared-20260611-v2",
-      "name": "Bánh chuối áp chảo"
+      "id": "Che dau do cot dua-shared-20260611-v3",
+      "name": "Chè đậu đỏ cốt dừa"
     },
     {
       "action": "added",
-      "id": "Sua chua trai cay-shared-20260611-v2",
-      "name": "Sữa chua trái cây"
+      "id": "Mousse cacao sua chua-shared-20260611-v3",
+      "name": "Mousse cacao sữa chua"
     },
     {
       "action": "added",
-      "id": "Sinh to chuoi sua-shared-20260611-v2",
-      "name": "Sinh tố chuối sữa"
+      "id": "Kem chuoi sua dua-shared-20260611-v3",
+      "name": "Kem chuối sữa dừa"
     },
     {
       "action": "added",
-      "id": "Che dau xanh-shared-20260611-v2",
-      "name": "Chè đậu xanh"
+      "id": "Tra sua matcha-shared-20260611-v3",
+      "name": "Trà sữa matcha"
     },
     {
       "action": "added",
-      "id": "Nom xoai tom-shared-20260611-v2",
-      "name": "Nộm xoài tôm"
-    },
-    {
-      "action": "added",
-      "id": "Com cuon rong bien-shared-20260611-v2",
-      "name": "Cơm cuộn rong biển"
-    },
-    {
-      "action": "added",
-      "id": "Trung hap thit-shared-20260611-v2",
-      "name": "Trứng hấp thịt"
-    },
-    {
-      "action": "added",
-      "id": "Nem chay-shared-20260611-v2",
-      "name": "Nem chay"
-    },
-    {
-      "action": "added",
-      "id": "Bun tron bo Nam Bo-shared-20260611-v2",
-      "name": "Bún trộn bò Nam Bộ"
-    },
-    {
-      "action": "added",
-      "id": "Chao yen mach thit bam-shared-20260611-v2",
-      "name": "Cháo yến mạch thịt băm"
-    },
-    {
-      "action": "added",
-      "id": "Dau phu sot dau hao-shared-20260611-v2",
-      "name": "Đậu phụ sốt dầu hào"
-    },
-    {
-      "action": "added",
-      "id": "Rau cu xao chay-shared-20260611-v2",
-      "name": "Rau củ xào chay"
-    },
-    {
-      "action": "added",
-      "id": "Salad uc ga-shared-20260611-v2",
-      "name": "Salad ức gà"
-    },
-    {
-      "action": "added",
-      "id": "Canh kim chi dau phu-shared-20260611-v2",
-      "name": "Canh kim chi đậu phụ"
-    },
-    {
-      "action": "added",
-      "id": "Trung cuon pho mai-shared-20260611-v2",
-      "name": "Trứng cuộn phô mai"
-    },
-    {
-      "action": "added",
-      "id": "Salad khoai tay mayonnaise-shared-20260611-v2",
-      "name": "Salad khoai tây mayonnaise"
+      "id": "Sua chua dau-shared-20260611-v3",
+      "name": "Sữa chua dâu"
     }
   ],
-  "dishesVersion": "2026-06-11T14:17:31.724Z",
+  "dishesVersion": "2026-06-11T14:50:03.620Z",
   "ingredientChanges": [
     {
       "action": "added",
-      "id": "Bong cai xanh-shared-20260611-v2",
-      "name": "Bông cải xanh"
+      "id": "Cai bo xoi-shared-20260611-v3",
+      "name": "Cải bó xôi"
     },
     {
       "action": "added",
-      "id": "Cu sen-shared-20260611-v2",
-      "name": "Củ sen"
+      "id": "Tuong ot Han Quoc-shared-20260611-v3",
+      "name": "Tương ớt Hàn Quốc"
     },
     {
       "action": "added",
-      "id": "Nam mo-shared-20260611-v2",
-      "name": "Nấm mỡ"
+      "id": "Banh gao Han Quoc-shared-20260611-v3",
+      "name": "Bánh gạo Hàn Quốc"
     },
     {
       "action": "added",
-      "id": "He-shared-20260611-v2",
-      "name": "Hẹ"
+      "id": "Tuong miso-shared-20260611-v3",
+      "name": "Tương miso"
     },
     {
       "action": "added",
-      "id": "Mi trung-shared-20260611-v2",
-      "name": "Mì trứng"
+      "id": "Rieng-shared-20260611-v3",
+      "name": "Riềng"
     },
     {
       "action": "added",
-      "id": "Nui-shared-20260611-v2",
-      "name": "Nui"
+      "id": "Sot ca ri xanh-shared-20260611-v3",
+      "name": "Sốt cà ri xanh"
     },
     {
       "action": "added",
-      "id": "Banh canh-shared-20260611-v2",
-      "name": "Bánh canh"
+      "id": "Mi spaghetti-shared-20260611-v3",
+      "name": "Mì spaghetti"
     },
     {
       "action": "added",
-      "id": "Hu tieu kho-shared-20260611-v2",
-      "name": "Hủ tiếu khô"
+      "id": "Thit bo xay-shared-20260611-v3",
+      "name": "Thịt bò xay"
     },
     {
       "action": "added",
-      "id": "Ca hoi-shared-20260611-v2",
-      "name": "Cá hồi"
+      "id": "Ca ngu hop-shared-20260611-v3",
+      "name": "Cá ngừ hộp"
     },
     {
       "action": "added",
-      "id": "Ca ngu-shared-20260611-v2",
-      "name": "Cá ngừ"
+      "id": "Banh mi goi-shared-20260611-v3",
+      "name": "Bánh mì gối"
     },
     {
       "action": "added",
-      "id": "Ngao-shared-20260611-v2",
-      "name": "Ngao"
+      "id": "Vani-shared-20260611-v3",
+      "name": "Vani"
     },
     {
       "action": "added",
-      "id": "Cha ca-shared-20260611-v2",
-      "name": "Chả cá"
+      "id": "Bot rau cau-shared-20260611-v3",
+      "name": "Bột rau câu"
     },
     {
       "action": "added",
-      "id": "Lap xuong-shared-20260611-v2",
-      "name": "Lạp xưởng"
+      "id": "Gelatin-shared-20260611-v3",
+      "name": "Gelatin"
     },
     {
       "action": "added",
-      "id": "Pho mai-shared-20260611-v2",
-      "name": "Phô mai"
+      "id": "Nep cam-shared-20260611-v3",
+      "name": "Nếp cẩm"
     },
     {
       "action": "added",
-      "id": "Sua chua khong duong-shared-20260611-v2",
-      "name": "Sữa chua không đường"
+      "id": "Kem tuoi-shared-20260611-v3",
+      "name": "Kem tươi"
     },
     {
       "action": "added",
-      "id": "Dau hao-shared-20260611-v2",
-      "name": "Dầu hào"
+      "id": "Dau tay-shared-20260611-v3",
+      "name": "Dâu tây"
     },
     {
       "action": "added",
-      "id": "Dau me-shared-20260611-v2",
-      "name": "Dầu mè"
+      "id": "Matcha-shared-20260611-v3",
+      "name": "Matcha"
     },
     {
       "action": "added",
-      "id": "Sa te-shared-20260611-v2",
-      "name": "Sa tế"
+      "id": "Bot cacao-shared-20260611-v3",
+      "name": "Bột cacao"
     },
     {
       "action": "added",
-      "id": "Bot ca ri-shared-20260611-v2",
-      "name": "Bột cà ri"
+      "id": "Vien ca ri Nhat-shared-20260611-v3",
+      "name": "Viên cà ri Nhật"
     },
     {
       "action": "added",
-      "id": "Mayonnaise-shared-20260611-v2",
-      "name": "Mayonnaise"
-    },
-    {
-      "action": "added",
-      "id": "Chuoi-shared-20260611-v2",
-      "name": "Chuối"
-    },
-    {
-      "action": "added",
-      "id": "Dua hau-shared-20260611-v2",
-      "name": "Dưa hấu"
-    },
-    {
-      "action": "added",
-      "id": "Nuoc cot me-shared-20260611-v2",
-      "name": "Nước cốt me"
-    },
-    {
-      "action": "added",
-      "id": "Bot chien gion-shared-20260611-v2",
-      "name": "Bột chiên giòn"
-    },
-    {
-      "action": "added",
-      "id": "Kim chi-shared-20260611-v2",
-      "name": "Kim chi"
+      "id": "Mi ramen-shared-20260611-v3",
+      "name": "Mì ramen"
     }
   ],
-  "ingredientsVersion": "2026-06-11T14:17:31.724Z",
+  "ingredientsVersion": "2026-06-11T14:50:03.620Z",
   "parts": {
     "config": {
       "changes": [],
@@ -381,383 +301,303 @@
       "changes": [
         {
           "action": "added",
-          "id": "Mi xao bo-shared-20260611-v2",
-          "name": "Mì xào bò"
+          "id": "Bibimbap-shared-20260611-v3",
+          "name": "Bibimbap"
         },
         {
           "action": "added",
-          "id": "Mi xao hai san-shared-20260611-v2",
-          "name": "Mì xào hải sản"
+          "id": "Tteokbokki-shared-20260611-v3",
+          "name": "Tteokbokki"
         },
         {
           "action": "added",
-          "id": "Nui xao bo-shared-20260611-v2",
-          "name": "Nui xào bò"
+          "id": "Canh rong bien thit bo-shared-20260611-v3",
+          "name": "Canh rong biển thịt bò"
         },
         {
           "action": "added",
-          "id": "Nui nau suon-shared-20260611-v2",
-          "name": "Nui nấu sườn"
+          "id": "Ga sot cay Han-shared-20260611-v3",
+          "name": "Gà sốt cay Hàn"
         },
         {
           "action": "added",
-          "id": "Banh canh cha ca-shared-20260611-v2",
-          "name": "Bánh canh chả cá"
+          "id": "Com ca ri Nhat-shared-20260611-v3",
+          "name": "Cơm cà ri Nhật"
         },
         {
           "action": "added",
-          "id": "Hu tieu tom thit-shared-20260611-v2",
-          "name": "Hủ tiếu tôm thịt"
+          "id": "Mi ramen don gian-shared-20260611-v3",
+          "name": "Mì ramen đơn giản"
         },
         {
           "action": "added",
-          "id": "Mien ga-shared-20260611-v2",
-          "name": "Miến gà"
+          "id": "Com ga oyakodon-shared-20260611-v3",
+          "name": "Cơm gà oyakodon"
         },
         {
           "action": "added",
-          "id": "Com chien trung-shared-20260611-v2",
-          "name": "Cơm chiên trứng"
+          "id": "Sup miso-shared-20260611-v3",
+          "name": "Súp miso"
         },
         {
           "action": "added",
-          "id": "Com chien hai san-shared-20260611-v2",
-          "name": "Cơm chiên hải sản"
+          "id": "Tom yum-shared-20260611-v3",
+          "name": "Tom yum"
         },
         {
           "action": "added",
-          "id": "Ca hoi ap chao-shared-20260611-v2",
-          "name": "Cá hồi áp chảo"
+          "id": "Pad Thai-shared-20260611-v3",
+          "name": "Pad Thái"
         },
         {
           "action": "added",
-          "id": "Ca hoi sot bo chanh-shared-20260611-v2",
-          "name": "Cá hồi sốt bơ chanh"
+          "id": "Ca ri xanh ga-shared-20260611-v3",
+          "name": "Cà ri xanh gà"
         },
         {
           "action": "added",
-          "id": "Ca ngu kho thom-shared-20260611-v2",
-          "name": "Cá ngừ kho thơm"
+          "id": "Goi xoai tom kieu Thai-shared-20260611-v3",
+          "name": "Gỏi xoài tôm kiểu Thái"
         },
         {
           "action": "added",
-          "id": "Ngao hap sa-shared-20260611-v2",
-          "name": "Ngao hấp sả"
+          "id": "Mi Y bo bam-shared-20260611-v3",
+          "name": "Mì Ý bò bằm"
         },
         {
           "action": "added",
-          "id": "Muc chien gion-shared-20260611-v2",
-          "name": "Mực chiên giòn"
+          "id": "Nui sot kem ga nam-shared-20260611-v3",
+          "name": "Nui sốt kem gà nấm"
         },
         {
           "action": "added",
-          "id": "Cha ca sot ca chua-shared-20260611-v2",
-          "name": "Chả cá sốt cà chua"
+          "id": "Sandwich ca ngu-shared-20260611-v3",
+          "name": "Sandwich cá ngừ"
         },
         {
           "action": "added",
-          "id": "Lap xuong chien-shared-20260611-v2",
-          "name": "Lạp xưởng chiên"
+          "id": "Sup ga rau cu-shared-20260611-v3",
+          "name": "Súp gà rau củ"
         },
         {
           "action": "added",
-          "id": "Bo xao bong cai xanh-shared-20260611-v2",
-          "name": "Bò xào bông cải xanh"
+          "id": "Chao yen mach ga-shared-20260611-v3",
+          "name": "Cháo yến mạch gà"
         },
         {
           "action": "added",
-          "id": "Ga nuong mat ong-shared-20260611-v2",
-          "name": "Gà nướng mật ong"
+          "id": "Sup ga khoai tay-shared-20260611-v3",
+          "name": "Súp gà khoai tây"
         },
         {
           "action": "added",
-          "id": "Ca ri ga-shared-20260611-v2",
-          "name": "Cà ri gà"
+          "id": "Canh bi do dau phu-shared-20260611-v3",
+          "name": "Canh bí đỏ đậu phụ"
         },
         {
           "action": "added",
-          "id": "Dau phu kho nam-shared-20260611-v2",
-          "name": "Đậu phụ kho nấm"
+          "id": "Com mem ca hap-shared-20260611-v3",
+          "name": "Cơm mềm cá hấp"
         },
         {
           "action": "added",
-          "id": "Nam dui ga kho tieu-shared-20260611-v2",
-          "name": "Nấm đùi gà kho tiêu"
+          "id": "Banh flan-shared-20260611-v3",
+          "name": "Bánh flan"
         },
         {
           "action": "added",
-          "id": "Ca tim nuong mo hanh-shared-20260611-v2",
-          "name": "Cà tím nướng mỡ hành"
+          "id": "Che ba ba-shared-20260611-v3",
+          "name": "Chè bà ba"
         },
         {
           "action": "added",
-          "id": "Dau phu chien sa-shared-20260611-v2",
-          "name": "Đậu phụ chiên sả"
+          "id": "Xoi xoai cot dua-shared-20260611-v3",
+          "name": "Xôi xoài cốt dừa"
         },
         {
           "action": "added",
-          "id": "Bong cai xanh luoc-shared-20260611-v2",
-          "name": "Bông cải xanh luộc"
+          "id": "Rau cau dua-shared-20260611-v3",
+          "name": "Rau câu dừa"
         },
         {
           "action": "added",
-          "id": "Salad xa lach trung-shared-20260611-v2",
-          "name": "Salad xà lách trứng"
+          "id": "Pudding sua chua-shared-20260611-v3",
+          "name": "Pudding sữa chua"
         },
         {
           "action": "added",
-          "id": "Canh he dau phu-shared-20260611-v2",
-          "name": "Canh hẹ đậu phụ"
+          "id": "Che chuoi-shared-20260611-v3",
+          "name": "Chè chuối"
         },
         {
           "action": "added",
-          "id": "Canh ngao nau chua-shared-20260611-v2",
-          "name": "Canh ngao nấu chua"
+          "id": "Che khoai mon-shared-20260611-v3",
+          "name": "Chè khoai môn"
         },
         {
           "action": "added",
-          "id": "Canh cu sen suon-shared-20260611-v2",
-          "name": "Canh củ sen sườn"
+          "id": "Che nep cam cot dua-shared-20260611-v3",
+          "name": "Chè nếp cẩm cốt dừa"
         },
         {
           "action": "added",
-          "id": "Sup bi do-shared-20260611-v2",
-          "name": "Súp bí đỏ"
+          "id": "Sinh to xoai-shared-20260611-v3",
+          "name": "Sinh tố xoài"
         },
         {
           "action": "added",
-          "id": "Sup ga ngo nam-shared-20260611-v2",
-          "name": "Súp gà ngô nấm"
+          "id": "Nuoc ep dua hau-shared-20260611-v3",
+          "name": "Nước ép dưa hấu"
         },
         {
           "action": "added",
-          "id": "Khoai tay chien-shared-20260611-v2",
-          "name": "Khoai tây chiên"
+          "id": "Panna cotta dau-shared-20260611-v3",
+          "name": "Panna cotta dâu"
         },
         {
           "action": "added",
-          "id": "Banh chuoi ap chao-shared-20260611-v2",
-          "name": "Bánh chuối áp chảo"
+          "id": "Che dau do cot dua-shared-20260611-v3",
+          "name": "Chè đậu đỏ cốt dừa"
         },
         {
           "action": "added",
-          "id": "Sua chua trai cay-shared-20260611-v2",
-          "name": "Sữa chua trái cây"
+          "id": "Mousse cacao sua chua-shared-20260611-v3",
+          "name": "Mousse cacao sữa chua"
         },
         {
           "action": "added",
-          "id": "Sinh to chuoi sua-shared-20260611-v2",
-          "name": "Sinh tố chuối sữa"
+          "id": "Kem chuoi sua dua-shared-20260611-v3",
+          "name": "Kem chuối sữa dừa"
         },
         {
           "action": "added",
-          "id": "Che dau xanh-shared-20260611-v2",
-          "name": "Chè đậu xanh"
+          "id": "Tra sua matcha-shared-20260611-v3",
+          "name": "Trà sữa matcha"
         },
         {
           "action": "added",
-          "id": "Nom xoai tom-shared-20260611-v2",
-          "name": "Nộm xoài tôm"
-        },
-        {
-          "action": "added",
-          "id": "Com cuon rong bien-shared-20260611-v2",
-          "name": "Cơm cuộn rong biển"
-        },
-        {
-          "action": "added",
-          "id": "Trung hap thit-shared-20260611-v2",
-          "name": "Trứng hấp thịt"
-        },
-        {
-          "action": "added",
-          "id": "Nem chay-shared-20260611-v2",
-          "name": "Nem chay"
-        },
-        {
-          "action": "added",
-          "id": "Bun tron bo Nam Bo-shared-20260611-v2",
-          "name": "Bún trộn bò Nam Bộ"
-        },
-        {
-          "action": "added",
-          "id": "Chao yen mach thit bam-shared-20260611-v2",
-          "name": "Cháo yến mạch thịt băm"
-        },
-        {
-          "action": "added",
-          "id": "Dau phu sot dau hao-shared-20260611-v2",
-          "name": "Đậu phụ sốt dầu hào"
-        },
-        {
-          "action": "added",
-          "id": "Rau cu xao chay-shared-20260611-v2",
-          "name": "Rau củ xào chay"
-        },
-        {
-          "action": "added",
-          "id": "Salad uc ga-shared-20260611-v2",
-          "name": "Salad ức gà"
-        },
-        {
-          "action": "added",
-          "id": "Canh kim chi dau phu-shared-20260611-v2",
-          "name": "Canh kim chi đậu phụ"
-        },
-        {
-          "action": "added",
-          "id": "Trung cuon pho mai-shared-20260611-v2",
-          "name": "Trứng cuộn phô mai"
-        },
-        {
-          "action": "added",
-          "id": "Salad khoai tay mayonnaise-shared-20260611-v2",
-          "name": "Salad khoai tây mayonnaise"
+          "id": "Sua chua dau-shared-20260611-v3",
+          "name": "Sữa chua dâu"
         }
       ],
-      "count": 190,
-      "hash": "3b144a3f747146d4b59e4ca1c588ebca03dac90930b44a20c431928d262c8a0b",
+      "count": 226,
+      "hash": "954669da81e35481148b7c3b1e787a924c3c36a8c80ac65c114e3158851ca7a0",
       "key": "dishes",
       "path": "docs/sync/shared/dishes.json",
-      "updatedAt": "2026-06-11T14:17:31.724Z",
-      "version": "2026-06-11T14:17:31.724Z"
+      "updatedAt": "2026-06-11T14:50:03.620Z",
+      "version": "2026-06-11T14:50:03.620Z"
     },
     "ingredients": {
       "changes": [
         {
           "action": "added",
-          "id": "Bong cai xanh-shared-20260611-v2",
-          "name": "Bông cải xanh"
+          "id": "Cai bo xoi-shared-20260611-v3",
+          "name": "Cải bó xôi"
         },
         {
           "action": "added",
-          "id": "Cu sen-shared-20260611-v2",
-          "name": "Củ sen"
+          "id": "Tuong ot Han Quoc-shared-20260611-v3",
+          "name": "Tương ớt Hàn Quốc"
         },
         {
           "action": "added",
-          "id": "Nam mo-shared-20260611-v2",
-          "name": "Nấm mỡ"
+          "id": "Banh gao Han Quoc-shared-20260611-v3",
+          "name": "Bánh gạo Hàn Quốc"
         },
         {
           "action": "added",
-          "id": "He-shared-20260611-v2",
-          "name": "Hẹ"
+          "id": "Tuong miso-shared-20260611-v3",
+          "name": "Tương miso"
         },
         {
           "action": "added",
-          "id": "Mi trung-shared-20260611-v2",
-          "name": "Mì trứng"
+          "id": "Rieng-shared-20260611-v3",
+          "name": "Riềng"
         },
         {
           "action": "added",
-          "id": "Nui-shared-20260611-v2",
-          "name": "Nui"
+          "id": "Sot ca ri xanh-shared-20260611-v3",
+          "name": "Sốt cà ri xanh"
         },
         {
           "action": "added",
-          "id": "Banh canh-shared-20260611-v2",
-          "name": "Bánh canh"
+          "id": "Mi spaghetti-shared-20260611-v3",
+          "name": "Mì spaghetti"
         },
         {
           "action": "added",
-          "id": "Hu tieu kho-shared-20260611-v2",
-          "name": "Hủ tiếu khô"
+          "id": "Thit bo xay-shared-20260611-v3",
+          "name": "Thịt bò xay"
         },
         {
           "action": "added",
-          "id": "Ca hoi-shared-20260611-v2",
-          "name": "Cá hồi"
+          "id": "Ca ngu hop-shared-20260611-v3",
+          "name": "Cá ngừ hộp"
         },
         {
           "action": "added",
-          "id": "Ca ngu-shared-20260611-v2",
-          "name": "Cá ngừ"
+          "id": "Banh mi goi-shared-20260611-v3",
+          "name": "Bánh mì gối"
         },
         {
           "action": "added",
-          "id": "Ngao-shared-20260611-v2",
-          "name": "Ngao"
+          "id": "Vani-shared-20260611-v3",
+          "name": "Vani"
         },
         {
           "action": "added",
-          "id": "Cha ca-shared-20260611-v2",
-          "name": "Chả cá"
+          "id": "Bot rau cau-shared-20260611-v3",
+          "name": "Bột rau câu"
         },
         {
           "action": "added",
-          "id": "Lap xuong-shared-20260611-v2",
-          "name": "Lạp xưởng"
+          "id": "Gelatin-shared-20260611-v3",
+          "name": "Gelatin"
         },
         {
           "action": "added",
-          "id": "Pho mai-shared-20260611-v2",
-          "name": "Phô mai"
+          "id": "Nep cam-shared-20260611-v3",
+          "name": "Nếp cẩm"
         },
         {
           "action": "added",
-          "id": "Sua chua khong duong-shared-20260611-v2",
-          "name": "Sữa chua không đường"
+          "id": "Kem tuoi-shared-20260611-v3",
+          "name": "Kem tươi"
         },
         {
           "action": "added",
-          "id": "Dau hao-shared-20260611-v2",
-          "name": "Dầu hào"
+          "id": "Dau tay-shared-20260611-v3",
+          "name": "Dâu tây"
         },
         {
           "action": "added",
-          "id": "Dau me-shared-20260611-v2",
-          "name": "Dầu mè"
+          "id": "Matcha-shared-20260611-v3",
+          "name": "Matcha"
         },
         {
           "action": "added",
-          "id": "Sa te-shared-20260611-v2",
-          "name": "Sa tế"
+          "id": "Bot cacao-shared-20260611-v3",
+          "name": "Bột cacao"
         },
         {
           "action": "added",
-          "id": "Bot ca ri-shared-20260611-v2",
-          "name": "Bột cà ri"
+          "id": "Vien ca ri Nhat-shared-20260611-v3",
+          "name": "Viên cà ri Nhật"
         },
         {
           "action": "added",
-          "id": "Mayonnaise-shared-20260611-v2",
-          "name": "Mayonnaise"
-        },
-        {
-          "action": "added",
-          "id": "Chuoi-shared-20260611-v2",
-          "name": "Chuối"
-        },
-        {
-          "action": "added",
-          "id": "Dua hau-shared-20260611-v2",
-          "name": "Dưa hấu"
-        },
-        {
-          "action": "added",
-          "id": "Nuoc cot me-shared-20260611-v2",
-          "name": "Nước cốt me"
-        },
-        {
-          "action": "added",
-          "id": "Bot chien gion-shared-20260611-v2",
-          "name": "Bột chiên giòn"
-        },
-        {
-          "action": "added",
-          "id": "Kim chi-shared-20260611-v2",
-          "name": "Kim chi"
+          "id": "Mi ramen-shared-20260611-v3",
+          "name": "Mì ramen"
         }
       ],
-      "count": 208,
-      "hash": "ca46710c2ea2be0e8b998bdd8f5d270629d390b041c91e92e3712eb0f3f5273e",
+      "count": 228,
+      "hash": "0b65d87b26aff5a81441913895fbfbfe6a7647aa0671e2e6dbd566b3d4fe39ef",
       "key": "ingredients",
       "path": "docs/sync/shared/ingredients.json",
-      "updatedAt": "2026-06-11T14:17:31.724Z",
-      "version": "2026-06-11T14:17:31.724Z"
+      "updatedAt": "2026-06-11T14:50:03.620Z",
+      "version": "2026-06-11T14:50:03.620Z"
     }
   },
   "schemaVersion": 2,
-  "updatedAt": "2026-06-11T14:17:31.724Z"
+  "updatedAt": "2026-06-11T14:50:03.620Z"
 }
