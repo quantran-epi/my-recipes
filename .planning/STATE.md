@@ -3,9 +3,9 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: ready
-stopped_at: Completed quick task 260611-dpl
-last_updated: "2026-06-11T10:42:57Z"
-last_activity: 2026-06-11 -- Completed quick task 260611-dpl: Deploy cooking duration button fix
+stopped_at: Completed quick task 260611-ntr
+last_updated: "2026-06-11T13:51:35Z"
+last_activity: 2026-06-11 -- Completed quick task 260611-ntr: Fix shared nutrition data and add daily household dishes
 progress:
   total_phases: 5
   completed_phases: 4
@@ -28,7 +28,7 @@ See: .planning/PROJECT.md (updated 2026-06-05)
 Phase: 5 (release-gate-and-product-guardrails) — READY
 Plan: Not started
 Status: Phase 04 complete; ready for Phase 05
-Last activity: 2026-06-11 -- Completed quick task 260611-dpl: Deploy cooking duration button fix
+Last activity: 2026-06-11 -- Completed quick task 260611-ntr: Fix shared nutrition data and add daily household dishes
 
 Progress: [████████░░] 80%
 
@@ -36,6 +36,7 @@ Progress: [████████░░] 80%
 
 | Date | Task | Artifact |
 |------|------|----------|
+| 2026-06-11 | Fix shared nutrition data and add daily household dishes | `.planning/quick/260611-ntr-fix-shared-nutrition-and-daily-data/260611-ntr-SUMMARY.md` |
 | 2026-06-11 | Deploy cooking duration button fix | `.planning/quick/260611-dpl-deploy-cooking-duration-button-fix/260611-dpl-SUMMARY.md` |
 | 2026-06-11 | Fix cooking session modal duration buttons | `.planning/quick/260611-oej-fix-cooking-session-modal-duration-butto/260611-oej-SUMMARY.md` |
 | 2026-06-11 | Make household health item tools top-right and collapse linked treatments | `.planning/quick/260611-m0u-make-household-health-item-tools-top-rig/260611-m0u-SUMMARY.md` |

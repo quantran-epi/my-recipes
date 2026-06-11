@@ -1289,25 +1289,25 @@
     "name": "Mỡ heo tảng",
     "nutrition": {
       "amount": 100,
-      "calcium": 232,
-      "calories": 32,
-      "carbs": 5.4,
-      "cholesterol": 0,
-      "fat": 0.6,
-      "fiber": 4,
-      "iron": 0.5,
-      "potassium": 213,
-      "protein": 3,
-      "saturatedFat": 0.1,
-      "sodium": 17,
+      "calcium": 0,
+      "calories": 902,
+      "carbs": 0,
+      "cholesterol": 95,
+      "fat": 100,
+      "fiber": 0,
+      "iron": 0,
+      "potassium": 0,
+      "protein": 0,
+      "saturatedFat": 39.2,
+      "sodium": 0,
       "sources": [
         {
           "confidence": "similar",
-          "matchedName": "Collards, raw",
+          "matchedName": "Lard",
           "name": "USDA FoodData Central",
-          "note": "Nutrient values are from USDA per 100 g food data; liquid units are displayed as the app serving basis when appropriate.",
-          "sourceFoodId": "170406",
-          "url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/170406/nutrients"
+          "note": "Nutrient values are from USDA FoodData Central or a conservative category estimate per 100 g/ml basis; liquid units are displayed as the app serving basis when appropriate.",
+          "sourceFoodId": "171401",
+          "url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/171401/nutrients"
         },
         {
           "confidence": "similar",
@@ -1317,10 +1317,10 @@
           "url": "https://www.fao.org/infoods/infoods/tables-and-databases/vietnam/en/"
         }
       ],
-      "sugar": 0.5,
+      "sugar": 0,
       "unit": "g",
-      "vitaminA": 251,
-      "vitaminC": 35.3
+      "vitaminA": 0,
+      "vitaminC": 0
     },
     "preservationCondition": "fridge",
     "priceEstimate": {
@@ -1347,25 +1347,25 @@
     "name": "Mỡ heo lỏng",
     "nutrition": {
       "amount": 100,
-      "calcium": 232,
-      "calories": 32,
-      "carbs": 5.4,
-      "cholesterol": 0,
-      "fat": 0.6,
-      "fiber": 4,
-      "iron": 0.5,
-      "potassium": 213,
-      "protein": 3,
-      "saturatedFat": 0.1,
-      "sodium": 17,
+      "calcium": 0,
+      "calories": 828,
+      "carbs": 0,
+      "cholesterol": 87,
+      "fat": 92,
+      "fiber": 0,
+      "iron": 0,
+      "potassium": 0,
+      "protein": 0,
+      "saturatedFat": 36.1,
+      "sodium": 0,
       "sources": [
         {
           "confidence": "similar",
-          "matchedName": "Collards, raw",
+          "matchedName": "Lard",
           "name": "USDA FoodData Central",
-          "note": "Nutrient values are from USDA per 100 g food data; liquid units are displayed as the app serving basis when appropriate.",
-          "sourceFoodId": "170406",
-          "url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/170406/nutrients"
+          "note": "Nutrient values are from USDA FoodData Central or a conservative category estimate per 100 g/ml basis; liquid units are displayed as the app serving basis when appropriate.",
+          "sourceFoodId": "171401",
+          "url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/171401/nutrients"
         },
         {
           "confidence": "similar",
@@ -1375,10 +1375,10 @@
           "url": "https://www.fao.org/infoods/infoods/tables-and-databases/vietnam/en/"
         }
       ],
-      "sugar": 0.5,
+      "sugar": 0,
       "unit": "ml",
-      "vitaminA": 251,
-      "vitaminC": 35.3
+      "vitaminA": 0,
+      "vitaminC": 0
     },
     "preservationCondition": "fridge",
     "priceEstimate": {
@@ -1568,7 +1568,7 @@
   },
   {
     "baseUnit": "g",
-    "category": "Hải sản",
+    "category": "Thịt",
     "id": "Thịt bò nạmJ1_LlvskPv",
     "inventoryUnits": [
       "g",
@@ -1577,25 +1577,24 @@
     "name": "Thịt bò nạm",
     "nutrition": {
       "amount": 100,
-      "calcium": 112,
-      "calories": 77,
+      "calcium": 5,
+      "calories": 216,
       "carbs": 0,
-      "cholesterol": 117,
-      "fat": 2,
+      "cholesterol": 62,
+      "fat": 15.6,
       "fiber": 0,
-      "iron": 4.4,
-      "potassium": 217,
-      "protein": 14.9,
-      "saturatedFat": 1,
-      "sodium": 81,
+      "iron": 1.9,
+      "potassium": 290,
+      "protein": 18.4,
+      "saturatedFat": 5.9,
+      "sodium": 56,
       "sources": [
         {
           "confidence": "similar",
-          "matchedName": "Beef, New Zealand, imported, variety meats and by-products, tripe uncooked, raw",
+          "matchedName": "Beef, brisket, raw",
           "name": "USDA FoodData Central",
-          "note": "Nutrient values are from USDA per 100 g food data; liquid units are displayed as the app serving basis when appropriate.",
-          "sourceFoodId": "173096",
-          "url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/173096/nutrients"
+          "note": "Nutrient values are from USDA FoodData Central or a conservative category estimate per 100 g/ml basis; liquid units are displayed as the app serving basis when appropriate.",
+          "url": "https://fdc.nal.usda.gov/fdc-app.html#/food-search?query=Beef%2C%20brisket%2C%20raw"
         },
         {
           "confidence": "similar",
@@ -1607,7 +1606,7 @@
       ],
       "sugar": 0,
       "unit": "g",
-      "vitaminA": 6,
+      "vitaminA": 0,
       "vitaminC": 0
     },
     "preservationCondition": "freezer",
@@ -2504,25 +2503,25 @@
     "name": "Muối iot",
     "nutrition": {
       "amount": 100,
-      "calcium": 21,
-      "calories": 37,
-      "carbs": 7.3,
+      "calcium": 50,
+      "calories": 0,
+      "carbs": 0,
       "cholesterol": 0,
-      "fat": 0.2,
-      "fiber": 3.1,
-      "iron": 0.7,
-      "potassium": 138,
-      "protein": 1.4,
+      "fat": 0,
+      "fiber": 0,
+      "iron": 0,
+      "potassium": 2,
+      "protein": 0,
       "saturatedFat": 0,
-      "sodium": 26,
+      "sodium": 38700,
       "sources": [
         {
-          "confidence": "similar",
-          "matchedName": "Vegetables, mixed (corn, lima beans, peas, green beans, carrots) canned, no salt added",
+          "confidence": "exact",
+          "matchedName": "Salt, table, iodized",
           "name": "USDA FoodData Central",
-          "note": "Nutrient values are from USDA per 100 g food data; liquid units are displayed as the app serving basis when appropriate.",
-          "sourceFoodId": "169085",
-          "url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/169085/nutrients"
+          "note": "Nutrient values are from USDA FoodData Central or a conservative category estimate per 100 g/ml basis; liquid units are displayed as the app serving basis when appropriate.",
+          "sourceFoodId": "746775",
+          "url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/746775/nutrients"
         },
         {
           "confidence": "similar",
@@ -2532,10 +2531,10 @@
           "url": "https://www.fao.org/infoods/infoods/tables-and-databases/vietnam/en/"
         }
       ],
-      "sugar": 2.4,
+      "sugar": 0,
       "unit": "g",
-      "vitaminA": 583,
-      "vitaminC": 3.8
+      "vitaminA": 0,
+      "vitaminC": 0
     },
     "preservationCondition": "cool_dry",
     "priceEstimate": {
@@ -2563,25 +2562,25 @@
     "name": "Muối trắng",
     "nutrition": {
       "amount": 100,
-      "calcium": 21,
-      "calories": 37,
-      "carbs": 7.3,
+      "calcium": 24,
+      "calories": 0,
+      "carbs": 0,
       "cholesterol": 0,
-      "fat": 0.2,
-      "fiber": 3.1,
-      "iron": 0.7,
-      "potassium": 138,
-      "protein": 1.4,
+      "fat": 0,
+      "fiber": 0,
+      "iron": 0.3,
+      "potassium": 8,
+      "protein": 0,
       "saturatedFat": 0,
-      "sodium": 26,
+      "sodium": 38800,
       "sources": [
         {
-          "confidence": "similar",
-          "matchedName": "Vegetables, mixed (corn, lima beans, peas, green beans, carrots) canned, no salt added",
+          "confidence": "exact",
+          "matchedName": "Salt, table",
           "name": "USDA FoodData Central",
-          "note": "Nutrient values are from USDA per 100 g food data; liquid units are displayed as the app serving basis when appropriate.",
-          "sourceFoodId": "169085",
-          "url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/169085/nutrients"
+          "note": "Nutrient values are from USDA FoodData Central or a conservative category estimate per 100 g/ml basis; liquid units are displayed as the app serving basis when appropriate.",
+          "sourceFoodId": "173468",
+          "url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/173468/nutrients"
         },
         {
           "confidence": "similar",
@@ -2591,10 +2590,10 @@
           "url": "https://www.fao.org/infoods/infoods/tables-and-databases/vietnam/en/"
         }
       ],
-      "sugar": 2.4,
+      "sugar": 0,
       "unit": "g",
-      "vitaminA": 583,
-      "vitaminC": 3.8
+      "vitaminA": 0,
+      "vitaminC": 0
     },
     "preservationCondition": "cool_dry",
     "priceEstimate": {
@@ -2680,25 +2679,25 @@
     "name": "Xì dầu",
     "nutrition": {
       "amount": 100,
-      "calcium": 3,
-      "calories": 714,
-      "carbs": 0.7,
+      "calcium": 33,
+      "calories": 53,
+      "carbs": 4.9,
       "cholesterol": 0,
-      "fat": 80,
-      "fiber": 0,
-      "iron": 0.1,
-      "potassium": 18,
-      "protein": 0.2,
-      "saturatedFat": 16.3,
-      "sodium": 886,
+      "fat": 0.6,
+      "fiber": 0.8,
+      "iron": 1.5,
+      "potassium": 435,
+      "protein": 8.1,
+      "saturatedFat": 0.1,
+      "sodium": 5493,
       "sources": [
         {
-          "confidence": "similar",
-          "matchedName": "Margarine, industrial, soy and partially hydrogenated soy oil, use for baking, sauces and candy",
+          "confidence": "exact",
+          "matchedName": "Soy sauce",
           "name": "USDA FoodData Central",
-          "note": "Nutrient values are from USDA per 100 g food data; liquid units are displayed as the app serving basis when appropriate.",
-          "sourceFoodId": "172369",
-          "url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/172369/nutrients"
+          "note": "Nutrient values are from USDA FoodData Central or a conservative category estimate per 100 g/ml basis; liquid units are displayed as the app serving basis when appropriate.",
+          "sourceFoodId": "2707442",
+          "url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/2707442/nutrients"
         },
         {
           "confidence": "similar",
@@ -2708,10 +2707,10 @@
           "url": "https://www.fao.org/infoods/infoods/tables-and-databases/vietnam/en/"
         }
       ],
-      "sugar": 0,
+      "sugar": 0.4,
       "unit": "ml",
-      "vitaminA": 5,
-      "vitaminC": 2
+      "vitaminA": 0,
+      "vitaminC": 0
     },
     "preservationCondition": "cool_dry",
     "priceEstimate": {
@@ -2740,24 +2739,24 @@
     "nutrition": {
       "amount": 100,
       "calcium": 6,
-      "calories": 36,
-      "carbs": 9.1,
+      "calories": 304,
+      "carbs": 82.4,
       "cholesterol": 0,
-      "fat": 0.1,
-      "fiber": 0.8,
-      "iron": 0.2,
-      "potassium": 228,
-      "protein": 0.5,
+      "fat": 0,
+      "fiber": 0.2,
+      "iron": 0.4,
+      "potassium": 52,
+      "protein": 0.3,
       "saturatedFat": 0,
-      "sodium": 18,
+      "sodium": 4,
       "sources": [
         {
-          "confidence": "similar",
-          "matchedName": "Melons, honeydew, raw",
+          "confidence": "exact",
+          "matchedName": "Honey",
           "name": "USDA FoodData Central",
-          "note": "Nutrient values are from USDA per 100 g food data; liquid units are displayed as the app serving basis when appropriate.",
-          "sourceFoodId": "169911",
-          "url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/169911/nutrients"
+          "note": "Nutrient values are from USDA FoodData Central or a conservative category estimate per 100 g/ml basis; liquid units are displayed as the app serving basis when appropriate.",
+          "sourceFoodId": "169640",
+          "url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/169640/nutrients"
         },
         {
           "confidence": "similar",
@@ -2767,10 +2766,10 @@
           "url": "https://www.fao.org/infoods/infoods/tables-and-databases/vietnam/en/"
         }
       ],
-      "sugar": 8.1,
+      "sugar": 82.1,
       "unit": "g",
-      "vitaminA": 3,
-      "vitaminC": 18
+      "vitaminA": 0,
+      "vitaminC": 0.5
     },
     "preservationCondition": "cool_dry",
     "priceEstimate": {
@@ -2857,25 +2856,24 @@
     "name": "Dầu ăn",
     "nutrition": {
       "amount": 100,
-      "calcium": 6,
-      "calories": 465,
+      "calcium": 0,
+      "calories": 828,
       "carbs": 0,
-      "cholesterol": 54,
-      "fat": 53,
+      "cholesterol": 0,
+      "fat": 92,
       "fiber": 0,
       "iron": 0,
-      "potassium": 6,
+      "potassium": 0,
       "protein": 0,
-      "saturatedFat": 17.9,
-      "sodium": 581,
+      "saturatedFat": 14,
+      "sodium": 0,
       "sources": [
         {
-          "confidence": "similar",
-          "matchedName": "Vegetable oil-butter spread, reduced calorie",
-          "name": "USDA FoodData Central",
-          "note": "Nutrient values are from USDA per 100 g food data; liquid units are displayed as the app serving basis when appropriate.",
-          "sourceFoodId": "167691",
-          "url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/167691/nutrients"
+          "confidence": "category",
+          "matchedName": "Generic vegetable cooking oil",
+          "name": "Ingredient category estimate",
+          "note": "Estimated from generic vegetable oil density and USDA-style oil composition; avoids the previous reduced-calorie spread match.",
+          "url": "https://www.fao.org/infoods/infoods/tables-and-databases/vietnam/en/"
         },
         {
           "confidence": "similar",
@@ -2887,7 +2885,7 @@
       ],
       "sugar": 0,
       "unit": "ml",
-      "vitaminA": 819,
+      "vitaminA": 0,
       "vitaminC": 0
     },
     "preservationCondition": "cool_dry",
@@ -3263,24 +3261,24 @@
     "name": "Cua đồng",
     "nutrition": {
       "amount": 100,
-      "calcium": 18,
-      "calories": 76,
-      "carbs": 20,
-      "cholesterol": 0,
-      "fat": 0.3,
-      "iron": 0.4,
-      "potassium": 194,
-      "protein": 0.4,
-      "saturatedFat": 0,
-      "sodium": 1,
+      "calcium": 89,
+      "calories": 87,
+      "carbs": 0,
+      "cholesterol": 78,
+      "fat": 1.1,
+      "fiber": 0,
+      "iron": 0.7,
+      "potassium": 329,
+      "protein": 18.1,
+      "saturatedFat": 0.2,
+      "sodium": 293,
       "sources": [
         {
           "confidence": "similar",
-          "matchedName": "Crabapples, raw",
+          "matchedName": "Crustaceans, crab, blue, raw",
           "name": "USDA FoodData Central",
-          "note": "Nutrient values are from USDA per 100 g food data; liquid units are displayed as the app serving basis when appropriate.",
-          "sourceFoodId": "171721",
-          "url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/171721/nutrients"
+          "note": "Nutrient values are from USDA FoodData Central or a conservative category estimate per 100 g/ml basis; liquid units are displayed as the app serving basis when appropriate.",
+          "url": "https://fdc.nal.usda.gov/fdc-app.html#/food-search?query=Crustaceans%2C%20crab%2C%20blue%2C%20raw"
         },
         {
           "confidence": "similar",
@@ -3290,9 +3288,10 @@
           "url": "https://www.fao.org/infoods/infoods/tables-and-databases/vietnam/en/"
         }
       ],
+      "sugar": 0,
       "unit": "g",
-      "vitaminA": 2,
-      "vitaminC": 8
+      "vitaminA": 0,
+      "vitaminC": 3
     },
     "preservationCondition": "freezer",
     "priceEstimate": {
@@ -3378,24 +3377,24 @@
     "name": "Bơ lạt",
     "nutrition": {
       "amount": 100,
-      "calcium": 19,
-      "calories": 39,
-      "carbs": 10,
-      "cholesterol": 0,
-      "fat": 0.1,
-      "iron": 0.6,
-      "potassium": 133,
-      "protein": 1.2,
-      "saturatedFat": 0,
-      "sodium": 2,
+      "calcium": 24,
+      "calories": 717,
+      "carbs": 0.1,
+      "cholesterol": 215,
+      "fat": 81.1,
+      "fiber": 0,
+      "iron": 0,
+      "potassium": 24,
+      "protein": 0.9,
+      "saturatedFat": 51.4,
+      "sodium": 11,
       "sources": [
         {
-          "confidence": "similar",
-          "matchedName": "Squash, winter, butternut, frozen, cooked, boiled, without salt",
+          "confidence": "exact",
+          "matchedName": "Butter, without salt",
           "name": "USDA FoodData Central",
-          "note": "Nutrient values are from USDA per 100 g food data; liquid units are displayed as the app serving basis when appropriate.",
-          "sourceFoodId": "168474",
-          "url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/168474/nutrients"
+          "note": "Nutrient values are from USDA FoodData Central or a conservative category estimate per 100 g/ml basis; liquid units are displayed as the app serving basis when appropriate.",
+          "url": "https://fdc.nal.usda.gov/fdc-app.html#/food-search?query=Butter%2C%20without%20salt"
         },
         {
           "confidence": "similar",
@@ -3405,9 +3404,10 @@
           "url": "https://www.fao.org/infoods/infoods/tables-and-databases/vietnam/en/"
         }
       ],
+      "sugar": 0,
       "unit": "g",
-      "vitaminA": 167,
-      "vitaminC": 3.5
+      "vitaminA": 684,
+      "vitaminC": 0
     },
     "preservationCondition": "fridge",
     "priceEstimate": {
@@ -3902,25 +3902,24 @@
     "name": "Hạt sen",
     "nutrition": {
       "amount": 100,
-      "calcium": 45,
-      "calories": 74,
-      "carbs": 17.2,
+      "calcium": 44,
+      "calories": 89,
+      "carbs": 17.3,
       "cholesterol": 0,
-      "fat": 0.1,
-      "fiber": 4.9,
-      "iron": 1.2,
-      "potassium": 556,
-      "protein": 2.6,
+      "fat": 0.5,
+      "fiber": 0.5,
+      "iron": 0.9,
+      "potassium": 367,
+      "protein": 4.1,
       "saturatedFat": 0,
-      "sodium": 40,
+      "sodium": 1,
       "sources": [
         {
           "confidence": "similar",
-          "matchedName": "Lotus root, raw",
+          "matchedName": "Seeds, lotus seeds, raw",
           "name": "USDA FoodData Central",
-          "note": "Nutrient values are from USDA per 100 g food data; liquid units are displayed as the app serving basis when appropriate.",
-          "sourceFoodId": "169250",
-          "url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/169250/nutrients"
+          "note": "Nutrient values are from USDA FoodData Central or a conservative category estimate per 100 g/ml basis; liquid units are displayed as the app serving basis when appropriate.",
+          "url": "https://fdc.nal.usda.gov/fdc-app.html#/food-search?query=Seeds%2C%20lotus%20seeds%2C%20raw"
         },
         {
           "confidence": "similar",
@@ -3930,9 +3929,10 @@
           "url": "https://www.fao.org/infoods/infoods/tables-and-databases/vietnam/en/"
         }
       ],
+      "sugar": 0.4,
       "unit": "g",
       "vitaminA": 0,
-      "vitaminC": 44
+      "vitaminC": 0
     },
     "preservationCondition": "fridge",
     "priceEstimate": {
@@ -4188,24 +4188,23 @@
     "nutrition": {
       "amount": 100,
       "calcium": 0,
-      "calories": 449,
-      "carbs": 2.5,
+      "calories": 18,
+      "carbs": 0.04,
       "cholesterol": 0,
-      "fat": 50.1,
+      "fat": 0,
       "fiber": 0,
       "iron": 0,
-      "potassium": 8,
+      "potassium": 2,
       "protein": 0,
-      "saturatedFat": 9.1,
-      "sodium": 1,
+      "saturatedFat": 0,
+      "sodium": 2,
       "sources": [
         {
-          "confidence": "similar",
-          "matchedName": "Salad dressing, home recipe, vinegar and oil",
+          "confidence": "exact",
+          "matchedName": "Vinegar, distilled",
           "name": "USDA FoodData Central",
-          "note": "Nutrient values are from USDA per 100 g food data; liquid units are displayed as the app serving basis when appropriate.",
-          "sourceFoodId": "171417",
-          "url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/171417/nutrients"
+          "note": "Nutrient values are from USDA FoodData Central or a conservative category estimate per 100 g/ml basis; liquid units are displayed as the app serving basis when appropriate.",
+          "url": "https://fdc.nal.usda.gov/fdc-app.html#/food-search?query=Vinegar%2C%20distilled"
         },
         {
           "confidence": "similar",
@@ -4215,7 +4214,7 @@
           "url": "https://www.fao.org/infoods/infoods/tables-and-databases/vietnam/en/"
         }
       ],
-      "sugar": 2.5,
+      "sugar": 0,
       "unit": "ml",
       "vitaminA": 0,
       "vitaminC": 0
@@ -4587,25 +4586,24 @@
     "name": "Thịt bò bắp",
     "nutrition": {
       "amount": 100,
-      "calcium": 112,
-      "calories": 77,
+      "calcium": 6,
+      "calories": 150,
       "carbs": 0,
-      "cholesterol": 117,
-      "fat": 2,
+      "cholesterol": 60,
+      "fat": 7,
       "fiber": 0,
-      "iron": 4.4,
-      "potassium": 217,
-      "protein": 14.9,
-      "saturatedFat": 1,
-      "sodium": 81,
+      "iron": 2.3,
+      "potassium": 320,
+      "protein": 20.3,
+      "saturatedFat": 2.8,
+      "sodium": 66,
       "sources": [
         {
           "confidence": "similar",
-          "matchedName": "Beef, New Zealand, imported, variety meats and by-products, tripe uncooked, raw",
+          "matchedName": "Beef, shank, raw",
           "name": "USDA FoodData Central",
-          "note": "Nutrient values are from USDA per 100 g food data; liquid units are displayed as the app serving basis when appropriate.",
-          "sourceFoodId": "173096",
-          "url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/173096/nutrients"
+          "note": "Nutrient values are from USDA FoodData Central or a conservative category estimate per 100 g/ml basis; liquid units are displayed as the app serving basis when appropriate.",
+          "url": "https://fdc.nal.usda.gov/fdc-app.html#/food-search?query=Beef%2C%20shank%2C%20raw"
         },
         {
           "confidence": "similar",
@@ -4617,7 +4615,7 @@
       ],
       "sugar": 0,
       "unit": "g",
-      "vitaminA": 6,
+      "vitaminA": 0,
       "vitaminC": 0
     },
     "preservationCondition": "freezer",
@@ -4761,25 +4759,24 @@
     "name": "Hoa chuối",
     "nutrition": {
       "amount": 100,
-      "calcium": 11,
-      "calories": 52,
-      "carbs": 12.4,
+      "calcium": 56,
+      "calories": 51,
+      "carbs": 9.9,
       "cholesterol": 0,
-      "fat": 0.3,
-      "fiber": 0.6,
-      "iron": 0.3,
-      "potassium": 184,
-      "protein": 0.4,
-      "saturatedFat": 0.1,
+      "fat": 0.6,
+      "fiber": 5.7,
+      "iron": 1.6,
+      "potassium": 553,
+      "protein": 1.6,
+      "saturatedFat": 0,
       "sodium": 5,
       "sources": [
         {
-          "confidence": "similar",
-          "matchedName": "Fruit juice smoothie, BOLTHOUSE FARMS, strawberry banana",
-          "name": "USDA FoodData Central",
-          "note": "Nutrient values are from USDA per 100 g food data; liquid units are displayed as the app serving basis when appropriate.",
-          "sourceFoodId": "167799",
-          "url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/167799/nutrients"
+          "confidence": "category",
+          "matchedName": "Banana blossom, raw",
+          "name": "Ingredient category estimate",
+          "note": "No close direct USDA item was available; values are conservative category estimates for the Vietnamese ingredient.",
+          "url": "https://www.fao.org/infoods/infoods/tables-and-databases/vietnam/en/"
         },
         {
           "confidence": "similar",
@@ -4789,10 +4786,10 @@
           "url": "https://www.fao.org/infoods/infoods/tables-and-databases/vietnam/en/"
         }
       ],
-      "sugar": 10.3,
+      "sugar": 2.2,
       "unit": "g",
-      "vitaminA": 1,
-      "vitaminC": 47.3
+      "vitaminA": 0,
+      "vitaminC": 13
     },
     "preservationCondition": "fridge",
     "priceEstimate": {
@@ -4933,24 +4930,24 @@
     "name": "Chả cua",
     "nutrition": {
       "amount": 100,
-      "calcium": 18,
-      "calories": 76,
-      "carbs": 20,
-      "cholesterol": 0,
-      "fat": 0.3,
-      "iron": 0.4,
-      "potassium": 194,
-      "protein": 0.4,
-      "saturatedFat": 0,
-      "sodium": 1,
+      "calcium": 55,
+      "calories": 160,
+      "carbs": 9,
+      "cholesterol": 55,
+      "fat": 8,
+      "fiber": 0.5,
+      "iron": 0.8,
+      "potassium": 180,
+      "protein": 13,
+      "saturatedFat": 1.4,
+      "sodium": 620,
       "sources": [
         {
-          "confidence": "similar",
-          "matchedName": "Crabapples, raw",
-          "name": "USDA FoodData Central",
-          "note": "Nutrient values are from USDA per 100 g food data; liquid units are displayed as the app serving basis when appropriate.",
-          "sourceFoodId": "171721",
-          "url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/171721/nutrients"
+          "confidence": "category",
+          "matchedName": "Crab cake / processed crab patty",
+          "name": "Ingredient category estimate",
+          "note": "No close direct USDA item was available; values are conservative category estimates for the Vietnamese ingredient.",
+          "url": "https://www.fao.org/infoods/infoods/tables-and-databases/vietnam/en/"
         },
         {
           "confidence": "similar",
@@ -4960,9 +4957,10 @@
           "url": "https://www.fao.org/infoods/infoods/tables-and-databases/vietnam/en/"
         }
       ],
+      "sugar": 0,
       "unit": "g",
-      "vitaminA": 2,
-      "vitaminC": 8
+      "vitaminA": 0,
+      "vitaminC": 0
     },
     "preservationCondition": "fridge",
     "priceEstimate": {
@@ -6602,25 +6600,24 @@
     "name": "Dọc mùng",
     "nutrition": {
       "amount": 100,
-      "calcium": 107,
-      "calories": 42,
-      "carbs": 6.7,
+      "calcium": 40,
+      "calories": 19,
+      "carbs": 4,
       "cholesterol": 0,
-      "fat": 0.7,
-      "fiber": 3.7,
-      "iron": 2.2,
-      "potassium": 648,
-      "protein": 5,
-      "saturatedFat": 0.2,
+      "fat": 0.1,
+      "fiber": 1.2,
+      "iron": 0.4,
+      "potassium": 300,
+      "protein": 0.8,
+      "saturatedFat": 0,
       "sodium": 3,
       "sources": [
         {
-          "confidence": "similar",
-          "matchedName": "Taro leaves, raw",
-          "name": "USDA FoodData Central",
-          "note": "Nutrient values are from USDA per 100 g food data; liquid units are displayed as the app serving basis when appropriate.",
-          "sourceFoodId": "168487",
-          "url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/168487/nutrients"
+          "confidence": "category",
+          "matchedName": "Dọc mùng / taro stem",
+          "name": "Ingredient category estimate",
+          "note": "No close direct USDA item was available; values are conservative category estimates for the edible stem/stalk rather than taro leaves.",
+          "url": "https://www.fao.org/infoods/infoods/tables-and-databases/vietnam/en/"
         },
         {
           "confidence": "similar",
@@ -6630,10 +6627,10 @@
           "url": "https://www.fao.org/infoods/infoods/tables-and-databases/vietnam/en/"
         }
       ],
-      "sugar": 3,
+      "sugar": 1.5,
       "unit": "g",
-      "vitaminA": 241,
-      "vitaminC": 52
+      "vitaminA": 5,
+      "vitaminC": 8
     },
     "preservationCondition": "fridge",
     "priceEstimate": {
@@ -6886,25 +6883,24 @@
     "name": "Bột mì",
     "nutrition": {
       "amount": 100,
-      "calcium": 52,
-      "calories": 445,
-      "carbs": 66.3,
+      "calcium": 15,
+      "calories": 364,
+      "carbs": 76.3,
       "cholesterol": 0,
-      "fat": 16.1,
-      "fiber": 1.2,
-      "iron": 2.5,
-      "potassium": 94,
-      "protein": 8.8,
-      "saturatedFat": 2.9,
-      "sodium": 445,
+      "fat": 1,
+      "fiber": 2.7,
+      "iron": 4.6,
+      "potassium": 107,
+      "protein": 10.3,
+      "saturatedFat": 0.2,
+      "sodium": 2,
       "sources": [
         {
-          "confidence": "similar",
-          "matchedName": "Pan Dulce, La Ricura, Salpora de Arroz con Azucar, cookie-like, contains wheat flour and rice flour",
+          "confidence": "exact",
+          "matchedName": "Wheat flour, white, all-purpose, enriched",
           "name": "USDA FoodData Central",
-          "note": "Nutrient values are from USDA per 100 g food data; liquid units are displayed as the app serving basis when appropriate.",
-          "sourceFoodId": "167938",
-          "url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/167938/nutrients"
+          "note": "Nutrient values are from USDA FoodData Central or a conservative category estimate per 100 g/ml basis; liquid units are displayed as the app serving basis when appropriate.",
+          "url": "https://fdc.nal.usda.gov/fdc-app.html#/food-search?query=Wheat%20flour%2C%20white%2C%20all-purpose%2C%20enriched"
         },
         {
           "confidence": "similar",
@@ -6914,7 +6910,7 @@
           "url": "https://www.fao.org/infoods/infoods/tables-and-databases/vietnam/en/"
         }
       ],
-      "sugar": 21.9,
+      "sugar": 0.3,
       "unit": "g",
       "vitaminA": 0,
       "vitaminC": 0
@@ -6944,25 +6940,24 @@
     "name": "Bột năng",
     "nutrition": {
       "amount": 100,
-      "calcium": 82,
-      "calories": 310,
-      "carbs": 55.1,
+      "calcium": 20,
+      "calories": 358,
+      "carbs": 88.7,
       "cholesterol": 0,
-      "fat": 6.4,
-      "fiber": 3.6,
-      "iron": 0.8,
-      "potassium": 161,
-      "protein": 8,
-      "saturatedFat": 1.2,
-      "sodium": 707,
+      "fat": 0,
+      "fiber": 0.9,
+      "iron": 1.6,
+      "potassium": 11,
+      "protein": 0.2,
+      "saturatedFat": 0,
+      "sodium": 1,
       "sources": [
         {
           "confidence": "similar",
-          "matchedName": "Rolls, gluten-free, white, made with brown rice flour, tapioca starch, and potato starch",
+          "matchedName": "Tapioca, pearl, dry",
           "name": "USDA FoodData Central",
-          "note": "Nutrient values are from USDA per 100 g food data; liquid units are displayed as the app serving basis when appropriate.",
-          "sourceFoodId": "171861",
-          "url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/171861/nutrients"
+          "note": "Nutrient values are from USDA FoodData Central or a conservative category estimate per 100 g/ml basis; liquid units are displayed as the app serving basis when appropriate.",
+          "url": "https://fdc.nal.usda.gov/fdc-app.html#/food-search?query=Tapioca%2C%20pearl%2C%20dry"
         },
         {
           "confidence": "similar",
@@ -6972,7 +6967,7 @@
           "url": "https://www.fao.org/infoods/infoods/tables-and-databases/vietnam/en/"
         }
       ],
-      "sugar": 9.5,
+      "sugar": 3.4,
       "unit": "g",
       "vitaminA": 0,
       "vitaminC": 0
@@ -7061,25 +7056,25 @@
     "name": "Nước",
     "nutrition": {
       "amount": 100,
-      "calcium": 60,
-      "calories": 119,
+      "calcium": 10,
+      "calories": 0,
       "carbs": 0,
-      "cholesterol": 64,
-      "fat": 4.9,
+      "cholesterol": 0,
+      "fat": 0,
       "fiber": 0,
-      "iron": 0.9,
-      "potassium": 275,
-      "protein": 17.5,
-      "saturatedFat": 1.1,
-      "sodium": 75,
+      "iron": 0,
+      "potassium": 0,
+      "protein": 0,
+      "saturatedFat": 0,
+      "sodium": 2,
       "sources": [
         {
-          "confidence": "similar",
-          "matchedName": "Fish, drum, freshwater, raw",
+          "confidence": "exact",
+          "matchedName": "Water, bottled, generic",
           "name": "USDA FoodData Central",
-          "note": "Nutrient values are from USDA per 100 g food data; liquid units are displayed as the app serving basis when appropriate.",
-          "sourceFoodId": "171960",
-          "url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/171960/nutrients"
+          "note": "Nutrient values are from USDA FoodData Central or a conservative category estimate per 100 g/ml basis; liquid units are displayed as the app serving basis when appropriate.",
+          "sourceFoodId": "174158",
+          "url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/174158/nutrients"
         },
         {
           "confidence": "similar",
@@ -7089,9 +7084,10 @@
           "url": "https://www.fao.org/infoods/infoods/tables-and-databases/vietnam/en/"
         }
       ],
+      "sugar": 0,
       "unit": "ml",
-      "vitaminA": 51,
-      "vitaminC": 1
+      "vitaminA": 0,
+      "vitaminC": 0
     },
     "preservationCondition": "room_temperature",
     "priceEstimate": {
@@ -7293,25 +7289,25 @@
     "name": "Sữa tươi không đường",
     "nutrition": {
       "amount": 100,
-      "calcium": 912,
-      "calories": 496,
-      "carbs": 38.4,
-      "cholesterol": 97,
-      "fat": 26.7,
+      "calcium": 123,
+      "calories": 61,
+      "carbs": 4.6,
+      "cholesterol": 12,
+      "fat": 3.2,
       "fiber": 0,
-      "iron": 0.5,
-      "potassium": 1330,
-      "protein": 26.3,
-      "saturatedFat": 16.7,
-      "sodium": 371,
+      "iron": 0,
+      "potassium": 150,
+      "protein": 3.3,
+      "saturatedFat": 1.9,
+      "sodium": 38,
       "sources": [
         {
           "confidence": "similar",
-          "matchedName": "Milk, dry, whole, with added vitamin D",
+          "matchedName": "Milk, whole",
           "name": "USDA FoodData Central",
-          "note": "Nutrient values are from USDA per 100 g food data; liquid units are displayed as the app serving basis when appropriate.",
-          "sourceFoodId": "170876",
-          "url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/170876/nutrients"
+          "note": "Nutrient values are from USDA FoodData Central or a conservative category estimate per 100 g/ml basis; liquid units are displayed as the app serving basis when appropriate.",
+          "sourceFoodId": "2705385",
+          "url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/2705385/nutrients"
         },
         {
           "confidence": "similar",
@@ -7321,10 +7317,10 @@
           "url": "https://www.fao.org/infoods/infoods/tables-and-databases/vietnam/en/"
         }
       ],
-      "sugar": 38.4,
+      "sugar": 4.6,
       "unit": "ml",
-      "vitaminA": 258,
-      "vitaminC": 8.6
+      "vitaminA": 32,
+      "vitaminC": 0
     },
     "preservationCondition": "fridge",
     "priceEstimate": {
@@ -7465,25 +7461,24 @@
     "name": "Đậu xanh",
     "nutrition": {
       "amount": 100,
-      "calcium": 13,
-      "calories": 30,
-      "carbs": 5.9,
+      "calcium": 132,
+      "calories": 347,
+      "carbs": 62.6,
       "cholesterol": 0,
-      "fat": 0.2,
-      "fiber": 1.8,
-      "iron": 0.9,
-      "potassium": 149,
-      "protein": 3,
-      "saturatedFat": 0,
-      "sodium": 6,
+      "fat": 1.2,
+      "fiber": 16.3,
+      "iron": 6.7,
+      "potassium": 1246,
+      "protein": 23.9,
+      "saturatedFat": 0.3,
+      "sodium": 15,
       "sources": [
         {
-          "confidence": "similar",
-          "matchedName": "Mung beans, mature seeds, sprouted, raw",
+          "confidence": "exact",
+          "matchedName": "Mung beans, mature seeds, raw",
           "name": "USDA FoodData Central",
-          "note": "Nutrient values are from USDA per 100 g food data; liquid units are displayed as the app serving basis when appropriate.",
-          "sourceFoodId": "169957",
-          "url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/169957/nutrients"
+          "note": "Nutrient values are from USDA FoodData Central or a conservative category estimate per 100 g/ml basis; liquid units are displayed as the app serving basis when appropriate.",
+          "url": "https://fdc.nal.usda.gov/fdc-app.html#/food-search?query=Mung%20beans%2C%20mature%20seeds%2C%20raw"
         },
         {
           "confidence": "similar",
@@ -7493,10 +7488,10 @@
           "url": "https://www.fao.org/infoods/infoods/tables-and-databases/vietnam/en/"
         }
       ],
-      "sugar": 4.1,
+      "sugar": 6.6,
       "unit": "g",
-      "vitaminA": 1,
-      "vitaminC": 13.2
+      "vitaminA": 0,
+      "vitaminC": 4.8
     },
     "preservationCondition": "cool_dry",
     "priceEstimate": {
@@ -7695,25 +7690,24 @@
     "name": "Đậu que",
     "nutrition": {
       "amount": 100,
-      "calcium": 197,
-      "calories": 147,
-      "carbs": 11,
+      "calcium": 37,
+      "calories": 31,
+      "carbs": 7,
       "cholesterol": 0,
-      "fat": 6.8,
-      "fiber": 4.2,
-      "iron": 3.5,
-      "potassium": 620,
-      "protein": 13,
-      "saturatedFat": 0.8,
-      "sodium": 15,
+      "fat": 0.2,
+      "fiber": 2.7,
+      "iron": 1,
+      "potassium": 211,
+      "protein": 1.8,
+      "saturatedFat": 0,
+      "sodium": 6,
       "sources": [
         {
-          "confidence": "similar",
-          "matchedName": "Soybeans, green, raw",
+          "confidence": "exact",
+          "matchedName": "Beans, snap, green, raw",
           "name": "USDA FoodData Central",
-          "note": "Nutrient values are from USDA per 100 g food data; liquid units are displayed as the app serving basis when appropriate.",
-          "sourceFoodId": "169282",
-          "url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/169282/nutrients"
+          "note": "Nutrient values are from USDA FoodData Central or a conservative category estimate per 100 g/ml basis; liquid units are displayed as the app serving basis when appropriate.",
+          "url": "https://fdc.nal.usda.gov/fdc-app.html#/food-search?query=Beans%2C%20snap%2C%20green%2C%20raw"
         },
         {
           "confidence": "similar",
@@ -7723,9 +7717,10 @@
           "url": "https://www.fao.org/infoods/infoods/tables-and-databases/vietnam/en/"
         }
       ],
+      "sugar": 3.3,
       "unit": "g",
-      "vitaminA": 9,
-      "vitaminC": 29
+      "vitaminA": 35,
+      "vitaminC": 12.2
     },
     "preservationCondition": "fridge",
     "priceEstimate": {
@@ -7752,25 +7747,24 @@
     "name": "Khoai tây",
     "nutrition": {
       "amount": 100,
-      "calcium": 78,
-      "calories": 42,
-      "carbs": 8.8,
+      "calcium": 12,
+      "calories": 77,
+      "carbs": 17.5,
       "cholesterol": 0,
-      "fat": 0.5,
-      "fiber": 5.3,
-      "iron": 1,
-      "potassium": 508,
-      "protein": 2.5,
-      "saturatedFat": 0.1,
+      "fat": 0.1,
+      "fiber": 2.2,
+      "iron": 0.8,
+      "potassium": 425,
+      "protein": 2,
+      "saturatedFat": 0,
       "sodium": 6,
       "sources": [
         {
           "confidence": "similar",
-          "matchedName": "Sweet potato leaves, raw",
+          "matchedName": "Potatoes, raw, skin",
           "name": "USDA FoodData Central",
-          "note": "Nutrient values are from USDA per 100 g food data; liquid units are displayed as the app serving basis when appropriate.",
-          "sourceFoodId": "169303",
-          "url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/169303/nutrients"
+          "note": "Nutrient values are from USDA FoodData Central or a conservative category estimate per 100 g/ml basis; liquid units are displayed as the app serving basis when appropriate.",
+          "url": "https://fdc.nal.usda.gov/fdc-app.html#/food-search?query=Potatoes%2C%20raw%2C%20skin"
         },
         {
           "confidence": "similar",
@@ -7780,9 +7774,10 @@
           "url": "https://www.fao.org/infoods/infoods/tables-and-databases/vietnam/en/"
         }
       ],
+      "sugar": 0.8,
       "unit": "g",
-      "vitaminA": 189,
-      "vitaminC": 11
+      "vitaminA": 0,
+      "vitaminC": 19.7
     },
     "preservationCondition": "cool_dry",
     "priceEstimate": {
@@ -7810,25 +7805,24 @@
     "name": "Khoai lang",
     "nutrition": {
       "amount": 100,
-      "calcium": 78,
-      "calories": 42,
-      "carbs": 8.8,
+      "calcium": 30,
+      "calories": 86,
+      "carbs": 20.1,
       "cholesterol": 0,
-      "fat": 0.5,
-      "fiber": 5.3,
-      "iron": 1,
-      "potassium": 508,
-      "protein": 2.5,
-      "saturatedFat": 0.1,
-      "sodium": 6,
+      "fat": 0.1,
+      "fiber": 3,
+      "iron": 0.6,
+      "potassium": 337,
+      "protein": 1.6,
+      "saturatedFat": 0,
+      "sodium": 55,
       "sources": [
         {
-          "confidence": "similar",
-          "matchedName": "Sweet potato leaves, raw",
+          "confidence": "exact",
+          "matchedName": "Sweet potato, raw, unprepared",
           "name": "USDA FoodData Central",
-          "note": "Nutrient values are from USDA per 100 g food data; liquid units are displayed as the app serving basis when appropriate.",
-          "sourceFoodId": "169303",
-          "url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/169303/nutrients"
+          "note": "Nutrient values are from USDA FoodData Central or a conservative category estimate per 100 g/ml basis; liquid units are displayed as the app serving basis when appropriate.",
+          "url": "https://fdc.nal.usda.gov/fdc-app.html#/food-search?query=Sweet%20potato%2C%20raw%2C%20unprepared"
         },
         {
           "confidence": "similar",
@@ -7838,9 +7832,10 @@
           "url": "https://www.fao.org/infoods/infoods/tables-and-databases/vietnam/en/"
         }
       ],
+      "sugar": 4.2,
       "unit": "g",
-      "vitaminA": 189,
-      "vitaminC": 11
+      "vitaminA": 709,
+      "vitaminC": 2.4
     },
     "preservationCondition": "cool_dry",
     "priceEstimate": {
@@ -7868,25 +7863,25 @@
     "name": "Nước dừa",
     "nutrition": {
       "amount": 100,
-      "calcium": 16,
-      "calories": 230,
-      "carbs": 5.5,
+      "calcium": 24,
+      "calories": 19,
+      "carbs": 3.7,
       "cholesterol": 0,
-      "fat": 23.8,
-      "fiber": 2.2,
-      "iron": 1.6,
-      "potassium": 263,
-      "protein": 2.3,
-      "saturatedFat": 21.1,
-      "sodium": 15,
+      "fat": 0.2,
+      "fiber": 1.1,
+      "iron": 0.3,
+      "potassium": 250,
+      "protein": 0.7,
+      "saturatedFat": 0.2,
+      "sodium": 105,
       "sources": [
         {
-          "confidence": "similar",
-          "matchedName": "Nuts, coconut milk, raw (liquid expressed from grated meat and water)",
+          "confidence": "exact",
+          "matchedName": "Nuts, coconut water (liquid from coconuts)",
           "name": "USDA FoodData Central",
-          "note": "Nutrient values are from USDA per 100 g food data; liquid units are displayed as the app serving basis when appropriate.",
-          "sourceFoodId": "170172",
-          "url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/170172/nutrients"
+          "note": "Nutrient values are from USDA FoodData Central or a conservative category estimate per 100 g/ml basis; liquid units are displayed as the app serving basis when appropriate.",
+          "sourceFoodId": "170174",
+          "url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/170174/nutrients"
         },
         {
           "confidence": "similar",
@@ -7896,10 +7891,10 @@
           "url": "https://www.fao.org/infoods/infoods/tables-and-databases/vietnam/en/"
         }
       ],
-      "sugar": 3.3,
+      "sugar": 2.6,
       "unit": "ml",
       "vitaminA": 0,
-      "vitaminC": 2.8
+      "vitaminC": 2.4
     },
     "preservationCondition": "fridge",
     "priceEstimate": {
@@ -8555,25 +8550,24 @@
     "name": "Tóp mỡ",
     "nutrition": {
       "amount": 100,
-      "calcium": 11,
-      "calories": 211,
+      "calcium": 30,
+      "calories": 544,
       "carbs": 0,
-      "cholesterol": 69,
-      "fat": 14.8,
+      "cholesterol": 95,
+      "fat": 31.3,
       "fiber": 0,
       "iron": 0.9,
-      "potassium": 319,
-      "protein": 18.2,
-      "saturatedFat": 4.9,
-      "sodium": 57,
+      "potassium": 127,
+      "protein": 61.3,
+      "saturatedFat": 11.4,
+      "sodium": 1818,
       "sources": [
         {
           "confidence": "similar",
-          "matchedName": "Pork, fresh, composite of trimmed leg, loin, shoulder, and spareribs, (includes cuts to be cured), separable lean and fat, raw",
+          "matchedName": "Pork skins, plain",
           "name": "USDA FoodData Central",
-          "note": "Nutrient values are from USDA per 100 g food data; liquid units are displayed as the app serving basis when appropriate.",
-          "sourceFoodId": "167810",
-          "url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/167810/nutrients"
+          "note": "Nutrient values are from USDA FoodData Central or a conservative category estimate per 100 g/ml basis; liquid units are displayed as the app serving basis when appropriate.",
+          "url": "https://fdc.nal.usda.gov/fdc-app.html#/food-search?query=Pork%20skins%2C%20plain"
         },
         {
           "confidence": "similar",
@@ -8585,8 +8579,8 @@
       ],
       "sugar": 0,
       "unit": "g",
-      "vitaminA": 1,
-      "vitaminC": 0.3
+      "vitaminA": 0,
+      "vitaminC": 0
     },
     "preservationCondition": "cool_dry",
     "priceEstimate": {
@@ -8962,25 +8956,24 @@
     "name": "Đường vàng",
     "nutrition": {
       "amount": 100,
-      "calcium": 12,
-      "calories": 426,
-      "carbs": 80.4,
+      "calcium": 83,
+      "calories": 380,
+      "carbs": 98.1,
       "cholesterol": 0,
-      "fat": 12.5,
-      "fiber": 4.2,
-      "iron": 1.5,
-      "potassium": 335,
-      "protein": 2.9,
-      "saturatedFat": 2,
-      "sodium": 83,
+      "fat": 0,
+      "fiber": 0,
+      "iron": 0.7,
+      "potassium": 133,
+      "protein": 0,
+      "saturatedFat": 0,
+      "sodium": 28,
       "sources": [
         {
           "confidence": "similar",
-          "matchedName": "Cookies, brownies, dry mix, sugar free",
+          "matchedName": "Sugars, brown",
           "name": "USDA FoodData Central",
-          "note": "Nutrient values are from USDA per 100 g food data; liquid units are displayed as the app serving basis when appropriate.",
-          "sourceFoodId": "172731",
-          "url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/172731/nutrients"
+          "note": "Nutrient values are from USDA FoodData Central or a conservative category estimate per 100 g/ml basis; liquid units are displayed as the app serving basis when appropriate.",
+          "url": "https://fdc.nal.usda.gov/fdc-app.html#/food-search?query=Sugars%2C%20brown"
         },
         {
           "confidence": "similar",
@@ -8990,6 +8983,7 @@
           "url": "https://www.fao.org/infoods/infoods/tables-and-databases/vietnam/en/"
         }
       ],
+      "sugar": 97,
       "unit": "g",
       "vitaminA": 0,
       "vitaminC": 0
@@ -9481,25 +9475,24 @@
     "name": "Khoai môn",
     "nutrition": {
       "amount": 100,
-      "calcium": 107,
-      "calories": 42,
-      "carbs": 6.7,
+      "calcium": 43,
+      "calories": 112,
+      "carbs": 26.5,
       "cholesterol": 0,
-      "fat": 0.7,
-      "fiber": 3.7,
-      "iron": 2.2,
-      "potassium": 648,
-      "protein": 5,
-      "saturatedFat": 0.2,
-      "sodium": 3,
+      "fat": 0.2,
+      "fiber": 4.1,
+      "iron": 0.6,
+      "potassium": 591,
+      "protein": 1.5,
+      "saturatedFat": 0,
+      "sodium": 11,
       "sources": [
         {
-          "confidence": "similar",
-          "matchedName": "Taro leaves, raw",
+          "confidence": "exact",
+          "matchedName": "Taro, raw",
           "name": "USDA FoodData Central",
-          "note": "Nutrient values are from USDA per 100 g food data; liquid units are displayed as the app serving basis when appropriate.",
-          "sourceFoodId": "168487",
-          "url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/168487/nutrients"
+          "note": "Nutrient values are from USDA FoodData Central or a conservative category estimate per 100 g/ml basis; liquid units are displayed as the app serving basis when appropriate.",
+          "url": "https://fdc.nal.usda.gov/fdc-app.html#/food-search?query=Taro%2C%20raw"
         },
         {
           "confidence": "similar",
@@ -9509,10 +9502,10 @@
           "url": "https://www.fao.org/infoods/infoods/tables-and-databases/vietnam/en/"
         }
       ],
-      "sugar": 3,
+      "sugar": 0.4,
       "unit": "g",
-      "vitaminA": 241,
-      "vitaminC": 52
+      "vitaminA": 4,
+      "vitaminC": 4.5
     },
     "preservationCondition": "cool_dry",
     "priceEstimate": {
@@ -9528,5 +9521,239 @@
       "kg": 1000
     },
     "shelfLife": "long"
+  },
+  {
+    "baseUnit": "g",
+    "category": "Rau củ",
+    "id": "Rau muong-shared-20260611",
+    "inventoryUnits": [
+      "g",
+      "kg",
+      "bó"
+    ],
+    "name": "Rau muống",
+    "nutrition": {
+      "amount": 100,
+      "calcium": 77,
+      "calories": 19,
+      "carbs": 3.1,
+      "cholesterol": 0,
+      "fat": 0.2,
+      "fiber": 2.1,
+      "iron": 1.7,
+      "potassium": 312,
+      "protein": 2.6,
+      "saturatedFat": 0,
+      "sodium": 113,
+      "sources": [
+        {
+          "confidence": "category",
+          "matchedName": "Rau muống raw / water spinach",
+          "name": "Ingredient category estimate",
+          "note": "No close direct USDA item was available; values are conservative category estimates for the Vietnamese ingredient.",
+          "url": "https://www.fao.org/infoods/infoods/tables-and-databases/vietnam/en/"
+        },
+        {
+          "confidence": "similar",
+          "matchedName": "Rau muống",
+          "name": "Vietnamese Food Composition Table 2007",
+          "note": "Vietnam-specific food composition reference listed by FAO/INFOODS; used for local ingredient context and cross-checking.",
+          "url": "https://www.fao.org/infoods/infoods/tables-and-databases/vietnam/en/"
+        }
+      ],
+      "sugar": 0.4,
+      "unit": "g",
+      "vitaminA": 315,
+      "vitaminC": 55
+    },
+    "preservationCondition": "fridge",
+    "priceEstimate": {
+      "amount": 1,
+      "currency": "VND",
+      "max": 25000,
+      "min": 10000,
+      "unit": "bó"
+    },
+    "recipeUnitConversions": {
+      "bó": 300,
+      "g": 1,
+      "kg": 1000
+    },
+    "shelfLife": "very_short"
+  },
+  {
+    "baseUnit": "g",
+    "category": "Rau củ",
+    "id": "Bap cai-shared-20260611",
+    "inventoryUnits": [
+      "g",
+      "kg"
+    ],
+    "name": "Bắp cải",
+    "nutrition": {
+      "amount": 100,
+      "calcium": 40,
+      "calories": 25,
+      "carbs": 5.8,
+      "cholesterol": 0,
+      "fat": 0.1,
+      "fiber": 2.5,
+      "iron": 0.5,
+      "potassium": 170,
+      "protein": 1.3,
+      "saturatedFat": 0,
+      "sodium": 18,
+      "sources": [
+        {
+          "confidence": "exact",
+          "matchedName": "Cabbage, raw",
+          "name": "USDA FoodData Central",
+          "note": "Nutrient values are from USDA FoodData Central or a conservative category estimate per 100 g/ml basis; liquid units are displayed as the app serving basis when appropriate.",
+          "url": "https://fdc.nal.usda.gov/fdc-app.html#/food-search?query=Cabbage%2C%20raw"
+        },
+        {
+          "confidence": "similar",
+          "matchedName": "Bắp cải",
+          "name": "Vietnamese Food Composition Table 2007",
+          "note": "Vietnam-specific food composition reference listed by FAO/INFOODS; used for local ingredient context and cross-checking.",
+          "url": "https://www.fao.org/infoods/infoods/tables-and-databases/vietnam/en/"
+        }
+      ],
+      "sugar": 3.2,
+      "unit": "g",
+      "vitaminA": 5,
+      "vitaminC": 36.6
+    },
+    "preservationCondition": "fridge",
+    "priceEstimate": {
+      "amount": 1,
+      "currency": "VND",
+      "max": 30000,
+      "min": 12000,
+      "unit": "kg"
+    },
+    "recipeUnitConversions": {
+      "g": 1,
+      "kg": 1000
+    },
+    "shelfLife": "medium"
+  },
+  {
+    "baseUnit": "g",
+    "category": "Rau củ",
+    "id": "Bau-shared-20260611",
+    "inventoryUnits": [
+      "g",
+      "kg",
+      "quả"
+    ],
+    "name": "Bầu",
+    "nutrition": {
+      "amount": 100,
+      "calcium": 26,
+      "calories": 14,
+      "carbs": 3.4,
+      "cholesterol": 0,
+      "fat": 0.1,
+      "fiber": 0.5,
+      "iron": 0.2,
+      "potassium": 150,
+      "protein": 0.6,
+      "saturatedFat": 0,
+      "sodium": 2,
+      "sources": [
+        {
+          "confidence": "category",
+          "matchedName": "Bottle gourd, raw",
+          "name": "Ingredient category estimate",
+          "note": "No close direct USDA item was available; values are conservative category estimates for the Vietnamese ingredient.",
+          "url": "https://www.fao.org/infoods/infoods/tables-and-databases/vietnam/en/"
+        },
+        {
+          "confidence": "similar",
+          "matchedName": "Bầu",
+          "name": "Vietnamese Food Composition Table 2007",
+          "note": "Vietnam-specific food composition reference listed by FAO/INFOODS; used for local ingredient context and cross-checking.",
+          "url": "https://www.fao.org/infoods/infoods/tables-and-databases/vietnam/en/"
+        }
+      ],
+      "sugar": 1.2,
+      "unit": "g",
+      "vitaminA": 0,
+      "vitaminC": 10.1
+    },
+    "preservationCondition": "fridge",
+    "priceEstimate": {
+      "amount": 1,
+      "currency": "VND",
+      "max": 28000,
+      "min": 12000,
+      "unit": "kg"
+    },
+    "recipeUnitConversions": {
+      "g": 1,
+      "kg": 1000,
+      "quả": 700
+    },
+    "shelfLife": "short"
+  },
+  {
+    "baseUnit": "g",
+    "category": "Rau củ",
+    "id": "Su su-shared-20260611",
+    "inventoryUnits": [
+      "g",
+      "kg",
+      "quả"
+    ],
+    "name": "Su su",
+    "nutrition": {
+      "amount": 100,
+      "calcium": 17,
+      "calories": 19,
+      "carbs": 4.5,
+      "cholesterol": 0,
+      "fat": 0.1,
+      "fiber": 1.7,
+      "iron": 0.3,
+      "potassium": 125,
+      "protein": 0.8,
+      "saturatedFat": 0,
+      "sodium": 2,
+      "sources": [
+        {
+          "confidence": "exact",
+          "matchedName": "Chayote, fruit, raw",
+          "name": "USDA FoodData Central",
+          "note": "Nutrient values are from USDA FoodData Central or a conservative category estimate per 100 g/ml basis; liquid units are displayed as the app serving basis when appropriate.",
+          "url": "https://fdc.nal.usda.gov/fdc-app.html#/food-search?query=Chayote%2C%20fruit%2C%20raw"
+        },
+        {
+          "confidence": "similar",
+          "matchedName": "Su su",
+          "name": "Vietnamese Food Composition Table 2007",
+          "note": "Vietnam-specific food composition reference listed by FAO/INFOODS; used for local ingredient context and cross-checking.",
+          "url": "https://www.fao.org/infoods/infoods/tables-and-databases/vietnam/en/"
+        }
+      ],
+      "sugar": 1.7,
+      "unit": "g",
+      "vitaminA": 0,
+      "vitaminC": 7.7
+    },
+    "preservationCondition": "fridge",
+    "priceEstimate": {
+      "amount": 1,
+      "currency": "VND",
+      "max": 35000,
+      "min": 15000,
+      "unit": "kg"
+    },
+    "recipeUnitConversions": {
+      "g": 1,
+      "kg": 1000,
+      "quả": 250
+    },
+    "shelfLife": "medium"
   }
 ]
