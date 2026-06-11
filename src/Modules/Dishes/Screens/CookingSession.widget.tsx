@@ -24,8 +24,11 @@ import {
     startCooking,
     toggleCookingStepComplete,
 } from "@store/Reducers/CookingSessionReducer";
+import { useCookingTimer } from "./useCookingTimer";
+import { CookingTimerCard } from "./CookingTimerCard.widget";
 import {
     selectCookingSessions,
+    selectCookTimeStats,
     selectDishes,
     selectDishesById,
     selectIngredientsById,
@@ -83,6 +86,7 @@ export const CookingSessionWidget: React.FunctionComponent<CookingSessionWidgetP
     const ingredientsById = useSelector(selectIngredientsById);
     const inventoryItems = useSelector(selectInventory);
     const sessions = useSelector(selectCookingSessions);
+    const cookTimeStats = useSelector(selectCookTimeStats);
     const selectedHouseholdMembers = useSelector(selectSelectedHouseholdMembers);
     const toggleShoppingList = useToggle();
     const [phase, setPhase] = useState<"prep" | "cooking">("prep");
@@ -104,6 +108,7 @@ export const CookingSessionWidget: React.FunctionComponent<CookingSessionWidgetP
     const totalSteps = sessionSteps.length;
     const currentIndex = Math.min(session?.currentStepIndex ?? 0, Math.max(0, totalSteps - 1));
     const completedStepSet = useMemo(() => new Set(session?.completedStepIndexes ?? []), [session?.completedStepIndexes]);
+    const timerView = useCookingTimer(session);
 
     const rows = useMemo<CookingIngredientRow[]>(() => {
         const amounts = DishServingHelper.collectIngredientAmounts(dish, allDishes, { targetServings: activeTargetServings });
@@ -129,9 +134,24 @@ export const CookingSessionWidget: React.FunctionComponent<CookingSessionWidgetP
 
     const lackingIngredientIds = rows.filter(r => !r.sufficient).map(r => r.ingredient.id);
     const allSufficient = rows.every(r => r.sufficient);
-    const durationText = DishDurationHelper.formatMinutes(DishDurationHelper.getTotalMinutesForDish(dish, dishesById));
+    const plannedTotalMinutes = DishDurationHelper.getTotalMinutesForDish(dish, dishesById);
+    const durationText = DishDurationHelper.formatMinutes(plannedTotalMinutes);
+    // Learned-time hint: surface what the user actually tends to take, once we have a recorded cook.
+    const cookTimeStat = cookTimeStats[dish.id];
+    const learnedHint = useMemo(() => {
+        if (!cookTimeStat || cookTimeStat.samples < 1) return null;
+        if (cookTimeStat.samples === 1) {
+            return { text: `Lần gần nhất ${cookTimeStat.lastTotalMinutes} phút`, diverges: false };
+        }
+        const diverges = plannedTotalMinutes > 0 && Math.abs(cookTimeStat.avgTotalMinutes - plannedTotalMinutes) / plannedTotalMinutes > 0.25;
+        return { text: `Bạn thường nấu ~${cookTimeStat.avgTotalMinutes} phút (${cookTimeStat.samples} lần)`, diverges };
+    }, [cookTimeStat, plannedTotalMinutes]);
 
     const _onStartCooking = () => {
+        // The live timer uses the top-level dish's own active duration phases (included-dish
+        // durations are intentionally not aggregated into the timeline — see plan §8).
+        const timerPhases = DishDurationHelper.getActiveItems(dish.duration)
+            .map(item => ({ phaseKey: item.phase.key, plannedMinutes: item.minutes }));
         dispatch(startCooking({
             dishId: dish.id,
             dishName: dish.name,
@@ -140,6 +160,7 @@ export const CookingSessionWidget: React.FunctionComponent<CookingSessionWidgetP
             steps,
             ingredientIds: rows.map(row => row.ingredient.id),
             householdMemberIds: selectedHouseholdMembers.map(member => member.id),
+            timerPhases,
         }));
         setPhase("cooking");
     };
@@ -202,7 +223,7 @@ export const CookingSessionWidget: React.FunctionComponent<CookingSessionWidgetP
     </Box>;
 
     if ((phase === "cooking" || activeSession) && session) {
-        if (showFinish || totalSteps === 0) {
+        if (showFinish || (totalSteps === 0 && !timerView.hasTimer)) {
             return <FinishCookingWidget session={session} onDone={onDone} />;
         }
 
@@ -216,7 +237,11 @@ export const CookingSessionWidget: React.FunctionComponent<CookingSessionWidgetP
                 <ServingSizeInput value={activeTargetServings} onChange={_onSessionServingChange} style={{ width: '100%' }} />
             </div>
 
-            <Box style={{ background: "#fffbe6", border: "1px solid #ffd591", borderRadius: 8, padding: "16px 14px" }}>
+            {timerView.hasTimer && !timerView.isFinished && (
+                <CookingTimerCard timer={timerView} onAdvanceLast={() => { timerView.advance(); setShowFinish(true); }} />
+            )}
+
+            {totalSteps > 0 && <Box style={{ background: "#fffbe6", border: "1px solid #ffd591", borderRadius: 8, padding: "16px 14px" }}>
                 <Stack justify="space-between" align="center" gap={8} style={{ marginBottom: 10 }}>
                     <Button aria-label="Bước trước" icon={<ArrowLeftOutlined />} disabled={currentIndex === 0} onClick={_onPrev} style={{ width: 38, paddingInline: 0 }} />
                     <Typography.Text strong style={{ fontSize: 13 }}>Bước {currentIndex + 1}/{totalSteps}</Typography.Text>
@@ -230,7 +255,7 @@ export const CookingSessionWidget: React.FunctionComponent<CookingSessionWidgetP
                     <Typography.Text type="secondary" style={{ fontSize: 12 }}>Đánh dấu bước này</Typography.Text>
                     <Switch checked={currentStepDone} checkedChildren="Xong" unCheckedChildren="Chưa" onChange={() => dispatch(toggleCookingStepComplete({ sessionId: session.id, stepIndex: currentIndex }))} />
                 </Stack>
-            </Box>
+            </Box>}
 
             {lackingIngredientIds.length > 0 && <Box style={{ background: '#fff7e6', border: '1px solid #ffd591', borderRadius: 8, padding: '8px 12px', fontSize: 12, color: '#d46b08' }}>
                 Thiếu {lackingIngredientIds.length} nguyên liệu.
@@ -267,6 +292,7 @@ export const CookingSessionWidget: React.FunctionComponent<CookingSessionWidgetP
             <div>
                 <Typography.Text strong style={{ display: 'block' }}>Khẩu phần</Typography.Text>
                 <Typography.Text type='secondary' style={{ fontSize: 12 }}>Gốc {baseServings} phần · {durationText}</Typography.Text>
+                {learnedHint && <Typography.Text style={{ display: 'block', fontSize: 12, color: learnedHint.diverges ? '#d46b08' : '#8c8c8c' }}>{learnedHint.text}</Typography.Text>}
             </div>
             <ServingSizeInput
                 value={targetServings}

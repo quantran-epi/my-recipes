@@ -46,6 +46,7 @@ export const selectShoppingLists = (state: RootState) => state.personal.shopping
 export const selectScheduledMeals = (state: RootState) => state.personal.scheduledMeal.scheduledMeals;
 export const selectSelectedMeals = (state: RootState) => state.personal.scheduledMeal.selectedMeals;
 export const selectCookingSessions = (state: RootState) => state.personal.cookingSession.sessions;
+export const selectCookTimeStats = (state: RootState) => state.personal.cookingSession.cookTimeStats ?? {};
 export const selectAppContext = (state: RootState) => state.personal.appContext;
 export const selectHouseholdHealthState = createSelector(
     [(state: RootState) => state.personal.householdHealth],

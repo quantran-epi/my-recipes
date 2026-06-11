@@ -1,4 +1,4 @@
-import { CheckCircleOutlined, CloseCircleOutlined } from "@ant-design/icons";
+import { CheckCircleOutlined, CloseCircleOutlined, ClockCircleOutlined } from "@ant-design/icons";
 import { Button } from "@components/Button";
 import { Stack } from "@components/Layout/Stack";
 import { useMessage } from "@components/Message";
@@ -7,8 +7,11 @@ import { Typography } from "@components/Typography";
 import { CookingSession, CookingSessionMemberFeedback } from "@store/Models/CookingSession";
 import { InventoryHelper } from "@common/Helpers/InventoryHelper";
 import { IngredientUnitHelper } from "@common/Helpers/IngredientUnitHelper";
-import { cancelCooking, finishCooking, setCookingMemberFeedback } from "@store/Reducers/CookingSessionReducer";
+import { DishDurationHelper } from "@common/Helpers/DishDurationHelper";
+import { cancelCooking, finishCooking, recordCookTime, setCookingMemberFeedback } from "@store/Reducers/CookingSessionReducer";
+import { updateDishDuration } from "@store/Reducers/DishesReducer";
 import { deductInventory } from "@store/Reducers/InventoryReducer";
+import { DishDuration, DishDurationPhaseKey } from "@store/Models/Dishes";
 import { selectDishes, selectDishesById, selectHouseholdMembers, selectIngredientsById, selectInventory, selectInventoryHealthConfig } from "@store/Selectors";
 import moment from "moment";
 import 'moment/locale/vi';
@@ -59,6 +62,40 @@ export const FinishCookingWidget: React.FunctionComponent<FinishCookingWidgetPro
             .map(([id, { total, unit, name }]) => ({ id, total, unit, name }));
     }, [dish, allDishes, ingredientsById, inventoryItems, session.targetServings, sessionIngredientStatusById]);
 
+    // Actual cook time, derived from the live timer. Per-phase data is precise (each phase has its
+    // own accumulatedSeconds); without a timer we fall back to coarse wall-clock (finish − start).
+    const cookTime = useMemo(() => {
+        const timer = session.timer;
+        if (timer && timer.phases.length > 0) {
+            // The active phase's in-progress segment isn't folded into accumulatedSeconds until
+            // finishCooking dispatches, so add it here or a straight-through cook undercounts.
+            const startedMs = timer.phaseStartedAt ? Date.parse(timer.phaseStartedAt) : NaN;
+            const runningSeconds = (!timer.isPaused && Number.isFinite(startedMs))
+                ? Math.max(0, Math.round((Date.now() - startedMs) / 1000))
+                : 0;
+            const phaseMinutes: Partial<Record<DishDurationPhaseKey, number>> = {};
+            let totalSeconds = 0;
+            timer.phases.forEach(p => {
+                const seconds = p.accumulatedSeconds + (p.phaseKey === timer.activePhaseKey ? runningSeconds : 0);
+                totalSeconds += seconds;
+                if (seconds > 0) phaseMinutes[p.phaseKey] = Math.max(1, Math.round(seconds / 60));
+            });
+            const plannedMinutes = timer.phases.reduce((sum, p) => sum + p.plannedMinutes, 0);
+            return {
+                hasTimer: true,
+                totalMinutes: Math.max(0, Math.round(totalSeconds / 60)),
+                plannedMinutes,
+                phaseMinutes,
+            };
+        }
+        // wall-clock fallback (approximate — includes idle time)
+        const startMs = Date.parse(session.startedAt);
+        const elapsedMin = Number.isFinite(startMs) ? Math.max(0, Math.round((Date.now() - startMs) / 60000)) : 0;
+        return { hasTimer: false, totalMinutes: elapsedMin, plannedMinutes: 0, phaseMinutes: undefined as Partial<Record<DishDurationPhaseKey, number>> | undefined };
+    }, [session.timer, session.startedAt]);
+
+    const cookTimeDelta = cookTime.plannedMinutes > 0 ? cookTime.totalMinutes - cookTime.plannedMinutes : 0;
+
     const _onFinish = () => {
         deductions.forEach(d => dispatch(deductInventory({
             ingredientId: d.id,
@@ -70,9 +107,23 @@ export const FinishCookingWidget: React.FunctionComponent<FinishCookingWidgetPro
         Object.entries(memberFeedback).forEach(([memberId, feedback]) => {
             dispatch(setCookingMemberFeedback({ sessionId: session.id, memberId, feedback }));
         });
+        if (cookTime.totalMinutes > 0) {
+            dispatch(recordCookTime({
+                dishId: session.dishId,
+                totalMinutes: cookTime.totalMinutes,
+                phaseMinutes: cookTime.phaseMinutes,
+            }));
+        }
         dispatch(finishCooking(session.id));
         message.success("Đã hoàn thành phiên nấu");
         onDone();
+    };
+
+    const _onUpdateDuration = () => {
+        if (!dish || !cookTime.phaseMinutes) return;
+        const nextDuration = DishDurationHelper.normalize(cookTime.phaseMinutes as Partial<DishDuration>);
+        dispatch(updateDishDuration({ dishId: dish.id, duration: nextDuration }));
+        message.success("Đã cập nhật thời lượng món theo lần nấu này");
     };
 
     const _onCancel = () => {
@@ -125,6 +176,37 @@ export const FinishCookingWidget: React.FunctionComponent<FinishCookingWidgetPro
                     />
                 </div>)}
             </div>
+        </div>}
+
+        {cookTime.totalMinutes > 0 && <div style={{ margin: '12px 0', padding: 10, border: '1px solid #ffe7ba', borderRadius: 8, background: '#fffbe6' }}>
+            <Stack align="center" gap={6} style={{ marginBottom: 6 }}>
+                <ClockCircleOutlined style={{ color: '#d46b08' }} />
+                <Typography.Text strong style={{ fontSize: 13 }}>Thời gian nấu thực tế</Typography.Text>
+            </Stack>
+            {cookTime.hasTimer && cookTime.plannedMinutes > 0 ? (
+                <Typography.Text style={{ display: 'block', fontSize: 13 }}>
+                    Bạn nấu hết <Typography.Text strong>{cookTime.totalMinutes} phút</Typography.Text>
+                    {' '}(dự kiến {cookTime.plannedMinutes} phút
+                    {cookTimeDelta !== 0 && <Typography.Text style={{ color: cookTimeDelta > 0 ? '#cf1322' : '#389e0d' }}>, {cookTimeDelta > 0 ? '+' : ''}{cookTimeDelta}</Typography.Text>})
+                </Typography.Text>
+            ) : (
+                <Typography.Text style={{ display: 'block', fontSize: 13 }}>
+                    Khoảng <Typography.Text strong>{cookTime.totalMinutes} phút</Typography.Text> <Typography.Text type="secondary">(ước tính thô)</Typography.Text>
+                </Typography.Text>
+            )}
+            {cookTime.hasTimer && cookTime.phaseMinutes && Object.keys(cookTime.phaseMinutes).length > 0 && (
+                <Typography.Text type="secondary" style={{ display: 'block', fontSize: 12, marginTop: 4 }}>
+                    {DishDurationHelper.phases
+                        .filter(p => cookTime.phaseMinutes?.[p.key] != null)
+                        .map(p => `${p.shortLabel} ${cookTime.phaseMinutes?.[p.key]}'`)
+                        .join(' · ')}
+                </Typography.Text>
+            )}
+            {cookTime.hasTimer && dish && cookTime.phaseMinutes && Object.keys(cookTime.phaseMinutes).length > 0 && (
+                <Button onClick={_onUpdateDuration} style={{ marginTop: 10 }} fullwidth>
+                    Cập nhật thời lượng món theo lần này
+                </Button>
+            )}
         </div>}
 
         <Stack direction="column" style={{ gap: 8, marginTop: 12 }}>

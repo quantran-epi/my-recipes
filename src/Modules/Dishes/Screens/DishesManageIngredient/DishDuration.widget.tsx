@@ -22,7 +22,7 @@ type DishDurationWidgetProps = {
     onSave: (value: DishesDurationEditParams) => void;
 }
 
-const durationIcon = (key: DishDurationPhaseKey, color: string) => {
+export const durationIcon = (key: DishDurationPhaseKey, color: string) => {
     const style: React.CSSProperties = { color, fontSize: 16 };
     switch (key) {
         case "unfreeze": return <HourglassOutlined style={style} />;
