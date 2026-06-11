@@ -23,6 +23,7 @@ export type CookingTimerView = {
     isOvertime: boolean;
     phasePercent: number;           // elapsed / planned, capped at 100
     isLastPhase: boolean;
+    unlockAudio: () => void;
     pause: () => void;
     resume: () => void;
     advance: () => void;
@@ -43,6 +44,8 @@ const computeRunningSeconds = (phaseStartedAt: string | null, isPaused: boolean)
 const playPhaseEndChime = (ctx: AudioContext | null) => {
     if (!ctx) return;
     try {
+        // A context can come back suspended (autoplay policy); resume before scheduling or it stays silent.
+        if (ctx.state === "suspended") ctx.resume();
         const now = ctx.currentTime;
         const tone = (freq: number, start: number, duration: number) => {
             const osc = ctx.createOscillator();
@@ -83,15 +86,28 @@ export const useCookingTimer = (session: CookingSession | undefined): CookingTim
         return () => window.clearInterval(id);
     }, [isRunning]);
 
+    // Create (once) and unlock the AudioContext. Must be called from a user gesture — autoplay
+    // policy otherwise hands back a suspended context that schedules tones but plays nothing.
     const ensureAudioContext = useCallback(() => {
-        if (audioCtxRef.current) return audioCtxRef.current;
-        try {
-            const Ctor = window.AudioContext || (window as any).webkitAudioContext;
-            if (Ctor) audioCtxRef.current = new Ctor();
-        } catch {
-            audioCtxRef.current = null;
+        if (!audioCtxRef.current) {
+            try {
+                const Ctor = window.AudioContext || (window as any).webkitAudioContext;
+                if (Ctor) audioCtxRef.current = new Ctor();
+            } catch {
+                audioCtxRef.current = null;
+            }
+        }
+        if (audioCtxRef.current?.state === "suspended") {
+            audioCtxRef.current.resume().catch(() => { /* ignore */ });
         }
         return audioCtxRef.current;
+    }, []);
+
+    // Close the context on unmount so repeated open/close of the cooking widget doesn't leak
+    // contexts (browsers cap concurrent AudioContexts).
+    useEffect(() => () => {
+        audioCtxRef.current?.close().catch(() => { /* ignore */ });
+        audioCtxRef.current = null;
     }, []);
 
     // Derive the view model for the active phase.
@@ -120,6 +136,12 @@ export const useCookingTimer = (session: CookingSession | undefined): CookingTim
             /* vibrate unsupported */
         }
     }, [activePhaseKey, isOvertime, timer?.soundEnabled]);
+
+    // Call from the start tap so the AudioContext is created/unlocked within a user gesture;
+    // otherwise the first phase's expiry chime is silent (context never existed yet).
+    const unlockAudio = useCallback(() => {
+        ensureAudioContext();
+    }, [ensureAudioContext]);
 
     const pause = useCallback(() => {
         if (sessionId) dispatch(pauseCookingTimer({ sessionId }));
@@ -154,6 +176,7 @@ export const useCookingTimer = (session: CookingSession | undefined): CookingTim
         isOvertime,
         phasePercent,
         isLastPhase,
+        unlockAudio,
         pause,
         resume,
         advance,

@@ -162,6 +162,8 @@ export const CookingSessionWidget: React.FunctionComponent<CookingSessionWidgetP
             householdMemberIds: selectedHouseholdMembers.map(member => member.id),
             timerPhases,
         }));
+        // Unlock audio within this tap so the first phase's expiry chime can play (autoplay policy).
+        if (timerPhases.length > 0) timerView.unlockAudio();
         setPhase("cooking");
     };
 

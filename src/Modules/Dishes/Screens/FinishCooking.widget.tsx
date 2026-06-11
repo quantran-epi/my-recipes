@@ -2,6 +2,7 @@ import { CheckCircleOutlined, CloseCircleOutlined, ClockCircleOutlined } from "@
 import { Button } from "@components/Button";
 import { Stack } from "@components/Layout/Stack";
 import { useMessage } from "@components/Message";
+import { useModal } from "@components/Modal/ModalProvider";
 import { Tag } from "@components/Tag";
 import { Typography } from "@components/Typography";
 import { CookingSession, CookingSessionMemberFeedback } from "@store/Models/CookingSession";
@@ -26,9 +27,13 @@ type FinishCookingWidgetProps = {
     onDone: () => void;
 }
 
+// Sits above the cooking flow's nested modals (z-index 4400) so the confirm is reachable.
+const COOKING_CONFIRM_Z_INDEX = 5200;
+
 export const FinishCookingWidget: React.FunctionComponent<FinishCookingWidgetProps> = ({ session, onDone }) => {
     const dispatch = useDispatch();
     const message = useMessage();
+    const modal = useModal();
     const allDishes = useSelector(selectDishes);
     const dishesById = useSelector(selectDishesById);
     const ingredientsById = useSelector(selectIngredientsById);
@@ -122,8 +127,22 @@ export const FinishCookingWidget: React.FunctionComponent<FinishCookingWidgetPro
     const _onUpdateDuration = () => {
         if (!dish || !cookTime.phaseMinutes) return;
         const nextDuration = DishDurationHelper.normalize(cookTime.phaseMinutes as Partial<DishDuration>);
-        dispatch(updateDishDuration({ dishId: dish.id, duration: nextDuration }));
-        message.success("Đã cập nhật thời lượng món theo lần nấu này");
+        const phaseSummary = DishDurationHelper.phases
+            .filter(p => cookTime.phaseMinutes?.[p.key] != null)
+            .map(p => `${p.shortLabel} ${cookTime.phaseMinutes?.[p.key]}'`)
+            .join(" · ");
+        modal.confirm({
+            title: "Cập nhật thời lượng món?",
+            content: `Thời lượng món "${dish.name}" sẽ được đặt theo lần nấu này: ${phaseSummary}. Thời lượng dự kiến cũ sẽ bị ghi đè.`,
+            okText: "Cập nhật",
+            cancelText: "Để sau",
+            centered: true,
+            zIndex: COOKING_CONFIRM_Z_INDEX,
+            onOk: () => {
+                dispatch(updateDishDuration({ dishId: dish.id, duration: nextDuration }));
+                message.success("Đã cập nhật thời lượng món theo lần nấu này");
+            },
+        });
     };
 
     const _onCancel = () => {
