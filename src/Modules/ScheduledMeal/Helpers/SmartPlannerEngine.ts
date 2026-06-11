@@ -486,18 +486,36 @@ const scoreDish = (
     const slotResult = getSlotScore(dish, slot, dishesById);
     const slotScore = clamp(68 + slotResult.score * 2);
     if (slotResult.reason) reasons.push(slotResult.reason);
-    details.push(buildScoreDetail('Độ hợp bữa ăn', slotResult.reason ?? 'Không có tag phù hợp rõ ràng', slotScore, 0.08, 'So khớp món với bữa đang lập. Bữa sáng ưu tiên tag Ăn sáng hoặc món nấu nhanh; bữa trưa và tối ưu tiên món chính, canh hoặc món dễ ghép bữa.'));
+    const slotLabel = slot === 'breakfast' ? 'bữa sáng' : slot === 'lunch' ? 'bữa trưa' : slot === 'dinner' ? 'bữa tối' : 'bữa linh hoạt';
+    const slotDescription = slot === 'any'
+        ? 'Món không gắn bữa cố định nên được chấm linh hoạt cho mọi bữa.'
+        : slotResult.reason
+            ? `Hợp ${slotLabel} vì ${slotResult.reason}${(dish.tags ?? []).length > 0 ? ` (tag: ${(dish.tags ?? []).join(', ')})` : ''}.`
+            : `Không có tag chuyên cho ${slotLabel} nên món chỉ giữ điểm nền cho bữa này.`;
+    details.push(buildScoreDetail('Độ hợp bữa ăn', slotResult.reason ?? 'Không có tag phù hợp rõ ràng', slotScore, 0.08, slotDescription));
 
     const timeScore = getTimeScore(minutes, input.maxCookMinutes);
     if (minutes > 0) reasons.push(DishDurationHelper.formatMinutes(minutes));
     else warnings.push('Thiếu thời gian nấu');
-    details.push(buildScoreDetail('Thời gian nấu', minutes > 0 ? DishDurationHelper.formatMinutes(minutes) : 'Chưa có thời gian nấu', timeScore, weights.time, 'Món càng gần giới hạn thời gian người dùng chọn càng được ưu tiên. Thiếu thời gian nấu làm giảm độ tin cậy.'));
+    const timeDescription = minutes <= 0
+        ? 'Món chưa có dữ liệu thời gian nấu nên không thể ưu tiên theo thời gian và bị giảm độ tin cậy.'
+        : input.maxCookMinutes && input.maxCookMinutes > 0
+            ? minutes <= input.maxCookMinutes
+                ? `Nấu khoảng ${DishDurationHelper.formatMinutes(minutes)}, nằm trong giới hạn ${DishDurationHelper.formatMinutes(input.maxCookMinutes)} bạn chọn nên được ưu tiên.`
+                : `Nấu khoảng ${DishDurationHelper.formatMinutes(minutes)}, vượt giới hạn ${DishDurationHelper.formatMinutes(input.maxCookMinutes)} bạn chọn nên bị trừ điểm.`
+            : `Nấu khoảng ${DishDurationHelper.formatMinutes(minutes)}; chưa đặt giới hạn thời gian nên món càng nhanh càng được ưu tiên.`;
+    details.push(buildScoreDetail('Thời gian nấu', minutes > 0 ? DishDurationHelper.formatMinutes(minutes) : 'Chưa có thời gian nấu', timeScore, weights.time, timeDescription));
 
     const inventoryScore = getInventoryScore(cost, enabledCriteria.has('inventory'));
     if (cost.shoppingCostAverage === 0) reasons.push('không cần mua');
     if (cost.urgentIngredientCount > 0) reasons.push(`dùng ${cost.urgentIngredientCount} đồ sắp hết hạn`);
     if (cost.missingIngredientCount > 0) warnings.push(`Cần mua ${cost.missingIngredientCount} nguyên liệu`);
-    details.push(buildScoreDetail('Tồn kho và đồ sắp hết hạn', cost.shoppingCostAverage === 0 ? 'Có đủ theo tồn kho hiện tại' : `Cần mua ${cost.shoppingCostLabel ?? 'thiếu giá'}`, inventoryScore, weights.inventory, 'Tính nguyên liệu đang có, nguyên liệu luôn có và phần cần mua thêm. Nguyên liệu sắp hết hạn được cộng điểm khi bật ưu tiên dùng tồn kho.'));
+    const inventoryParts: string[] = [];
+    if (cost.shoppingCostAverage === 0) inventoryParts.push('Đủ nguyên liệu theo tồn kho hiện tại nên không cần đi mua');
+    else inventoryParts.push(`Cần mua thêm ${cost.missingIngredientCount} nguyên liệu${cost.shoppingCostLabel ? ` (~${cost.shoppingCostLabel})` : ''}`);
+    if (cost.missingRequiredIngredientCount > 0) inventoryParts.push(`trong đó ${cost.missingRequiredIngredientCount} là bắt buộc`);
+    if (cost.urgentIngredientCount > 0) inventoryParts.push(`dùng ${cost.urgentIngredientCount} đồ sắp hết hạn${enabledCriteria.has('inventory') ? ' nên được cộng điểm ưu tiên' : ''}`);
+    details.push(buildScoreDetail('Tồn kho và đồ sắp hết hạn', cost.shoppingCostAverage === 0 ? 'Có đủ theo tồn kho hiện tại' : `Cần mua ${cost.shoppingCostLabel ?? 'thiếu giá'}`, inventoryScore, weights.inventory, inventoryParts.join(', ') + '.'));
 
     const budgetReference = input.scope === 'cook_now'
         ? Math.max(1, input.maxExtraSpend ?? input.dailyBudget ?? 100000)
@@ -508,7 +526,15 @@ const scoreDish = (
         if (budgetCost === undefined || cost.missingPriceCount > 0) warnings.push('Thiếu dữ liệu giá');
         else if (budgetCost <= budgetReference) reasons.push(input.inventoryAwareBudget ? 'vừa tiền mua thêm' : 'vừa ngân sách');
     }
-    details.push(buildScoreDetail('Ngân sách', enabledCriteria.has('budget') ? `${input.inventoryAwareBudget ? 'Cần mua' : 'Tổng'} ${input.inventoryAwareBudget ? cost.shoppingCostLabel ?? 'thiếu giá' : cost.costLabel ?? 'thiếu giá'}` : 'Không dùng để xếp hạng', budgetScore, weights.budget, enabledCriteria.has('budget') ? 'So chi phí với ngân sách đang chọn. Khi bật tính theo tủ lạnh, planner dùng phần cần mua thêm sau khi trừ tồn kho.' : 'Tiêu chí Ngân sách đang tắt, nên chi phí món không ảnh hưởng mạnh đến xếp hạng.'));
+    const budgetCostLabelText = input.inventoryAwareBudget ? 'phần cần mua thêm' : 'tổng chi phí';
+    const budgetDescription = !enabledCriteria.has('budget')
+        ? 'Tiêu chí Ngân sách đang tắt, nên chi phí món không ảnh hưởng mạnh đến xếp hạng.'
+        : budgetCost === undefined || cost.missingPriceCount > 0
+            ? `Thiếu giá cho ${cost.missingPriceCount} nguyên liệu nên chi phí chưa chắc chắn và bị giảm độ tin cậy.`
+            : budgetCost <= budgetReference
+                ? `Mức ${budgetCostLabelText} ~${IngredientPriceHelper.formatCurrency(budgetCost)} nằm trong tham chiếu ~${IngredientPriceHelper.formatCurrency(budgetReference)} nên được cộng điểm.`
+                : `Mức ${budgetCostLabelText} ~${IngredientPriceHelper.formatCurrency(budgetCost)} vượt tham chiếu ~${IngredientPriceHelper.formatCurrency(budgetReference)} nên bị trừ điểm.`;
+    details.push(buildScoreDetail('Ngân sách', enabledCriteria.has('budget') ? `${input.inventoryAwareBudget ? 'Cần mua' : 'Tổng'} ${input.inventoryAwareBudget ? cost.shoppingCostLabel ?? 'thiếu giá' : cost.costLabel ?? 'thiếu giá'}` : 'Không dùng để xếp hạng', budgetScore, weights.budget, budgetDescription));
 
     let nutritionMatch: NutritionGoalMatch | undefined;
     let nutritionLabel: string | undefined;
@@ -528,7 +554,12 @@ const scoreDish = (
             warnings.push('Thiếu dữ liệu dinh dưỡng');
         }
     }
-    details.push(buildScoreDetail('Mục tiêu dinh dưỡng', enabledCriteria.has('nutrition') && selectedNutritionGoal ? nutritionLabel ? `${nutritionLabel} (${formatPercent(nutritionScore)} gần mục tiêu)` : `Thiếu dữ liệu cho ${selectedNutritionGoal.name}` : 'Không dùng để xếp hạng', nutritionScore, weights.nutrition, enabledCriteria.has('nutrition') && selectedNutritionGoal ? 'So sánh dinh dưỡng mỗi phần ăn với mục tiêu đã chọn. Thiếu dữ liệu dinh dưỡng làm giảm độ tin cậy.' : 'Tiêu chí Dinh dưỡng đang tắt hoặc chưa chọn mục tiêu.'));
+    const nutritionDescription = !(enabledCriteria.has('nutrition') && selectedNutritionGoal)
+        ? 'Tiêu chí Dinh dưỡng đang tắt hoặc chưa chọn mục tiêu.'
+        : nutritionMatch
+            ? `Đạt ${nutritionMatch.matchedCriteriaCount}/${nutritionMatch.totalCriteriaCount} tiêu chí của mục tiêu ${selectedNutritionGoal.name}, tính theo mỗi phần ăn (${formatPercent(nutritionScore)} gần mục tiêu).`
+            : `Thiếu dữ liệu dinh dưỡng cho ${selectedNutritionGoal.name} nên không chấm được theo mục tiêu và bị giảm độ tin cậy.`;
+    details.push(buildScoreDetail('Mục tiêu dinh dưỡng', enabledCriteria.has('nutrition') && selectedNutritionGoal ? nutritionLabel ? `${nutritionLabel} (${formatPercent(nutritionScore)} gần mục tiêu)` : `Thiếu dữ liệu cho ${selectedNutritionGoal.name}` : 'Không dùng để xếp hạng', nutritionScore, weights.nutrition, nutritionDescription));
 
     let suitability: HouseholdDishSuitability | undefined;
     let suitabilityScore = 64;
@@ -541,11 +572,23 @@ const scoreDish = (
     const feedback = getFeedbackImpact(dish.id, input);
     const householdWithFeedbackScore = clamp(suitabilityScore + feedback.impact);
     if (feedback.label) reasons.push(feedback.label);
-    details.push(buildScoreDetail('Độ hợp nhà mình', enabledCriteria.has('household') && input.members.length > 0 ? `${householdWithFeedbackScore}% cho ${input.members.length} thành viên${feedback.label ? ` · ${feedback.label}` : ''}` : 'Không dùng để xếp hạng', householdWithFeedbackScore, weights.household, 'Tính hồ sơ các thành viên đang chọn và phản hồi nấu ăn đã lưu. Dị ứng và nguyên liệu chặn cứng được lọc trước khi chấm điểm.'));
+    const householdParts: string[] = [];
+    if (enabledCriteria.has('household') && input.members.length > 0) {
+        householdParts.push(`Khẩu vị trung bình ${formatPercent(suitability ? suitability.averageScore : suitabilityScore)} cho ${input.members.length} thành viên đang chọn`);
+        if (suitability && suitability.warningCount > 0) householdParts.push(`có ${suitability.warningCount} lưu ý cần cân nhắc`);
+        else if (suitability && suitability.positiveCount > 0) householdParts.push('nhiều điểm hợp khẩu vị');
+        if (feedback.label) householdParts.push(`phản hồi nấu ăn đã lưu: ${feedback.label}`);
+    } else {
+        householdParts.push('Chưa chọn thành viên nào nên khẩu vị nhà mình không tính vào điểm');
+    }
+    details.push(buildScoreDetail('Độ hợp nhà mình', enabledCriteria.has('household') && input.members.length > 0 ? `${householdWithFeedbackScore}% cho ${input.members.length} thành viên${feedback.label ? ` · ${feedback.label}` : ''}` : 'Không dùng để xếp hạng', householdWithFeedbackScore, weights.household, householdParts.join(', ') + '.'));
 
     const variety = getVarietyScore(dish, input, usage);
     if (variety.penalty > 0) warnings.push('Bị trừ vì lặp món hoặc nguyên liệu gần đây');
-    details.push(buildScoreDetail('Đa dạng thực đơn', variety.detail, variety.score, weights.variety, 'Dựa trên lịch nấu/lịch ăn gần đây và các món đã chọn trong lần lập hiện tại. Chế độ nhiều đa dạng trừ điểm lặp mạnh hơn.'));
+    const varietyDescription = variety.penalty <= 0
+        ? 'Món không trùng lịch gần đây hay các món đã chọn trong lần lập này nên giữ điểm đa dạng cao.'
+        : `Bị trừ điểm đa dạng vì ${variety.detail}${input.priorities.includes('variety') ? ' (đang ưu tiên đa dạng nên trừ mạnh hơn)' : ''}.`;
+    details.push(buildScoreDetail('Đa dạng thực đơn', variety.detail, variety.score, weights.variety, varietyDescription));
 
     const weightedScore = clamp(
         slotScore * 0.08

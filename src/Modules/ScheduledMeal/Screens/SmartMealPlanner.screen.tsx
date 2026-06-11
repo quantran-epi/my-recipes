@@ -38,6 +38,19 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useSearchParams } from 'react-router-dom';
 import DietPlanIcon from '../../../../assets/icons/diet-plan.png';
 
+// Static "how this criterion is calculated" help text, keyed by score detail
+// label. Shown on demand behind a ? toggle, alongside the dynamic per-dish
+// description the engine builds for each suggestion.
+const SCORE_METHODOLOGY: Record<string, string> = {
+    'Độ hợp bữa ăn': 'So khớp món với bữa đang lập. Bữa sáng ưu tiên tag Ăn sáng hoặc món nấu nhanh; bữa trưa và tối ưu tiên món chính, canh hoặc món dễ ghép bữa.',
+    'Thời gian nấu': 'Món càng gần giới hạn thời gian người dùng chọn càng được ưu tiên. Thiếu thời gian nấu làm giảm độ tin cậy.',
+    'Tồn kho và đồ sắp hết hạn': 'Tính nguyên liệu đang có, nguyên liệu luôn có và phần cần mua thêm. Nguyên liệu sắp hết hạn được cộng điểm khi bật ưu tiên dùng tồn kho.',
+    'Ngân sách': 'So chi phí với ngân sách đang chọn. Khi bật tính theo tủ lạnh, planner dùng phần cần mua thêm sau khi trừ tồn kho.',
+    'Mục tiêu dinh dưỡng': 'So sánh dinh dưỡng mỗi phần ăn với mục tiêu đã chọn. Thiếu dữ liệu dinh dưỡng làm giảm độ tin cậy.',
+    'Độ hợp nhà mình': 'Tính hồ sơ các thành viên đang chọn và phản hồi nấu ăn đã lưu. Dị ứng và nguyên liệu chặn cứng được lọc trước khi chấm điểm.',
+    'Đa dạng thực đơn': 'Dựa trên lịch nấu/lịch ăn gần đây và các món đã chọn trong lần lập hiện tại. Chế độ nhiều đa dạng trừ điểm lặp mạnh hơn.',
+};
+
 type PlannerScope = 'cook_now' | 'day' | 'week';
 type MealSlot = 'breakfast' | 'lunch' | 'dinner';
 
@@ -1121,16 +1134,27 @@ export const SmartMealPlannerScreen: React.FC = () => {
                 description='Mỗi dòng là một dữ liệu planner đã dùng để gợi ý món. Cột điểm cho biết dữ liệu đó làm món tăng, giảm hoặc giữ nguyên điểm xếp hạng.'
             >
                 <Stack direction='column' gap={8} style={{ width: '100%' }}>
-                    {detailSelection.item.scoreDetails.map(detail => <Box key={`${detail.label}-${detail.value}`} style={{ border: '1px solid rgba(15,23,42,0.07)', borderRadius: 8, background: '#f8fafc', padding: 10 }}>
-                        <Stack justify='space-between' align='flex-start' gap={8} wrap='wrap' style={{ width: '100%' }}>
-                            <div style={{ minWidth: 0, flex: '1 1 220px' }}>
-                                <Typography.Text strong style={{ display: 'block', color: '#111827', fontSize: 13, lineHeight: '18px' }}>{detail.label}</Typography.Text>
-                                <Typography.Text style={{ display: 'block', color: '#334155', fontSize: 12, lineHeight: '17px', marginTop: 2 }}>{detail.value}</Typography.Text>
-                            </div>
-                            <Tag color={getImpactColor(detail.impact)} style={{ marginRight: 0 }}>{formatImpact(detail.impact)}</Tag>
-                        </Stack>
-                        <Typography.Text type='secondary' style={{ display: 'block', fontSize: 12, lineHeight: '18px', marginTop: 7 }}>{detail.description}</Typography.Text>
-                    </Box>)}
+                    {detailSelection.item.scoreDetails.map(detail => {
+                        const methodologyKey = `score-method-${detail.label}`;
+                        const methodology = SCORE_METHODOLOGY[detail.label];
+                        return <Box key={`${detail.label}-${detail.value}`} style={{ border: '1px solid rgba(15,23,42,0.07)', borderRadius: 8, background: '#f8fafc', padding: 10 }}>
+                            <Stack justify='space-between' align='flex-start' gap={8} wrap='wrap' style={{ width: '100%' }}>
+                                <div style={{ minWidth: 0, flex: '1 1 220px' }}>
+                                    <Typography.Text strong style={{ display: 'block', color: '#111827', fontSize: 13, lineHeight: '18px' }}>{detail.label}</Typography.Text>
+                                    <Typography.Text style={{ display: 'block', color: '#334155', fontSize: 12, lineHeight: '17px', marginTop: 2 }}>{detail.value}</Typography.Text>
+                                </div>
+                                <Stack align='center' gap={4} style={{ flexShrink: 0 }}>
+                                    <Tag color={getImpactColor(detail.impact)} style={{ marginRight: 0 }}>{formatImpact(detail.impact)}</Tag>
+                                    {methodology && <Button type='text' aria-label={`Cách tính ${detail.label}`} icon={<QuestionCircleOutlined />} onClick={() => _toggleHelp(methodologyKey)} style={{ width: 28, height: 28, paddingInline: 0, borderRadius: 999, color: openHelpKey === methodologyKey ? '#13a8a8' : '#9ca3af' }} />}
+                                </Stack>
+                            </Stack>
+                            <Typography.Text type='secondary' style={{ display: 'block', fontSize: 12, lineHeight: '18px', marginTop: 7 }}>{detail.description}</Typography.Text>
+                            {methodology && openHelpKey === methodologyKey && <Box style={{ marginTop: 8, padding: '8px 10px', borderRadius: 6, background: 'rgba(19,168,168,0.08)', border: '1px solid rgba(19,168,168,0.18)' }}>
+                                <Typography.Text style={{ display: 'block', fontSize: 11, fontWeight: 650, color: '#0f766e', lineHeight: '15px', marginBottom: 3 }}>Cách tính tiêu chí này</Typography.Text>
+                                <Typography.Text type='secondary' style={{ display: 'block', fontSize: 12, lineHeight: '18px' }}>{methodology}</Typography.Text>
+                            </Box>}
+                        </Box>;
+                    })}
                 </Stack>
             </DetailSection>
 
