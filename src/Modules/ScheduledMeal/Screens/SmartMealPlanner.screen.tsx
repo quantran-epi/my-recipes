@@ -9,12 +9,13 @@ import { NutritionGoalHelper, type NutritionGoalMatch } from '@common/Helpers/Nu
 import { Button } from '@components/Button';
 import { Collapse } from '@components/Collapse';
 import { Dropdown } from '@components/Dropdown';
+import { renderResponsiveTagPlaceholder } from '@components/Form/Select';
 import { Image } from '@components/Image';
 import { Box } from '@components/Layout/Box';
 import { Stack } from '@components/Layout/Stack';
 import { useMessage } from '@components/Message';
 import { Modal } from '@components/Modal';
-import { Popconfirm } from '@components/Popconfirm';
+import { useModal } from '@components/Modal/ModalProvider';
 import { Tag } from '@components/Tag';
 import { Typography } from '@components/Typography';
 import { useScreenTitle } from '@hooks';
@@ -620,6 +621,7 @@ export const SmartMealPlannerScreen: React.FC = () => {
     useScreenTitle({ value: 'Lập thực đơn', deps: [] });
     const dispatch = useDispatch();
     const message = useMessage();
+    const modal = useModal();
     const [searchParams] = useSearchParams();
     const dishes = useSelector(selectDishes);
     const ingredients = useSelector(selectIngredients);
@@ -896,6 +898,17 @@ export const SmartMealPlannerScreen: React.FC = () => {
         message.success(`Đã bắt đầu nấu ${item.dish.name}`);
     };
 
+    const _confirmStartCookingRecommendation = (item: SmartPlannerDishRecommendation) => {
+        modal.confirm({
+            title: 'Bắt đầu nấu món này?',
+            content: <Typography.Text style={{ fontSize: 13, lineHeight: '19px' }}>Sẽ tạo phiên nấu cho "{item.dish.name}". Bạn có thể theo dõi các bước nấu trong phiên này.</Typography.Text>,
+            okText: 'Bắt đầu',
+            cancelText: 'Hủy',
+            icon: <PlayCircleOutlined />,
+            onOk: () => _startCookingRecommendation(item),
+        });
+    };
+
     const _scheduleCookNowSelection = () => {
         if (!scheduleSelection) return;
         const itemsBySlot: Partial<Record<MealSlot, { dish: Dishes }>> = { [scheduleSelection.slot]: scheduleSelection.item };
@@ -1018,15 +1031,7 @@ export const SmartMealPlannerScreen: React.FC = () => {
                 <Tag color={getScoreColor(item.score)} style={{ marginRight: 0 }}>{item.score}%</Tag>
             </div>
             <div className='smart-planner-result-actions'>
-                <Popconfirm
-                    title='Bắt đầu nấu món này?'
-                    description={`Sẽ tạo phiên nấu cho "${item.dish.name}". Bạn có thể theo dõi các bước nấu trong phiên này.`}
-                    okText='Bắt đầu'
-                    cancelText='Hủy'
-                    onConfirm={() => _startCookingRecommendation(item)}
-                >
-                    <Button className='smart-planner-result-primary' type='primary' icon={<PlayCircleOutlined />}>Nấu</Button>
-                </Popconfirm>
+                <Button className='smart-planner-result-primary' type='primary' icon={<PlayCircleOutlined />} onClick={() => _confirmStartCookingRecommendation(item)}>Nấu</Button>
                 <Dropdown
                     placement='bottomRight'
                     menu={{
@@ -1231,16 +1236,16 @@ export const SmartMealPlannerScreen: React.FC = () => {
             <Button type='primary' icon={<CalendarOutlined />} onClick={_scheduleCookNowSelection}>Lên lịch</Button>
         </Stack>}
     >
-        <Stack direction='column' gap={12} style={{ width: '100%' }}>
-            <Box style={{ border: '1px solid rgba(15,23,42,0.08)', borderRadius: 8, background: '#f8fafc', padding: 10 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 12, width: '100%' }}>
+            <Box style={{ width: '100%', boxSizing: 'border-box', border: '1px solid rgba(15,23,42,0.08)', borderRadius: 8, background: '#f8fafc', padding: 10 }}>
                 <Typography.Text strong style={{ display: 'block', color: '#111827', lineHeight: '20px' }}>{scheduleSelection.item.dish.name}</Typography.Text>
                 <Typography.Text type='secondary' style={{ display: 'block', fontSize: 12, lineHeight: '18px', marginTop: 3 }}>{targetServings} phần · {scheduleSelection.item.shoppingCostLabel ? `mua thêm ${scheduleSelection.item.shoppingCostLabel}` : 'chưa có chi phí mua thêm'}</Typography.Text>
             </Box>
-            <div>
+            <div style={{ width: '100%' }}>
                 <Typography.Text strong style={{ display: 'block', marginBottom: 6 }}>Ngày</Typography.Text>
                 <DatePicker value={scheduleSelection.date} onChange={value => value && setScheduleSelection(current => current ? { ...current, date: value.startOf('day') } : current)} format='DD/MM/YYYY' style={{ width: '100%' }} />
             </div>
-            <div>
+            <div style={{ width: '100%' }}>
                 <Typography.Text strong style={{ display: 'block', marginBottom: 6 }}>Bữa</Typography.Text>
                 <Segmented block value={scheduleSelection.slot} onChange={value => setScheduleSelection(current => current ? { ...current, slot: value as MealSlot } : current)} options={([
                     { value: 'breakfast', label: 'Sáng' },
@@ -1248,7 +1253,7 @@ export const SmartMealPlannerScreen: React.FC = () => {
                     { value: 'dinner', label: 'Tối' },
                 ] as Array<{ value: MealSlot; label: string }>)} />
             </div>
-        </Stack>
+        </div>
     </Modal> : null;
 
     const recommendationShoppingModal = shoppingRecommendation ? <Modal
@@ -1309,7 +1314,7 @@ export const SmartMealPlannerScreen: React.FC = () => {
                             </div>
                             <div>
                                 <PlannerFieldLabel helpKey='members' label={<><TeamOutlined /> Ăn cùng</>}>Chọn người ăn cùng để tính khẩu phần, món thích, món tránh và mục tiêu riêng của từng người.</PlannerFieldLabel>
-                                <Select mode='multiple' allowClear maxTagCount='responsive' value={memberIds} onChange={value => { setMemberIds(value); _clearSuggestions(); }} options={members.map(member => ({ value: member.id, label: member.name }))} placeholder='Tất cả thành viên' style={{ width: '100%' }} />
+                                <Select mode='multiple' allowClear maxTagCount='responsive' maxTagPlaceholder={renderResponsiveTagPlaceholder} value={memberIds} onChange={value => { setMemberIds(value); _clearSuggestions(); }} options={members.map(member => ({ value: member.id, label: member.name }))} placeholder='Tất cả thành viên' style={{ width: '100%' }} />
                             </div>
                         </div>
                     </div>
@@ -1418,15 +1423,15 @@ export const SmartMealPlannerScreen: React.FC = () => {
                                         </div>
                                         <div>
                                             <PlannerFieldLabel helpKey='avoid-ingredients' label='Tránh nguyên liệu'>Món chứa bất kỳ nguyên liệu nào ở đây sẽ bị loại.</PlannerFieldLabel>
-                                            <Select mode='multiple' allowClear maxTagCount='responsive' value={avoidIngredientIds} onChange={value => { setAvoidIngredientIds(value); _clearSuggestions(); }} options={ingredientOptions} placeholder='Chọn nguyên liệu cần tránh' style={{ width: '100%' }} />
+                                            <Select mode='multiple' allowClear maxTagCount='responsive' maxTagPlaceholder={renderResponsiveTagPlaceholder} value={avoidIngredientIds} onChange={value => { setAvoidIngredientIds(value); _clearSuggestions(); }} options={ingredientOptions} placeholder='Chọn nguyên liệu cần tránh' style={{ width: '100%' }} />
                                         </div>
                                         <div>
                                             <PlannerFieldLabel helpKey='expiring-ingredients' label='Bắt buộc đồ sắp hết hạn'>Món phải dùng các nguyên liệu sắp hết hạn đã chọn.</PlannerFieldLabel>
-                                            <Select mode='multiple' allowClear maxTagCount='responsive' value={requiredExpiringIngredientIds} onChange={value => { setRequiredExpiringIngredientIds(value); _clearSuggestions(); }} options={expiringIngredientOptions} placeholder='Chọn nguyên liệu sắp hết hạn' style={{ width: '100%' }} />
+                                            <Select mode='multiple' allowClear maxTagCount='responsive' maxTagPlaceholder={renderResponsiveTagPlaceholder} value={requiredExpiringIngredientIds} onChange={value => { setRequiredExpiringIngredientIds(value); _clearSuggestions(); }} options={expiringIngredientOptions} placeholder='Chọn nguyên liệu sắp hết hạn' style={{ width: '100%' }} />
                                         </div>
                                         <div>
                                             <PlannerFieldLabel helpKey='required-tags' label='Bắt buộc tag món'>Món phải có các tag này. Có thể nhập tag như Vegetarian hoặc Low-carb nếu món đã dùng tag đó.</PlannerFieldLabel>
-                                            <Select mode='tags' allowClear maxTagCount='responsive' value={requiredTags} onChange={value => { setRequiredTags(value); _clearSuggestions(); }} options={tagOptions} placeholder='Ví dụ: Salad, Vegetarian, Low-carb' style={{ width: '100%' }} />
+                                            <Select mode='tags' allowClear maxTagCount='responsive' maxTagPlaceholder={renderResponsiveTagPlaceholder} value={requiredTags} onChange={value => { setRequiredTags(value); _clearSuggestions(); }} options={tagOptions} placeholder='Ví dụ: Salad, Vegetarian, Low-carb' style={{ width: '100%' }} />
                                         </div>
                                     </div>}
                                 </div>

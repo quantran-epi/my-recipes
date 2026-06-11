@@ -108,13 +108,14 @@ export const FinishCookingWidget: React.FunctionComponent<FinishCookingWidgetPro
 
         {cookingMembers.length > 0 && <div style={{ margin: '12px 0', padding: 10, border: '1px solid #d6e4ff', borderRadius: 8, background: '#f8fbff' }}>
             <Typography.Text strong style={{ display: 'block', fontSize: 13 }}>Mọi người thấy sao?</Typography.Text>
-            <Stack direction="column" style={{ gap: 7, marginTop: 8 }}>
-                {cookingMembers.map(member => <div key={member.id} style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) 132px', gap: 8, alignItems: 'center' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 7, marginTop: 8, width: '100%' }}>
+                {cookingMembers.map(member => <div key={member.id} style={{ width: '100%', boxSizing: 'border-box', display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) 132px', gap: 8, alignItems: 'center' }}>
                     <Typography.Text style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{member.name}</Typography.Text>
                     <Select
                         size="small"
                         value={memberFeedback[member.id]}
                         placeholder="Chọn"
+                        style={{ width: '100%' }}
                         onChange={(value) => setMemberFeedback(current => ({ ...current, [member.id]: value }))}
                         options={[
                             { value: 'liked', label: 'Thích' },
@@ -123,7 +124,7 @@ export const FinishCookingWidget: React.FunctionComponent<FinishCookingWidgetPro
                         ]}
                     />
                 </div>)}
-            </Stack>
+            </div>
         </div>}
 
         <Stack direction="column" style={{ gap: 8, marginTop: 12 }}>

@@ -1098,13 +1098,13 @@ export const DashboardAnalyticsScreen = () => {
                 {suggestions.map(item => {
                     const matchPercent = Math.round(item.score * 100);
                     const tone = matchPercent >= 100 ? '#389e0d' : matchPercent >= 50 ? '#d48806' : '#d46b08';
-                    return <button key={item.dish.id} type='button' onClick={() => openRoute(RootRoutes.AuthorizedRoutes.DishesRoutes.ManageIngredient(item.dish.id))} style={{ border: '1px solid rgba(116,54,220,0.10)', borderRadius: 8, background: '#fff', padding: 11, textAlign: 'left', cursor: 'pointer', boxShadow: '0 6px 18px rgba(74,48,130,0.07)' }}>
-                        <Typography.Text strong style={{ display: 'block', color: '#111827', lineHeight: '18px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{item.dish.name}</Typography.Text>
+                    return <button key={item.dish.id} type='button' onClick={() => openRoute(RootRoutes.AuthorizedRoutes.DishesRoutes.ManageIngredient(item.dish.id))} style={{ border: '1px solid rgba(116,54,220,0.10)', borderRadius: 8, background: '#fff', padding: '9px 10px', textAlign: 'left', cursor: 'pointer', boxShadow: '0 6px 18px rgba(74,48,130,0.07)', boxSizing: 'border-box' }}>
+                        <Typography.Text strong style={{ display: 'block', color: '#111827', fontSize: 12, lineHeight: '16px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{item.dish.name}</Typography.Text>
                         <Typography.Text type='secondary' style={{ display: 'block', fontSize: 11, lineHeight: '15px', marginTop: 3 }}>{item.matchedIngredientIds.length} đủ · {item.missingIngredientIds.length} thiếu</Typography.Text>
                         <div style={{ height: 6, borderRadius: 999, background: '#f0edf8', overflow: 'hidden', marginTop: 9 }}>
                             <div style={{ height: '100%', width: `${Math.max(4, matchPercent)}%`, borderRadius: 999, background: tone }} />
                         </div>
-                        <Typography.Text strong style={{ display: 'block', color: tone, fontSize: 12, lineHeight: '16px', marginTop: 6 }}>{matchPercent}% khớp</Typography.Text>
+                        <Typography.Text strong style={{ display: 'block', color: tone, fontSize: 11, lineHeight: '15px', marginTop: 6 }}>{matchPercent}% khớp</Typography.Text>
                     </button>;
                 })}
             </div>}

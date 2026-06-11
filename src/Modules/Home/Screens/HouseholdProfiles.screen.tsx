@@ -1,5 +1,6 @@
 import { DeleteOutlined, PlusOutlined, SaveOutlined, UserOutlined } from '@ant-design/icons';
 import { Button } from '@components/Button';
+import { renderResponsiveTagPlaceholder } from '@components/Form/Select';
 import { Image } from '@components/Image';
 import { Box } from '@components/Layout/Box';
 import { Stack } from '@components/Layout/Stack';
@@ -403,7 +404,7 @@ export const HouseholdProfilesScreen: React.FC = () => {
                         </div>
                         <div className='household-field-row'>
                             <FieldLabel>Khẩu phần thường ăn</FieldLabel>
-                            <div className='household-field-control'><InputNumber min={0.5} max={12} step={0.5} value={draftMember.portionPreference ?? 1} addonAfter='phần' onChange={value => _updateDraftMember({ portionPreference: Number(value ?? 1) })} style={{ width: '100%' }} /></div>
+                            <div className='household-field-control'><InputNumber min={0.1} max={12} step={0.1} precision={1} value={draftMember.portionPreference ?? 1} addonAfter='phần' onChange={value => _updateDraftMember({ portionPreference: Number(value ?? 1) })} style={{ width: '100%' }} /></div>
                         </div>
                         <div className='household-field-row'>
                             <FieldLabel>Mục tiêu dinh dưỡng</FieldLabel>
@@ -421,35 +422,35 @@ export const HouseholdProfilesScreen: React.FC = () => {
                     <div className='household-field-list'>
                         <div className='household-field-row'>
                             <FieldLabel>Món thích</FieldLabel>
-                            <div className='household-field-control'><Select mode='multiple' allowClear maxTagCount='responsive' value={draftMember.favoriteDishIds} onChange={ids => {
+                            <div className='household-field-control'><Select mode='multiple' allowClear maxTagCount='responsive' maxTagPlaceholder={renderResponsiveTagPlaceholder} value={draftMember.favoriteDishIds} onChange={ids => {
                                 const nextIds = ids ?? [];
                                 _updateDraftMember({ favoriteDishIds: nextIds, avoidedDishIds: draftMember.avoidedDishIds.filter(id => !nextIds.includes(id)) });
                             }} options={dishOptions} style={{ width: '100%' }} placeholder='Chọn món' /></div>
                         </div>
                         <div className='household-field-row'>
                             <FieldLabel>Món tránh</FieldLabel>
-                            <div className='household-field-control'><Select mode='multiple' allowClear maxTagCount='responsive' value={draftMember.avoidedDishIds} onChange={ids => {
+                            <div className='household-field-control'><Select mode='multiple' allowClear maxTagCount='responsive' maxTagPlaceholder={renderResponsiveTagPlaceholder} value={draftMember.avoidedDishIds} onChange={ids => {
                                 const nextIds = ids ?? [];
                                 _updateDraftMember({ avoidedDishIds: nextIds, favoriteDishIds: draftMember.favoriteDishIds.filter(id => !nextIds.includes(id)) });
                             }} options={dishOptions} style={{ width: '100%' }} placeholder='Chọn món' /></div>
                         </div>
                         <div className='household-field-row'>
                             <FieldLabel>Nguyên liệu thích</FieldLabel>
-                            <div className='household-field-control'><Select mode='multiple' allowClear maxTagCount='responsive' value={draftMember.favoriteIngredientIds} onChange={ids => {
+                            <div className='household-field-control'><Select mode='multiple' allowClear maxTagCount='responsive' maxTagPlaceholder={renderResponsiveTagPlaceholder} value={draftMember.favoriteIngredientIds} onChange={ids => {
                                 const nextIds = ids ?? [];
                                 _updateDraftMember({ favoriteIngredientIds: nextIds, avoidedIngredientIds: draftMember.avoidedIngredientIds.filter(id => !nextIds.includes(id)) });
                             }} options={ingredientOptions} style={{ width: '100%' }} placeholder='Chọn nguyên liệu' /></div>
                         </div>
                         <div className='household-field-row'>
                             <FieldLabel>Nguyên liệu tránh</FieldLabel>
-                            <div className='household-field-control'><Select mode='multiple' allowClear maxTagCount='responsive' value={draftMember.avoidedIngredientIds} onChange={ids => {
+                            <div className='household-field-control'><Select mode='multiple' allowClear maxTagCount='responsive' maxTagPlaceholder={renderResponsiveTagPlaceholder} value={draftMember.avoidedIngredientIds} onChange={ids => {
                                 const nextIds = ids ?? [];
                                 _updateDraftMember({ avoidedIngredientIds: nextIds, favoriteIngredientIds: draftMember.favoriteIngredientIds.filter(id => !nextIds.includes(id)) });
                             }} options={ingredientOptions} style={{ width: '100%' }} placeholder='Chọn nguyên liệu' /></div>
                         </div>
                         <div className='household-field-row'>
                             <FieldLabel>Dị ứng</FieldLabel>
-                            <div className='household-field-control'><Select mode='multiple' allowClear maxTagCount='responsive' value={draftMember.allergenIngredientIds} onChange={ids => {
+                            <div className='household-field-control'><Select mode='multiple' allowClear maxTagCount='responsive' maxTagPlaceholder={renderResponsiveTagPlaceholder} value={draftMember.allergenIngredientIds} onChange={ids => {
                                 const nextIds = ids ?? [];
                                 _updateDraftMember({
                                     allergenIngredientIds: nextIds,
@@ -461,7 +462,7 @@ export const HouseholdProfilesScreen: React.FC = () => {
                         </div>
                         <div className='household-field-row'>
                             <FieldLabel>Nguyên liệu chặn cứng</FieldLabel>
-                            <div className='household-field-control'><Select mode='multiple' allowClear maxTagCount='responsive' value={draftMember.hardExcludedIngredientIds} onChange={ids => {
+                            <div className='household-field-control'><Select mode='multiple' allowClear maxTagCount='responsive' maxTagPlaceholder={renderResponsiveTagPlaceholder} value={draftMember.hardExcludedIngredientIds} onChange={ids => {
                                 const nextIds = ids ?? [];
                                 _updateDraftMember({
                                     hardExcludedIngredientIds: nextIds,
@@ -473,14 +474,14 @@ export const HouseholdProfilesScreen: React.FC = () => {
                         </div>
                         <div className='household-field-row'>
                             <FieldLabel>Kiểu món thích</FieldLabel>
-                            <div className='household-field-control'><Select mode='multiple' allowClear maxTagCount='responsive' value={draftMember.preferredTags} onChange={tags => {
+                            <div className='household-field-control'><Select mode='multiple' allowClear maxTagCount='responsive' maxTagPlaceholder={renderResponsiveTagPlaceholder} value={draftMember.preferredTags} onChange={tags => {
                                 const nextTags = tags ?? [];
                                 _updateDraftMember({ preferredTags: nextTags, avoidedTags: draftMember.avoidedTags.filter(tag => !nextTags.includes(tag)) });
                             }} options={tagOptions} style={{ width: '100%' }} placeholder='Chọn tag' /></div>
                         </div>
                         <div className='household-field-row'>
                             <FieldLabel>Kiểu món tránh</FieldLabel>
-                            <div className='household-field-control'><Select mode='multiple' allowClear maxTagCount='responsive' value={draftMember.avoidedTags} onChange={tags => {
+                            <div className='household-field-control'><Select mode='multiple' allowClear maxTagCount='responsive' maxTagPlaceholder={renderResponsiveTagPlaceholder} value={draftMember.avoidedTags} onChange={tags => {
                                 const nextTags = tags ?? [];
                                 _updateDraftMember({ avoidedTags: nextTags, preferredTags: draftMember.preferredTags.filter(tag => !nextTags.includes(tag)) });
                             }} options={tagOptions} style={{ width: '100%' }} placeholder='Chọn tag' /></div>

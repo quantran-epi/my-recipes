@@ -39,6 +39,7 @@ export const DishesAddWidget = () => {
             duration: DishDurationHelper.createEmpty(),
             image: "",
             tags: [],
+            isAccompaniment: false,
         },
         onSubmit: (values) => {
             dispatch(addDishes(values.transformValues));
@@ -54,7 +55,7 @@ export const DishesAddWidget = () => {
             ingredients: { name: ObjectPropertyHelper.nameof(defaultValues, e => e.ingredients), noMarkup: true },
             steps: { name: ObjectPropertyHelper.nameof(defaultValues, e => e.steps), noMarkup: true },
             isCompleted: { name: ObjectPropertyHelper.nameof(defaultValues, e => e.isCompleted), noMarkup: true },
-            isAccompaniment: { name: ObjectPropertyHelper.nameof(defaultValues, e => e.isAccompaniment) },
+            isAccompaniment: { name: ObjectPropertyHelper.nameof(defaultValues, e => e.isAccompaniment), valuePropName: "checked" },
             image: { label: "Ảnh", name: ObjectPropertyHelper.nameof(defaultValues, e => e.image) },
             duration: { name: ObjectPropertyHelper.nameof(defaultValues, e => e.duration), noMarkup: true },
             tags: { label: "Thể loại", name: ObjectPropertyHelper.nameof(defaultValues, e => e.tags) },
@@ -99,7 +100,7 @@ export const DishesAddWidget = () => {
             <DishDurationEditor value={durationValue} onChange={_onDurationChange} />
         </Box>
         <SmartForm.Item {...addDishesForm.itemDefinitions.tags}>
-            <Select mode="multiple" placeholder="Chọn thể loại" options={tagOptions} style={{ width: '100%' }} />
+            <Select mode="multiple" maxTagCount="responsive" placeholder="Chọn thể loại" options={tagOptions} style={{ width: '100%' }} />
         </SmartForm.Item>
         <SmartForm.Item {...addDishesForm.itemDefinitions.image}>
             <ImageInput />

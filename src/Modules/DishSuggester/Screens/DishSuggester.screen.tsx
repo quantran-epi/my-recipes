@@ -6,6 +6,7 @@ import { HouseholdSuitabilityHelper } from "@common/Helpers/HouseholdSuitability
 import { NutritionGoalHelper, NutritionGoalMatch } from "@common/Helpers/NutritionGoalHelper";
 import { Button } from "@components/Button";
 import { Dropdown } from "@components/Dropdown";
+import { renderResponsiveTagPlaceholder } from "@components/Form/Select";
 import { Image } from "@components/Image";
 import { Box } from "@components/Layout/Box";
 import { Space } from "@components/Layout/Space";
@@ -825,6 +826,7 @@ export const DishSuggesterScreen: React.FC<DishSuggesterScreenProps> = ({ open, 
                                 style={{ width: "100%", marginBottom: 10 }}
                                 size="small"
                                 maxTagCount="responsive"
+                                maxTagPlaceholder={renderResponsiveTagPlaceholder}
                                 options={allIngredients.map(i => ({
                                     value: i.id,
                                     label: i.name,
@@ -918,6 +920,7 @@ export const DishSuggesterScreen: React.FC<DishSuggesterScreenProps> = ({ open, 
                                 style={{ width: "100%", marginBottom: 10 }}
                                 size="small"
                                 maxTagCount="responsive"
+                                maxTagPlaceholder={renderResponsiveTagPlaceholder}
                                 options={allIngredients.map(i => ({ value: i.id, label: i.name }))}
                             />
                             <Typography.Text type="secondary">
@@ -935,6 +938,7 @@ export const DishSuggesterScreen: React.FC<DishSuggesterScreenProps> = ({ open, 
                                 style={{ width: "100%", marginBottom: 10 }}
                                 size="small"
                                 maxTagCount="responsive"
+                                maxTagPlaceholder={renderResponsiveTagPlaceholder}
                                 options={allIngredients.map(i => ({ value: i.id, label: i.name }))}
                             />
                             <Typography.Text type="secondary" style={{ fontSize: 12, display: "block", marginBottom: 10 }}>
@@ -1173,6 +1177,7 @@ export const DishSuggesterScreen: React.FC<DishSuggesterScreenProps> = ({ open, 
                         mode='multiple'
                         allowClear
                         maxTagCount='responsive'
+                        maxTagPlaceholder={renderResponsiveTagPlaceholder}
                         value={selectedHouseholdMemberIds}
                         placeholder='Tất cả thành viên'
                         onChange={_onSelectedHouseholdMembersChange}

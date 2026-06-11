@@ -49,7 +49,7 @@ export const DishesEditWidget = ({ item, onDone }) => {
             ingredients: { name: ObjectPropertyHelper.nameof(defaultValues, e => e.ingredients), noMarkup: true },
             steps: { name: ObjectPropertyHelper.nameof(defaultValues, e => e.steps), noMarkup: true },
             isCompleted: { name: ObjectPropertyHelper.nameof(defaultValues, e => e.isCompleted) },
-            isAccompaniment: { name: ObjectPropertyHelper.nameof(defaultValues, e => e.isAccompaniment) },
+            isAccompaniment: { name: ObjectPropertyHelper.nameof(defaultValues, e => e.isAccompaniment), valuePropName: "checked" },
             duration: { name: ObjectPropertyHelper.nameof(defaultValues, e => e.duration), noMarkup: true },
             image: { label: "Ảnh", name: ObjectPropertyHelper.nameof(defaultValues, e => e.image) },
             tags: { label: "Thể loại", name: ObjectPropertyHelper.nameof(defaultValues, e => e.tags) },
@@ -89,7 +89,7 @@ export const DishesEditWidget = ({ item, onDone }) => {
             <DishDurationEditor value={durationValue} onChange={_onDurationChange} />
         </Box>
         <SmartForm.Item {...editDishesForm.itemDefinitions.tags}>
-            <Select mode="multiple" placeholder="Chọn thể loại" options={tagOptions} style={{ width: '100%' }} />
+            <Select mode="multiple" maxTagCount="responsive" placeholder="Chọn thể loại" options={tagOptions} style={{ width: '100%' }} />
         </SmartForm.Item>
         <SmartForm.Item {...editDishesForm.itemDefinitions.image}>
             <ImageInput />
