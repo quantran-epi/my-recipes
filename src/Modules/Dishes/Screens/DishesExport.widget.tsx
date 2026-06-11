@@ -26,11 +26,19 @@ const formatDishToText = (dish: Dishes, ingredientsById: Map<string, Ingredient>
         lines.push("");
     }
 
-    if (dish.duration) {
-        const parts = DishDurationHelper.getActiveItems(dish.duration)
+    const durationBreakdown = DishDurationHelper.getBreakdown(dish, dishesById);
+    const ownDuration = durationBreakdown.items.find(item => item.dishId === dish.id);
+    if (ownDuration) {
+        const parts = ownDuration.activeItems
             .map(item => `${item.phase.label}: ${DishDurationHelper.formatMinutes(item.minutes)}`);
         if (parts.length > 0) {
-            lines.push(`${indent}⏱ Thời gian: ${DishDurationHelper.formatMinutes(DishDurationHelper.getTotalMinutes(dish.duration))} (${parts.join(" | ")})`);
+            const totalPrefix = durationBreakdown.totalMinutes !== ownDuration.ownMinutes
+                ? `Tổng ${DishDurationHelper.formatMinutes(durationBreakdown.totalMinutes)}; món này ${DishDurationHelper.formatMinutes(ownDuration.ownMinutes)}`
+                : DishDurationHelper.formatMinutes(ownDuration.ownMinutes);
+            lines.push(`${indent}⏱ Thời gian: ${totalPrefix} (${parts.join(" | ")})`);
+            durationBreakdown.items
+                .filter(item => item.dishId !== dish.id)
+                .forEach(item => lines.push(`${indent}  ↳ ${item.dishName}: ${DishDurationHelper.formatMinutes(item.ownMinutes)}`));
             lines.push("");
         }
     }

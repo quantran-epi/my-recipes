@@ -318,12 +318,12 @@ export const aggregateShoppingRows = (rows: ShoppingPreviewRow[]): ShoppingPrevi
 
 export const getAlternativeItems = (alternative: SmartPlannerDayAlternative): PlannedDish[] => [alternative.breakfast, alternative.lunch, alternative.dinner].filter((item): item is PlannedDish => Boolean(item));
 
-const getSlotScore = (dish: Dishes, slot: PlannerMealSlot | 'any'): { score: number; reason?: string } => {
+const getSlotScore = (dish: Dishes, slot: PlannerMealSlot | 'any', dishesById: Map<string, Dishes>): { score: number; reason?: string } => {
     const tags = dish.tags ?? [];
     if (slot === 'any') return { score: 8, reason: 'linh hoạt bữa' };
     if (slot === 'breakfast') {
         if (tags.includes('Ăn sáng')) return { score: 16, reason: 'hợp bữa sáng' };
-        const minutes = DishDurationHelper.getTotalMinutes(dish.duration);
+        const minutes = DishDurationHelper.getTotalMinutesForDish(dish, dishesById);
         if (minutes > 0 && minutes <= 25) return { score: 9, reason: 'nấu nhanh buổi sáng' };
         return { score: -2 };
     }
@@ -450,8 +450,9 @@ const scoreDish = (
     usage: UsageContext,
     targetServings: number,
     weights: PlannerWeights,
+    dishesById: Map<string, Dishes>,
 ): PlannedDish | null => {
-    const minutes = DishDurationHelper.getTotalMinutes(dish.duration);
+    const minutes = DishDurationHelper.getTotalMinutesForDish(dish, dishesById);
     const cost = getDishCostInfo(dish, input.ingredients, input.dishes, targetServings, input.inventoryItems, input.inventoryConfig);
     const blockers = getHardBlockReasons(dish, input, cost, minutes);
     if (blockers.length > 0) return null;
@@ -460,7 +461,7 @@ const scoreDish = (
     const reasons: string[] = [];
     const warnings: string[] = [];
     const details: SmartPlannerScoreDetail[] = [];
-    const slotResult = getSlotScore(dish, slot);
+    const slotResult = getSlotScore(dish, slot, dishesById);
     const slotScore = clamp(68 + slotResult.score * 2);
     if (slotResult.reason) reasons.push(slotResult.reason);
     details.push(buildScoreDetail('Độ hợp bữa ăn', slotResult.reason ?? 'Không có tag phù hợp rõ ràng', slotScore, 0.08, 'So khớp món với bữa đang lập. Bữa sáng ưu tiên tag Ăn sáng hoặc món nấu nhanh; bữa trưa và tối ưu tiên món chính, canh hoặc món dễ ghép bữa.'));
@@ -572,12 +573,15 @@ const addUsage = (usage: UsageContext, dish: Dishes, allDishes: Dishes[]) => {
     getMethodTags(dish).forEach(tag => usage.usedMethodCounts.set(tag, (usage.usedMethodCounts.get(tag) ?? 0) + 1));
 };
 
-const buildRecommendations = (input: BuildSmartPlannerInput, usage: UsageContext, targetServings: number, weights: PlannerWeights, slot: PlannerMealSlot | 'any'): PlannedDish[] => input.dishes
-    .filter(dish => dish.isCompleted !== false)
-    .filter(dish => dish.isAccompaniment !== true)
-    .map(dish => scoreDish(dish, slot, input, usage, targetServings, weights))
-    .filter((item): item is PlannedDish => Boolean(item))
-    .sort((a, b) => b.score - a.score || a.dish.name.localeCompare(b.dish.name));
+const buildRecommendations = (input: BuildSmartPlannerInput, usage: UsageContext, targetServings: number, weights: PlannerWeights, slot: PlannerMealSlot | 'any'): PlannedDish[] => {
+    const dishesById = new Map(input.dishes.map(dish => [dish.id, dish]));
+    return input.dishes
+        .filter(dish => dish.isCompleted !== false)
+        .filter(dish => dish.isAccompaniment !== true)
+        .map(dish => scoreDish(dish, slot, input, usage, targetServings, weights, dishesById))
+        .filter((item): item is PlannedDish => Boolean(item))
+        .sort((a, b) => b.score - a.score || a.dish.name.localeCompare(b.dish.name));
+};
 
 const getDailyBudgetScore = (items: PlannedDish[], input: BuildSmartPlannerInput) => {
     const dayBudget = Math.max(1, input.dailyBudget ?? 150000);

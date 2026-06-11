@@ -1,5 +1,5 @@
 import { CheckCircleOutlined, ClockCircleOutlined, CopyOutlined, DeleteOutlined, EditOutlined, ExclamationCircleOutlined, FileTextOutlined, HolderOutlined, PlusOutlined, FireOutlined } from "@ant-design/icons";
-import { DishDurationHelper } from "@common/Helpers/DishDurationHelper";
+import { DishDurationBreakdownItem, DishDurationHelper } from "@common/Helpers/DishDurationHelper";
 import { Button } from "@components/Button";
 import { Dropdown } from "@components/Dropdown";
 import { FastModalShell } from "@components/FastOverlay";
@@ -16,7 +16,7 @@ import { Tag } from "@components/Tag";
 import { Typography } from "@components/Typography";
 import { useScreenTitle, useToggle, useAdminMode, usePagedVirtualItems, useScheduledCalculation } from "@hooks";
 import { useAppShellNavigation } from "@routing/AppShellNavigationContext";
-import { DishDuration, Dishes } from "@store/Models/Dishes";
+import { Dishes } from "@store/Models/Dishes";
 import { Ingredient } from "@store/Models/Ingredient";
 import { DishesDurationEditParams, duplicateDish, removeDishes, updateDishDuration } from "@store/Reducers/DishesReducer";
 import { selectDishes, selectIngredients } from "@store/Selectors";
@@ -174,10 +174,19 @@ const DeferredSearchInput = React.memo(({ onCommit }: { onCommit: (value: string
     return <Input allowClear data-testid="dish-search-input" placeholder="Tìm kiếm" value={value} onChange={onChange} style={searchInputStyle} />;
 });
 
-const DishDurationDetail: React.FunctionComponent<{ duration: DishDuration }> = ({ duration }) => {
-    const items = DishDurationHelper.getActiveItems(duration);
-    const total = DishDurationHelper.getTotalMinutes(duration);
+const DishDurationDetail: React.FunctionComponent<{ dish: Dishes; dishesById: Map<string, Dishes> }> = ({ dish, dishesById }) => {
+    const breakdown = DishDurationHelper.getBreakdown(dish, dishesById);
+    const items = breakdown.items;
+    const total = breakdown.totalMinutes;
     const tempo = DishDurationHelper.getTempo(total);
+    const ownItem = items.find(item => item.dishId === dish.id);
+    const includedItems = items.filter(item => item.dishId !== dish.id);
+
+    const renderPhases = (item: DishDurationBreakdownItem) => <Space wrap size={[4, 4]}>
+        {item.activeItems.map(active => <Tag key={`${item.dishId}-${active.phase.key}`} style={{ marginRight: 0, borderColor: active.phase.border, background: "#fff", color: active.phase.color }}>
+            {active.phase.shortLabel}: {DishDurationHelper.formatMinutes(active.minutes)}
+        </Tag>)}
+    </Space>;
 
     if (items.length === 0) {
         return <Box style={{ width: 220, padding: 4 }}>
@@ -185,19 +194,32 @@ const DishDurationDetail: React.FunctionComponent<{ duration: DishDuration }> = 
         </Box>;
     }
 
-    return <Box style={{ width: 240 }}>
+    return <Box style={{ width: 280 }}>
         <Box style={{ border: `1px solid ${tempo.border}`, background: tempo.background, borderRadius: 8, padding: "8px 10px", marginBottom: 6 }}>
             <Stack justify="space-between" align="center" gap={8}>
                 <Typography.Text strong style={{ color: tempo.color }}>{tempo.label}</Typography.Text>
                 <Typography.Text strong style={{ color: tempo.color }}>{DishDurationHelper.formatMinutes(total)}</Typography.Text>
             </Stack>
         </Box>
-        <List size="small" dataSource={items} renderItem={item => <List.Item style={{ paddingInline: 0 }}>
-            <Stack fullwidth justify="space-between" gap={8}>
-                <Typography.Text style={{ fontSize: 13, color: item.phase.color }}>{item.phase.shortLabel}</Typography.Text>
-                <Tag style={{ marginRight: 0 }}>{DishDurationHelper.formatMinutes(item.minutes)}</Tag>
+        {ownItem && <Box style={{ border: "1px solid #f0f0f0", borderRadius: 8, background: "#fff", padding: 8, marginBottom: includedItems.length > 0 ? 8 : 0 }}>
+            <Stack fullwidth justify="space-between" gap={8} style={{ marginBottom: 6 }}>
+                <Typography.Text strong style={{ fontSize: 13 }}>Món chính</Typography.Text>
+                <Tag style={{ marginRight: 0 }}>{DishDurationHelper.formatMinutes(ownItem.ownMinutes)}</Tag>
             </Stack>
-        </List.Item>} />
+            {renderPhases(ownItem)}
+        </Box>}
+        {includedItems.length > 0 && <Box>
+            <Typography.Text strong style={{ display: "block", fontSize: 12, lineHeight: "16px", marginBottom: 5 }}>Món bao gồm</Typography.Text>
+            <List size="small" dataSource={includedItems} renderItem={item => <List.Item style={{ paddingInline: 0, display: "block" }}>
+                <Box style={{ border: "1px solid #f0f0f0", borderRadius: 8, background: "#fff", padding: 8, marginLeft: Math.min(item.depth, 3) * 8 }}>
+                    <Stack fullwidth justify="space-between" gap={8} style={{ marginBottom: 6 }}>
+                        <Typography.Text strong style={{ fontSize: 13, overflowWrap: "anywhere" }}>{item.dishName}</Typography.Text>
+                        <Tag style={{ marginRight: 0 }}>{DishDurationHelper.formatMinutes(item.ownMinutes)}</Tag>
+                    </Stack>
+                    {renderPhases(item)}
+                </Box>
+            </List.Item>} />
+        </Box>}
     </Box>;
 };
 
@@ -499,6 +521,7 @@ const DishesItemComponent: React.FunctionComponent<DishesItemProps> = (props) =>
     const dispatch = useDispatch();
     const { navigateWithFeedback } = useAppShellNavigation();
     const dishes = props.allDishes;
+    const dishesById = useMemo(() => new Map(dishes.map(dish => [dish.id, dish])), [dishes]);
     const ingredients = props.allIngredients;
 
     const _onEdit = () => toggleEdit.show();
@@ -508,11 +531,11 @@ const DishesItemComponent: React.FunctionComponent<DishesItemProps> = (props) =>
     }
 
     const _sumDuration = () => {
-        return DishDurationHelper.formatMinutes(DishDurationHelper.getTotalMinutes(props.item.duration));
+        return DishDurationHelper.formatMinutes(DishDurationHelper.getTotalMinutesForDish(props.item, dishesById));
     }
 
     const _hasDuration = () => {
-        return DishDurationHelper.hasDuration(props.item.duration);
+        return DishDurationHelper.hasDurationForDish(props.item, dishesById);
     }
 
     const toggleExport = useToggle();
@@ -574,7 +597,7 @@ const DishesItemComponent: React.FunctionComponent<DishesItemProps> = (props) =>
             }}>
                 <div onClick={toggleDishesDetail.show} style={{ position: "relative", cursor: "pointer", width: 88, height: 122 }}>
                     <DishImageWidget src={props.item.image} width={88} height={122} borderRadius={8} fallbackIconSize={34} surface="list" testId={`dish-row-image-${props.item.id}`} />
-                    <Popover title="Thời lượng" content={durationOpen ? <DishDurationDetail duration={props.item.duration} /> : null} open={durationOpen} onOpenChange={setDurationOpen}>
+                    <Popover title="Thời lượng" content={durationOpen ? <DishDurationDetail dish={props.item} dishesById={dishesById} /> : null} open={durationOpen} onOpenChange={setDurationOpen}>
                         <button
                             type="button"
                             onClick={(event) => event.stopPropagation()}

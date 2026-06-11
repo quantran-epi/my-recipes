@@ -1,4 +1,4 @@
-import { DishDuration, DishDurationPhaseKey } from "@store/Models/Dishes";
+import { DishDuration, DishDurationPhaseKey, Dishes } from "@store/Models/Dishes";
 
 export type DishDurationPhase = {
     key: DishDurationPhaseKey;
@@ -15,6 +15,20 @@ export type DishDurationPreset = {
     label: string;
     description: string;
     duration: DishDuration;
+}
+
+export type DishDurationBreakdownItem = {
+    dishId: string;
+    dishName: string;
+    depth: number;
+    duration: DishDuration;
+    activeItems: Array<{ phase: DishDurationPhase; minutes: number }>;
+    ownMinutes: number;
+}
+
+export type DishDurationBreakdown = {
+    totalMinutes: number;
+    items: DishDurationBreakdownItem[];
 }
 
 const phase = (
@@ -37,6 +51,8 @@ const create = (duration: Partial<Record<DishDurationPhaseKey, number | null>>):
 });
 
 const hasUsableNumber = (value: unknown): value is number => typeof value === "number" && Number.isFinite(value) && value > 0;
+
+const emptyBreakdown = (): DishDurationBreakdown => ({ totalMinutes: 0, items: [] });
 
 export const DISH_DURATION_PHASES: DishDurationPhase[] = [
     phase("unfreeze", "Rã đông", "Rã đông", "Thời gian chờ nguyên liệu mềm trước khi sơ chế.", "#1677ff", "#e6f4ff", "#91caff", 15),
@@ -95,6 +111,45 @@ export const DishDurationHelper = {
 
     hasDuration(duration?: Partial<Record<DishDurationPhaseKey, number | null>> | null): boolean {
         return DishDurationHelper.getTotalMinutes(duration) > 0;
+    },
+
+    getBreakdown(dish?: Dishes | null, dishesById?: Map<string, Dishes>, visited = new Set<string>(), depth = 0): DishDurationBreakdown {
+        if (!dish || visited.has(dish.id)) return emptyBreakdown();
+
+        visited.add(dish.id);
+        const duration = DishDurationHelper.normalize(dish.duration);
+        const activeItems = DishDurationHelper.getActiveItems(duration);
+        const ownMinutes = DishDurationHelper.getTotalMinutes(duration);
+        const ownItems: DishDurationBreakdownItem[] = ownMinutes > 0 ? [{
+            dishId: dish.id,
+            dishName: dish.name,
+            depth,
+            duration,
+            activeItems,
+            ownMinutes,
+        }] : [];
+
+        const includedBreakdown = (dish.includeDishes ?? []).reduce((result, id) => {
+            const includedDish = dishesById?.get(id);
+            if (!includedDish) return result;
+            const breakdown = DishDurationHelper.getBreakdown(includedDish, dishesById, visited, depth + 1);
+            result.totalMinutes += breakdown.totalMinutes;
+            result.items.push(...breakdown.items);
+            return result;
+        }, emptyBreakdown());
+
+        return {
+            totalMinutes: ownMinutes + includedBreakdown.totalMinutes,
+            items: [...ownItems, ...includedBreakdown.items],
+        };
+    },
+
+    getTotalMinutesForDish(dish?: Dishes | null, dishesById?: Map<string, Dishes>): number {
+        return DishDurationHelper.getBreakdown(dish, dishesById).totalMinutes;
+    },
+
+    hasDurationForDish(dish?: Dishes | null, dishesById?: Map<string, Dishes>): boolean {
+        return DishDurationHelper.getTotalMinutesForDish(dish, dishesById) > 0;
     },
 
     formatMinutes,

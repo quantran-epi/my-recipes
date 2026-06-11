@@ -1,5 +1,5 @@
 import { EditOutlined, QuestionCircleOutlined } from "@ant-design/icons";
-import { DishDurationHelper } from "@common/Helpers/DishDurationHelper";
+import { DishDurationBreakdownItem, DishDurationHelper } from "@common/Helpers/DishDurationHelper";
 import { IngredientUnitHelper } from "@common/Helpers/IngredientUnitHelper";
 import { InventoryHelper } from "@common/Helpers/InventoryHelper";
 import { ServingSizeInput } from "@components/Form/ServingSizeInput";
@@ -98,10 +98,22 @@ export const DishesReadonlyDetailWidget: React.FunctionComponent<DishesReadonlyD
     }, [dish.includeDishes, dishesById]);
 
     const durationSummary = useMemo(() => {
-        const items = DishDurationHelper.getActiveItems(dish.duration);
-        const total = DishDurationHelper.getTotalMinutes(dish.duration);
-        return { items, total, tempo: DishDurationHelper.getTempo(total) };
-    }, [dish.duration]);
+        const breakdown = DishDurationHelper.getBreakdown(dish, dishesById);
+        const ownItem = breakdown.items.find(item => item.dishId === dish.id);
+        const includedItems = breakdown.items.filter(item => item.dishId !== dish.id);
+        return {
+            ...breakdown,
+            ownItem,
+            includedItems,
+            tempo: DishDurationHelper.getTempo(breakdown.totalMinutes),
+        };
+    }, [dish, dishesById]);
+
+    const renderDurationPhases = (item: DishDurationBreakdownItem) => <Space wrap size={[6, 6]}>
+        {item.activeItems.map(active => <Tag key={`${item.dishId}-${active.phase.key}`} style={{ borderColor: active.phase.border, background: "#fff", color: active.phase.color, marginInlineEnd: 0 }}>
+            {active.phase.shortLabel}: {DishDurationHelper.formatMinutes(active.minutes)}
+        </Tag>)}
+    </Space>;
 
     return <React.Fragment>
         <DishImageWidget src={dish.image} height={180} borderRadius={8} surface="detail" style={{ marginBottom: 12 }} />
@@ -147,13 +159,25 @@ export const DishesReadonlyDetailWidget: React.FunctionComponent<DishesReadonlyD
                         <Image src={ClockIcon} preview={false} width={16} style={{ marginBottom: 2 }} />
                         <Typography.Text strong style={{ color: durationSummary.tempo.color }}>Thời lượng</Typography.Text>
                     </Space>
-                    <Typography.Text strong style={{ color: durationSummary.tempo.color }}>{DishDurationHelper.formatMinutes(durationSummary.total)}</Typography.Text>
+                    <Typography.Text strong style={{ color: durationSummary.tempo.color }}>{DishDurationHelper.formatMinutes(durationSummary.totalMinutes)}</Typography.Text>
                 </Stack>
-                <Space wrap size={[6, 6]}>
-                    {durationSummary.items.map(item => <Tag key={item.phase.key} style={{ borderColor: item.phase.border, background: "#fff", color: item.phase.color, marginInlineEnd: 0 }}>
-                        {item.phase.shortLabel}: {DishDurationHelper.formatMinutes(item.minutes)}
-                    </Tag>)}
-                </Space>
+                {durationSummary.ownItem && <Box style={{ border: "1px solid #f0f0f0", borderRadius: 8, background: "#fff", padding: 8, marginBottom: durationSummary.includedItems.length > 0 ? 8 : 0 }}>
+                    <Stack fullwidth justify="space-between" gap={8} style={{ marginBottom: 6 }}>
+                        <Typography.Text strong style={{ fontSize: 13 }}>Món chính</Typography.Text>
+                        <Tag style={{ marginRight: 0 }}>{DishDurationHelper.formatMinutes(durationSummary.ownItem.ownMinutes)}</Tag>
+                    </Stack>
+                    {renderDurationPhases(durationSummary.ownItem)}
+                </Box>}
+                {durationSummary.includedItems.length > 0 && <Stack direction="column" gap={8} fullwidth align="stretch">
+                    <Typography.Text strong style={{ display: "block", fontSize: 12, lineHeight: "16px" }}>Món bao gồm</Typography.Text>
+                    {durationSummary.includedItems.map(item => <Box key={item.dishId} style={{ border: "1px solid #f0f0f0", borderRadius: 8, background: "#fff", padding: 8, marginLeft: Math.min(item.depth, 3) * 8 }}>
+                        <Stack fullwidth justify="space-between" gap={8} style={{ marginBottom: 6 }}>
+                            <Typography.Text strong style={{ fontSize: 13, overflowWrap: "anywhere" }}>{item.dishName}</Typography.Text>
+                            <Tag style={{ marginRight: 0 }}>{DishDurationHelper.formatMinutes(item.ownMinutes)}</Tag>
+                        </Stack>
+                        {renderDurationPhases(item)}
+                    </Box>)}
+                </Stack>}
             </Box>}
         </React.Fragment>}
 

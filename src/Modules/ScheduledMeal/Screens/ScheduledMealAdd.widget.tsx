@@ -141,12 +141,12 @@ export const ScheduledMealAddWidget = ({ date, initialName, initialMeals, initia
         <SmartForm.Item {...addScheduledMealForm.itemDefinitions.plannedDate}>
             <DatePicker style={{ width: "100%" }} placeholder="Chọn ngày" format={"DD/MM/YYYY"} />
         </SmartForm.Item>
-        {plannedDate && <Box style={{ border: "1px solid #e6f4ff", borderRadius: 8, background: "#f8fbff", padding: 10, marginBottom: 12 }}>
+        {plannedDate && <Box style={{ display: "block", width: "100%", maxWidth: "100%", minWidth: 0, boxSizing: "border-box", alignSelf: "stretch", justifySelf: "stretch", marginInline: 0, textAlign: "left", border: "1px solid #e6f4ff", borderRadius: 8, background: "#f8fbff", padding: 10, marginBottom: 12 }}>
             <Typography.Text strong style={{ display: "block", color: "#111827", fontSize: 12, lineHeight: "17px", marginBottom: 8 }}>Thực đơn đã có trong ngày này</Typography.Text>
-            <Stack direction="column" gap={6} style={{ width: "100%" }}>
+            <Stack direction="column" gap={6} fullwidth align="stretch" style={{ width: "100%", textAlign: "left" }}>
                 {mealSlotLabels.map(slot => {
                     const names = _getExistingDishNames(slot.key);
-                    return <div key={slot.key} style={{ display: "grid", gridTemplateColumns: "58px minmax(0, 1fr)", gap: 8, alignItems: "start", width: "100%" }}>
+                    return <div key={slot.key} style={{ display: "grid", gridTemplateColumns: "58px minmax(0, 1fr)", gap: 8, alignItems: "start", width: "100%", boxSizing: "border-box", textAlign: "left" }}>
                         <Tag style={{ marginRight: 0, color: slot.color, background: slot.background, borderColor: slot.border, textAlign: "center" }}>{slot.label}</Tag>
                         <Typography.Text type={names.length > 0 ? undefined : "secondary"} style={{ fontSize: 12, lineHeight: "18px", overflowWrap: "anywhere" }}>
                             {names.length > 0 ? names.join(" · ") : "Chưa có món"}

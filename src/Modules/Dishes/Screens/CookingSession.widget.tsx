@@ -129,7 +129,7 @@ export const CookingSessionWidget: React.FunctionComponent<CookingSessionWidgetP
 
     const lackingIngredientIds = rows.filter(r => !r.sufficient).map(r => r.ingredient.id);
     const allSufficient = rows.every(r => r.sufficient);
-    const durationText = DishDurationHelper.formatMinutes(DishDurationHelper.getTotalMinutes(dish.duration));
+    const durationText = DishDurationHelper.formatMinutes(DishDurationHelper.getTotalMinutesForDish(dish, dishesById));
 
     const _onStartCooking = () => {
         dispatch(startCooking({

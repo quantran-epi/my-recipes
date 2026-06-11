@@ -1068,6 +1068,10 @@ export const SmartMealPlannerScreen: React.FC = () => {
         </Box>;
     };
 
+    const suggestionDurationBreakdown = detailSelection ? DishDurationHelper.getBreakdown(detailSelection.item.dish, dishesById) : undefined;
+    const suggestionOwnDurationItem = suggestionDurationBreakdown?.items.find(item => item.dishId === detailSelection?.item.dish.id);
+    const suggestionIncludedDurationItems = suggestionDurationBreakdown?.items.filter(item => item.dishId !== detailSelection?.item.dish.id) ?? [];
+
     const suggestionDetailModal = detailSelection ? <Modal
         open={Boolean(detailSelection)}
         onCancel={() => setDetailSelection(undefined)}
@@ -1090,6 +1094,39 @@ export const SmartMealPlannerScreen: React.FC = () => {
                     <Typography.Text type='secondary' style={{ display: 'block', fontSize: 12, lineHeight: '18px', marginTop: 4 }}>Món này được xếp hạng cho bữa {mealSlotMeta[detailSelection.slot].label.toLowerCase()} bằng cách bắt đầu từ điểm nền, rồi cộng/trừ theo từng tiêu chí đang bật. Ngân sách được tính theo tổng cả ngày, không chia đều cho từng bữa. Điểm cuối cùng được giới hạn trong khoảng 0-100.</Typography.Text>
                 </div>
             </Box>
+
+            {suggestionDurationBreakdown && suggestionDurationBreakdown.items.length > 0 && <DetailSection
+                title='Thời lượng'
+                description='Tổng thời lượng bao gồm món chính và các món được ghép vào. Mỗi món vẫn được tách riêng để kiểm tra nhanh.'
+            >
+                <Stack direction='column' gap={8} style={{ width: '100%' }}>
+                    <Stack wrap='wrap' gap={6}>
+                        <Tag color='blue' style={{ marginRight: 0 }}>Tổng {DishDurationHelper.formatMinutes(suggestionDurationBreakdown.totalMinutes)}</Tag>
+                    </Stack>
+                    {suggestionOwnDurationItem && <Box style={{ border: '1px solid rgba(15,23,42,0.07)', borderRadius: 8, background: '#f8fafc', padding: 10 }}>
+                        <Stack justify='space-between' align='flex-start' gap={8} wrap='wrap' style={{ width: '100%', marginBottom: 7 }}>
+                            <Typography.Text strong style={{ color: '#111827', fontSize: 13, lineHeight: '18px' }}>Món chính</Typography.Text>
+                            <Tag style={{ marginRight: 0 }}>{DishDurationHelper.formatMinutes(suggestionOwnDurationItem.ownMinutes)}</Tag>
+                        </Stack>
+                        <Stack wrap='wrap' gap={5}>
+                            {suggestionOwnDurationItem.activeItems.map(active => <Tag key={`${suggestionOwnDurationItem.dishId}-${active.phase.key}`} style={{ marginRight: 0, borderColor: active.phase.border, background: '#fff', color: active.phase.color }}>
+                                {active.phase.shortLabel}: {DishDurationHelper.formatMinutes(active.minutes)}
+                            </Tag>)}
+                        </Stack>
+                    </Box>}
+                    {suggestionIncludedDurationItems.map(item => <Box key={item.dishId} style={{ border: '1px solid rgba(15,23,42,0.07)', borderRadius: 8, background: '#f8fafc', padding: 10, marginLeft: Math.min(item.depth, 3) * 8 }}>
+                        <Stack justify='space-between' align='flex-start' gap={8} wrap='wrap' style={{ width: '100%', marginBottom: 7 }}>
+                            <Typography.Text strong style={{ color: '#111827', fontSize: 13, lineHeight: '18px', overflowWrap: 'anywhere' }}>{item.dishName}</Typography.Text>
+                            <Tag style={{ marginRight: 0 }}>{DishDurationHelper.formatMinutes(item.ownMinutes)}</Tag>
+                        </Stack>
+                        <Stack wrap='wrap' gap={5}>
+                            {item.activeItems.map(active => <Tag key={`${item.dishId}-${active.phase.key}`} style={{ marginRight: 0, borderColor: active.phase.border, background: '#fff', color: active.phase.color }}>
+                                {active.phase.shortLabel}: {DishDurationHelper.formatMinutes(active.minutes)}
+                            </Tag>)}
+                        </Stack>
+                    </Box>)}
+                </Stack>
+            </DetailSection>}
 
             <DetailSection
                 title='Cách tính điểm'
@@ -1270,14 +1307,14 @@ export const SmartMealPlannerScreen: React.FC = () => {
                     { value: 'dinner', label: 'Tối' },
                 ] as Array<{ value: MealSlot; label: string }>)} />
             </div>
-            <Box style={{ width: '100%', boxSizing: 'border-box', border: '1px solid #e6f4ff', borderRadius: 8, background: '#f8fbff', padding: 10 }}>
+            <Box style={{ display: 'block', width: '100%', maxWidth: '100%', minWidth: 0, boxSizing: 'border-box', alignSelf: 'stretch', justifySelf: 'stretch', marginInline: 0, textAlign: 'left', border: '1px solid #e6f4ff', borderRadius: 8, background: '#f8fbff', padding: 10 }}>
                 <Typography.Text strong style={{ display: 'block', color: '#111827', fontSize: 12, lineHeight: '17px', marginBottom: 8 }}>Thực đơn đã có trong ngày này</Typography.Text>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 6, width: '100%', textAlign: 'left' }}>
                     {(['breakfast', 'lunch', 'dinner'] as MealSlot[]).map(slot => {
                         const meta = mealSlotMeta[slot];
                         const names = _getExistingScheduleDishNames(slot);
                         const active = scheduleSelection.slot === slot;
-                        return <div key={slot} style={{ display: 'grid', gridTemplateColumns: '58px minmax(0, 1fr)', gap: 8, alignItems: 'start', borderRadius: 6, padding: active ? '4px 6px' : 0, background: active ? meta.background : 'transparent' }}>
+                        return <div key={slot} style={{ display: 'grid', gridTemplateColumns: '58px minmax(0, 1fr)', gap: 8, alignItems: 'start', width: '100%', boxSizing: 'border-box', textAlign: 'left', borderRadius: 6, padding: active ? '4px 6px' : 0, background: active ? meta.background : 'transparent' }}>
                             <Tag style={{ marginRight: 0, color: meta.tone, background: '#fff', borderColor: meta.border, textAlign: 'center' }}>{meta.label}</Tag>
                             <Typography.Text type={names.length > 0 ? undefined : 'secondary'} style={{ fontSize: 12, lineHeight: '18px', overflowWrap: 'anywhere' }}>
                                 {names.length > 0 ? names.join(' · ') : 'Chưa có món'}

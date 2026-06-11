@@ -318,6 +318,7 @@ export const DishScorer = {
         nutritionGoal?: NutritionGoal,
     ): ScoredDish[] {
         const ingredientById = new Map(allIngredients.map(ingredient => [ingredient.id, ingredient]));
+        const dishById = new Map(allDishes.map(dish => [dish.id, dish]));
         return scoreInventoryDishes(
             dishes,
             inventory,
@@ -327,7 +328,7 @@ export const DishScorer = {
             dish => getDishServingScale(dish, profile.servingCount),
         )
             .map(scored => {
-                const totalMinutes = DishDurationHelper.getTotalMinutes(scored.dish.duration);
+                const totalMinutes = DishDurationHelper.getTotalMinutesForDish(scored.dish, dishById);
                 const speedScore = getSpeedScore(totalMinutes, profile.maxCookMinutes);
                 const preference = getPreferenceScore(scored.dish, profile);
                 const budgetScore = getBudgetScore(scored.extraShoppingCost, scored.missingPriceCount, profile.maxExtraCost);

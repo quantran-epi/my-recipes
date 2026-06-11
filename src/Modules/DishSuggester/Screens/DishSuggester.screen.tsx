@@ -62,8 +62,8 @@ type DishSuggesterScreenProps = {
     actionMode?: SuggesterActionMode;
 }
 
-const totalDurationMins = (dish: Dishes) => {
-    return DishDurationHelper.getTotalMinutes(dish.duration);
+const totalDurationMins = (dish: Dishes, dishesById: Map<string, Dishes>) => {
+    return DishDurationHelper.getTotalMinutesForDish(dish, dishesById);
 };
 
 const collectAllCookingSteps = (dish: Dishes, dishesById: Map<string, Dishes>, visited = new Set<string>()): string[] => {
@@ -224,10 +224,10 @@ export const DishSuggesterScreen: React.FC<DishSuggesterScreenProps> = ({ open, 
     const calculateDurationDishes = React.useCallback((): DurationDishCalculation => {
         return {
             dishes: dishes
-                .filter(d => { const t = totalDurationMins(d); return t > 0 && t <= maxMinutes; })
-                .sort((a, b) => totalDurationMins(a) - totalDurationMins(b)),
+                .filter(d => { const t = totalDurationMins(d, dishesById); return t > 0 && t <= maxMinutes; })
+                .sort((a, b) => totalDurationMins(a, dishesById) - totalDurationMins(b, dishesById)),
         };
-    }, [dishes, maxMinutes]);
+    }, [dishes, dishesById, maxMinutes]);
     const { value: durationCalculation, pending: durationPending } = useScheduledCalculation(calculateDurationDishes, {
         enabled: open && mode === "duration" && step === 1,
         initialValue: createEmptyDurationDishCalculation,
@@ -949,8 +949,10 @@ export const DishSuggesterScreen: React.FC<DishSuggesterScreenProps> = ({ open, 
                             </Typography.Text>
                             <Box style={{ maxHeight: 380, overflowY: "auto" }}>
                                 {filteredDurationDishes.map(dish => {
-                                    const mins = totalDurationMins(dish);
-                                    const durationItems = DishDurationHelper.getActiveItems(dish.duration);
+                                    const mins = totalDurationMins(dish, dishesById);
+                                    const durationBreakdown = DishDurationHelper.getBreakdown(dish, dishesById);
+                                    const ownDurationItem = durationBreakdown.items.find(item => item.dishId === dish.id);
+                                    const includedDurationItems = durationBreakdown.items.filter(item => item.dishId !== dish.id);
                                     const tempo = DishDurationHelper.getTempo(mins);
                                     const selected = selectedDishIds.includes(dish.id);
                                     const ingredients = dish.ingredients ?? [];
@@ -985,11 +987,17 @@ export const DishSuggesterScreen: React.FC<DishSuggesterScreenProps> = ({ open, 
                                                     </Tag>
                                                 </Stack>
                                             </div>
-                                            {durationItems.length > 0 && <Space wrap size={[4, 4]} style={{ marginBottom: ingredients.length > 0 ? 7 : 0 }}>
-                                                {durationItems.map(item => <span key={item.phase.key} style={{ padding: "1px 7px", borderRadius: 999, border: `1px solid ${item.phase.border}`, background: "#fff", color: item.phase.color, fontSize: 11, lineHeight: "18px", whiteSpace: "nowrap" }}>
+                                            {ownDurationItem && <Space wrap size={[4, 4]} style={{ marginBottom: includedDurationItems.length > 0 || ingredients.length > 0 ? 7 : 0 }}>
+                                                {ownDurationItem.activeItems.map(item => <span key={item.phase.key} style={{ padding: "1px 7px", borderRadius: 999, border: `1px solid ${item.phase.border}`, background: "#fff", color: item.phase.color, fontSize: 11, lineHeight: "18px", whiteSpace: "nowrap" }}>
                                                     {item.phase.shortLabel} {item.minutes}'
                                                 </span>)}
                                             </Space>}
+                                            {includedDurationItems.length > 0 && <Stack direction="column" gap={4} align="stretch" style={{ width: "100%", marginBottom: ingredients.length > 0 ? 7 : 0 }}>
+                                                {includedDurationItems.map(item => <div key={item.dishId} style={{ display: "grid", gridTemplateColumns: "minmax(0, 1fr) auto", gap: 8, alignItems: "center", border: "1px solid #f0f0f0", borderRadius: 8, background: "#fff", padding: "5px 7px", marginLeft: Math.min(item.depth, 3) * 8 }}>
+                                                    <Typography.Text type="secondary" style={{ fontSize: 11, lineHeight: "15px", overflowWrap: "anywhere" }}>{item.dishName}</Typography.Text>
+                                                    <Tag style={{ marginRight: 0, fontSize: 11 }}>{DishDurationHelper.formatMinutes(item.ownMinutes)}</Tag>
+                                                </div>)}
+                                            </Stack>}
                                             {ingredients.length > 0 && (
                                                 <Stack wrap="wrap" gap={4}>
                                                     {ingredients.map(req => {
