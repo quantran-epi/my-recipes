@@ -3,6 +3,7 @@ import { message } from "antd";
 import { LoadingOutlined } from "@ant-design/icons";
 import { checkStorageHealth } from "@common/Storage/AppStorage";
 import { useGistBackup } from "@hooks";
+import { CookingTimerNotifier } from "@modules/Dishes/Screens/CookingTimerNotifier";
 
 type AppInitializerProps = {
     children: React.ReactNode;
@@ -83,6 +84,7 @@ export const AppInitializer: React.FC<AppInitializerProps> = ({ children }) => {
 
     return <>
         {children}
+        <CookingTimerNotifier />
         {personalSyncStatus.isSyncing && <PersonalSyncIndicator label={personalSyncStatus.label} />}
     </>;
 };
