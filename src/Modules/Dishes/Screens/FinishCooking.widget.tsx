@@ -17,7 +17,7 @@ import moment from "moment";
 import 'moment/locale/vi';
 import React, { useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Select } from "antd";
+import { Popconfirm, Select } from "antd";
 
 import { DishServingHelper } from '@common/Helpers/DishServingHelper';
 
@@ -203,9 +203,17 @@ export const FinishCookingWidget: React.FunctionComponent<FinishCookingWidgetPro
                 </Typography.Text>
             )}
             {cookTime.hasTimer && dish && cookTime.phaseMinutes && Object.keys(cookTime.phaseMinutes).length > 0 && (
-                <Button onClick={_onUpdateDuration} style={{ marginTop: 10 }} fullwidth>
-                    Cập nhật thời lượng món theo lần này
-                </Button>
+                <Popconfirm
+                    title="Cập nhật thời lượng món?"
+                    description="Thời lượng hiện tại của món sẽ được thay bằng thời gian nấu thực tế lần này."
+                    okText="Cập nhật"
+                    cancelText="Hủy"
+                    onConfirm={_onUpdateDuration}
+                >
+                    <Button style={{ marginTop: 10 }} fullwidth>
+                        Cập nhật thời lượng
+                    </Button>
+                </Popconfirm>
             )}
         </div>}
 

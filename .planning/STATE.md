@@ -3,9 +3,9 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: ready
-stopped_at: Completed quick task 260611-m0u
-last_updated: "2026-06-11T08:54:01Z"
-last_activity: 2026-06-11 -- Completed quick task 260611-m0u: Make household health item tools top-right and collapse linked treatments
+stopped_at: Completed quick task 260611-oej
+last_updated: "2026-06-11T10:36:12Z"
+last_activity: 2026-06-11 -- Completed quick task 260611-oej: Fix cooking session modal duration buttons
 progress:
   total_phases: 5
   completed_phases: 4
@@ -28,7 +28,7 @@ See: .planning/PROJECT.md (updated 2026-06-05)
 Phase: 5 (release-gate-and-product-guardrails) — READY
 Plan: Not started
 Status: Phase 04 complete; ready for Phase 05
-Last activity: 2026-06-11 -- Completed quick task 260611-m0u: Make household health item tools top-right and collapse linked treatments
+Last activity: 2026-06-11 -- Completed quick task 260611-oej: Fix cooking session modal duration buttons
 
 Progress: [████████░░] 80%
 
@@ -36,6 +36,7 @@ Progress: [████████░░] 80%
 
 | Date | Task | Artifact |
 |------|------|----------|
+| 2026-06-11 | Fix cooking session modal duration buttons | `.planning/quick/260611-oej-fix-cooking-session-modal-duration-butto/260611-oej-SUMMARY.md` |
 | 2026-06-11 | Make household health item tools top-right and collapse linked treatments | `.planning/quick/260611-m0u-make-household-health-item-tools-top-rig/260611-m0u-SUMMARY.md` |
 | 2026-06-11 | Fix household health status control and history row layout | `.planning/quick/260611-lpp-fix-household-health-status-control-and-/260611-lpp-SUMMARY.md` |
 | 2026-06-11 | Link health treatments to sickness records and mark current household user | `.planning/quick/260611-lci-link-health-treatments-to-sickness-recor/260611-lci-SUMMARY.md` |

@@ -119,10 +119,11 @@ export const CookingTimerCard: React.FunctionComponent<CookingTimerCardProps> = 
                 <Button
                     type="primary"
                     icon={timer.isLastPhase ? <CheckCircleOutlined /> : <ArrowRightOutlined />}
+                    aria-label={timer.isLastPhase ? "Hoàn tất hẹn giờ" : "Sang giai đoạn tiếp theo"}
                     onClick={_onAdvance}
                     style={{ flex: 1, background: activePhase.color, borderColor: activePhase.color }}
                 >
-                    {timer.isLastPhase ? "Xong, hoàn thành" : "Xong giai đoạn"}
+                    {timer.isLastPhase ? "Xong" : "Tiếp"}
                 </Button>
             </Stack>
         </Box>
