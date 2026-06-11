@@ -74,21 +74,47 @@ const fieldListStyle: React.CSSProperties = {
 };
 
 const fieldRowStyle: React.CSSProperties = {
-    display: 'grid',
-    gridTemplateColumns: 'minmax(130px, 170px) minmax(0, 1fr)',
-    gap: 12,
+    display: 'flex',
+    flexDirection: 'column',
+    gap: 6,
     alignItems: 'start',
     borderTop: '1px solid rgba(15,23,42,0.06)',
     paddingTop: 10,
+    width: '100%',
 };
 
 const labelStyle: React.CSSProperties = {
     display: 'block',
     fontSize: 12,
     lineHeight: '16px',
-    marginBottom: 5,
+    marginBottom: 0,
     color: '#374151',
+    textAlign: 'left',
 };
+
+const healthCss = `
+.household-health-status-segment.ant-segmented {
+    width: 100%;
+}
+.household-health-status-segment .ant-segmented-group {
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(112px, 1fr));
+    gap: 4px;
+}
+.household-health-status-segment .ant-segmented-item {
+    min-width: 0;
+}
+.household-health-status-segment .ant-segmented-item-label {
+    min-height: 34px;
+    line-height: 17px;
+    padding: 8px 8px;
+    white-space: normal;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+`;
 
 const formatDate = (value?: string) => value ? dayjs(value).format('DD/MM/YYYY') : 'Đang diễn ra';
 
@@ -189,9 +215,10 @@ export const HouseholdHealthWidget: React.FC<{ member: HouseholdMemberProfile }>
     };
 
     return <Stack direction='column' gap={14} style={{ width: '100%' }}>
+        <style>{healthCss}</style>
         <Box style={{ border: '1px solid rgba(15,23,42,0.08)', borderRadius: 8, background: '#fff', padding: 12 }}>
-            <Stack justify='space-between' align='center' gap={8} wrap='wrap' style={{ marginBottom: 10 }}>
-                <Stack align='center' gap={8} style={{ minWidth: 0 }}>
+            <Stack justify='space-between' align='flex-start' gap={8} wrap='wrap' style={{ marginBottom: 10, width: '100%' }}>
+                <Stack align='center' gap={8} style={{ minWidth: 0, justifyContent: 'flex-start', textAlign: 'left' }}>
                     <HeartOutlined style={{ color: getHouseholdHealthStatusMeta(draft.status).tone }} />
                     <Typography.Text strong style={{ color: '#111827' }}>Hồ sơ sức khỏe</Typography.Text>
                 </Stack>
@@ -201,7 +228,7 @@ export const HouseholdHealthWidget: React.FC<{ member: HouseholdMemberProfile }>
             <div style={fieldListStyle}>
                 <div style={{ ...fieldRowStyle, borderTop: 0, paddingTop: 0 }}>
                     <Typography.Text strong style={labelStyle}>Trạng thái nhanh</Typography.Text>
-                    <Segmented block value={draft.status} onChange={value => _setStatus(value as HouseholdHealthStatus)} options={statusOptions} />
+                    <Segmented className='household-health-status-segment' value={draft.status} onChange={value => _setStatus(value as HouseholdHealthStatus)} options={statusOptions} />
                 </div>
                 <div style={fieldRowStyle}>
                     <Typography.Text strong style={labelStyle}>Chiều cao</Typography.Text>
