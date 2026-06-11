@@ -118,7 +118,10 @@ export const GistBackupWidget: React.FC = () => {
                 children: (
                     <Flex vertical gap={8}>
                         <Typography.Text type="secondary" style={{ fontSize: 12 }}>
-                            Sao lưu / khôi phục dữ liệu cá nhân (tồn kho, lịch mua sắm, thực đơn) vào GitHub Gist của bạn.
+                            Sao lưu / khôi phục dữ liệu cá nhân (tồn kho, lịch mua sắm, thực đơn, hồ sơ sức khỏe gia đình) vào GitHub Gist của bạn.
+                        </Typography.Text>
+                        <Typography.Text type="secondary" style={{ fontSize: 11 }}>
+                            Hồ sơ sức khỏe được lưu trong phần sao lưu cá nhân riêng, không nằm trong dữ liệu dùng chung.
                         </Typography.Text>
                         <div style={{ border: "1px solid #f0f0f0", borderRadius: 8, padding: "8px 10px", background: "#fafafa" }}>
                             <Flex align="center" justify="space-between" gap={8}>

@@ -2,6 +2,7 @@ import { AppstoreOutlined, BarChartOutlined, CalendarOutlined, CheckCircleOutlin
 import { DateHelpers } from '@common/Helpers/DateHelper';
 import { DishDurationHelper } from '@common/Helpers/DishDurationHelper';
 import { DishServingHelper } from '@common/Helpers/DishServingHelper';
+import { getHouseholdHealthStatusMeta } from '@common/Helpers/HouseholdHealthHelper';
 import type { HouseholdDishSuitability } from '@common/Helpers/HouseholdSuitabilityHelper';
 import { IngredientPriceHelper } from '@common/Helpers/IngredientPriceHelper';
 import { InventoryHelper } from '@common/Helpers/InventoryHelper';
@@ -28,7 +29,7 @@ import { ScheduledMeal } from '@store/Models/ScheduledMeal';
 import { rememberScheduledMealName } from '@store/Reducers/AppContextReducer';
 import { startCooking } from '@store/Reducers/CookingSessionReducer';
 import { addScheduledMeal, editScheduledMeal } from '@store/Reducers/ScheduledMealReducer';
-import { selectCookingSessions, selectDishes, selectDishesById, selectHouseholdMembers, selectIngredients, selectIngredientsById, selectInventory, selectInventoryHealthConfig, selectNutritionGoals, selectScheduledMeals, selectSelectedHouseholdMemberIds } from '@store/Selectors';
+import { selectCookingSessions, selectDishes, selectDishesById, selectHouseholdHealthProfiles, selectHouseholdMembers, selectIngredients, selectIngredientsById, selectInventory, selectInventoryHealthConfig, selectNutritionGoals, selectScheduledMeals, selectSelectedHouseholdMemberIds } from '@store/Selectors';
 import { DatePicker, Empty, InputNumber, Select, Segmented, Spin, Switch } from 'antd';
 import dayjs, { Dayjs } from 'dayjs';
 import { nanoid } from 'nanoid';
@@ -623,6 +624,7 @@ export const SmartMealPlannerScreen: React.FC = () => {
     const inventoryItems = useSelector(selectInventory);
     const inventoryConfig = useSelector(selectInventoryHealthConfig);
     const members = useSelector(selectHouseholdMembers);
+    const healthProfiles = useSelector(selectHouseholdHealthProfiles);
     const selectedHouseholdMemberIds = useSelector(selectSelectedHouseholdMemberIds);
     const nutritionGoals = useSelector(selectNutritionGoals);
     const scheduledMeals = useSelector(selectScheduledMeals);
@@ -666,6 +668,12 @@ export const SmartMealPlannerScreen: React.FC = () => {
         const selected = members.filter(member => ids.has(member.id));
         return selected.length > 0 ? selected : members;
     }, [memberIds, members, selectedHouseholdMemberIds]);
+
+    const selectedMemberHealth = useMemo(() => selectedMembers.map(member => ({
+        member,
+        profile: healthProfiles[member.id],
+        meta: getHouseholdHealthStatusMeta(healthProfiles[member.id]?.status),
+    })), [healthProfiles, selectedMembers]);
 
     const selectedNutritionGoal = useMemo(() => nutritionGoals.find(goal => goal.id === nutritionGoalId), [nutritionGoalId, nutritionGoals]);
     const memberOptions = useMemo(() => members.map(member => ({ value: member.id, label: member.name })), [members]);
@@ -1365,6 +1373,11 @@ export const SmartMealPlannerScreen: React.FC = () => {
                             <div>
                                 <PlannerFieldLabel helpKey='members' label={<><TeamOutlined /> Ăn cùng</>}>Chọn người ăn cùng để tính khẩu phần, món thích, món tránh và mục tiêu riêng của từng người.</PlannerFieldLabel>
                                 <Select mode='multiple' allowClear maxTagCount='responsive' maxTagPlaceholder={renderResponsiveTagPlaceholder} dropdownRender={createSelectedOptionsDropdownRender({ mode: 'multiple', value: memberIds, options: memberOptions })} value={memberIds} onChange={value => { setMemberIds(value); _clearSuggestions(); }} options={memberOptions} placeholder='Tất cả thành viên' style={{ width: '100%' }} />
+                                {selectedMemberHealth.length > 0 && <Stack wrap='wrap' gap={5} style={{ marginTop: 7 }}>
+                                    {selectedMemberHealth.map(item => <Tag key={item.member.id} color={item.meta.color} style={{ marginRight: 0 }}>
+                                        {item.member.name}: {item.meta.label}{(item.profile?.status === 'sick' || item.profile?.status === 'recovering') && item.profile.statusNote ? ` - ${item.profile.statusNote}` : ''}
+                                    </Tag>)}
+                                </Stack>}
                             </div>
                         </div>
                     </div>
@@ -1474,6 +1487,7 @@ export const SmartMealPlannerScreen: React.FC = () => {
                         <Stack wrap='wrap' gap={6}>
                             <Tag color='blue' style={{ marginRight: 0 }}>{targetServings} phần/bữa</Tag>
                             <Tag color='cyan' style={{ marginRight: 0 }}>{selectedMembers.length || members.length} thành viên</Tag>
+                            {selectedMemberHealth.filter(item => item.profile?.status === 'sick' || item.profile?.status === 'recovering').map(item => <Tag key={`health-${item.member.id}`} color={item.meta.color} style={{ marginRight: 0 }}>{item.member.name}: {item.meta.label}</Tag>)}
                             {hasSuggested && <Tag color='green' style={{ marginRight: 0 }}>{scope === 'cook_now' ? visibleCookNowRecommendations.length : plannedDishCount} lượt món</Tag>}
                         </Stack>
                     </Box>

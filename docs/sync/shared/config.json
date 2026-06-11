@@ -1,134 +1,134 @@
 {
   "inventory": {
-    "lowStockAmount": 2,
-    "urgentExpiryDays": 3,
     "expirationDefaults": {
-      "very_short": {
-        "room_temperature": 1,
-        "cool_dry": 1,
-        "fridge": 2,
-        "freezer": 14
-      },
-      "short": {
-        "room_temperature": 2,
-        "cool_dry": 3,
-        "fridge": 5,
-        "freezer": 30
+      "long": {
+        "cool_dry": 21,
+        "freezer": 90,
+        "fridge": 21,
+        "room_temperature": 14
       },
       "medium": {
-        "room_temperature": 5,
         "cool_dry": 7,
+        "freezer": 60,
         "fridge": 10,
-        "freezer": 60
+        "room_temperature": 5
       },
-      "long": {
-        "room_temperature": 14,
-        "cool_dry": 21,
-        "fridge": 21,
-        "freezer": 90
+      "short": {
+        "cool_dry": 3,
+        "freezer": 30,
+        "fridge": 5,
+        "room_temperature": 2
       },
       "very_long": {
-        "room_temperature": 60,
         "cool_dry": 90,
+        "freezer": 180,
         "fridge": 90,
-        "freezer": 180
+        "room_temperature": 60
+      },
+      "very_short": {
+        "cool_dry": 1,
+        "freezer": 14,
+        "fridge": 2,
+        "room_temperature": 1
       }
-    }
+    },
+    "lowStockAmount": 2,
+    "urgentExpiryDays": 3
   },
   "nutrition": {
     "goals": [
       {
-        "id": "balanced-meal",
-        "name": "Bữa cân bằng",
-        "description": "Kcal vừa phải, đủ đạm và có chất xơ cho một khẩu phần.",
         "color": "#7436dc",
         "criteria": [
           {
-            "id": "balanced-calories",
-            "nutrient": "calories",
             "direction": "between",
+            "id": "balanced-calories",
+            "max": 650,
             "min": 350,
-            "max": 650
+            "nutrient": "calories"
           },
           {
+            "direction": "at_least",
             "id": "balanced-protein",
-            "nutrient": "protein",
-            "direction": "at_least",
-            "min": 18
+            "min": 18,
+            "nutrient": "protein"
           },
           {
-            "id": "balanced-fat",
-            "nutrient": "fat",
             "direction": "at_most",
-            "max": 28
+            "id": "balanced-fat",
+            "max": 28,
+            "nutrient": "fat"
           },
           {
-            "id": "balanced-fiber",
-            "nutrient": "fiber",
             "direction": "at_least",
-            "min": 4
+            "id": "balanced-fiber",
+            "min": 4,
+            "nutrient": "fiber"
           }
-        ]
+        ],
+        "description": "Kcal vừa phải, đủ đạm và có chất xơ cho một khẩu phần.",
+        "id": "balanced-meal",
+        "name": "Bữa cân bằng"
       },
       {
-        "id": "high-protein",
-        "name": "Giàu đạm",
-        "description": "Ưu tiên món có lượng protein cao cho mỗi khẩu phần.",
         "color": "#1677ff",
         "criteria": [
           {
-            "id": "high-protein-protein",
-            "nutrient": "protein",
             "direction": "at_least",
-            "min": 28
+            "id": "high-protein-protein",
+            "min": 28,
+            "nutrient": "protein"
           },
           {
-            "id": "high-protein-calories",
-            "nutrient": "calories",
             "direction": "at_most",
-            "max": 750
+            "id": "high-protein-calories",
+            "max": 750,
+            "nutrient": "calories"
           }
-        ]
+        ],
+        "description": "Ưu tiên món có lượng protein cao cho mỗi khẩu phần.",
+        "id": "high-protein",
+        "name": "Giàu đạm"
       },
       {
-        "id": "light-calories",
-        "name": "Nhẹ kcal",
-        "description": "Ưu tiên món nhẹ năng lượng nhưng vẫn có đạm cơ bản.",
         "color": "#389e0d",
         "criteria": [
           {
-            "id": "light-calories-calories",
-            "nutrient": "calories",
             "direction": "at_most",
-            "max": 450
+            "id": "light-calories-calories",
+            "max": 450,
+            "nutrient": "calories"
           },
           {
-            "id": "light-calories-protein",
-            "nutrient": "protein",
             "direction": "at_least",
-            "min": 12
+            "id": "light-calories-protein",
+            "min": 12,
+            "nutrient": "protein"
           }
-        ]
+        ],
+        "description": "Ưu tiên món nhẹ năng lượng nhưng vẫn có đạm cơ bản.",
+        "id": "light-calories",
+        "name": "Nhẹ kcal"
       },
       {
-        "id": "high-fiber",
-        "name": "Nhiều chất xơ",
-        "description": "Ưu tiên món có nhiều rau củ, đậu, ngũ cốc hoặc chất xơ.",
         "color": "#d48806",
         "criteria": [
           {
-            "id": "high-fiber-fiber",
-            "nutrient": "fiber",
             "direction": "at_least",
-            "min": 7
+            "id": "high-fiber-fiber",
+            "min": 7,
+            "nutrient": "fiber"
           },
           {
-            "id": "high-fiber-calories",
-            "nutrient": "calories",
             "direction": "at_most",
-            "max": 700
+            "id": "high-fiber-calories",
+            "max": 700,
+            "nutrient": "calories"
           }
-        ]
+        ],
+        "description": "Ưu tiên món có nhiều rau củ, đậu, ngũ cốc hoặc chất xơ.",
+        "id": "high-fiber",
+        "name": "Nhiều chất xơ"
       }
     ]
   }

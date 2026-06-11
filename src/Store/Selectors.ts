@@ -5,6 +5,8 @@
 import { RootState } from "@store/Store";
 import { DEFAULT_SHARED_CONFIG, normalizeSharedConfig } from "@store/Models/SharedConfig";
 import { buildHouseholdPreferenceProfile, getSelectedHouseholdMembers, normalizeHouseholdMembers } from "@store/Reducers/AppContextReducer";
+import { normalizeHouseholdHealthState } from "@store/Reducers/HouseholdHealthReducer";
+import type { HouseholdHealthRecord } from "@store/Reducers/HouseholdHealthReducer";
 import { createSelector } from "reselect";
 
 // ── Shared (admin-published) ─────────────────────────────────────────────────
@@ -45,6 +47,10 @@ export const selectScheduledMeals = (state: RootState) => state.personal.schedul
 export const selectSelectedMeals = (state: RootState) => state.personal.scheduledMeal.selectedMeals;
 export const selectCookingSessions = (state: RootState) => state.personal.cookingSession.sessions;
 export const selectAppContext = (state: RootState) => state.personal.appContext;
+export const selectHouseholdHealthState = createSelector(
+    [(state: RootState) => state.personal.householdHealth],
+    householdHealth => normalizeHouseholdHealthState(householdHealth)
+);
 export const selectCurrentFeatureName = (state: RootState) => state.personal.appContext.currentFeatureName;
 export const selectShoppingListNameHistory = (state: RootState) => state.personal.appContext.shoppingListNameHistory ?? [];
 export const selectScheduledMealNameHistory = (state: RootState) => state.personal.appContext.scheduledMealNameHistory ?? [];
@@ -59,9 +65,44 @@ export const selectHouseholdMembers = createSelector(
 
 export const selectSelectedHouseholdMemberIds = (state: RootState) => state.personal.appContext.selectedHouseholdMemberIds ?? [];
 
+export const selectCurrentHouseholdMemberId = createSelector(
+    [selectAppContext, selectHouseholdMembers],
+    (appContext, members) => {
+        const memberId = String(appContext.currentHouseholdMemberId ?? '').trim();
+        return memberId && members.some(member => member.id === memberId) ? memberId : undefined;
+    }
+);
+
 export const selectSelectedHouseholdMembers = createSelector(
     [selectHouseholdMembers, selectSelectedHouseholdMemberIds],
     (members, selectedIds) => getSelectedHouseholdMembers(members, selectedIds)
+);
+
+export const selectHouseholdHealthProfiles = createSelector(
+    [selectHouseholdHealthState],
+    householdHealth => householdHealth.profiles
+);
+
+export const selectHouseholdHealthRecords = createSelector(
+    [selectHouseholdHealthState],
+    householdHealth => householdHealth.records
+);
+
+export const selectMemberHealthProfile = (memberId: string) => createSelector(
+    [selectHouseholdHealthProfiles],
+    profiles => profiles[memberId]
+);
+
+export const selectHealthRecordsByMember = (memberId: string) => createSelector(
+    [selectHouseholdHealthRecords],
+    records => records
+        .filter(record => record.memberId === memberId)
+        .sort((a, b) => new Date(b.startedAt).valueOf() - new Date(a.startedAt).valueOf())
+);
+
+export const selectActiveSicknessByMember = (memberId: string) => createSelector(
+    [selectHealthRecordsByMember(memberId)],
+    records => records.filter((record): record is HouseholdHealthRecord => record.type === 'sickness' && !record.endedAt)
 );
 
 export const selectHouseholdPreferenceProfile = createSelector(
