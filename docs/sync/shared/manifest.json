@@ -8,7 +8,7 @@
       "name": "Sốt ướp thịt nướng sả"
     }
   ],
-  "dishesVersion": "2026-06-11T08:08:22.360Z",
+  "dishesVersion": "2026-06-11T08:08:43.274Z",
   "ingredientChanges": [],
   "ingredientsVersion": "2026-06-11T08:08:22.360Z",
   "parts": {
@@ -30,11 +30,11 @@
         }
       ],
       "count": 98,
-      "hash": "70db8f016d3b4752f253d0442acad9394c28f4679bc12d345726a5c100892a55",
+      "hash": "5bede3f5ad692c81ae6f45d1d10ff00b8bb10df7c93151f35265dab527061a20",
       "key": "dishes",
       "path": "docs/sync/shared/dishes.json",
-      "updatedAt": "2026-06-11T08:08:22.360Z",
-      "version": "2026-06-11T08:08:22.360Z"
+      "updatedAt": "2026-06-11T08:08:43.274Z",
+      "version": "2026-06-11T08:08:43.274Z"
     },
     "ingredients": {
       "changes": [],
@@ -47,5 +47,5 @@
     }
   },
   "schemaVersion": 2,
-  "updatedAt": "2026-06-11T08:08:22.360Z"
+  "updatedAt": "2026-06-11T08:08:43.274Z"
 }
