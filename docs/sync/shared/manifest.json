@@ -1,39 +1,51 @@
 {
-  "schemaVersion": 2,
-  "updatedAt": "2026-06-11T06:11:43.265Z",
+  "configChanges": [],
+  "configVersion": "2026-06-11T08:08:22.360Z",
+  "dishChanges": [
+    {
+      "action": "modified",
+      "id": "Sốt ướp thịt nướng sảViIOYxgxhe",
+      "name": "Sốt ướp thịt nướng sả"
+    }
+  ],
+  "dishesVersion": "2026-06-11T08:08:22.360Z",
+  "ingredientChanges": [],
+  "ingredientsVersion": "2026-06-11T08:08:22.360Z",
   "parts": {
-    "ingredients": {
-      "key": "ingredients",
-      "path": "docs/sync/shared/ingredients.json",
-      "version": "2026-06-11T06:09:49.783Z",
-      "hash": "76eb15ad2242cad81e284ba1f86602c0bf6af36ba6c26c22c6b383376eac31bb",
-      "count": 165,
-      "updatedAt": "2026-06-11T06:09:49.783Z",
-      "changes": []
-    },
-    "dishes": {
-      "key": "dishes",
-      "path": "docs/sync/shared/dishes.json",
-      "version": "2026-06-11T06:11:43.265Z",
-      "hash": "2fbd4419f54873082befa75515cbbf86eac5f2a69e603463c28883ae34cd599c",
-      "count": 98,
-      "updatedAt": "2026-06-11T06:11:43.265Z",
-      "changes": []
-    },
     "config": {
+      "changes": [],
+      "count": 1,
+      "hash": "33ec8381c7fc03fa33e7ce5b657e628067871ee82402fa81997d6107f52f9f94",
       "key": "config",
       "path": "docs/sync/shared/config.json",
-      "version": "2026-06-11T06:09:49.783Z",
-      "hash": "a43d5cc4fbdddecfb5b639e2f78f353cb2f3128efa42001c776be482bda456b5",
-      "count": 1,
-      "updatedAt": "2026-06-11T06:09:49.783Z",
-      "changes": []
+      "updatedAt": "2026-06-11T08:08:22.360Z",
+      "version": "2026-06-11T08:08:22.360Z"
+    },
+    "dishes": {
+      "changes": [
+        {
+          "action": "modified",
+          "id": "Sốt ướp thịt nướng sảViIOYxgxhe",
+          "name": "Sốt ướp thịt nướng sả"
+        }
+      ],
+      "count": 98,
+      "hash": "70db8f016d3b4752f253d0442acad9394c28f4679bc12d345726a5c100892a55",
+      "key": "dishes",
+      "path": "docs/sync/shared/dishes.json",
+      "updatedAt": "2026-06-11T08:08:22.360Z",
+      "version": "2026-06-11T08:08:22.360Z"
+    },
+    "ingredients": {
+      "changes": [],
+      "count": 165,
+      "hash": "119c0ac02d4a454124d6529141f9516f0084a22f4d5cbd7b7506d136103e947f",
+      "key": "ingredients",
+      "path": "docs/sync/shared/ingredients.json",
+      "updatedAt": "2026-06-11T08:08:22.360Z",
+      "version": "2026-06-11T08:08:22.360Z"
     }
   },
-  "ingredientsVersion": "2026-06-11T06:09:49.783Z",
-  "dishesVersion": "2026-06-11T06:11:43.265Z",
-  "configVersion": "2026-06-11T06:09:49.783Z",
-  "ingredientChanges": [],
-  "dishChanges": [],
-  "configChanges": []
+  "schemaVersion": 2,
+  "updatedAt": "2026-06-11T08:08:22.360Z"
 }
