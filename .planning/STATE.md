@@ -3,9 +3,9 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: ready
-stopped_at: Completed quick task 260610-sif
-last_updated: "2026-06-10T04:18:01Z"
-last_activity: 2026-06-10 -- Completed quick task 260610-sif: Smart planner inventory filters alternatives
+stopped_at: Completed quick task 260611-d6g
+last_updated: "2026-06-11T02:37:41Z"
+last_activity: 2026-06-11 -- Completed quick task 260611-d6g: Fix accompaniment switch persistence and selected tag visibility
 progress:
   total_phases: 5
   completed_phases: 4
@@ -28,7 +28,7 @@ See: .planning/PROJECT.md (updated 2026-06-05)
 Phase: 5 (release-gate-and-product-guardrails) — READY
 Plan: Not started
 Status: Phase 04 complete; ready for Phase 05
-Last activity: 2026-06-10 -- Completed quick task 260610-sif: Smart planner inventory filters alternatives
+Last activity: 2026-06-11 -- Completed quick task 260611-d6g: Fix accompaniment switch persistence and selected tag visibility
 
 Progress: [████████░░] 80%
 
@@ -36,6 +36,14 @@ Progress: [████████░░] 80%
 
 | Date | Task | Artifact |
 |------|------|----------|
+| 2026-06-11 | Fix accompaniment switch persistence and selected tag visibility | `.planning/quick/260611-d6g-fix-accompaniment-switch-selected-tags/260611-d6g-SUMMARY.md` |
+| 2026-06-11 | Smart planner full-width suggestions nutrition factor ingredient details and dish tag management | `.planning/quick/260611-czy-smart-planner-full-width-suggestions-nut/260611-czy-SUMMARY.md` |
+| 2026-06-11 | Deploy UI fixes for checking | `.planning/quick/260611-csr-deploy-ui-fixes-for-checking/260611-csr-SUMMARY.md` |
+| 2026-06-11 | Fix modal widths, form persistence, planner prompt modal, tag select visibility, analytics typography, and household serving decimal edits | `.planning/quick/260611-cfk-fix-modal-widths-form-persistence-planne/260611-cfk-SUMMARY.md` |
+| 2026-06-10 | Deploy Family Smart Meal Planner implementation | `.planning/quick/260610-lqo-deploy-family-smart-meal-planner-impleme/260610-lqo-SUMMARY.md` |
+| 2026-06-10 | Implement Family Smart Meal Planner complete plan | `.planning/quick/260610-l4i-implement-docs-family-smart-meal-planner/260610-l4i-SUMMARY.md` |
+| 2026-06-10 | Family Smart Meal Planner complete plan | `.planning/quick/260610-fsp-family-smart-meal-planner-complete-plan/260610-fsp-SUMMARY.md` |
+| 2026-06-10 | Cook Now Smart Meal Planner plan | `.planning/quick/260610-smp-cook-now-smart-meal-planner-plan/260610-smp-SUMMARY.md` |
 | 2026-06-10 | Smart planner inventory filters alternatives | `.planning/quick/260610-sif-smart-planner-inventory-filters-alternatives/260610-sif-SUMMARY.md` |
 | 2026-06-10 | Smart planner daily budget scoring | `.planning/quick/260610-sdb-smart-planner-daily-budget-scoring/260610-sdb-SUMMARY.md` |
 | 2026-06-10 | Smart planner suggestion detail modal | `.planning/quick/260610-smd-smart-planner-suggestion-detail-modal/260610-smd-SUMMARY.md` |

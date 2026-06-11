@@ -11,12 +11,13 @@ import { Stack } from "@components/Layout/Stack"
 import { useMessage } from "@components/Message"
 import { SmartForm, useSmartForm } from "@components/SmartForm"
 import { Typography } from "@components/Typography"
-import { DISH_TAGS, Dishes } from "@store/Models/Dishes"
+import { Dishes } from "@store/Models/Dishes"
 import { editDishes } from "@store/Reducers/DishesReducer"
 import { ShoppingListIngredientHelpers, updateShoppingListIngredientDishData } from "@store/Reducers/ShoppingListReducer"
 import { selectDishes } from "@store/Selectors"
 import { useMemo } from "react"
 import { useDispatch, useSelector } from "react-redux"
+import { DishTagHelper } from "../Helpers/DishTagHelper"
 import { DishDurationEditor } from "./DishesManageIngredient/DishDuration.widget"
 
 export const DishesEditWidget = ({ item, onDone }) => {
@@ -24,12 +25,12 @@ export const DishesEditWidget = ({ item, onDone }) => {
     const message = useMessage();
     const dishes = useSelector(selectDishes);
     const dishOptions = useMemo(() => dishes.map(dish => ({ label: dish.name, value: dish.id })), [dishes]);
-    const tagOptions = useMemo(() => DISH_TAGS.map(tag => ({ label: tag, value: tag })), []);
+    const tagOptions = useMemo(() => DishTagHelper.getTagOptions(dishes), [dishes]);
 
     const editDishesForm = useSmartForm<Dishes>({
-        defaultValues: { tags: [], ...item, baseServings: item.baseServings ?? 2, duration: DishDurationHelper.normalize(item.duration) },
+        defaultValues: { tags: [], ...item, baseServings: item.baseServings ?? 2, duration: DishDurationHelper.normalize(item.duration), isAccompaniment: item.isAccompaniment ?? false },
         onSubmit: (values) => {
-            const dishToSave = { ...values.transformValues, duration: DishDurationHelper.normalize(values.transformValues.duration) };
+            const dishToSave = { ...values.transformValues, tags: DishTagHelper.normalizeTags(values.transformValues.tags), duration: DishDurationHelper.normalize(values.transformValues.duration) };
             if (dishToSave.includeDishes.some(e => ShoppingListIngredientHelpers.isInclude(e, dishes, dishToSave.id))) {
                 message.error("Lỗi lặp vòng tròn");
                 return;
@@ -61,9 +62,14 @@ export const DishesEditWidget = ({ item, onDone }) => {
     }
 
     const durationValue = SmartForm.useWatch("duration", editDishesForm.form);
+    const isAccompanimentValue = SmartForm.useWatch("isAccompaniment", editDishesForm.form);
 
     const _onDurationChange = (duration) => {
         editDishesForm.form.setFieldsValue({ duration });
+    }
+
+    const _onAccompanimentChange = (isAccompaniment: boolean) => {
+        editDishesForm.form.setFieldsValue({ isAccompaniment });
     }
 
     return <SmartForm {...editDishesForm.defaultProps}>
@@ -89,7 +95,7 @@ export const DishesEditWidget = ({ item, onDone }) => {
             <DishDurationEditor value={durationValue} onChange={_onDurationChange} />
         </Box>
         <SmartForm.Item {...editDishesForm.itemDefinitions.tags}>
-            <Select mode="multiple" maxTagCount="responsive" placeholder="Chọn thể loại" options={tagOptions} style={{ width: '100%' }} />
+            <Select mode="tags" allowClear maxTagCount="responsive" placeholder="Chọn hoặc nhập thể loại" options={tagOptions} style={{ width: '100%' }} />
         </SmartForm.Item>
         <SmartForm.Item {...editDishesForm.itemDefinitions.image}>
             <ImageInput />
@@ -98,7 +104,7 @@ export const DishesEditWidget = ({ item, onDone }) => {
             <Switch checkedChildren="Hoàn thiện" unCheckedChildren="Chưa hoàn thiện" />
         </SmartForm.Item>
         <SmartForm.Item {...editDishesForm.itemDefinitions.isAccompaniment} label="Món ăn kèm">
-            <Switch checkedChildren="Ăn kèm, không gợi ý riêng" unCheckedChildren="Món dùng độc lập" />
+            <Switch checked={Boolean(isAccompanimentValue)} onChange={_onAccompanimentChange} checkedChildren="Ăn kèm, không gợi ý riêng" unCheckedChildren="Món dùng độc lập" />
         </SmartForm.Item>
         <Stack fullwidth justify="flex-end">
             <Button onClick={_onSave}>Lưu</Button>

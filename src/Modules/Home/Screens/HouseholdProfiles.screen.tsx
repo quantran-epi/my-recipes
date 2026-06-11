@@ -1,6 +1,6 @@
 import { DeleteOutlined, PlusOutlined, SaveOutlined, UserOutlined } from '@ant-design/icons';
 import { Button } from '@components/Button';
-import { renderResponsiveTagPlaceholder } from '@components/Form/Select';
+import { createSelectedOptionsDropdownRender, renderResponsiveTagPlaceholder } from '@components/Form/Select';
 import { Image } from '@components/Image';
 import { Box } from '@components/Layout/Box';
 import { Stack } from '@components/Layout/Stack';
@@ -425,28 +425,28 @@ export const HouseholdProfilesScreen: React.FC = () => {
                             <div className='household-field-control'><Select mode='multiple' allowClear maxTagCount='responsive' maxTagPlaceholder={renderResponsiveTagPlaceholder} value={draftMember.favoriteDishIds} onChange={ids => {
                                 const nextIds = ids ?? [];
                                 _updateDraftMember({ favoriteDishIds: nextIds, avoidedDishIds: draftMember.avoidedDishIds.filter(id => !nextIds.includes(id)) });
-                            }} options={dishOptions} style={{ width: '100%' }} placeholder='Chọn món' /></div>
+                            }} dropdownRender={createSelectedOptionsDropdownRender({ mode: 'multiple', value: draftMember.favoriteDishIds, options: dishOptions })} options={dishOptions} style={{ width: '100%' }} placeholder='Chọn món' /></div>
                         </div>
                         <div className='household-field-row'>
                             <FieldLabel>Món tránh</FieldLabel>
                             <div className='household-field-control'><Select mode='multiple' allowClear maxTagCount='responsive' maxTagPlaceholder={renderResponsiveTagPlaceholder} value={draftMember.avoidedDishIds} onChange={ids => {
                                 const nextIds = ids ?? [];
                                 _updateDraftMember({ avoidedDishIds: nextIds, favoriteDishIds: draftMember.favoriteDishIds.filter(id => !nextIds.includes(id)) });
-                            }} options={dishOptions} style={{ width: '100%' }} placeholder='Chọn món' /></div>
+                            }} dropdownRender={createSelectedOptionsDropdownRender({ mode: 'multiple', value: draftMember.avoidedDishIds, options: dishOptions })} options={dishOptions} style={{ width: '100%' }} placeholder='Chọn món' /></div>
                         </div>
                         <div className='household-field-row'>
                             <FieldLabel>Nguyên liệu thích</FieldLabel>
                             <div className='household-field-control'><Select mode='multiple' allowClear maxTagCount='responsive' maxTagPlaceholder={renderResponsiveTagPlaceholder} value={draftMember.favoriteIngredientIds} onChange={ids => {
                                 const nextIds = ids ?? [];
                                 _updateDraftMember({ favoriteIngredientIds: nextIds, avoidedIngredientIds: draftMember.avoidedIngredientIds.filter(id => !nextIds.includes(id)) });
-                            }} options={ingredientOptions} style={{ width: '100%' }} placeholder='Chọn nguyên liệu' /></div>
+                            }} dropdownRender={createSelectedOptionsDropdownRender({ mode: 'multiple', value: draftMember.favoriteIngredientIds, options: ingredientOptions })} options={ingredientOptions} style={{ width: '100%' }} placeholder='Chọn nguyên liệu' /></div>
                         </div>
                         <div className='household-field-row'>
                             <FieldLabel>Nguyên liệu tránh</FieldLabel>
                             <div className='household-field-control'><Select mode='multiple' allowClear maxTagCount='responsive' maxTagPlaceholder={renderResponsiveTagPlaceholder} value={draftMember.avoidedIngredientIds} onChange={ids => {
                                 const nextIds = ids ?? [];
                                 _updateDraftMember({ avoidedIngredientIds: nextIds, favoriteIngredientIds: draftMember.favoriteIngredientIds.filter(id => !nextIds.includes(id)) });
-                            }} options={ingredientOptions} style={{ width: '100%' }} placeholder='Chọn nguyên liệu' /></div>
+                            }} dropdownRender={createSelectedOptionsDropdownRender({ mode: 'multiple', value: draftMember.avoidedIngredientIds, options: ingredientOptions })} options={ingredientOptions} style={{ width: '100%' }} placeholder='Chọn nguyên liệu' /></div>
                         </div>
                         <div className='household-field-row'>
                             <FieldLabel>Dị ứng</FieldLabel>
@@ -458,7 +458,7 @@ export const HouseholdProfilesScreen: React.FC = () => {
                                     avoidedIngredientIds: draftMember.avoidedIngredientIds.filter(id => !nextIds.includes(id)),
                                     hardExcludedIngredientIds: draftMember.hardExcludedIngredientIds.filter(id => !nextIds.includes(id)),
                                 });
-                            }} options={ingredientOptions} style={{ width: '100%' }} placeholder='Chọn nguyên liệu gây dị ứng' /></div>
+                            }} dropdownRender={createSelectedOptionsDropdownRender({ mode: 'multiple', value: draftMember.allergenIngredientIds, options: ingredientOptions })} options={ingredientOptions} style={{ width: '100%' }} placeholder='Chọn nguyên liệu gây dị ứng' /></div>
                         </div>
                         <div className='household-field-row'>
                             <FieldLabel>Nguyên liệu chặn cứng</FieldLabel>
@@ -470,21 +470,21 @@ export const HouseholdProfilesScreen: React.FC = () => {
                                     avoidedIngredientIds: draftMember.avoidedIngredientIds.filter(id => !nextIds.includes(id)),
                                     allergenIngredientIds: draftMember.allergenIngredientIds.filter(id => !nextIds.includes(id)),
                                 });
-                            }} options={ingredientOptions} style={{ width: '100%' }} placeholder='Chọn nguyên liệu tuyệt đối không dùng' /></div>
+                            }} dropdownRender={createSelectedOptionsDropdownRender({ mode: 'multiple', value: draftMember.hardExcludedIngredientIds, options: ingredientOptions })} options={ingredientOptions} style={{ width: '100%' }} placeholder='Chọn nguyên liệu tuyệt đối không dùng' /></div>
                         </div>
                         <div className='household-field-row'>
                             <FieldLabel>Kiểu món thích</FieldLabel>
                             <div className='household-field-control'><Select mode='multiple' allowClear maxTagCount='responsive' maxTagPlaceholder={renderResponsiveTagPlaceholder} value={draftMember.preferredTags} onChange={tags => {
                                 const nextTags = tags ?? [];
                                 _updateDraftMember({ preferredTags: nextTags, avoidedTags: draftMember.avoidedTags.filter(tag => !nextTags.includes(tag)) });
-                            }} options={tagOptions} style={{ width: '100%' }} placeholder='Chọn tag' /></div>
+                            }} dropdownRender={createSelectedOptionsDropdownRender({ mode: 'multiple', value: draftMember.preferredTags, options: tagOptions })} options={tagOptions} style={{ width: '100%' }} placeholder='Chọn tag' /></div>
                         </div>
                         <div className='household-field-row'>
                             <FieldLabel>Kiểu món tránh</FieldLabel>
                             <div className='household-field-control'><Select mode='multiple' allowClear maxTagCount='responsive' maxTagPlaceholder={renderResponsiveTagPlaceholder} value={draftMember.avoidedTags} onChange={tags => {
                                 const nextTags = tags ?? [];
                                 _updateDraftMember({ avoidedTags: nextTags, preferredTags: draftMember.preferredTags.filter(tag => !nextTags.includes(tag)) });
-                            }} options={tagOptions} style={{ width: '100%' }} placeholder='Chọn tag' /></div>
+                            }} dropdownRender={createSelectedOptionsDropdownRender({ mode: 'multiple', value: draftMember.avoidedTags, options: tagOptions })} options={tagOptions} style={{ width: '100%' }} placeholder='Chọn tag' /></div>
                         </div>
                     </div>
 

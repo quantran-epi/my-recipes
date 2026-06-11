@@ -6,7 +6,7 @@ import { HouseholdSuitabilityHelper } from "@common/Helpers/HouseholdSuitability
 import { NutritionGoalHelper, NutritionGoalMatch } from "@common/Helpers/NutritionGoalHelper";
 import { Button } from "@components/Button";
 import { Dropdown } from "@components/Dropdown";
-import { renderResponsiveTagPlaceholder } from "@components/Form/Select";
+import { createSelectedOptionsDropdownRender, renderResponsiveTagPlaceholder } from "@components/Form/Select";
 import { Image } from "@components/Image";
 import { Box } from "@components/Layout/Box";
 import { Space } from "@components/Layout/Space";
@@ -171,6 +171,9 @@ export const DishSuggesterScreen: React.FC<DishSuggesterScreenProps> = ({ open, 
     const selectedNutritionGoal = useMemo<SharedNutritionGoal | undefined>(() => {
         return nutritionGoals.find(goal => goal.id === nutritionGoalId) ?? nutritionGoals[0];
     }, [nutritionGoalId, nutritionGoals]);
+
+    const ingredientOptions = useMemo(() => allIngredients.map(i => ({ value: i.id, label: i.name })), [allIngredients]);
+    const householdMemberOptions = useMemo(() => householdMembers.map(member => ({ value: member.id, label: member.name })), [householdMembers]);
 
     const inventoryIngredientIds = useMemo(() => {
         if (!open) return [];
@@ -827,10 +830,8 @@ export const DishSuggesterScreen: React.FC<DishSuggesterScreenProps> = ({ open, 
                                 size="small"
                                 maxTagCount="responsive"
                                 maxTagPlaceholder={renderResponsiveTagPlaceholder}
-                                options={allIngredients.map(i => ({
-                                    value: i.id,
-                                    label: i.name,
-                                }))}
+                                dropdownRender={createSelectedOptionsDropdownRender({ mode: 'multiple', value: fridgeSearchIds, options: ingredientOptions })}
+                                options={ingredientOptions}
                             />
                             {inventorySuggestionsPending
                                 ? <PendingCalculationBox text="Đang tính món phù hợp với tủ lạnh..." />
@@ -921,7 +922,8 @@ export const DishSuggesterScreen: React.FC<DishSuggesterScreenProps> = ({ open, 
                                 size="small"
                                 maxTagCount="responsive"
                                 maxTagPlaceholder={renderResponsiveTagPlaceholder}
-                                options={allIngredients.map(i => ({ value: i.id, label: i.name }))}
+                                dropdownRender={createSelectedOptionsDropdownRender({ mode: 'multiple', value: durationSearchIds, options: ingredientOptions })}
+                                options={ingredientOptions}
                             />
                             <Typography.Text type="secondary">
                                 Không có món nào chứa đủ các nguyên liệu đã chọn
@@ -939,7 +941,8 @@ export const DishSuggesterScreen: React.FC<DishSuggesterScreenProps> = ({ open, 
                                 size="small"
                                 maxTagCount="responsive"
                                 maxTagPlaceholder={renderResponsiveTagPlaceholder}
-                                options={allIngredients.map(i => ({ value: i.id, label: i.name }))}
+                                dropdownRender={createSelectedOptionsDropdownRender({ mode: 'multiple', value: durationSearchIds, options: ingredientOptions })}
+                                options={ingredientOptions}
                             />
                             <Typography.Text type="secondary" style={{ fontSize: 12, display: "block", marginBottom: 10 }}>
                                 {filteredDurationDishes.length}{durationSearchIds.length > 0 ? ` / ${durationFiltered.length}` : ''} món nấu được trong ≤ {maxMinutes} phút
@@ -1178,10 +1181,11 @@ export const DishSuggesterScreen: React.FC<DishSuggesterScreenProps> = ({ open, 
                         allowClear
                         maxTagCount='responsive'
                         maxTagPlaceholder={renderResponsiveTagPlaceholder}
+                        dropdownRender={createSelectedOptionsDropdownRender({ mode: 'multiple', value: selectedHouseholdMemberIds, options: householdMemberOptions })}
                         value={selectedHouseholdMemberIds}
                         placeholder='Tất cả thành viên'
                         onChange={_onSelectedHouseholdMembersChange}
-                        options={householdMembers.map(member => ({ value: member.id, label: member.name }))}
+                        options={householdMemberOptions}
                         style={{ width: '100%' }}
                     />
                 </Box>

@@ -12,11 +12,12 @@ import { useMessage } from "@components/Message"
 import { SmartForm, useSmartForm } from "@components/SmartForm"
 import { Typography } from "@components/Typography"
 import { nanoid } from "@reduxjs/toolkit"
-import { DISH_TAGS, Dishes } from "@store/Models/Dishes"
+import { Dishes } from "@store/Models/Dishes"
 import { addDishes } from "@store/Reducers/DishesReducer"
 import { selectDishes } from "@store/Selectors"
 import { useMemo } from "react"
 import { useDispatch, useSelector } from "react-redux"
+import { DishTagHelper } from "../Helpers/DishTagHelper"
 import { DishDurationEditor } from "./DishesManageIngredient/DishDuration.widget"
 
 export const DishesAddWidget = () => {
@@ -24,7 +25,7 @@ export const DishesAddWidget = () => {
     const message = useMessage();
     const dishes = useSelector(selectDishes);
     const dishOptions = useMemo(() => dishes.map(dish => ({ label: dish.name, value: dish.id })), [dishes]);
-    const tagOptions = useMemo(() => DISH_TAGS.map(tag => ({ label: tag, value: tag })), []);
+    const tagOptions = useMemo(() => DishTagHelper.getTagOptions(dishes), [dishes]);
 
     const addDishesForm = useSmartForm<Dishes>({
         defaultValues: {
@@ -63,11 +64,13 @@ export const DishesAddWidget = () => {
         transformFunc: (values) => ({
             ...values,
             id: values.name.concat(nanoid(10)),
+            tags: DishTagHelper.normalizeTags(values.tags),
             duration: DishDurationHelper.normalize(values.duration),
         })
     })
 
     const durationValue = SmartForm.useWatch("duration", addDishesForm.form);
+    const isAccompanimentValue = SmartForm.useWatch("isAccompaniment", addDishesForm.form);
 
     const _onDurationChange = (duration) => {
         addDishesForm.form.setFieldsValue({ duration });
@@ -75,6 +78,10 @@ export const DishesAddWidget = () => {
 
     const _onSave = () => {
         addDishesForm.submit();
+    }
+
+    const _onAccompanimentChange = (isAccompaniment: boolean) => {
+        addDishesForm.form.setFieldsValue({ isAccompaniment });
     }
 
     return <SmartForm {...addDishesForm.defaultProps}>
@@ -100,13 +107,13 @@ export const DishesAddWidget = () => {
             <DishDurationEditor value={durationValue} onChange={_onDurationChange} />
         </Box>
         <SmartForm.Item {...addDishesForm.itemDefinitions.tags}>
-            <Select mode="multiple" maxTagCount="responsive" placeholder="Chọn thể loại" options={tagOptions} style={{ width: '100%' }} />
+            <Select mode="tags" allowClear maxTagCount="responsive" placeholder="Chọn hoặc nhập thể loại" options={tagOptions} style={{ width: '100%' }} />
         </SmartForm.Item>
         <SmartForm.Item {...addDishesForm.itemDefinitions.image}>
             <ImageInput />
         </SmartForm.Item>
         <SmartForm.Item {...addDishesForm.itemDefinitions.isAccompaniment} label="Món ăn kèm">
-            <Switch checkedChildren="Ăn kèm, không gợi ý riêng" unCheckedChildren="Món dùng độc lập" />
+            <Switch checked={Boolean(isAccompanimentValue)} onChange={_onAccompanimentChange} checkedChildren="Ăn kèm, không gợi ý riêng" unCheckedChildren="Món dùng độc lập" />
         </SmartForm.Item>
         <Stack fullwidth justify="flex-end">
             <Button onClick={_onSave}>Lưu</Button>

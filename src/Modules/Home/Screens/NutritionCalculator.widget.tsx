@@ -9,7 +9,7 @@ import {
     WarningOutlined,
 } from '@ant-design/icons';
 import { DateHelpers } from '@common/Helpers/DateHelper';
-import { DishNutritionHelper, DishNutritionSummary, DishNutritionTotals } from '@common/Helpers/DishNutritionHelper';
+import { DishNutritionHelper, type DishNutritionNutrientKey, DishNutritionSummary, DishNutritionTotals } from '@common/Helpers/DishNutritionHelper';
 import { DishServingHelper } from '@common/Helpers/DishServingHelper';
 import { NutritionGoalHelper } from '@common/Helpers/NutritionGoalHelper';
 import { Button } from '@components/Button';
@@ -247,11 +247,20 @@ const CalculatorPanel: React.FunctionComponent<{ title: string; subtitle?: strin
     </Box>;
 };
 
-const CalculatorMetricTile: React.FunctionComponent<{ label: string; value: string; detail: string; tone: string }> = ({ label, value, detail, tone }) => {
-    return <Box style={{ border: `1px solid ${tone}1f`, borderRadius: 8, background: `${tone}08`, padding: 10, minWidth: 0 }}>
+const CalculatorMetricTile: React.FunctionComponent<{ label: string; value: string; detail: string; tone: string; active?: boolean; onClick?: () => void }> = ({ label, value, detail, tone, active, onClick }) => {
+    const content = <>
         <Typography.Text type='secondary' style={{ display: 'block', fontSize: 11, lineHeight: '15px' }}>{label}</Typography.Text>
         <Typography.Text strong style={{ display: 'block', fontSize: 17, lineHeight: '23px', color: tone, overflowWrap: 'anywhere' }}>{value}</Typography.Text>
         <Typography.Text type='secondary' style={{ display: 'block', fontSize: 11, lineHeight: '15px' }}>{detail}</Typography.Text>
+    </>;
+    const style: React.CSSProperties = { border: active ? `1px solid ${tone}` : `1px solid ${tone}1f`, borderRadius: 8, background: active ? `${tone}12` : `${tone}08`, padding: 10, minWidth: 0, boxShadow: active ? `inset 0 0 0 1px ${tone}33` : undefined };
+
+    if (onClick) return <button type='button' onClick={onClick} style={{ ...style, width: '100%', textAlign: 'left', cursor: 'pointer' }}>
+        {content}
+    </button>;
+
+    return <Box style={style}>
+        {content}
     </Box>;
 };
 
@@ -272,6 +281,7 @@ export const NutritionCalculatorModalContent: React.FunctionComponent<{ initialS
     const [selectedShoppingListIds, setSelectedShoppingListIds] = useState<string[]>(initialSelection?.shoppingListIds ?? []);
     const [selectedMealIds, setSelectedMealIds] = useState<string[]>(initialSelection?.mealIds ?? []);
     const [creationModal, setCreationModal] = useState<CreationModal>(null);
+    const [selectedNutrientKey, setSelectedNutrientKey] = useState<DishNutritionNutrientKey | null>(null);
 
     const entries = useMemo(() => {
         if (source === 'shoppingLists') {
@@ -303,6 +313,23 @@ export const NutritionCalculatorModalContent: React.FunctionComponent<{ initialS
         .map((goal: NutritionGoal) => ({ goal, match: NutritionGoalHelper.score(goalSummary, goal) }))
         .sort((a, b) => b.match.score - a.match.score)
         .slice(0, 3), [goalSummary, goals]);
+    const selectedNutrientOption = useMemo(() => selectedNutrientKey
+        ? NutritionGoalHelper.nutrientOptions.find(option => option.value === selectedNutrientKey)
+        : undefined, [selectedNutrientKey]);
+    const selectedNutrientBreakdown = useMemo(() => {
+        if (!selectedNutrientKey) return [];
+        return aggregate.results.map(result => {
+            const rows = result.dish
+                ? DishNutritionHelper.calculateIngredientContributions(result.dish, dishes, ingredientsById, { targetServings: result.entry.servings })
+                    .sort((a, b) => (b.total[selectedNutrientKey] ?? -1) - (a.total[selectedNutrientKey] ?? -1))
+                : [];
+            return {
+                result,
+                rows,
+                total: result.summary?.total[selectedNutrientKey],
+            };
+        });
+    }, [aggregate.results, dishes, ingredientsById, selectedNutrientKey]);
 
     const _onDishChange = (ids: string[]) => {
         const nextIds = ids ?? [];
@@ -432,6 +459,8 @@ export const NutritionCalculatorModalContent: React.FunctionComponent<{ initialS
                             value={NutritionGoalHelper.formatNutrientValue(key, aggregate.total[key])}
                             detail={`${NutritionGoalHelper.formatNutrientValue(key, aggregate.perServing[key])} / phần`}
                             tone={key === 'calories' ? '#d46b08' : key === 'protein' ? '#1677ff' : key === 'fiber' ? '#389e0d' : '#0f172a'}
+                            active={selectedNutrientKey === key}
+                            onClick={() => setSelectedNutrientKey(current => current === key ? null : key)}
                         />)}
                         <Box style={{ border: '1px solid #e6f4ff', borderRadius: 8, background: '#f7fbff', padding: 10, minWidth: 0 }}>
                             <Typography.Text type='secondary' style={{ display: 'block', fontSize: 11, lineHeight: '15px' }}>Độ phủ</Typography.Text>
@@ -480,11 +509,54 @@ export const NutritionCalculatorModalContent: React.FunctionComponent<{ initialS
                     {(aggregate.missingNutritionIngredientIds.length > 0 || aggregate.missingConversionIngredientIds.length > 0) && <Tag color='gold' icon={<WarningOutlined />} style={{ marginInlineEnd: 0 }}>Thiếu {aggregate.missingNutritionIngredientIds.length + aggregate.missingConversionIngredientIds.length}</Tag>}
                 </Space>}>
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(132px, 1fr))', gap: 7 }}>
-                        {NutritionGoalHelper.nutrientOptions.map(option => <div key={option.value} style={{ border: '1px solid #f3f4f6', borderRadius: 8, padding: '7px 8px', background: '#fcfcfd', minWidth: 0 }}>
+                        {NutritionGoalHelper.nutrientOptions.map(option => <button key={option.value} type='button' onClick={() => setSelectedNutrientKey(current => current === option.value ? null : option.value)} style={{ border: selectedNutrientKey === option.value ? '1px solid #d48806' : '1px solid #f3f4f6', borderRadius: 8, padding: '7px 8px', background: selectedNutrientKey === option.value ? '#fff7e6' : '#fcfcfd', minWidth: 0, textAlign: 'left', cursor: 'pointer', boxShadow: selectedNutrientKey === option.value ? 'inset 0 0 0 1px rgba(212,136,6,0.20)' : undefined }}>
                             <Typography.Text type='secondary' style={{ display: 'block', fontSize: 11, lineHeight: '15px' }}>{option.label}</Typography.Text>
                             <Typography.Text strong style={{ display: 'block', lineHeight: '18px' }}>{option.format(aggregate.total[option.value])}</Typography.Text>
-                        </div>)}
+                        </button>)}
                     </div>
+                    {selectedNutrientKey && selectedNutrientOption && <Box style={{ border: '1px solid rgba(212,136,6,0.18)', borderRadius: 8, background: '#fffaf0', padding: 10, marginTop: 10 }}>
+                        <Stack justify='space-between' align='center' gap={8} wrap='wrap' style={{ marginBottom: 8 }}>
+                            <div style={{ minWidth: 0 }}>
+                                <Typography.Text strong style={{ display: 'block', color: '#111827', fontSize: 13, lineHeight: '18px' }}>Chi tiết {selectedNutrientOption.label}</Typography.Text>
+                                <Typography.Text type='secondary' style={{ display: 'block', fontSize: 11, lineHeight: '15px' }}>Theo từng nguyên liệu trong mỗi món đang tính.</Typography.Text>
+                            </div>
+                            <Button onClick={() => setSelectedNutrientKey(null)} style={{ height: 28, padding: '0 9px', fontSize: 11 }}>Đóng</Button>
+                        </Stack>
+                        <Stack direction='column' align='stretch' gap={8} style={{ width: '100%' }}>
+                            {selectedNutrientBreakdown.map(({ result, rows, total }) => <Box key={result.entry.key} style={{ border: '1px solid rgba(15,23,42,0.07)', borderRadius: 8, background: '#fff', padding: 9 }}>
+                                <Stack justify='space-between' align='flex-start' gap={8} wrap='wrap' style={{ marginBottom: 8 }}>
+                                    <div style={{ minWidth: 0 }}>
+                                        <Typography.Text strong style={{ display: 'block', color: '#111827', fontSize: 12, lineHeight: '16px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{result.dish?.name ?? result.entry.dishId}</Typography.Text>
+                                        <Typography.Text type='secondary' style={{ display: 'block', fontSize: 11, lineHeight: '15px' }}>{compactSourceLabel(result.entry.sourceLabel)}</Typography.Text>
+                                    </div>
+                                    <Tag color='gold' style={{ marginInlineEnd: 0 }}>{NutritionGoalHelper.formatNutrientValue(selectedNutrientKey, total)}</Tag>
+                                </Stack>
+                                {rows.length === 0 ? <Typography.Text type='secondary' style={{ fontSize: 11 }}>Không có dữ liệu nguyên liệu để hiển thị.</Typography.Text> : <Stack direction='column' align='stretch' gap={6} style={{ width: '100%' }}>
+                                    {rows.map(row => {
+                                        const value = row.total[selectedNutrientKey];
+                                        const percent = typeof value === 'number' && typeof total === 'number' && total > 0 ? Math.round(value / total * 100) : 0;
+                                        const label = row.missingReason === 'nutrition'
+                                            ? 'Thiếu nutrition'
+                                            : row.missingReason === 'conversion'
+                                                ? 'Thiếu quy đổi'
+                                                : NutritionGoalHelper.formatNutrientValue(selectedNutrientKey, value);
+                                        return <div key={row.ingredientId} style={{ border: '1px solid #f3f4f6', borderRadius: 8, padding: '7px 8px', background: '#fcfcfd' }}>
+                                            <Stack justify='space-between' align='center' gap={8} style={{ width: '100%' }}>
+                                                <div style={{ minWidth: 0 }}>
+                                                    <Typography.Text strong style={{ display: 'block', color: '#111827', fontSize: 12, lineHeight: '16px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{row.ingredientName}</Typography.Text>
+                                                    <Typography.Text type='secondary' style={{ display: 'block', fontSize: 11, lineHeight: '15px' }}>{row.amountLabel}</Typography.Text>
+                                                </div>
+                                                <Tag color={row.missingReason ? 'orange' : 'blue'} style={{ marginInlineEnd: 0, flexShrink: 0 }}>{label}</Tag>
+                                            </Stack>
+                                            {!row.missingReason && <div style={{ height: 5, borderRadius: 999, background: '#fff7e6', overflow: 'hidden', marginTop: 6 }}>
+                                                <div style={{ height: '100%', width: `${Math.max(4, Math.min(100, percent))}%`, borderRadius: 999, background: '#d48806' }} />
+                                            </div>}
+                                        </div>;
+                                    })}
+                                </Stack>}
+                            </Box>)}
+                        </Stack>
+                    </Box>}
                     {aggregate.sourceNames.length > 0 && <Typography.Text type='secondary' style={{ display: 'block', marginTop: 8, fontSize: 11, lineHeight: '15px' }}>
                         Nguồn: {aggregate.sourceNames.slice(0, 4).join(', ')}{aggregate.sourceNames.length > 4 ? ` +${aggregate.sourceNames.length - 4}` : ''}
                     </Typography.Text>}

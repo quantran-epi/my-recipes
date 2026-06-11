@@ -16,7 +16,7 @@ import { Tag } from "@components/Tag";
 import { Typography } from "@components/Typography";
 import { useScreenTitle, useToggle, useAdminMode, usePagedVirtualItems, useScheduledCalculation } from "@hooks";
 import { useAppShellNavigation } from "@routing/AppShellNavigationContext";
-import { DISH_TAGS, DishDuration, Dishes } from "@store/Models/Dishes";
+import { DishDuration, Dishes } from "@store/Models/Dishes";
 import { Ingredient } from "@store/Models/Ingredient";
 import { DishesDurationEditParams, duplicateDish, removeDishes, updateDishDuration } from "@store/Reducers/DishesReducer";
 import { selectDishes, selectIngredients } from "@store/Selectors";
@@ -34,6 +34,7 @@ import { DishesDetailWidget } from "./DishesManageIngredient/DishDetail.widget";
 import { DishImageWidget } from "./DishesManageIngredient/DishImage.widget";
 import { DishDurationWidget } from "./DishesManageIngredient/DishDuration.widget";
 import { CookingSessionWidget } from "./CookingSession.widget";
+import { DishTagHelper } from "../Helpers/DishTagHelper";
 
 type DishListItemSummary = {
     ingredientCount: number;
@@ -314,9 +315,7 @@ export const DishesListScreen = () => {
     }, [_setScrollTopVisible]);
 
     const allTags = useMemo<string[]>(() => {
-        const tagSet = new Set<string>();
-        dishes.forEach(d => d.tags?.forEach(t => tagSet.add(t)));
-        return DISH_TAGS.filter(t => tagSet.has(t));
+        return DishTagHelper.getAllTags(dishes);
     }, [dishes]);
 
     const calculateFilterData = useCallback((): DishFilterData => {

@@ -9,7 +9,7 @@ import { NutritionGoalHelper, type NutritionGoalMatch } from '@common/Helpers/Nu
 import { Button } from '@components/Button';
 import { Collapse } from '@components/Collapse';
 import { Dropdown } from '@components/Dropdown';
-import { renderResponsiveTagPlaceholder } from '@components/Form/Select';
+import { createSelectedOptionsDropdownRender, renderResponsiveTagPlaceholder } from '@components/Form/Select';
 import { Image } from '@components/Image';
 import { Box } from '@components/Layout/Box';
 import { Stack } from '@components/Layout/Stack';
@@ -329,6 +329,12 @@ const pageCss = `
     box-shadow: 0 10px 24px rgba(15,23,42,0.06);
     padding: 12px;
 }
+.smart-planner-page .ant-space-vertical {
+    width: 100%;
+}
+.smart-planner-page .ant-space-vertical > .ant-space-item {
+    width: 100%;
+}
 .smart-planner-title {
     display: block;
     color: #111827;
@@ -450,6 +456,8 @@ const pageCss = `
     margin-top: 2px;
 }
 .smart-planner-result-card {
+    width: 100%;
+    box-sizing: border-box;
     border: 1px solid rgba(15,23,42,0.1);
     border-radius: 10px;
     background: #fff;
@@ -677,6 +685,7 @@ export const SmartMealPlannerScreen: React.FC = () => {
     }, [memberIds, members, selectedHouseholdMemberIds]);
 
     const selectedNutritionGoal = useMemo(() => nutritionGoals.find(goal => goal.id === nutritionGoalId), [nutritionGoalId, nutritionGoals]);
+    const memberOptions = useMemo(() => members.map(member => ({ value: member.id, label: member.name })), [members]);
     const ingredientOptions = useMemo(() => ingredients.map(ingredient => ({ value: ingredient.id, label: ingredient.name })), [ingredients]);
     const tagOptions = useMemo(() => {
         const tags = new Set<string>(DISH_TAGS);
@@ -954,7 +963,7 @@ export const SmartMealPlannerScreen: React.FC = () => {
                 event.preventDefault();
                 setDetailSelection({ item, slot, date });
             }}
-            style={{ border: `1px solid ${meta.border}`, borderRadius: 8, padding: 10, background: meta.background, minWidth: 0, cursor: 'pointer' }}
+            style={{ width: '100%', boxSizing: 'border-box', border: `1px solid ${meta.border}`, borderRadius: 8, padding: 10, background: meta.background, minWidth: 0, cursor: 'pointer' }}
         >
             <div style={{ display: 'grid', gridTemplateColumns: '46px minmax(0, 1fr) auto', gap: 9, alignItems: 'start' }}>
                 <DishImageWidget src={item.dish.image} width={46} height={46} borderRadius={8} fallbackIconSize={24} showBrokenLabel={false} />
@@ -981,7 +990,7 @@ export const SmartMealPlannerScreen: React.FC = () => {
             event.preventDefault();
             _selectAlternative(date, alternative.id);
         }}
-        style={{ border: selected ? '1px solid #13a8a8' : '1px solid rgba(15,23,42,0.08)', borderRadius: 8, padding: 10, background: selected ? '#e6fffb' : '#fff', cursor: 'pointer', minWidth: 0 }}
+        style={{ width: '100%', boxSizing: 'border-box', border: selected ? '1px solid #13a8a8' : '1px solid rgba(15,23,42,0.08)', borderRadius: 8, padding: 10, background: selected ? '#e6fffb' : '#fff', cursor: 'pointer', minWidth: 0 }}
     >
         <Stack justify='space-between' align='flex-start' gap={8} style={{ width: '100%' }}>
             <div style={{ minWidth: 0 }}>
@@ -1314,7 +1323,7 @@ export const SmartMealPlannerScreen: React.FC = () => {
                             </div>
                             <div>
                                 <PlannerFieldLabel helpKey='members' label={<><TeamOutlined /> Ăn cùng</>}>Chọn người ăn cùng để tính khẩu phần, món thích, món tránh và mục tiêu riêng của từng người.</PlannerFieldLabel>
-                                <Select mode='multiple' allowClear maxTagCount='responsive' maxTagPlaceholder={renderResponsiveTagPlaceholder} value={memberIds} onChange={value => { setMemberIds(value); _clearSuggestions(); }} options={members.map(member => ({ value: member.id, label: member.name }))} placeholder='Tất cả thành viên' style={{ width: '100%' }} />
+                                <Select mode='multiple' allowClear maxTagCount='responsive' maxTagPlaceholder={renderResponsiveTagPlaceholder} dropdownRender={createSelectedOptionsDropdownRender({ mode: 'multiple', value: memberIds, options: memberOptions })} value={memberIds} onChange={value => { setMemberIds(value); _clearSuggestions(); }} options={memberOptions} placeholder='Tất cả thành viên' style={{ width: '100%' }} />
                             </div>
                         </div>
                     </div>
@@ -1395,7 +1404,7 @@ export const SmartMealPlannerScreen: React.FC = () => {
                                                     <li><b>Khẩu vị nhà</b>: chấm theo hồ sơ các thành viên đang chọn, món thích/tránh, dị ứng và phản hồi nấu ăn đã lưu. Cần chọn người ăn cùng.</li>
                                                 </ul>
                                             </PlannerFieldLabel>
-                                            <Select mode='multiple' value={criteria} onChange={value => { setCriteria(value); _clearSuggestions(); }} options={criteriaOptions} style={{ width: '100%' }} />
+                                            <Select mode='multiple' dropdownRender={createSelectedOptionsDropdownRender({ mode: 'multiple', value: criteria, options: criteriaOptions })} value={criteria} onChange={value => { setCriteria(value); _clearSuggestions(); }} options={criteriaOptions} style={{ width: '100%' }} />
                                         </div>
                                     </div>
                                     <Box style={{ marginTop: 10 }}>
@@ -1423,15 +1432,15 @@ export const SmartMealPlannerScreen: React.FC = () => {
                                         </div>
                                         <div>
                                             <PlannerFieldLabel helpKey='avoid-ingredients' label='Tránh nguyên liệu'>Món chứa bất kỳ nguyên liệu nào ở đây sẽ bị loại.</PlannerFieldLabel>
-                                            <Select mode='multiple' allowClear maxTagCount='responsive' maxTagPlaceholder={renderResponsiveTagPlaceholder} value={avoidIngredientIds} onChange={value => { setAvoidIngredientIds(value); _clearSuggestions(); }} options={ingredientOptions} placeholder='Chọn nguyên liệu cần tránh' style={{ width: '100%' }} />
+                                            <Select mode='multiple' allowClear maxTagCount='responsive' maxTagPlaceholder={renderResponsiveTagPlaceholder} dropdownRender={createSelectedOptionsDropdownRender({ mode: 'multiple', value: avoidIngredientIds, options: ingredientOptions })} value={avoidIngredientIds} onChange={value => { setAvoidIngredientIds(value); _clearSuggestions(); }} options={ingredientOptions} placeholder='Chọn nguyên liệu cần tránh' style={{ width: '100%' }} />
                                         </div>
                                         <div>
                                             <PlannerFieldLabel helpKey='expiring-ingredients' label='Bắt buộc đồ sắp hết hạn'>Món phải dùng các nguyên liệu sắp hết hạn đã chọn.</PlannerFieldLabel>
-                                            <Select mode='multiple' allowClear maxTagCount='responsive' maxTagPlaceholder={renderResponsiveTagPlaceholder} value={requiredExpiringIngredientIds} onChange={value => { setRequiredExpiringIngredientIds(value); _clearSuggestions(); }} options={expiringIngredientOptions} placeholder='Chọn nguyên liệu sắp hết hạn' style={{ width: '100%' }} />
+                                            <Select mode='multiple' allowClear maxTagCount='responsive' maxTagPlaceholder={renderResponsiveTagPlaceholder} dropdownRender={createSelectedOptionsDropdownRender({ mode: 'multiple', value: requiredExpiringIngredientIds, options: expiringIngredientOptions })} value={requiredExpiringIngredientIds} onChange={value => { setRequiredExpiringIngredientIds(value); _clearSuggestions(); }} options={expiringIngredientOptions} placeholder='Chọn nguyên liệu sắp hết hạn' style={{ width: '100%' }} />
                                         </div>
                                         <div>
                                             <PlannerFieldLabel helpKey='required-tags' label='Bắt buộc tag món'>Món phải có các tag này. Có thể nhập tag như Vegetarian hoặc Low-carb nếu món đã dùng tag đó.</PlannerFieldLabel>
-                                            <Select mode='tags' allowClear maxTagCount='responsive' maxTagPlaceholder={renderResponsiveTagPlaceholder} value={requiredTags} onChange={value => { setRequiredTags(value); _clearSuggestions(); }} options={tagOptions} placeholder='Ví dụ: Salad, Vegetarian, Low-carb' style={{ width: '100%' }} />
+                                            <Select mode='tags' allowClear maxTagCount='responsive' maxTagPlaceholder={renderResponsiveTagPlaceholder} dropdownRender={createSelectedOptionsDropdownRender({ mode: 'tags', value: requiredTags, options: tagOptions })} value={requiredTags} onChange={value => { setRequiredTags(value); _clearSuggestions(); }} options={tagOptions} placeholder='Ví dụ: Salad, Vegetarian, Low-carb' style={{ width: '100%' }} />
                                         </div>
                                     </div>}
                                 </div>
@@ -1536,7 +1545,7 @@ export const SmartMealPlannerScreen: React.FC = () => {
                                     {day.alternatives?.map(alternative => <PlannerAlternativeCard key={alternative.id} alternative={alternative} date={day.date} selected={alternative.id === day.selectedAlternativeId} />)}
                                 </div>
                                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(190px, 1fr))', gap: 8 }}>
-                                    {(['breakfast', 'lunch', 'dinner'] as MealSlot[]).map(slot => <div key={slot}>
+                                    {(['breakfast', 'lunch', 'dinner'] as MealSlot[]).map(slot => <div key={slot} style={{ width: '100%', minWidth: 0 }}>
                                         <Typography.Text strong style={{ display: 'block', color: mealSlotMeta[slot].tone, fontSize: 12, lineHeight: '16px', marginBottom: 5 }}>{mealSlotMeta[slot].label}</Typography.Text>
                                         <PlannerDishCard item={day[slot]} slot={slot} date={day.date} />
                                     </div>)}

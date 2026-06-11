@@ -10,6 +10,15 @@ export type DishNutritionNutrientKey = keyof Pick<IngredientNutritionInfo,
 
 export type DishNutritionTotals = Partial<Record<DishNutritionNutrientKey, number>>;
 
+export type DishNutritionIngredientContribution = {
+    ingredientId: string;
+    ingredientName: string;
+    amountLabel: string;
+    total: DishNutritionTotals;
+    sourceNames: string[];
+    missingReason?: 'nutrition' | 'conversion';
+}
+
 export type DishNutritionSummary = {
     dishId: string;
     servings: number;
@@ -72,6 +81,8 @@ const divideTotals = (value: DishNutritionTotals, divisor: number): DishNutritio
 
 const hasAnyNutrition = (value: DishNutritionTotals): boolean => nutrientKeys.some(key => hasNumber(value[key]));
 
+const formatOriginalAmount = (amount: string | number, unit: string): string => `${amount}${unit}`;
+
 export const DishNutritionHelper = {
     nutrientKeys,
 
@@ -130,6 +141,70 @@ export const DishNutritionHelper = {
             sourceNames: Array.from(sourceNames),
             hasNutrition: hasAnyNutrition(perServing),
         };
+    },
+
+    calculateIngredientContributions(
+        dish: Dishes,
+        allDishes: Dishes[],
+        ingredientsById: Map<string, Ingredient>,
+        options: { targetServings?: number } = {},
+    ): DishNutritionIngredientContribution[] {
+        const servings = DishServingHelper.getTargetServings(dish, options.targetServings);
+        const amounts = DishServingHelper.collectIngredientAmounts(dish, allDishes, { targetServings: servings })
+            .filter(item => item.required !== false);
+        const grouped = new Map<string, {
+            ingredientName: string;
+            amount: number;
+            unit?: string;
+            originalLabels: string[];
+            totals: DishNutritionTotals;
+            sourceNames: Set<string>;
+            missingReason?: 'nutrition' | 'conversion';
+        }>();
+
+        amounts.forEach(amount => {
+            const ingredient = ingredientsById.get(amount.ingredientId);
+            const current = grouped.get(amount.ingredientId) ?? {
+                ingredientName: ingredient?.name ?? amount.ingredientId,
+                amount: 0,
+                originalLabels: [],
+                totals: {},
+                sourceNames: new Set<string>(),
+            };
+            current.originalLabels.push(formatOriginalAmount(amount.amount, amount.unit));
+
+            const nutrition = IngredientNutritionHelper.getNutrition(ingredient);
+            if (!nutrition) {
+                current.missingReason = current.missingReason ?? 'nutrition';
+                grouped.set(amount.ingredientId, current);
+                return;
+            }
+
+            const convertedAmount = IngredientUnitHelper.toBaseAmount(ingredient, amount.amount, amount.unit, nutrition.unit);
+            if (convertedAmount === null || convertedAmount <= 0) {
+                current.missingReason = current.missingReason ?? 'conversion';
+                grouped.set(amount.ingredientId, current);
+                return;
+            }
+
+            const factor = convertedAmount / nutrition.amount;
+            current.amount += convertedAmount;
+            current.unit = nutrition.unit;
+            addScaledNutrition(current.totals, nutrition, factor);
+            nutrition.sources?.forEach(source => current.sourceNames.add(source.name));
+            grouped.set(amount.ingredientId, current);
+        });
+
+        return Array.from(grouped.entries()).map(([ingredientId, row]) => ({
+            ingredientId,
+            ingredientName: row.ingredientName,
+            amountLabel: row.unit && row.amount > 0
+                ? `${IngredientUnitHelper.formatAmount(roundOne(row.amount))} ${row.unit}`
+                : Array.from(new Set(row.originalLabels)).join(', '),
+            total: normalizeTotals(row.totals),
+            sourceNames: Array.from(row.sourceNames),
+            missingReason: hasAnyNutrition(row.totals) ? undefined : row.missingReason,
+        })).sort((a, b) => a.ingredientName.localeCompare(b.ingredientName));
     },
 
     formatCalories(value?: number): string {
