@@ -1,4 +1,20 @@
-export const stableJson = (value: unknown): string => JSON.stringify(value ?? null, null, 2);
+// Canonical, key-order-independent serialization for sync comparisons.
+// Objects with identical data but different key insertion order must produce
+// the same string, otherwise change-detection reports false "modified" rows.
+const sortKeysDeep = (value: unknown): unknown => {
+    if (Array.isArray(value)) return value.map(sortKeysDeep);
+    if (value && typeof value === "object") {
+        return Object.keys(value as Record<string, unknown>)
+            .sort()
+            .reduce((acc, key) => {
+                acc[key] = sortKeysDeep((value as Record<string, unknown>)[key]);
+                return acc;
+            }, {} as Record<string, unknown>);
+    }
+    return value;
+};
+
+export const stableJson = (value: unknown): string => JSON.stringify(sortKeysDeep(value ?? null), null, 2);
 
 export const countCollection = (value: unknown): number => {
     if (Array.isArray(value)) return value.length;

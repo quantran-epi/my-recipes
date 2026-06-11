@@ -70,7 +70,6 @@ export const DishesAddWidget = () => {
     })
 
     const durationValue = SmartForm.useWatch("duration", addDishesForm.form);
-    const isAccompanimentValue = SmartForm.useWatch("isAccompaniment", addDishesForm.form);
 
     const _onDurationChange = (duration) => {
         addDishesForm.form.setFieldsValue({ duration });
@@ -78,10 +77,6 @@ export const DishesAddWidget = () => {
 
     const _onSave = () => {
         addDishesForm.submit();
-    }
-
-    const _onAccompanimentChange = (isAccompaniment: boolean) => {
-        addDishesForm.form.setFieldsValue({ isAccompaniment });
     }
 
     return <SmartForm {...addDishesForm.defaultProps}>
@@ -113,7 +108,7 @@ export const DishesAddWidget = () => {
             <ImageInput />
         </SmartForm.Item>
         <SmartForm.Item {...addDishesForm.itemDefinitions.isAccompaniment} label="Món ăn kèm">
-            <Switch checked={Boolean(isAccompanimentValue)} onChange={_onAccompanimentChange} checkedChildren="Ăn kèm, không gợi ý riêng" unCheckedChildren="Món dùng độc lập" />
+            <Switch checkedChildren="Ăn kèm, không gợi ý riêng" unCheckedChildren="Món dùng độc lập" />
         </SmartForm.Item>
         <Stack fullwidth justify="flex-end">
             <Button onClick={_onSave}>Lưu</Button>

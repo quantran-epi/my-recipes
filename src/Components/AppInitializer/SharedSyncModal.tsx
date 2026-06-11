@@ -18,6 +18,7 @@ import { Ingredient } from "@store/Models/Ingredient";
 import { Dishes } from "@store/Models/Dishes";
 import { normalizeSharedConfig, SharedConfig } from "@store/Models/SharedConfig";
 import { replaceSharedConfig } from "@store/Reducers/SharedConfigReducer";
+import { stableJson } from "@common/Helpers/SyncDataHelper";
 
 interface Props {
     open: boolean;

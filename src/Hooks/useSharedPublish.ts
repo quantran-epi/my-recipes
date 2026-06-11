@@ -211,7 +211,7 @@ const diffItems = <T extends { id: string; name: string }>(prev: T[], next: T[])
     next.forEach(item => {
         if (!prevMap.has(item.id)) {
             changes.push({ id: item.id, name: item.name, action: "added" });
-        } else if (JSON.stringify(prevMap.get(item.id)) !== JSON.stringify(item)) {
+        } else if (stableJson(prevMap.get(item.id)) !== stableJson(item)) {
             changes.push({ id: item.id, name: item.name, action: "modified" });
         }
     });

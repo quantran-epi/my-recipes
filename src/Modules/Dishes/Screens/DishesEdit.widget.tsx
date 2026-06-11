@@ -62,14 +62,9 @@ export const DishesEditWidget = ({ item, onDone }) => {
     }
 
     const durationValue = SmartForm.useWatch("duration", editDishesForm.form);
-    const isAccompanimentValue = SmartForm.useWatch("isAccompaniment", editDishesForm.form);
 
     const _onDurationChange = (duration) => {
         editDishesForm.form.setFieldsValue({ duration });
-    }
-
-    const _onAccompanimentChange = (isAccompaniment: boolean) => {
-        editDishesForm.form.setFieldsValue({ isAccompaniment });
     }
 
     return <SmartForm {...editDishesForm.defaultProps}>
@@ -104,7 +99,7 @@ export const DishesEditWidget = ({ item, onDone }) => {
             <Switch checkedChildren="Hoàn thiện" unCheckedChildren="Chưa hoàn thiện" />
         </SmartForm.Item>
         <SmartForm.Item {...editDishesForm.itemDefinitions.isAccompaniment} label="Món ăn kèm">
-            <Switch checked={Boolean(isAccompanimentValue)} onChange={_onAccompanimentChange} checkedChildren="Ăn kèm, không gợi ý riêng" unCheckedChildren="Món dùng độc lập" />
+            <Switch checkedChildren="Ăn kèm, không gợi ý riêng" unCheckedChildren="Món dùng độc lập" />
         </SmartForm.Item>
         <Stack fullwidth justify="flex-end">
             <Button onClick={_onSave}>Lưu</Button>
