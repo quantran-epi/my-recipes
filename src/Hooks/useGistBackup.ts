@@ -11,6 +11,7 @@ import { createPersistRoot, getStorageString, removeStorageItem, setStorageStrin
 import {
     selectAppContext,
     selectCookingSessions,
+    selectHouseholdHealthState,
     selectInventory,
     selectScheduledMeals,
     selectSelectedMeals,
@@ -32,6 +33,7 @@ const PERSONAL_PART_FILES = {
     shoppingList: "personal-shoppingList.json",
     scheduledMeal: "personal-scheduledMeal.json",
     cookingSession: "personal-cookingSession.json",
+    householdHealth: "personal-householdHealth.json",
 } as const;
 
 export type PersonalPartKey = keyof typeof PERSONAL_PART_FILES;
@@ -130,6 +132,7 @@ const emptyManifest = (): PersonalManifest => ({
         shoppingList: { key: "shoppingList", fileName: PERSONAL_PART_FILES.shoppingList, version: "", hash: "", count: 0, updatedAt: "" },
         scheduledMeal: { key: "scheduledMeal", fileName: PERSONAL_PART_FILES.scheduledMeal, version: "", hash: "", count: 0, updatedAt: "" },
         cookingSession: { key: "cookingSession", fileName: PERSONAL_PART_FILES.cookingSession, version: "", hash: "", count: 0, updatedAt: "" },
+        householdHealth: { key: "householdHealth", fileName: PERSONAL_PART_FILES.householdHealth, version: "", hash: "", count: 0, updatedAt: "" },
     },
 });
 
@@ -146,6 +149,7 @@ const normalizeManifest = (manifest: Partial<PersonalManifest> | null | undefine
             shoppingList: { ...base.parts.shoppingList, ...manifest?.parts?.shoppingList },
             scheduledMeal: { ...base.parts.scheduledMeal, ...manifest?.parts?.scheduledMeal },
             cookingSession: { ...base.parts.cookingSession, ...manifest?.parts?.cookingSession },
+            householdHealth: { ...base.parts.householdHealth, ...manifest?.parts?.householdHealth },
         },
     };
 };
@@ -208,6 +212,15 @@ const parseJson = <T,>(content: string | null | undefined, fallback: T): T => {
     } catch {
         return fallback;
     }
+};
+
+const emptyPersonalSlice = (partKey: PersonalPartKey): unknown => {
+    if (partKey === "inventory") return { items: {} };
+    if (partKey === "shoppingList") return { shoppingLists: [] };
+    if (partKey === "scheduledMeal") return { scheduledMeals: [], selectedMeals: [] };
+    if (partKey === "cookingSession") return { sessions: [] };
+    if (partKey === "householdHealth") return { profiles: {}, records: [] };
+    return {};
 };
 
 const buildSliceHashes = async (slices: PersonalSlices): Promise<PersonalPartHashMap> => {
@@ -309,7 +322,11 @@ const readChangedRemoteSlices = async (params: {
 
     await Promise.all(personalPartKeys.map(async partKey => {
         const part = params.manifest.parts[partKey];
-        if (!part?.fileName) return;
+        if (!part?.hash) {
+            restoredSlices[partKey] = emptyPersonalSlice(partKey);
+            return;
+        }
+        if (!part.fileName) return;
         if (part.hash && part.hash === params.localHashes[partKey]) return;
 
         const file = await readGistFile(params.gistJson, part.fileName, params.token);
@@ -355,6 +372,7 @@ export const useGistBackup = (): UseGistBackupResult => {
     const scheduledMeals = useSelector(selectScheduledMeals);
     const selectedMeals = useSelector(selectSelectedMeals);
     const cookingSessions = useSelector(selectCookingSessions);
+    const householdHealth = useSelector(selectHouseholdHealthState);
 
     const personalSlices: PersonalSlices = useMemo(() => ({
         appContext,
@@ -362,7 +380,8 @@ export const useGistBackup = (): UseGistBackupResult => {
         shoppingList: { shoppingLists },
         scheduledMeal: { scheduledMeals, selectedMeals: Array.from(selectedMeals) },
         cookingSession: { sessions: cookingSessions },
-    }), [appContext, inventory, shoppingLists, scheduledMeals, selectedMeals, cookingSessions]);
+        householdHealth,
+    }), [appContext, inventory, shoppingLists, scheduledMeals, selectedMeals, cookingSessions, householdHealth]);
 
     useEffect(() => {
         let cancelled = false;
@@ -501,6 +520,25 @@ export const useGistBackup = (): UseGistBackupResult => {
                 buildSliceHashes(personalSlices),
             ]);
             const remoteHashes = getManifestPartHashes(manifest);
+            const remoteMissingParts = personalPartKeys.filter(partKey => !manifest.parts[partKey]?.hash);
+            if (remoteMissingParts.length > 0) {
+                const now = new Date().toISOString();
+                const { files, manifestContent } = buildPersonalBackupPatch({
+                    previousManifest: manifest,
+                    previousManifestContent: manifestFile.content,
+                    slices: personalSlices,
+                    hashes: localHashes,
+                    now,
+                });
+
+                if (Object.keys(files).length > 0) {
+                    await patchGistFiles(targetGistId, targetToken, files);
+                }
+                await setStorageString(LAST_BACKUP_KEY, now);
+                await writeSyncCheckpoint(manifestContent, localHashes);
+                setLastBackupAt(now);
+                return Object.keys(files).length > 0;
+            }
             const localMatchesRemote = !hasHashDifference(localHashes, remoteHashes);
 
             if (lastAppliedManifestHash === manifestHash) {

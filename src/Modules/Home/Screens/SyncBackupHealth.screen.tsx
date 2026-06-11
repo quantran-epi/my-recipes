@@ -20,6 +20,7 @@ const personalPartLabels: Record<PersonalPartKey, string> = {
     shoppingList: 'Lịch mua sắm',
     scheduledMeal: 'Thực đơn',
     cookingSession: 'Phiên nấu',
+    householdHealth: 'Sức khỏe gia đình',
 };
 
 const pageStyle: React.CSSProperties = {
@@ -223,8 +224,11 @@ export const SyncBackupHealthScreen = () => {
                     <Typography.Text type='secondary' style={{ display: 'block', fontSize: 12, lineHeight: '16px', fontWeight: 650 }}>Thay đổi local đang chờ sao lưu</Typography.Text>
                     <Stack wrap='wrap' gap={5} style={{ marginTop: 7 }}>{pendingPartTags}</Stack>
                     {personalHealth && <Typography.Text type='secondary' style={{ display: 'block', fontSize: 11, lineHeight: '15px', marginTop: 8 }}>
-                        Dữ liệu hiện có: tồn kho {personalHealth.localCounts.inventory}, mua sắm {personalHealth.localCounts.shoppingList}, thực đơn {personalHealth.localCounts.scheduledMeal}, phiên nấu {personalHealth.localCounts.cookingSession}.
+                        Dữ liệu hiện có: tồn kho {personalHealth.localCounts.inventory}, mua sắm {personalHealth.localCounts.shoppingList}, thực đơn {personalHealth.localCounts.scheduledMeal}, phiên nấu {personalHealth.localCounts.cookingSession}, sức khỏe {personalHealth.localCounts.householdHealth}.
                     </Typography.Text>}
+                    <Typography.Text type='secondary' style={{ display: 'block', fontSize: 11, lineHeight: '15px', marginTop: 6 }}>
+                        Sao lưu cá nhân bao gồm hồ sơ sức khỏe gia đình trong file riêng trên Gist cá nhân của bạn.
+                    </Typography.Text>
                 </Box>
                 <Stack wrap='wrap' gap={8} style={{ marginTop: 10 }}>
                     <Button icon={<CheckCircleOutlined />} loading={isTesting} disabled={!gistId || !gistToken} onClick={() => testGistConfig()}>Kiểm tra Gist</Button>

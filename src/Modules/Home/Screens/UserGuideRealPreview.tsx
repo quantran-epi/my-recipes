@@ -17,6 +17,7 @@ import InventoryReducer from '@store/Reducers/InventoryReducer';
 import ShoppingListReducer from '@store/Reducers/ShoppingListReducer';
 import ScheduledMealReducer from '@store/Reducers/ScheduledMealReducer';
 import CookingSessionReducer from '@store/Reducers/CookingSessionReducer';
+import HouseholdHealthReducer from '@store/Reducers/HouseholdHealthReducer';
 import { Dishes } from '@store/Models/Dishes';
 import { Ingredient, IngredientInventory } from '@store/Models/Ingredient';
 import { ScheduledMeal } from '@store/Models/ScheduledMeal';
@@ -39,6 +40,7 @@ const personalReducer = combineReducers({
     shoppingList: ShoppingListReducer,
     scheduledMeal: ScheduledMealReducer,
     cookingSession: CookingSessionReducer,
+    householdHealth: HouseholdHealthReducer,
 });
 
 const rootReducer = combineReducers({
@@ -377,6 +379,7 @@ const createGuidePreviewState = (): GuidePreviewState => ({
         shoppingList: { shoppingLists: SHOPPING_LISTS },
         scheduledMeal: { scheduledMeals: SCHEDULED_MEALS, selectedMeals: ['guide-meal-today'] },
         cookingSession: { sessions: COOKING_SESSIONS },
+        householdHealth: { profiles: {}, records: [] },
     },
 });
 

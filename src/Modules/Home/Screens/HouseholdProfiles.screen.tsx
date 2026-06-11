@@ -8,10 +8,11 @@ import { useMessage } from '@components/Message';
 import { Tag } from '@components/Tag';
 import { Typography } from '@components/Typography';
 import { useScreenTitle } from '@hooks';
+import { HouseholdHealthStatusTag, HouseholdHealthWidget } from './HouseholdHealth.widget';
 import { DISH_TAGS } from '@store/Models/Dishes';
 import { HouseholdMemberProfile, removeHouseholdMemberProfile, setSelectedHouseholdMemberIds, upsertHouseholdMemberProfile } from '@store/Reducers/AppContextReducer';
-import { selectDishes, selectHouseholdMembers, selectIngredients, selectNutritionGoals, selectSelectedHouseholdMemberIds } from '@store/Selectors';
-import { Empty, Input, InputNumber, Popconfirm, Select, Switch } from 'antd';
+import { selectDishes, selectHouseholdHealthProfiles, selectHouseholdMembers, selectIngredients, selectNutritionGoals, selectSelectedHouseholdMemberIds } from '@store/Selectors';
+import { Empty, Input, InputNumber, Popconfirm, Segmented, Select, Switch } from 'antd';
 import { nanoid } from 'nanoid';
 import React, { useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
@@ -214,8 +215,10 @@ export const HouseholdProfilesScreen: React.FC = () => {
     const dishes = useSelector(selectDishes);
     const ingredients = useSelector(selectIngredients);
     const nutritionGoals = useSelector(selectNutritionGoals);
+    const healthProfiles = useSelector(selectHouseholdHealthProfiles);
     const [activeMemberId, setActiveMemberId] = useState<string | undefined>(() => members[0]?.id);
     const [draftMember, setDraftMember] = useState<HouseholdMemberProfile | null>(null);
+    const [editorMode, setEditorMode] = useState<'food' | 'health'>('food');
 
     React.useEffect(() => {
         if (activeMemberId && members.some(member => member.id === activeMemberId)) return;
@@ -355,6 +358,9 @@ export const HouseholdProfilesScreen: React.FC = () => {
                                     <Typography.Text type='secondary' style={{ display: 'block', fontSize: 11, lineHeight: '15px' }}>
                                         {(member.favoriteDishIds.length + member.favoriteIngredientIds.length + member.preferredTags.length)} thích · {(member.avoidedDishIds.length + member.avoidedIngredientIds.length + member.avoidedTags.length)} tránh · {(member.allergenIngredientIds.length + member.hardExcludedIngredientIds.length)} chặn
                                     </Typography.Text>
+                                    <Stack wrap='wrap' gap={5} style={{ marginTop: 5 }}>
+                                        <HouseholdHealthStatusTag status={healthProfiles[member.id]?.status} compact />
+                                    </Stack>
                                 </span>
                             </button>
                             <div className='household-member-toggle'>
@@ -397,6 +403,12 @@ export const HouseholdProfilesScreen: React.FC = () => {
                         </div>
                     </Stack>
 
+                    <Segmented block value={editorMode} onChange={value => setEditorMode(value as 'food' | 'health')} options={[
+                        { value: 'food', label: 'Ăn uống' },
+                        { value: 'health', label: 'Sức khỏe' },
+                    ]} />
+
+                    {editorMode === 'food' ? <>
                     <div className='household-field-list'>
                         <div className='household-field-row'>
                             <FieldLabel>Tên</FieldLabel>
@@ -492,6 +504,7 @@ export const HouseholdProfilesScreen: React.FC = () => {
                         <FieldLabel>Ghi chú riêng</FieldLabel>
                         <div className='household-field-control'><Input.TextArea value={draftMember.notes} onChange={event => _updateDraftMember({ notes: event.target.value })} placeholder='Ví dụ: ăn ít cay, không đậu phộng, khẩu phần trẻ em...' autoSize={{ minRows: 3, maxRows: 6 }} /></div>
                     </div>
+                    </> : <HouseholdHealthWidget member={activeMember} />}
                 </Stack>}
             </Box>
         </div>
