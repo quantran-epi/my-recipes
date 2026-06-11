@@ -10565,6 +10565,1448 @@
         "thìa": 5
       },
       "shelfLife": "very_long"
+    },
+    {
+      "id": "Bong cai xanh-shared-20260611-v2",
+      "name": "Bông cải xanh",
+      "category": "Rau củ",
+      "shelfLife": "medium",
+      "preservationCondition": "fridge",
+      "baseUnit": "g",
+      "inventoryUnits": [
+        "g",
+        "kg"
+      ],
+      "recipeUnitConversions": {
+        "g": 1,
+        "kg": 1000
+      },
+      "priceEstimate": {
+        "min": 35000,
+        "max": 70000,
+        "amount": 1,
+        "unit": "kg",
+        "currency": "VND"
+      },
+      "nutrition": {
+        "amount": 100,
+        "calories": 34,
+        "protein": 2.8,
+        "carbs": 6.6,
+        "fat": 0.4,
+        "saturatedFat": 0,
+        "cholesterol": 0,
+        "fiber": 2.6,
+        "sugar": 1.7,
+        "sodium": 33,
+        "potassium": 316,
+        "calcium": 47,
+        "iron": 0.7,
+        "vitaminA": 31,
+        "vitaminC": 89.2,
+        "unit": "g",
+        "sources": [
+          {
+            "name": "USDA FoodData Central",
+            "url": "https://fdc.nal.usda.gov/fdc-app.html#/food-search?query=Broccoli%2C%20raw",
+            "matchedName": "Broccoli, raw",
+            "confidence": "exact",
+            "note": "Nutrient values are from USDA FoodData Central or a conservative category estimate per 100 g/ml basis; liquid units are displayed as the app serving basis when appropriate."
+          },
+          {
+            "name": "Vietnamese Food Composition Table 2007",
+            "url": "https://www.fao.org/infoods/infoods/tables-and-databases/vietnam/en/",
+            "matchedName": "Bông cải xanh",
+            "confidence": "similar",
+            "note": "Vietnam-specific food composition reference listed by FAO/INFOODS; used for local ingredient context and cross-checking."
+          }
+        ]
+      }
+    },
+    {
+      "id": "Cu sen-shared-20260611-v2",
+      "name": "Củ sen",
+      "category": "Rau củ",
+      "shelfLife": "medium",
+      "preservationCondition": "fridge",
+      "baseUnit": "g",
+      "inventoryUnits": [
+        "g",
+        "kg",
+        "củ"
+      ],
+      "recipeUnitConversions": {
+        "g": 1,
+        "kg": 1000,
+        "củ": 250
+      },
+      "priceEstimate": {
+        "min": 60000,
+        "max": 120000,
+        "amount": 1,
+        "unit": "kg",
+        "currency": "VND"
+      },
+      "nutrition": {
+        "amount": 100,
+        "calories": 74,
+        "protein": 2.6,
+        "carbs": 17.2,
+        "fat": 0.1,
+        "saturatedFat": 0,
+        "cholesterol": 0,
+        "fiber": 4.9,
+        "sugar": 0.5,
+        "sodium": 40,
+        "potassium": 556,
+        "calcium": 45,
+        "iron": 1.2,
+        "vitaminA": 0,
+        "vitaminC": 44,
+        "unit": "g",
+        "sources": [
+          {
+            "name": "USDA FoodData Central",
+            "url": "https://fdc.nal.usda.gov/fdc-app.html#/food-search?query=Lotus%20root%2C%20raw",
+            "matchedName": "Lotus root, raw",
+            "confidence": "exact",
+            "note": "Nutrient values are from USDA FoodData Central or a conservative category estimate per 100 g/ml basis; liquid units are displayed as the app serving basis when appropriate."
+          },
+          {
+            "name": "Vietnamese Food Composition Table 2007",
+            "url": "https://www.fao.org/infoods/infoods/tables-and-databases/vietnam/en/",
+            "matchedName": "Củ sen",
+            "confidence": "similar",
+            "note": "Vietnam-specific food composition reference listed by FAO/INFOODS; used for local ingredient context and cross-checking."
+          }
+        ]
+      }
+    },
+    {
+      "id": "Nam mo-shared-20260611-v2",
+      "name": "Nấm mỡ",
+      "category": "Rau củ",
+      "shelfLife": "short",
+      "preservationCondition": "fridge",
+      "baseUnit": "g",
+      "inventoryUnits": [
+        "g",
+        "kg"
+      ],
+      "recipeUnitConversions": {
+        "g": 1,
+        "kg": 1000
+      },
+      "priceEstimate": {
+        "min": 90000,
+        "max": 170000,
+        "amount": 1,
+        "unit": "kg",
+        "currency": "VND"
+      },
+      "nutrition": {
+        "amount": 100,
+        "calories": 22,
+        "protein": 3.1,
+        "carbs": 3.3,
+        "fat": 0.3,
+        "saturatedFat": 0,
+        "cholesterol": 0,
+        "fiber": 1,
+        "sugar": 2,
+        "sodium": 5,
+        "potassium": 318,
+        "calcium": 3,
+        "iron": 0.5,
+        "vitaminA": 0,
+        "vitaminC": 2.1,
+        "unit": "g",
+        "sources": [
+          {
+            "name": "USDA FoodData Central",
+            "url": "https://fdc.nal.usda.gov/fdc-app.html#/food-search?query=Mushrooms%2C%20white%2C%20raw",
+            "matchedName": "Mushrooms, white, raw",
+            "confidence": "exact",
+            "note": "Nutrient values are from USDA FoodData Central or a conservative category estimate per 100 g/ml basis; liquid units are displayed as the app serving basis when appropriate."
+          },
+          {
+            "name": "Vietnamese Food Composition Table 2007",
+            "url": "https://www.fao.org/infoods/infoods/tables-and-databases/vietnam/en/",
+            "matchedName": "Nấm mỡ",
+            "confidence": "similar",
+            "note": "Vietnam-specific food composition reference listed by FAO/INFOODS; used for local ingredient context and cross-checking."
+          }
+        ]
+      }
+    },
+    {
+      "id": "He-shared-20260611-v2",
+      "name": "Hẹ",
+      "category": "Gia vị",
+      "shelfLife": "very_short",
+      "preservationCondition": "fridge",
+      "baseUnit": "g",
+      "inventoryUnits": [
+        "g",
+        "kg",
+        "bó"
+      ],
+      "recipeUnitConversions": {
+        "g": 1,
+        "kg": 1000,
+        "bó": 100
+      },
+      "priceEstimate": {
+        "min": 8000,
+        "max": 20000,
+        "amount": 1,
+        "unit": "bó",
+        "currency": "VND"
+      },
+      "nutrition": {
+        "amount": 100,
+        "calories": 30,
+        "protein": 3.3,
+        "carbs": 4.4,
+        "fat": 0.7,
+        "saturatedFat": 0,
+        "cholesterol": 0,
+        "fiber": 2.5,
+        "sugar": 1.9,
+        "sodium": 3,
+        "potassium": 296,
+        "calcium": 92,
+        "iron": 1.6,
+        "vitaminA": 218,
+        "vitaminC": 58.1,
+        "unit": "g",
+        "sources": [
+          {
+            "name": "USDA FoodData Central",
+            "url": "https://fdc.nal.usda.gov/fdc-app.html#/food-search?query=Chives%2C%20raw",
+            "matchedName": "Chives, raw",
+            "confidence": "exact",
+            "note": "Nutrient values are from USDA FoodData Central or a conservative category estimate per 100 g/ml basis; liquid units are displayed as the app serving basis when appropriate."
+          },
+          {
+            "name": "Vietnamese Food Composition Table 2007",
+            "url": "https://www.fao.org/infoods/infoods/tables-and-databases/vietnam/en/",
+            "matchedName": "Hẹ",
+            "confidence": "similar",
+            "note": "Vietnam-specific food composition reference listed by FAO/INFOODS; used for local ingredient context and cross-checking."
+          }
+        ]
+      }
+    },
+    {
+      "id": "Mi trung-shared-20260611-v2",
+      "name": "Mì trứng",
+      "category": "Tinh bột",
+      "shelfLife": "very_long",
+      "preservationCondition": "cool_dry",
+      "baseUnit": "g",
+      "inventoryUnits": [
+        "g",
+        "kg"
+      ],
+      "recipeUnitConversions": {
+        "g": 1,
+        "kg": 1000
+      },
+      "priceEstimate": {
+        "min": 50000,
+        "max": 100000,
+        "amount": 1,
+        "unit": "kg",
+        "currency": "VND"
+      },
+      "nutrition": {
+        "amount": 100,
+        "calories": 384,
+        "protein": 14.2,
+        "carbs": 71.3,
+        "fat": 4.4,
+        "saturatedFat": 1.3,
+        "cholesterol": 84,
+        "fiber": 3.3,
+        "sugar": 1.9,
+        "sodium": 21,
+        "potassium": 244,
+        "calcium": 35,
+        "iron": 3.4,
+        "vitaminA": 0,
+        "vitaminC": 0,
+        "unit": "g",
+        "sources": [
+          {
+            "name": "USDA FoodData Central",
+            "url": "https://fdc.nal.usda.gov/fdc-app.html#/food-search?query=Noodles%2C%20egg%2C%20dry",
+            "matchedName": "Noodles, egg, dry",
+            "confidence": "exact",
+            "note": "Nutrient values are from USDA FoodData Central or a conservative category estimate per 100 g/ml basis; liquid units are displayed as the app serving basis when appropriate."
+          },
+          {
+            "name": "Vietnamese Food Composition Table 2007",
+            "url": "https://www.fao.org/infoods/infoods/tables-and-databases/vietnam/en/",
+            "matchedName": "Mì trứng",
+            "confidence": "similar",
+            "note": "Vietnam-specific food composition reference listed by FAO/INFOODS; used for local ingredient context and cross-checking."
+          }
+        ]
+      }
+    },
+    {
+      "id": "Nui-shared-20260611-v2",
+      "name": "Nui",
+      "category": "Tinh bột",
+      "shelfLife": "very_long",
+      "preservationCondition": "cool_dry",
+      "baseUnit": "g",
+      "inventoryUnits": [
+        "g",
+        "kg"
+      ],
+      "recipeUnitConversions": {
+        "g": 1,
+        "kg": 1000
+      },
+      "priceEstimate": {
+        "min": 35000,
+        "max": 80000,
+        "amount": 1,
+        "unit": "kg",
+        "currency": "VND"
+      },
+      "nutrition": {
+        "amount": 100,
+        "calories": 371,
+        "protein": 13,
+        "carbs": 74.7,
+        "fat": 1.5,
+        "saturatedFat": 0,
+        "cholesterol": 0,
+        "fiber": 3.2,
+        "sugar": 2.7,
+        "sodium": 6,
+        "potassium": 223,
+        "calcium": 21,
+        "iron": 1.3,
+        "vitaminA": 0,
+        "vitaminC": 0,
+        "unit": "g",
+        "sources": [
+          {
+            "name": "USDA FoodData Central",
+            "url": "https://fdc.nal.usda.gov/fdc-app.html#/food-search?query=Pasta%2C%20dry%2C%20enriched",
+            "matchedName": "Pasta, dry, enriched",
+            "confidence": "exact",
+            "note": "Nutrient values are from USDA FoodData Central or a conservative category estimate per 100 g/ml basis; liquid units are displayed as the app serving basis when appropriate."
+          },
+          {
+            "name": "Vietnamese Food Composition Table 2007",
+            "url": "https://www.fao.org/infoods/infoods/tables-and-databases/vietnam/en/",
+            "matchedName": "Nui",
+            "confidence": "similar",
+            "note": "Vietnam-specific food composition reference listed by FAO/INFOODS; used for local ingredient context and cross-checking."
+          }
+        ]
+      }
+    },
+    {
+      "id": "Banh canh-shared-20260611-v2",
+      "name": "Bánh canh",
+      "category": "Tinh bột",
+      "shelfLife": "short",
+      "preservationCondition": "fridge",
+      "baseUnit": "g",
+      "inventoryUnits": [
+        "g",
+        "kg"
+      ],
+      "recipeUnitConversions": {
+        "g": 1,
+        "kg": 1000
+      },
+      "priceEstimate": {
+        "min": 30000,
+        "max": 60000,
+        "amount": 1,
+        "unit": "kg",
+        "currency": "VND"
+      },
+      "nutrition": {
+        "amount": 100,
+        "calories": 150,
+        "protein": 2.5,
+        "carbs": 34,
+        "fat": 0.4,
+        "saturatedFat": 0,
+        "cholesterol": 0,
+        "fiber": 0.8,
+        "sugar": 0.2,
+        "sodium": 120,
+        "potassium": 30,
+        "calcium": 8,
+        "iron": 0.3,
+        "vitaminA": 0,
+        "vitaminC": 0,
+        "unit": "g",
+        "sources": [
+          {
+            "name": "Ingredient category estimate",
+            "url": "https://www.fao.org/infoods/infoods/tables-and-databases/vietnam/en/",
+            "matchedName": "Vietnamese thick tapioca-rice noodles",
+            "confidence": "category",
+            "note": "Bánh canh varies by rice/tapioca ratio; values are conservative estimates for fresh noodles."
+          },
+          {
+            "name": "Vietnamese Food Composition Table 2007",
+            "url": "https://www.fao.org/infoods/infoods/tables-and-databases/vietnam/en/",
+            "matchedName": "Bánh canh",
+            "confidence": "similar",
+            "note": "Vietnam-specific food composition reference listed by FAO/INFOODS; used for local ingredient context and cross-checking."
+          }
+        ]
+      }
+    },
+    {
+      "id": "Hu tieu kho-shared-20260611-v2",
+      "name": "Hủ tiếu khô",
+      "category": "Tinh bột",
+      "shelfLife": "very_long",
+      "preservationCondition": "cool_dry",
+      "baseUnit": "g",
+      "inventoryUnits": [
+        "g",
+        "kg"
+      ],
+      "recipeUnitConversions": {
+        "g": 1,
+        "kg": 1000
+      },
+      "priceEstimate": {
+        "min": 45000,
+        "max": 90000,
+        "amount": 1,
+        "unit": "kg",
+        "currency": "VND"
+      },
+      "nutrition": {
+        "amount": 100,
+        "calories": 365,
+        "protein": 6,
+        "carbs": 82,
+        "fat": 0.8,
+        "saturatedFat": 0,
+        "cholesterol": 0,
+        "fiber": 1.5,
+        "sugar": 0.5,
+        "sodium": 20,
+        "potassium": 70,
+        "calcium": 15,
+        "iron": 0.5,
+        "vitaminA": 0,
+        "vitaminC": 0,
+        "unit": "g",
+        "sources": [
+          {
+            "name": "Ingredient category estimate",
+            "url": "https://www.fao.org/infoods/infoods/tables-and-databases/vietnam/en/",
+            "matchedName": "Dried rice noodles",
+            "confidence": "category",
+            "note": "No close direct USDA item was available; values are conservative category estimates for the Vietnamese ingredient."
+          },
+          {
+            "name": "Vietnamese Food Composition Table 2007",
+            "url": "https://www.fao.org/infoods/infoods/tables-and-databases/vietnam/en/",
+            "matchedName": "Hủ tiếu khô",
+            "confidence": "similar",
+            "note": "Vietnam-specific food composition reference listed by FAO/INFOODS; used for local ingredient context and cross-checking."
+          }
+        ]
+      }
+    },
+    {
+      "id": "Ca hoi-shared-20260611-v2",
+      "name": "Cá hồi",
+      "category": "Hải sản",
+      "shelfLife": "very_short",
+      "preservationCondition": "freezer",
+      "baseUnit": "g",
+      "inventoryUnits": [
+        "g",
+        "kg"
+      ],
+      "recipeUnitConversions": {
+        "g": 1,
+        "kg": 1000
+      },
+      "priceEstimate": {
+        "min": 350000,
+        "max": 650000,
+        "amount": 1,
+        "unit": "kg",
+        "currency": "VND"
+      },
+      "nutrition": {
+        "amount": 100,
+        "calories": 208,
+        "protein": 20.4,
+        "carbs": 0,
+        "fat": 13.4,
+        "saturatedFat": 3.1,
+        "cholesterol": 55,
+        "fiber": 0,
+        "sugar": 0,
+        "sodium": 59,
+        "potassium": 363,
+        "calcium": 9,
+        "iron": 0.3,
+        "vitaminA": 58,
+        "vitaminC": 0,
+        "unit": "g",
+        "sources": [
+          {
+            "name": "USDA FoodData Central",
+            "url": "https://fdc.nal.usda.gov/fdc-app.html#/food-search?query=Fish%2C%20salmon%2C%20Atlantic%2C%20farmed%2C%20raw",
+            "matchedName": "Fish, salmon, Atlantic, farmed, raw",
+            "confidence": "similar",
+            "note": "Nutrient values are from USDA FoodData Central or a conservative category estimate per 100 g/ml basis; liquid units are displayed as the app serving basis when appropriate."
+          },
+          {
+            "name": "Vietnamese Food Composition Table 2007",
+            "url": "https://www.fao.org/infoods/infoods/tables-and-databases/vietnam/en/",
+            "matchedName": "Cá hồi",
+            "confidence": "similar",
+            "note": "Vietnam-specific food composition reference listed by FAO/INFOODS; used for local ingredient context and cross-checking."
+          }
+        ]
+      }
+    },
+    {
+      "id": "Ca ngu-shared-20260611-v2",
+      "name": "Cá ngừ",
+      "category": "Hải sản",
+      "shelfLife": "very_short",
+      "preservationCondition": "freezer",
+      "baseUnit": "g",
+      "inventoryUnits": [
+        "g",
+        "kg"
+      ],
+      "recipeUnitConversions": {
+        "g": 1,
+        "kg": 1000
+      },
+      "priceEstimate": {
+        "min": 120000,
+        "max": 260000,
+        "amount": 1,
+        "unit": "kg",
+        "currency": "VND"
+      },
+      "nutrition": {
+        "amount": 100,
+        "calories": 109,
+        "protein": 24.4,
+        "carbs": 0,
+        "fat": 0.5,
+        "saturatedFat": 0.2,
+        "cholesterol": 39,
+        "fiber": 0,
+        "sugar": 0,
+        "sodium": 45,
+        "potassium": 441,
+        "calcium": 4,
+        "iron": 0.8,
+        "vitaminA": 18,
+        "vitaminC": 0,
+        "unit": "g",
+        "sources": [
+          {
+            "name": "USDA FoodData Central",
+            "url": "https://fdc.nal.usda.gov/fdc-app.html#/food-search?query=Fish%2C%20tuna%2C%20fresh%2C%20yellowfin%2C%20raw",
+            "matchedName": "Fish, tuna, fresh, yellowfin, raw",
+            "confidence": "similar",
+            "note": "Nutrient values are from USDA FoodData Central or a conservative category estimate per 100 g/ml basis; liquid units are displayed as the app serving basis when appropriate."
+          },
+          {
+            "name": "Vietnamese Food Composition Table 2007",
+            "url": "https://www.fao.org/infoods/infoods/tables-and-databases/vietnam/en/",
+            "matchedName": "Cá ngừ",
+            "confidence": "similar",
+            "note": "Vietnam-specific food composition reference listed by FAO/INFOODS; used for local ingredient context and cross-checking."
+          }
+        ]
+      }
+    },
+    {
+      "id": "Ngao-shared-20260611-v2",
+      "name": "Ngao",
+      "category": "Hải sản",
+      "shelfLife": "very_short",
+      "preservationCondition": "fridge",
+      "baseUnit": "g",
+      "inventoryUnits": [
+        "g",
+        "kg"
+      ],
+      "recipeUnitConversions": {
+        "g": 1,
+        "kg": 1000
+      },
+      "priceEstimate": {
+        "min": 40000,
+        "max": 90000,
+        "amount": 1,
+        "unit": "kg",
+        "currency": "VND"
+      },
+      "nutrition": {
+        "amount": 100,
+        "calories": 86,
+        "protein": 14.7,
+        "carbs": 3.6,
+        "fat": 1,
+        "saturatedFat": 0.1,
+        "cholesterol": 30,
+        "fiber": 0,
+        "sugar": 0,
+        "sodium": 601,
+        "potassium": 628,
+        "calcium": 39,
+        "iron": 2.8,
+        "vitaminA": 90,
+        "vitaminC": 0,
+        "unit": "g",
+        "sources": [
+          {
+            "name": "USDA FoodData Central",
+            "url": "https://fdc.nal.usda.gov/fdc-app.html#/food-search?query=Mollusks%2C%20clam%2C%20mixed%20species%2C%20raw",
+            "matchedName": "Mollusks, clam, mixed species, raw",
+            "confidence": "similar",
+            "note": "Nutrient values are from USDA FoodData Central or a conservative category estimate per 100 g/ml basis; liquid units are displayed as the app serving basis when appropriate."
+          },
+          {
+            "name": "Vietnamese Food Composition Table 2007",
+            "url": "https://www.fao.org/infoods/infoods/tables-and-databases/vietnam/en/",
+            "matchedName": "Ngao",
+            "confidence": "similar",
+            "note": "Vietnam-specific food composition reference listed by FAO/INFOODS; used for local ingredient context and cross-checking."
+          }
+        ]
+      }
+    },
+    {
+      "id": "Cha ca-shared-20260611-v2",
+      "name": "Chả cá",
+      "category": "Hải sản",
+      "shelfLife": "short",
+      "preservationCondition": "fridge",
+      "baseUnit": "g",
+      "inventoryUnits": [
+        "g",
+        "kg"
+      ],
+      "recipeUnitConversions": {
+        "g": 1,
+        "kg": 1000
+      },
+      "priceEstimate": {
+        "min": 100000,
+        "max": 180000,
+        "amount": 1,
+        "unit": "kg",
+        "currency": "VND"
+      },
+      "nutrition": {
+        "amount": 100,
+        "calories": 150,
+        "protein": 15,
+        "carbs": 8,
+        "fat": 6,
+        "saturatedFat": 1.4,
+        "cholesterol": 45,
+        "fiber": 0.5,
+        "sugar": 1,
+        "sodium": 700,
+        "potassium": 220,
+        "calcium": 40,
+        "iron": 0.8,
+        "vitaminA": 0,
+        "vitaminC": 0,
+        "unit": "g",
+        "sources": [
+          {
+            "name": "Ingredient category estimate",
+            "url": "https://www.fao.org/infoods/infoods/tables-and-databases/vietnam/en/",
+            "matchedName": "Vietnamese fish cake",
+            "confidence": "category",
+            "note": "Processed fish cake varies by brand and recipe; values are conservative estimates with elevated sodium."
+          },
+          {
+            "name": "Vietnamese Food Composition Table 2007",
+            "url": "https://www.fao.org/infoods/infoods/tables-and-databases/vietnam/en/",
+            "matchedName": "Chả cá",
+            "confidence": "similar",
+            "note": "Vietnam-specific food composition reference listed by FAO/INFOODS; used for local ingredient context and cross-checking."
+          }
+        ]
+      }
+    },
+    {
+      "id": "Lap xuong-shared-20260611-v2",
+      "name": "Lạp xưởng",
+      "category": "Thịt",
+      "shelfLife": "long",
+      "preservationCondition": "fridge",
+      "baseUnit": "g",
+      "inventoryUnits": [
+        "g",
+        "kg"
+      ],
+      "recipeUnitConversions": {
+        "g": 1,
+        "kg": 1000,
+        "chiếc": 50
+      },
+      "priceEstimate": {
+        "min": 160000,
+        "max": 260000,
+        "amount": 1,
+        "unit": "kg",
+        "currency": "VND"
+      },
+      "nutrition": {
+        "amount": 100,
+        "calories": 455,
+        "protein": 18,
+        "carbs": 10,
+        "fat": 38,
+        "saturatedFat": 13,
+        "cholesterol": 80,
+        "fiber": 0,
+        "sugar": 8,
+        "sodium": 1200,
+        "potassium": 250,
+        "calcium": 15,
+        "iron": 1.2,
+        "vitaminA": 0,
+        "vitaminC": 0,
+        "unit": "g",
+        "sources": [
+          {
+            "name": "Ingredient category estimate",
+            "url": "https://www.fao.org/infoods/infoods/tables-and-databases/vietnam/en/",
+            "matchedName": "Chinese-style pork sausage",
+            "confidence": "category",
+            "note": "Lạp xưởng varies by maker; values are estimated for sweet cured pork sausage."
+          },
+          {
+            "name": "Vietnamese Food Composition Table 2007",
+            "url": "https://www.fao.org/infoods/infoods/tables-and-databases/vietnam/en/",
+            "matchedName": "Lạp xưởng",
+            "confidence": "similar",
+            "note": "Vietnam-specific food composition reference listed by FAO/INFOODS; used for local ingredient context and cross-checking."
+          }
+        ]
+      }
+    },
+    {
+      "id": "Pho mai-shared-20260611-v2",
+      "name": "Phô mai",
+      "category": "Sữa & trứng",
+      "shelfLife": "medium",
+      "preservationCondition": "fridge",
+      "baseUnit": "g",
+      "inventoryUnits": [
+        "g",
+        "kg",
+        "thanh"
+      ],
+      "recipeUnitConversions": {
+        "g": 1,
+        "kg": 1000,
+        "thanh": 20
+      },
+      "priceEstimate": {
+        "min": 180000,
+        "max": 350000,
+        "amount": 1,
+        "unit": "kg",
+        "currency": "VND"
+      },
+      "nutrition": {
+        "amount": 100,
+        "calories": 402,
+        "protein": 25,
+        "carbs": 1.3,
+        "fat": 33,
+        "saturatedFat": 19,
+        "cholesterol": 105,
+        "fiber": 0,
+        "sugar": 0.5,
+        "sodium": 621,
+        "potassium": 98,
+        "calcium": 721,
+        "iron": 0.7,
+        "vitaminA": 265,
+        "vitaminC": 0,
+        "unit": "g",
+        "sources": [
+          {
+            "name": "USDA FoodData Central",
+            "url": "https://fdc.nal.usda.gov/fdc-app.html#/food-search?query=Cheese%2C%20cheddar",
+            "matchedName": "Cheese, cheddar",
+            "confidence": "exact",
+            "note": "Nutrient values are from USDA FoodData Central or a conservative category estimate per 100 g/ml basis; liquid units are displayed as the app serving basis when appropriate."
+          },
+          {
+            "name": "Vietnamese Food Composition Table 2007",
+            "url": "https://www.fao.org/infoods/infoods/tables-and-databases/vietnam/en/",
+            "matchedName": "Phô mai",
+            "confidence": "similar",
+            "note": "Vietnam-specific food composition reference listed by FAO/INFOODS; used for local ingredient context and cross-checking."
+          }
+        ]
+      }
+    },
+    {
+      "id": "Sua chua khong duong-shared-20260611-v2",
+      "name": "Sữa chua không đường",
+      "category": "Sữa & trứng",
+      "shelfLife": "medium",
+      "preservationCondition": "fridge",
+      "baseUnit": "g",
+      "inventoryUnits": [
+        "g",
+        "kg"
+      ],
+      "recipeUnitConversions": {
+        "g": 1,
+        "kg": 1000
+      },
+      "priceEstimate": {
+        "min": 45000,
+        "max": 90000,
+        "amount": 1,
+        "unit": "kg",
+        "currency": "VND"
+      },
+      "nutrition": {
+        "amount": 100,
+        "calories": 61,
+        "protein": 3.5,
+        "carbs": 4.7,
+        "fat": 3.3,
+        "saturatedFat": 2.1,
+        "cholesterol": 13,
+        "fiber": 0,
+        "sugar": 4.7,
+        "sodium": 46,
+        "potassium": 155,
+        "calcium": 121,
+        "iron": 0.1,
+        "vitaminA": 27,
+        "vitaminC": 0.5,
+        "unit": "g",
+        "sources": [
+          {
+            "name": "USDA FoodData Central",
+            "url": "https://fdc.nal.usda.gov/fdc-app.html#/food-search?query=Yogurt%2C%20plain%2C%20whole%20milk",
+            "matchedName": "Yogurt, plain, whole milk",
+            "confidence": "exact",
+            "note": "Nutrient values are from USDA FoodData Central or a conservative category estimate per 100 g/ml basis; liquid units are displayed as the app serving basis when appropriate."
+          },
+          {
+            "name": "Vietnamese Food Composition Table 2007",
+            "url": "https://www.fao.org/infoods/infoods/tables-and-databases/vietnam/en/",
+            "matchedName": "Sữa chua không đường",
+            "confidence": "similar",
+            "note": "Vietnam-specific food composition reference listed by FAO/INFOODS; used for local ingredient context and cross-checking."
+          }
+        ]
+      }
+    },
+    {
+      "id": "Dau hao-shared-20260611-v2",
+      "name": "Dầu hào",
+      "category": "Gia vị",
+      "shelfLife": "very_long",
+      "preservationCondition": "cool_dry",
+      "baseUnit": "ml",
+      "inventoryUnits": [
+        "ml",
+        "lít"
+      ],
+      "recipeUnitConversions": {
+        "ml": 1,
+        "lít": 1000,
+        "thìa": 15
+      },
+      "priceEstimate": {
+        "min": 40000,
+        "max": 90000,
+        "amount": 1,
+        "unit": "lít",
+        "currency": "VND"
+      },
+      "nutrition": {
+        "amount": 100,
+        "calories": 100,
+        "protein": 2,
+        "carbs": 22,
+        "fat": 0.3,
+        "saturatedFat": 0,
+        "cholesterol": 0,
+        "fiber": 0,
+        "sugar": 12,
+        "sodium": 5000,
+        "potassium": 100,
+        "calcium": 15,
+        "iron": 0.5,
+        "vitaminA": 0,
+        "vitaminC": 0,
+        "unit": "ml",
+        "sources": [
+          {
+            "name": "Ingredient category estimate",
+            "url": "https://www.fao.org/infoods/infoods/tables-and-databases/vietnam/en/",
+            "matchedName": "Oyster sauce",
+            "confidence": "category",
+            "note": "Sauce nutrition varies by brand; sodium and sugar are estimated high for seasoning use."
+          },
+          {
+            "name": "Vietnamese Food Composition Table 2007",
+            "url": "https://www.fao.org/infoods/infoods/tables-and-databases/vietnam/en/",
+            "matchedName": "Dầu hào",
+            "confidence": "similar",
+            "note": "Vietnam-specific food composition reference listed by FAO/INFOODS; used for local ingredient context and cross-checking."
+          }
+        ]
+      }
+    },
+    {
+      "id": "Dau me-shared-20260611-v2",
+      "name": "Dầu mè",
+      "category": "Gia vị",
+      "shelfLife": "very_long",
+      "preservationCondition": "cool_dry",
+      "baseUnit": "ml",
+      "inventoryUnits": [
+        "ml",
+        "lít"
+      ],
+      "recipeUnitConversions": {
+        "ml": 1,
+        "lít": 1000,
+        "thìa": 15
+      },
+      "priceEstimate": {
+        "min": 120000,
+        "max": 240000,
+        "amount": 1,
+        "unit": "lít",
+        "currency": "VND"
+      },
+      "nutrition": {
+        "amount": 100,
+        "calories": 884,
+        "protein": 0,
+        "carbs": 0,
+        "fat": 100,
+        "saturatedFat": 14.2,
+        "cholesterol": 0,
+        "fiber": 0,
+        "sugar": 0,
+        "sodium": 0,
+        "potassium": 0,
+        "calcium": 0,
+        "iron": 0,
+        "vitaminA": 0,
+        "vitaminC": 0,
+        "unit": "ml",
+        "sources": [
+          {
+            "name": "USDA FoodData Central",
+            "url": "https://fdc.nal.usda.gov/fdc-app.html#/food-search?query=Oil%2C%20sesame%2C%20salad%20or%20cooking",
+            "matchedName": "Oil, sesame, salad or cooking",
+            "confidence": "exact",
+            "note": "Nutrient values are from USDA FoodData Central or a conservative category estimate per 100 g/ml basis; liquid units are displayed as the app serving basis when appropriate."
+          },
+          {
+            "name": "Vietnamese Food Composition Table 2007",
+            "url": "https://www.fao.org/infoods/infoods/tables-and-databases/vietnam/en/",
+            "matchedName": "Dầu mè",
+            "confidence": "similar",
+            "note": "Vietnam-specific food composition reference listed by FAO/INFOODS; used for local ingredient context and cross-checking."
+          }
+        ]
+      }
+    },
+    {
+      "id": "Sa te-shared-20260611-v2",
+      "name": "Sa tế",
+      "category": "Gia vị",
+      "shelfLife": "very_long",
+      "preservationCondition": "cool_dry",
+      "baseUnit": "g",
+      "inventoryUnits": [
+        "g",
+        "kg"
+      ],
+      "recipeUnitConversions": {
+        "g": 1,
+        "kg": 1000,
+        "thìa": 15
+      },
+      "priceEstimate": {
+        "min": 70000,
+        "max": 150000,
+        "amount": 1,
+        "unit": "kg",
+        "currency": "VND"
+      },
+      "nutrition": {
+        "amount": 100,
+        "calories": 500,
+        "protein": 4,
+        "carbs": 15,
+        "fat": 46,
+        "saturatedFat": 7,
+        "cholesterol": 0,
+        "fiber": 6,
+        "sugar": 5,
+        "sodium": 2200,
+        "potassium": 350,
+        "calcium": 40,
+        "iron": 2,
+        "vitaminA": 0,
+        "vitaminC": 0,
+        "unit": "g",
+        "sources": [
+          {
+            "name": "Ingredient category estimate",
+            "url": "https://www.fao.org/infoods/infoods/tables-and-databases/vietnam/en/",
+            "matchedName": "Vietnamese chili oil paste",
+            "confidence": "category",
+            "note": "Sa tế is an oil-rich chili seasoning; values are broad estimates and should be used as seasoning-scale data."
+          },
+          {
+            "name": "Vietnamese Food Composition Table 2007",
+            "url": "https://www.fao.org/infoods/infoods/tables-and-databases/vietnam/en/",
+            "matchedName": "Sa tế",
+            "confidence": "similar",
+            "note": "Vietnam-specific food composition reference listed by FAO/INFOODS; used for local ingredient context and cross-checking."
+          }
+        ]
+      }
+    },
+    {
+      "id": "Bot ca ri-shared-20260611-v2",
+      "name": "Bột cà ri",
+      "category": "Gia vị",
+      "shelfLife": "very_long",
+      "preservationCondition": "cool_dry",
+      "baseUnit": "g",
+      "inventoryUnits": [
+        "g",
+        "kg"
+      ],
+      "recipeUnitConversions": {
+        "g": 1,
+        "kg": 1000,
+        "thìa": 5
+      },
+      "priceEstimate": {
+        "min": 120000,
+        "max": 250000,
+        "amount": 1,
+        "unit": "kg",
+        "currency": "VND"
+      },
+      "nutrition": {
+        "amount": 100,
+        "calories": 325,
+        "protein": 14.3,
+        "carbs": 55.8,
+        "fat": 14,
+        "saturatedFat": 1.6,
+        "cholesterol": 0,
+        "fiber": 53,
+        "sugar": 2.8,
+        "sodium": 52,
+        "potassium": 1543,
+        "calcium": 525,
+        "iron": 19.1,
+        "vitaminA": 49,
+        "vitaminC": 11.4,
+        "unit": "g",
+        "sources": [
+          {
+            "name": "USDA FoodData Central",
+            "url": "https://fdc.nal.usda.gov/fdc-app.html#/food-search?query=Spices%2C%20curry%20powder",
+            "matchedName": "Spices, curry powder",
+            "confidence": "exact",
+            "note": "Nutrient values are from USDA FoodData Central or a conservative category estimate per 100 g/ml basis; liquid units are displayed as the app serving basis when appropriate."
+          },
+          {
+            "name": "Vietnamese Food Composition Table 2007",
+            "url": "https://www.fao.org/infoods/infoods/tables-and-databases/vietnam/en/",
+            "matchedName": "Bột cà ri",
+            "confidence": "similar",
+            "note": "Vietnam-specific food composition reference listed by FAO/INFOODS; used for local ingredient context and cross-checking."
+          }
+        ]
+      }
+    },
+    {
+      "id": "Mayonnaise-shared-20260611-v2",
+      "name": "Mayonnaise",
+      "category": "Gia vị",
+      "shelfLife": "long",
+      "preservationCondition": "fridge",
+      "baseUnit": "g",
+      "inventoryUnits": [
+        "g",
+        "kg"
+      ],
+      "recipeUnitConversions": {
+        "g": 1,
+        "kg": 1000,
+        "thìa": 14
+      },
+      "priceEstimate": {
+        "min": 70000,
+        "max": 160000,
+        "amount": 1,
+        "unit": "kg",
+        "currency": "VND"
+      },
+      "nutrition": {
+        "amount": 100,
+        "calories": 680,
+        "protein": 1,
+        "carbs": 0.6,
+        "fat": 75,
+        "saturatedFat": 11,
+        "cholesterol": 42,
+        "fiber": 0,
+        "sugar": 0.6,
+        "sodium": 635,
+        "potassium": 20,
+        "calcium": 8,
+        "iron": 0.2,
+        "vitaminA": 16,
+        "vitaminC": 0,
+        "unit": "g",
+        "sources": [
+          {
+            "name": "USDA FoodData Central",
+            "url": "https://fdc.nal.usda.gov/fdc-app.html#/food-search?query=Salad%20dressing%2C%20mayonnaise%2C%20regular",
+            "matchedName": "Salad dressing, mayonnaise, regular",
+            "confidence": "exact",
+            "note": "Nutrient values are from USDA FoodData Central or a conservative category estimate per 100 g/ml basis; liquid units are displayed as the app serving basis when appropriate."
+          },
+          {
+            "name": "Vietnamese Food Composition Table 2007",
+            "url": "https://www.fao.org/infoods/infoods/tables-and-databases/vietnam/en/",
+            "matchedName": "Mayonnaise",
+            "confidence": "similar",
+            "note": "Vietnam-specific food composition reference listed by FAO/INFOODS; used for local ingredient context and cross-checking."
+          }
+        ]
+      }
+    },
+    {
+      "id": "Chuoi-shared-20260611-v2",
+      "name": "Chuối",
+      "category": "Rau củ",
+      "shelfLife": "short",
+      "preservationCondition": "room_temperature",
+      "baseUnit": "g",
+      "inventoryUnits": [
+        "g",
+        "kg",
+        "quả"
+      ],
+      "recipeUnitConversions": {
+        "g": 1,
+        "kg": 1000,
+        "quả": 120
+      },
+      "priceEstimate": {
+        "min": 20000,
+        "max": 45000,
+        "amount": 1,
+        "unit": "kg",
+        "currency": "VND"
+      },
+      "nutrition": {
+        "amount": 100,
+        "calories": 89,
+        "protein": 1.1,
+        "carbs": 22.8,
+        "fat": 0.3,
+        "saturatedFat": 0,
+        "cholesterol": 0,
+        "fiber": 2.6,
+        "sugar": 12.2,
+        "sodium": 1,
+        "potassium": 358,
+        "calcium": 5,
+        "iron": 0.3,
+        "vitaminA": 3,
+        "vitaminC": 8.7,
+        "unit": "g",
+        "sources": [
+          {
+            "name": "USDA FoodData Central",
+            "url": "https://fdc.nal.usda.gov/fdc-app.html#/food-search?query=Bananas%2C%20raw",
+            "matchedName": "Bananas, raw",
+            "confidence": "exact",
+            "note": "Nutrient values are from USDA FoodData Central or a conservative category estimate per 100 g/ml basis; liquid units are displayed as the app serving basis when appropriate."
+          },
+          {
+            "name": "Vietnamese Food Composition Table 2007",
+            "url": "https://www.fao.org/infoods/infoods/tables-and-databases/vietnam/en/",
+            "matchedName": "Chuối",
+            "confidence": "similar",
+            "note": "Vietnam-specific food composition reference listed by FAO/INFOODS; used for local ingredient context and cross-checking."
+          }
+        ]
+      }
+    },
+    {
+      "id": "Dua hau-shared-20260611-v2",
+      "name": "Dưa hấu",
+      "category": "Rau củ",
+      "shelfLife": "short",
+      "preservationCondition": "fridge",
+      "baseUnit": "g",
+      "inventoryUnits": [
+        "g",
+        "kg",
+        "quả"
+      ],
+      "recipeUnitConversions": {
+        "g": 1,
+        "kg": 1000,
+        "quả": 3000
+      },
+      "priceEstimate": {
+        "min": 12000,
+        "max": 30000,
+        "amount": 1,
+        "unit": "kg",
+        "currency": "VND"
+      },
+      "nutrition": {
+        "amount": 100,
+        "calories": 30,
+        "protein": 0.6,
+        "carbs": 7.6,
+        "fat": 0.2,
+        "saturatedFat": 0,
+        "cholesterol": 0,
+        "fiber": 0.4,
+        "sugar": 6.2,
+        "sodium": 1,
+        "potassium": 112,
+        "calcium": 7,
+        "iron": 0.2,
+        "vitaminA": 28,
+        "vitaminC": 8.1,
+        "unit": "g",
+        "sources": [
+          {
+            "name": "USDA FoodData Central",
+            "url": "https://fdc.nal.usda.gov/fdc-app.html#/food-search?query=Watermelon%2C%20raw",
+            "matchedName": "Watermelon, raw",
+            "confidence": "exact",
+            "note": "Nutrient values are from USDA FoodData Central or a conservative category estimate per 100 g/ml basis; liquid units are displayed as the app serving basis when appropriate."
+          },
+          {
+            "name": "Vietnamese Food Composition Table 2007",
+            "url": "https://www.fao.org/infoods/infoods/tables-and-databases/vietnam/en/",
+            "matchedName": "Dưa hấu",
+            "confidence": "similar",
+            "note": "Vietnam-specific food composition reference listed by FAO/INFOODS; used for local ingredient context and cross-checking."
+          }
+        ]
+      }
+    },
+    {
+      "id": "Nuoc cot me-shared-20260611-v2",
+      "name": "Nước cốt me",
+      "category": "Gia vị",
+      "shelfLife": "medium",
+      "preservationCondition": "fridge",
+      "baseUnit": "ml",
+      "inventoryUnits": [
+        "ml",
+        "lít"
+      ],
+      "recipeUnitConversions": {
+        "ml": 1,
+        "lít": 1000,
+        "thìa": 15
+      },
+      "priceEstimate": {
+        "min": 60000,
+        "max": 130000,
+        "amount": 1,
+        "unit": "lít",
+        "currency": "VND"
+      },
+      "nutrition": {
+        "amount": 100,
+        "calories": 110,
+        "protein": 1,
+        "carbs": 27,
+        "fat": 0.2,
+        "saturatedFat": 0,
+        "cholesterol": 0,
+        "fiber": 1.5,
+        "sugar": 22,
+        "sodium": 20,
+        "potassium": 250,
+        "calcium": 25,
+        "iron": 1,
+        "vitaminA": 0,
+        "vitaminC": 0,
+        "unit": "ml",
+        "sources": [
+          {
+            "name": "Ingredient category estimate",
+            "url": "https://www.fao.org/infoods/infoods/tables-and-databases/vietnam/en/",
+            "matchedName": "Tamarind concentrate diluted for cooking",
+            "confidence": "category",
+            "note": "Nước cốt me concentration varies; values are estimates for a cooking concentrate."
+          },
+          {
+            "name": "Vietnamese Food Composition Table 2007",
+            "url": "https://www.fao.org/infoods/infoods/tables-and-databases/vietnam/en/",
+            "matchedName": "Nước cốt me",
+            "confidence": "similar",
+            "note": "Vietnam-specific food composition reference listed by FAO/INFOODS; used for local ingredient context and cross-checking."
+          }
+        ]
+      }
+    },
+    {
+      "id": "Bot chien gion-shared-20260611-v2",
+      "name": "Bột chiên giòn",
+      "category": "Tinh bột",
+      "shelfLife": "very_long",
+      "preservationCondition": "cool_dry",
+      "baseUnit": "g",
+      "inventoryUnits": [
+        "g",
+        "kg"
+      ],
+      "recipeUnitConversions": {
+        "g": 1,
+        "kg": 1000
+      },
+      "priceEstimate": {
+        "min": 30000,
+        "max": 70000,
+        "amount": 1,
+        "unit": "kg",
+        "currency": "VND"
+      },
+      "nutrition": {
+        "amount": 100,
+        "calories": 360,
+        "protein": 7,
+        "carbs": 78,
+        "fat": 2,
+        "saturatedFat": 0.5,
+        "cholesterol": 0,
+        "fiber": 2,
+        "sugar": 3,
+        "sodium": 900,
+        "potassium": 110,
+        "calcium": 30,
+        "iron": 2,
+        "vitaminA": 0,
+        "vitaminC": 0,
+        "unit": "g",
+        "sources": [
+          {
+            "name": "Ingredient category estimate",
+            "url": "https://www.fao.org/infoods/infoods/tables-and-databases/vietnam/en/",
+            "matchedName": "Crispy frying flour mix",
+            "confidence": "category",
+            "note": "Packaged frying mixes vary by brand; sodium is estimated higher than plain flour."
+          },
+          {
+            "name": "Vietnamese Food Composition Table 2007",
+            "url": "https://www.fao.org/infoods/infoods/tables-and-databases/vietnam/en/",
+            "matchedName": "Bột chiên giòn",
+            "confidence": "similar",
+            "note": "Vietnam-specific food composition reference listed by FAO/INFOODS; used for local ingredient context and cross-checking."
+          }
+        ]
+      }
+    },
+    {
+      "id": "Kim chi-shared-20260611-v2",
+      "name": "Kim chi",
+      "category": "Rau củ",
+      "shelfLife": "medium",
+      "preservationCondition": "fridge",
+      "baseUnit": "g",
+      "inventoryUnits": [
+        "g",
+        "kg"
+      ],
+      "recipeUnitConversions": {
+        "g": 1,
+        "kg": 1000
+      },
+      "priceEstimate": {
+        "min": 70000,
+        "max": 150000,
+        "amount": 1,
+        "unit": "kg",
+        "currency": "VND"
+      },
+      "nutrition": {
+        "amount": 100,
+        "calories": 21,
+        "protein": 1.7,
+        "carbs": 4,
+        "fat": 0.8,
+        "saturatedFat": 0,
+        "cholesterol": 0,
+        "fiber": 1.6,
+        "sugar": 1.1,
+        "sodium": 498,
+        "potassium": 151,
+        "calcium": 33,
+        "iron": 1,
+        "vitaminA": 5,
+        "vitaminC": 18,
+        "unit": "g",
+        "sources": [
+          {
+            "name": "USDA FoodData Central",
+            "url": "https://fdc.nal.usda.gov/fdc-app.html#/food-search?query=Kimchi%2C%20cabbage",
+            "matchedName": "Kimchi, cabbage",
+            "confidence": "exact",
+            "note": "Nutrient values are from USDA FoodData Central or a conservative category estimate per 100 g/ml basis; liquid units are displayed as the app serving basis when appropriate."
+          },
+          {
+            "name": "Vietnamese Food Composition Table 2007",
+            "url": "https://www.fao.org/infoods/infoods/tables-and-databases/vietnam/en/",
+            "matchedName": "Kim chi",
+            "confidence": "similar",
+            "note": "Vietnam-specific food composition reference listed by FAO/INFOODS; used for local ingredient context and cross-checking."
+          }
+        ]
+      }
     }
   ],
   "dishes": [
@@ -27330,6 +28772,5228 @@
       "tags": [
         "Món phụ",
         "Xào"
+      ]
+    },
+    {
+      "id": "Mi xao bo-shared-20260611-v2",
+      "ingredients": [
+        {
+          "dishesId": "Mi xao bo-shared-20260611-v2",
+          "ingredientId": "Mi trung-shared-20260611-v2",
+          "amount": "180",
+          "unit": "g",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Mi xao bo-shared-20260611-v2",
+          "ingredientId": "Thịt bò thănDyzpaj8qvS",
+          "amount": "180",
+          "unit": "g",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Mi xao bo-shared-20260611-v2",
+          "ingredientId": "Hành tâyPsERexf4zd",
+          "amount": "120",
+          "unit": "g",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Mi xao bo-shared-20260611-v2",
+          "ingredientId": "Rau cải thìaTCzhEhy6rE",
+          "amount": "150",
+          "unit": "g",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Mi xao bo-shared-20260611-v2",
+          "ingredientId": "Tỏi3NILO1jEd0",
+          "amount": "3",
+          "unit": "nhánh",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Mi xao bo-shared-20260611-v2",
+          "ingredientId": "Dau hao-shared-20260611-v2",
+          "amount": "1",
+          "unit": "thìa",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Mi xao bo-shared-20260611-v2",
+          "ingredientId": "Dầu ănb13XIYIrDh",
+          "amount": "15",
+          "unit": "ml",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        }
+      ],
+      "steps": [
+        {
+          "id": "Mi xao bo-shared-20260611-v2-step-1",
+          "content": "Luộc mì vừa mềm rồi xả ráo.",
+          "order": 1,
+          "isDone": false,
+          "required": true
+        },
+        {
+          "id": "Mi xao bo-shared-20260611-v2-step-2",
+          "content": "Ướp bò với dầu hào và tỏi băm.",
+          "order": 2,
+          "isDone": false,
+          "required": true
+        },
+        {
+          "id": "Mi xao bo-shared-20260611-v2-step-3",
+          "content": "Xào bò nhanh lửa lớn, để riêng.",
+          "order": 3,
+          "isDone": false,
+          "required": true
+        },
+        {
+          "id": "Mi xao bo-shared-20260611-v2-step-4",
+          "content": "Xào rau và mì, cho bò trở lại đảo đều.",
+          "order": 4,
+          "isDone": false,
+          "required": true
+        }
+      ],
+      "name": "Mì xào bò",
+      "includeDishes": [],
+      "note": "",
+      "isCompleted": true,
+      "duration": {
+        "unfreeze": null,
+        "prepare": 12,
+        "cooking": 10,
+        "serve": 3,
+        "cooldown": null
+      },
+      "baseServings": 2,
+      "tags": [
+        "Món chính",
+        "Xào"
+      ]
+    },
+    {
+      "id": "Mi xao hai san-shared-20260611-v2",
+      "ingredients": [
+        {
+          "dishesId": "Mi xao hai san-shared-20260611-v2",
+          "ingredientId": "Mi trung-shared-20260611-v2",
+          "amount": "180",
+          "unit": "g",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Mi xao hai san-shared-20260611-v2",
+          "ingredientId": "Tôm sú4vHhSAcJTQ",
+          "amount": "120",
+          "unit": "g",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Mi xao hai san-shared-20260611-v2",
+          "ingredientId": "Mực ốngLunhJeJvsh",
+          "amount": "150",
+          "unit": "g",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Mi xao hai san-shared-20260611-v2",
+          "ingredientId": "Rau cải thìaTCzhEhy6rE",
+          "amount": "150",
+          "unit": "g",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Mi xao hai san-shared-20260611-v2",
+          "ingredientId": "Hành tâyPsERexf4zd",
+          "amount": "100",
+          "unit": "g",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Mi xao hai san-shared-20260611-v2",
+          "ingredientId": "Dau hao-shared-20260611-v2",
+          "amount": "1",
+          "unit": "thìa",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Mi xao hai san-shared-20260611-v2",
+          "ingredientId": "Dầu ănb13XIYIrDh",
+          "amount": "15",
+          "unit": "ml",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        }
+      ],
+      "steps": [
+        {
+          "id": "Mi xao hai san-shared-20260611-v2-step-1",
+          "content": "Luộc mì, xả ráo và trộn chút dầu.",
+          "order": 1,
+          "isDone": false,
+          "required": true
+        },
+        {
+          "id": "Mi xao hai san-shared-20260611-v2-step-2",
+          "content": "Sơ chế tôm, mực và rau.",
+          "order": 2,
+          "isDone": false,
+          "required": true
+        },
+        {
+          "id": "Mi xao hai san-shared-20260611-v2-step-3",
+          "content": "Xào hải sản đến khi vừa chín.",
+          "order": 3,
+          "isDone": false,
+          "required": true
+        },
+        {
+          "id": "Mi xao hai san-shared-20260611-v2-step-4",
+          "content": "Cho mì và rau vào đảo đều, nêm dầu hào.",
+          "order": 4,
+          "isDone": false,
+          "required": true
+        }
+      ],
+      "name": "Mì xào hải sản",
+      "includeDishes": [],
+      "note": "",
+      "isCompleted": true,
+      "duration": {
+        "unfreeze": null,
+        "prepare": 15,
+        "cooking": 12,
+        "serve": 3,
+        "cooldown": null
+      },
+      "baseServings": 2,
+      "tags": [
+        "Món chính",
+        "Xào"
+      ]
+    },
+    {
+      "id": "Nui xao bo-shared-20260611-v2",
+      "ingredients": [
+        {
+          "dishesId": "Nui xao bo-shared-20260611-v2",
+          "ingredientId": "Nui-shared-20260611-v2",
+          "amount": "180",
+          "unit": "g",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Nui xao bo-shared-20260611-v2",
+          "ingredientId": "Thịt bò thănDyzpaj8qvS",
+          "amount": "180",
+          "unit": "g",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Nui xao bo-shared-20260611-v2",
+          "ingredientId": "Cà chuaZP4MdEXiO_",
+          "amount": "150",
+          "unit": "g",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Nui xao bo-shared-20260611-v2",
+          "ingredientId": "Hành tâyPsERexf4zd",
+          "amount": "120",
+          "unit": "g",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Nui xao bo-shared-20260611-v2",
+          "ingredientId": "Tỏi3NILO1jEd0",
+          "amount": "3",
+          "unit": "nhánh",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Nui xao bo-shared-20260611-v2",
+          "ingredientId": "Tương càiHkFzpVbMI",
+          "amount": "2",
+          "unit": "thìa",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Nui xao bo-shared-20260611-v2",
+          "ingredientId": "Dầu ănb13XIYIrDh",
+          "amount": "15",
+          "unit": "ml",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        }
+      ],
+      "steps": [
+        {
+          "id": "Nui xao bo-shared-20260611-v2-step-1",
+          "content": "Luộc nui vừa chín tới rồi để ráo.",
+          "order": 1,
+          "isDone": false,
+          "required": true
+        },
+        {
+          "id": "Nui xao bo-shared-20260611-v2-step-2",
+          "content": "Thái bò mỏng và ướp nhẹ.",
+          "order": 2,
+          "isDone": false,
+          "required": true
+        },
+        {
+          "id": "Nui xao bo-shared-20260611-v2-step-3",
+          "content": "Xào bò nhanh với tỏi, để riêng.",
+          "order": 3,
+          "isDone": false,
+          "required": true
+        },
+        {
+          "id": "Nui xao bo-shared-20260611-v2-step-4",
+          "content": "Xào cà chua, hành tây và nui rồi trộn bò vào.",
+          "order": 4,
+          "isDone": false,
+          "required": true
+        }
+      ],
+      "name": "Nui xào bò",
+      "includeDishes": [],
+      "note": "",
+      "isCompleted": true,
+      "duration": {
+        "unfreeze": null,
+        "prepare": 12,
+        "cooking": 12,
+        "serve": 3,
+        "cooldown": null
+      },
+      "baseServings": 2,
+      "tags": [
+        "Món chính",
+        "Xào"
+      ]
+    },
+    {
+      "id": "Nui nau suon-shared-20260611-v2",
+      "ingredients": [
+        {
+          "dishesId": "Nui nau suon-shared-20260611-v2",
+          "ingredientId": "Nui-shared-20260611-v2",
+          "amount": "160",
+          "unit": "g",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Nui nau suon-shared-20260611-v2",
+          "ingredientId": "Sườn heo nonlic0JR5JmA",
+          "amount": "350",
+          "unit": "g",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Nui nau suon-shared-20260611-v2",
+          "ingredientId": "Cà rốtGB2tp6fqpw",
+          "amount": "150",
+          "unit": "g",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Nui nau suon-shared-20260611-v2",
+          "ingredientId": "Khoai tâylAyMsTv486",
+          "amount": "200",
+          "unit": "g",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Nui nau suon-shared-20260611-v2",
+          "ingredientId": "Nước9jnS_eO8Cv",
+          "amount": "1200",
+          "unit": "ml",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Nui nau suon-shared-20260611-v2",
+          "ingredientId": "Hat nem-shared-20260611",
+          "amount": "1",
+          "unit": "thìa",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Nui nau suon-shared-20260611-v2",
+          "ingredientId": "Hành láZtNmZbNswb",
+          "amount": "15",
+          "unit": "g",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        }
+      ],
+      "steps": [
+        {
+          "id": "Nui nau suon-shared-20260611-v2-step-1",
+          "content": "Chần sườn rồi rửa sạch.",
+          "order": 1,
+          "isDone": false,
+          "required": true
+        },
+        {
+          "id": "Nui nau suon-shared-20260611-v2-step-2",
+          "content": "Hầm sườn với nước đến khi mềm.",
+          "order": 2,
+          "isDone": false,
+          "required": true
+        },
+        {
+          "id": "Nui nau suon-shared-20260611-v2-step-3",
+          "content": "Thêm cà rốt, khoai tây và nui.",
+          "order": 3,
+          "isDone": false,
+          "required": true
+        },
+        {
+          "id": "Nui nau suon-shared-20260611-v2-step-4",
+          "content": "Nêm hạt nêm, rắc hành lá và dùng nóng.",
+          "order": 4,
+          "isDone": false,
+          "required": true
+        }
+      ],
+      "name": "Nui nấu sườn",
+      "includeDishes": [],
+      "note": "",
+      "isCompleted": true,
+      "duration": {
+        "unfreeze": null,
+        "prepare": 15,
+        "cooking": 40,
+        "serve": 4,
+        "cooldown": null
+      },
+      "baseServings": 2,
+      "tags": [
+        "Canh",
+        "Món chính"
+      ]
+    },
+    {
+      "id": "Banh canh cha ca-shared-20260611-v2",
+      "ingredients": [
+        {
+          "dishesId": "Banh canh cha ca-shared-20260611-v2",
+          "ingredientId": "Banh canh-shared-20260611-v2",
+          "amount": "350",
+          "unit": "g",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Banh canh cha ca-shared-20260611-v2",
+          "ingredientId": "Cha ca-shared-20260611-v2",
+          "amount": "200",
+          "unit": "g",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Banh canh cha ca-shared-20260611-v2",
+          "ingredientId": "Nước9jnS_eO8Cv",
+          "amount": "1000",
+          "unit": "ml",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Banh canh cha ca-shared-20260611-v2",
+          "ingredientId": "Hành láZtNmZbNswb",
+          "amount": "20",
+          "unit": "g",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Banh canh cha ca-shared-20260611-v2",
+          "ingredientId": "Nước mắm9koIj5Fz3a",
+          "amount": "1",
+          "unit": "thìa",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Banh canh cha ca-shared-20260611-v2",
+          "ingredientId": "Hat nem-shared-20260611",
+          "amount": "1",
+          "unit": "thìa",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Banh canh cha ca-shared-20260611-v2",
+          "ingredientId": "Hạt tiêu4eEOesKltQ",
+          "amount": "1/4",
+          "unit": "thìa",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        }
+      ],
+      "steps": [
+        {
+          "id": "Banh canh cha ca-shared-20260611-v2-step-1",
+          "content": "Đun nước dùng và nêm hạt nêm.",
+          "order": 1,
+          "isDone": false,
+          "required": true
+        },
+        {
+          "id": "Banh canh cha ca-shared-20260611-v2-step-2",
+          "content": "Cho chả cá vào nấu nóng.",
+          "order": 2,
+          "isDone": false,
+          "required": true
+        },
+        {
+          "id": "Banh canh cha ca-shared-20260611-v2-step-3",
+          "content": "Trụng bánh canh rồi cho vào tô.",
+          "order": 3,
+          "isDone": false,
+          "required": true
+        },
+        {
+          "id": "Banh canh cha ca-shared-20260611-v2-step-4",
+          "content": "Chan nước dùng, thêm hành lá và tiêu.",
+          "order": 4,
+          "isDone": false,
+          "required": true
+        }
+      ],
+      "name": "Bánh canh chả cá",
+      "includeDishes": [],
+      "note": "",
+      "isCompleted": true,
+      "duration": {
+        "unfreeze": null,
+        "prepare": 12,
+        "cooking": 20,
+        "serve": 4,
+        "cooldown": null
+      },
+      "baseServings": 2,
+      "tags": [
+        "Món chính"
+      ]
+    },
+    {
+      "id": "Hu tieu tom thit-shared-20260611-v2",
+      "ingredients": [
+        {
+          "dishesId": "Hu tieu tom thit-shared-20260611-v2",
+          "ingredientId": "Hu tieu kho-shared-20260611-v2",
+          "amount": "220",
+          "unit": "g",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Hu tieu tom thit-shared-20260611-v2",
+          "ingredientId": "Tôm sú4vHhSAcJTQ",
+          "amount": "180",
+          "unit": "g",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Hu tieu tom thit-shared-20260611-v2",
+          "ingredientId": "Thịt heo nạc vaiVXHDweEHeG",
+          "amount": "180",
+          "unit": "g",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Hu tieu tom thit-shared-20260611-v2",
+          "ingredientId": "Giá đỗLaF0woHgwA",
+          "amount": "150",
+          "unit": "g",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Hu tieu tom thit-shared-20260611-v2",
+          "ingredientId": "He-shared-20260611-v2",
+          "amount": "30",
+          "unit": "g",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Hu tieu tom thit-shared-20260611-v2",
+          "ingredientId": "Nước9jnS_eO8Cv",
+          "amount": "1200",
+          "unit": "ml",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Hu tieu tom thit-shared-20260611-v2",
+          "ingredientId": "Nước mắm9koIj5Fz3a",
+          "amount": "1",
+          "unit": "thìa",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        }
+      ],
+      "steps": [
+        {
+          "id": "Hu tieu tom thit-shared-20260611-v2-step-1",
+          "content": "Luộc thịt, tôm và giữ nước dùng.",
+          "order": 1,
+          "isDone": false,
+          "required": true
+        },
+        {
+          "id": "Hu tieu tom thit-shared-20260611-v2-step-2",
+          "content": "Trụng hủ tiếu khô đến khi mềm.",
+          "order": 2,
+          "isDone": false,
+          "required": true
+        },
+        {
+          "id": "Hu tieu tom thit-shared-20260611-v2-step-3",
+          "content": "Nêm nước dùng với nước mắm.",
+          "order": 3,
+          "isDone": false,
+          "required": true
+        },
+        {
+          "id": "Hu tieu tom thit-shared-20260611-v2-step-4",
+          "content": "Xếp hủ tiếu, tôm, thịt, giá và hẹ vào tô rồi chan nước.",
+          "order": 4,
+          "isDone": false,
+          "required": true
+        }
+      ],
+      "name": "Hủ tiếu tôm thịt",
+      "includeDishes": [],
+      "note": "",
+      "isCompleted": true,
+      "duration": {
+        "unfreeze": null,
+        "prepare": 18,
+        "cooking": 30,
+        "serve": 4,
+        "cooldown": null
+      },
+      "baseServings": 2,
+      "tags": [
+        "Món chính"
+      ]
+    },
+    {
+      "id": "Mien ga-shared-20260611-v2",
+      "ingredients": [
+        {
+          "dishesId": "Mien ga-shared-20260611-v2",
+          "ingredientId": "MiếnObDS-xNaoB",
+          "amount": "180",
+          "unit": "g",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Mien ga-shared-20260611-v2",
+          "ingredientId": "Thịt gà đùi0vjCseh7j1",
+          "amount": "350",
+          "unit": "g",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Mien ga-shared-20260611-v2",
+          "ingredientId": "Nấm hươngF3SfMXRu9p",
+          "amount": "30",
+          "unit": "g",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Mien ga-shared-20260611-v2",
+          "ingredientId": "Mộc nhĩzQ75NeGAeu",
+          "amount": "20",
+          "unit": "g",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Mien ga-shared-20260611-v2",
+          "ingredientId": "Nước9jnS_eO8Cv",
+          "amount": "1200",
+          "unit": "ml",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Mien ga-shared-20260611-v2",
+          "ingredientId": "Hành láZtNmZbNswb",
+          "amount": "20",
+          "unit": "g",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Mien ga-shared-20260611-v2",
+          "ingredientId": "Nước mắm9koIj5Fz3a",
+          "amount": "1",
+          "unit": "thìa",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        }
+      ],
+      "steps": [
+        {
+          "id": "Mien ga-shared-20260611-v2-step-1",
+          "content": "Luộc gà chín và xé thịt.",
+          "order": 1,
+          "isDone": false,
+          "required": true
+        },
+        {
+          "id": "Mien ga-shared-20260611-v2-step-2",
+          "content": "Ngâm nấm hương, mộc nhĩ rồi thái nhỏ.",
+          "order": 2,
+          "isDone": false,
+          "required": true
+        },
+        {
+          "id": "Mien ga-shared-20260611-v2-step-3",
+          "content": "Nấu nước dùng với nấm và nêm vừa ăn.",
+          "order": 3,
+          "isDone": false,
+          "required": true
+        },
+        {
+          "id": "Mien ga-shared-20260611-v2-step-4",
+          "content": "Trụng miến, cho gà vào tô và chan nước dùng.",
+          "order": 4,
+          "isDone": false,
+          "required": true
+        }
+      ],
+      "name": "Miến gà",
+      "includeDishes": [],
+      "note": "",
+      "isCompleted": true,
+      "duration": {
+        "unfreeze": null,
+        "prepare": 15,
+        "cooking": 35,
+        "serve": 4,
+        "cooldown": null
+      },
+      "baseServings": 2,
+      "tags": [
+        "Món chính"
+      ]
+    },
+    {
+      "id": "Com chien trung-shared-20260611-v2",
+      "ingredients": [
+        {
+          "dishesId": "Com chien trung-shared-20260611-v2",
+          "ingredientId": "Gạo tẻC_vFfi5R77",
+          "amount": "180",
+          "unit": "g",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Com chien trung-shared-20260611-v2",
+          "ingredientId": "Trứng gà72vN9igVwa",
+          "amount": "2",
+          "unit": "quả",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Com chien trung-shared-20260611-v2",
+          "ingredientId": "Hành láZtNmZbNswb",
+          "amount": "20",
+          "unit": "g",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Com chien trung-shared-20260611-v2",
+          "ingredientId": "Cà rốtGB2tp6fqpw",
+          "amount": "80",
+          "unit": "g",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Com chien trung-shared-20260611-v2",
+          "ingredientId": "Dầu ănb13XIYIrDh",
+          "amount": "20",
+          "unit": "ml",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Com chien trung-shared-20260611-v2",
+          "ingredientId": "Xì dầuJhjF6UAtE7",
+          "amount": "1",
+          "unit": "thìa",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        }
+      ],
+      "steps": [
+        {
+          "id": "Com chien trung-shared-20260611-v2-step-1",
+          "content": "Nấu hoặc dùng cơm nguội tơi hạt.",
+          "order": 1,
+          "isDone": false,
+          "required": true
+        },
+        {
+          "id": "Com chien trung-shared-20260611-v2-step-2",
+          "content": "Đánh trứng và thái nhỏ cà rốt, hành lá.",
+          "order": 2,
+          "isDone": false,
+          "required": true
+        },
+        {
+          "id": "Com chien trung-shared-20260611-v2-step-3",
+          "content": "Chiên trứng rồi cho cơm vào đảo đều.",
+          "order": 3,
+          "isDone": false,
+          "required": true
+        },
+        {
+          "id": "Com chien trung-shared-20260611-v2-step-4",
+          "content": "Nêm xì dầu, thêm cà rốt và hành lá.",
+          "order": 4,
+          "isDone": false,
+          "required": true
+        }
+      ],
+      "name": "Cơm chiên trứng",
+      "includeDishes": [],
+      "note": "",
+      "isCompleted": true,
+      "duration": {
+        "unfreeze": null,
+        "prepare": 8,
+        "cooking": 10,
+        "serve": 3,
+        "cooldown": null
+      },
+      "baseServings": 2,
+      "tags": [
+        "Món chính",
+        "Chiên"
+      ]
+    },
+    {
+      "id": "Com chien hai san-shared-20260611-v2",
+      "ingredients": [
+        {
+          "dishesId": "Com chien hai san-shared-20260611-v2",
+          "ingredientId": "Gạo tẻC_vFfi5R77",
+          "amount": "180",
+          "unit": "g",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Com chien hai san-shared-20260611-v2",
+          "ingredientId": "Tôm sú4vHhSAcJTQ",
+          "amount": "120",
+          "unit": "g",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Com chien hai san-shared-20260611-v2",
+          "ingredientId": "Mực ốngLunhJeJvsh",
+          "amount": "120",
+          "unit": "g",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Com chien hai san-shared-20260611-v2",
+          "ingredientId": "Trứng gà72vN9igVwa",
+          "amount": "1",
+          "unit": "quả",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Com chien hai san-shared-20260611-v2",
+          "ingredientId": "Dau Ha Lan-shared-20260611",
+          "amount": "80",
+          "unit": "g",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Com chien hai san-shared-20260611-v2",
+          "ingredientId": "Cà rốtGB2tp6fqpw",
+          "amount": "80",
+          "unit": "g",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Com chien hai san-shared-20260611-v2",
+          "ingredientId": "Dầu ănb13XIYIrDh",
+          "amount": "20",
+          "unit": "ml",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        }
+      ],
+      "steps": [
+        {
+          "id": "Com chien hai san-shared-20260611-v2-step-1",
+          "content": "Chuẩn bị cơm nguội tơi hạt.",
+          "order": 1,
+          "isDone": false,
+          "required": true
+        },
+        {
+          "id": "Com chien hai san-shared-20260611-v2-step-2",
+          "content": "Sơ chế tôm, mực và rau củ.",
+          "order": 2,
+          "isDone": false,
+          "required": true
+        },
+        {
+          "id": "Com chien hai san-shared-20260611-v2-step-3",
+          "content": "Xào hải sản chín tới, để riêng.",
+          "order": 3,
+          "isDone": false,
+          "required": true
+        },
+        {
+          "id": "Com chien hai san-shared-20260611-v2-step-4",
+          "content": "Chiên cơm với trứng, rau củ rồi trộn hải sản vào.",
+          "order": 4,
+          "isDone": false,
+          "required": true
+        }
+      ],
+      "name": "Cơm chiên hải sản",
+      "includeDishes": [],
+      "note": "",
+      "isCompleted": true,
+      "duration": {
+        "unfreeze": null,
+        "prepare": 12,
+        "cooking": 12,
+        "serve": 3,
+        "cooldown": null
+      },
+      "baseServings": 2,
+      "tags": [
+        "Món chính",
+        "Chiên"
+      ]
+    },
+    {
+      "id": "Ca hoi ap chao-shared-20260611-v2",
+      "ingredients": [
+        {
+          "dishesId": "Ca hoi ap chao-shared-20260611-v2",
+          "ingredientId": "Ca hoi-shared-20260611-v2",
+          "amount": "300",
+          "unit": "g",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Ca hoi ap chao-shared-20260611-v2",
+          "ingredientId": "Bơ lạtbK-8VT5e-z",
+          "amount": "20",
+          "unit": "g",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Ca hoi ap chao-shared-20260611-v2",
+          "ingredientId": "Chanh2c6lpZSaM4",
+          "amount": "10",
+          "unit": "ml",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Ca hoi ap chao-shared-20260611-v2",
+          "ingredientId": "Tỏi3NILO1jEd0",
+          "amount": "2",
+          "unit": "nhánh",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Ca hoi ap chao-shared-20260611-v2",
+          "ingredientId": "Muối trắngrOsVaI3tKv",
+          "amount": "1/4",
+          "unit": "thìa",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Ca hoi ap chao-shared-20260611-v2",
+          "ingredientId": "Hạt tiêu4eEOesKltQ",
+          "amount": "1/4",
+          "unit": "thìa",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        }
+      ],
+      "steps": [
+        {
+          "id": "Ca hoi ap chao-shared-20260611-v2-step-1",
+          "content": "Thấm khô cá hồi và ướp muối tiêu.",
+          "order": 1,
+          "isDone": false,
+          "required": true
+        },
+        {
+          "id": "Ca hoi ap chao-shared-20260611-v2-step-2",
+          "content": "Làm nóng chảo, áp mặt cá đến khi vàng.",
+          "order": 2,
+          "isDone": false,
+          "required": true
+        },
+        {
+          "id": "Ca hoi ap chao-shared-20260611-v2-step-3",
+          "content": "Thêm bơ và tỏi, rưới bơ thơm lên cá.",
+          "order": 3,
+          "isDone": false,
+          "required": true
+        },
+        {
+          "id": "Ca hoi ap chao-shared-20260611-v2-step-4",
+          "content": "Vắt chanh nhẹ trước khi dùng.",
+          "order": 4,
+          "isDone": false,
+          "required": true
+        }
+      ],
+      "name": "Cá hồi áp chảo",
+      "includeDishes": [],
+      "note": "",
+      "isCompleted": true,
+      "duration": {
+        "unfreeze": null,
+        "prepare": 8,
+        "cooking": 10,
+        "serve": 3,
+        "cooldown": null
+      },
+      "baseServings": 2,
+      "tags": [
+        "Món chính"
+      ]
+    },
+    {
+      "id": "Ca hoi sot bo chanh-shared-20260611-v2",
+      "ingredients": [
+        {
+          "dishesId": "Ca hoi sot bo chanh-shared-20260611-v2",
+          "ingredientId": "Ca hoi-shared-20260611-v2",
+          "amount": "300",
+          "unit": "g",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Ca hoi sot bo chanh-shared-20260611-v2",
+          "ingredientId": "Bơ lạtbK-8VT5e-z",
+          "amount": "25",
+          "unit": "g",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Ca hoi sot bo chanh-shared-20260611-v2",
+          "ingredientId": "Chanh2c6lpZSaM4",
+          "amount": "20",
+          "unit": "ml",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Ca hoi sot bo chanh-shared-20260611-v2",
+          "ingredientId": "Tỏi3NILO1jEd0",
+          "amount": "2",
+          "unit": "nhánh",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Ca hoi sot bo chanh-shared-20260611-v2",
+          "ingredientId": "Mật ongOr177EkX2-",
+          "amount": "1/2",
+          "unit": "thìa",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Ca hoi sot bo chanh-shared-20260611-v2",
+          "ingredientId": "Muối trắngrOsVaI3tKv",
+          "amount": "1/4",
+          "unit": "thìa",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        }
+      ],
+      "steps": [
+        {
+          "id": "Ca hoi sot bo chanh-shared-20260611-v2-step-1",
+          "content": "Áp chảo cá hồi vừa chín.",
+          "order": 1,
+          "isDone": false,
+          "required": true
+        },
+        {
+          "id": "Ca hoi sot bo chanh-shared-20260611-v2-step-2",
+          "content": "Làm sốt với bơ, tỏi, chanh và mật ong.",
+          "order": 2,
+          "isDone": false,
+          "required": true
+        },
+        {
+          "id": "Ca hoi sot bo chanh-shared-20260611-v2-step-3",
+          "content": "Cho cá vào áo đều sốt.",
+          "order": 3,
+          "isDone": false,
+          "required": true
+        },
+        {
+          "id": "Ca hoi sot bo chanh-shared-20260611-v2-step-4",
+          "content": "Dùng nóng với rau hoặc cơm.",
+          "order": 4,
+          "isDone": false,
+          "required": true
+        }
+      ],
+      "name": "Cá hồi sốt bơ chanh",
+      "includeDishes": [],
+      "note": "",
+      "isCompleted": true,
+      "duration": {
+        "unfreeze": null,
+        "prepare": 8,
+        "cooking": 12,
+        "serve": 3,
+        "cooldown": null
+      },
+      "baseServings": 2,
+      "tags": [
+        "Món chính"
+      ]
+    },
+    {
+      "id": "Ca ngu kho thom-shared-20260611-v2",
+      "ingredients": [
+        {
+          "dishesId": "Ca ngu kho thom-shared-20260611-v2",
+          "ingredientId": "Ca ngu-shared-20260611-v2",
+          "amount": "350",
+          "unit": "g",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Ca ngu kho thom-shared-20260611-v2",
+          "ingredientId": "DứaGu02Q4sahX",
+          "amount": "180",
+          "unit": "g",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Ca ngu kho thom-shared-20260611-v2",
+          "ingredientId": "Nước màumi1ObkFY7D",
+          "amount": "1",
+          "unit": "thìa",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Ca ngu kho thom-shared-20260611-v2",
+          "ingredientId": "Nước mắm9koIj5Fz3a",
+          "amount": "2",
+          "unit": "thìa",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Ca ngu kho thom-shared-20260611-v2",
+          "ingredientId": "Hành tímYvb82U-VOH",
+          "amount": "3",
+          "unit": "nhánh",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Ca ngu kho thom-shared-20260611-v2",
+          "ingredientId": "Ớt đỏ cay4cIqrjz_8U",
+          "amount": "10",
+          "unit": "g",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Ca ngu kho thom-shared-20260611-v2",
+          "ingredientId": "Nước9jnS_eO8Cv",
+          "amount": "150",
+          "unit": "ml",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        }
+      ],
+      "steps": [
+        {
+          "id": "Ca ngu kho thom-shared-20260611-v2-step-1",
+          "content": "Ướp cá ngừ với nước mắm, hành tím và nước màu.",
+          "order": 1,
+          "isDone": false,
+          "required": true
+        },
+        {
+          "id": "Ca ngu kho thom-shared-20260611-v2-step-2",
+          "content": "Xào dứa cho thơm nhẹ.",
+          "order": 2,
+          "isDone": false,
+          "required": true
+        },
+        {
+          "id": "Ca ngu kho thom-shared-20260611-v2-step-3",
+          "content": "Cho cá vào kho cùng dứa và ít nước.",
+          "order": 3,
+          "isDone": false,
+          "required": true
+        },
+        {
+          "id": "Ca ngu kho thom-shared-20260611-v2-step-4",
+          "content": "Kho lửa nhỏ đến khi cá thấm vị.",
+          "order": 4,
+          "isDone": false,
+          "required": true
+        }
+      ],
+      "name": "Cá ngừ kho thơm",
+      "includeDishes": [],
+      "note": "",
+      "isCompleted": true,
+      "duration": {
+        "unfreeze": null,
+        "prepare": 12,
+        "cooking": 25,
+        "serve": 3,
+        "cooldown": null
+      },
+      "baseServings": 2,
+      "tags": [
+        "Món chính"
+      ]
+    },
+    {
+      "id": "Ngao hap sa-shared-20260611-v2",
+      "ingredients": [
+        {
+          "dishesId": "Ngao hap sa-shared-20260611-v2",
+          "ingredientId": "Ngao-shared-20260611-v2",
+          "amount": "700",
+          "unit": "g",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Ngao hap sa-shared-20260611-v2",
+          "ingredientId": "SảN-nr3-BboO",
+          "amount": "4",
+          "unit": "nhánh",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Ngao hap sa-shared-20260611-v2",
+          "ingredientId": "Gừngc-VE7hkDli",
+          "amount": "10",
+          "unit": "g",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Ngao hap sa-shared-20260611-v2",
+          "ingredientId": "Ớt đỏ cay4cIqrjz_8U",
+          "amount": "5",
+          "unit": "g",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Ngao hap sa-shared-20260611-v2",
+          "ingredientId": "Nước9jnS_eO8Cv",
+          "amount": "100",
+          "unit": "ml",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        }
+      ],
+      "steps": [
+        {
+          "id": "Ngao hap sa-shared-20260611-v2-step-1",
+          "content": "Ngâm ngao nhả cát và rửa sạch.",
+          "order": 1,
+          "isDone": false,
+          "required": true
+        },
+        {
+          "id": "Ngao hap sa-shared-20260611-v2-step-2",
+          "content": "Đập dập sả, thái gừng và ớt.",
+          "order": 2,
+          "isDone": false,
+          "required": true
+        },
+        {
+          "id": "Ngao hap sa-shared-20260611-v2-step-3",
+          "content": "Cho ngao, sả, gừng và ít nước vào nồi.",
+          "order": 3,
+          "isDone": false,
+          "required": true
+        },
+        {
+          "id": "Ngao hap sa-shared-20260611-v2-step-4",
+          "content": "Hấp đến khi ngao mở miệng và dùng nóng.",
+          "order": 4,
+          "isDone": false,
+          "required": true
+        }
+      ],
+      "name": "Ngao hấp sả",
+      "includeDishes": [],
+      "note": "",
+      "isCompleted": true,
+      "duration": {
+        "unfreeze": null,
+        "prepare": 10,
+        "cooking": 10,
+        "serve": 3,
+        "cooldown": null
+      },
+      "baseServings": 2,
+      "tags": [
+        "Món chính",
+        "Hấp"
+      ]
+    },
+    {
+      "id": "Muc chien gion-shared-20260611-v2",
+      "ingredients": [
+        {
+          "dishesId": "Muc chien gion-shared-20260611-v2",
+          "ingredientId": "Mực ốngLunhJeJvsh",
+          "amount": "350",
+          "unit": "g",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Muc chien gion-shared-20260611-v2",
+          "ingredientId": "Bot chien gion-shared-20260611-v2",
+          "amount": "80",
+          "unit": "g",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Muc chien gion-shared-20260611-v2",
+          "ingredientId": "Trứng gà72vN9igVwa",
+          "amount": "1",
+          "unit": "quả",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Muc chien gion-shared-20260611-v2",
+          "ingredientId": "Dầu ănb13XIYIrDh",
+          "amount": "150",
+          "unit": "ml",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Muc chien gion-shared-20260611-v2",
+          "ingredientId": "Muối trắngrOsVaI3tKv",
+          "amount": "1/4",
+          "unit": "thìa",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Muc chien gion-shared-20260611-v2",
+          "ingredientId": "Hạt tiêu4eEOesKltQ",
+          "amount": "1/4",
+          "unit": "thìa",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        }
+      ],
+      "steps": [
+        {
+          "id": "Muc chien gion-shared-20260611-v2-step-1",
+          "content": "Sơ chế mực và cắt khoanh.",
+          "order": 1,
+          "isDone": false,
+          "required": true
+        },
+        {
+          "id": "Muc chien gion-shared-20260611-v2-step-2",
+          "content": "Ướp mực với muối tiêu.",
+          "order": 2,
+          "isDone": false,
+          "required": true
+        },
+        {
+          "id": "Muc chien gion-shared-20260611-v2-step-3",
+          "content": "Nhúng mực qua trứng và bột chiên giòn.",
+          "order": 3,
+          "isDone": false,
+          "required": true
+        },
+        {
+          "id": "Muc chien gion-shared-20260611-v2-step-4",
+          "content": "Chiên vàng, để ráo dầu và dùng nóng.",
+          "order": 4,
+          "isDone": false,
+          "required": true
+        }
+      ],
+      "name": "Mực chiên giòn",
+      "includeDishes": [],
+      "note": "",
+      "isCompleted": true,
+      "duration": {
+        "unfreeze": null,
+        "prepare": 15,
+        "cooking": 12,
+        "serve": 3,
+        "cooldown": null
+      },
+      "baseServings": 2,
+      "tags": [
+        "Món chính",
+        "Chiên"
+      ]
+    },
+    {
+      "id": "Cha ca sot ca chua-shared-20260611-v2",
+      "ingredients": [
+        {
+          "dishesId": "Cha ca sot ca chua-shared-20260611-v2",
+          "ingredientId": "Cha ca-shared-20260611-v2",
+          "amount": "300",
+          "unit": "g",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Cha ca sot ca chua-shared-20260611-v2",
+          "ingredientId": "Cà chuaZP4MdEXiO_",
+          "amount": "250",
+          "unit": "g",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Cha ca sot ca chua-shared-20260611-v2",
+          "ingredientId": "Hành láZtNmZbNswb",
+          "amount": "15",
+          "unit": "g",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Cha ca sot ca chua-shared-20260611-v2",
+          "ingredientId": "Dầu ănb13XIYIrDh",
+          "amount": "15",
+          "unit": "ml",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Cha ca sot ca chua-shared-20260611-v2",
+          "ingredientId": "Nước mắm9koIj5Fz3a",
+          "amount": "1",
+          "unit": "thìa",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Cha ca sot ca chua-shared-20260611-v2",
+          "ingredientId": "Đường trắngDH_YV6vOlJ",
+          "amount": "1/2",
+          "unit": "thìa",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        }
+      ],
+      "steps": [
+        {
+          "id": "Cha ca sot ca chua-shared-20260611-v2-step-1",
+          "content": "Cắt chả cá miếng vừa ăn.",
+          "order": 1,
+          "isDone": false,
+          "required": true
+        },
+        {
+          "id": "Cha ca sot ca chua-shared-20260611-v2-step-2",
+          "content": "Xào cà chua thành sốt.",
+          "order": 2,
+          "isDone": false,
+          "required": true
+        },
+        {
+          "id": "Cha ca sot ca chua-shared-20260611-v2-step-3",
+          "content": "Nêm nước mắm và chút đường.",
+          "order": 3,
+          "isDone": false,
+          "required": true
+        },
+        {
+          "id": "Cha ca sot ca chua-shared-20260611-v2-step-4",
+          "content": "Cho chả cá vào om thấm sốt, thêm hành lá.",
+          "order": 4,
+          "isDone": false,
+          "required": true
+        }
+      ],
+      "name": "Chả cá sốt cà chua",
+      "includeDishes": [],
+      "note": "",
+      "isCompleted": true,
+      "duration": {
+        "unfreeze": null,
+        "prepare": 8,
+        "cooking": 18,
+        "serve": 3,
+        "cooldown": null
+      },
+      "baseServings": 2,
+      "tags": [
+        "Món chính"
+      ]
+    },
+    {
+      "id": "Lap xuong chien-shared-20260611-v2",
+      "ingredients": [
+        {
+          "dishesId": "Lap xuong chien-shared-20260611-v2",
+          "ingredientId": "Lap xuong-shared-20260611-v2",
+          "amount": "200",
+          "unit": "g",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Lap xuong chien-shared-20260611-v2",
+          "ingredientId": "Nước9jnS_eO8Cv",
+          "amount": "80",
+          "unit": "ml",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        }
+      ],
+      "steps": [
+        {
+          "id": "Lap xuong chien-shared-20260611-v2-step-1",
+          "content": "Cắt lạp xưởng thành khúc hoặc để nguyên cây.",
+          "order": 1,
+          "isDone": false,
+          "required": true
+        },
+        {
+          "id": "Lap xuong chien-shared-20260611-v2-step-2",
+          "content": "Cho lạp xưởng và ít nước vào chảo.",
+          "order": 2,
+          "isDone": false,
+          "required": true
+        },
+        {
+          "id": "Lap xuong chien-shared-20260611-v2-step-3",
+          "content": "Đun đến khi nước cạn và lạp xưởng tiết dầu.",
+          "order": 3,
+          "isDone": false,
+          "required": true
+        },
+        {
+          "id": "Lap xuong chien-shared-20260611-v2-step-4",
+          "content": "Áp chảo đến khi vàng thơm rồi thái lát.",
+          "order": 4,
+          "isDone": false,
+          "required": true
+        }
+      ],
+      "name": "Lạp xưởng chiên",
+      "includeDishes": [],
+      "note": "",
+      "isCompleted": true,
+      "duration": {
+        "unfreeze": null,
+        "prepare": 3,
+        "cooking": 10,
+        "serve": 3,
+        "cooldown": null
+      },
+      "baseServings": 2,
+      "tags": [
+        "Món chính",
+        "Chiên"
+      ]
+    },
+    {
+      "id": "Bo xao bong cai xanh-shared-20260611-v2",
+      "ingredients": [
+        {
+          "dishesId": "Bo xao bong cai xanh-shared-20260611-v2",
+          "ingredientId": "Thịt bò thănDyzpaj8qvS",
+          "amount": "220",
+          "unit": "g",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Bo xao bong cai xanh-shared-20260611-v2",
+          "ingredientId": "Bong cai xanh-shared-20260611-v2",
+          "amount": "250",
+          "unit": "g",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Bo xao bong cai xanh-shared-20260611-v2",
+          "ingredientId": "Tỏi3NILO1jEd0",
+          "amount": "3",
+          "unit": "nhánh",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Bo xao bong cai xanh-shared-20260611-v2",
+          "ingredientId": "Dau hao-shared-20260611-v2",
+          "amount": "1",
+          "unit": "thìa",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Bo xao bong cai xanh-shared-20260611-v2",
+          "ingredientId": "Dầu ănb13XIYIrDh",
+          "amount": "15",
+          "unit": "ml",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Bo xao bong cai xanh-shared-20260611-v2",
+          "ingredientId": "Hạt tiêu4eEOesKltQ",
+          "amount": "1/4",
+          "unit": "thìa",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        }
+      ],
+      "steps": [
+        {
+          "id": "Bo xao bong cai xanh-shared-20260611-v2-step-1",
+          "content": "Thái bò mỏng và ướp dầu hào, tiêu.",
+          "order": 1,
+          "isDone": false,
+          "required": true
+        },
+        {
+          "id": "Bo xao bong cai xanh-shared-20260611-v2-step-2",
+          "content": "Tách bông cải, chần sơ cho xanh.",
+          "order": 2,
+          "isDone": false,
+          "required": true
+        },
+        {
+          "id": "Bo xao bong cai xanh-shared-20260611-v2-step-3",
+          "content": "Phi tỏi, xào bò nhanh lửa lớn.",
+          "order": 3,
+          "isDone": false,
+          "required": true
+        },
+        {
+          "id": "Bo xao bong cai xanh-shared-20260611-v2-step-4",
+          "content": "Cho bông cải vào đảo đều và nêm lại.",
+          "order": 4,
+          "isDone": false,
+          "required": true
+        }
+      ],
+      "name": "Bò xào bông cải xanh",
+      "includeDishes": [],
+      "note": "",
+      "isCompleted": true,
+      "duration": {
+        "unfreeze": null,
+        "prepare": 12,
+        "cooking": 10,
+        "serve": 3,
+        "cooldown": null
+      },
+      "baseServings": 2,
+      "tags": [
+        "Món chính",
+        "Xào"
+      ]
+    },
+    {
+      "id": "Ga nuong mat ong-shared-20260611-v2",
+      "ingredients": [
+        {
+          "dishesId": "Ga nuong mat ong-shared-20260611-v2",
+          "ingredientId": "Thịt gà đùi0vjCseh7j1",
+          "amount": "500",
+          "unit": "g",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Ga nuong mat ong-shared-20260611-v2",
+          "ingredientId": "Mật ongOr177EkX2-",
+          "amount": "2",
+          "unit": "thìa",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Ga nuong mat ong-shared-20260611-v2",
+          "ingredientId": "Xì dầuJhjF6UAtE7",
+          "amount": "1",
+          "unit": "thìa",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Ga nuong mat ong-shared-20260611-v2",
+          "ingredientId": "Tỏi3NILO1jEd0",
+          "amount": "3",
+          "unit": "nhánh",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Ga nuong mat ong-shared-20260611-v2",
+          "ingredientId": "Dầu ănb13XIYIrDh",
+          "amount": "10",
+          "unit": "ml",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Ga nuong mat ong-shared-20260611-v2",
+          "ingredientId": "Hạt tiêu4eEOesKltQ",
+          "amount": "1/4",
+          "unit": "thìa",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        }
+      ],
+      "steps": [
+        {
+          "id": "Ga nuong mat ong-shared-20260611-v2-step-1",
+          "content": "Ướp gà với mật ong, xì dầu, tỏi và tiêu.",
+          "order": 1,
+          "isDone": false,
+          "required": true
+        },
+        {
+          "id": "Ga nuong mat ong-shared-20260611-v2-step-2",
+          "content": "Để gà thấm ít nhất 15 phút.",
+          "order": 2,
+          "isDone": false,
+          "required": true
+        },
+        {
+          "id": "Ga nuong mat ong-shared-20260611-v2-step-3",
+          "content": "Nướng hoặc áp chảo lửa vừa đến khi chín.",
+          "order": 3,
+          "isDone": false,
+          "required": true
+        },
+        {
+          "id": "Ga nuong mat ong-shared-20260611-v2-step-4",
+          "content": "Quét thêm sốt ướp cuối cùng cho mặt bóng thơm.",
+          "order": 4,
+          "isDone": false,
+          "required": true
+        }
+      ],
+      "name": "Gà nướng mật ong",
+      "includeDishes": [],
+      "note": "",
+      "isCompleted": true,
+      "duration": {
+        "unfreeze": null,
+        "prepare": 15,
+        "cooking": 35,
+        "serve": 5,
+        "cooldown": null
+      },
+      "baseServings": 2,
+      "tags": [
+        "Món chính",
+        "Nướng"
+      ]
+    },
+    {
+      "id": "Ca ri ga-shared-20260611-v2",
+      "ingredients": [
+        {
+          "dishesId": "Ca ri ga-shared-20260611-v2",
+          "ingredientId": "Thịt gà đùi0vjCseh7j1",
+          "amount": "500",
+          "unit": "g",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Ca ri ga-shared-20260611-v2",
+          "ingredientId": "Khoai tâylAyMsTv486",
+          "amount": "250",
+          "unit": "g",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Ca ri ga-shared-20260611-v2",
+          "ingredientId": "Cà rốtGB2tp6fqpw",
+          "amount": "180",
+          "unit": "g",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Ca ri ga-shared-20260611-v2",
+          "ingredientId": "Cốt dừa0fULSP8Mc7",
+          "amount": "300",
+          "unit": "ml",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Ca ri ga-shared-20260611-v2",
+          "ingredientId": "Bot ca ri-shared-20260611-v2",
+          "amount": "2",
+          "unit": "thìa",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Ca ri ga-shared-20260611-v2",
+          "ingredientId": "SảN-nr3-BboO",
+          "amount": "2",
+          "unit": "nhánh",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Ca ri ga-shared-20260611-v2",
+          "ingredientId": "Nước9jnS_eO8Cv",
+          "amount": "500",
+          "unit": "ml",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        }
+      ],
+      "steps": [
+        {
+          "id": "Ca ri ga-shared-20260611-v2-step-1",
+          "content": "Ướp gà với bột cà ri và sả băm.",
+          "order": 1,
+          "isDone": false,
+          "required": true
+        },
+        {
+          "id": "Ca ri ga-shared-20260611-v2-step-2",
+          "content": "Xào gà cho săn và thơm.",
+          "order": 2,
+          "isDone": false,
+          "required": true
+        },
+        {
+          "id": "Ca ri ga-shared-20260611-v2-step-3",
+          "content": "Thêm nước, khoai tây, cà rốt nấu mềm.",
+          "order": 3,
+          "isDone": false,
+          "required": true
+        },
+        {
+          "id": "Ca ri ga-shared-20260611-v2-step-4",
+          "content": "Cho cốt dừa vào, nêm lại và nấu sánh nhẹ.",
+          "order": 4,
+          "isDone": false,
+          "required": true
+        }
+      ],
+      "name": "Cà ri gà",
+      "includeDishes": [],
+      "note": "",
+      "isCompleted": true,
+      "duration": {
+        "unfreeze": null,
+        "prepare": 18,
+        "cooking": 40,
+        "serve": 5,
+        "cooldown": null
+      },
+      "baseServings": 2,
+      "tags": [
+        "Món chính"
+      ]
+    },
+    {
+      "id": "Dau phu kho nam-shared-20260611-v2",
+      "ingredients": [
+        {
+          "dishesId": "Dau phu kho nam-shared-20260611-v2",
+          "ingredientId": "Đậu phụQdYQjd3uDU",
+          "amount": "350",
+          "unit": "g",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Dau phu kho nam-shared-20260611-v2",
+          "ingredientId": "Nấm hươngF3SfMXRu9p",
+          "amount": "40",
+          "unit": "g",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Dau phu kho nam-shared-20260611-v2",
+          "ingredientId": "Nam mo-shared-20260611-v2",
+          "amount": "150",
+          "unit": "g",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Dau phu kho nam-shared-20260611-v2",
+          "ingredientId": "Xì dầuJhjF6UAtE7",
+          "amount": "2",
+          "unit": "thìa",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Dau phu kho nam-shared-20260611-v2",
+          "ingredientId": "Nước9jnS_eO8Cv",
+          "amount": "180",
+          "unit": "ml",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Dau phu kho nam-shared-20260611-v2",
+          "ingredientId": "Hành láZtNmZbNswb",
+          "amount": "10",
+          "unit": "g",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Dau phu kho nam-shared-20260611-v2",
+          "ingredientId": "Dầu ănb13XIYIrDh",
+          "amount": "10",
+          "unit": "ml",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        }
+      ],
+      "steps": [
+        {
+          "id": "Dau phu kho nam-shared-20260611-v2-step-1",
+          "content": "Cắt đậu phụ và áp chảo nhẹ.",
+          "order": 1,
+          "isDone": false,
+          "required": true
+        },
+        {
+          "id": "Dau phu kho nam-shared-20260611-v2-step-2",
+          "content": "Ngâm nấm hương, cắt nấm mỡ.",
+          "order": 2,
+          "isDone": false,
+          "required": true
+        },
+        {
+          "id": "Dau phu kho nam-shared-20260611-v2-step-3",
+          "content": "Kho đậu với nấm, xì dầu và nước.",
+          "order": 3,
+          "isDone": false,
+          "required": true
+        },
+        {
+          "id": "Dau phu kho nam-shared-20260611-v2-step-4",
+          "content": "Nấu đến khi thấm vị, thêm hành lá.",
+          "order": 4,
+          "isDone": false,
+          "required": true
+        }
+      ],
+      "name": "Đậu phụ kho nấm",
+      "includeDishes": [],
+      "note": "",
+      "isCompleted": true,
+      "duration": {
+        "unfreeze": null,
+        "prepare": 10,
+        "cooking": 20,
+        "serve": 3,
+        "cooldown": null
+      },
+      "baseServings": 2,
+      "tags": [
+        "Món chính"
+      ]
+    },
+    {
+      "id": "Nam dui ga kho tieu-shared-20260611-v2",
+      "ingredients": [
+        {
+          "dishesId": "Nam dui ga kho tieu-shared-20260611-v2",
+          "ingredientId": "Nấm đùi gàOxusi8DbqC",
+          "amount": "300",
+          "unit": "g",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Nam dui ga kho tieu-shared-20260611-v2",
+          "ingredientId": "Xì dầuJhjF6UAtE7",
+          "amount": "2",
+          "unit": "thìa",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Nam dui ga kho tieu-shared-20260611-v2",
+          "ingredientId": "Nước màumi1ObkFY7D",
+          "amount": "1/2",
+          "unit": "thìa",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Nam dui ga kho tieu-shared-20260611-v2",
+          "ingredientId": "Hạt tiêu4eEOesKltQ",
+          "amount": "1/2",
+          "unit": "thìa",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Nam dui ga kho tieu-shared-20260611-v2",
+          "ingredientId": "Hành láZtNmZbNswb",
+          "amount": "10",
+          "unit": "g",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Nam dui ga kho tieu-shared-20260611-v2",
+          "ingredientId": "Dầu ănb13XIYIrDh",
+          "amount": "10",
+          "unit": "ml",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        }
+      ],
+      "steps": [
+        {
+          "id": "Nam dui ga kho tieu-shared-20260611-v2-step-1",
+          "content": "Thái nấm đùi gà miếng dày.",
+          "order": 1,
+          "isDone": false,
+          "required": true
+        },
+        {
+          "id": "Nam dui ga kho tieu-shared-20260611-v2-step-2",
+          "content": "Áp chảo nấm cho xém nhẹ.",
+          "order": 2,
+          "isDone": false,
+          "required": true
+        },
+        {
+          "id": "Nam dui ga kho tieu-shared-20260611-v2-step-3",
+          "content": "Thêm xì dầu, nước màu và tiêu.",
+          "order": 3,
+          "isDone": false,
+          "required": true
+        },
+        {
+          "id": "Nam dui ga kho tieu-shared-20260611-v2-step-4",
+          "content": "Kho đến khi sốt bám nấm, thêm hành lá.",
+          "order": 4,
+          "isDone": false,
+          "required": true
+        }
+      ],
+      "name": "Nấm đùi gà kho tiêu",
+      "includeDishes": [],
+      "note": "",
+      "isCompleted": true,
+      "duration": {
+        "unfreeze": null,
+        "prepare": 8,
+        "cooking": 15,
+        "serve": 3,
+        "cooldown": null
+      },
+      "baseServings": 2,
+      "tags": [
+        "Món chính"
+      ]
+    },
+    {
+      "id": "Ca tim nuong mo hanh-shared-20260611-v2",
+      "ingredients": [
+        {
+          "dishesId": "Ca tim nuong mo hanh-shared-20260611-v2",
+          "ingredientId": "Cà tímIfuFxVXDBv",
+          "amount": "350",
+          "unit": "g",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Ca tim nuong mo hanh-shared-20260611-v2",
+          "ingredientId": "Hành láZtNmZbNswb",
+          "amount": "30",
+          "unit": "g",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Ca tim nuong mo hanh-shared-20260611-v2",
+          "ingredientId": "Dầu ănb13XIYIrDh",
+          "amount": "25",
+          "unit": "ml",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Ca tim nuong mo hanh-shared-20260611-v2",
+          "ingredientId": "Nước mắm9koIj5Fz3a",
+          "amount": "1",
+          "unit": "thìa",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Ca tim nuong mo hanh-shared-20260611-v2",
+          "ingredientId": "Đậu phộnggq3Fe10jOx",
+          "amount": "20",
+          "unit": "g",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        }
+      ],
+      "steps": [
+        {
+          "id": "Ca tim nuong mo hanh-shared-20260611-v2-step-1",
+          "content": "Nướng hoặc áp chảo cà tím đến khi mềm.",
+          "order": 1,
+          "isDone": false,
+          "required": true
+        },
+        {
+          "id": "Ca tim nuong mo hanh-shared-20260611-v2-step-2",
+          "content": "Làm mỡ hành với dầu nóng và hành lá.",
+          "order": 2,
+          "isDone": false,
+          "required": true
+        },
+        {
+          "id": "Ca tim nuong mo hanh-shared-20260611-v2-step-3",
+          "content": "Bóc vỏ cà tím nếu muốn, rưới mỡ hành.",
+          "order": 3,
+          "isDone": false,
+          "required": true
+        },
+        {
+          "id": "Ca tim nuong mo hanh-shared-20260611-v2-step-4",
+          "content": "Thêm nước mắm nhẹ và đậu phộng giã.",
+          "order": 4,
+          "isDone": false,
+          "required": true
+        }
+      ],
+      "name": "Cà tím nướng mỡ hành",
+      "includeDishes": [],
+      "note": "",
+      "isCompleted": true,
+      "duration": {
+        "unfreeze": null,
+        "prepare": 8,
+        "cooking": 18,
+        "serve": 3,
+        "cooldown": null
+      },
+      "baseServings": 2,
+      "tags": [
+        "Món phụ",
+        "Nướng"
+      ]
+    },
+    {
+      "id": "Dau phu chien sa-shared-20260611-v2",
+      "ingredients": [
+        {
+          "dishesId": "Dau phu chien sa-shared-20260611-v2",
+          "ingredientId": "Đậu phụQdYQjd3uDU",
+          "amount": "400",
+          "unit": "g",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Dau phu chien sa-shared-20260611-v2",
+          "ingredientId": "SảN-nr3-BboO",
+          "amount": "3",
+          "unit": "nhánh",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Dau phu chien sa-shared-20260611-v2",
+          "ingredientId": "Ớt đỏ cay4cIqrjz_8U",
+          "amount": "5",
+          "unit": "g",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Dau phu chien sa-shared-20260611-v2",
+          "ingredientId": "Dầu ănb13XIYIrDh",
+          "amount": "120",
+          "unit": "ml",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Dau phu chien sa-shared-20260611-v2",
+          "ingredientId": "Muối trắngrOsVaI3tKv",
+          "amount": "1/4",
+          "unit": "thìa",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        }
+      ],
+      "steps": [
+        {
+          "id": "Dau phu chien sa-shared-20260611-v2-step-1",
+          "content": "Cắt đậu phụ miếng vừa ăn và thấm khô.",
+          "order": 1,
+          "isDone": false,
+          "required": true
+        },
+        {
+          "id": "Dau phu chien sa-shared-20260611-v2-step-2",
+          "content": "Băm sả, ớt với chút muối.",
+          "order": 2,
+          "isDone": false,
+          "required": true
+        },
+        {
+          "id": "Dau phu chien sa-shared-20260611-v2-step-3",
+          "content": "Chiên đậu vàng giòn.",
+          "order": 3,
+          "isDone": false,
+          "required": true
+        },
+        {
+          "id": "Dau phu chien sa-shared-20260611-v2-step-4",
+          "content": "Phi sả ớt thơm rồi xóc đậu vào.",
+          "order": 4,
+          "isDone": false,
+          "required": true
+        }
+      ],
+      "name": "Đậu phụ chiên sả",
+      "includeDishes": [],
+      "note": "",
+      "isCompleted": true,
+      "duration": {
+        "unfreeze": null,
+        "prepare": 10,
+        "cooking": 12,
+        "serve": 3,
+        "cooldown": null
+      },
+      "baseServings": 2,
+      "tags": [
+        "Món chính",
+        "Chiên"
+      ]
+    },
+    {
+      "id": "Bong cai xanh luoc-shared-20260611-v2",
+      "ingredients": [
+        {
+          "dishesId": "Bong cai xanh luoc-shared-20260611-v2",
+          "ingredientId": "Bong cai xanh-shared-20260611-v2",
+          "amount": "350",
+          "unit": "g",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Bong cai xanh luoc-shared-20260611-v2",
+          "ingredientId": "Nước9jnS_eO8Cv",
+          "amount": "1000",
+          "unit": "ml",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Bong cai xanh luoc-shared-20260611-v2",
+          "ingredientId": "Muối trắngrOsVaI3tKv",
+          "amount": "1/4",
+          "unit": "thìa",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        }
+      ],
+      "steps": [
+        {
+          "id": "Bong cai xanh luoc-shared-20260611-v2-step-1",
+          "content": "Tách bông cải xanh thành miếng vừa ăn.",
+          "order": 1,
+          "isDone": false,
+          "required": true
+        },
+        {
+          "id": "Bong cai xanh luoc-shared-20260611-v2-step-2",
+          "content": "Rửa sạch và để ráo.",
+          "order": 2,
+          "isDone": false,
+          "required": true
+        },
+        {
+          "id": "Bong cai xanh luoc-shared-20260611-v2-step-3",
+          "content": "Đun nước sôi với chút muối.",
+          "order": 3,
+          "isDone": false,
+          "required": true
+        },
+        {
+          "id": "Bong cai xanh luoc-shared-20260611-v2-step-4",
+          "content": "Luộc bông cải vừa chín xanh rồi vớt ra.",
+          "order": 4,
+          "isDone": false,
+          "required": true
+        }
+      ],
+      "name": "Bông cải xanh luộc",
+      "includeDishes": [],
+      "note": "",
+      "isCompleted": true,
+      "duration": {
+        "unfreeze": null,
+        "prepare": 8,
+        "cooking": 6,
+        "serve": 3,
+        "cooldown": null
+      },
+      "baseServings": 2,
+      "tags": [
+        "Món phụ",
+        "Luộc"
+      ]
+    },
+    {
+      "id": "Salad xa lach trung-shared-20260611-v2",
+      "ingredients": [
+        {
+          "dishesId": "Salad xa lach trung-shared-20260611-v2",
+          "ingredientId": "Xà láchGY5tn2xg5J",
+          "amount": "150",
+          "unit": "g",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Salad xa lach trung-shared-20260611-v2",
+          "ingredientId": "Trứng gà72vN9igVwa",
+          "amount": "2",
+          "unit": "quả",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Salad xa lach trung-shared-20260611-v2",
+          "ingredientId": "Cà chuaZP4MdEXiO_",
+          "amount": "150",
+          "unit": "g",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Salad xa lach trung-shared-20260611-v2",
+          "ingredientId": "Dưa chuộtiww2N4-K0c",
+          "amount": "150",
+          "unit": "g",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Salad xa lach trung-shared-20260611-v2",
+          "ingredientId": "Mayonnaise-shared-20260611-v2",
+          "amount": "1",
+          "unit": "thìa",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Salad xa lach trung-shared-20260611-v2",
+          "ingredientId": "Sua chua khong duong-shared-20260611-v2",
+          "amount": "2",
+          "unit": "thìa",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        }
+      ],
+      "steps": [
+        {
+          "id": "Salad xa lach trung-shared-20260611-v2-step-1",
+          "content": "Luộc trứng, bóc vỏ và cắt miếng.",
+          "order": 1,
+          "isDone": false,
+          "required": true
+        },
+        {
+          "id": "Salad xa lach trung-shared-20260611-v2-step-2",
+          "content": "Rửa xà lách, cà chua và dưa chuột.",
+          "order": 2,
+          "isDone": false,
+          "required": true
+        },
+        {
+          "id": "Salad xa lach trung-shared-20260611-v2-step-3",
+          "content": "Trộn mayonnaise với sữa chua làm sốt.",
+          "order": 3,
+          "isDone": false,
+          "required": true
+        },
+        {
+          "id": "Salad xa lach trung-shared-20260611-v2-step-4",
+          "content": "Xếp rau và trứng, rưới sốt trước khi dùng.",
+          "order": 4,
+          "isDone": false,
+          "required": true
+        }
+      ],
+      "name": "Salad xà lách trứng",
+      "includeDishes": [],
+      "note": "",
+      "isCompleted": true,
+      "duration": {
+        "unfreeze": null,
+        "prepare": 12,
+        "cooking": 8,
+        "serve": 3,
+        "cooldown": null
+      },
+      "baseServings": 2,
+      "tags": [
+        "Salad",
+        "Món phụ"
+      ]
+    },
+    {
+      "id": "Canh he dau phu-shared-20260611-v2",
+      "ingredients": [
+        {
+          "dishesId": "Canh he dau phu-shared-20260611-v2",
+          "ingredientId": "He-shared-20260611-v2",
+          "amount": "80",
+          "unit": "g",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Canh he dau phu-shared-20260611-v2",
+          "ingredientId": "Đậu phụQdYQjd3uDU",
+          "amount": "250",
+          "unit": "g",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Canh he dau phu-shared-20260611-v2",
+          "ingredientId": "Nước9jnS_eO8Cv",
+          "amount": "850",
+          "unit": "ml",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Canh he dau phu-shared-20260611-v2",
+          "ingredientId": "Hat nem-shared-20260611",
+          "amount": "1/2",
+          "unit": "thìa",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Canh he dau phu-shared-20260611-v2",
+          "ingredientId": "Nước mắm9koIj5Fz3a",
+          "amount": "1/2",
+          "unit": "thìa",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        }
+      ],
+      "steps": [
+        {
+          "id": "Canh he dau phu-shared-20260611-v2-step-1",
+          "content": "Rửa hẹ và cắt khúc.",
+          "order": 1,
+          "isDone": false,
+          "required": true
+        },
+        {
+          "id": "Canh he dau phu-shared-20260611-v2-step-2",
+          "content": "Cắt đậu phụ miếng vừa ăn.",
+          "order": 2,
+          "isDone": false,
+          "required": true
+        },
+        {
+          "id": "Canh he dau phu-shared-20260611-v2-step-3",
+          "content": "Đun nước sôi, cho đậu phụ vào.",
+          "order": 3,
+          "isDone": false,
+          "required": true
+        },
+        {
+          "id": "Canh he dau phu-shared-20260611-v2-step-4",
+          "content": "Nêm vừa ăn, thêm hẹ và tắt bếp khi hẹ vừa chín.",
+          "order": 4,
+          "isDone": false,
+          "required": true
+        }
+      ],
+      "name": "Canh hẹ đậu phụ",
+      "includeDishes": [],
+      "note": "",
+      "isCompleted": true,
+      "duration": {
+        "unfreeze": null,
+        "prepare": 8,
+        "cooking": 10,
+        "serve": 3,
+        "cooldown": null
+      },
+      "baseServings": 2,
+      "tags": [
+        "Canh",
+        "Món phụ"
+      ]
+    },
+    {
+      "id": "Canh ngao nau chua-shared-20260611-v2",
+      "ingredients": [
+        {
+          "dishesId": "Canh ngao nau chua-shared-20260611-v2",
+          "ingredientId": "Ngao-shared-20260611-v2",
+          "amount": "600",
+          "unit": "g",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Canh ngao nau chua-shared-20260611-v2",
+          "ingredientId": "Cà chuaZP4MdEXiO_",
+          "amount": "200",
+          "unit": "g",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Canh ngao nau chua-shared-20260611-v2",
+          "ingredientId": "DứaGu02Q4sahX",
+          "amount": "150",
+          "unit": "g",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Canh ngao nau chua-shared-20260611-v2",
+          "ingredientId": "Nuoc cot me-shared-20260611-v2",
+          "amount": "2",
+          "unit": "thìa",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Canh ngao nau chua-shared-20260611-v2",
+          "ingredientId": "Nước9jnS_eO8Cv",
+          "amount": "1000",
+          "unit": "ml",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Canh ngao nau chua-shared-20260611-v2",
+          "ingredientId": "Nước mắm9koIj5Fz3a",
+          "amount": "1",
+          "unit": "thìa",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Canh ngao nau chua-shared-20260611-v2",
+          "ingredientId": "Hành láZtNmZbNswb",
+          "amount": "15",
+          "unit": "g",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        }
+      ],
+      "steps": [
+        {
+          "id": "Canh ngao nau chua-shared-20260611-v2-step-1",
+          "content": "Luộc ngao đến khi mở miệng, giữ nước luộc.",
+          "order": 1,
+          "isDone": false,
+          "required": true
+        },
+        {
+          "id": "Canh ngao nau chua-shared-20260611-v2-step-2",
+          "content": "Lọc nước ngao cho sạch cát.",
+          "order": 2,
+          "isDone": false,
+          "required": true
+        },
+        {
+          "id": "Canh ngao nau chua-shared-20260611-v2-step-3",
+          "content": "Nấu cà chua, dứa và nước cốt me với nước ngao.",
+          "order": 3,
+          "isDone": false,
+          "required": true
+        },
+        {
+          "id": "Canh ngao nau chua-shared-20260611-v2-step-4",
+          "content": "Cho thịt ngao lại vào, nêm nước mắm và hành lá.",
+          "order": 4,
+          "isDone": false,
+          "required": true
+        }
+      ],
+      "name": "Canh ngao nấu chua",
+      "includeDishes": [],
+      "note": "",
+      "isCompleted": true,
+      "duration": {
+        "unfreeze": null,
+        "prepare": 15,
+        "cooking": 18,
+        "serve": 4,
+        "cooldown": null
+      },
+      "baseServings": 2,
+      "tags": [
+        "Canh",
+        "Món chính"
+      ]
+    },
+    {
+      "id": "Canh cu sen suon-shared-20260611-v2",
+      "ingredients": [
+        {
+          "dishesId": "Canh cu sen suon-shared-20260611-v2",
+          "ingredientId": "Cu sen-shared-20260611-v2",
+          "amount": "300",
+          "unit": "g",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Canh cu sen suon-shared-20260611-v2",
+          "ingredientId": "Sườn heo nonlic0JR5JmA",
+          "amount": "400",
+          "unit": "g",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Canh cu sen suon-shared-20260611-v2",
+          "ingredientId": "Cà rốtGB2tp6fqpw",
+          "amount": "150",
+          "unit": "g",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Canh cu sen suon-shared-20260611-v2",
+          "ingredientId": "Nước9jnS_eO8Cv",
+          "amount": "1200",
+          "unit": "ml",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Canh cu sen suon-shared-20260611-v2",
+          "ingredientId": "Hat nem-shared-20260611",
+          "amount": "1",
+          "unit": "thìa",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Canh cu sen suon-shared-20260611-v2",
+          "ingredientId": "Hành láZtNmZbNswb",
+          "amount": "15",
+          "unit": "g",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        }
+      ],
+      "steps": [
+        {
+          "id": "Canh cu sen suon-shared-20260611-v2-step-1",
+          "content": "Chần sườn rồi rửa sạch.",
+          "order": 1,
+          "isDone": false,
+          "required": true
+        },
+        {
+          "id": "Canh cu sen suon-shared-20260611-v2-step-2",
+          "content": "Thái củ sen và cà rốt miếng vừa ăn.",
+          "order": 2,
+          "isDone": false,
+          "required": true
+        },
+        {
+          "id": "Canh cu sen suon-shared-20260611-v2-step-3",
+          "content": "Hầm sườn với củ sen đến khi mềm.",
+          "order": 3,
+          "isDone": false,
+          "required": true
+        },
+        {
+          "id": "Canh cu sen suon-shared-20260611-v2-step-4",
+          "content": "Thêm cà rốt, nêm hạt nêm và hành lá.",
+          "order": 4,
+          "isDone": false,
+          "required": true
+        }
+      ],
+      "name": "Canh củ sen sườn",
+      "includeDishes": [],
+      "note": "",
+      "isCompleted": true,
+      "duration": {
+        "unfreeze": null,
+        "prepare": 15,
+        "cooking": 50,
+        "serve": 5,
+        "cooldown": null
+      },
+      "baseServings": 2,
+      "tags": [
+        "Canh",
+        "Món phụ"
+      ]
+    },
+    {
+      "id": "Sup bi do-shared-20260611-v2",
+      "ingredients": [
+        {
+          "dishesId": "Sup bi do-shared-20260611-v2",
+          "ingredientId": "Bí đỏdfZiGA8n81",
+          "amount": "350",
+          "unit": "g",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Sup bi do-shared-20260611-v2",
+          "ingredientId": "Sữa tươi không đườngHqQaWllTs2",
+          "amount": "250",
+          "unit": "ml",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Sup bi do-shared-20260611-v2",
+          "ingredientId": "Bơ lạtbK-8VT5e-z",
+          "amount": "15",
+          "unit": "g",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Sup bi do-shared-20260611-v2",
+          "ingredientId": "Hành tâyPsERexf4zd",
+          "amount": "80",
+          "unit": "g",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Sup bi do-shared-20260611-v2",
+          "ingredientId": "Nước9jnS_eO8Cv",
+          "amount": "300",
+          "unit": "ml",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Sup bi do-shared-20260611-v2",
+          "ingredientId": "Muối trắngrOsVaI3tKv",
+          "amount": "1/4",
+          "unit": "thìa",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        }
+      ],
+      "steps": [
+        {
+          "id": "Sup bi do-shared-20260611-v2-step-1",
+          "content": "Cắt bí đỏ và hành tây miếng nhỏ.",
+          "order": 1,
+          "isDone": false,
+          "required": true
+        },
+        {
+          "id": "Sup bi do-shared-20260611-v2-step-2",
+          "content": "Xào hành tây với bơ cho thơm.",
+          "order": 2,
+          "isDone": false,
+          "required": true
+        },
+        {
+          "id": "Sup bi do-shared-20260611-v2-step-3",
+          "content": "Nấu bí đỏ với nước đến khi mềm.",
+          "order": 3,
+          "isDone": false,
+          "required": true
+        },
+        {
+          "id": "Sup bi do-shared-20260611-v2-step-4",
+          "content": "Nghiền hoặc xay mịn, thêm sữa và nêm nhẹ.",
+          "order": 4,
+          "isDone": false,
+          "required": true
+        }
+      ],
+      "name": "Súp bí đỏ",
+      "includeDishes": [],
+      "note": "",
+      "isCompleted": true,
+      "duration": {
+        "unfreeze": null,
+        "prepare": 10,
+        "cooking": 25,
+        "serve": 3,
+        "cooldown": null
+      },
+      "baseServings": 2,
+      "tags": [
+        "Canh",
+        "Món phụ"
+      ]
+    },
+    {
+      "id": "Sup ga ngo nam-shared-20260611-v2",
+      "ingredients": [
+        {
+          "dishesId": "Sup ga ngo nam-shared-20260611-v2",
+          "ingredientId": "Thịt gà ứcirYK34PGfJ",
+          "amount": "180",
+          "unit": "g",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Sup ga ngo nam-shared-20260611-v2",
+          "ingredientId": "Ngo ngot-shared-20260611",
+          "amount": "180",
+          "unit": "g",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Sup ga ngo nam-shared-20260611-v2",
+          "ingredientId": "Nam mo-shared-20260611-v2",
+          "amount": "120",
+          "unit": "g",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Sup ga ngo nam-shared-20260611-v2",
+          "ingredientId": "Trứng gà72vN9igVwa",
+          "amount": "1",
+          "unit": "quả",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Sup ga ngo nam-shared-20260611-v2",
+          "ingredientId": "Nước9jnS_eO8Cv",
+          "amount": "900",
+          "unit": "ml",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Sup ga ngo nam-shared-20260611-v2",
+          "ingredientId": "Bột năngho3LUqgeAO",
+          "amount": "1",
+          "unit": "thìa",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Sup ga ngo nam-shared-20260611-v2",
+          "ingredientId": "Hat nem-shared-20260611",
+          "amount": "1",
+          "unit": "thìa",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        }
+      ],
+      "steps": [
+        {
+          "id": "Sup ga ngo nam-shared-20260611-v2-step-1",
+          "content": "Luộc gà chín và xé sợi.",
+          "order": 1,
+          "isDone": false,
+          "required": true
+        },
+        {
+          "id": "Sup ga ngo nam-shared-20260611-v2-step-2",
+          "content": "Nấu nước dùng với ngô và nấm.",
+          "order": 2,
+          "isDone": false,
+          "required": true
+        },
+        {
+          "id": "Sup ga ngo nam-shared-20260611-v2-step-3",
+          "content": "Cho gà xé vào, nêm hạt nêm.",
+          "order": 3,
+          "isDone": false,
+          "required": true
+        },
+        {
+          "id": "Sup ga ngo nam-shared-20260611-v2-step-4",
+          "content": "Tạo sánh bằng bột năng, rót trứng vào khuấy nhẹ.",
+          "order": 4,
+          "isDone": false,
+          "required": true
+        }
+      ],
+      "name": "Súp gà ngô nấm",
+      "includeDishes": [],
+      "note": "",
+      "isCompleted": true,
+      "duration": {
+        "unfreeze": null,
+        "prepare": 12,
+        "cooking": 25,
+        "serve": 4,
+        "cooldown": null
+      },
+      "baseServings": 2,
+      "tags": [
+        "Canh",
+        "Món phụ"
+      ]
+    },
+    {
+      "id": "Khoai tay chien-shared-20260611-v2",
+      "ingredients": [
+        {
+          "dishesId": "Khoai tay chien-shared-20260611-v2",
+          "ingredientId": "Khoai tâylAyMsTv486",
+          "amount": "400",
+          "unit": "g",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Khoai tay chien-shared-20260611-v2",
+          "ingredientId": "Bot chien gion-shared-20260611-v2",
+          "amount": "40",
+          "unit": "g",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Khoai tay chien-shared-20260611-v2",
+          "ingredientId": "Dầu ănb13XIYIrDh",
+          "amount": "200",
+          "unit": "ml",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Khoai tay chien-shared-20260611-v2",
+          "ingredientId": "Muối trắngrOsVaI3tKv",
+          "amount": "1/4",
+          "unit": "thìa",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        }
+      ],
+      "steps": [
+        {
+          "id": "Khoai tay chien-shared-20260611-v2-step-1",
+          "content": "Gọt khoai tây và cắt thanh.",
+          "order": 1,
+          "isDone": false,
+          "required": true
+        },
+        {
+          "id": "Khoai tay chien-shared-20260611-v2-step-2",
+          "content": "Ngâm khoai trong nước lạnh rồi để ráo.",
+          "order": 2,
+          "isDone": false,
+          "required": true
+        },
+        {
+          "id": "Khoai tay chien-shared-20260611-v2-step-3",
+          "content": "Áo khoai với lớp bột mỏng.",
+          "order": 3,
+          "isDone": false,
+          "required": true
+        },
+        {
+          "id": "Khoai tay chien-shared-20260611-v2-step-4",
+          "content": "Chiên vàng giòn, rắc muối nhẹ.",
+          "order": 4,
+          "isDone": false,
+          "required": true
+        }
+      ],
+      "name": "Khoai tây chiên",
+      "includeDishes": [],
+      "note": "",
+      "isCompleted": true,
+      "duration": {
+        "unfreeze": null,
+        "prepare": 12,
+        "cooking": 15,
+        "serve": 3,
+        "cooldown": null
+      },
+      "baseServings": 2,
+      "tags": [
+        "Ăn vặt",
+        "Chiên"
+      ]
+    },
+    {
+      "id": "Banh chuoi ap chao-shared-20260611-v2",
+      "ingredients": [
+        {
+          "dishesId": "Banh chuoi ap chao-shared-20260611-v2",
+          "ingredientId": "Chuoi-shared-20260611-v2",
+          "amount": "240",
+          "unit": "g",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Banh chuoi ap chao-shared-20260611-v2",
+          "ingredientId": "Bột mìpg1-aZIoDs",
+          "amount": "80",
+          "unit": "g",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Banh chuoi ap chao-shared-20260611-v2",
+          "ingredientId": "Sữa tươi không đườngHqQaWllTs2",
+          "amount": "120",
+          "unit": "ml",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Banh chuoi ap chao-shared-20260611-v2",
+          "ingredientId": "Trứng gà72vN9igVwa",
+          "amount": "1",
+          "unit": "quả",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Banh chuoi ap chao-shared-20260611-v2",
+          "ingredientId": "Mật ongOr177EkX2-",
+          "amount": "1",
+          "unit": "thìa",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Banh chuoi ap chao-shared-20260611-v2",
+          "ingredientId": "Bơ lạtbK-8VT5e-z",
+          "amount": "15",
+          "unit": "g",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        }
+      ],
+      "steps": [
+        {
+          "id": "Banh chuoi ap chao-shared-20260611-v2-step-1",
+          "content": "Nghiền chuối chín.",
+          "order": 1,
+          "isDone": false,
+          "required": true
+        },
+        {
+          "id": "Banh chuoi ap chao-shared-20260611-v2-step-2",
+          "content": "Trộn chuối với bột, sữa và trứng.",
+          "order": 2,
+          "isDone": false,
+          "required": true
+        },
+        {
+          "id": "Banh chuoi ap chao-shared-20260611-v2-step-3",
+          "content": "Làm nóng chảo với chút bơ.",
+          "order": 3,
+          "isDone": false,
+          "required": true
+        },
+        {
+          "id": "Banh chuoi ap chao-shared-20260611-v2-step-4",
+          "content": "Áp chảo từng bánh nhỏ đến khi vàng hai mặt.",
+          "order": 4,
+          "isDone": false,
+          "required": true
+        }
+      ],
+      "name": "Bánh chuối áp chảo",
+      "includeDishes": [],
+      "note": "",
+      "isCompleted": true,
+      "duration": {
+        "unfreeze": null,
+        "prepare": 10,
+        "cooking": 12,
+        "serve": 3,
+        "cooldown": null
+      },
+      "baseServings": 2,
+      "tags": [
+        "Ăn vặt",
+        "Tráng miệng"
+      ]
+    },
+    {
+      "id": "Sua chua trai cay-shared-20260611-v2",
+      "ingredients": [
+        {
+          "dishesId": "Sua chua trai cay-shared-20260611-v2",
+          "ingredientId": "Sua chua khong duong-shared-20260611-v2",
+          "amount": "250",
+          "unit": "g",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Sua chua trai cay-shared-20260611-v2",
+          "ingredientId": "Chuoi-shared-20260611-v2",
+          "amount": "120",
+          "unit": "g",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Sua chua trai cay-shared-20260611-v2",
+          "ingredientId": "XoàiZenHCISCaR",
+          "amount": "120",
+          "unit": "g",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Sua chua trai cay-shared-20260611-v2",
+          "ingredientId": "Dua hau-shared-20260611-v2",
+          "amount": "150",
+          "unit": "g",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Sua chua trai cay-shared-20260611-v2",
+          "ingredientId": "Mật ongOr177EkX2-",
+          "amount": "1",
+          "unit": "thìa",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        }
+      ],
+      "steps": [
+        {
+          "id": "Sua chua trai cay-shared-20260611-v2-step-1",
+          "content": "Cắt trái cây miếng vừa ăn.",
+          "order": 1,
+          "isDone": false,
+          "required": true
+        },
+        {
+          "id": "Sua chua trai cay-shared-20260611-v2-step-2",
+          "content": "Cho sữa chua vào tô hoặc ly.",
+          "order": 2,
+          "isDone": false,
+          "required": true
+        },
+        {
+          "id": "Sua chua trai cay-shared-20260611-v2-step-3",
+          "content": "Xếp trái cây lên trên.",
+          "order": 3,
+          "isDone": false,
+          "required": true
+        },
+        {
+          "id": "Sua chua trai cay-shared-20260611-v2-step-4",
+          "content": "Rưới mật ong nhẹ và dùng lạnh.",
+          "order": 4,
+          "isDone": false,
+          "required": true
+        }
+      ],
+      "name": "Sữa chua trái cây",
+      "includeDishes": [],
+      "note": "",
+      "isCompleted": true,
+      "duration": {
+        "unfreeze": null,
+        "prepare": 10,
+        "cooking": 0,
+        "serve": 3,
+        "cooldown": null
+      },
+      "baseServings": 2,
+      "tags": [
+        "Tráng miệng"
+      ]
+    },
+    {
+      "id": "Sinh to chuoi sua-shared-20260611-v2",
+      "ingredients": [
+        {
+          "dishesId": "Sinh to chuoi sua-shared-20260611-v2",
+          "ingredientId": "Chuoi-shared-20260611-v2",
+          "amount": "180",
+          "unit": "g",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Sinh to chuoi sua-shared-20260611-v2",
+          "ingredientId": "Sữa tươi không đườngHqQaWllTs2",
+          "amount": "300",
+          "unit": "ml",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Sinh to chuoi sua-shared-20260611-v2",
+          "ingredientId": "Mật ongOr177EkX2-",
+          "amount": "1",
+          "unit": "thìa",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Sinh to chuoi sua-shared-20260611-v2",
+          "ingredientId": "Sua chua khong duong-shared-20260611-v2",
+          "amount": "80",
+          "unit": "g",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        }
+      ],
+      "steps": [
+        {
+          "id": "Sinh to chuoi sua-shared-20260611-v2-step-1",
+          "content": "Cắt chuối thành khoanh.",
+          "order": 1,
+          "isDone": false,
+          "required": true
+        },
+        {
+          "id": "Sinh to chuoi sua-shared-20260611-v2-step-2",
+          "content": "Cho chuối, sữa, sữa chua và mật ong vào cối.",
+          "order": 2,
+          "isDone": false,
+          "required": true
+        },
+        {
+          "id": "Sinh to chuoi sua-shared-20260611-v2-step-3",
+          "content": "Xay mịn đến khi sánh.",
+          "order": 3,
+          "isDone": false,
+          "required": true
+        },
+        {
+          "id": "Sinh to chuoi sua-shared-20260611-v2-step-4",
+          "content": "Rót ra ly và dùng lạnh.",
+          "order": 4,
+          "isDone": false,
+          "required": true
+        }
+      ],
+      "name": "Sinh tố chuối sữa",
+      "includeDishes": [],
+      "note": "",
+      "isCompleted": true,
+      "duration": {
+        "unfreeze": null,
+        "prepare": 6,
+        "cooking": 0,
+        "serve": 3,
+        "cooldown": null
+      },
+      "baseServings": 2,
+      "tags": [
+        "Đồ uống"
+      ]
+    },
+    {
+      "id": "Che dau xanh-shared-20260611-v2",
+      "ingredients": [
+        {
+          "dishesId": "Che dau xanh-shared-20260611-v2",
+          "ingredientId": "Đậu xanhnIxKmFNrRM",
+          "amount": "180",
+          "unit": "g",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Che dau xanh-shared-20260611-v2",
+          "ingredientId": "Đường phènCgPf36wjMX",
+          "amount": "80",
+          "unit": "g",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Che dau xanh-shared-20260611-v2",
+          "ingredientId": "Cốt dừa0fULSP8Mc7",
+          "amount": "200",
+          "unit": "ml",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Che dau xanh-shared-20260611-v2",
+          "ingredientId": "Nước9jnS_eO8Cv",
+          "amount": "900",
+          "unit": "ml",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Che dau xanh-shared-20260611-v2",
+          "ingredientId": "Muối trắngrOsVaI3tKv",
+          "amount": "1/8",
+          "unit": "thìa",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        }
+      ],
+      "steps": [
+        {
+          "id": "Che dau xanh-shared-20260611-v2-step-1",
+          "content": "Ngâm đậu xanh nếu có thời gian.",
+          "order": 1,
+          "isDone": false,
+          "required": true
+        },
+        {
+          "id": "Che dau xanh-shared-20260611-v2-step-2",
+          "content": "Nấu đậu với nước đến khi mềm.",
+          "order": 2,
+          "isDone": false,
+          "required": true
+        },
+        {
+          "id": "Che dau xanh-shared-20260611-v2-step-3",
+          "content": "Thêm đường phèn và chút muối.",
+          "order": 3,
+          "isDone": false,
+          "required": true
+        },
+        {
+          "id": "Che dau xanh-shared-20260611-v2-step-4",
+          "content": "Chan cốt dừa khi dùng.",
+          "order": 4,
+          "isDone": false,
+          "required": true
+        }
+      ],
+      "name": "Chè đậu xanh",
+      "includeDishes": [],
+      "note": "",
+      "isCompleted": true,
+      "duration": {
+        "unfreeze": null,
+        "prepare": 10,
+        "cooking": 35,
+        "serve": 5,
+        "cooldown": null
+      },
+      "baseServings": 2,
+      "tags": [
+        "Tráng miệng"
+      ]
+    },
+    {
+      "id": "Nom xoai tom-shared-20260611-v2",
+      "ingredients": [
+        {
+          "dishesId": "Nom xoai tom-shared-20260611-v2",
+          "ingredientId": "XoàiZenHCISCaR",
+          "amount": "300",
+          "unit": "g",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Nom xoai tom-shared-20260611-v2",
+          "ingredientId": "Tôm sú4vHhSAcJTQ",
+          "amount": "180",
+          "unit": "g",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Nom xoai tom-shared-20260611-v2",
+          "ingredientId": "Rau rămUSdFLbxJzV",
+          "amount": "20",
+          "unit": "g",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Nom xoai tom-shared-20260611-v2",
+          "ingredientId": "Đậu phộnggq3Fe10jOx",
+          "amount": "30",
+          "unit": "g",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Nom xoai tom-shared-20260611-v2",
+          "ingredientId": "Nước mắm9koIj5Fz3a",
+          "amount": "2",
+          "unit": "thìa",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Nom xoai tom-shared-20260611-v2",
+          "ingredientId": "Đường trắngDH_YV6vOlJ",
+          "amount": "1",
+          "unit": "thìa",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Nom xoai tom-shared-20260611-v2",
+          "ingredientId": "Chanh2c6lpZSaM4",
+          "amount": "20",
+          "unit": "ml",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        }
+      ],
+      "steps": [
+        {
+          "id": "Nom xoai tom-shared-20260611-v2-step-1",
+          "content": "Luộc tôm chín, bóc vỏ.",
+          "order": 1,
+          "isDone": false,
+          "required": true
+        },
+        {
+          "id": "Nom xoai tom-shared-20260611-v2-step-2",
+          "content": "Bào xoài sợi và cắt rau răm.",
+          "order": 2,
+          "isDone": false,
+          "required": true
+        },
+        {
+          "id": "Nom xoai tom-shared-20260611-v2-step-3",
+          "content": "Pha nước mắm, đường và chanh.",
+          "order": 3,
+          "isDone": false,
+          "required": true
+        },
+        {
+          "id": "Nom xoai tom-shared-20260611-v2-step-4",
+          "content": "Trộn xoài, tôm, rau răm và đậu phộng.",
+          "order": 4,
+          "isDone": false,
+          "required": true
+        }
+      ],
+      "name": "Nộm xoài tôm",
+      "includeDishes": [],
+      "note": "",
+      "isCompleted": true,
+      "duration": {
+        "unfreeze": null,
+        "prepare": 18,
+        "cooking": 5,
+        "serve": 3,
+        "cooldown": null
+      },
+      "baseServings": 2,
+      "tags": [
+        "Salad",
+        "Khai vị"
+      ]
+    },
+    {
+      "id": "Com cuon rong bien-shared-20260611-v2",
+      "ingredients": [
+        {
+          "dishesId": "Com cuon rong bien-shared-20260611-v2",
+          "ingredientId": "Gạo tẻC_vFfi5R77",
+          "amount": "180",
+          "unit": "g",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Com cuon rong bien-shared-20260611-v2",
+          "ingredientId": "Rong bien-shared-20260611",
+          "amount": "12",
+          "unit": "g",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Com cuon rong bien-shared-20260611-v2",
+          "ingredientId": "Trứng gà72vN9igVwa",
+          "amount": "2",
+          "unit": "quả",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Com cuon rong bien-shared-20260611-v2",
+          "ingredientId": "Dưa chuộtiww2N4-K0c",
+          "amount": "150",
+          "unit": "g",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Com cuon rong bien-shared-20260611-v2",
+          "ingredientId": "Cà rốtGB2tp6fqpw",
+          "amount": "120",
+          "unit": "g",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Com cuon rong bien-shared-20260611-v2",
+          "ingredientId": "Xúc xíchv-K-3pPXWH",
+          "amount": "120",
+          "unit": "g",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Com cuon rong bien-shared-20260611-v2",
+          "ingredientId": "Dau me-shared-20260611-v2",
+          "amount": "1",
+          "unit": "thìa",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        }
+      ],
+      "steps": [
+        {
+          "id": "Com cuon rong bien-shared-20260611-v2-step-1",
+          "content": "Nấu cơm và trộn nhẹ với dầu mè.",
+          "order": 1,
+          "isDone": false,
+          "required": true
+        },
+        {
+          "id": "Com cuon rong bien-shared-20260611-v2-step-2",
+          "content": "Chiên trứng mỏng, thái sợi cùng rau củ.",
+          "order": 2,
+          "isDone": false,
+          "required": true
+        },
+        {
+          "id": "Com cuon rong bien-shared-20260611-v2-step-3",
+          "content": "Trải rong biển, dàn cơm và xếp nhân.",
+          "order": 3,
+          "isDone": false,
+          "required": true
+        },
+        {
+          "id": "Com cuon rong bien-shared-20260611-v2-step-4",
+          "content": "Cuộn chặt tay rồi cắt khoanh.",
+          "order": 4,
+          "isDone": false,
+          "required": true
+        }
+      ],
+      "name": "Cơm cuộn rong biển",
+      "includeDishes": [],
+      "note": "",
+      "isCompleted": true,
+      "duration": {
+        "unfreeze": null,
+        "prepare": 20,
+        "cooking": 20,
+        "serve": 3,
+        "cooldown": null
+      },
+      "baseServings": 2,
+      "tags": [
+        "Món chính"
+      ]
+    },
+    {
+      "id": "Trung hap thit-shared-20260611-v2",
+      "ingredients": [
+        {
+          "dishesId": "Trung hap thit-shared-20260611-v2",
+          "ingredientId": "Trứng gà72vN9igVwa",
+          "amount": "3",
+          "unit": "quả",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Trung hap thit-shared-20260611-v2",
+          "ingredientId": "Thịt heo xayTtz3UMTzNU",
+          "amount": "150",
+          "unit": "g",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Trung hap thit-shared-20260611-v2",
+          "ingredientId": "Mộc nhĩzQ75NeGAeu",
+          "amount": "20",
+          "unit": "g",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Trung hap thit-shared-20260611-v2",
+          "ingredientId": "Hành láZtNmZbNswb",
+          "amount": "15",
+          "unit": "g",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Trung hap thit-shared-20260611-v2",
+          "ingredientId": "Nước mắm9koIj5Fz3a",
+          "amount": "1",
+          "unit": "thìa",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Trung hap thit-shared-20260611-v2",
+          "ingredientId": "Hạt tiêu4eEOesKltQ",
+          "amount": "1/4",
+          "unit": "thìa",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        }
+      ],
+      "steps": [
+        {
+          "id": "Trung hap thit-shared-20260611-v2-step-1",
+          "content": "Ngâm mộc nhĩ và thái nhỏ.",
+          "order": 1,
+          "isDone": false,
+          "required": true
+        },
+        {
+          "id": "Trung hap thit-shared-20260611-v2-step-2",
+          "content": "Trộn trứng với thịt xay, mộc nhĩ và gia vị.",
+          "order": 2,
+          "isDone": false,
+          "required": true
+        },
+        {
+          "id": "Trung hap thit-shared-20260611-v2-step-3",
+          "content": "Cho hỗn hợp vào bát chịu nhiệt.",
+          "order": 3,
+          "isDone": false,
+          "required": true
+        },
+        {
+          "id": "Trung hap thit-shared-20260611-v2-step-4",
+          "content": "Hấp đến khi trứng chín chắc và thơm.",
+          "order": 4,
+          "isDone": false,
+          "required": true
+        }
+      ],
+      "name": "Trứng hấp thịt",
+      "includeDishes": [],
+      "note": "",
+      "isCompleted": true,
+      "duration": {
+        "unfreeze": null,
+        "prepare": 10,
+        "cooking": 20,
+        "serve": 3,
+        "cooldown": null
+      },
+      "baseServings": 2,
+      "tags": [
+        "Món chính",
+        "Hấp"
+      ]
+    },
+    {
+      "id": "Nem chay-shared-20260611-v2",
+      "ingredients": [
+        {
+          "dishesId": "Nem chay-shared-20260611-v2",
+          "ingredientId": "Banh da nem-shared-20260611",
+          "amount": "12",
+          "unit": "lá",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Nem chay-shared-20260611-v2",
+          "ingredientId": "MiếnObDS-xNaoB",
+          "amount": "80",
+          "unit": "g",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Nem chay-shared-20260611-v2",
+          "ingredientId": "Mộc nhĩzQ75NeGAeu",
+          "amount": "30",
+          "unit": "g",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Nem chay-shared-20260611-v2",
+          "ingredientId": "Nấm hươngF3SfMXRu9p",
+          "amount": "30",
+          "unit": "g",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Nem chay-shared-20260611-v2",
+          "ingredientId": "Cà rốtGB2tp6fqpw",
+          "amount": "120",
+          "unit": "g",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Nem chay-shared-20260611-v2",
+          "ingredientId": "Đậu phụQdYQjd3uDU",
+          "amount": "200",
+          "unit": "g",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Nem chay-shared-20260611-v2",
+          "ingredientId": "Dầu ănb13XIYIrDh",
+          "amount": "180",
+          "unit": "ml",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        }
+      ],
+      "steps": [
+        {
+          "id": "Nem chay-shared-20260611-v2-step-1",
+          "content": "Ngâm miến, mộc nhĩ, nấm hương và thái nhỏ.",
+          "order": 1,
+          "isDone": false,
+          "required": true
+        },
+        {
+          "id": "Nem chay-shared-20260611-v2-step-2",
+          "content": "Bóp vụn đậu phụ, trộn cùng cà rốt và nhân nấm.",
+          "order": 2,
+          "isDone": false,
+          "required": true
+        },
+        {
+          "id": "Nem chay-shared-20260611-v2-step-3",
+          "content": "Cuốn nhân với bánh đa nem.",
+          "order": 3,
+          "isDone": false,
+          "required": true
+        },
+        {
+          "id": "Nem chay-shared-20260611-v2-step-4",
+          "content": "Chiên nem vàng giòn và để ráo dầu.",
+          "order": 4,
+          "isDone": false,
+          "required": true
+        }
+      ],
+      "name": "Nem chay",
+      "includeDishes": [],
+      "note": "",
+      "isCompleted": true,
+      "duration": {
+        "unfreeze": null,
+        "prepare": 25,
+        "cooking": 18,
+        "serve": 5,
+        "cooldown": null
+      },
+      "baseServings": 2,
+      "tags": [
+        "Món chính",
+        "Chiên"
+      ]
+    },
+    {
+      "id": "Bun tron bo Nam Bo-shared-20260611-v2",
+      "ingredients": [
+        {
+          "dishesId": "Bun tron bo Nam Bo-shared-20260611-v2",
+          "ingredientId": "Bún khôK-nYu2l5_h",
+          "amount": "220",
+          "unit": "g",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Bun tron bo Nam Bo-shared-20260611-v2",
+          "ingredientId": "Thịt bò thănDyzpaj8qvS",
+          "amount": "220",
+          "unit": "g",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Bun tron bo Nam Bo-shared-20260611-v2",
+          "ingredientId": "Xà láchGY5tn2xg5J",
+          "amount": "120",
+          "unit": "g",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Bun tron bo Nam Bo-shared-20260611-v2",
+          "ingredientId": "Giá đỗLaF0woHgwA",
+          "amount": "120",
+          "unit": "g",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Bun tron bo Nam Bo-shared-20260611-v2",
+          "ingredientId": "Dưa chuộtiww2N4-K0c",
+          "amount": "150",
+          "unit": "g",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Bun tron bo Nam Bo-shared-20260611-v2",
+          "ingredientId": "Đậu phộnggq3Fe10jOx",
+          "amount": "30",
+          "unit": "g",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Bun tron bo Nam Bo-shared-20260611-v2",
+          "ingredientId": "Nước mắm9koIj5Fz3a",
+          "amount": "2",
+          "unit": "thìa",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Bun tron bo Nam Bo-shared-20260611-v2",
+          "ingredientId": "Chanh2c6lpZSaM4",
+          "amount": "20",
+          "unit": "ml",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        }
+      ],
+      "steps": [
+        {
+          "id": "Bun tron bo Nam Bo-shared-20260611-v2-step-1",
+          "content": "Luộc bún khô và để ráo.",
+          "order": 1,
+          "isDone": false,
+          "required": true
+        },
+        {
+          "id": "Bun tron bo Nam Bo-shared-20260611-v2-step-2",
+          "content": "Ướp bò với chút nước mắm rồi xào nhanh.",
+          "order": 2,
+          "isDone": false,
+          "required": true
+        },
+        {
+          "id": "Bun tron bo Nam Bo-shared-20260611-v2-step-3",
+          "content": "Chuẩn bị rau sống, dưa chuột và giá.",
+          "order": 3,
+          "isDone": false,
+          "required": true
+        },
+        {
+          "id": "Bun tron bo Nam Bo-shared-20260611-v2-step-4",
+          "content": "Trộn bún với bò, rau, nước mắm chua ngọt và đậu phộng.",
+          "order": 4,
+          "isDone": false,
+          "required": true
+        }
+      ],
+      "name": "Bún trộn bò Nam Bộ",
+      "includeDishes": [],
+      "note": "",
+      "isCompleted": true,
+      "duration": {
+        "unfreeze": null,
+        "prepare": 18,
+        "cooking": 10,
+        "serve": 3,
+        "cooldown": null
+      },
+      "baseServings": 2,
+      "tags": [
+        "Món chính",
+        "Salad"
+      ]
+    },
+    {
+      "id": "Chao yen mach thit bam-shared-20260611-v2",
+      "ingredients": [
+        {
+          "dishesId": "Chao yen mach thit bam-shared-20260611-v2",
+          "ingredientId": "Yen mach-shared-20260611",
+          "amount": "70",
+          "unit": "g",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Chao yen mach thit bam-shared-20260611-v2",
+          "ingredientId": "Thịt heo xayTtz3UMTzNU",
+          "amount": "100",
+          "unit": "g",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Chao yen mach thit bam-shared-20260611-v2",
+          "ingredientId": "Nước9jnS_eO8Cv",
+          "amount": "600",
+          "unit": "ml",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Chao yen mach thit bam-shared-20260611-v2",
+          "ingredientId": "Hành láZtNmZbNswb",
+          "amount": "10",
+          "unit": "g",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Chao yen mach thit bam-shared-20260611-v2",
+          "ingredientId": "Nước mắm9koIj5Fz3a",
+          "amount": "1/2",
+          "unit": "thìa",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Chao yen mach thit bam-shared-20260611-v2",
+          "ingredientId": "Hạt tiêu4eEOesKltQ",
+          "amount": "1/4",
+          "unit": "thìa",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        }
+      ],
+      "steps": [
+        {
+          "id": "Chao yen mach thit bam-shared-20260611-v2-step-1",
+          "content": "Ướp thịt băm với chút nước mắm.",
+          "order": 1,
+          "isDone": false,
+          "required": true
+        },
+        {
+          "id": "Chao yen mach thit bam-shared-20260611-v2-step-2",
+          "content": "Đun nước sôi, cho thịt vào khuấy tơi.",
+          "order": 2,
+          "isDone": false,
+          "required": true
+        },
+        {
+          "id": "Chao yen mach thit bam-shared-20260611-v2-step-3",
+          "content": "Thêm yến mạch, nấu đến khi mềm sánh.",
+          "order": 3,
+          "isDone": false,
+          "required": true
+        },
+        {
+          "id": "Chao yen mach thit bam-shared-20260611-v2-step-4",
+          "content": "Rắc hành lá và tiêu trước khi dùng.",
+          "order": 4,
+          "isDone": false,
+          "required": true
+        }
+      ],
+      "name": "Cháo yến mạch thịt băm",
+      "includeDishes": [],
+      "note": "",
+      "isCompleted": true,
+      "duration": {
+        "unfreeze": null,
+        "prepare": 8,
+        "cooking": 15,
+        "serve": 3,
+        "cooldown": null
+      },
+      "baseServings": 2,
+      "tags": [
+        "Ăn sáng",
+        "Món chính"
+      ]
+    },
+    {
+      "id": "Dau phu sot dau hao-shared-20260611-v2",
+      "ingredients": [
+        {
+          "dishesId": "Dau phu sot dau hao-shared-20260611-v2",
+          "ingredientId": "Đậu phụQdYQjd3uDU",
+          "amount": "350",
+          "unit": "g",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Dau phu sot dau hao-shared-20260611-v2",
+          "ingredientId": "Dau hao-shared-20260611-v2",
+          "amount": "1",
+          "unit": "thìa",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Dau phu sot dau hao-shared-20260611-v2",
+          "ingredientId": "Nam mo-shared-20260611-v2",
+          "amount": "150",
+          "unit": "g",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Dau phu sot dau hao-shared-20260611-v2",
+          "ingredientId": "Hành láZtNmZbNswb",
+          "amount": "15",
+          "unit": "g",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Dau phu sot dau hao-shared-20260611-v2",
+          "ingredientId": "Dầu ănb13XIYIrDh",
+          "amount": "15",
+          "unit": "ml",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Dau phu sot dau hao-shared-20260611-v2",
+          "ingredientId": "Nước9jnS_eO8Cv",
+          "amount": "120",
+          "unit": "ml",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        }
+      ],
+      "steps": [
+        {
+          "id": "Dau phu sot dau hao-shared-20260611-v2-step-1",
+          "content": "Cắt đậu phụ và áp chảo nhẹ.",
+          "order": 1,
+          "isDone": false,
+          "required": true
+        },
+        {
+          "id": "Dau phu sot dau hao-shared-20260611-v2-step-2",
+          "content": "Xào nấm mỡ cho thơm.",
+          "order": 2,
+          "isDone": false,
+          "required": true
+        },
+        {
+          "id": "Dau phu sot dau hao-shared-20260611-v2-step-3",
+          "content": "Thêm dầu hào và nước tạo sốt.",
+          "order": 3,
+          "isDone": false,
+          "required": true
+        },
+        {
+          "id": "Dau phu sot dau hao-shared-20260611-v2-step-4",
+          "content": "Cho đậu vào om thấm, thêm hành lá.",
+          "order": 4,
+          "isDone": false,
+          "required": true
+        }
+      ],
+      "name": "Đậu phụ sốt dầu hào",
+      "includeDishes": [],
+      "note": "",
+      "isCompleted": true,
+      "duration": {
+        "unfreeze": null,
+        "prepare": 8,
+        "cooking": 15,
+        "serve": 3,
+        "cooldown": null
+      },
+      "baseServings": 2,
+      "tags": [
+        "Món chính"
+      ]
+    },
+    {
+      "id": "Rau cu xao chay-shared-20260611-v2",
+      "ingredients": [
+        {
+          "dishesId": "Rau cu xao chay-shared-20260611-v2",
+          "ingredientId": "Bong cai xanh-shared-20260611-v2",
+          "amount": "180",
+          "unit": "g",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Rau cu xao chay-shared-20260611-v2",
+          "ingredientId": "Cà rốtGB2tp6fqpw",
+          "amount": "120",
+          "unit": "g",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Rau cu xao chay-shared-20260611-v2",
+          "ingredientId": "Nam mo-shared-20260611-v2",
+          "amount": "150",
+          "unit": "g",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Rau cu xao chay-shared-20260611-v2",
+          "ingredientId": "Dau Ha Lan-shared-20260611",
+          "amount": "100",
+          "unit": "g",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Rau cu xao chay-shared-20260611-v2",
+          "ingredientId": "Tỏi3NILO1jEd0",
+          "amount": "2",
+          "unit": "nhánh",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Rau cu xao chay-shared-20260611-v2",
+          "ingredientId": "Xì dầuJhjF6UAtE7",
+          "amount": "1",
+          "unit": "thìa",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Rau cu xao chay-shared-20260611-v2",
+          "ingredientId": "Dau me-shared-20260611-v2",
+          "amount": "1/2",
+          "unit": "thìa",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        }
+      ],
+      "steps": [
+        {
+          "id": "Rau cu xao chay-shared-20260611-v2-step-1",
+          "content": "Sơ chế rau củ thành miếng vừa ăn.",
+          "order": 1,
+          "isDone": false,
+          "required": true
+        },
+        {
+          "id": "Rau cu xao chay-shared-20260611-v2-step-2",
+          "content": "Chần nhanh bông cải và đậu Hà Lan.",
+          "order": 2,
+          "isDone": false,
+          "required": true
+        },
+        {
+          "id": "Rau cu xao chay-shared-20260611-v2-step-3",
+          "content": "Phi tỏi, xào cà rốt và nấm trước.",
+          "order": 3,
+          "isDone": false,
+          "required": true
+        },
+        {
+          "id": "Rau cu xao chay-shared-20260611-v2-step-4",
+          "content": "Cho rau còn lại vào, nêm xì dầu và dầu mè.",
+          "order": 4,
+          "isDone": false,
+          "required": true
+        }
+      ],
+      "name": "Rau củ xào chay",
+      "includeDishes": [],
+      "note": "",
+      "isCompleted": true,
+      "duration": {
+        "unfreeze": null,
+        "prepare": 12,
+        "cooking": 10,
+        "serve": 3,
+        "cooldown": null
+      },
+      "baseServings": 2,
+      "tags": [
+        "Món phụ",
+        "Xào"
+      ]
+    },
+    {
+      "id": "Salad uc ga-shared-20260611-v2",
+      "ingredients": [
+        {
+          "dishesId": "Salad uc ga-shared-20260611-v2",
+          "ingredientId": "Thịt gà ứcirYK34PGfJ",
+          "amount": "250",
+          "unit": "g",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Salad uc ga-shared-20260611-v2",
+          "ingredientId": "Xà láchGY5tn2xg5J",
+          "amount": "150",
+          "unit": "g",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Salad uc ga-shared-20260611-v2",
+          "ingredientId": "Dưa chuộtiww2N4-K0c",
+          "amount": "150",
+          "unit": "g",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Salad uc ga-shared-20260611-v2",
+          "ingredientId": "Cà chuaZP4MdEXiO_",
+          "amount": "150",
+          "unit": "g",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Salad uc ga-shared-20260611-v2",
+          "ingredientId": "Sua chua khong duong-shared-20260611-v2",
+          "amount": "2",
+          "unit": "thìa",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Salad uc ga-shared-20260611-v2",
+          "ingredientId": "Mayonnaise-shared-20260611-v2",
+          "amount": "1",
+          "unit": "thìa",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Salad uc ga-shared-20260611-v2",
+          "ingredientId": "Hạt tiêu4eEOesKltQ",
+          "amount": "1/4",
+          "unit": "thìa",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        }
+      ],
+      "steps": [
+        {
+          "id": "Salad uc ga-shared-20260611-v2-step-1",
+          "content": "Luộc hoặc áp chảo ức gà chín rồi xé miếng.",
+          "order": 1,
+          "isDone": false,
+          "required": true
+        },
+        {
+          "id": "Salad uc ga-shared-20260611-v2-step-2",
+          "content": "Rửa và cắt rau củ.",
+          "order": 2,
+          "isDone": false,
+          "required": true
+        },
+        {
+          "id": "Salad uc ga-shared-20260611-v2-step-3",
+          "content": "Trộn sữa chua, mayonnaise và tiêu làm sốt.",
+          "order": 3,
+          "isDone": false,
+          "required": true
+        },
+        {
+          "id": "Salad uc ga-shared-20260611-v2-step-4",
+          "content": "Xếp gà lên rau và rưới sốt khi ăn.",
+          "order": 4,
+          "isDone": false,
+          "required": true
+        }
+      ],
+      "name": "Salad ức gà",
+      "includeDishes": [],
+      "note": "",
+      "isCompleted": true,
+      "duration": {
+        "unfreeze": null,
+        "prepare": 15,
+        "cooking": 15,
+        "serve": 3,
+        "cooldown": null
+      },
+      "baseServings": 2,
+      "tags": [
+        "Salad",
+        "Món chính"
+      ]
+    },
+    {
+      "id": "Canh kim chi dau phu-shared-20260611-v2",
+      "ingredients": [
+        {
+          "dishesId": "Canh kim chi dau phu-shared-20260611-v2",
+          "ingredientId": "Kim chi-shared-20260611-v2",
+          "amount": "220",
+          "unit": "g",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Canh kim chi dau phu-shared-20260611-v2",
+          "ingredientId": "Đậu phụQdYQjd3uDU",
+          "amount": "250",
+          "unit": "g",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Canh kim chi dau phu-shared-20260611-v2",
+          "ingredientId": "Nấm kim châmmlA63sS5ey",
+          "amount": "120",
+          "unit": "g",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Canh kim chi dau phu-shared-20260611-v2",
+          "ingredientId": "Nước9jnS_eO8Cv",
+          "amount": "800",
+          "unit": "ml",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Canh kim chi dau phu-shared-20260611-v2",
+          "ingredientId": "Hành láZtNmZbNswb",
+          "amount": "15",
+          "unit": "g",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Canh kim chi dau phu-shared-20260611-v2",
+          "ingredientId": "Sa te-shared-20260611-v2",
+          "amount": "1/2",
+          "unit": "thìa",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        }
+      ],
+      "steps": [
+        {
+          "id": "Canh kim chi dau phu-shared-20260611-v2-step-1",
+          "content": "Cắt kim chi và đậu phụ miếng vừa ăn.",
+          "order": 1,
+          "isDone": false,
+          "required": true
+        },
+        {
+          "id": "Canh kim chi dau phu-shared-20260611-v2-step-2",
+          "content": "Đun nước với kim chi cho ra vị chua cay.",
+          "order": 2,
+          "isDone": false,
+          "required": true
+        },
+        {
+          "id": "Canh kim chi dau phu-shared-20260611-v2-step-3",
+          "content": "Thêm đậu phụ và nấm kim châm.",
+          "order": 3,
+          "isDone": false,
+          "required": true
+        },
+        {
+          "id": "Canh kim chi dau phu-shared-20260611-v2-step-4",
+          "content": "Nêm sa tế nhẹ, rắc hành lá rồi dùng nóng.",
+          "order": 4,
+          "isDone": false,
+          "required": true
+        }
+      ],
+      "name": "Canh kim chi đậu phụ",
+      "includeDishes": [],
+      "note": "",
+      "isCompleted": true,
+      "duration": {
+        "unfreeze": null,
+        "prepare": 8,
+        "cooking": 15,
+        "serve": 3,
+        "cooldown": null
+      },
+      "baseServings": 2,
+      "tags": [
+        "Canh",
+        "Món chính"
+      ]
+    },
+    {
+      "id": "Trung cuon pho mai-shared-20260611-v2",
+      "ingredients": [
+        {
+          "dishesId": "Trung cuon pho mai-shared-20260611-v2",
+          "ingredientId": "Trứng gà72vN9igVwa",
+          "amount": "3",
+          "unit": "quả",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Trung cuon pho mai-shared-20260611-v2",
+          "ingredientId": "Pho mai-shared-20260611-v2",
+          "amount": "40",
+          "unit": "g",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Trung cuon pho mai-shared-20260611-v2",
+          "ingredientId": "Sữa tươi không đườngHqQaWllTs2",
+          "amount": "30",
+          "unit": "ml",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Trung cuon pho mai-shared-20260611-v2",
+          "ingredientId": "Bơ lạtbK-8VT5e-z",
+          "amount": "10",
+          "unit": "g",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Trung cuon pho mai-shared-20260611-v2",
+          "ingredientId": "Muối trắngrOsVaI3tKv",
+          "amount": "1/8",
+          "unit": "thìa",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        }
+      ],
+      "steps": [
+        {
+          "id": "Trung cuon pho mai-shared-20260611-v2-step-1",
+          "content": "Đánh trứng với sữa và chút muối.",
+          "order": 1,
+          "isDone": false,
+          "required": true
+        },
+        {
+          "id": "Trung cuon pho mai-shared-20260611-v2-step-2",
+          "content": "Làm nóng chảo với bơ.",
+          "order": 2,
+          "isDone": false,
+          "required": true
+        },
+        {
+          "id": "Trung cuon pho mai-shared-20260611-v2-step-3",
+          "content": "Đổ trứng mỏng, đặt phô mai vào giữa.",
+          "order": 3,
+          "isDone": false,
+          "required": true
+        },
+        {
+          "id": "Trung cuon pho mai-shared-20260611-v2-step-4",
+          "content": "Cuộn trứng khi vừa chín mềm.",
+          "order": 4,
+          "isDone": false,
+          "required": true
+        }
+      ],
+      "name": "Trứng cuộn phô mai",
+      "includeDishes": [],
+      "note": "",
+      "isCompleted": true,
+      "duration": {
+        "unfreeze": null,
+        "prepare": 6,
+        "cooking": 8,
+        "serve": 3,
+        "cooldown": null
+      },
+      "baseServings": 2,
+      "tags": [
+        "Ăn sáng",
+        "Món phụ"
+      ]
+    },
+    {
+      "id": "Salad khoai tay mayonnaise-shared-20260611-v2",
+      "ingredients": [
+        {
+          "dishesId": "Salad khoai tay mayonnaise-shared-20260611-v2",
+          "ingredientId": "Khoai tâylAyMsTv486",
+          "amount": "300",
+          "unit": "g",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Salad khoai tay mayonnaise-shared-20260611-v2",
+          "ingredientId": "Trứng gà72vN9igVwa",
+          "amount": "2",
+          "unit": "quả",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Salad khoai tay mayonnaise-shared-20260611-v2",
+          "ingredientId": "Dưa chuộtiww2N4-K0c",
+          "amount": "120",
+          "unit": "g",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Salad khoai tay mayonnaise-shared-20260611-v2",
+          "ingredientId": "Mayonnaise-shared-20260611-v2",
+          "amount": "2",
+          "unit": "thìa",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Salad khoai tay mayonnaise-shared-20260611-v2",
+          "ingredientId": "Sua chua khong duong-shared-20260611-v2",
+          "amount": "1",
+          "unit": "thìa",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        },
+        {
+          "dishesId": "Salad khoai tay mayonnaise-shared-20260611-v2",
+          "ingredientId": "Muối trắngrOsVaI3tKv",
+          "amount": "1/4",
+          "unit": "thìa",
+          "required": true,
+          "prepare": [],
+          "meal": null,
+          "dish": null
+        }
+      ],
+      "steps": [
+        {
+          "id": "Salad khoai tay mayonnaise-shared-20260611-v2-step-1",
+          "content": "Luộc khoai tây và trứng đến chín.",
+          "order": 1,
+          "isDone": false,
+          "required": true
+        },
+        {
+          "id": "Salad khoai tay mayonnaise-shared-20260611-v2-step-2",
+          "content": "Cắt khoai, trứng và dưa chuột miếng nhỏ.",
+          "order": 2,
+          "isDone": false,
+          "required": true
+        },
+        {
+          "id": "Salad khoai tay mayonnaise-shared-20260611-v2-step-3",
+          "content": "Trộn mayonnaise với sữa chua và muối.",
+          "order": 3,
+          "isDone": false,
+          "required": true
+        },
+        {
+          "id": "Salad khoai tay mayonnaise-shared-20260611-v2-step-4",
+          "content": "Trộn đều salad và làm lạnh nhẹ trước khi dùng.",
+          "order": 4,
+          "isDone": false,
+          "required": true
+        }
+      ],
+      "name": "Salad khoai tây mayonnaise",
+      "includeDishes": [],
+      "note": "",
+      "isCompleted": true,
+      "duration": {
+        "unfreeze": null,
+        "prepare": 12,
+        "cooking": 15,
+        "serve": 3,
+        "cooldown": null
+      },
+      "baseServings": 2,
+      "tags": [
+        "Salad",
+        "Món phụ"
       ]
     }
   ]
