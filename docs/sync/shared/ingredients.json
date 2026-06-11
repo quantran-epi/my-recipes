@@ -9755,5 +9755,814 @@
       "quả": 250
     },
     "shelfLife": "medium"
+  },
+  {
+    "baseUnit": "g",
+    "category": "Rau củ",
+    "id": "Rau khoai lang-shared-20260611",
+    "inventoryUnits": [
+      "g",
+      "kg",
+      "bó"
+    ],
+    "name": "Rau khoai lang",
+    "nutrition": {
+      "amount": 100,
+      "calcium": 78,
+      "calories": 35,
+      "carbs": 7.1,
+      "cholesterol": 0,
+      "fat": 0.3,
+      "fiber": 4,
+      "iron": 1,
+      "potassium": 508,
+      "protein": 2.5,
+      "saturatedFat": 0,
+      "sodium": 9,
+      "sources": [
+        {
+          "confidence": "category",
+          "matchedName": "Sweet potato leaves, raw",
+          "name": "Ingredient category estimate",
+          "note": "No close direct USDA item was available; values are conservative category estimates for the Vietnamese ingredient.",
+          "url": "https://www.fao.org/infoods/infoods/tables-and-databases/vietnam/en/"
+        },
+        {
+          "confidence": "similar",
+          "matchedName": "Rau khoai lang",
+          "name": "Vietnamese Food Composition Table 2007",
+          "note": "Vietnam-specific food composition reference listed by FAO/INFOODS; used for local ingredient context and cross-checking.",
+          "url": "https://www.fao.org/infoods/infoods/tables-and-databases/vietnam/en/"
+        }
+      ],
+      "sugar": 0.9,
+      "unit": "g",
+      "vitaminA": 189,
+      "vitaminC": 11
+    },
+    "preservationCondition": "fridge",
+    "priceEstimate": {
+      "amount": 1,
+      "currency": "VND",
+      "max": 25000,
+      "min": 10000,
+      "unit": "bó"
+    },
+    "recipeUnitConversions": {
+      "bó": 300,
+      "g": 1,
+      "kg": 1000
+    },
+    "shelfLife": "very_short"
+  },
+  {
+    "baseUnit": "g",
+    "category": "Rau củ",
+    "id": "Rau den-shared-20260611",
+    "inventoryUnits": [
+      "g",
+      "kg",
+      "bó"
+    ],
+    "name": "Rau dền",
+    "nutrition": {
+      "amount": 100,
+      "calcium": 215,
+      "calories": 23,
+      "carbs": 4,
+      "cholesterol": 0,
+      "fat": 0.3,
+      "fiber": 2.2,
+      "iron": 2.3,
+      "potassium": 611,
+      "protein": 2.5,
+      "saturatedFat": 0,
+      "sodium": 20,
+      "sources": [
+        {
+          "confidence": "exact",
+          "matchedName": "Amaranth leaves, raw",
+          "name": "USDA FoodData Central",
+          "note": "Nutrient values are from USDA FoodData Central or a conservative category estimate per 100 g/ml basis; liquid units are displayed as the app serving basis when appropriate.",
+          "url": "https://fdc.nal.usda.gov/fdc-app.html#/food-search?query=Amaranth%20leaves%2C%20raw"
+        },
+        {
+          "confidence": "similar",
+          "matchedName": "Rau dền",
+          "name": "Vietnamese Food Composition Table 2007",
+          "note": "Vietnam-specific food composition reference listed by FAO/INFOODS; used for local ingredient context and cross-checking.",
+          "url": "https://www.fao.org/infoods/infoods/tables-and-databases/vietnam/en/"
+        }
+      ],
+      "sugar": 0.3,
+      "unit": "g",
+      "vitaminA": 146,
+      "vitaminC": 43.3
+    },
+    "preservationCondition": "fridge",
+    "priceEstimate": {
+      "amount": 1,
+      "currency": "VND",
+      "max": 25000,
+      "min": 10000,
+      "unit": "bó"
+    },
+    "recipeUnitConversions": {
+      "bó": 300,
+      "g": 1,
+      "kg": 1000
+    },
+    "shelfLife": "very_short"
+  },
+  {
+    "baseUnit": "g",
+    "category": "Rau củ",
+    "id": "Cai thao-shared-20260611",
+    "inventoryUnits": [
+      "g",
+      "kg"
+    ],
+    "name": "Cải thảo",
+    "nutrition": {
+      "amount": 100,
+      "calcium": 77,
+      "calories": 16,
+      "carbs": 3.2,
+      "cholesterol": 0,
+      "fat": 0.2,
+      "fiber": 1.2,
+      "iron": 0.3,
+      "potassium": 238,
+      "protein": 1.2,
+      "saturatedFat": 0,
+      "sodium": 8,
+      "sources": [
+        {
+          "confidence": "similar",
+          "matchedName": "Cabbage, chinese (pak-choi), raw",
+          "name": "USDA FoodData Central",
+          "note": "Nutrient values are from USDA FoodData Central or a conservative category estimate per 100 g/ml basis; liquid units are displayed as the app serving basis when appropriate.",
+          "url": "https://fdc.nal.usda.gov/fdc-app.html#/food-search?query=Cabbage%2C%20chinese%20(pak-choi)%2C%20raw"
+        },
+        {
+          "confidence": "similar",
+          "matchedName": "Cải thảo",
+          "name": "Vietnamese Food Composition Table 2007",
+          "note": "Vietnam-specific food composition reference listed by FAO/INFOODS; used for local ingredient context and cross-checking.",
+          "url": "https://www.fao.org/infoods/infoods/tables-and-databases/vietnam/en/"
+        }
+      ],
+      "sugar": 1.4,
+      "unit": "g",
+      "vitaminA": 16,
+      "vitaminC": 27
+    },
+    "preservationCondition": "fridge",
+    "priceEstimate": {
+      "amount": 1,
+      "currency": "VND",
+      "max": 35000,
+      "min": 15000,
+      "unit": "kg"
+    },
+    "recipeUnitConversions": {
+      "g": 1,
+      "kg": 1000
+    },
+    "shelfLife": "medium"
+  },
+  {
+    "baseUnit": "g",
+    "category": "Rau củ",
+    "id": "Ngo ngot-shared-20260611",
+    "inventoryUnits": [
+      "g",
+      "kg",
+      "quả"
+    ],
+    "name": "Ngô ngọt",
+    "nutrition": {
+      "amount": 100,
+      "calcium": 2,
+      "calories": 86,
+      "carbs": 18.7,
+      "cholesterol": 0,
+      "fat": 1.4,
+      "fiber": 2,
+      "iron": 0.5,
+      "potassium": 270,
+      "protein": 3.3,
+      "saturatedFat": 0.3,
+      "sodium": 15,
+      "sources": [
+        {
+          "confidence": "exact",
+          "matchedName": "Corn, sweet, yellow, raw",
+          "name": "USDA FoodData Central",
+          "note": "Nutrient values are from USDA FoodData Central or a conservative category estimate per 100 g/ml basis; liquid units are displayed as the app serving basis when appropriate.",
+          "url": "https://fdc.nal.usda.gov/fdc-app.html#/food-search?query=Corn%2C%20sweet%2C%20yellow%2C%20raw"
+        },
+        {
+          "confidence": "similar",
+          "matchedName": "Ngô ngọt",
+          "name": "Vietnamese Food Composition Table 2007",
+          "note": "Vietnam-specific food composition reference listed by FAO/INFOODS; used for local ingredient context and cross-checking.",
+          "url": "https://www.fao.org/infoods/infoods/tables-and-databases/vietnam/en/"
+        }
+      ],
+      "sugar": 6.3,
+      "unit": "g",
+      "vitaminA": 9,
+      "vitaminC": 6.8
+    },
+    "preservationCondition": "fridge",
+    "priceEstimate": {
+      "amount": 1,
+      "currency": "VND",
+      "max": 18000,
+      "min": 8000,
+      "unit": "quả"
+    },
+    "recipeUnitConversions": {
+      "g": 1,
+      "kg": 1000,
+      "quả": 180
+    },
+    "shelfLife": "medium"
+  },
+  {
+    "baseUnit": "g",
+    "category": "Rau củ",
+    "id": "Nam rom-shared-20260611",
+    "inventoryUnits": [
+      "g",
+      "kg"
+    ],
+    "name": "Nấm rơm",
+    "nutrition": {
+      "amount": 100,
+      "calcium": 8,
+      "calories": 32,
+      "carbs": 4.6,
+      "cholesterol": 0,
+      "fat": 0.7,
+      "fiber": 2.5,
+      "iron": 1.1,
+      "potassium": 390,
+      "protein": 3.8,
+      "saturatedFat": 0.1,
+      "sodium": 8,
+      "sources": [
+        {
+          "confidence": "category",
+          "matchedName": "Straw mushrooms, raw",
+          "name": "Ingredient category estimate",
+          "note": "No close direct USDA item was available; values are conservative category estimates for the Vietnamese ingredient.",
+          "url": "https://www.fao.org/infoods/infoods/tables-and-databases/vietnam/en/"
+        },
+        {
+          "confidence": "similar",
+          "matchedName": "Nấm rơm",
+          "name": "Vietnamese Food Composition Table 2007",
+          "note": "Vietnam-specific food composition reference listed by FAO/INFOODS; used for local ingredient context and cross-checking.",
+          "url": "https://www.fao.org/infoods/infoods/tables-and-databases/vietnam/en/"
+        }
+      ],
+      "sugar": 1.7,
+      "unit": "g",
+      "vitaminA": 0,
+      "vitaminC": 4
+    },
+    "preservationCondition": "fridge",
+    "priceEstimate": {
+      "amount": 1,
+      "currency": "VND",
+      "max": 120000,
+      "min": 60000,
+      "unit": "kg"
+    },
+    "recipeUnitConversions": {
+      "g": 1,
+      "kg": 1000
+    },
+    "shelfLife": "very_short"
+  },
+  {
+    "baseUnit": "g",
+    "category": "Gia vị",
+    "id": "Mam tom-shared-20260611",
+    "inventoryUnits": [
+      "g",
+      "kg"
+    ],
+    "name": "Mắm tôm",
+    "nutrition": {
+      "amount": 100,
+      "calcium": 100,
+      "calories": 80,
+      "carbs": 3,
+      "cholesterol": 85,
+      "fat": 1.5,
+      "fiber": 0,
+      "iron": 2,
+      "potassium": 180,
+      "protein": 14,
+      "saturatedFat": 0.4,
+      "sodium": 7000,
+      "sources": [
+        {
+          "confidence": "category",
+          "matchedName": "Fermented shrimp paste",
+          "name": "Ingredient category estimate",
+          "note": "Fermented shrimp paste varies widely by brand; values are conservative estimates and sodium is intentionally high.",
+          "url": "https://www.fao.org/infoods/infoods/tables-and-databases/vietnam/en/"
+        },
+        {
+          "confidence": "similar",
+          "matchedName": "Mắm tôm",
+          "name": "Vietnamese Food Composition Table 2007",
+          "note": "Vietnam-specific food composition reference listed by FAO/INFOODS; used for local ingredient context and cross-checking.",
+          "url": "https://www.fao.org/infoods/infoods/tables-and-databases/vietnam/en/"
+        }
+      ],
+      "sugar": 1.5,
+      "unit": "g",
+      "vitaminA": 15,
+      "vitaminC": 0
+    },
+    "preservationCondition": "cool_dry",
+    "priceEstimate": {
+      "amount": 1,
+      "currency": "VND",
+      "max": 90000,
+      "min": 40000,
+      "unit": "kg"
+    },
+    "recipeUnitConversions": {
+      "g": 1,
+      "kg": 1000,
+      "thìa": 15
+    },
+    "shelfLife": "very_long"
+  },
+  {
+    "baseUnit": "g",
+    "category": "Hải sản",
+    "id": "Ca thu-shared-20260611",
+    "inventoryUnits": [
+      "g",
+      "kg"
+    ],
+    "name": "Cá thu",
+    "nutrition": {
+      "amount": 100,
+      "calcium": 12,
+      "calories": 205,
+      "carbs": 0,
+      "cholesterol": 70,
+      "fat": 13.9,
+      "fiber": 0,
+      "iron": 1.6,
+      "potassium": 314,
+      "protein": 18.6,
+      "saturatedFat": 3.3,
+      "sodium": 90,
+      "sources": [
+        {
+          "confidence": "similar",
+          "matchedName": "Fish, mackerel, raw",
+          "name": "USDA FoodData Central",
+          "note": "Nutrient values are from USDA FoodData Central or a conservative category estimate per 100 g/ml basis; liquid units are displayed as the app serving basis when appropriate.",
+          "url": "https://fdc.nal.usda.gov/fdc-app.html#/food-search?query=Fish%2C%20mackerel%2C%20raw"
+        },
+        {
+          "confidence": "similar",
+          "matchedName": "Cá thu",
+          "name": "Vietnamese Food Composition Table 2007",
+          "note": "Vietnam-specific food composition reference listed by FAO/INFOODS; used for local ingredient context and cross-checking.",
+          "url": "https://www.fao.org/infoods/infoods/tables-and-databases/vietnam/en/"
+        }
+      ],
+      "sugar": 0,
+      "unit": "g",
+      "vitaminA": 50,
+      "vitaminC": 0
+    },
+    "preservationCondition": "freezer",
+    "priceEstimate": {
+      "amount": 1,
+      "currency": "VND",
+      "max": 280000,
+      "min": 160000,
+      "unit": "kg"
+    },
+    "recipeUnitConversions": {
+      "g": 1,
+      "kg": 1000
+    },
+    "shelfLife": "very_short"
+  },
+  {
+    "baseUnit": "g",
+    "category": "Hải sản",
+    "id": "Ca basa-shared-20260611",
+    "inventoryUnits": [
+      "g",
+      "kg"
+    ],
+    "name": "Cá basa",
+    "nutrition": {
+      "amount": 100,
+      "calcium": 10,
+      "calories": 105,
+      "carbs": 0,
+      "cholesterol": 55,
+      "fat": 4,
+      "fiber": 0,
+      "iron": 0.6,
+      "potassium": 302,
+      "protein": 17,
+      "saturatedFat": 1.2,
+      "sodium": 50,
+      "sources": [
+        {
+          "confidence": "category",
+          "matchedName": "Pangasius / basa fish, raw",
+          "name": "Ingredient category estimate",
+          "note": "USDA does not consistently expose a direct basa item; values are a conservative lean white-fish estimate.",
+          "url": "https://www.fao.org/infoods/infoods/tables-and-databases/vietnam/en/"
+        },
+        {
+          "confidence": "similar",
+          "matchedName": "Cá basa",
+          "name": "Vietnamese Food Composition Table 2007",
+          "note": "Vietnam-specific food composition reference listed by FAO/INFOODS; used for local ingredient context and cross-checking.",
+          "url": "https://www.fao.org/infoods/infoods/tables-and-databases/vietnam/en/"
+        }
+      ],
+      "sugar": 0,
+      "unit": "g",
+      "vitaminA": 5,
+      "vitaminC": 0
+    },
+    "preservationCondition": "freezer",
+    "priceEstimate": {
+      "amount": 1,
+      "currency": "VND",
+      "max": 120000,
+      "min": 65000,
+      "unit": "kg"
+    },
+    "recipeUnitConversions": {
+      "g": 1,
+      "kg": 1000
+    },
+    "shelfLife": "very_short"
+  },
+  {
+    "baseUnit": "g",
+    "category": "Rau củ",
+    "id": "Rong bien-shared-20260611",
+    "inventoryUnits": [
+      "g",
+      "kg"
+    ],
+    "name": "Rong biển",
+    "nutrition": {
+      "amount": 100,
+      "calcium": 280,
+      "calories": 306,
+      "carbs": 44,
+      "cholesterol": 0,
+      "fat": 3.7,
+      "fiber": 26,
+      "iron": 11,
+      "potassium": 2400,
+      "protein": 41,
+      "saturatedFat": 0.5,
+      "sodium": 575,
+      "sources": [
+        {
+          "confidence": "category",
+          "matchedName": "Dried seaweed / laver",
+          "name": "Ingredient category estimate",
+          "note": "Rong biển in pantry use is usually dried; values are estimated per 100 g dry seaweed and recipe amounts should stay small.",
+          "url": "https://www.fao.org/infoods/infoods/tables-and-databases/vietnam/en/"
+        },
+        {
+          "confidence": "similar",
+          "matchedName": "Rong biển",
+          "name": "Vietnamese Food Composition Table 2007",
+          "note": "Vietnam-specific food composition reference listed by FAO/INFOODS; used for local ingredient context and cross-checking.",
+          "url": "https://www.fao.org/infoods/infoods/tables-and-databases/vietnam/en/"
+        }
+      ],
+      "sugar": 0.5,
+      "unit": "g",
+      "vitaminA": 230,
+      "vitaminC": 39
+    },
+    "preservationCondition": "cool_dry",
+    "priceEstimate": {
+      "amount": 1,
+      "currency": "VND",
+      "max": 500000,
+      "min": 250000,
+      "unit": "kg"
+    },
+    "recipeUnitConversions": {
+      "g": 1,
+      "kg": 1000
+    },
+    "shelfLife": "very_long"
+  },
+  {
+    "baseUnit": "g",
+    "category": "Tinh bột",
+    "id": "Yen mach-shared-20260611",
+    "inventoryUnits": [
+      "g",
+      "kg"
+    ],
+    "name": "Yến mạch",
+    "nutrition": {
+      "amount": 100,
+      "calcium": 54,
+      "calories": 389,
+      "carbs": 66.3,
+      "cholesterol": 0,
+      "fat": 6.9,
+      "fiber": 10.6,
+      "iron": 4.7,
+      "potassium": 429,
+      "protein": 16.9,
+      "saturatedFat": 1.2,
+      "sodium": 2,
+      "sources": [
+        {
+          "confidence": "exact",
+          "matchedName": "Oats, raw",
+          "name": "USDA FoodData Central",
+          "note": "Nutrient values are from USDA FoodData Central or a conservative category estimate per 100 g/ml basis; liquid units are displayed as the app serving basis when appropriate.",
+          "url": "https://fdc.nal.usda.gov/fdc-app.html#/food-search?query=Oats%2C%20raw"
+        },
+        {
+          "confidence": "similar",
+          "matchedName": "Yến mạch",
+          "name": "Vietnamese Food Composition Table 2007",
+          "note": "Vietnam-specific food composition reference listed by FAO/INFOODS; used for local ingredient context and cross-checking.",
+          "url": "https://www.fao.org/infoods/infoods/tables-and-databases/vietnam/en/"
+        }
+      ],
+      "sugar": 0.9,
+      "unit": "g",
+      "vitaminA": 0,
+      "vitaminC": 0
+    },
+    "preservationCondition": "cool_dry",
+    "priceEstimate": {
+      "amount": 1,
+      "currency": "VND",
+      "max": 150000,
+      "min": 70000,
+      "unit": "kg"
+    },
+    "recipeUnitConversions": {
+      "g": 1,
+      "kg": 1000
+    },
+    "shelfLife": "very_long"
+  },
+  {
+    "baseUnit": "g",
+    "category": "Tinh bột",
+    "id": "Banh da nem-shared-20260611",
+    "inventoryUnits": [
+      "g",
+      "kg",
+      "lá"
+    ],
+    "name": "Bánh đa nem",
+    "nutrition": {
+      "amount": 100,
+      "calcium": 20,
+      "calories": 320,
+      "carbs": 78,
+      "cholesterol": 0,
+      "fat": 0.6,
+      "fiber": 1,
+      "iron": 0.4,
+      "potassium": 60,
+      "protein": 5,
+      "saturatedFat": 0.1,
+      "sodium": 350,
+      "sources": [
+        {
+          "confidence": "category",
+          "matchedName": "Rice paper wrapper",
+          "name": "Ingredient category estimate",
+          "note": "Packaged bánh đa nem varies by brand; values are estimated from common rice-paper wrappers.",
+          "url": "https://www.fao.org/infoods/infoods/tables-and-databases/vietnam/en/"
+        },
+        {
+          "confidence": "similar",
+          "matchedName": "Bánh đa nem",
+          "name": "Vietnamese Food Composition Table 2007",
+          "note": "Vietnam-specific food composition reference listed by FAO/INFOODS; used for local ingredient context and cross-checking.",
+          "url": "https://www.fao.org/infoods/infoods/tables-and-databases/vietnam/en/"
+        }
+      ],
+      "sugar": 1,
+      "unit": "g",
+      "vitaminA": 0,
+      "vitaminC": 0
+    },
+    "preservationCondition": "cool_dry",
+    "priceEstimate": {
+      "amount": 1,
+      "currency": "VND",
+      "max": 130000,
+      "min": 70000,
+      "unit": "kg"
+    },
+    "recipeUnitConversions": {
+      "g": 1,
+      "kg": 1000,
+      "lá": 8
+    },
+    "shelfLife": "very_long"
+  },
+  {
+    "baseUnit": "g",
+    "category": "Rau củ",
+    "id": "Dau Ha Lan-shared-20260611",
+    "inventoryUnits": [
+      "g",
+      "kg"
+    ],
+    "name": "Đậu Hà Lan",
+    "nutrition": {
+      "amount": 100,
+      "calcium": 25,
+      "calories": 81,
+      "carbs": 14.5,
+      "cholesterol": 0,
+      "fat": 0.4,
+      "fiber": 5.1,
+      "iron": 1.5,
+      "potassium": 244,
+      "protein": 5.4,
+      "saturatedFat": 0.1,
+      "sodium": 5,
+      "sources": [
+        {
+          "confidence": "exact",
+          "matchedName": "Peas, green, raw",
+          "name": "USDA FoodData Central",
+          "note": "Nutrient values are from USDA FoodData Central or a conservative category estimate per 100 g/ml basis; liquid units are displayed as the app serving basis when appropriate.",
+          "url": "https://fdc.nal.usda.gov/fdc-app.html#/food-search?query=Peas%2C%20green%2C%20raw"
+        },
+        {
+          "confidence": "similar",
+          "matchedName": "Đậu Hà Lan",
+          "name": "Vietnamese Food Composition Table 2007",
+          "note": "Vietnam-specific food composition reference listed by FAO/INFOODS; used for local ingredient context and cross-checking.",
+          "url": "https://www.fao.org/infoods/infoods/tables-and-databases/vietnam/en/"
+        }
+      ],
+      "sugar": 5.7,
+      "unit": "g",
+      "vitaminA": 38,
+      "vitaminC": 40
+    },
+    "preservationCondition": "freezer",
+    "priceEstimate": {
+      "amount": 1,
+      "currency": "VND",
+      "max": 110000,
+      "min": 50000,
+      "unit": "kg"
+    },
+    "recipeUnitConversions": {
+      "g": 1,
+      "kg": 1000
+    },
+    "shelfLife": "medium"
+  },
+  {
+    "baseUnit": "g",
+    "category": "Gia vị",
+    "id": "Hat nem-shared-20260611",
+    "inventoryUnits": [
+      "g",
+      "kg"
+    ],
+    "name": "Hạt nêm",
+    "nutrition": {
+      "amount": 100,
+      "calcium": 40,
+      "calories": 230,
+      "carbs": 42,
+      "cholesterol": 0,
+      "fat": 2,
+      "fiber": 0,
+      "iron": 1,
+      "potassium": 120,
+      "protein": 8,
+      "saturatedFat": 0.6,
+      "sodium": 18000,
+      "sources": [
+        {
+          "confidence": "category",
+          "matchedName": "Seasoning granules",
+          "name": "Ingredient category estimate",
+          "note": "Hạt nêm nutrition varies greatly by brand; sodium is intentionally estimated high for seasoning use.",
+          "url": "https://www.fao.org/infoods/infoods/tables-and-databases/vietnam/en/"
+        },
+        {
+          "confidence": "similar",
+          "matchedName": "Hạt nêm",
+          "name": "Vietnamese Food Composition Table 2007",
+          "note": "Vietnam-specific food composition reference listed by FAO/INFOODS; used for local ingredient context and cross-checking.",
+          "url": "https://www.fao.org/infoods/infoods/tables-and-databases/vietnam/en/"
+        }
+      ],
+      "sugar": 15,
+      "unit": "g",
+      "vitaminA": 0,
+      "vitaminC": 0
+    },
+    "preservationCondition": "cool_dry",
+    "priceEstimate": {
+      "amount": 1,
+      "currency": "VND",
+      "max": 130000,
+      "min": 70000,
+      "unit": "kg"
+    },
+    "recipeUnitConversions": {
+      "g": 1,
+      "kg": 1000,
+      "thìa": 5
+    },
+    "shelfLife": "very_long"
+  },
+  {
+    "baseUnit": "g",
+    "category": "Gia vị",
+    "id": "Bot canh-shared-20260611",
+    "inventoryUnits": [
+      "g",
+      "kg"
+    ],
+    "name": "Bột canh",
+    "nutrition": {
+      "amount": 100,
+      "calcium": 40,
+      "calories": 90,
+      "carbs": 20,
+      "cholesterol": 0,
+      "fat": 0,
+      "fiber": 0,
+      "iron": 0.5,
+      "potassium": 80,
+      "protein": 1,
+      "saturatedFat": 0,
+      "sodium": 25000,
+      "sources": [
+        {
+          "confidence": "category",
+          "matchedName": "Soup seasoning salt",
+          "name": "Ingredient category estimate",
+          "note": "Bột canh is mostly salt and seasoning powder; sodium is intentionally estimated high.",
+          "url": "https://www.fao.org/infoods/infoods/tables-and-databases/vietnam/en/"
+        },
+        {
+          "confidence": "similar",
+          "matchedName": "Bột canh",
+          "name": "Vietnamese Food Composition Table 2007",
+          "note": "Vietnam-specific food composition reference listed by FAO/INFOODS; used for local ingredient context and cross-checking.",
+          "url": "https://www.fao.org/infoods/infoods/tables-and-databases/vietnam/en/"
+        }
+      ],
+      "sugar": 5,
+      "unit": "g",
+      "vitaminA": 0,
+      "vitaminC": 0
+    },
+    "preservationCondition": "cool_dry",
+    "priceEstimate": {
+      "amount": 1,
+      "currency": "VND",
+      "max": 70000,
+      "min": 30000,
+      "unit": "kg"
+    },
+    "recipeUnitConversions": {
+      "g": 1,
+      "kg": 1000,
+      "thìa": 5
+    },
+    "shelfLife": "very_long"
   }
 ]
