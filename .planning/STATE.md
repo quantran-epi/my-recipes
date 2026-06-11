@@ -3,9 +3,9 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: ready
-stopped_at: Completed quick task 260611-lci
-last_updated: "2026-06-11T08:30:15Z"
-last_activity: 2026-06-11 -- Completed quick task 260611-lci: Link health treatments to sickness records and mark current household user
+stopped_at: Completed quick task 260611-lpp
+last_updated: "2026-06-11T08:40:54Z"
+last_activity: 2026-06-11 -- Completed quick task 260611-lpp: Fix household health status control and history row layout
 progress:
   total_phases: 5
   completed_phases: 4
@@ -28,7 +28,7 @@ See: .planning/PROJECT.md (updated 2026-06-05)
 Phase: 5 (release-gate-and-product-guardrails) — READY
 Plan: Not started
 Status: Phase 04 complete; ready for Phase 05
-Last activity: 2026-06-11 -- Completed quick task 260611-lci: Link health treatments to sickness records and mark current household user
+Last activity: 2026-06-11 -- Completed quick task 260611-lpp: Fix household health status control and history row layout
 
 Progress: [████████░░] 80%
 
@@ -36,6 +36,7 @@ Progress: [████████░░] 80%
 
 | Date | Task | Artifact |
 |------|------|----------|
+| 2026-06-11 | Fix household health status control and history row layout | `.planning/quick/260611-lpp-fix-household-health-status-control-and-/260611-lpp-SUMMARY.md` |
 | 2026-06-11 | Link health treatments to sickness records and mark current household user | `.planning/quick/260611-lci-link-health-treatments-to-sickness-recor/260611-lci-SUMMARY.md` |
 | 2026-06-11 | Fix household health tab vertical layout | `.planning/quick/260611-l56-fix-household-health-tab-vertical-layout/260611-l56-SUMMARY.md` |
 | 2026-06-11 | Implement household health management feature from PLAN-v2 | `.planning/quick/260611-k7j-implement-household-health-management-fe/260611-k7j-SUMMARY.md` |
