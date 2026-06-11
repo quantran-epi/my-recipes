@@ -8,8 +8,9 @@ import { DeferredModalContent, Modal } from '@components/Modal';
 import { Typography } from '@components/Typography';
 import { CookingSessionWidget } from '@modules/Dishes/Screens/CookingSession.widget';
 import { Dishes } from '@store/Models/Dishes';
+import { CookingSessionMemberFeedback } from '@store/Models/CookingSession';
 import { addLeftoverTrackerItem } from '@store/Reducers/AppContextReducer';
-import { startCooking } from '@store/Reducers/CookingSessionReducer';
+import { recordDishFeedback, startCooking } from '@store/Reducers/CookingSessionReducer';
 import { selectCookingSessions, selectDishes, selectDishesById, selectSelectedHouseholdMembers } from '@store/Selectors';
 import { Input, InputNumber, Select, Switch } from 'antd';
 import dayjs from 'dayjs';
@@ -154,13 +155,25 @@ export const MealCompletionLeftoverModal: React.FC<MealCompletionLeftoverModalPr
     const dispatch = useDispatch();
     const message = useMessage();
     const dishesById = useSelector(selectDishesById);
+    const members = useSelector(selectSelectedHouseholdMembers);
     const uniqueDishIds = useMemo(() => getScheduledMealDishIds(dishIds), [dishIds]);
     const [drafts, setDrafts] = useState<Record<string, LeftoverDishDraft>>({});
+    // dishId → memberId → reaction, captured after eating. Aggregated into the durable
+    // dish-feedback store on save (one recordDishFeedback dispatch per member rating).
+    const [feedback, setFeedback] = useState<Record<string, Record<string, CookingSessionMemberFeedback>>>({});
 
     React.useEffect(() => {
         if (!open) return;
         setDrafts(Object.fromEntries(uniqueDishIds.map(id => [id, { enabled: false, portions: 1, eatInDays: 2, note: '' }])));
+        setFeedback({});
     }, [open, uniqueDishIds]);
+
+    const _setFeedback = (dishId: string, memberId: string, value: CookingSessionMemberFeedback) => {
+        setFeedback(current => ({
+            ...current,
+            [dishId]: { ...(current[dishId] ?? {}), [memberId]: value },
+        }));
+    };
 
     const _updateDraft = (dishId: string, patch: Partial<LeftoverDishDraft>) => {
         setDrafts(current => ({
@@ -194,7 +207,18 @@ export const MealCompletionLeftoverModal: React.FC<MealCompletionLeftoverModalPr
             }));
             saved += 1;
         });
-        message.success(saved > 0 ? `Đã lưu ${saved} món còn lại` : 'Đã hoàn tất bữa ăn');
+        // Aggregate each member's reaction into the durable per-dish feedback store.
+        let rated = 0;
+        uniqueDishIds.forEach(dishId => {
+            Object.values(feedback[dishId] ?? {}).forEach(reaction => {
+                dispatch(recordDishFeedback({ dishId, feedback: reaction }));
+                rated += 1;
+            });
+        });
+        const parts: string[] = [];
+        if (saved > 0) parts.push(`${saved} món còn lại`);
+        if (rated > 0) parts.push(`${rated} phản hồi`);
+        message.success(parts.length > 0 ? `Đã lưu ${parts.join(' · ')}` : 'Đã hoàn tất bữa ăn');
         onClose();
     };
 
@@ -234,6 +258,26 @@ export const MealCompletionLeftoverModal: React.FC<MealCompletionLeftoverModalPr
                             <div style={{ gridColumn: '1 / -1' }}>
                                 <Typography.Text strong style={{ display: 'block', fontSize: 12, marginBottom: 5 }}>Ghi chú</Typography.Text>
                                 <Input.TextArea value={draft.note} onChange={event => _updateDraft(dishId, { note: event.target.value })} placeholder='Ví dụ: để hộp ngăn mát, phần cho bữa trưa mai...' autoSize={{ minRows: 2, maxRows: 4 }} />
+                            </div>
+                        </div>}
+                        {members.length > 0 && <div style={{ marginTop: 10, paddingTop: 10, borderTop: '1px solid rgba(15,23,42,0.06)' }}>
+                            <Typography.Text strong style={{ display: 'block', fontSize: 12, marginBottom: 6 }}>Mọi người thấy sao?</Typography.Text>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: 7 }}>
+                                {members.map(member => <div key={member.id} style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) 132px', gap: 8, alignItems: 'center' }}>
+                                    <Typography.Text style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{member.name}</Typography.Text>
+                                    <Select
+                                        size='small'
+                                        value={feedback[dishId]?.[member.id]}
+                                        placeholder='Chọn'
+                                        style={{ width: '100%' }}
+                                        onChange={value => _setFeedback(dishId, member.id, value)}
+                                        options={[
+                                            { value: 'liked', label: 'Thích' },
+                                            { value: 'neutral', label: 'Bình thường' },
+                                            { value: 'disliked', label: 'Không hợp' },
+                                        ]}
+                                    />
+                                </div>)}
                             </div>
                         </div>}
                     </Box>;

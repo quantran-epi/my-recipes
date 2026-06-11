@@ -1,7 +1,7 @@
 import type { PayloadAction } from '@reduxjs/toolkit';
 import { createSlice } from '@reduxjs/toolkit';
 import { Ingredient } from '@store/Models/Ingredient';
-import { CookingSession, CookingSessionIngredientStatus, CookingSessionMemberFeedback, CookingTimer, DishCookTimeStat } from '@store/Models/CookingSession';
+import { CookingSession, CookingSessionIngredientStatus, CookingSessionMemberFeedback, CookingTimer, DishCookTimeStat, DishFeedbackStat } from '@store/Models/CookingSession';
 import { DishDurationPhaseKey } from '@store/Models/Dishes';
 import { nanoid } from 'nanoid';
 
@@ -50,11 +50,13 @@ export type FinishCookingParams = {
 export interface CookingSessionState {
     sessions: CookingSession[];
     cookTimeStats?: Record<string, DishCookTimeStat>; // durable per-dish learned times, keyed by dishId
+    dishFeedback?: Record<string, DishFeedbackStat>;   // durable per-dish household feedback, keyed by dishId
 }
 
 const initialState: CookingSessionState = {
     sessions: [],
     cookTimeStats: {},
+    dishFeedback: {},
 }
 
 export const CookingSessionSlice = createSlice({
@@ -218,6 +220,17 @@ export const CookingSessionSlice = createSlice({
                 existing.phaseAverages = nextPhaseAverages;
             }
         },
+        recordDishFeedback: (state, action: PayloadAction<{ dishId: string; feedback: CookingSessionMemberFeedback }>) => {
+            const { dishId, feedback } = action.payload;
+            if (!dishId) return;
+            const store = state.dishFeedback ?? (state.dishFeedback = {});
+            const existing = store[dishId] ?? { dishId, liked: 0, neutral: 0, disliked: 0, updatedAt: '' };
+            if (feedback === 'liked') existing.liked += 1;
+            else if (feedback === 'neutral') existing.neutral += 1;
+            else if (feedback === 'disliked') existing.disliked += 1;
+            existing.updatedAt = new Date().toISOString();
+            store[dishId] = existing;
+        },
         clearFinished: (state) => {
             state.sessions = state.sessions.filter(s => s.status === "cooking");
         },
@@ -239,6 +252,7 @@ export const {
     advancePhase: advanceCookingPhase,
     toggleTimerSound: toggleCookingTimerSound,
     recordCookTime: recordCookTime,
+    recordDishFeedback: recordDishFeedback,
     clearFinished: clearCookingHistory,
 } = CookingSessionSlice.actions;
 export default CookingSessionSlice.reducer;

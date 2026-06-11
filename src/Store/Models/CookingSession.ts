@@ -27,6 +27,17 @@ export type CookingSessionIngredientProgress = {
 
 export type CookingSessionMemberFeedback = "liked" | "neutral" | "disliked";
 
+// Durable per-dish household feedback, aggregated across meals. Lives outside the session
+// list (like DishCookTimeStat) so clearCookingHistory can't wipe it — feedback is collected
+// at meal completion and may have no cooking session behind it at all.
+export type DishFeedbackStat = {
+    dishId: string;
+    liked: number;
+    neutral: number;
+    disliked: number;
+    updatedAt: string;
+}
+
 // Durable per-dish learned cook-time stat. Lives outside the session list because
 // clearCookingHistory wipes finished sessions; stats must survive that.
 export type DishCookTimeStat = {

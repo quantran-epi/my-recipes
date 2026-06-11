@@ -609,6 +609,7 @@ export const ScheduledMealItem = ({ item, selected, dishNameById, onDelete }: { 
     const [cookingToken, setCookingToken] = useState(0);
     const [cookingScope, setCookingScope] = useState<{ title: string; dishIds: string[] }>({ title: '', dishIds: [] });
     const [completionOpen, setCompletionOpen] = useState(false);
+    const [completionScope, setCompletionScope] = useState<{ title: string; dishIds: string[] }>({ title: '', dishIds: [] });
     const [copyDate, setCopyDate] = useState<Dayjs | null>(null);
     const dispatch = useDispatch();
 
@@ -641,13 +642,20 @@ export const ScheduledMealItem = ({ item, selected, dishNameById, onDelete }: { 
         setCookingOpen(true);
     };
 
+    const _openCompletion = (title: string, dishIds: string[]) => {
+        setCompletionScope({ title, dishIds: getScheduledMealDishIds(dishIds) });
+        setCompletionOpen(true);
+    };
+
     const _onMoreActionClick = (e) => {
         switch (e.key) {
             case "cook": _openCooking(`Nấu thực đơn - ${item.name}`, allDishIds); break;
             case "cook-breakfast": _openCooking(`Nấu bữa sáng - ${item.name}`, item.meals.breakfast); break;
             case "cook-lunch": _openCooking(`Nấu bữa trưa - ${item.name}`, item.meals.lunch); break;
             case "cook-dinner": _openCooking(`Nấu bữa tối - ${item.name}`, item.meals.dinner); break;
-            case "complete": setCompletionOpen(true); break;
+            case "complete-breakfast": _openCompletion(`Hoàn tất bữa sáng - ${item.name}`, item.meals.breakfast); break;
+            case "complete-lunch": _openCompletion(`Hoàn tất bữa trưa - ${item.name}`, item.meals.lunch); break;
+            case "complete-dinner": _openCompletion(`Hoàn tất bữa tối - ${item.name}`, item.meals.dinner); break;
             case "detail": toggleMealModal.show(); break;
             case "copy": toggleCopyModal.show(); break;
             case "edit": toggleEditModal.show(); break;
@@ -726,7 +734,9 @@ export const ScheduledMealItem = ({ item, selected, dishNameById, onDelete }: { 
                                     { label: "Nấu bữa sáng", key: "cook-breakfast", icon: <FireOutlined />, disabled: item.meals.breakfast.length === 0 },
                                     { label: "Nấu bữa trưa", key: "cook-lunch", icon: <FireOutlined />, disabled: item.meals.lunch.length === 0 },
                                     { label: "Nấu bữa tối", key: "cook-dinner", icon: <FireOutlined />, disabled: item.meals.dinner.length === 0 },
-                                    { label: "Hoàn tất bữa", key: "complete", icon: <RestOutlined />, disabled: allDishIds.length === 0 },
+                                    { label: "Hoàn tất bữa sáng", key: "complete-breakfast", icon: <RestOutlined />, disabled: item.meals.breakfast.length === 0 },
+                                    { label: "Hoàn tất bữa trưa", key: "complete-lunch", icon: <RestOutlined />, disabled: item.meals.lunch.length === 0 },
+                                    { label: "Hoàn tất bữa tối", key: "complete-dinner", icon: <RestOutlined />, disabled: item.meals.dinner.length === 0 },
                                     { label: "Chi tiết", key: "detail", icon: <CalendarOutlined /> },
                                     { type: "divider" },
                                     { label: "Sao chép", key: "copy", icon: <CopyOutlined /> },
@@ -760,8 +770,8 @@ export const ScheduledMealItem = ({ item, selected, dishNameById, onDelete }: { 
 
             <MealCompletionLeftoverModal
                 open={completionOpen}
-                title={`Hoàn tất bữa - ${item.name}`}
-                dishIds={allDishIds}
+                title={completionScope.title}
+                dishIds={completionScope.dishIds}
                 onClose={() => setCompletionOpen(false)}
             />
 

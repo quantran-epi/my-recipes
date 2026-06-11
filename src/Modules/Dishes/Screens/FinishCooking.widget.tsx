@@ -5,20 +5,20 @@ import { useMessage } from "@components/Message";
 import { useModal } from "@components/Modal/ModalProvider";
 import { Tag } from "@components/Tag";
 import { Typography } from "@components/Typography";
-import { CookingSession, CookingSessionMemberFeedback } from "@store/Models/CookingSession";
+import { CookingSession } from "@store/Models/CookingSession";
 import { InventoryHelper } from "@common/Helpers/InventoryHelper";
 import { IngredientUnitHelper } from "@common/Helpers/IngredientUnitHelper";
 import { DishDurationHelper } from "@common/Helpers/DishDurationHelper";
-import { cancelCooking, finishCooking, recordCookTime, setCookingMemberFeedback } from "@store/Reducers/CookingSessionReducer";
+import { cancelCooking, finishCooking, recordCookTime } from "@store/Reducers/CookingSessionReducer";
 import { updateDishDuration } from "@store/Reducers/DishesReducer";
 import { deductInventory } from "@store/Reducers/InventoryReducer";
 import { DishDuration, DishDurationPhaseKey } from "@store/Models/Dishes";
-import { selectDishes, selectDishesById, selectHouseholdMembers, selectIngredientsById, selectInventory, selectInventoryHealthConfig } from "@store/Selectors";
+import { selectDishes, selectDishesById, selectIngredientsById, selectInventory, selectInventoryHealthConfig } from "@store/Selectors";
 import moment from "moment";
 import 'moment/locale/vi';
-import React, { useMemo, useState } from "react";
+import React, { useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Popconfirm, Select } from "antd";
+import { Popconfirm } from "antd";
 
 import { DishServingHelper } from '@common/Helpers/DishServingHelper';
 
@@ -39,13 +39,8 @@ export const FinishCookingWidget: React.FunctionComponent<FinishCookingWidgetPro
     const ingredientsById = useSelector(selectIngredientsById);
     const inventoryItems = useSelector(selectInventory);
     const inventoryConfig = useSelector(selectInventoryHealthConfig);
-    const householdMembers = useSelector(selectHouseholdMembers);
-    const [memberFeedback, setMemberFeedback] = useState<Record<string, CookingSessionMemberFeedback>>(session.memberFeedback ?? {});
-
     const dish = dishesById.get(session.dishId);
     const sessionIngredientStatusById = useMemo(() => new Map((session.ingredients ?? []).map(item => [item.ingredientId, item.status])), [session.ingredients]);
-    const sessionMemberIdSet = useMemo(() => new Set(session.householdMemberIds ?? []), [session.householdMemberIds]);
-    const cookingMembers = useMemo(() => householdMembers.filter(member => sessionMemberIdSet.has(member.id)), [householdMembers, sessionMemberIdSet]);
 
     const deductions = useMemo(() => {
         if (!dish) return [];
@@ -109,9 +104,6 @@ export const FinishCookingWidget: React.FunctionComponent<FinishCookingWidgetPro
             ingredient: ingredientsById.get(d.id),
             inventoryConfig,
         })));
-        Object.entries(memberFeedback).forEach(([memberId, feedback]) => {
-            dispatch(setCookingMemberFeedback({ sessionId: session.id, memberId, feedback }));
-        });
         if (cookTime.totalMinutes > 0) {
             dispatch(recordCookTime({
                 dishId: session.dishId,
@@ -175,27 +167,6 @@ export const FinishCookingWidget: React.FunctionComponent<FinishCookingWidgetPro
                 </div>
             ))}
         </div>
-
-        {cookingMembers.length > 0 && <div style={{ margin: '12px 0', padding: 10, border: '1px solid #d6e4ff', borderRadius: 8, background: '#f8fbff' }}>
-            <Typography.Text strong style={{ display: 'block', fontSize: 13 }}>Mọi người thấy sao?</Typography.Text>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 7, marginTop: 8, width: '100%' }}>
-                {cookingMembers.map(member => <div key={member.id} style={{ width: '100%', boxSizing: 'border-box', display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) 132px', gap: 8, alignItems: 'center' }}>
-                    <Typography.Text style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{member.name}</Typography.Text>
-                    <Select
-                        size="small"
-                        value={memberFeedback[member.id]}
-                        placeholder="Chọn"
-                        style={{ width: '100%' }}
-                        onChange={(value) => setMemberFeedback(current => ({ ...current, [member.id]: value }))}
-                        options={[
-                            { value: 'liked', label: 'Thích' },
-                            { value: 'neutral', label: 'Bình thường' },
-                            { value: 'disliked', label: 'Không hợp' },
-                        ]}
-                    />
-                </div>)}
-            </div>
-        </div>}
 
         {cookTime.totalMinutes > 0 && <div style={{ margin: '12px 0', padding: 10, border: '1px solid #ffe7ba', borderRadius: 8, background: '#fffbe6' }}>
             <Stack align="center" gap={6} style={{ marginBottom: 6 }}>

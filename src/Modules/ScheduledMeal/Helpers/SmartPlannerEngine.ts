@@ -10,7 +10,7 @@ import { Dishes } from '@store/Models/Dishes';
 import { Ingredient, IngredientInventory, IngredientUnit } from '@store/Models/Ingredient';
 import { ScheduledMeal } from '@store/Models/ScheduledMeal';
 import { InventoryHealthConfig, NutritionGoal } from '@store/Models/SharedConfig';
-import { CookingSession } from '@store/Models/CookingSession';
+import { CookingSession, DishFeedbackStat } from '@store/Models/CookingSession';
 import { HouseholdMemberProfile } from '@store/Reducers/AppContextReducer';
 import dayjs, { Dayjs } from 'dayjs';
 
@@ -157,6 +157,7 @@ export type BuildSmartPlannerInput = {
     nutritionGoals: NutritionGoal[];
     scheduledMeals: ScheduledMeal[];
     cookingSessions: CookingSession[];
+    dishFeedback: Record<string, DishFeedbackStat>;
 }
 
 type PlannerWeights = {
@@ -397,6 +398,15 @@ const getFeedbackImpact = (dishId: string, input: BuildSmartPlannerInput): { imp
     const memberSet = new Set(input.memberIds);
     let liked = 0;
     let disliked = 0;
+    // Durable per-dish feedback store (collected at meal completion) is the source of truth.
+    // It aggregates counts rather than per-member ratings, so member scoping doesn't apply here.
+    const stat = input.dishFeedback[dishId];
+    if (stat) {
+        liked += stat.liked;
+        disliked += stat.disliked;
+    }
+    // Legacy fallback: feedback recorded on cooking sessions before it moved to the durable
+    // store. Still member-scoped. Folded in so pre-upgrade data keeps influencing ranking.
     input.cookingSessions.forEach(session => {
         if (session.dishId !== dishId) return;
         Object.entries(session.memberFeedback ?? {}).forEach(([memberId, feedback]) => {

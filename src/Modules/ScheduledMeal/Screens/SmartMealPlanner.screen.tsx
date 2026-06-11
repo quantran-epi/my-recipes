@@ -29,7 +29,7 @@ import { ScheduledMeal } from '@store/Models/ScheduledMeal';
 import { rememberScheduledMealName } from '@store/Reducers/AppContextReducer';
 import { startCooking } from '@store/Reducers/CookingSessionReducer';
 import { addScheduledMeal, editScheduledMeal } from '@store/Reducers/ScheduledMealReducer';
-import { selectCookingSessions, selectDishes, selectDishesById, selectHouseholdHealthProfiles, selectHouseholdMembers, selectIngredients, selectIngredientsById, selectInventory, selectInventoryHealthConfig, selectNutritionGoals, selectScheduledMeals, selectSelectedHouseholdMemberIds } from '@store/Selectors';
+import { selectCookingSessions, selectDishes, selectDishesById, selectDishFeedback, selectHouseholdHealthProfiles, selectHouseholdMembers, selectIngredients, selectIngredientsById, selectInventory, selectInventoryHealthConfig, selectNutritionGoals, selectScheduledMeals, selectSelectedHouseholdMemberIds } from '@store/Selectors';
 import { DatePicker, Empty, InputNumber, Select, Segmented, Spin, Switch } from 'antd';
 import dayjs, { Dayjs } from 'dayjs';
 import { nanoid } from 'nanoid';
@@ -642,6 +642,7 @@ export const SmartMealPlannerScreen: React.FC = () => {
     const nutritionGoals = useSelector(selectNutritionGoals);
     const scheduledMeals = useSelector(selectScheduledMeals);
     const cookingSessions = useSelector(selectCookingSessions);
+    const dishFeedback = useSelector(selectDishFeedback);
     const dishesById = useSelector(selectDishesById);
     const [scope, setScope] = useState<PlannerScope>('cook_now');
     const routeDateValue = searchParams.get('date');
@@ -777,7 +778,8 @@ export const SmartMealPlannerScreen: React.FC = () => {
         nutritionGoals,
         scheduledMeals,
         cookingSessions,
-    }), [avoidIngredientIds, cookNowMealSlot, cookingSessions, dailyBudget, dishes, hardConstraintsEnabled, ingredients, ingredientsById, inventoryAwareBudget, inventoryConfig, inventoryItems, maxCookingMinutes, maxExtraSpend, nutritionGoalId, nutritionGoals, priorities, requiredExpiringIngredientIds, requiredTags, scheduledMeals, scope, selectedMembers, shoppingMode, startDate, weeklyBudget]);
+        dishFeedback,
+    }), [avoidIngredientIds, cookNowMealSlot, cookingSessions, dishFeedback, dailyBudget, dishes, hardConstraintsEnabled, ingredients, ingredientsById, inventoryAwareBudget, inventoryConfig, inventoryItems, maxCookingMinutes, maxExtraSpend, nutritionGoalId, nutritionGoals, priorities, requiredExpiringIngredientIds, requiredTags, scheduledMeals, scope, selectedMembers, shoppingMode, startDate, weeklyBudget]);
 
     const visibleCookNowRecommendations = useMemo(() => {
         const dismissed = new Set(dismissedDishIds);
