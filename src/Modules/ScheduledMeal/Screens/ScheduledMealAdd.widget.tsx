@@ -1,9 +1,12 @@
 import { ObjectPropertyHelper } from "@common/Helpers/ObjectProperty"
 import { Button } from "@components/Button"
 import { DatePicker } from "@components/Form/DatePicker"
+import { Box } from "@components/Layout/Box"
 import { Stack } from "@components/Layout/Stack"
 import { useMessage } from "@components/Message"
 import { SmartForm, useSmartForm } from "@components/SmartForm"
+import { Tag } from "@components/Tag"
+import { Typography } from "@components/Typography"
 import { normalizeDishServings } from "@modules/ShoppingList/Screens/DishServingSelector.widget"
 import { nanoid } from "@reduxjs/toolkit"
 import { ScheduledMeal } from "@store/Models/ScheduledMeal"
@@ -16,6 +19,14 @@ import { useEffect, useMemo } from "react"
 import { useDispatch, useSelector } from "react-redux"
 import { ScheduledMealEstimateSummary } from "./ScheduledMealEstimateSummary.widget"
 import { ScheduledMealMealPlanner } from "./ScheduledMealMealPlanner.widget"
+
+type MealSlotKey = keyof ScheduledMeal["meals"];
+
+const mealSlotLabels: Array<{ key: MealSlotKey; label: string; color: string; background: string; border: string }> = [
+    { key: "breakfast", label: "Sáng", color: "#d48806", background: "#fffbe6", border: "#ffe58f" },
+    { key: "lunch", label: "Trưa", color: "#d46b08", background: "#fff7e6", border: "#ffd591" },
+    { key: "dinner", label: "Tối", color: "#531dab", background: "#f9f0ff", border: "#efdbff" },
+];
 
 const buildNameOptions = (names: string[]) => {
     const uniqueNames = Array.from(new Map(names
@@ -47,6 +58,7 @@ export const ScheduledMealAddWidget = ({ date, initialName, initialMeals, initia
     const scheduledMealNameHistory = useSelector(selectScheduledMealNameHistory);
     const message = useMessage();
     const nameOptions = useMemo(() => buildNameOptions([...scheduledMealNameHistory, ...scheduledMeals.map(item => item.name)]), [scheduledMealNameHistory, scheduledMeals]);
+    const dishesById = useMemo(() => new Map(dishes.map(dish => [dish.id, dish])), [dishes]);
 
     const addScheduledMealForm = useSmartForm<ScheduledMeal>({
         defaultValues: {
@@ -86,7 +98,12 @@ export const ScheduledMealAddWidget = ({ date, initialName, initialMeals, initia
 
     const meals = SmartForm.useWatch("meals", addScheduledMealForm.form);
     const dishServings = SmartForm.useWatch("dishServings", addScheduledMealForm.form) ?? {};
+    const plannedDate = SmartForm.useWatch("plannedDate", addScheduledMealForm.form);
     const selectedDishIds = useMemo(() => Object.values(meals ?? { breakfast: [], lunch: [], dinner: [] }).flat(), [meals]);
+    const existingMealsForPlannedDate = useMemo(() => {
+        if (!plannedDate) return [];
+        return scheduledMeals.filter(item => dayjs(item.plannedDate).isSame(dayjs(plannedDate), "day"));
+    }, [plannedDate, scheduledMeals]);
 
     const _onSave = () => {
         addScheduledMealForm.submit();
@@ -97,6 +114,10 @@ export const ScheduledMealAddWidget = ({ date, initialName, initialMeals, initia
             meals: nextMeals,
             dishServings: nextDishServings,
         });
+    }
+
+    const _getExistingDishNames = (slot: MealSlotKey) => {
+        return existingMealsForPlannedDate.flatMap(item => (item.meals?.[slot] ?? []).map(dishId => dishesById.get(dishId)?.name ?? dishId));
     }
 
     useEffect(() => {
@@ -120,6 +141,20 @@ export const ScheduledMealAddWidget = ({ date, initialName, initialMeals, initia
         <SmartForm.Item {...addScheduledMealForm.itemDefinitions.plannedDate}>
             <DatePicker style={{ width: "100%" }} placeholder="Chọn ngày" format={"DD/MM/YYYY"} />
         </SmartForm.Item>
+        {plannedDate && <Box style={{ border: "1px solid #e6f4ff", borderRadius: 8, background: "#f8fbff", padding: 10, marginBottom: 12 }}>
+            <Typography.Text strong style={{ display: "block", color: "#111827", fontSize: 12, lineHeight: "17px", marginBottom: 8 }}>Thực đơn đã có trong ngày này</Typography.Text>
+            <Stack direction="column" gap={6} style={{ width: "100%" }}>
+                {mealSlotLabels.map(slot => {
+                    const names = _getExistingDishNames(slot.key);
+                    return <div key={slot.key} style={{ display: "grid", gridTemplateColumns: "58px minmax(0, 1fr)", gap: 8, alignItems: "start", width: "100%" }}>
+                        <Tag style={{ marginRight: 0, color: slot.color, background: slot.background, borderColor: slot.border, textAlign: "center" }}>{slot.label}</Tag>
+                        <Typography.Text type={names.length > 0 ? undefined : "secondary"} style={{ fontSize: 12, lineHeight: "18px", overflowWrap: "anywhere" }}>
+                            {names.length > 0 ? names.join(" · ") : "Chưa có món"}
+                        </Typography.Text>
+                    </div>
+                })}
+            </Stack>
+        </Box>}
         <div style={{ marginBottom: 14 }}>
             <ScheduledMealEstimateSummary dishIds={selectedDishIds} dishServings={dishServings} title="Ước tính ngày này" maxRows={4} />
         </div>

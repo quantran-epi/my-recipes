@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "updatedAt": "2026-06-07T14:30:00.000Z",
+  "updatedAt": "2026-06-11T03:02:52.788Z",
   "parts": {
     "ingredients": {
       "key": "ingredients",
@@ -840,10 +840,10 @@
     "dishes": {
       "key": "dishes",
       "path": "docs/sync/shared/dishes.json",
-      "version": "2026-06-07T13:50:13.291Z",
-      "hash": "b40c98f9bd7613515a3cce219308dacbb1177ef959ad2e4eda07054feb81f4a1",
+      "version": "2026-06-11T03:02:52.788Z",
+      "hash": "f2eea7de17246666e49cd2ad401e66c5d5d11c8d6902950b472065ee18235600",
       "count": 98,
-      "updatedAt": "2026-06-07T13:50:13.291Z",
+      "updatedAt": "2026-06-11T03:02:52.788Z",
       "changes": [
         {
           "id": "Bún bò HuếXu07qgaE3i",
@@ -1076,6 +1076,11 @@
           "action": "modified"
         },
         {
+          "id": "Gà chiên mắmqZNDqYlsWY",
+          "name": "Gà chiên mắm",
+          "action": "modified"
+        },
+        {
           "id": "Gà xào nấmB1RYSsK6Oe",
           "name": "Gà xào nấm",
           "action": "modified"
@@ -1133,6 +1138,11 @@
         {
           "id": "Bò sốt vangdF28akq1Mp",
           "name": "Bò sốt vang",
+          "action": "modified"
+        },
+        {
+          "id": "Bánh baoLKwsrX4wPV",
+          "name": "Bánh bao",
           "action": "modified"
         },
         {
@@ -1329,7 +1339,7 @@
     }
   },
   "ingredientsVersion": "2026-06-07T14:30:00.000Z",
-  "dishesVersion": "2026-06-07T13:50:13.291Z",
+  "dishesVersion": "2026-06-11T03:02:52.788Z",
   "ingredientChanges": [
     {
       "id": "Đậu phụQdYQjd3uDU",
@@ -2389,6 +2399,11 @@
       "action": "modified"
     },
     {
+      "id": "Gà chiên mắmqZNDqYlsWY",
+      "name": "Gà chiên mắm",
+      "action": "modified"
+    },
+    {
       "id": "Gà xào nấmB1RYSsK6Oe",
       "name": "Gà xào nấm",
       "action": "modified"
@@ -2446,6 +2461,11 @@
     {
       "id": "Bò sốt vangdF28akq1Mp",
       "name": "Bò sốt vang",
+      "action": "modified"
+    },
+    {
+      "id": "Bánh baoLKwsrX4wPV",
+      "name": "Bánh bao",
       "action": "modified"
     },
     {

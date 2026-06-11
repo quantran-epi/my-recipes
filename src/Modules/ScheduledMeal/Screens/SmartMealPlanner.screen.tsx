@@ -726,6 +726,10 @@ export const SmartMealPlannerScreen: React.FC = () => {
     }, [routeDateValue, _clearSuggestions]);
 
     const plannedDishCount = plannedDays.reduce((sum, day) => sum + (day.breakfast ? 1 : 0) + (day.lunch ? 1 : 0) + (day.dinner ? 1 : 0), 0);
+    const scheduleSelectionExistingMeals = useMemo(() => {
+        if (!scheduleSelection) return [];
+        return scheduledMeals.filter(item => dayjs(item.plannedDate).isSame(scheduleSelection.date, 'day'));
+    }, [scheduleSelection, scheduledMeals]);
     const selectedAlternatives = useMemo(() => plannedDays
         .map(day => day.alternatives?.find(alternative => alternative.id === day.selectedAlternativeId) ?? day.alternatives?.[0])
         .filter((alternative): alternative is PlannedDayAlternative => Boolean(alternative)), [plannedDays]);
@@ -925,6 +929,10 @@ export const SmartMealPlannerScreen: React.FC = () => {
         setScheduleSelection(undefined);
         if (result === 'updated') message.success('Đã thêm món vào thực đơn có sẵn');
         if (result === 'created') message.success('Đã tạo thực đơn từ gợi ý');
+    };
+
+    const _getExistingScheduleDishNames = (slot: MealSlot) => {
+        return scheduleSelectionExistingMeals.flatMap(item => (item.meals?.[slot] ?? []).map(dishId => dishesById.get(dishId)?.name ?? dishId));
     };
 
     const _dismissRecommendation = (item: SmartPlannerDishRecommendation) => {
@@ -1262,6 +1270,22 @@ export const SmartMealPlannerScreen: React.FC = () => {
                     { value: 'dinner', label: 'Tối' },
                 ] as Array<{ value: MealSlot; label: string }>)} />
             </div>
+            <Box style={{ width: '100%', boxSizing: 'border-box', border: '1px solid #e6f4ff', borderRadius: 8, background: '#f8fbff', padding: 10 }}>
+                <Typography.Text strong style={{ display: 'block', color: '#111827', fontSize: 12, lineHeight: '17px', marginBottom: 8 }}>Thực đơn đã có trong ngày này</Typography.Text>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                    {(['breakfast', 'lunch', 'dinner'] as MealSlot[]).map(slot => {
+                        const meta = mealSlotMeta[slot];
+                        const names = _getExistingScheduleDishNames(slot);
+                        const active = scheduleSelection.slot === slot;
+                        return <div key={slot} style={{ display: 'grid', gridTemplateColumns: '58px minmax(0, 1fr)', gap: 8, alignItems: 'start', borderRadius: 6, padding: active ? '4px 6px' : 0, background: active ? meta.background : 'transparent' }}>
+                            <Tag style={{ marginRight: 0, color: meta.tone, background: '#fff', borderColor: meta.border, textAlign: 'center' }}>{meta.label}</Tag>
+                            <Typography.Text type={names.length > 0 ? undefined : 'secondary'} style={{ fontSize: 12, lineHeight: '18px', overflowWrap: 'anywhere' }}>
+                                {names.length > 0 ? names.join(' · ') : 'Chưa có món'}
+                            </Typography.Text>
+                        </div>;
+                    })}
+                </div>
+            </Box>
         </div>
     </Modal> : null;
 

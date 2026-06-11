@@ -3,9 +3,9 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: ready
-stopped_at: Completed quick task 260611-d6g
-last_updated: "2026-06-11T02:37:41Z"
-last_activity: 2026-06-11 -- Completed quick task 260611-d6g: Fix accompaniment switch persistence and selected tag visibility
+stopped_at: Completed quick task 260611-vsm
+last_updated: "2026-06-11T03:04:12Z"
+last_activity: 2026-06-11 -- Completed quick task 260611-vsm: Smart planner existing meal visibility and dish duration data
 progress:
   total_phases: 5
   completed_phases: 4
@@ -28,7 +28,7 @@ See: .planning/PROJECT.md (updated 2026-06-05)
 Phase: 5 (release-gate-and-product-guardrails) — READY
 Plan: Not started
 Status: Phase 04 complete; ready for Phase 05
-Last activity: 2026-06-11 -- Completed quick task 260611-d6g: Fix accompaniment switch persistence and selected tag visibility
+Last activity: 2026-06-11 -- Completed quick task 260611-vsm: Smart planner existing meal visibility and dish duration data
 
 Progress: [████████░░] 80%
 
@@ -36,6 +36,7 @@ Progress: [████████░░] 80%
 
 | Date | Task | Artifact |
 |------|------|----------|
+| 2026-06-11 | Smart planner existing meal visibility and dish duration data | `.planning/quick/260611-vsm-smart-planner-existing-meal-duration-data/260611-vsm-SUMMARY.md` |
 | 2026-06-11 | Fix accompaniment switch persistence and selected tag visibility | `.planning/quick/260611-d6g-fix-accompaniment-switch-selected-tags/260611-d6g-SUMMARY.md` |
 | 2026-06-11 | Smart planner full-width suggestions nutrition factor ingredient details and dish tag management | `.planning/quick/260611-czy-smart-planner-full-width-suggestions-nut/260611-czy-SUMMARY.md` |
 | 2026-06-11 | Deploy UI fixes for checking | `.planning/quick/260611-csr-deploy-ui-fixes-for-checking/260611-csr-SUMMARY.md` |

@@ -1,6 +1,6 @@
 {
   "ingredientsVersion": "2026-06-07T14:30:00.000Z",
-  "dishesVersion": "2026-06-07T13:50:13.291Z",
+  "dishesVersion": "2026-06-11T03:02:52.788Z",
   "ingredientChanges": [
     {
       "id": "Đậu phụQdYQjd3uDU",
@@ -1060,6 +1060,11 @@
       "action": "modified"
     },
     {
+      "id": "Gà chiên mắmqZNDqYlsWY",
+      "name": "Gà chiên mắm",
+      "action": "modified"
+    },
+    {
       "id": "Gà xào nấmB1RYSsK6Oe",
       "name": "Gà xào nấm",
       "action": "modified"
@@ -1117,6 +1122,11 @@
     {
       "id": "Bò sốt vangdF28akq1Mp",
       "name": "Bò sốt vang",
+      "action": "modified"
+    },
+    {
+      "id": "Bánh baoLKwsrX4wPV",
+      "name": "Bánh bao",
       "action": "modified"
     },
     {
@@ -1309,5 +1319,6 @@
       "name": "Sườn chua cay Thái",
       "action": "modified"
     }
-  ]
+  ],
+  "updatedAt": "2026-06-11T03:02:52.788Z"
 }

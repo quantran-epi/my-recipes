@@ -257,9 +257,9 @@
     "isCompleted": true,
     "duration": {
       "unfreeze": null,
-      "prepare": null,
-      "cooking": null,
-      "serve": null,
+      "prepare": 30,
+      "cooking": 90,
+      "serve": 5,
       "cooldown": null
     },
     "baseServings": 2,
@@ -348,9 +348,9 @@
     "isCompleted": true,
     "duration": {
       "unfreeze": null,
-      "prepare": null,
-      "cooking": null,
-      "serve": null,
+      "prepare": 18,
+      "cooking": 28,
+      "serve": 4,
       "cooldown": null
     },
     "baseServings": 2,
@@ -474,9 +474,9 @@
     "isCompleted": true,
     "duration": {
       "unfreeze": null,
-      "prepare": null,
-      "cooking": null,
-      "serve": null,
+      "prepare": 18,
+      "cooking": 24,
+      "serve": 4,
       "cooldown": null
     },
     "baseServings": 2,
@@ -566,9 +566,9 @@
     "isCompleted": true,
     "duration": {
       "unfreeze": null,
-      "prepare": null,
-      "cooking": null,
-      "serve": null,
+      "prepare": 17,
+      "cooking": 25,
+      "serve": 3,
       "cooldown": null
     },
     "baseServings": 2,
@@ -703,9 +703,9 @@
     "isCompleted": false,
     "duration": {
       "unfreeze": null,
-      "prepare": null,
-      "cooking": null,
-      "serve": null,
+      "prepare": 24,
+      "cooking": 55,
+      "serve": 5,
       "cooldown": null
     },
     "baseServings": 2,
@@ -884,9 +884,9 @@
     "isCompleted": true,
     "duration": {
       "unfreeze": null,
-      "prepare": null,
-      "cooking": null,
-      "serve": null,
+      "prepare": 18,
+      "cooking": 35,
+      "serve": 3,
       "cooldown": null
     },
     "baseServings": 2,
@@ -969,9 +969,9 @@
     "isCompleted": true,
     "duration": {
       "unfreeze": null,
-      "prepare": null,
-      "cooking": null,
-      "serve": null,
+      "prepare": 16,
+      "cooking": 25,
+      "serve": 4,
       "cooldown": null
     },
     "baseServings": 2,
@@ -1141,9 +1141,9 @@
     "isCompleted": true,
     "duration": {
       "unfreeze": null,
-      "prepare": null,
-      "cooking": null,
-      "serve": null,
+      "prepare": 28,
+      "cooking": 85,
+      "serve": 5,
       "cooldown": null
     },
     "baseServings": 2,
@@ -1330,9 +1330,9 @@
     "isCompleted": true,
     "duration": {
       "unfreeze": null,
-      "prepare": null,
-      "cooking": null,
-      "serve": null,
+      "prepare": 28,
+      "cooking": 65,
+      "serve": 5,
       "cooldown": null
     },
     "baseServings": 2,
@@ -1485,9 +1485,9 @@
     "isCompleted": false,
     "duration": {
       "unfreeze": null,
-      "prepare": null,
-      "cooking": null,
-      "serve": null,
+      "prepare": 28,
+      "cooking": 85,
+      "serve": 5,
       "cooldown": null
     },
     "baseServings": 2,
@@ -1579,9 +1579,9 @@
     "isCompleted": true,
     "duration": {
       "unfreeze": null,
-      "prepare": null,
-      "cooking": null,
-      "serve": null,
+      "prepare": 14,
+      "cooking": 8,
+      "serve": 3,
       "cooldown": null
     },
     "baseServings": 2,
@@ -1673,9 +1673,9 @@
     "isCompleted": true,
     "duration": {
       "unfreeze": null,
-      "prepare": null,
-      "cooking": null,
-      "serve": null,
+      "prepare": 14,
+      "cooking": 8,
+      "serve": 3,
       "cooldown": null
     },
     "baseServings": 2,
@@ -1767,9 +1767,9 @@
     "isCompleted": true,
     "duration": {
       "unfreeze": null,
-      "prepare": null,
-      "cooking": null,
-      "serve": null,
+      "prepare": 14,
+      "cooking": 8,
+      "serve": 3,
       "cooldown": null
     },
     "baseServings": 2,
@@ -1852,9 +1852,9 @@
     "isCompleted": true,
     "duration": {
       "unfreeze": null,
-      "prepare": null,
-      "cooking": null,
-      "serve": null,
+      "prepare": 12,
+      "cooking": 8,
+      "serve": 3,
       "cooldown": null
     },
     "baseServings": 2,
@@ -1940,9 +1940,9 @@
     "isCompleted": true,
     "duration": {
       "unfreeze": null,
-      "prepare": null,
-      "cooking": null,
-      "serve": null,
+      "prepare": 25,
+      "cooking": 70,
+      "serve": 4,
       "cooldown": null
     },
     "baseServings": 2,
@@ -2023,9 +2023,9 @@
     "isCompleted": true,
     "duration": {
       "unfreeze": null,
-      "prepare": null,
-      "cooking": null,
-      "serve": null,
+      "prepare": 12,
+      "cooking": 15,
+      "serve": 3,
       "cooldown": null
     },
     "baseServings": 2,
@@ -2147,10 +2147,10 @@
     "isCompleted": true,
     "duration": {
       "unfreeze": null,
-      "prepare": null,
-      "cooking": null,
-      "serve": null,
-      "cooldown": null
+      "prepare": 35,
+      "cooking": 25,
+      "serve": 3,
+      "cooldown": 10
     },
     "baseServings": 2,
     "tags": [
@@ -2212,10 +2212,10 @@
     "isCompleted": true,
     "duration": {
       "unfreeze": null,
-      "prepare": null,
-      "cooking": null,
-      "serve": null,
-      "cooldown": null
+      "prepare": 35,
+      "cooking": 25,
+      "serve": 3,
+      "cooldown": 10
     },
     "baseServings": 2,
     "tags": [
@@ -2307,10 +2307,10 @@
     "isCompleted": true,
     "duration": {
       "unfreeze": null,
-      "prepare": null,
-      "cooking": null,
-      "serve": null,
-      "cooldown": null
+      "prepare": 35,
+      "cooking": 25,
+      "serve": 3,
+      "cooldown": 10
     },
     "baseServings": 2,
     "tags": [
@@ -2390,10 +2390,10 @@
     "isCompleted": false,
     "duration": {
       "unfreeze": null,
-      "prepare": null,
-      "cooking": null,
-      "serve": null,
-      "cooldown": null
+      "prepare": 24,
+      "cooking": 32,
+      "serve": 3,
+      "cooldown": 10
     },
     "baseServings": 2,
     "tags": [
@@ -2573,10 +2573,10 @@
     "isCompleted": true,
     "duration": {
       "unfreeze": null,
-      "prepare": null,
-      "cooking": null,
-      "serve": null,
-      "cooldown": null
+      "prepare": 32,
+      "cooking": 30,
+      "serve": 3,
+      "cooldown": 5
     },
     "baseServings": 2,
     "tags": [
@@ -2638,10 +2638,10 @@
     "isCompleted": true,
     "duration": {
       "unfreeze": null,
-      "prepare": null,
-      "cooking": null,
-      "serve": null,
-      "cooldown": null
+      "prepare": 11,
+      "cooking": 22,
+      "serve": 3,
+      "cooldown": 5
     },
     "baseServings": 2,
     "tags": [
@@ -2771,10 +2771,10 @@
     "isCompleted": true,
     "duration": {
       "unfreeze": null,
-      "prepare": null,
-      "cooking": null,
-      "serve": null,
-      "cooldown": null
+      "prepare": 18,
+      "cooking": 22,
+      "serve": 3,
+      "cooldown": 5
     },
     "baseServings": 2,
     "tags": [
@@ -2894,9 +2894,9 @@
     "isCompleted": true,
     "duration": {
       "unfreeze": null,
-      "prepare": null,
-      "cooking": null,
-      "serve": null,
+      "prepare": 17,
+      "cooking": 16,
+      "serve": 3,
       "cooldown": null
     },
     "baseServings": 2,
@@ -3066,9 +3066,9 @@
     "isCompleted": true,
     "duration": {
       "unfreeze": null,
-      "prepare": null,
-      "cooking": null,
-      "serve": null,
+      "prepare": 26,
+      "cooking": 15,
+      "serve": 3,
       "cooldown": null
     },
     "baseServings": 2,
@@ -3131,9 +3131,9 @@
     "isCompleted": true,
     "duration": {
       "unfreeze": null,
-      "prepare": null,
-      "cooking": null,
-      "serve": null,
+      "prepare": 26,
+      "cooking": 15,
+      "serve": 3,
       "cooldown": null
     },
     "baseServings": 2,
@@ -3206,9 +3206,9 @@
     "isCompleted": true,
     "duration": {
       "unfreeze": null,
-      "prepare": null,
-      "cooking": null,
-      "serve": null,
+      "prepare": 25,
+      "cooking": 18,
+      "serve": 3,
       "cooldown": null
     },
     "baseServings": 2,
@@ -3272,9 +3272,9 @@
     "isCompleted": true,
     "duration": {
       "unfreeze": null,
-      "prepare": null,
-      "cooking": null,
-      "serve": null,
+      "prepare": 8,
+      "cooking": 5,
+      "serve": 3,
       "cooldown": null
     },
     "baseServings": 2,
@@ -3406,9 +3406,9 @@
     "image": "https://eurocook.com.vn/Data/upload/images/tintuc/mon-ngon-moi-ngay-thit-kho-nuoc-dua-02.jpg",
     "duration": {
       "unfreeze": null,
-      "prepare": null,
-      "cooking": null,
-      "serve": null,
+      "prepare": 16,
+      "cooking": 32,
+      "serve": 3,
       "cooldown": null
     },
     "baseServings": 2,
@@ -3537,9 +3537,9 @@
     "isCompleted": true,
     "duration": {
       "unfreeze": null,
-      "prepare": null,
-      "cooking": null,
-      "serve": null,
+      "prepare": 16,
+      "cooking": 32,
+      "serve": 3,
       "cooldown": null
     },
     "baseServings": 2,
@@ -3649,9 +3649,9 @@
     "image": "https://i1-giadinh.vnecdn.net/2022/10/08/Thanh-pham-4-4-1443-1665204099.jpg?w=0&h=0&q=100&dpr=2&fit=crop&s=oBIihXQC5MPakCfn52CWqQ",
     "duration": {
       "unfreeze": null,
-      "prepare": null,
-      "cooking": null,
-      "serve": null,
+      "prepare": 14,
+      "cooking": 16,
+      "serve": 3,
       "cooldown": null
     },
     "baseServings": 2,
@@ -3765,9 +3765,9 @@
     "image": "https://cookbeo.com/media/2024/04/thit-lon-rang-sa-ot/thit-lon-rang-sa-ot.jpg",
     "duration": {
       "unfreeze": null,
-      "prepare": null,
-      "cooking": null,
-      "serve": null,
+      "prepare": 16,
+      "cooking": 16,
+      "serve": 3,
       "cooldown": null
     },
     "baseServings": 2,
@@ -3937,10 +3937,10 @@
     "image": "https://www.bigc.vn/files/cam-nang-mua-sam-27-11-2023-14-35-21/vao-bep-cung-go-27-11-2023-14-39-10/cach-lam-banh-mi-thit-nuong.jpg",
     "duration": {
       "unfreeze": null,
-      "prepare": null,
-      "cooking": null,
-      "serve": null,
-      "cooldown": null
+      "prepare": 26,
+      "cooking": 25,
+      "serve": 3,
+      "cooldown": 5
     },
     "baseServings": 2,
     "tags": [
@@ -4119,9 +4119,9 @@
     "isCompleted": true,
     "duration": {
       "unfreeze": null,
-      "prepare": null,
-      "cooking": null,
-      "serve": null,
+      "prepare": 24,
+      "cooking": 22,
+      "serve": 3,
       "cooldown": null
     },
     "baseServings": 2,
@@ -4294,9 +4294,9 @@
     "isCompleted": true,
     "duration": {
       "unfreeze": null,
-      "prepare": null,
+      "prepare": 25,
       "cooking": null,
-      "serve": null,
+      "serve": 3,
       "cooldown": null
     },
     "baseServings": 2,
@@ -4439,9 +4439,9 @@
     "isCompleted": true,
     "duration": {
       "unfreeze": null,
-      "prepare": null,
-      "cooking": null,
-      "serve": null,
+      "prepare": 17,
+      "cooking": 25,
+      "serve": 3,
       "cooldown": null
     },
     "baseServings": 2,
@@ -4542,9 +4542,9 @@
     "image": "https://cookbeo.com/media/2024/04/trung-chien-thit-bam/thanh-pham-trung-chien-thit-bam.jpg",
     "duration": {
       "unfreeze": null,
-      "prepare": null,
-      "cooking": null,
-      "serve": null,
+      "prepare": 13,
+      "cooking": 15,
+      "serve": 3,
       "cooldown": null
     },
     "baseServings": 2,
@@ -4675,9 +4675,9 @@
     "image": "https://cdn.tgdd.vn/Files/2021/04/06/1341261/cach-lam-dau-que-xao-thit-bo-thom-ngon-hap-dan-cho-ca-nha-202104061451403048.jpg",
     "duration": {
       "unfreeze": null,
-      "prepare": null,
-      "cooking": null,
-      "serve": null,
+      "prepare": 16,
+      "cooking": 12,
+      "serve": 2,
       "cooldown": null
     },
     "baseServings": 2,
@@ -4847,9 +4847,9 @@
     "isCompleted": true,
     "duration": {
       "unfreeze": null,
-      "prepare": null,
-      "cooking": null,
-      "serve": null,
+      "prepare": 21,
+      "cooking": 24,
+      "serve": 2,
       "cooldown": null
     },
     "baseServings": 2,
@@ -4999,9 +4999,9 @@
     "isCompleted": true,
     "duration": {
       "unfreeze": null,
-      "prepare": null,
-      "cooking": null,
-      "serve": null,
+      "prepare": 19,
+      "cooking": 45,
+      "serve": 3,
       "cooldown": null
     },
     "baseServings": 2,
@@ -5141,9 +5141,9 @@
     "isCompleted": true,
     "duration": {
       "unfreeze": null,
-      "prepare": null,
-      "cooking": null,
-      "serve": null,
+      "prepare": 17,
+      "cooking": 45,
+      "serve": 3,
       "cooldown": null
     },
     "baseServings": 2,
@@ -5273,9 +5273,9 @@
     "isCompleted": true,
     "duration": {
       "unfreeze": null,
-      "prepare": null,
-      "cooking": null,
-      "serve": null,
+      "prepare": 16,
+      "cooking": 45,
+      "serve": 3,
       "cooldown": null
     },
     "baseServings": 2,
@@ -5398,9 +5398,9 @@
     "image": "https://cookbeo.com/media/2023/09/cu-sen-ham-xuong/bat-cu-sen-ham-xuong.jpg",
     "duration": {
       "unfreeze": null,
-      "prepare": null,
-      "cooking": null,
-      "serve": null,
+      "prepare": 17,
+      "cooking": 60,
+      "serve": 4,
       "cooldown": null
     },
     "baseServings": 2,
@@ -5520,10 +5520,10 @@
     "isCompleted": true,
     "duration": {
       "unfreeze": null,
-      "prepare": null,
-      "cooking": null,
-      "serve": null,
-      "cooldown": null
+      "prepare": 15,
+      "cooking": 15,
+      "serve": 3,
+      "cooldown": 5
     },
     "baseServings": 2,
     "tags": [
@@ -5642,9 +5642,9 @@
     "isCompleted": true,
     "duration": {
       "unfreeze": null,
-      "prepare": null,
-      "cooking": null,
-      "serve": null,
+      "prepare": 15,
+      "cooking": 16,
+      "serve": 3,
       "cooldown": null
     },
     "baseServings": 2,
@@ -5793,9 +5793,9 @@
     "isCompleted": true,
     "duration": {
       "unfreeze": null,
-      "prepare": null,
-      "cooking": null,
-      "serve": null,
+      "prepare": 19,
+      "cooking": 12,
+      "serve": 2,
       "cooldown": null
     },
     "baseServings": 2,
@@ -5920,10 +5920,10 @@
     ],
     "duration": {
       "unfreeze": null,
-      "prepare": null,
-      "cooking": null,
-      "serve": null,
-      "cooldown": null
+      "prepare": 16,
+      "cooking": 15,
+      "serve": 3,
+      "cooldown": 5
     },
     "name": "Gà chiên mắm",
     "includeDishes": [],
@@ -6077,9 +6077,9 @@
     "isCompleted": true,
     "duration": {
       "unfreeze": null,
-      "prepare": null,
-      "cooking": null,
-      "serve": null,
+      "prepare": 19,
+      "cooking": 12,
+      "serve": 2,
       "cooldown": null
     },
     "baseServings": 2,
@@ -6229,9 +6229,9 @@
     "isCompleted": true,
     "duration": {
       "unfreeze": null,
-      "prepare": null,
-      "cooking": null,
-      "serve": null,
+      "prepare": 19,
+      "cooking": 60,
+      "serve": 4,
       "cooldown": null
     },
     "baseServings": 2,
@@ -6331,9 +6331,9 @@
     "image": "https://cookbeo.com/media/2024/03/tom-dong-rang/thanh-pham-tom-dong-rang.jpg",
     "duration": {
       "unfreeze": null,
-      "prepare": null,
-      "cooking": null,
-      "serve": null,
+      "prepare": 15,
+      "cooking": 16,
+      "serve": 3,
       "cooldown": null
     },
     "baseServings": 2,
@@ -6439,9 +6439,9 @@
     "image": "https://cdn.tgdd.vn/Files/2019/05/15/1167198/cach-lam-tom-chien-bo-toi-thom-ngon-cang-an-cang-ghien-202201101623307077.jpg",
     "duration": {
       "unfreeze": null,
-      "prepare": null,
-      "cooking": null,
-      "serve": null,
+      "prepare": 15,
+      "cooking": 32,
+      "serve": 3,
       "cooldown": null
     },
     "baseServings": 2,
@@ -6533,9 +6533,9 @@
     "image": "https://cookbeo.com/media/2021/05/tom-hap-bia/tom-hap-bia.jpg",
     "duration": {
       "unfreeze": null,
-      "prepare": null,
-      "cooking": null,
-      "serve": null,
+      "prepare": 16,
+      "cooking": 18,
+      "serve": 3,
       "cooldown": null
     },
     "baseServings": 2,
@@ -6636,9 +6636,9 @@
     "image": "https://cdn.tgdd.vn/Files/2019/03/20/1155562/cach-lam-dau-phu-tam-hanh-dan-da-ma-ngon-com-202202151620266794.jpg",
     "duration": {
       "unfreeze": null,
-      "prepare": null,
-      "cooking": null,
-      "serve": null,
+      "prepare": 10,
+      "cooking": 15,
+      "serve": 3,
       "cooldown": null
     },
     "baseServings": 2,
@@ -6778,9 +6778,9 @@
     "isCompleted": true,
     "duration": {
       "unfreeze": null,
-      "prepare": null,
-      "cooking": null,
-      "serve": null,
+      "prepare": 14,
+      "cooking": 8,
+      "serve": 2,
       "cooldown": null
     },
     "baseServings": 2,
@@ -6939,9 +6939,9 @@
     "isCompleted": true,
     "duration": {
       "unfreeze": null,
-      "prepare": null,
-      "cooking": null,
-      "serve": null,
+      "prepare": 17,
+      "cooking": 12,
+      "serve": 2,
       "cooldown": null
     },
     "baseServings": 2,
@@ -7040,9 +7040,9 @@
     "isCompleted": true,
     "duration": {
       "unfreeze": null,
-      "prepare": null,
-      "cooking": null,
-      "serve": null,
+      "prepare": 13,
+      "cooking": 12,
+      "serve": 2,
       "cooldown": null
     },
     "baseServings": 2,
@@ -7202,9 +7202,9 @@
     "isCompleted": true,
     "duration": {
       "unfreeze": null,
-      "prepare": null,
-      "cooking": null,
-      "serve": null,
+      "prepare": 20,
+      "cooking": 12,
+      "serve": 2,
       "cooldown": null
     },
     "baseServings": 2,
@@ -7404,9 +7404,9 @@
     "isCompleted": true,
     "duration": {
       "unfreeze": null,
-      "prepare": null,
-      "cooking": null,
-      "serve": null,
+      "prepare": 24,
+      "cooking": 12,
+      "serve": 2,
       "cooldown": null
     },
     "baseServings": 2,
@@ -7606,9 +7606,9 @@
     "isCompleted": true,
     "duration": {
       "unfreeze": null,
-      "prepare": null,
-      "cooking": null,
-      "serve": null,
+      "prepare": 25,
+      "cooking": 70,
+      "serve": 4,
       "cooldown": null
     },
     "baseServings": 2,
@@ -7702,10 +7702,10 @@
     ],
     "duration": {
       "unfreeze": null,
-      "prepare": null,
-      "cooking": null,
-      "serve": null,
-      "cooldown": null
+      "prepare": 35,
+      "cooking": 25,
+      "serve": 3,
+      "cooldown": 10
     },
     "name": "Bánh bao",
     "includeDishes": [],
@@ -7809,10 +7809,10 @@
     "isCompleted": true,
     "duration": {
       "unfreeze": null,
-      "prepare": null,
-      "cooking": null,
-      "serve": null,
-      "cooldown": null
+      "prepare": 45,
+      "cooking": 18,
+      "serve": 2,
+      "cooldown": 10
     },
     "baseServings": 2,
     "tags": [
@@ -7991,9 +7991,9 @@
     "isCompleted": true,
     "duration": {
       "unfreeze": null,
-      "prepare": null,
-      "cooking": null,
-      "serve": null,
+      "prepare": 22,
+      "cooking": 35,
+      "serve": 3,
       "cooldown": null
     },
     "baseServings": 2,
@@ -8202,9 +8202,9 @@
     "isCompleted": true,
     "duration": {
       "unfreeze": null,
-      "prepare": null,
-      "cooking": null,
-      "serve": null,
+      "prepare": 22,
+      "cooking": 24,
+      "serve": 3,
       "cooldown": null
     },
     "baseServings": 2,
@@ -8374,9 +8374,9 @@
     "isCompleted": true,
     "duration": {
       "unfreeze": null,
-      "prepare": null,
-      "cooking": null,
-      "serve": null,
+      "prepare": 21,
+      "cooking": 32,
+      "serve": 3,
       "cooldown": null
     },
     "baseServings": 2,
@@ -8506,9 +8506,9 @@
     "image": "https://cookbeo.com/media/2023/08/canh-dau-phu-ca-chua/canh-dau-phu-ca-chua.jpg",
     "duration": {
       "unfreeze": null,
-      "prepare": null,
-      "cooking": null,
-      "serve": null,
+      "prepare": 13,
+      "cooking": 12,
+      "serve": 2,
       "cooldown": null
     },
     "baseServings": 2,
@@ -8590,9 +8590,9 @@
     "image": "https://cookbeo.com/media/2024/04/trung-chien-thit-bam/thanh-pham-trung-chien-thit-bam.jpg",
     "duration": {
       "unfreeze": null,
-      "prepare": null,
-      "cooking": null,
-      "serve": null,
+      "prepare": 10,
+      "cooking": 15,
+      "serve": 3,
       "cooldown": null
     },
     "baseServings": 2,
@@ -8674,9 +8674,9 @@
     "isCompleted": true,
     "duration": {
       "unfreeze": null,
-      "prepare": null,
-      "cooking": null,
-      "serve": null,
+      "prepare": 11,
+      "cooking": 24,
+      "serve": 3,
       "cooldown": null
     },
     "baseServings": 2,
@@ -8825,9 +8825,9 @@
     "isCompleted": true,
     "duration": {
       "unfreeze": null,
-      "prepare": null,
-      "cooking": null,
-      "serve": null,
+      "prepare": 19,
+      "cooking": 12,
+      "serve": 2,
       "cooldown": null
     },
     "baseServings": 2,
@@ -8898,9 +8898,9 @@
     "isCompleted": true,
     "duration": {
       "unfreeze": null,
-      "prepare": null,
-      "cooking": null,
-      "serve": null,
+      "prepare": 14,
+      "cooking": 32,
+      "serve": 3,
       "cooldown": null
     },
     "baseServings": 2,
@@ -8973,9 +8973,9 @@
     "image": "https://upload.wikimedia.org/wikipedia/commons/5/5d/Hard-boiled_egg.jpg",
     "duration": {
       "unfreeze": null,
-      "prepare": null,
-      "cooking": null,
-      "serve": null,
+      "prepare": 5,
+      "cooking": 10,
+      "serve": 2,
       "cooldown": null
     },
     "baseServings": 2,
@@ -9089,9 +9089,9 @@
     "image": "https://www.bigc.vn/files/cam-nang-mua-sam-27-11-2023-14-35-21/vao-bep-cung-go-27-11-2023-14-39-10/cach-lam-banh-mi-thit-nuong.jpg",
     "duration": {
       "unfreeze": null,
-      "prepare": null,
-      "cooking": null,
-      "serve": null,
+      "prepare": 22,
+      "cooking": 10,
+      "serve": 3,
       "cooldown": null
     },
     "baseServings": 2,
@@ -9192,9 +9192,9 @@
     "image": "https://vcdn1-giadinh.vnecdn.net/2020/11/15/daidien-1605417540-6495-1605417726.jpg?w=1200&h=0&q=100&dpr=1&fit=crop&s=78XZiYnQDEf8Ghj-I_SVGg",
     "duration": {
       "unfreeze": null,
-      "prepare": null,
+      "prepare": 8,
       "cooking": null,
-      "serve": null,
+      "serve": 2,
       "cooldown": null
     },
     "baseServings": 2,
@@ -9304,10 +9304,10 @@
     "isCompleted": true,
     "duration": {
       "unfreeze": null,
-      "prepare": null,
+      "prepare": 13,
       "cooking": null,
-      "serve": null,
-      "cooldown": null
+      "serve": 3,
+      "cooldown": 30
     },
     "baseServings": 2,
     "tags": [
@@ -9477,9 +9477,9 @@
     "image": "https://www.huongnghiepaau.com/wp-content/uploads/2019/01/nem-nuong-mien-tay620x400.jpg",
     "duration": {
       "unfreeze": null,
-      "prepare": null,
-      "cooking": null,
-      "serve": null,
+      "prepare": 12,
+      "cooking": 15,
+      "serve": 2,
       "cooldown": null
     },
     "baseServings": 2,
@@ -9600,9 +9600,9 @@
     "isCompleted": true,
     "duration": {
       "unfreeze": null,
-      "prepare": null,
-      "cooking": null,
-      "serve": null,
+      "prepare": 25,
+      "cooking": 18,
+      "serve": 3,
       "cooldown": null
     },
     "baseServings": 2,
@@ -9675,9 +9675,9 @@
     "isCompleted": true,
     "duration": {
       "unfreeze": null,
-      "prepare": null,
-      "cooking": null,
-      "serve": null,
+      "prepare": 15,
+      "cooking": 25,
+      "serve": 3,
       "cooldown": null
     },
     "baseServings": 2,
@@ -9739,9 +9739,9 @@
     "isCompleted": true,
     "duration": {
       "unfreeze": null,
-      "prepare": null,
-      "cooking": null,
-      "serve": null,
+      "prepare": 14,
+      "cooking": 25,
+      "serve": 3,
       "cooldown": null
     },
     "baseServings": 2,
@@ -9850,9 +9850,9 @@
     "isCompleted": true,
     "duration": {
       "unfreeze": null,
-      "prepare": null,
-      "cooking": null,
-      "serve": null,
+      "prepare": 20,
+      "cooking": 25,
+      "serve": 3,
       "cooldown": null
     },
     "baseServings": 2,
@@ -9915,9 +9915,9 @@
     "isCompleted": true,
     "duration": {
       "unfreeze": null,
-      "prepare": null,
-      "cooking": null,
-      "serve": null,
+      "prepare": 8,
+      "cooking": 5,
+      "serve": 3,
       "cooldown": null
     },
     "baseServings": 2,
@@ -9981,9 +9981,9 @@
     "isCompleted": true,
     "duration": {
       "unfreeze": null,
-      "prepare": null,
-      "cooking": null,
-      "serve": null,
+      "prepare": 8,
+      "cooking": 5,
+      "serve": 3,
       "cooldown": null
     },
     "baseServings": 2,
@@ -10115,9 +10115,9 @@
     "image": "https://img-global.cpcdn.com/recipes/3c872698969f85ec/1360x964cq70/banh-cu%E1%BB%91n-homemade-recipe-main-photo.webp",
     "duration": {
       "unfreeze": null,
-      "prepare": null,
+      "prepare": 8,
       "cooking": null,
-      "serve": null,
+      "serve": 2,
       "cooldown": null
     },
     "baseServings": 2,
@@ -10236,9 +10236,9 @@
     "isCompleted": false,
     "duration": {
       "unfreeze": null,
-      "prepare": null,
-      "cooking": null,
-      "serve": null,
+      "prepare": 19,
+      "cooking": 16,
+      "serve": 3,
       "cooldown": null
     },
     "baseServings": 2,
@@ -10320,9 +10320,9 @@
     "isCompleted": true,
     "duration": {
       "unfreeze": null,
-      "prepare": null,
-      "cooking": null,
-      "serve": null,
+      "prepare": 12,
+      "cooking": 8,
+      "serve": 3,
       "cooldown": null
     },
     "baseServings": 2,
@@ -10421,10 +10421,10 @@
     "isCompleted": false,
     "duration": {
       "unfreeze": null,
-      "prepare": null,
+      "prepare": 10,
       "cooking": null,
-      "serve": null,
-      "cooldown": null
+      "serve": 2,
+      "cooldown": 5
     },
     "baseServings": 2,
     "tags": [
@@ -10505,9 +10505,9 @@
     "isCompleted": true,
     "duration": {
       "unfreeze": null,
-      "prepare": null,
-      "cooking": null,
-      "serve": null,
+      "prepare": 16,
+      "cooking": 25,
+      "serve": 4,
       "cooldown": null
     },
     "baseServings": 2,
@@ -10591,9 +10591,9 @@
     "isCompleted": true,
     "duration": {
       "unfreeze": null,
-      "prepare": null,
-      "cooking": null,
-      "serve": null,
+      "prepare": 16,
+      "cooking": 25,
+      "serve": 4,
       "cooldown": null
     },
     "baseServings": 2,
@@ -10715,9 +10715,9 @@
     "image": "https://i1-giadinh.vnecdn.net/2023/04/16/Bc11Thnhphm11-1681636259-6445-1681636728.jpg?w=0&h=0&q=100&dpr=2&fit=crop&s=2zyjryzCAWgbIFdeBFwyow",
     "duration": {
       "unfreeze": null,
-      "prepare": null,
-      "cooking": null,
-      "serve": null,
+      "prepare": 8,
+      "cooking": 5,
+      "serve": 2,
       "cooldown": null
     },
     "baseServings": 2,
@@ -10847,9 +10847,9 @@
     "image": "https://cdn.sforum.vn/sforum/wp-content/uploads/2023/09/cach-lam-cha-vien-nuong-thumb.jpg",
     "duration": {
       "unfreeze": null,
-      "prepare": null,
+      "prepare": 10,
       "cooking": null,
-      "serve": null,
+      "serve": 2,
       "cooldown": null
     },
     "baseServings": 2,
@@ -10956,9 +10956,9 @@
     "image": "https://www.bigc.vn/files/cam-nang-mua-sam-27-11-2023-14-35-21/vao-bep-cung-go-27-11-2023-14-39-10/cach-lam-banh-mi-thit-nuong.jpg",
     "duration": {
       "unfreeze": null,
-      "prepare": null,
+      "prepare": 10,
       "cooking": null,
-      "serve": null,
+      "serve": 2,
       "cooldown": null
     },
     "baseServings": 2,
@@ -11065,9 +11065,9 @@
     "image": "https://www.bigc.vn/files/cam-nang-mua-sam-27-11-2023-14-35-21/vao-bep-cung-go-27-11-2023-14-39-10/cach-lam-banh-mi-thit-nuong.jpg",
     "duration": {
       "unfreeze": null,
-      "prepare": null,
+      "prepare": 10,
       "cooking": null,
-      "serve": null,
+      "serve": 2,
       "cooldown": null
     },
     "baseServings": 2,
@@ -11177,9 +11177,9 @@
     "isCompleted": true,
     "duration": {
       "unfreeze": null,
-      "prepare": null,
-      "cooking": null,
-      "serve": null,
+      "prepare": 18,
+      "cooking": 35,
+      "serve": 3,
       "cooldown": null
     },
     "baseServings": 2,
@@ -11240,10 +11240,10 @@
     "isCompleted": true,
     "duration": {
       "unfreeze": null,
-      "prepare": null,
-      "cooking": null,
-      "serve": null,
-      "cooldown": null
+      "prepare": 11,
+      "cooking": 22,
+      "serve": 3,
+      "cooldown": 5
     },
     "baseServings": 2,
     "tags": [
@@ -11353,9 +11353,9 @@
     "isCompleted": true,
     "duration": {
       "unfreeze": null,
-      "prepare": null,
+      "prepare": 8,
       "cooking": null,
-      "serve": null,
+      "serve": 2,
       "cooldown": null
     },
     "baseServings": 2,
@@ -11524,9 +11524,9 @@
     "isCompleted": true,
     "duration": {
       "unfreeze": null,
-      "prepare": null,
-      "cooking": null,
-      "serve": null,
+      "prepare": 21,
+      "cooking": 35,
+      "serve": 3,
       "cooldown": null
     },
     "baseServings": 2,
@@ -11687,9 +11687,9 @@
     "isCompleted": true,
     "duration": {
       "unfreeze": null,
-      "prepare": null,
-      "cooking": null,
-      "serve": null,
+      "prepare": 20,
+      "cooking": 35,
+      "serve": 3,
       "cooldown": null
     },
     "baseServings": 2,
@@ -11770,10 +11770,10 @@
     "isCompleted": false,
     "duration": {
       "unfreeze": null,
-      "prepare": null,
+      "prepare": 20,
       "cooking": null,
-      "serve": null,
-      "cooldown": null
+      "serve": 2,
+      "cooldown": 120
     },
     "baseServings": 2,
     "tags": [
@@ -11881,9 +11881,9 @@
     "isCompleted": true,
     "duration": {
       "unfreeze": null,
-      "prepare": null,
+      "prepare": 8,
       "cooking": null,
-      "serve": null,
+      "serve": 2,
       "cooldown": null
     },
     "baseServings": 2,
@@ -11998,9 +11998,9 @@
     "isCompleted": false,
     "duration": {
       "unfreeze": null,
-      "prepare": null,
-      "cooking": null,
-      "serve": null,
+      "prepare": 19,
+      "cooking": 45,
+      "serve": 3,
       "cooldown": null
     },
     "name": "Sườn chua cay Thái",
