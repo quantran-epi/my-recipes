@@ -1,4 +1,4 @@
-import { DeleteOutlined, EditOutlined, HeartOutlined, PlusOutlined, SaveOutlined } from '@ant-design/icons';
+import { DeleteOutlined, DownOutlined, EditOutlined, HeartOutlined, PlusOutlined, RightOutlined, SaveOutlined } from '@ant-design/icons';
 import { getHouseholdHealthStatusMeta, HOUSEHOLD_HEALTH_STATUS_META } from '@common/Helpers/HouseholdHealthHelper';
 import { Button } from '@components/Button';
 import { Box } from '@components/Layout/Box';
@@ -161,11 +161,12 @@ const healthCss = `
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto;
     gap: 10px;
-    align-items: center;
+    align-items: start;
     width: 100%;
 }
 .household-health-history-actions {
     justify-self: end;
+    align-self: start;
     display: flex;
     align-items: center;
     justify-content: flex-end;
@@ -177,18 +178,36 @@ const healthCss = `
     flex: 0 0 36px;
 }
 .household-health-linked-treatment-list {
-    border-top: 1px solid rgba(15,23,42,0.07);
     background: #f8fafc;
-    padding: 10px;
+    padding: 0 10px 10px;
     display: grid;
     gap: 8px;
 }
+.household-health-treatment-toggle {
+    width: 100%;
+    border: 0;
+    border-top: 1px solid rgba(15,23,42,0.07);
+    background: #f8fafc;
+    padding: 9px 10px;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 8px;
+    align-items: center;
+    text-align: left;
+    color: #475569;
+    cursor: pointer;
+    font: inherit;
+}
+.household-health-treatment-toggle:hover {
+    background: #eef6ff;
+}
 @media (max-width: 560px) {
     .household-health-history-row {
-        grid-template-columns: minmax(0, 1fr);
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: 8px;
     }
     .household-health-history-actions {
-        width: 100%;
+        width: auto;
         justify-content: flex-end;
     }
 }
@@ -226,6 +245,13 @@ const iconButtonStyle: React.CSSProperties = {
 };
 
 const formatDate = (value?: string) => value ? dayjs(value).format('DD/MM/YYYY') : 'Đang diễn ra';
+
+const getTreatmentBrief = (treatments: HouseholdHealthRecord[]): string => {
+    const names = treatments.slice(0, 2).map(treatment => treatment.title).filter(Boolean);
+    const moreCount = Math.max(0, treatments.length - names.length);
+    const suffix = moreCount > 0 ? ` +${moreCount}` : '';
+    return `${treatments.length} điều trị liên quan${names.length > 0 ? `: ${names.join(', ')}${suffix}` : ''}`;
+};
 
 const createRecordDraft = (record?: HouseholdHealthRecord, relatedSicknessId?: string): HealthRecordDraft => ({
     id: record?.id,
@@ -277,6 +303,7 @@ export const HouseholdHealthWidget: React.FC<{ member: HouseholdMemberProfile }>
         statusNote: profile?.statusNote,
     }));
     const [recordDraft, setRecordDraft] = useState<HealthRecordDraft | null>(null);
+    const [expandedSicknessIds, setExpandedSicknessIds] = useState<Set<string>>(() => new Set());
     const availableSicknessOptions = useMemo(() => sicknessOptions.filter(option => option.value !== recordDraft?.id), [recordDraft?.id, sicknessOptions]);
 
     React.useEffect(() => {
@@ -343,6 +370,18 @@ export const HouseholdHealthWidget: React.FC<{ member: HouseholdMemberProfile }>
         message.success(`Đã xóa ${record.title}`);
     };
 
+    const _toggleSicknessTreatments = (recordId: string) => {
+        setExpandedSicknessIds(current => {
+            const next = new Set(current);
+            if (next.has(recordId)) {
+                next.delete(recordId);
+            } else {
+                next.add(recordId);
+            }
+            return next;
+        });
+    };
+
     const _renderHistoryActions = (record: HouseholdHealthRecord) => <div className='household-health-history-actions'>
         {record.type === 'sickness' && <Tooltip title='Thêm điều trị cho ghi nhận này'>
             <Button aria-label={`Thêm điều trị cho ${record.title}`} icon={<PlusOutlined />} onClick={() => _openTreatmentForSickness(record)} style={iconButtonStyle} />
@@ -381,13 +420,17 @@ export const HouseholdHealthWidget: React.FC<{ member: HouseholdMemberProfile }>
 
     const _renderSicknessRow = (record: HouseholdHealthRecord) => {
         const treatments = linkedTreatmentsBySicknessId.get(record.id) ?? [];
+        const expanded = expandedSicknessIds.has(record.id);
         return <Box key={record.id} style={sicknessCardStyle}>
             <div className='household-health-history-row' style={sicknessHeaderStyle}>
                 {_renderRecordSummary(record, false)}
                 {_renderHistoryActions(record)}
             </div>
-            {treatments.length > 0 && <div className='household-health-linked-treatment-list'>
-                <Typography.Text type='secondary' style={{ fontSize: 12, lineHeight: '17px' }}>{treatments.length} điều trị / chăm sóc liên quan</Typography.Text>
+            {treatments.length > 0 && <button type='button' className='household-health-treatment-toggle' onClick={() => _toggleSicknessTreatments(record.id)} aria-expanded={expanded}>
+                <Typography.Text type='secondary' style={{ fontSize: 12, lineHeight: '17px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{getTreatmentBrief(treatments)}</Typography.Text>
+                {expanded ? <DownOutlined style={{ color: '#64748b', fontSize: 12 }} /> : <RightOutlined style={{ color: '#64748b', fontSize: 12 }} />}
+            </button>}
+            {expanded && treatments.length > 0 && <div className='household-health-linked-treatment-list'>
                 {treatments.map(treatment => _renderTreatmentRow(treatment, false))}
             </div>}
         </Box>;
