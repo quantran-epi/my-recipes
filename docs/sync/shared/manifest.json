@@ -18,13 +18,7 @@
       "hash": "2fbd4419f54873082befa75515cbbf86eac5f2a69e603463c28883ae34cd599c",
       "count": 98,
       "updatedAt": "2026-06-11T06:11:43.265Z",
-      "changes": [
-        {
-          "id": "Sốt ướp thịt nướng sảViIOYxgxhe",
-          "name": "Sốt ướp thịt nướng sả",
-          "action": "modified"
-        }
-      ]
+      "changes": []
     },
     "config": {
       "key": "config",
@@ -40,12 +34,6 @@
   "dishesVersion": "2026-06-11T06:11:43.265Z",
   "configVersion": "2026-06-11T06:09:49.783Z",
   "ingredientChanges": [],
-  "dishChanges": [
-    {
-      "id": "Sốt ướp thịt nướng sảViIOYxgxhe",
-      "name": "Sốt ướp thịt nướng sả",
-      "action": "modified"
-    }
-  ],
+  "dishChanges": [],
   "configChanges": []
 }
