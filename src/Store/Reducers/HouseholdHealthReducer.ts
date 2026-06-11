@@ -19,6 +19,7 @@ export type HouseholdHealthRecord = {
     id: string;
     memberId: string;
     type: HouseholdHealthRecordType;
+    relatedSicknessId?: string;
     title: string;
     startedAt: string;
     endedAt?: string;
@@ -93,12 +94,14 @@ export const normalizeHealthRecord = (record?: Partial<HouseholdHealthRecord> | 
     const now = new Date().toISOString();
     const memberId = normalizeString(record?.memberId);
     if (!memberId) return null;
-    const title = normalizeString(record?.title) || (record?.type === 'treatment' ? 'Điều trị' : 'Sức khỏe');
+    const type = normalizeRecordType(record?.type);
+    const title = normalizeString(record?.title) || (type === 'treatment' ? 'Điều trị' : 'Sức khỏe');
     const createdAt = normalizeDate(record?.createdAt, now);
     return {
         id: normalizeString(record?.id) || nanoid(10),
         memberId,
-        type: normalizeRecordType(record?.type),
+        type,
+        relatedSicknessId: type === 'treatment' ? normalizeString(record?.relatedSicknessId) || undefined : undefined,
         title,
         startedAt: normalizeDate(record?.startedAt, now),
         endedAt: normalizeOptionalDate(record?.endedAt),
@@ -171,7 +174,9 @@ export const householdHealthSlice = createSlice({
             state.records = normalizeHealthRecords([next, ...state.records.filter(record => record.id !== next.id)]);
         },
         removeHealthRecord: (state, action: PayloadAction<string>) => {
-            state.records = state.records.filter(record => record.id !== action.payload);
+            state.records = normalizeHealthRecords(state.records
+                .filter(record => record.id !== action.payload)
+                .map(record => record.relatedSicknessId === action.payload ? { ...record, relatedSicknessId: undefined } : record));
         },
     },
     extraReducers: builder => {

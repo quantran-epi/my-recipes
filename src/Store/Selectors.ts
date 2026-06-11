@@ -65,6 +65,14 @@ export const selectHouseholdMembers = createSelector(
 
 export const selectSelectedHouseholdMemberIds = (state: RootState) => state.personal.appContext.selectedHouseholdMemberIds ?? [];
 
+export const selectCurrentHouseholdMemberId = createSelector(
+    [selectAppContext, selectHouseholdMembers],
+    (appContext, members) => {
+        const memberId = String(appContext.currentHouseholdMemberId ?? '').trim();
+        return memberId && members.some(member => member.id === memberId) ? memberId : undefined;
+    }
+);
+
 export const selectSelectedHouseholdMembers = createSelector(
     [selectHouseholdMembers, selectSelectedHouseholdMemberIds],
     (members, selectedIds) => getSelectedHouseholdMembers(members, selectedIds)

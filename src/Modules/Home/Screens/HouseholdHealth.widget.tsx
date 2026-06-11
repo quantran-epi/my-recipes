@@ -19,7 +19,7 @@ import {
     upsertMemberHealthProfile,
 } from '@store/Reducers/HouseholdHealthReducer';
 import { selectHealthRecordsByMember, selectMemberHealthProfile } from '@store/Selectors';
-import { DatePicker, Empty, Input, InputNumber, Popconfirm, Select, Segmented } from 'antd';
+import { DatePicker, Empty, Input, InputNumber, Popconfirm, Select, Segmented, Tooltip } from 'antd';
 import dayjs, { Dayjs } from 'dayjs';
 import React, { useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
@@ -34,6 +34,7 @@ type HealthProfileDraft = {
 type HealthRecordDraft = {
     id?: string;
     type: HouseholdHealthRecordType;
+    relatedSicknessId?: string;
     title: string;
     startedAt: Dayjs;
     endedAt?: Dayjs | null;
@@ -114,13 +115,84 @@ const healthCss = `
     align-items: center;
     justify-content: center;
 }
+.household-health-record-modal,
+.household-health-record-modal > * {
+    width: 100%;
+}
+.household-health-record-modal .ant-input,
+.household-health-record-modal .ant-input-number,
+.household-health-record-modal .ant-input-number-group-wrapper,
+.household-health-record-modal .ant-picker,
+.household-health-record-modal .ant-select,
+.household-health-record-modal .ant-segmented,
+.household-health-record-modal textarea {
+    width: 100% !important;
+}
+.household-health-history-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 10px;
+    align-items: center;
+    width: 100%;
+}
+.household-health-history-actions {
+    justify-self: end;
+}
+.household-health-linked-treatment-list {
+    border-top: 1px solid rgba(15,23,42,0.07);
+    background: #f8fafc;
+    padding: 10px;
+    display: grid;
+    gap: 8px;
+}
+@media (max-width: 560px) {
+    .household-health-history-row {
+        grid-template-columns: minmax(0, 1fr);
+    }
+    .household-health-history-actions {
+        width: 100%;
+        justify-content: flex-end;
+    }
+}
 `;
+
+const historyRowStyle: React.CSSProperties = {
+    width: '100%',
+    border: '1px solid rgba(15,23,42,0.07)',
+    borderRadius: 8,
+    background: '#f8fafc',
+    padding: 10,
+};
+
+const sicknessCardStyle: React.CSSProperties = {
+    ...historyRowStyle,
+    background: '#fff',
+    padding: 0,
+    overflow: 'hidden',
+};
+
+const sicknessHeaderStyle: React.CSSProperties = {
+    padding: 10,
+};
+
+const treatmentRowStyle: React.CSSProperties = {
+    ...historyRowStyle,
+    background: '#fff',
+    border: '1px solid rgba(37,99,235,0.14)',
+};
+
+const iconButtonStyle: React.CSSProperties = {
+    width: 36,
+    height: 36,
+    paddingInline: 0,
+};
 
 const formatDate = (value?: string) => value ? dayjs(value).format('DD/MM/YYYY') : 'Đang diễn ra';
 
-const createRecordDraft = (record?: HouseholdHealthRecord): HealthRecordDraft => ({
+const createRecordDraft = (record?: HouseholdHealthRecord, relatedSicknessId?: string): HealthRecordDraft => ({
     id: record?.id,
-    type: record?.type ?? 'sickness',
+    type: record?.type ?? (relatedSicknessId ? 'treatment' : 'sickness'),
+    relatedSicknessId: record?.relatedSicknessId ?? relatedSicknessId,
     title: record?.title ?? '',
     startedAt: record?.startedAt ? dayjs(record.startedAt) : dayjs(),
     endedAt: record?.endedAt ? dayjs(record.endedAt) : null,
@@ -145,6 +217,21 @@ export const HouseholdHealthWidget: React.FC<{ member: HouseholdMemberProfile }>
     const recordsSelector = useMemo(() => selectHealthRecordsByMember(member.id), [member.id]);
     const profile = useSelector(profileSelector);
     const records = useSelector(recordsSelector);
+    const sicknessRecords = useMemo(() => records.filter(record => record.type === 'sickness'), [records]);
+    const sicknessById = useMemo(() => new Map(sicknessRecords.map(record => [record.id, record])), [sicknessRecords]);
+    const linkedTreatmentsBySicknessId = useMemo(() => {
+        const grouped = new Map<string, HouseholdHealthRecord[]>();
+        records.forEach(record => {
+            if (record.type !== 'treatment' || !record.relatedSicknessId || !sicknessById.has(record.relatedSicknessId)) return;
+            grouped.set(record.relatedSicknessId, [...(grouped.get(record.relatedSicknessId) ?? []), record]);
+        });
+        return grouped;
+    }, [records, sicknessById]);
+    const standaloneTreatments = useMemo(() => records.filter(record => record.type === 'treatment' && (!record.relatedSicknessId || !sicknessById.has(record.relatedSicknessId))), [records, sicknessById]);
+    const sicknessOptions = useMemo(() => sicknessRecords.map(record => ({
+        value: record.id,
+        label: `${record.title} · ${formatDate(record.startedAt)} - ${formatDate(record.endedAt)}`,
+    })), [sicknessRecords]);
     const [draft, setDraft] = useState<HealthProfileDraft>(() => ({
         heightCm: profile?.heightCm,
         weightKg: profile?.weightKg,
@@ -152,6 +239,7 @@ export const HouseholdHealthWidget: React.FC<{ member: HouseholdMemberProfile }>
         statusNote: profile?.statusNote,
     }));
     const [recordDraft, setRecordDraft] = useState<HealthRecordDraft | null>(null);
+    const availableSicknessOptions = useMemo(() => sicknessOptions.filter(option => option.value !== recordDraft?.id), [recordDraft?.id, sicknessOptions]);
 
     React.useEffect(() => {
         setDraft({
@@ -181,6 +269,8 @@ export const HouseholdHealthWidget: React.FC<{ member: HouseholdMemberProfile }>
 
     const _openRecordModal = (record?: HouseholdHealthRecord) => setRecordDraft(createRecordDraft(record));
 
+    const _openTreatmentForSickness = (record: HouseholdHealthRecord) => setRecordDraft(createRecordDraft(undefined, record.id));
+
     const _saveRecord = () => {
         if (!recordDraft) return;
         if (!recordDraft.title.trim()) {
@@ -192,6 +282,7 @@ export const HouseholdHealthWidget: React.FC<{ member: HouseholdMemberProfile }>
             id: recordDraft.id,
             memberId: member.id,
             type: recordDraft.type,
+            relatedSicknessId: recordDraft.type === 'treatment' && recordDraft.relatedSicknessId !== recordDraft.id ? recordDraft.relatedSicknessId : undefined,
             title: recordDraft.title,
             startedAt: recordDraft.startedAt.toISOString(),
             endedAt: recordDraft.endedAt?.toISOString(),
@@ -212,6 +303,56 @@ export const HouseholdHealthWidget: React.FC<{ member: HouseholdMemberProfile }>
     const _removeRecord = (record: HouseholdHealthRecord) => {
         dispatch(removeHealthRecord(record.id));
         message.success(`Đã xóa ${record.title}`);
+    };
+
+    const _renderHistoryActions = (record: HouseholdHealthRecord) => <Stack className='household-health-history-actions' gap={6} wrap='wrap' justify='flex-end' align='center'>
+        {record.type === 'sickness' && <Tooltip title='Thêm điều trị cho ghi nhận này'>
+            <Button aria-label={`Thêm điều trị cho ${record.title}`} icon={<PlusOutlined />} onClick={() => _openTreatmentForSickness(record)} style={iconButtonStyle} />
+        </Tooltip>}
+        <Tooltip title='Sửa ghi nhận'>
+            <Button aria-label={`Sửa ${record.title}`} icon={<EditOutlined />} onClick={() => _openRecordModal(record)} style={iconButtonStyle} />
+        </Tooltip>
+        <Popconfirm title='Xóa ghi nhận này?' okText='Xóa' cancelText='Hủy' okButtonProps={{ danger: true }} onConfirm={() => _removeRecord(record)}>
+            <Tooltip title='Xóa ghi nhận'>
+                <Button aria-label={`Xóa ${record.title}`} danger icon={<DeleteOutlined />} style={iconButtonStyle} />
+            </Tooltip>
+        </Popconfirm>
+    </Stack>;
+
+    const _renderRecordSummary = (record: HouseholdHealthRecord, showRelatedSickness = true) => {
+        const relatedSickness = record.relatedSicknessId ? sicknessById.get(record.relatedSicknessId) : undefined;
+        return <div style={{ minWidth: 0, width: '100%' }}>
+            <Stack wrap='wrap' gap={5} style={{ marginBottom: 5 }}>
+                <Tag color={record.type === 'sickness' ? 'volcano' : 'blue'} style={{ marginRight: 0 }}>{record.type === 'sickness' ? 'Bệnh' : 'Điều trị'}</Tag>
+                {record.severity && <Tag color={record.severity === 'high' ? 'red' : record.severity === 'medium' ? 'orange' : 'green'} style={{ marginRight: 0 }}>{severityOptions.find(item => item.value === record.severity)?.label}</Tag>}
+                {record.type === 'treatment' && showRelatedSickness && relatedSickness && <Tag color='geekblue' style={{ marginRight: 0, maxWidth: '100%', overflow: 'hidden', textOverflow: 'ellipsis' }}>Cho: {relatedSickness.title}</Tag>}
+                {record.type === 'treatment' && showRelatedSickness && !relatedSickness && <Tag style={{ marginRight: 0 }}>Chưa nối bệnh</Tag>}
+            </Stack>
+            <Typography.Text strong style={{ display: 'block', color: '#111827', lineHeight: '18px', overflowWrap: 'anywhere' }}>{record.title}</Typography.Text>
+            <Typography.Text type='secondary' style={{ display: 'block', fontSize: 12, lineHeight: '17px', marginTop: 3 }}>{formatDate(record.startedAt)} - {formatDate(record.endedAt)}</Typography.Text>
+            {(record.provider || record.dosage || record.notes) && <Typography.Text style={{ display: 'block', color: '#334155', fontSize: 12, lineHeight: '17px', marginTop: 5, overflowWrap: 'anywhere' }}>
+                {[record.provider, record.dosage, record.notes].filter(Boolean).join(' · ')}
+            </Typography.Text>}
+        </div>;
+    };
+
+    const _renderTreatmentRow = (record: HouseholdHealthRecord, showRelatedSickness = true) => <Box key={record.id} className='household-health-history-row' style={treatmentRowStyle}>
+        {_renderRecordSummary(record, showRelatedSickness)}
+        {_renderHistoryActions(record)}
+    </Box>;
+
+    const _renderSicknessRow = (record: HouseholdHealthRecord) => {
+        const treatments = linkedTreatmentsBySicknessId.get(record.id) ?? [];
+        return <Box key={record.id} style={sicknessCardStyle}>
+            <div className='household-health-history-row' style={sicknessHeaderStyle}>
+                {_renderRecordSummary(record, false)}
+                {_renderHistoryActions(record)}
+            </div>
+            {treatments.length > 0 && <div className='household-health-linked-treatment-list'>
+                <Typography.Text type='secondary' style={{ fontSize: 12, lineHeight: '17px' }}>{treatments.length} điều trị / chăm sóc liên quan</Typography.Text>
+                {treatments.map(treatment => _renderTreatmentRow(treatment, false))}
+            </div>}
+        </Box>;
     };
 
     return <Stack direction='column' gap={14} style={{ width: '100%' }}>
@@ -257,27 +398,11 @@ export const HouseholdHealthWidget: React.FC<{ member: HouseholdMemberProfile }>
                 <Button type='primary' icon={<PlusOutlined />} onClick={() => _openRecordModal()}>Thêm ghi nhận</Button>
             </Stack>
             {records.length === 0 ? <Empty description='Chưa có ghi nhận sức khỏe' image={Empty.PRESENTED_IMAGE_SIMPLE} /> : <Stack direction='column' gap={8} style={{ width: '100%' }}>
-                {records.map(record => <Box key={record.id} style={{ border: '1px solid rgba(15,23,42,0.07)', borderRadius: 8, background: '#f8fafc', padding: 10 }}>
-                    <Stack justify='space-between' align='flex-start' gap={8} wrap='wrap' style={{ width: '100%' }}>
-                        <div style={{ minWidth: 0, flex: '1 1 220px' }}>
-                            <Stack wrap='wrap' gap={5} style={{ marginBottom: 5 }}>
-                                <Tag color={record.type === 'sickness' ? 'volcano' : 'blue'} style={{ marginRight: 0 }}>{record.type === 'sickness' ? 'Bệnh' : 'Điều trị'}</Tag>
-                                {record.severity && <Tag color={record.severity === 'high' ? 'red' : record.severity === 'medium' ? 'orange' : 'green'} style={{ marginRight: 0 }}>{severityOptions.find(item => item.value === record.severity)?.label}</Tag>}
-                            </Stack>
-                            <Typography.Text strong style={{ display: 'block', color: '#111827', lineHeight: '18px', overflowWrap: 'anywhere' }}>{record.title}</Typography.Text>
-                            <Typography.Text type='secondary' style={{ display: 'block', fontSize: 12, lineHeight: '17px', marginTop: 3 }}>{formatDate(record.startedAt)} - {formatDate(record.endedAt)}</Typography.Text>
-                            {(record.provider || record.dosage || record.notes) && <Typography.Text style={{ display: 'block', color: '#334155', fontSize: 12, lineHeight: '17px', marginTop: 5, overflowWrap: 'anywhere' }}>
-                                {[record.provider, record.dosage, record.notes].filter(Boolean).join(' · ')}
-                            </Typography.Text>}
-                        </div>
-                        <Stack gap={6} wrap='wrap'>
-                            <Button icon={<EditOutlined />} onClick={() => _openRecordModal(record)}>Sửa</Button>
-                            <Popconfirm title='Xóa ghi nhận này?' okText='Xóa' cancelText='Hủy' okButtonProps={{ danger: true }} onConfirm={() => _removeRecord(record)}>
-                                <Button danger icon={<DeleteOutlined />}>Xóa</Button>
-                            </Popconfirm>
-                        </Stack>
-                    </Stack>
-                </Box>)}
+                {sicknessRecords.map(_renderSicknessRow)}
+                {standaloneTreatments.length > 0 && <Box style={{ width: '100%', display: 'grid', gap: 8 }}>
+                    <Typography.Text type='secondary' style={{ fontSize: 12, lineHeight: '17px' }}>Điều trị / chăm sóc chưa nối với bệnh</Typography.Text>
+                    {standaloneTreatments.map(treatment => _renderTreatmentRow(treatment, true))}
+                </Box>}
             </Stack>}
         </Box>
 
@@ -291,44 +416,48 @@ export const HouseholdHealthWidget: React.FC<{ member: HouseholdMemberProfile }>
             cancelText='Hủy'
             onOk={_saveRecord}
         >
-            {recordDraft && <Stack direction='column' gap={10} style={{ width: '100%' }}>
-                <div>
+            {recordDraft && <Stack className='household-health-record-modal' direction='column' gap={10} fullwidth>
+                <div style={{ width: '100%' }}>
                     <Typography.Text strong style={labelStyle}>Loại ghi nhận</Typography.Text>
-                    <Segmented block value={recordDraft.type} onChange={value => setRecordDraft(current => current ? { ...current, type: value as HouseholdHealthRecordType } : current)} options={recordTypeOptions} />
+                    <Segmented block value={recordDraft.type} onChange={value => setRecordDraft(current => current ? { ...current, type: value as HouseholdHealthRecordType, relatedSicknessId: value === 'treatment' ? current.relatedSicknessId : undefined } : current)} options={recordTypeOptions} />
                 </div>
-                <div>
+                {recordDraft.type === 'treatment' && <div style={{ width: '100%' }}>
+                    <Typography.Text strong style={labelStyle}>Liên quan đến</Typography.Text>
+                    <Select allowClear value={recordDraft.relatedSicknessId} onChange={value => setRecordDraft(current => current ? { ...current, relatedSicknessId: value } : current)} options={availableSicknessOptions} disabled={availableSicknessOptions.length === 0} placeholder={availableSicknessOptions.length === 0 ? 'Chưa có bệnh/triệu chứng để nối' : 'Chọn bệnh/triệu chứng liên quan'} style={{ width: '100%' }} />
+                </div>}
+                <div style={{ width: '100%' }}>
                     <Typography.Text strong style={labelStyle}>Tên ghi nhận</Typography.Text>
                     <Input value={recordDraft.title} onChange={event => setRecordDraft(current => current ? { ...current, title: event.target.value } : current)} placeholder={recordDraft.type === 'sickness' ? 'Ví dụ: sốt, cảm cúm, đau bụng...' : 'Ví dụ: uống hạ sốt, khám bác sĩ...'} />
                 </div>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 10 }}>
-                    <div>
+                <div style={{ width: '100%', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 10 }}>
+                    <div style={{ width: '100%', minWidth: 0 }}>
                         <Typography.Text strong style={labelStyle}>Bắt đầu</Typography.Text>
                         <DatePicker value={recordDraft.startedAt} onChange={value => value && setRecordDraft(current => current ? { ...current, startedAt: value } : current)} format='DD/MM/YYYY' style={{ width: '100%' }} />
                     </div>
-                    <div>
+                    <div style={{ width: '100%', minWidth: 0 }}>
                         <Typography.Text strong style={labelStyle}>Kết thúc</Typography.Text>
                         <DatePicker allowClear value={recordDraft.endedAt} onChange={value => setRecordDraft(current => current ? { ...current, endedAt: value } : current)} format='DD/MM/YYYY' style={{ width: '100%' }} />
                     </div>
                 </div>
-                <div>
+                <div style={{ width: '100%' }}>
                     <Typography.Text strong style={labelStyle}>Mức độ</Typography.Text>
                     <Select allowClear value={recordDraft.severity} onChange={value => setRecordDraft(current => current ? { ...current, severity: value } : current)} options={severityOptions} placeholder='Chọn mức độ nếu cần' style={{ width: '100%' }} />
                 </div>
-                {recordDraft.type === 'treatment' && <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 10 }}>
-                    <div>
+                {recordDraft.type === 'treatment' && <div style={{ width: '100%', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 10 }}>
+                    <div style={{ width: '100%', minWidth: 0 }}>
                         <Typography.Text strong style={labelStyle}>Nơi/người chăm sóc</Typography.Text>
                         <Input value={recordDraft.provider} onChange={event => setRecordDraft(current => current ? { ...current, provider: event.target.value } : current)} placeholder='Bác sĩ, phòng khám, tự chăm...' />
                     </div>
-                    <div>
+                    <div style={{ width: '100%', minWidth: 0 }}>
                         <Typography.Text strong style={labelStyle}>Liều/cách dùng</Typography.Text>
                         <Input value={recordDraft.dosage} onChange={event => setRecordDraft(current => current ? { ...current, dosage: event.target.value } : current)} placeholder='Nhập tự do, app không kiểm tra y tế' />
                     </div>
                 </div>}
-                <div>
+                <div style={{ width: '100%' }}>
                     <Typography.Text strong style={labelStyle}>Cập nhật trạng thái sau khi lưu</Typography.Text>
                     <Select value={recordDraft.statusAfterSave ?? 'none'} onChange={value => setRecordDraft(current => current ? { ...current, statusAfterSave: value as HealthRecordDraft['statusAfterSave'] } : current)} options={statusAfterSaveOptions} style={{ width: '100%' }} />
                 </div>
-                <div>
+                <div style={{ width: '100%' }}>
                     <Typography.Text strong style={labelStyle}>Ghi chú</Typography.Text>
                     <Input.TextArea value={recordDraft.notes} onChange={event => setRecordDraft(current => current ? { ...current, notes: event.target.value } : current)} placeholder='Ghi chú theo dõi gia đình, không phải tư vấn y tế' autoSize={{ minRows: 3, maxRows: 5 }} />
                 </div>

@@ -114,6 +114,7 @@ export interface AppContextState {
     householdPreferenceProfile?: HouseholdPreferenceProfile;
     householdMembers?: HouseholdMemberProfile[];
     selectedHouseholdMemberIds?: string[];
+    currentHouseholdMemberId?: string;
     leftoverTrackerItems?: LeftoverTrackerItem[];
 }
 
@@ -129,6 +130,7 @@ const initialState: AppContextState = {
     householdPreferenceProfile: DEFAULT_HOUSEHOLD_PREFERENCE_PROFILE,
     householdMembers: [],
     selectedHouseholdMemberIds: [],
+    currentHouseholdMemberId: undefined,
     leftoverTrackerItems: [],
 }
 
@@ -341,10 +343,18 @@ export const appContextSlice = createSlice({
         removeHouseholdMemberProfile: (state, action: PayloadAction<string>) => {
             state.householdMembers = normalizeHouseholdMembers(state.householdMembers).filter(item => item.id !== action.payload);
             state.selectedHouseholdMemberIds = normalizeStringList(state.selectedHouseholdMemberIds, 30).filter(id => id !== action.payload);
+            if (state.currentHouseholdMemberId === action.payload) {
+                state.currentHouseholdMemberId = undefined;
+            }
         },
         setSelectedHouseholdMemberIds: (state, action: PayloadAction<string[]>) => {
             const memberIds = new Set(normalizeHouseholdMembers(state.householdMembers).map(item => item.id));
             state.selectedHouseholdMemberIds = normalizeStringList(action.payload, 30).filter(id => memberIds.has(id));
+        },
+        setCurrentHouseholdMemberId: (state, action: PayloadAction<string | undefined>) => {
+            const memberIds = new Set(normalizeHouseholdMembers(state.householdMembers).map(item => item.id));
+            const memberId = String(action.payload ?? '').trim();
+            state.currentHouseholdMemberId = memberId && memberIds.has(memberId) ? memberId : undefined;
         },
         addLeftoverTrackerItem: (state, action: PayloadAction<LeftoverTrackerItem>) => {
             const portions = normalizePortions(action.payload.portions);
@@ -383,6 +393,7 @@ export const {
     upsertHouseholdMemberProfile,
     removeHouseholdMemberProfile,
     setSelectedHouseholdMemberIds,
+    setCurrentHouseholdMemberId,
     addLeftoverTrackerItem,
     eatLeftoverPortion,
     finishLeftoverItem,

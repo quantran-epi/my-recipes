@@ -10,8 +10,8 @@ import { Typography } from '@components/Typography';
 import { useScreenTitle } from '@hooks';
 import { HouseholdHealthStatusTag, HouseholdHealthWidget } from './HouseholdHealth.widget';
 import { DISH_TAGS } from '@store/Models/Dishes';
-import { HouseholdMemberProfile, removeHouseholdMemberProfile, setSelectedHouseholdMemberIds, upsertHouseholdMemberProfile } from '@store/Reducers/AppContextReducer';
-import { selectDishes, selectHouseholdHealthProfiles, selectHouseholdMembers, selectIngredients, selectNutritionGoals, selectSelectedHouseholdMemberIds } from '@store/Selectors';
+import { HouseholdMemberProfile, removeHouseholdMemberProfile, setCurrentHouseholdMemberId, setSelectedHouseholdMemberIds, upsertHouseholdMemberProfile } from '@store/Reducers/AppContextReducer';
+import { selectCurrentHouseholdMemberId, selectDishes, selectHouseholdHealthProfiles, selectHouseholdMembers, selectIngredients, selectNutritionGoals, selectSelectedHouseholdMemberIds } from '@store/Selectors';
 import { Empty, Input, InputNumber, Popconfirm, Segmented, Select, Switch } from 'antd';
 import { nanoid } from 'nanoid';
 import React, { useMemo, useState } from 'react';
@@ -108,6 +108,12 @@ const pageCss = `
     width: 100%;
     justify-items: end;
 }
+.household-editor-switches {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 8px;
+    width: 100%;
+}
 .household-editor-action-buttons {
     display: flex;
     justify-content: flex-end;
@@ -123,8 +129,8 @@ const pageCss = `
     border-radius: 8px;
     background: #fff;
     padding: 8px 10px;
-    width: min(100%, 360px);
-    justify-self: end;
+    width: 100%;
+    justify-self: stretch;
 }
 .household-editor-heading {
     display: grid;
@@ -212,6 +218,7 @@ export const HouseholdProfilesScreen: React.FC = () => {
     const message = useMessage();
     const members = useSelector(selectHouseholdMembers);
     const selectedMemberIds = useSelector(selectSelectedHouseholdMemberIds);
+    const currentHouseholdMemberId = useSelector(selectCurrentHouseholdMemberId);
     const dishes = useSelector(selectDishes);
     const ingredients = useSelector(selectIngredients);
     const nutritionGoals = useSelector(selectNutritionGoals);
@@ -318,7 +325,13 @@ export const HouseholdProfilesScreen: React.FC = () => {
         dispatch(setSelectedHouseholdMemberIds(next));
     };
 
+    const _setCurrentMember = (member: HouseholdMemberProfile, current: boolean) => {
+        dispatch(setCurrentHouseholdMemberId(current ? member.id : undefined));
+        message.success(current ? `Đã đánh dấu ${member.name} là tôi` : 'Đã bỏ đánh dấu hồ sơ tôi');
+    };
+
     const activeMemberSelected = activeMember ? selectedSet.has(activeMember.id) : false;
+    const activeMemberIsCurrent = activeMember ? activeMember.id === currentHouseholdMemberId : false;
 
     return <Box className='household-page' data-testid='household-profiles-page'>
         <style>{pageCss}</style>
@@ -348,13 +361,17 @@ export const HouseholdProfilesScreen: React.FC = () => {
                     {members.map(member => {
                         const active = activeMember?.id === member.id;
                         const selected = selectedSet.has(member.id);
+                        const isCurrent = member.id === currentHouseholdMemberId;
                         return <div key={member.id} className={`household-member-row${active ? ' active' : ''}`}>
                             <button type='button' className='household-member-main' onClick={() => setActiveMemberId(member.id)}>
                                 <span style={{ width: 42, height: 42, borderRadius: 14, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', background: `${member.color ?? '#1677ff'}18`, color: member.color ?? '#1677ff', border: `1px solid ${member.color ?? '#1677ff'}30` }}>
                                     <UserOutlined />
                                 </span>
                                 <span style={{ minWidth: 0 }}>
-                                    <Typography.Text strong style={{ display: 'block', color: '#111827', lineHeight: '18px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{member.name}</Typography.Text>
+                                    <span style={{ display: 'flex', alignItems: 'center', gap: 6, minWidth: 0 }}>
+                                        <Typography.Text strong style={{ color: '#111827', lineHeight: '18px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{member.name}</Typography.Text>
+                                        {isCurrent && <Tag color='gold' style={{ marginRight: 0, flexShrink: 0 }}>Tôi</Tag>}
+                                    </span>
                                     <Typography.Text type='secondary' style={{ display: 'block', fontSize: 11, lineHeight: '15px' }}>
                                         {(member.favoriteDishIds.length + member.favoriteIngredientIds.length + member.preferredTags.length)} thích · {(member.avoidedDishIds.length + member.avoidedIngredientIds.length + member.avoidedTags.length)} tránh · {(member.allergenIngredientIds.length + member.hardExcludedIngredientIds.length)} chặn
                                     </Typography.Text>
@@ -382,20 +399,31 @@ export const HouseholdProfilesScreen: React.FC = () => {
                                 <UserOutlined style={{ fontSize: 20 }} />
                             </span>
                             <div style={{ minWidth: 0 }}>
-                                <Typography.Text strong style={{ display: 'block', color: '#111827', fontSize: 18, lineHeight: '24px', overflowWrap: 'anywhere' }}>{draftMember.name || 'Thành viên'}</Typography.Text>
-                                <Typography.Text type='secondary' style={{ display: 'block', fontSize: 12, lineHeight: '17px' }}>Bấm Lưu sau khi chỉnh sửa</Typography.Text>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap', minWidth: 0 }}>
+                                    <Typography.Text strong style={{ color: '#111827', fontSize: 18, lineHeight: '24px', overflowWrap: 'anywhere' }}>{draftMember.name || 'Thành viên'}</Typography.Text>
+                                    {activeMemberIsCurrent && <Tag color='gold' style={{ marginRight: 0 }}>Tôi</Tag>}
+                                </div>
+                                <Typography.Text type='secondary' style={{ display: 'block', fontSize: 12, lineHeight: '17px' }}>Hồ sơ ăn uống và sức khỏe của thành viên</Typography.Text>
                             </div>
                         </div>
                         <div className='household-editor-actions'>
-                            <div className='household-editor-switch'>
-                                <span style={{ minWidth: 0 }}>
-                                    <Typography.Text strong style={{ display: 'block', color: '#111827', fontSize: 12, lineHeight: '16px' }}>{activeMemberSelected ? 'Đang dùng khi gợi ý' : 'Tạm bỏ qua khi gợi ý'}</Typography.Text>
-                                    <Typography.Text type='secondary' style={{ display: 'block', fontSize: 11, lineHeight: '15px' }}>Gợi ý món và thực đơn sẽ {activeMemberSelected ? 'tính' : 'không tính'} người này.</Typography.Text>
-                                </span>
-                                <Switch checked={activeMemberSelected} onChange={checked => _setMemberSelected(activeMember.id, checked)} />
+                            <div className='household-editor-switches'>
+                                <div className='household-editor-switch'>
+                                    <span style={{ minWidth: 0 }}>
+                                        <Typography.Text strong style={{ display: 'block', color: '#111827', fontSize: 12, lineHeight: '16px' }}>{activeMemberIsCurrent ? 'Hồ sơ của tôi' : 'Đánh dấu là tôi'}</Typography.Text>
+                                        <Typography.Text type='secondary' style={{ display: 'block', fontSize: 11, lineHeight: '15px' }}>{activeMemberIsCurrent ? 'Ứng dụng sẽ nhận biết đây là người đang dùng.' : 'Chỉ một hồ sơ được đánh dấu là tôi.'}</Typography.Text>
+                                    </span>
+                                    <Switch checked={activeMemberIsCurrent} onChange={checked => _setCurrentMember(activeMember, checked)} />
+                                </div>
+                                <div className='household-editor-switch'>
+                                    <span style={{ minWidth: 0 }}>
+                                        <Typography.Text strong style={{ display: 'block', color: '#111827', fontSize: 12, lineHeight: '16px' }}>{activeMemberSelected ? 'Đang dùng khi gợi ý' : 'Tạm bỏ qua khi gợi ý'}</Typography.Text>
+                                        <Typography.Text type='secondary' style={{ display: 'block', fontSize: 11, lineHeight: '15px' }}>Gợi ý món và thực đơn sẽ {activeMemberSelected ? 'tính' : 'không tính'} người này.</Typography.Text>
+                                    </span>
+                                    <Switch checked={activeMemberSelected} onChange={checked => _setMemberSelected(activeMember.id, checked)} />
+                                </div>
                             </div>
                             <div className='household-editor-action-buttons'>
-                                <Button type='primary' icon={<SaveOutlined />} onClick={_saveDraftMember}>Lưu</Button>
                                 <Popconfirm title='Xoá hồ sơ này?' okText='Xoá' cancelText='Huỷ' okButtonProps={{ danger: true }} onConfirm={() => _removeMember(activeMember)}>
                                     <Button danger icon={<DeleteOutlined />}>Xoá</Button>
                                 </Popconfirm>
@@ -504,6 +532,9 @@ export const HouseholdProfilesScreen: React.FC = () => {
                         <FieldLabel>Ghi chú riêng</FieldLabel>
                         <div className='household-field-control'><Input.TextArea value={draftMember.notes} onChange={event => _updateDraftMember({ notes: event.target.value })} placeholder='Ví dụ: ăn ít cay, không đậu phộng, khẩu phần trẻ em...' autoSize={{ minRows: 3, maxRows: 6 }} /></div>
                     </div>
+                    <Stack justify='flex-end'>
+                        <Button type='primary' icon={<SaveOutlined />} onClick={_saveDraftMember}>Lưu hồ sơ ăn uống</Button>
+                    </Stack>
                     </> : <HouseholdHealthWidget member={activeMember} />}
                 </Stack>}
             </Box>
