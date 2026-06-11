@@ -9184,12 +9184,6 @@
         "required": true
       }
     ],
-    "name": "Nước sốt trộn chua ngọt",
-    "servingSize": 2,
-    "includeDishes": [],
-    "note": "",
-    "isCompleted": true,
-    "image": "https://vcdn1-giadinh.vnecdn.net/2020/11/15/daidien-1605417540-6495-1605417726.jpg?w=1200&h=0&q=100&dpr=1&fit=crop&s=78XZiYnQDEf8Ghj-I_SVGg",
     "duration": {
       "unfreeze": null,
       "prepare": 8,
@@ -9197,11 +9191,16 @@
       "serve": 2,
       "cooldown": null
     },
+    "name": "Nước sốt trộn chua ngọt",
     "baseServings": 2,
+    "includeDishes": [],
+    "note": "",
     "tags": [
-      "Món phụ",
-      "Salad"
-    ]
+      "Sốt trộn"
+    ],
+    "image": "https://vcdn1-giadinh.vnecdn.net/2020/11/15/daidien-1605417540-6495-1605417726.jpg?w=1200&h=0&q=100&dpr=1&fit=crop&s=78XZiYnQDEf8Ghj-I_SVGg",
+    "isCompleted": true,
+    "isAccompaniment": true
   },
   {
     "id": "Cà rốt và củ cải ngâm chua ngọtEwWkyZx38p",
@@ -9469,12 +9468,6 @@
         "required": true
       }
     ],
-    "name": "Nước chấm nem nướng",
-    "servingSize": 2,
-    "includeDishes": [],
-    "note": "",
-    "isCompleted": true,
-    "image": "https://www.huongnghiepaau.com/wp-content/uploads/2019/01/nem-nuong-mien-tay620x400.jpg",
     "duration": {
       "unfreeze": null,
       "prepare": 12,
@@ -9482,10 +9475,16 @@
       "serve": 2,
       "cooldown": null
     },
+    "name": "Nước chấm nem nướng",
     "baseServings": 2,
+    "includeDishes": [],
+    "note": "",
     "tags": [
-      "Món phụ"
-    ]
+      "Nước chấm"
+    ],
+    "image": "https://www.huongnghiepaau.com/wp-content/uploads/2019/01/nem-nuong-mien-tay620x400.jpg",
+    "isCompleted": true,
+    "isAccompaniment": true
   },
   {
     "id": "Bánh cuốn8njAOXZMLa",
@@ -10107,12 +10106,6 @@
         "required": true
       }
     ],
-    "name": "Nước chấm bánh cuốn",
-    "servingSize": 2,
-    "includeDishes": [],
-    "note": "",
-    "isCompleted": true,
-    "image": "https://img-global.cpcdn.com/recipes/3c872698969f85ec/1360x964cq70/banh-cu%E1%BB%91n-homemade-recipe-main-photo.webp",
     "duration": {
       "unfreeze": null,
       "prepare": 8,
@@ -10120,10 +10113,16 @@
       "serve": 2,
       "cooldown": null
     },
+    "name": "Nước chấm bánh cuốn",
     "baseServings": 2,
+    "includeDishes": [],
+    "note": "",
     "tags": [
-      "Món phụ"
-    ]
+      "Nước chấm"
+    ],
+    "image": "https://img-global.cpcdn.com/recipes/3c872698969f85ec/1360x964cq70/banh-cu%E1%BB%91n-homemade-recipe-main-photo.webp",
+    "isCompleted": true,
+    "isAccompaniment": true
   },
   {
     "id": "Bò bít tếtaOXbsKyhgB",
@@ -10414,11 +10413,6 @@
         "required": true
       }
     ],
-    "name": "Sốt chấm hải sản",
-    "includeDishes": [],
-    "note": "",
-    "image": "https://cdn.tgdd.vn/Files/2021/05/05/1349943/cach-lam-muoi-ot-xanh-cham-hai-san-ngon-dung-dieu-202105051459349345.jpg",
-    "isCompleted": false,
     "duration": {
       "unfreeze": null,
       "prepare": 10,
@@ -10426,10 +10420,16 @@
       "serve": 2,
       "cooldown": 5
     },
+    "name": "Sốt chấm hải sản",
     "baseServings": 2,
+    "includeDishes": [],
+    "note": "",
     "tags": [
-      "Món phụ"
-    ]
+      "Nước chấm"
+    ],
+    "image": "https://cdn.tgdd.vn/Files/2021/05/05/1349943/cach-lam-muoi-ot-xanh-cham-hai-san-ngon-dung-dieu-202105051459349345.jpg",
+    "isCompleted": false,
+    "isAccompaniment": true
   },
   {
     "id": "Bún chả miếngfKGq1GQZND",
@@ -10707,12 +10707,6 @@
         "required": true
       }
     ],
-    "name": "Nước chấm bún chả",
-    "servingSize": 2,
-    "includeDishes": [],
-    "note": "",
-    "isCompleted": true,
-    "image": "https://i1-giadinh.vnecdn.net/2023/04/16/Bc11Thnhphm11-1681636259-6445-1681636728.jpg?w=0&h=0&q=100&dpr=2&fit=crop&s=2zyjryzCAWgbIFdeBFwyow",
     "duration": {
       "unfreeze": null,
       "prepare": 8,
@@ -10720,10 +10714,16 @@
       "serve": 2,
       "cooldown": null
     },
+    "name": "Nước chấm bún chả",
     "baseServings": 2,
+    "includeDishes": [],
+    "note": "",
     "tags": [
-      "Món phụ"
-    ]
+      "Nước chấm"
+    ],
+    "image": "https://i1-giadinh.vnecdn.net/2023/04/16/Bc11Thnhphm11-1681636259-6445-1681636728.jpg?w=0&h=0&q=100&dpr=2&fit=crop&s=2zyjryzCAWgbIFdeBFwyow",
+    "isCompleted": true,
+    "isAccompaniment": true
   },
   {
     "id": "Sốt ướp chả nướng (bún chả)bgtSIsRYZV",
@@ -10839,12 +10839,6 @@
         "required": true
       }
     ],
-    "name": "Sốt ướp chả nướng (bún chả)",
-    "servingSize": 2,
-    "includeDishes": [],
-    "note": "Dùng cho 300g thịt",
-    "isCompleted": true,
-    "image": "https://cdn.sforum.vn/sforum/wp-content/uploads/2023/09/cach-lam-cha-vien-nuong-thumb.jpg",
     "duration": {
       "unfreeze": null,
       "prepare": 10,
@@ -10852,11 +10846,16 @@
       "serve": 2,
       "cooldown": null
     },
+    "name": "Sốt ướp chả nướng (bún chả)",
     "baseServings": 2,
+    "includeDishes": [],
+    "note": "Dùng cho 300g thịt",
     "tags": [
-      "Món phụ",
-      "Nướng"
-    ]
+      "Sốt ướp"
+    ],
+    "image": "https://cdn.sforum.vn/sforum/wp-content/uploads/2023/09/cach-lam-cha-vien-nuong-thumb.jpg",
+    "isCompleted": true,
+    "isAccompaniment": true
   },
   {
     "id": "Sốt ướp thịt nướng sảViIOYxgxhe",
@@ -10948,12 +10947,6 @@
         "required": true
       }
     ],
-    "name": "Sốt ướp thịt nướng sả",
-    "servingSize": 2,
-    "includeDishes": [],
-    "note": "",
-    "isCompleted": false,
-    "image": "https://www.bigc.vn/files/cam-nang-mua-sam-27-11-2023-14-35-21/vao-bep-cung-go-27-11-2023-14-39-10/cach-lam-banh-mi-thit-nuong.jpg",
     "duration": {
       "unfreeze": null,
       "prepare": 10,
@@ -10961,11 +10954,16 @@
       "serve": 2,
       "cooldown": null
     },
+    "name": "Sốt ướp thịt nướng sả",
     "baseServings": 2,
+    "includeDishes": [],
+    "note": "",
     "tags": [
-      "Món phụ",
-      "Nướng"
-    ]
+      "Sốt ướp"
+    ],
+    "image": "https://www.bigc.vn/files/cam-nang-mua-sam-27-11-2023-14-35-21/vao-bep-cung-go-27-11-2023-14-39-10/cach-lam-banh-mi-thit-nuong.jpg",
+    "isCompleted": false,
+    "isAccompaniment": false
   },
   {
     "id": "Sốt ướp thịt nướng mật ongqZhf-2mjJm",
@@ -11057,12 +11055,6 @@
         "required": true
       }
     ],
-    "name": "Sốt ướp thịt nướng mật ong",
-    "servingSize": 2,
-    "includeDishes": [],
-    "note": "",
-    "isCompleted": false,
-    "image": "https://www.bigc.vn/files/cam-nang-mua-sam-27-11-2023-14-35-21/vao-bep-cung-go-27-11-2023-14-39-10/cach-lam-banh-mi-thit-nuong.jpg",
     "duration": {
       "unfreeze": null,
       "prepare": 10,
@@ -11070,11 +11062,16 @@
       "serve": 2,
       "cooldown": null
     },
+    "name": "Sốt ướp thịt nướng mật ong",
     "baseServings": 2,
+    "includeDishes": [],
+    "note": "",
     "tags": [
-      "Món phụ",
-      "Nướng"
-    ]
+      "Sốt ướp"
+    ],
+    "image": "https://www.bigc.vn/files/cam-nang-mua-sam-27-11-2023-14-35-21/vao-bep-cung-go-27-11-2023-14-39-10/cach-lam-banh-mi-thit-nuong.jpg",
+    "isCompleted": false,
+    "isAccompaniment": true
   },
   {
     "id": "Riêu cuaBBGR0lt-N3",
@@ -11346,11 +11343,6 @@
         "required": true
       }
     ],
-    "name": "Nước chấm cá rán",
-    "includeDishes": [],
-    "note": "",
-    "image": "https://cdn.eva.vn/upload/3-2023/images/2023-07-18/cach-lam-bun-ca-cham-va-cong-thuc-pha-nuoc-mam-cham-ngon-nhu-ngoai-hang-6-1689663781-953-width600height484.jpg",
-    "isCompleted": true,
     "duration": {
       "unfreeze": null,
       "prepare": 8,
@@ -11358,10 +11350,16 @@
       "serve": 2,
       "cooldown": null
     },
+    "name": "Nước chấm cá rán",
     "baseServings": 2,
+    "includeDishes": [],
+    "note": "",
     "tags": [
-      "Món phụ"
-    ]
+      "Nước chấm"
+    ],
+    "image": "https://cdn.eva.vn/upload/3-2023/images/2023-07-18/cach-lam-bun-ca-cham-va-cong-thuc-pha-nuoc-mam-cham-ngon-nhu-ngoai-hang-6-1689663781-953-width600height484.jpg",
+    "isCompleted": true,
+    "isAccompaniment": true
   },
   {
     "id": "Gà kho sả ớt2NJpSsMRKr",
@@ -11874,11 +11872,6 @@
         "required": true
       }
     ],
-    "name": "Nước chấm chua ngọt",
-    "includeDishes": [],
-    "note": "",
-    "image": "https://vcdn1-giadinh.vnecdn.net/2020/11/15/daidien-1605417540-6495-1605417726.jpg?w=1200&h=0&q=100&dpr=1&fit=crop&s=78XZiYnQDEf8Ghj-I_SVGg",
-    "isCompleted": true,
     "duration": {
       "unfreeze": null,
       "prepare": 8,
@@ -11886,10 +11879,16 @@
       "serve": 2,
       "cooldown": null
     },
+    "name": "Nước chấm chua ngọt",
     "baseServings": 2,
+    "includeDishes": [],
+    "note": "",
     "tags": [
-      "Món phụ"
-    ]
+      "Nước chấm"
+    ],
+    "image": "https://vcdn1-giadinh.vnecdn.net/2020/11/15/daidien-1605417540-6495-1605417726.jpg?w=1200&h=0&q=100&dpr=1&fit=crop&s=78XZiYnQDEf8Ghj-I_SVGg",
+    "isCompleted": true,
+    "isAccompaniment": true
   },
   {
     "id": "Sườn chua cay TháiQZm3j8N_jt",
