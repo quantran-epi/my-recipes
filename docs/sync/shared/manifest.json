@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "updatedAt": "2026-06-11T06:09:49.783Z",
+  "updatedAt": "2026-06-11T06:11:43.265Z",
   "parts": {
     "ingredients": {
       "key": "ingredients",
@@ -14,59 +14,14 @@
     "dishes": {
       "key": "dishes",
       "path": "docs/sync/shared/dishes.json",
-      "version": "2026-06-11T06:09:49.783Z",
-      "hash": "7ec7426b81e798e4e8ccd1178188a55f22972cce63b72241cdd46f9e1d99ed70",
+      "version": "2026-06-11T06:11:43.265Z",
+      "hash": "2fbd4419f54873082befa75515cbbf86eac5f2a69e603463c28883ae34cd599c",
       "count": 98,
-      "updatedAt": "2026-06-11T06:09:49.783Z",
+      "updatedAt": "2026-06-11T06:11:43.265Z",
       "changes": [
-        {
-          "id": "Nước sốt bún trộnHQE5qZrQpv",
-          "name": "Nước sốt trộn chua ngọt",
-          "action": "modified"
-        },
-        {
-          "id": "Nước chấm nem nướngTae9hkbHGW",
-          "name": "Nước chấm nem nướng",
-          "action": "modified"
-        },
-        {
-          "id": "Nước chấm bánh cuốnECD_ldv04_",
-          "name": "Nước chấm bánh cuốn",
-          "action": "modified"
-        },
-        {
-          "id": "Nước chấm hải sảnabDnXSNf-y",
-          "name": "Sốt chấm hải sản",
-          "action": "modified"
-        },
-        {
-          "id": "Nước chấm bún chả9XYmqW0KpO",
-          "name": "Nước chấm bún chả",
-          "action": "modified"
-        },
-        {
-          "id": "Sốt ướp chả nướng (bún chả)bgtSIsRYZV",
-          "name": "Sốt ướp chả nướng (bún chả)",
-          "action": "modified"
-        },
         {
           "id": "Sốt ướp thịt nướng sảViIOYxgxhe",
           "name": "Sốt ướp thịt nướng sả",
-          "action": "modified"
-        },
-        {
-          "id": "Sốt ướp thịt nướng mật ongqZhf-2mjJm",
-          "name": "Sốt ướp thịt nướng mật ong",
-          "action": "modified"
-        },
-        {
-          "id": "Nước chấm cá rán0UK9PsMOJv",
-          "name": "Nước chấm cá rán",
-          "action": "modified"
-        },
-        {
-          "id": "Nước chấm chua ngọtG7qG4YmA5R",
-          "name": "Nước chấm chua ngọt",
           "action": "modified"
         }
       ]
@@ -78,76 +33,19 @@
       "hash": "a43d5cc4fbdddecfb5b639e2f78f353cb2f3128efa42001c776be482bda456b5",
       "count": 1,
       "updatedAt": "2026-06-11T06:09:49.783Z",
-      "changes": [
-        {
-          "id": "shared-config",
-          "name": "Cấu hình dùng chung",
-          "action": "added"
-        }
-      ]
+      "changes": []
     }
   },
   "ingredientsVersion": "2026-06-11T06:09:49.783Z",
-  "dishesVersion": "2026-06-11T06:09:49.783Z",
+  "dishesVersion": "2026-06-11T06:11:43.265Z",
   "configVersion": "2026-06-11T06:09:49.783Z",
   "ingredientChanges": [],
   "dishChanges": [
     {
-      "id": "Nước sốt bún trộnHQE5qZrQpv",
-      "name": "Nước sốt trộn chua ngọt",
-      "action": "modified"
-    },
-    {
-      "id": "Nước chấm nem nướngTae9hkbHGW",
-      "name": "Nước chấm nem nướng",
-      "action": "modified"
-    },
-    {
-      "id": "Nước chấm bánh cuốnECD_ldv04_",
-      "name": "Nước chấm bánh cuốn",
-      "action": "modified"
-    },
-    {
-      "id": "Nước chấm hải sảnabDnXSNf-y",
-      "name": "Sốt chấm hải sản",
-      "action": "modified"
-    },
-    {
-      "id": "Nước chấm bún chả9XYmqW0KpO",
-      "name": "Nước chấm bún chả",
-      "action": "modified"
-    },
-    {
-      "id": "Sốt ướp chả nướng (bún chả)bgtSIsRYZV",
-      "name": "Sốt ướp chả nướng (bún chả)",
-      "action": "modified"
-    },
-    {
       "id": "Sốt ướp thịt nướng sảViIOYxgxhe",
       "name": "Sốt ướp thịt nướng sả",
       "action": "modified"
-    },
-    {
-      "id": "Sốt ướp thịt nướng mật ongqZhf-2mjJm",
-      "name": "Sốt ướp thịt nướng mật ong",
-      "action": "modified"
-    },
-    {
-      "id": "Nước chấm cá rán0UK9PsMOJv",
-      "name": "Nước chấm cá rán",
-      "action": "modified"
-    },
-    {
-      "id": "Nước chấm chua ngọtG7qG4YmA5R",
-      "name": "Nước chấm chua ngọt",
-      "action": "modified"
     }
   ],
-  "configChanges": [
-    {
-      "id": "shared-config",
-      "name": "Cấu hình dùng chung",
-      "action": "added"
-    }
-  ]
+  "configChanges": []
 }
