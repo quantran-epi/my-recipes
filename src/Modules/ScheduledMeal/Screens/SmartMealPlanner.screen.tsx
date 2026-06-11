@@ -561,6 +561,14 @@ const presetOptions: Array<{ value: SmartPlannerPreset; label: string; icon: Rea
     { value: 'more_variety', label: 'Đa dạng hơn', icon: <ThunderboltOutlined />, hint: 'Tăng đa dạng, tránh lặp món' },
 ];
 
+// Presets that boost a gated scoring dimension must also enable its criterion,
+// otherwise the preset would weight a dimension that returns a flat score.
+const presetRequiredCriterion: Partial<Record<SmartPlannerPreset, CriteriaKey>> = {
+    budget: 'budget',
+    healthy: 'nutrition',
+    family_fit: 'member',
+};
+
 const varietyModeOptions: Array<{ value: SmartPlannerVarietyMode; label: string }> = [
     { value: 'familiar', label: 'Quen thuộc' },
     { value: 'balanced', label: 'Cân bằng' },
@@ -812,6 +820,8 @@ export const SmartMealPlannerScreen: React.FC = () => {
 
     const _onPresetChange = (value: SmartPlannerPreset) => {
         setPreset(value);
+        const required = presetRequiredCriterion[value];
+        if (required) setCriteria(current => current.includes(required) ? current : [...current, required]);
         _clearSuggestions();
     };
 
@@ -1465,7 +1475,13 @@ export const SmartMealPlannerScreen: React.FC = () => {
                                                     <li><b>Khẩu vị nhà</b>: chấm theo hồ sơ các thành viên đang chọn, món thích/tránh, dị ứng và phản hồi nấu ăn đã lưu. Cần chọn người ăn cùng.</li>
                                                 </ul>
                                             </PlannerFieldLabel>
-                                            <Select mode='multiple' dropdownRender={createSelectedOptionsDropdownRender({ mode: 'multiple', value: criteria, options: criteriaOptions })} value={criteria} onChange={value => { setCriteria(value); _clearSuggestions(); }} options={criteriaOptions} style={{ width: '100%' }} />
+                                            <Select mode='multiple' dropdownRender={createSelectedOptionsDropdownRender({ mode: 'multiple', value: criteria, options: criteriaOptions })} value={criteria} onChange={value => {
+                                                const required = presetRequiredCriterion[preset];
+                                                setCriteria(required && !value.includes(required) ? [...value, required] : value);
+                                                _clearSuggestions();
+                                            }} options={criteriaOptions.map(option => option.value === presetRequiredCriterion[preset]
+                                                ? { ...option, label: `${option.label} · mẫu ${presetOptions.find(item => item.value === preset)?.label} cần`, disabled: true }
+                                                : option)} style={{ width: '100%' }} />
                                         </div>
                                     </div>
                                     <Box style={{ marginTop: 10 }}>
