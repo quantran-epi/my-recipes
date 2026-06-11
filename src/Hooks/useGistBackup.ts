@@ -323,7 +323,9 @@ const readChangedRemoteSlices = async (params: {
     await Promise.all(personalPartKeys.map(async partKey => {
         const part = params.manifest.parts[partKey];
         if (!part?.hash) {
-            restoredSlices[partKey] = emptyPersonalSlice(partKey);
+            // Remote manifest has no hash for this slice — e.g. restoring from a
+            // backup made by an older app version that predates this slice. Keep
+            // the local data instead of overwriting it with an empty slice.
             return;
         }
         if (!part.fileName) return;

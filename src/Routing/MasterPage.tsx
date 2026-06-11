@@ -66,6 +66,23 @@ const sidebarNavListStyle: React.CSSProperties = {
     padding: "10px 8px 8px",
 };
 
+const sidebarNavGroupStyle: React.CSSProperties = {
+    display: "flex",
+    flexDirection: "column",
+    gap: 2,
+    marginBottom: 14,
+};
+
+const sidebarNavSectionLabelStyle: React.CSSProperties = {
+    fontSize: 11,
+    fontWeight: 700,
+    letterSpacing: 0.4,
+    textTransform: "uppercase",
+    color: "#9b8fb5",
+    padding: "0 12px",
+    marginBottom: 4,
+};
+
 const APP_CONFIRM_Z_INDEX = 5200;
 
 const headerActionButtonStyle: React.CSSProperties = {
@@ -451,18 +468,42 @@ const SidebarDrawer = ({ buttonStyle }: { buttonStyle?: React.CSSProperties }) =
             ? "Đang dùng token cấu hình sẵn. Bạn có thể nhập token khác để ghi đè trên thiết bị này."
             : "Chưa có token xuất bản. Token chỉ lưu trong trình duyệt của thiết bị này.";
 
-    const sidebarNavItems = [
-        { key: 'dashboard', href: RootRoutes.AuthorizedRoutes.Root(), icon: HouseIcon, label: 'Tổng quan' },
-        { key: 'analytics', href: RootRoutes.AuthorizedRoutes.Analytics(), icon: MonitorIcon, label: 'Phân tích' },
-        { key: 'nutritionGoals', href: RootRoutes.AuthorizedRoutes.NutritionGoals(), icon: NutritionPlanIcon, label: 'Dinh dưỡng' },
-        { key: 'templates', href: RootRoutes.AuthorizedRoutes.Templates(), icon: LayoutIcon, label: 'Mẫu dùng lại' },
-        { key: 'dishSuggester', href: RootRoutes.AuthorizedRoutes.DishSuggester(), icon: SuggesterIcon, label: 'Nấu gì?' },
-        { key: 'household', href: RootRoutes.AuthorizedRoutes.HouseholdProfiles(), icon: FamilyIcon, label: 'Nhà mình' },
-        { key: 'ingredients', href: RootRoutes.AuthorizedRoutes.IngredientRoutes.List(), icon: IngredientIcon, label: 'Nguyên liệu' },
-        { key: 'dishes', href: RootRoutes.AuthorizedRoutes.DishesRoutes.List(), icon: DishesIcon, label: 'Món ăn' },
-        { key: 'expensePlanner', href: RootRoutes.AuthorizedRoutes.ExpensePlanner(), icon: BudgetIcon, label: 'Tính chi phí' },
-        { key: 'shoppingList', href: RootRoutes.AuthorizedRoutes.ShoppingListRoutes.List(), icon: ShoppingListIcon, label: 'Lịch mua sắm' },
-        { key: 'meals', href: RootRoutes.AuthorizedRoutes.ScheduledMealRoutes.List(), icon: DietPlanIcon, label: 'Thực đơn' },
+    const sidebarNavGroups = [
+        {
+            key: 'overview',
+            label: 'Tổng quan',
+            items: [
+                { key: 'dashboard', href: RootRoutes.AuthorizedRoutes.Root(), icon: HouseIcon, label: 'Tổng quan' },
+                { key: 'analytics', href: RootRoutes.AuthorizedRoutes.Analytics(), icon: MonitorIcon, label: 'Phân tích' },
+            ],
+        },
+        {
+            key: 'planning',
+            label: 'Lên thực đơn',
+            items: [
+                { key: 'dishSuggester', href: RootRoutes.AuthorizedRoutes.DishSuggester(), icon: SuggesterIcon, label: 'Nấu gì?' },
+                { key: 'meals', href: RootRoutes.AuthorizedRoutes.ScheduledMealRoutes.List(), icon: DietPlanIcon, label: 'Thực đơn' },
+                { key: 'shoppingList', href: RootRoutes.AuthorizedRoutes.ShoppingListRoutes.List(), icon: ShoppingListIcon, label: 'Lịch mua sắm' },
+                { key: 'expensePlanner', href: RootRoutes.AuthorizedRoutes.ExpensePlanner(), icon: BudgetIcon, label: 'Tính chi phí' },
+            ],
+        },
+        {
+            key: 'library',
+            label: 'Thư viện',
+            items: [
+                { key: 'dishes', href: RootRoutes.AuthorizedRoutes.DishesRoutes.List(), icon: DishesIcon, label: 'Món ăn' },
+                { key: 'ingredients', href: RootRoutes.AuthorizedRoutes.IngredientRoutes.List(), icon: IngredientIcon, label: 'Nguyên liệu' },
+                { key: 'templates', href: RootRoutes.AuthorizedRoutes.Templates(), icon: LayoutIcon, label: 'Mẫu dùng lại' },
+            ],
+        },
+        {
+            key: 'household',
+            label: 'Gia đình',
+            items: [
+                { key: 'household', href: RootRoutes.AuthorizedRoutes.HouseholdProfiles(), icon: FamilyIcon, label: 'Nhà mình' },
+                { key: 'nutritionGoals', href: RootRoutes.AuthorizedRoutes.NutritionGoals(), icon: NutritionPlanIcon, label: 'Dinh dưỡng' },
+            ],
+        },
     ];
 
     return (
@@ -488,17 +529,22 @@ const SidebarDrawer = ({ buttonStyle }: { buttonStyle?: React.CSSProperties }) =
                 {/* ── Navigation ── */}
                 <div data-testid="sidebar-drawer-primary-nav">
                     <div style={sidebarNavListStyle}>
-                        {sidebarNavItems.map(item => (
-                            <button
-                                key={item.key}
-                                type="button"
-                                data-testid={`sidebar-nav-${item.key}`}
-                                style={sidebarNavButtonStyle(location.pathname === item.href)}
-                                onClick={() => onNavigate(item.href)}
-                            >
-                                <Image src={item.icon} width={24} alt="" />
-                                <span>{item.label}</span>
-                            </button>
+                        {sidebarNavGroups.map(group => (
+                            <div key={group.key} style={sidebarNavGroupStyle} data-testid={`sidebar-nav-group-${group.key}`}>
+                                <div style={sidebarNavSectionLabelStyle}>{group.label}</div>
+                                {group.items.map(item => (
+                                    <button
+                                        key={item.key}
+                                        type="button"
+                                        data-testid={`sidebar-nav-${item.key}`}
+                                        style={sidebarNavButtonStyle(location.pathname === item.href)}
+                                        onClick={() => onNavigate(item.href)}
+                                    >
+                                        <Image src={item.icon} width={24} alt="" />
+                                        <span>{item.label}</span>
+                                    </button>
+                                ))}
+                            </div>
                         ))}
                     </div>
                 </div>

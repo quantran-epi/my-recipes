@@ -163,15 +163,27 @@ export const normalizeSharedManifest = (manifest: Partial<SharedManifest> | null
 };
 
 const getFileSha = async (path: string, token: string): Promise<{ sha: string; content: string } | null> => {
+    // Use the "object" media type so the sha is always returned, even for files
+    // over 1MB (the default media type omits/refuses content past 1MB).
     const res = await fetch(
         `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${path}`,
-        { headers: { Authorization: `Bearer ${token}`, Accept: "application/vnd.github+json" } }
+        { headers: { Authorization: `Bearer ${token}`, Accept: "application/vnd.github.object+json" } }
     );
     if (res.status === 404) return null;
     if (!res.ok) throw new Error(`Failed to read ${path}: ${res.status} ${res.statusText}`);
     const json = await res.json();
-    const decoded = decodeURIComponent(escape(atob(json.content.replace(/\n/g, ""))));
-    return { sha: json.sha, content: decoded };
+    // Files <=1MB include inline base64 content; larger files come back with
+    // empty content, so fetch the raw blob (git blobs API supports up to 100MB).
+    if (json.content && json.encoding === "base64") {
+        const decoded = decodeURIComponent(escape(atob(json.content.replace(/\n/g, ""))));
+        return { sha: json.sha, content: decoded };
+    }
+    const blobRes = await fetch(
+        `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/git/blobs/${json.sha}`,
+        { headers: { Authorization: `Bearer ${token}`, Accept: "application/vnd.github.raw" } }
+    );
+    if (!blobRes.ok) throw new Error(`Failed to read blob for ${path}: ${blobRes.status} ${blobRes.statusText}`);
+    return { sha: json.sha, content: await blobRes.text() };
 };
 
 const pushFile = async (path: string, token: string, sha: string | null, content: string, commitMessage: string): Promise<void> => {
