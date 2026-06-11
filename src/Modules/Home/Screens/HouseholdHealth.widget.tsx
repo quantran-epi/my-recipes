@@ -94,26 +94,55 @@ const labelStyle: React.CSSProperties = {
 };
 
 const healthCss = `
-.household-health-status-segment.ant-segmented {
-    width: 100%;
-}
-.household-health-status-segment .ant-segmented-group {
+.household-health-status-grid {
     width: 100%;
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(112px, 1fr));
-    gap: 4px;
+    grid-template-columns: repeat(auto-fit, minmax(126px, 1fr));
+    gap: 8px;
 }
-.household-health-status-segment .ant-segmented-item {
-    min-width: 0;
-}
-.household-health-status-segment .ant-segmented-item-label {
-    min-height: 34px;
-    line-height: 17px;
-    padding: 8px 8px;
-    white-space: normal;
+.household-health-status-chip {
+    min-height: 38px;
+    border: 1px solid rgba(15,23,42,0.12);
+    border-radius: 8px;
+    background: #fff;
+    padding: 8px 10px;
     display: flex;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-start;
+    gap: 8px;
+    cursor: pointer;
+    font: inherit;
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 16px;
+    text-align: left;
+    min-width: 0;
+    transition: border-color 0.12s ease, background 0.12s ease, box-shadow 0.12s ease;
+}
+.household-health-status-chip:hover {
+    border-color: rgba(22,119,255,0.42);
+    box-shadow: 0 4px 12px rgba(15,23,42,0.08);
+}
+.household-health-status-chip-dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    flex: 0 0 auto;
+}
+.household-health-record-tags {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 5px;
+    margin-bottom: 5px;
+    min-width: 0;
+}
+.household-health-record-tags .ant-tag {
+    margin-right: 0 !important;
+    max-width: 100%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 .household-health-record-modal,
 .household-health-record-modal > * {
@@ -137,6 +166,15 @@ const healthCss = `
 }
 .household-health-history-actions {
     justify-self: end;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 6px;
+    flex-wrap: nowrap;
+    min-width: max-content;
+}
+.household-health-history-actions .ant-btn {
+    flex: 0 0 36px;
 }
 .household-health-linked-treatment-list {
     border-top: 1px solid rgba(15,23,42,0.07);
@@ -305,7 +343,7 @@ export const HouseholdHealthWidget: React.FC<{ member: HouseholdMemberProfile }>
         message.success(`Đã xóa ${record.title}`);
     };
 
-    const _renderHistoryActions = (record: HouseholdHealthRecord) => <Stack className='household-health-history-actions' gap={6} wrap='wrap' justify='flex-end' align='center'>
+    const _renderHistoryActions = (record: HouseholdHealthRecord) => <div className='household-health-history-actions'>
         {record.type === 'sickness' && <Tooltip title='Thêm điều trị cho ghi nhận này'>
             <Button aria-label={`Thêm điều trị cho ${record.title}`} icon={<PlusOutlined />} onClick={() => _openTreatmentForSickness(record)} style={iconButtonStyle} />
         </Tooltip>}
@@ -317,17 +355,17 @@ export const HouseholdHealthWidget: React.FC<{ member: HouseholdMemberProfile }>
                 <Button aria-label={`Xóa ${record.title}`} danger icon={<DeleteOutlined />} style={iconButtonStyle} />
             </Tooltip>
         </Popconfirm>
-    </Stack>;
+    </div>;
 
     const _renderRecordSummary = (record: HouseholdHealthRecord, showRelatedSickness = true) => {
         const relatedSickness = record.relatedSicknessId ? sicknessById.get(record.relatedSicknessId) : undefined;
         return <div style={{ minWidth: 0, width: '100%' }}>
-            <Stack wrap='wrap' gap={5} style={{ marginBottom: 5 }}>
+            <div className='household-health-record-tags'>
                 <Tag color={record.type === 'sickness' ? 'volcano' : 'blue'} style={{ marginRight: 0 }}>{record.type === 'sickness' ? 'Bệnh' : 'Điều trị'}</Tag>
                 {record.severity && <Tag color={record.severity === 'high' ? 'red' : record.severity === 'medium' ? 'orange' : 'green'} style={{ marginRight: 0 }}>{severityOptions.find(item => item.value === record.severity)?.label}</Tag>}
                 {record.type === 'treatment' && showRelatedSickness && relatedSickness && <Tag color='geekblue' style={{ marginRight: 0, maxWidth: '100%', overflow: 'hidden', textOverflow: 'ellipsis' }}>Cho: {relatedSickness.title}</Tag>}
                 {record.type === 'treatment' && showRelatedSickness && !relatedSickness && <Tag style={{ marginRight: 0 }}>Chưa nối bệnh</Tag>}
-            </Stack>
+            </div>
             <Typography.Text strong style={{ display: 'block', color: '#111827', lineHeight: '18px', overflowWrap: 'anywhere' }}>{record.title}</Typography.Text>
             <Typography.Text type='secondary' style={{ display: 'block', fontSize: 12, lineHeight: '17px', marginTop: 3 }}>{formatDate(record.startedAt)} - {formatDate(record.endedAt)}</Typography.Text>
             {(record.provider || record.dosage || record.notes) && <Typography.Text style={{ display: 'block', color: '#334155', fontSize: 12, lineHeight: '17px', marginTop: 5, overflowWrap: 'anywhere' }}>
@@ -369,7 +407,28 @@ export const HouseholdHealthWidget: React.FC<{ member: HouseholdMemberProfile }>
             <div style={fieldListStyle}>
                 <div style={{ ...fieldRowStyle, borderTop: 0, paddingTop: 0 }}>
                     <Typography.Text strong style={labelStyle}>Trạng thái nhanh</Typography.Text>
-                    <Segmented className='household-health-status-segment' value={draft.status} onChange={value => _setStatus(value as HouseholdHealthStatus)} options={statusOptions} />
+                    <div className='household-health-status-grid'>
+                        {statusOptions.map(option => {
+                            const meta = HOUSEHOLD_HEALTH_STATUS_META[option.value];
+                            const active = draft.status === option.value;
+                            return <button
+                                key={option.value}
+                                type='button'
+                                className='household-health-status-chip'
+                                aria-pressed={active}
+                                onClick={() => _setStatus(option.value)}
+                                style={{
+                                    borderColor: active ? meta.tone : undefined,
+                                    background: active ? `${meta.tone}14` : undefined,
+                                    color: active ? meta.tone : undefined,
+                                    boxShadow: active ? `inset 0 0 0 1px ${meta.tone}33` : undefined,
+                                }}
+                            >
+                                <span className='household-health-status-chip-dot' style={{ background: meta.tone }} />
+                                <span style={{ minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{option.label}</span>
+                            </button>;
+                        })}
+                    </div>
                 </div>
                 <div style={fieldRowStyle}>
                     <Typography.Text strong style={labelStyle}>Chiều cao</Typography.Text>
