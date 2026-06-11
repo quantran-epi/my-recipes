@@ -210,8 +210,8 @@ export const MealCompletionLeftoverModal: React.FC<MealCompletionLeftoverModalPr
         // Aggregate each member's reaction into the durable per-dish feedback store.
         let rated = 0;
         uniqueDishIds.forEach(dishId => {
-            Object.values(feedback[dishId] ?? {}).forEach(reaction => {
-                dispatch(recordDishFeedback({ dishId, feedback: reaction }));
+            Object.entries(feedback[dishId] ?? {}).forEach(([memberId, reaction]) => {
+                dispatch(recordDishFeedback({ dishId, memberId, feedback: reaction }));
                 rated += 1;
             });
         });

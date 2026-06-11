@@ -399,11 +399,14 @@ const getFeedbackImpact = (dishId: string, input: BuildSmartPlannerInput): { imp
     let liked = 0;
     let disliked = 0;
     // Durable per-dish feedback store (collected at meal completion) is the source of truth.
-    // It aggregates counts rather than per-member ratings, so member scoping doesn't apply here.
+    // Tallies are per member, so scope to the selected members like the legacy path does.
     const stat = input.dishFeedback[dishId];
     if (stat) {
-        liked += stat.liked;
-        disliked += stat.disliked;
+        Object.entries(stat.members).forEach(([memberId, tally]) => {
+            if (memberSet.size > 0 && !memberSet.has(memberId)) return;
+            liked += tally.liked;
+            disliked += tally.disliked;
+        });
     }
     // Legacy fallback: feedback recorded on cooking sessions before it moved to the durable
     // store. Still member-scoped. Folded in so pre-upgrade data keeps influencing ranking.

@@ -220,16 +220,18 @@ export const CookingSessionSlice = createSlice({
                 existing.phaseAverages = nextPhaseAverages;
             }
         },
-        recordDishFeedback: (state, action: PayloadAction<{ dishId: string; feedback: CookingSessionMemberFeedback }>) => {
-            const { dishId, feedback } = action.payload;
-            if (!dishId) return;
+        recordDishFeedback: (state, action: PayloadAction<{ dishId: string; memberId: string; feedback: CookingSessionMemberFeedback }>) => {
+            const { dishId, memberId, feedback } = action.payload;
+            if (!dishId || !memberId) return;
             const store = state.dishFeedback ?? (state.dishFeedback = {});
-            const existing = store[dishId] ?? { dishId, liked: 0, neutral: 0, disliked: 0, updatedAt: '' };
-            if (feedback === 'liked') existing.liked += 1;
-            else if (feedback === 'neutral') existing.neutral += 1;
-            else if (feedback === 'disliked') existing.disliked += 1;
-            existing.updatedAt = new Date().toISOString();
-            store[dishId] = existing;
+            const stat = store[dishId] ?? { dishId, members: {}, updatedAt: '' };
+            const tally = stat.members[memberId] ?? { liked: 0, neutral: 0, disliked: 0 };
+            if (feedback === 'liked') tally.liked += 1;
+            else if (feedback === 'neutral') tally.neutral += 1;
+            else if (feedback === 'disliked') tally.disliked += 1;
+            stat.members[memberId] = tally;
+            stat.updatedAt = new Date().toISOString();
+            store[dishId] = stat;
         },
         clearFinished: (state) => {
             state.sessions = state.sessions.filter(s => s.status === "cooking");

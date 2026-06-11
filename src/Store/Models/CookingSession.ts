@@ -27,14 +27,20 @@ export type CookingSessionIngredientProgress = {
 
 export type CookingSessionMemberFeedback = "liked" | "neutral" | "disliked";
 
-// Durable per-dish household feedback, aggregated across meals. Lives outside the session
-// list (like DishCookTimeStat) so clearCookingHistory can't wipe it — feedback is collected
-// at meal completion and may have no cooking session behind it at all.
-export type DishFeedbackStat = {
-    dishId: string;
+// Per-member reaction tally for one dish, accumulated across meals.
+export type MemberFeedbackTally = {
     liked: number;
     neutral: number;
     disliked: number;
+}
+
+// Durable per-dish household feedback, kept per member so the planner can scope to the
+// currently selected members. Lives outside the session list (like DishCookTimeStat) so
+// clearCookingHistory can't wipe it — feedback is collected at meal completion and may
+// have no cooking session behind it at all.
+export type DishFeedbackStat = {
+    dishId: string;
+    members: Record<string, MemberFeedbackTally>; // keyed by householdMemberId
     updatedAt: string;
 }
 

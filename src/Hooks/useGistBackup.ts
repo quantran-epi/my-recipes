@@ -11,6 +11,8 @@ import { createPersistRoot, getStorageString, removeStorageItem, setStorageStrin
 import {
     selectAppContext,
     selectCookingSessions,
+    selectCookTimeStats,
+    selectDishFeedback,
     selectHouseholdHealthState,
     selectInventory,
     selectScheduledMeals,
@@ -218,7 +220,7 @@ const emptyPersonalSlice = (partKey: PersonalPartKey): unknown => {
     if (partKey === "inventory") return { items: {} };
     if (partKey === "shoppingList") return { shoppingLists: [] };
     if (partKey === "scheduledMeal") return { scheduledMeals: [], selectedMeals: [] };
-    if (partKey === "cookingSession") return { sessions: [] };
+    if (partKey === "cookingSession") return { sessions: [], cookTimeStats: {}, dishFeedback: {} };
     if (partKey === "householdHealth") return { profiles: {}, records: [] };
     return {};
 };
@@ -374,6 +376,8 @@ export const useGistBackup = (): UseGistBackupResult => {
     const scheduledMeals = useSelector(selectScheduledMeals);
     const selectedMeals = useSelector(selectSelectedMeals);
     const cookingSessions = useSelector(selectCookingSessions);
+    const cookTimeStats = useSelector(selectCookTimeStats);
+    const dishFeedback = useSelector(selectDishFeedback);
     const householdHealth = useSelector(selectHouseholdHealthState);
 
     const personalSlices: PersonalSlices = useMemo(() => ({
@@ -381,9 +385,9 @@ export const useGistBackup = (): UseGistBackupResult => {
         inventory: { items: inventory },
         shoppingList: { shoppingLists },
         scheduledMeal: { scheduledMeals, selectedMeals: Array.from(selectedMeals) },
-        cookingSession: { sessions: cookingSessions },
+        cookingSession: { sessions: cookingSessions, cookTimeStats, dishFeedback },
         householdHealth,
-    }), [appContext, inventory, shoppingLists, scheduledMeals, selectedMeals, cookingSessions, householdHealth]);
+    }), [appContext, inventory, shoppingLists, scheduledMeals, selectedMeals, cookingSessions, cookTimeStats, dishFeedback, householdHealth]);
 
     useEffect(() => {
         let cancelled = false;
