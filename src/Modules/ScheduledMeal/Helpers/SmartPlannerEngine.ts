@@ -18,9 +18,10 @@ export type SmartPlannerScope = 'cook_now' | 'day' | 'week';
 export type SmartPlannerMealSlot = 'breakfast' | 'lunch' | 'dinner' | 'snack' | 'any';
 export type PlannerMealSlot = 'breakfast' | 'lunch' | 'dinner';
 export type SmartPlannerShoppingMode = 'no_shopping' | 'small_top_up' | 'normal';
-export type SmartPlannerVarietyMode = 'familiar' | 'balanced' | 'more_variety';
-export type SmartPlannerPreset = 'balanced' | 'quick' | 'budget' | 'healthy' | 'family_fit' | 'use_inventory' | 'more_variety';
-export type SmartPlannerCriterion = 'budget' | 'nutrition' | 'member';
+// One key per scoring dimension. Selecting a priority weights that dimension and
+// turns on its companion behaviour (variety de-dupe, expiring-stock bonus). An
+// empty list means "balance everything" and falls back to DEFAULT_WEIGHTS.
+export type SmartPlannerPriority = 'budget' | 'time' | 'nutrition' | 'household' | 'inventory' | 'variety';
 
 export type SmartPlannerScoreDetail = {
     label: string;
@@ -141,13 +142,10 @@ export type BuildSmartPlannerInput = {
     shoppingMode: SmartPlannerShoppingMode;
     maxExtraSpend?: number;
     nutritionGoalId?: string;
-    preferExpiring: boolean;
-    varietyMode: SmartPlannerVarietyMode;
-    preset: SmartPlannerPreset;
+    priorities: SmartPlannerPriority[];
     requiredTags: string[];
     avoidedIngredientIds: string[];
     requiredExpiringIngredientIds: string[];
-    criteria: SmartPlannerCriterion[];
     inventoryAwareBudget: boolean;
     shuffleAlternatives?: boolean;
     dishes: Dishes[];
@@ -228,16 +226,31 @@ const normalizeWeights = (weights: PlannerWeights): PlannerWeights => {
     };
 };
 
-const getPresetWeights = (preset: SmartPlannerPreset): PlannerWeights => {
-    const weights = { ...DEFAULT_WEIGHTS };
-    if (preset === 'quick') weights.time += 0.18;
-    if (preset === 'budget') weights.budget += 0.18;
-    if (preset === 'healthy') weights.nutrition += 0.18;
-    if (preset === 'family_fit') weights.household += 0.18;
-    if (preset === 'use_inventory') weights.inventory += 0.20;
-    if (preset === 'more_variety') weights.variety += 0.18;
+// Variety keeps a small floor weight even when unselected, so day/week plans
+// never repeat the same dish across slots — see getVarietyScore.
+const VARIETY_FLOOR_WEIGHT = 0.05;
+
+const getPriorityWeights = (priorities: SmartPlannerPriority[]): PlannerWeights => {
+    // No priorities chosen → balance every dimension (the default profile).
+    if (priorities.length === 0) return { ...DEFAULT_WEIGHTS };
+    const selected = new Set(priorities);
+    // Only selected dimensions score; the rest go to weight 0 and stay neutral
+    // (variety keeps a floor so de-duplication still works).
+    const weights: PlannerWeights = {
+        household: selected.has('household') ? DEFAULT_WEIGHTS.household : 0,
+        inventory: selected.has('inventory') ? DEFAULT_WEIGHTS.inventory : 0,
+        nutrition: selected.has('nutrition') ? DEFAULT_WEIGHTS.nutrition : 0,
+        budget: selected.has('budget') ? DEFAULT_WEIGHTS.budget : 0,
+        time: selected.has('time') ? DEFAULT_WEIGHTS.time : 0,
+        variety: selected.has('variety') ? DEFAULT_WEIGHTS.variety : VARIETY_FLOOR_WEIGHT,
+    };
     return normalizeWeights(weights);
 };
+
+// A dimension scores when it is selected, or when nothing is selected (the
+// balanced default). Mirrors getPriorityWeights so weighting and gating agree.
+const isPriorityActive = (priorities: SmartPlannerPriority[], priority: SmartPlannerPriority): boolean =>
+    priorities.length === 0 || priorities.includes(priority);
 
 const getSummaryAverage = (summary: { min: number; max: number; pricedCount: number }, emptyValue?: number): number | undefined => {
     if (summary.pricedCount <= 0) return emptyValue;
@@ -366,7 +379,7 @@ const getTimeScore = (minutes: number, maxCookMinutes?: number): number => {
 
 const getRecentDishCount = (dishId: string, input: BuildSmartPlannerInput): number => {
     const start = input.startDate.startOf('day');
-    const windowDays = input.varietyMode === 'more_variety' ? 21 : input.varietyMode === 'balanced' ? 14 : 7;
+    const windowDays = input.priorities.includes('variety') ? 21 : 10;
     const since = start.subtract(windowDays, 'day');
     const scheduledCount = input.scheduledMeals.filter(meal => {
         const date = dayjs(meal.plannedDate);
@@ -398,19 +411,22 @@ const getFeedbackImpact = (dishId: string, input: BuildSmartPlannerInput): { imp
 };
 
 const getVarietyScore = (dish: Dishes, input: BuildSmartPlannerInput, usage: UsageContext): { score: number; detail: string; penalty: number } => {
+    const aggressive = input.priorities.includes('variety');
     let penalty = 0;
     const recentCount = getRecentDishCount(dish.id, input);
-    const recentMultiplier = input.varietyMode === 'more_variety' ? 18 : input.varietyMode === 'balanced' ? 12 : 6;
+    const recentMultiplier = aggressive ? 18 : 8;
     penalty += Math.min(42, recentCount * recentMultiplier);
-    if (usage.usedDishIds.has(dish.id)) penalty += input.varietyMode === 'familiar' ? 30 : 46;
+    // Repeating a dish already chosen in this plan stays heavily penalised even
+    // when variety isn't prioritised, so a day/week never serves the same dish twice.
+    if (usage.usedDishIds.has(dish.id)) penalty += aggressive ? 46 : 30;
 
     getPrimaryIngredientIds(dish, input.dishes).forEach(id => {
         const count = usage.usedIngredientCounts.get(id) ?? 0;
-        penalty += Math.min(18, count * (input.varietyMode === 'more_variety' ? 8 : 4));
+        penalty += Math.min(18, count * (aggressive ? 8 : 4));
     });
     getMethodTags(dish).forEach(tag => {
         const count = usage.usedMethodCounts.get(tag) ?? 0;
-        penalty += Math.min(14, count * (input.varietyMode === 'more_variety' ? 7 : 3));
+        penalty += Math.min(14, count * (aggressive ? 7 : 3));
     });
 
     return {
@@ -457,7 +473,13 @@ const scoreDish = (
     const blockers = getHardBlockReasons(dish, input, cost, minutes);
     if (blockers.length > 0) return null;
 
-    const enabledCriteria = new Set(input.criteria);
+    // Active scoring dimensions. Empty selection means "balance everything",
+    // so every dimension scores; otherwise only the chosen ones do.
+    const enabledCriteria = new Set<SmartPlannerPriority>(
+        input.priorities.length === 0
+            ? ['budget', 'time', 'nutrition', 'household', 'inventory', 'variety']
+            : input.priorities,
+    );
     const reasons: string[] = [];
     const warnings: string[] = [];
     const details: SmartPlannerScoreDetail[] = [];
@@ -471,7 +493,7 @@ const scoreDish = (
     else warnings.push('Thiếu thời gian nấu');
     details.push(buildScoreDetail('Thời gian nấu', minutes > 0 ? DishDurationHelper.formatMinutes(minutes) : 'Chưa có thời gian nấu', timeScore, weights.time, 'Món càng gần giới hạn thời gian người dùng chọn càng được ưu tiên. Thiếu thời gian nấu làm giảm độ tin cậy.'));
 
-    const inventoryScore = getInventoryScore(cost, input.preferExpiring || input.preset === 'use_inventory');
+    const inventoryScore = getInventoryScore(cost, enabledCriteria.has('inventory'));
     if (cost.shoppingCostAverage === 0) reasons.push('không cần mua');
     if (cost.urgentIngredientCount > 0) reasons.push(`dùng ${cost.urgentIngredientCount} đồ sắp hết hạn`);
     if (cost.missingIngredientCount > 0) warnings.push(`Cần mua ${cost.missingIngredientCount} nguyên liệu`);
@@ -510,7 +532,7 @@ const scoreDish = (
 
     let suitability: HouseholdDishSuitability | undefined;
     let suitabilityScore = 64;
-    if (enabledCriteria.has('member') && input.members.length > 0) {
+    if (enabledCriteria.has('household') && input.members.length > 0) {
         suitability = HouseholdSuitabilityHelper.evaluateDishForMembers(dish, input.members, input.dishes, input.ingredientsById, input.nutritionGoals);
         suitabilityScore = suitability.averageScore;
         if (suitability.warningCount > 0) warnings.push(`${suitability.warningCount} lưu ý nhà mình`);
@@ -519,7 +541,7 @@ const scoreDish = (
     const feedback = getFeedbackImpact(dish.id, input);
     const householdWithFeedbackScore = clamp(suitabilityScore + feedback.impact);
     if (feedback.label) reasons.push(feedback.label);
-    details.push(buildScoreDetail('Độ hợp nhà mình', enabledCriteria.has('member') && input.members.length > 0 ? `${householdWithFeedbackScore}% cho ${input.members.length} thành viên${feedback.label ? ` · ${feedback.label}` : ''}` : 'Không dùng để xếp hạng', householdWithFeedbackScore, weights.household, 'Tính hồ sơ các thành viên đang chọn và phản hồi nấu ăn đã lưu. Dị ứng và nguyên liệu chặn cứng được lọc trước khi chấm điểm.'));
+    details.push(buildScoreDetail('Độ hợp nhà mình', enabledCriteria.has('household') && input.members.length > 0 ? `${householdWithFeedbackScore}% cho ${input.members.length} thành viên${feedback.label ? ` · ${feedback.label}` : ''}` : 'Không dùng để xếp hạng', householdWithFeedbackScore, weights.household, 'Tính hồ sơ các thành viên đang chọn và phản hồi nấu ăn đã lưu. Dị ứng và nguyên liệu chặn cứng được lọc trước khi chấm điểm.'));
 
     const variety = getVarietyScore(dish, input, usage);
     if (variety.penalty > 0) warnings.push('Bị trừ vì lặp món hoặc nguyên liệu gần đây');
@@ -551,7 +573,7 @@ const scoreDish = (
         nutritionLabel,
         nutritionGoalName,
         nutritionMatch,
-        suitabilityScore: enabledCriteria.has('member') ? householdWithFeedbackScore : undefined,
+        suitabilityScore: enabledCriteria.has('household') ? householdWithFeedbackScore : undefined,
         suitability,
         totalMinutes: minutes,
         urgentIngredientCount: cost.urgentIngredientCount,
@@ -621,7 +643,7 @@ const getDailyBudgetScore = (items: PlannedDish[], input: BuildSmartPlannerInput
 };
 
 const applyDailyBudgetToDay = (itemsBySlot: Partial<Record<PlannerMealSlot, PlannedDish>>, input: BuildSmartPlannerInput): Partial<Record<PlannerMealSlot, PlannedDish>> => {
-    if (!input.criteria.includes('budget')) return itemsBySlot;
+    if (!isPriorityActive(input.priorities, 'budget')) return itemsBySlot;
     const items = PLANNER_MEAL_SLOTS.map(slot => itemsBySlot[slot]).filter((item): item is PlannedDish => Boolean(item));
     if (items.length === 0) return itemsBySlot;
 
@@ -696,7 +718,7 @@ const buildPlannedDays = (input: BuildSmartPlannerInput, targetServings: number,
 
         ranked.slice(0, BASE_CANDIDATE_LIMIT).forEach(addCandidate);
 
-        if (input.criteria.includes('budget')) {
+        if (isPriorityActive(input.priorities, 'budget')) {
             ranked
                 .filter(item => (input.inventoryAwareBudget ? item.shoppingCostAverage : item.costAverage) !== undefined)
                 .sort((a, b) => ((input.inventoryAwareBudget ? a.shoppingCostAverage : a.costAverage) ?? Number.POSITIVE_INFINITY) - ((input.inventoryAwareBudget ? b.shoppingCostAverage : b.costAverage) ?? Number.POSITIVE_INFINITY))
@@ -722,7 +744,7 @@ const buildPlannedDays = (input: BuildSmartPlannerInput, targetServings: number,
                         const ids = items.map(item => item.dish.id);
                         if (!allowDuplicateDishes && new Set(ids).size !== ids.length) return;
 
-                        const dailyBudgetScore = input.criteria.includes('budget') ? getDailyBudgetScore(items, input) : undefined;
+                        const dailyBudgetScore = isPriorityActive(input.priorities, 'budget') ? getDailyBudgetScore(items, input) : undefined;
                         const score = items.reduce((sum, item) => sum + item.score, 0) + (dailyBudgetScore?.impact ?? 0);
                         const overage = dailyBudgetScore ? Math.max(0, dailyBudgetScore.budgetCostAverage - dailyBudgetScore.dayBudget) : 0;
                         combos.push({ itemsBySlot: { breakfast, lunch, dinner }, score, overage, key: ids.join('|') });
@@ -868,7 +890,7 @@ const buildSummaryFromDays = (days: SmartPlannerPlannedDay[], input: BuildSmartP
 };
 
 export const buildSmartPlannerResult = (input: BuildSmartPlannerInput): SmartPlannerPlanResult => {
-    const weights = getPresetWeights(input.preset);
+    const weights = getPriorityWeights(input.priorities);
     const targetServings = getTargetServings(input.members);
     const usage = createUsageContext();
 

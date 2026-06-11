@@ -1,4 +1,4 @@
-import { AppstoreOutlined, BarChartOutlined, CalendarOutlined, CheckCircleOutlined, ClockCircleOutlined, DollarCircleOutlined, ExclamationCircleOutlined, EyeOutlined, FilterOutlined, HeartOutlined, MoreOutlined, PlayCircleOutlined, QuestionCircleOutlined, ShoppingCartOutlined, SlidersOutlined, StopOutlined, TeamOutlined, ThunderboltOutlined } from '@ant-design/icons';
+import { AppstoreOutlined, BarChartOutlined, CalendarOutlined, CheckCircleOutlined, ClockCircleOutlined, DollarCircleOutlined, ExclamationCircleOutlined, EyeOutlined, FilterOutlined, MoreOutlined, PlayCircleOutlined, QuestionCircleOutlined, ShoppingCartOutlined, SlidersOutlined, StopOutlined, TeamOutlined, ThunderboltOutlined } from '@ant-design/icons';
 import { DateHelpers } from '@common/Helpers/DateHelper';
 import { DishDurationHelper } from '@common/Helpers/DishDurationHelper';
 import { DishServingHelper } from '@common/Helpers/DishServingHelper';
@@ -21,7 +21,7 @@ import { Typography } from '@components/Typography';
 import { useScreenTitle } from '@hooks';
 import { DishImageWidget } from '@modules/Dishes/Screens/DishesManageIngredient/DishImage.widget';
 import { ShoppingListAddWidget } from '@modules/ShoppingList/Screens/ShoppingListAdd.widget';
-import { SmartPlannerEngine, type SmartPlannerCookNowCategory, type SmartPlannerDishRecommendation, type SmartPlannerMealSlot, type SmartPlannerPlanResult, type SmartPlannerPlanSummary, type SmartPlannerPreset, type SmartPlannerShoppingMode, type SmartPlannerVarietyMode } from '@modules/ScheduledMeal/Helpers/SmartPlannerEngine';
+import { SmartPlannerEngine, type SmartPlannerCookNowCategory, type SmartPlannerDishRecommendation, type SmartPlannerMealSlot, type SmartPlannerPlanResult, type SmartPlannerPlanSummary, type SmartPlannerPriority, type SmartPlannerShoppingMode } from '@modules/ScheduledMeal/Helpers/SmartPlannerEngine';
 import { DISH_TAGS, Dishes } from '@store/Models/Dishes';
 import { IngredientUnit } from '@store/Models/Ingredient';
 import { ScheduledMeal } from '@store/Models/ScheduledMeal';
@@ -39,7 +39,6 @@ import DietPlanIcon from '../../../../assets/icons/diet-plan.png';
 
 type PlannerScope = 'cook_now' | 'day' | 'week';
 type MealSlot = 'breakfast' | 'lunch' | 'dinner';
-type CriteriaKey = 'budget' | 'nutrition' | 'member';
 
 type PlannerScoreDetail = {
     label: string;
@@ -525,12 +524,6 @@ const pageCss = `
 }
 `;
 
-const criteriaOptions: Array<{ value: CriteriaKey; label: string }> = [
-    { value: 'budget', label: 'Ngân sách' },
-    { value: 'nutrition', label: 'Dinh dưỡng' },
-    { value: 'member', label: 'Khẩu vị nhà' },
-];
-
 const plannerModeOptions: Array<{ value: PlannerScope; label: string }> = [
     { value: 'cook_now', label: 'Nấu ngay' },
     { value: 'day', label: 'Một ngày' },
@@ -551,28 +544,13 @@ const shoppingModeOptions: Array<{ value: SmartPlannerShoppingMode; label: strin
     { value: 'no_shopping', label: 'Không đi mua' },
 ];
 
-const presetOptions: Array<{ value: SmartPlannerPreset; label: string; icon: React.ReactNode; hint: string }> = [
-    { value: 'balanced', label: 'Cân bằng', icon: <AppstoreOutlined />, hint: 'Cân đối mọi tiêu chí' },
-    { value: 'quick', label: 'Nhanh', icon: <ClockCircleOutlined />, hint: 'Ưu tiên món nấu nhanh' },
+const priorityOptions: Array<{ value: SmartPlannerPriority; label: string; icon: React.ReactNode; hint: string }> = [
     { value: 'budget', label: 'Tiết kiệm', icon: <DollarCircleOutlined />, hint: 'Ưu tiên chi phí thấp' },
-    { value: 'healthy', label: 'Lành mạnh', icon: <BarChartOutlined />, hint: 'Ưu tiên hợp dinh dưỡng' },
-    { value: 'family_fit', label: 'Hợp gia đình', icon: <TeamOutlined />, hint: 'Ưu tiên khẩu vị cả nhà' },
-    { value: 'use_inventory', label: 'Dùng đồ sẵn có', icon: <ShoppingCartOutlined />, hint: 'Ưu tiên đồ đang có trong kho' },
-    { value: 'more_variety', label: 'Đa dạng hơn', icon: <ThunderboltOutlined />, hint: 'Tăng đa dạng, tránh lặp món' },
-];
-
-// Presets that boost a gated scoring dimension must also enable its criterion,
-// otherwise the preset would weight a dimension that returns a flat score.
-const presetRequiredCriterion: Partial<Record<SmartPlannerPreset, CriteriaKey>> = {
-    budget: 'budget',
-    healthy: 'nutrition',
-    family_fit: 'member',
-};
-
-const varietyModeOptions: Array<{ value: SmartPlannerVarietyMode; label: string }> = [
-    { value: 'familiar', label: 'Quen thuộc' },
-    { value: 'balanced', label: 'Cân bằng' },
-    { value: 'more_variety', label: 'Đa dạng hơn' },
+    { value: 'time', label: 'Nhanh', icon: <ClockCircleOutlined />, hint: 'Ưu tiên món nấu nhanh' },
+    { value: 'nutrition', label: 'Lành mạnh', icon: <BarChartOutlined />, hint: 'Bám mục tiêu dinh dưỡng' },
+    { value: 'household', label: 'Hợp khẩu vị nhà', icon: <TeamOutlined />, hint: 'Ưu tiên khẩu vị cả nhà' },
+    { value: 'inventory', label: 'Dùng đồ sẵn có', icon: <ShoppingCartOutlined />, hint: 'Ưu tiên đồ đang có, sắp hết hạn' },
+    { value: 'variety', label: 'Đa dạng món', icon: <ThunderboltOutlined />, hint: 'Tránh lặp món gần đây' },
 ];
 
 const formatImpact = (value: number): string => {
@@ -660,16 +638,13 @@ export const SmartMealPlannerScreen: React.FC = () => {
     const [maxCookingMinutes, setMaxCookingMinutes] = useState<number | undefined>();
     const [maxExtraSpend, setMaxExtraSpend] = useState<number | undefined>(100000);
     const [shoppingMode, setShoppingMode] = useState<SmartPlannerShoppingMode>('normal');
-    const [preset, setPreset] = useState<SmartPlannerPreset>('balanced');
-    const [varietyMode, setVarietyMode] = useState<SmartPlannerVarietyMode>('balanced');
-    const [preferExpiring, setPreferExpiring] = useState(false);
     const [cookNowMealSlot, setCookNowMealSlot] = useState<SmartPlannerMealSlot>('any');
     const [avoidIngredientIds, setAvoidIngredientIds] = useState<string[]>([]);
     const [requiredExpiringIngredientIds, setRequiredExpiringIngredientIds] = useState<string[]>([]);
     const [requiredTags, setRequiredTags] = useState<string[]>([]);
     const [nutritionGoalId, setNutritionGoalId] = useState<string | undefined>(() => nutritionGoals[0]?.id);
     const [memberIds, setMemberIds] = useState<string[]>(() => selectedHouseholdMemberIds);
-    const [criteria, setCriteria] = useState<CriteriaKey[]>(['budget', 'nutrition', 'member']);
+    const [priorities, setPriorities] = useState<SmartPlannerPriority[]>([]);
     const [plannedDays, setPlannedDays] = useState<PlannedDay[]>([]);
     const [rankedRecommendations, setRankedRecommendations] = useState<SmartPlannerDishRecommendation[]>([]);
     const [planSummary, setPlanSummary] = useState<SmartPlannerPlanSummary>();
@@ -766,13 +741,10 @@ export const SmartMealPlannerScreen: React.FC = () => {
         strictTime: Boolean(maxCookingMinutes) && (hardConstraintsEnabled || scope === 'cook_now'),
         shoppingMode,
         nutritionGoalId,
-        preferExpiring,
-        varietyMode,
-        preset,
+        priorities,
         requiredTags: hardConstraintsEnabled ? requiredTags : [],
         avoidedIngredientIds: hardConstraintsEnabled ? avoidIngredientIds : [],
         requiredExpiringIngredientIds: hardConstraintsEnabled ? requiredExpiringIngredientIds : [],
-        criteria,
         inventoryAwareBudget,
         shuffleAlternatives,
         dishes,
@@ -784,7 +756,7 @@ export const SmartMealPlannerScreen: React.FC = () => {
         nutritionGoals,
         scheduledMeals,
         cookingSessions,
-    }), [avoidIngredientIds, cookNowMealSlot, cookingSessions, criteria, dailyBudget, dishes, hardConstraintsEnabled, ingredients, ingredientsById, inventoryAwareBudget, inventoryConfig, inventoryItems, maxCookingMinutes, maxExtraSpend, nutritionGoalId, nutritionGoals, preferExpiring, preset, requiredExpiringIngredientIds, requiredTags, scheduledMeals, scope, selectedMembers, shoppingMode, startDate, varietyMode, weeklyBudget]);
+    }), [avoidIngredientIds, cookNowMealSlot, cookingSessions, dailyBudget, dishes, hardConstraintsEnabled, ingredients, ingredientsById, inventoryAwareBudget, inventoryConfig, inventoryItems, maxCookingMinutes, maxExtraSpend, nutritionGoalId, nutritionGoals, priorities, requiredExpiringIngredientIds, requiredTags, scheduledMeals, scope, selectedMembers, shoppingMode, startDate, weeklyBudget]);
 
     const visibleCookNowRecommendations = useMemo(() => {
         const dismissed = new Set(dismissedDishIds);
@@ -818,10 +790,8 @@ export const SmartMealPlannerScreen: React.FC = () => {
         _clearSuggestions();
     };
 
-    const _onPresetChange = (value: SmartPlannerPreset) => {
-        setPreset(value);
-        const required = presetRequiredCriterion[value];
-        if (required) setCriteria(current => current.includes(required) ? current : [...current, required]);
+    const _onPriorityToggle = (value: SmartPlannerPriority) => {
+        setPriorities(current => current.includes(value) ? current.filter(item => item !== value) : [...current, value]);
         _clearSuggestions();
     };
 
@@ -1401,18 +1371,21 @@ export const SmartMealPlannerScreen: React.FC = () => {
 
                     <div className='smart-planner-section'>
                         <div className='smart-planner-section-title'><ThunderboltOutlined /> Ưu tiên theo</div>
-                        <Typography.Text type='secondary' style={{ display: 'block', fontSize: 11, lineHeight: '16px', marginBottom: 10 }}>Chọn một mẫu là đủ cho hầu hết trường hợp. Mẫu chỉ đổi cách xếp hạng, không loại món nào.</Typography.Text>
+                        <Typography.Text type='secondary' style={{ display: 'block', fontSize: 11, lineHeight: '16px', marginBottom: 10 }}>Chọn những điều bạn quan tâm để xếp hạng món theo đó. Bỏ chọn hết để cân bằng mọi tiêu chí. Không loại món nào.</Typography.Text>
                         <div className='smart-planner-presets'>
-                            {presetOptions.map(option => <button
-                                key={option.value}
-                                type='button'
-                                aria-pressed={preset === option.value}
-                                className={`smart-planner-preset${preset === option.value ? ' is-active' : ''}`}
-                                onClick={() => _onPresetChange(option.value)}
-                            >
-                                <span className='smart-planner-preset-name'>{option.icon} {option.label}</span>
-                                <span className='smart-planner-preset-hint'>{option.hint}</span>
-                            </button>)}
+                            {priorityOptions.map(option => {
+                                const active = priorities.includes(option.value);
+                                return <button
+                                    key={option.value}
+                                    type='button'
+                                    aria-pressed={active}
+                                    className={`smart-planner-preset${active ? ' is-active' : ''}`}
+                                    onClick={() => _onPriorityToggle(option.value)}
+                                >
+                                    <span className='smart-planner-preset-name'>{option.icon} {option.label}</span>
+                                    <span className='smart-planner-preset-hint'>{option.hint}</span>
+                                </button>;
+                            })}
                         </div>
                     </div>
 
@@ -1459,38 +1432,10 @@ export const SmartMealPlannerScreen: React.FC = () => {
                                             <Select value={shoppingMode} onChange={_onShoppingModeChange} options={shoppingModeOptions} style={{ width: '100%' }} />
                                         </div>
                                         <div>
-                                            <PlannerFieldLabel helpKey='variety' label='Độ đa dạng'>Càng đa dạng, planner càng trừ điểm món, nguyên liệu chính hoặc cách nấu bị lặp gần đây.</PlannerFieldLabel>
-                                            <Select value={varietyMode} onChange={value => { setVarietyMode(value); _clearSuggestions(); }} options={varietyModeOptions} style={{ width: '100%' }} />
-                                        </div>
-                                        <div>
-                                            <PlannerFieldLabel helpKey='nutrition' label={<><BarChartOutlined /> Mục tiêu dinh dưỡng</>}>Nếu bật tiêu chí dinh dưỡng, món gần với mục tiêu đã chọn sẽ được ưu tiên hơn.</PlannerFieldLabel>
+                                            <PlannerFieldLabel helpKey='nutrition' label={<><BarChartOutlined /> Mục tiêu dinh dưỡng</>}>Chọn mục tiêu để planner biết món nào hợp. Bật ưu tiên Lành mạnh ở trên để mục tiêu này tham gia xếp hạng.</PlannerFieldLabel>
                                             <Select allowClear value={nutritionGoalId} onChange={value => { setNutritionGoalId(value); _clearSuggestions(); }} options={nutritionGoals.map(goal => ({ value: goal.id, label: goal.name }))} placeholder='Chọn mục tiêu' style={{ width: '100%' }} />
                                         </div>
-                                        <div>
-                                            <PlannerFieldLabel helpKey='criteria' label={<><HeartOutlined /> Tiêu chí tính điểm</>}>
-                                                Bật hoặc tắt nhóm dữ liệu được phép tham gia chấm điểm. Mẫu ưu tiên chỉ đổi trọng số của các tiêu chí đang bật; tiêu chí đã tắt giữ điểm trung tính, không cộng cũng không trừ.
-                                                <ul>
-                                                    <li><b>Ngân sách</b>: so chi phí món với ngân sách đang chọn. Khi bật tính theo tủ lạnh, chỉ tính phần cần mua thêm sau khi trừ tồn kho.</li>
-                                                    <li><b>Dinh dưỡng</b>: so dinh dưỡng mỗi phần với mục tiêu đã chọn. Cần chọn một mục tiêu dinh dưỡng thì tiêu chí này mới có tác dụng.</li>
-                                                    <li><b>Khẩu vị nhà</b>: chấm theo hồ sơ các thành viên đang chọn, món thích/tránh, dị ứng và phản hồi nấu ăn đã lưu. Cần chọn người ăn cùng.</li>
-                                                </ul>
-                                            </PlannerFieldLabel>
-                                            <Select mode='multiple' dropdownRender={createSelectedOptionsDropdownRender({ mode: 'multiple', value: criteria, options: criteriaOptions })} value={criteria} onChange={value => {
-                                                const required = presetRequiredCriterion[preset];
-                                                setCriteria(required && !value.includes(required) ? [...value, required] : value);
-                                                _clearSuggestions();
-                                            }} options={criteriaOptions.map(option => option.value === presetRequiredCriterion[preset]
-                                                ? { ...option, label: `${option.label} · mẫu ${presetOptions.find(item => item.value === preset)?.label} cần`, disabled: true }
-                                                : option)} style={{ width: '100%' }} />
-                                        </div>
                                     </div>
-                                    <Box style={{ marginTop: 10 }}>
-                                        <PlannerFieldLabel helpKey='prefer-expiring' label='Ưu tiên đồ sắp hết hạn'>Khi bật, món dùng nguyên liệu gần hết hạn trong kho sẽ được cộng điểm rõ hơn.</PlannerFieldLabel>
-                                        <div className='smart-planner-toggle-row'>
-                                            <Typography.Text style={{ fontSize: 12, lineHeight: '18px', color: '#334155' }}>{preferExpiring ? 'Đang ưu tiên dùng sớm' : 'Ưu tiên bình thường'}</Typography.Text>
-                                            <Switch checked={preferExpiring} onChange={checked => { setPreferExpiring(checked); _clearSuggestions(); }} />
-                                        </div>
-                                    </Box>
                                 </div>
 
                                 <div className='smart-planner-adv-group'>
