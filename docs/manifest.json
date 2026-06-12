@@ -1,7 +1,7 @@
 {
-  "short_name": "My Recipes",
-  "name": "My Recipes",
-  "description": "App for manage recipes and grocery list",
+  "short_name": "My Household",
+  "name": "My Household",
+  "description": "An app to manage your household food and health.",
   "icons": [
     {
       "src": "logo.png",

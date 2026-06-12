@@ -1,16 +1,16 @@
 {
   "files": {
     "main.css": "/my-recipes/static/css/main.87da95ed.css",
-    "main.js": "/my-recipes/static/js/main.8df1000d.js",
+    "main.js": "/my-recipes/static/js/main.9b275aa8.js",
     "static/js/672.57248307.chunk.js": "/my-recipes/static/js/672.57248307.chunk.js",
     "static/js/720.0dc7da9c.chunk.js": "/my-recipes/static/js/720.0dc7da9c.chunk.js",
     "static/js/206.82a4e427.chunk.js": "/my-recipes/static/js/206.82a4e427.chunk.js",
     "static/media/noodles.png": "/my-recipes/static/media/noodles.db502210854831dbe3a0.png",
     "static/media/clock (1).png": "/my-recipes/static/media/clock (1).416f91e493651fab8c39.png",
     "static/media/family.png": "/my-recipes/static/media/family.3e6bb461b35300c729e9.png",
+    "static/media/logo.png": "/my-recipes/static/media/logo.05a83247d49cc60b0aa4.png",
     "static/media/budget.png": "/my-recipes/static/media/budget.9a0121f5eb55c9f69d1b.png",
     "static/media/diet.png": "/my-recipes/static/media/diet.7e11e8c1d026384f9d62.png",
-    "static/media/logo.png": "/my-recipes/static/media/logo.343efc60b8b70dd39875.png",
     "static/media/leftover.png": "/my-recipes/static/media/leftover.6bc227f0f4b6c3737020.png",
     "static/media/shoppingList.png": "/my-recipes/static/media/shoppingList.8e9a35171bf2cea2583f.png",
     "static/media/nutrition-plan.png": "/my-recipes/static/media/nutrition-plan.7109a1431185072b7143.png",
@@ -40,6 +40,6 @@
   },
   "entrypoints": [
     "static/css/main.87da95ed.css",
-    "static/js/main.8df1000d.js"
+    "static/js/main.9b275aa8.js"
   ]
 }
