@@ -35,6 +35,7 @@ import LogoIcon from "../../assets/icons/logo.png";
 import HouseIcon from "../../assets/icons/house.png";
 import FamilyIcon from "../../assets/icons/family.png";
 import DietPlanIcon from "../../assets/icons/diet-plan.png";
+import ChatIcon from "../../assets/icons/chat.png";
 import DishesIcon from "../../assets/icons/noodles.png";
 import ShoppingListIcon from "../../assets/icons/shoppingList.png";
 import IngredientIcon from "../../assets/icons/vegetable.png";
@@ -240,6 +241,7 @@ export const MasterPage = () => {
             case "Mẫu dùng lại": return LayoutIcon;
             case "Nhà mình": return FamilyIcon;
             case "Lập thực đơn": return DietPlanIcon;
+            case "Phản hồi món": return ChatIcon;
             case "Sức khỏe dữ liệu": return MedicalRecordIcon;
             case 'Tổng quan': return HouseIcon;
             default: return null;
@@ -483,7 +485,7 @@ const SidebarDrawer = ({ buttonStyle }: { buttonStyle?: React.CSSProperties }) =
             items: [
                 { key: 'dishSuggester', href: RootRoutes.AuthorizedRoutes.DishSuggester(), icon: SuggesterIcon, label: 'Nấu gì?' },
                 { key: 'meals', href: RootRoutes.AuthorizedRoutes.ScheduledMealRoutes.List(), icon: DietPlanIcon, label: 'Thực đơn' },
-                { key: 'dishFeedback', href: RootRoutes.AuthorizedRoutes.ScheduledMealRoutes.FeedbackHistory(), icon: DietPlanIcon, label: 'Phản hồi món' },
+                { key: 'dishFeedback', href: RootRoutes.AuthorizedRoutes.ScheduledMealRoutes.FeedbackHistory(), icon: ChatIcon, label: 'Phản hồi món' },
                 { key: 'shoppingList', href: RootRoutes.AuthorizedRoutes.ShoppingListRoutes.List(), icon: ShoppingListIcon, label: 'Lịch mua sắm' },
                 { key: 'expensePlanner', href: RootRoutes.AuthorizedRoutes.ExpensePlanner(), icon: BudgetIcon, label: 'Tính chi phí' },
             ],

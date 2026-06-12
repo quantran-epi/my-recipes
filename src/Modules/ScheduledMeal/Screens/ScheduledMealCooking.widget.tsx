@@ -308,11 +308,12 @@ export const MealCompletionLeftoverModal: React.FC<MealCompletionLeftoverModalPr
     const renderFeedbackTags = (dishId: string) => {
         const entries = Object.entries(feedback[dishId] ?? {}) as [string, CookingSessionMemberFeedback][];
         if (entries.length === 0) return <Typography.Text type='secondary' style={{ fontSize: 12 }}>Chưa có phản hồi đã lưu</Typography.Text>;
-        return <Stack wrap='wrap' gap={5} style={{ width: '100%' }}>
-            {entries.map(([memberId, reaction]) => <Tag key={`${dishId}-${memberId}`} color={feedbackColorByValue[reaction]} style={{ marginRight: 0 }}>
-                {memberNameById.get(memberId) ?? 'Thành viên'}: {feedbackLabelByValue[reaction]}
-            </Tag>)}
-        </Stack>;
+        return <div style={{ display: 'flex', flexDirection: 'column', gap: 6, width: '100%' }}>
+            {entries.map(([memberId, reaction]) => <div key={`${dishId}-${memberId}`} style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) auto', gap: 8, alignItems: 'center', width: '100%' }}>
+                <Typography.Text style={{ minWidth: 0, color: '#111827', fontSize: 13, lineHeight: '18px', overflowWrap: 'anywhere' }}>{memberNameById.get(memberId) ?? 'Thành viên'}</Typography.Text>
+                <Tag color={feedbackColorByValue[reaction]} style={{ marginRight: 0, flexShrink: 0 }}>{feedbackLabelByValue[reaction]}</Tag>
+            </div>)}
+        </div>;
     };
 
     return <Modal

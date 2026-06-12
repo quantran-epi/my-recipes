@@ -1155,44 +1155,44 @@ export const SmartMealPlannerScreen: React.FC = () => {
                 title='Thời lượng'
                 description='Tổng thời lượng bao gồm món chính và các món được ghép vào. Mỗi món vẫn được tách riêng để kiểm tra nhanh.'
             >
-                <Stack direction='column' gap={8} style={{ width: '100%' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 8, width: '100%' }}>
                     <Stack wrap='wrap' gap={6}>
                         <Tag color='blue' style={{ marginRight: 0 }}>Tổng {DishDurationHelper.formatMinutes(suggestionDurationBreakdown.totalMinutes)}</Tag>
                     </Stack>
-                    {suggestionOwnDurationItem && <Box style={{ border: '1px solid rgba(15,23,42,0.07)', borderRadius: 8, background: '#f8fafc', padding: 10 }}>
-                        <Stack justify='space-between' align='flex-start' gap={8} wrap='wrap' style={{ width: '100%', marginBottom: 7 }}>
+                    {suggestionOwnDurationItem && <Box style={{ width: '100%', boxSizing: 'border-box', border: '1px solid rgba(15,23,42,0.07)', borderRadius: 8, background: '#f8fafc', padding: 10 }}>
+                        <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'flex-start', justifyContent: 'space-between', gap: 8, width: '100%', marginBottom: 7 }}>
                             <Typography.Text strong style={{ color: '#111827', fontSize: 13, lineHeight: '18px' }}>Món chính</Typography.Text>
-                            <Tag style={{ marginRight: 0 }}>{DishDurationHelper.formatMinutes(suggestionOwnDurationItem.ownMinutes)}</Tag>
-                        </Stack>
+                            <Tag style={{ marginRight: 0, flexShrink: 0 }}>{DishDurationHelper.formatMinutes(suggestionOwnDurationItem.ownMinutes)}</Tag>
+                        </div>
                         <Stack wrap='wrap' gap={5}>
                             {suggestionOwnDurationItem.activeItems.map(active => <Tag key={`${suggestionOwnDurationItem.dishId}-${active.phase.key}`} style={{ marginRight: 0, borderColor: active.phase.border, background: '#fff', color: active.phase.color }}>
                                 {active.phase.shortLabel}: {DishDurationHelper.formatMinutes(active.minutes)}
                             </Tag>)}
                         </Stack>
                     </Box>}
-                    {suggestionIncludedDurationItems.map(item => <Box key={item.dishId} style={{ border: '1px solid rgba(15,23,42,0.07)', borderRadius: 8, background: '#f8fafc', padding: 10, marginLeft: Math.min(item.depth, 3) * 8 }}>
-                        <Stack justify='space-between' align='flex-start' gap={8} wrap='wrap' style={{ width: '100%', marginBottom: 7 }}>
+                    {suggestionIncludedDurationItems.map(item => <Box key={item.dishId} style={{ width: `calc(100% - ${Math.min(item.depth, 3) * 8}px)`, boxSizing: 'border-box', border: '1px solid rgba(15,23,42,0.07)', borderRadius: 8, background: '#f8fafc', padding: 10, marginLeft: Math.min(item.depth, 3) * 8 }}>
+                        <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'flex-start', justifyContent: 'space-between', gap: 8, width: '100%', marginBottom: 7 }}>
                             <Typography.Text strong style={{ color: '#111827', fontSize: 13, lineHeight: '18px', overflowWrap: 'anywhere' }}>{item.dishName}</Typography.Text>
-                            <Tag style={{ marginRight: 0 }}>{DishDurationHelper.formatMinutes(item.ownMinutes)}</Tag>
-                        </Stack>
+                            <Tag style={{ marginRight: 0, flexShrink: 0 }}>{DishDurationHelper.formatMinutes(item.ownMinutes)}</Tag>
+                        </div>
                         <Stack wrap='wrap' gap={5}>
                             {item.activeItems.map(active => <Tag key={`${item.dishId}-${active.phase.key}`} style={{ marginRight: 0, borderColor: active.phase.border, background: '#fff', color: active.phase.color }}>
                                 {active.phase.shortLabel}: {DishDurationHelper.formatMinutes(active.minutes)}
                             </Tag>)}
                         </Stack>
                     </Box>)}
-                </Stack>
+                </div>
             </DetailSection>}
 
             <DetailSection
                 title='Cách tính điểm'
                 description='Mỗi dòng là một dữ liệu planner đã dùng để gợi ý món. Cột điểm cho biết dữ liệu đó làm món tăng, giảm hoặc giữ nguyên điểm xếp hạng.'
             >
-                <Stack direction='column' gap={8} style={{ width: '100%' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 8, width: '100%' }}>
                     {detailSelection.item.scoreDetails.map(detail => {
                         const methodologyKey = `score-method-${detail.label}`;
                         const methodology = SCORE_METHODOLOGY[detail.label];
-                        return <Box key={`${detail.label}-${detail.value}`} style={{ border: '1px solid rgba(15,23,42,0.07)', borderRadius: 8, background: '#f8fafc', padding: 10 }}>
+                        return <Box key={`${detail.label}-${detail.value}`} style={{ width: '100%', boxSizing: 'border-box', border: '1px solid rgba(15,23,42,0.07)', borderRadius: 8, background: '#f8fafc', padding: 10 }}>
                             <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'flex-start', gap: 8, width: '100%' }}>
                                 <div style={{ minWidth: 0, flex: '1 1 220px' }}>
                                     <Typography.Text strong style={{ display: 'block', color: '#111827', fontSize: 13, lineHeight: '18px' }}>{detail.label}</Typography.Text>
@@ -1210,7 +1210,7 @@ export const SmartMealPlannerScreen: React.FC = () => {
                             </Box>}
                         </Box>;
                     })}
-                </Stack>
+                </div>
             </DetailSection>
 
             {(detailSelection.item.warnings ?? []).length > 0 && <DetailSection
@@ -1226,14 +1226,14 @@ export const SmartMealPlannerScreen: React.FC = () => {
                 title={`Dinh dưỡng: ${detailSelection.item.nutritionGoalName}`}
                 description='Các dòng dưới đây là từng tiêu chí trong mục tiêu dinh dưỡng. Giá trị món được tính theo mỗi phần ăn từ dữ liệu dinh dưỡng của nguyên liệu.'
             >
-                <Stack direction='column' gap={8} style={{ width: '100%' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 8, width: '100%' }}>
                     <Stack wrap='wrap' gap={6}>
                         <Tag color='cyan' style={{ marginRight: 0 }}>{detailSelection.item.nutritionLabel}</Tag>
                         <Tag color='blue' style={{ marginRight: 0 }}>{formatRatioPercent(detailSelection.item.nutritionMatch.score)} gần mục tiêu</Tag>
                     </Stack>
                     {detailSelection.item.nutritionMatch.criteria.map(row => {
                         const actual = NutritionGoalHelper.formatNutrientValue(row.criterion.nutrient, row.value);
-                        return <Box key={`${row.criterion.nutrient}-${row.label}`} style={{ border: '1px solid rgba(15,23,42,0.07)', borderRadius: 8, background: '#f8fafc', padding: 10 }}>
+                        return <Box key={`${row.criterion.nutrient}-${row.label}`} style={{ width: '100%', boxSizing: 'border-box', border: '1px solid rgba(15,23,42,0.07)', borderRadius: 8, background: '#f8fafc', padding: 10 }}>
                             <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'flex-start', gap: 8, width: '100%' }}>
                                 <div style={{ minWidth: 0, flex: '1 1 220px' }}>
                                     <Typography.Text strong style={{ display: 'block', color: '#111827', fontSize: 13, lineHeight: '18px' }}>{row.label}</Typography.Text>
@@ -1244,19 +1244,19 @@ export const SmartMealPlannerScreen: React.FC = () => {
                             <Typography.Text type='secondary' style={{ display: 'block', fontSize: 12, lineHeight: '18px', marginTop: 7 }}>Tiêu chí này so giá trị thực tế của món với ngưỡng mục tiêu. Nếu chưa đạt, phần trăm cho biết món đang gần ngưỡng đến mức nào.</Typography.Text>
                         </Box>;
                     })}
-                </Stack>
+                </div>
             </DetailSection>}
 
             {detailSelection.item.suitability && <DetailSection
                 title='Khẩu vị nhà mình'
                 description='Mỗi thành viên được chấm riêng từ hồ sơ gia đình. Điểm trung bình của các thành viên đang chọn được đưa vào điểm gợi ý.'
             >
-                <Stack direction='column' gap={8} style={{ width: '100%' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 8, width: '100%' }}>
                     <Stack wrap='wrap' gap={6}>
                         <Tag color={detailSelection.item.suitability.averageScore >= 70 ? 'green' : 'orange'} style={{ marginRight: 0 }}>{formatPercent(detailSelection.item.suitability.averageScore)} trung bình</Tag>
                         <Tag color={detailSelection.item.suitability.warningCount > 0 ? 'volcano' : 'green'} style={{ marginRight: 0 }}>{detailSelection.item.suitability.warningCount} lưu ý</Tag>
                     </Stack>
-                    {detailSelection.item.suitability.members.map(memberResult => <Box key={memberResult.member.id} style={{ border: '1px solid rgba(15,23,42,0.07)', borderRadius: 8, background: '#f8fafc', padding: 10 }}>
+                    {detailSelection.item.suitability.members.map(memberResult => <Box key={memberResult.member.id} style={{ width: '100%', boxSizing: 'border-box', border: '1px solid rgba(15,23,42,0.07)', borderRadius: 8, background: '#f8fafc', padding: 10 }}>
                         <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'flex-start', gap: 8, width: '100%' }}>
                             <div style={{ minWidth: 0, flex: '1 1 220px' }}>
                                 <Typography.Text strong style={{ display: 'block', color: '#111827', fontSize: 13, lineHeight: '18px' }}>{memberResult.member.name}</Typography.Text>
@@ -1270,7 +1270,7 @@ export const SmartMealPlannerScreen: React.FC = () => {
                             {memberResult.notes.map(text => <Tag key={`note-${text}`} color='default' style={{ marginRight: 0 }}>{text}</Tag>)}
                         </Stack>
                     </Box>)}
-                </Stack>
+                </div>
             </DetailSection>}
 
             {detailSelection.item.reasons.length > 0 && <DetailSection
