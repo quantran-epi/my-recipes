@@ -3,7 +3,7 @@ import { Box } from '@components/Layout/Box';
 import { Stack } from '@components/Layout/Stack';
 import { Tag } from '@components/Tag';
 import { Typography } from '@components/Typography';
-import { Button } from '@components/Button';
+import { ActionButton } from '@components/Button';
 import { CookingMealFeedbackHistoryRecord, CookingMealFeedbackSlot, CookingSessionMemberFeedback } from '@store/Models/CookingSession';
 import { selectDishFeedbackHistory, selectHouseholdMembers } from '@store/Selectors';
 import { DatePicker, Empty, Select } from 'antd';
@@ -191,7 +191,7 @@ export const MemberDishFeedbackHistoryWidget: React.FC<MemberDishFeedbackHistory
                     {option.icon}{option.label}
                 </Tag.CheckableTag>;
             })}
-            {hasActiveFilter && <Button type='text' icon={<CloseCircleOutlined />} onClick={_clearFilters} style={{ color: '#6b7280', fontSize: 12, height: 24, paddingInline: 6 }}>Xoá lọc</Button>}
+            {hasActiveFilter && <ActionButton icon={<CloseCircleOutlined />} onClick={_clearFilters}>Xoá lọc</ActionButton>}
         </div>
 
         {lockedDate && <Tag color='blue' style={{ marginRight: 0, marginBottom: 10 }}>{effectiveDate?.format('DD/MM/YYYY')}</Tag>}
