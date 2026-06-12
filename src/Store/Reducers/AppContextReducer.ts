@@ -91,6 +91,10 @@ export type LeftoverTrackerItem = {
     eatBy?: string;
     note?: string;
     cookingSessionId?: string;
+    scheduledMealId?: string;
+    mealSlot?: string;
+    mealDate?: string;
+    mealTitle?: string;
     status: LeftoverTrackerItemStatus;
 }
 

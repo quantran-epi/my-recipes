@@ -12,7 +12,7 @@ import { Dishes } from '@store/Models/Dishes';
 import { CookingMealFeedbackHistoryRecord, CookingMealFeedbackSlot, CookingSessionMemberFeedback } from '@store/Models/CookingSession';
 import { addLeftoverTrackerItem } from '@store/Reducers/AppContextReducer';
 import { saveMealFeedbackHistory, startCooking } from '@store/Reducers/CookingSessionReducer';
-import { selectCookingSessions, selectDishFeedbackHistory, selectDishes, selectDishesById, selectSelectedHouseholdMembers } from '@store/Selectors';
+import { selectCookingSessions, selectDishFeedbackHistory, selectDishes, selectDishesById, selectLeftoverTrackerItems, selectSelectedHouseholdMembers } from '@store/Selectors';
 import { Input, InputNumber, Select, Switch } from 'antd';
 import dayjs from 'dayjs';
 import { nanoid } from 'nanoid';
@@ -225,9 +225,18 @@ export const MealCompletionLeftoverModal: React.FC<MealCompletionLeftoverModalPr
     const dishesById = useSelector(selectDishesById);
     const members = useSelector(selectSelectedHouseholdMembers);
     const feedbackHistory = useSelector(selectDishFeedbackHistory);
+    const leftoverItems = useSelector(selectLeftoverTrackerItems);
     const uniqueDishIds = useMemo(() => getScheduledMealDishIds(dishIds), [dishIds]);
     const mealDateKey = useMemo(() => getMealDateKey(mealDate), [mealDate]);
     const mealDateValue = useMemo(() => dayjs(mealDateKey), [mealDateKey]);
+    const mealLeftovers = useMemo(() => leftoverItems.filter(item => {
+        if (scheduledMealId && item.scheduledMealId === scheduledMealId) {
+            return mealSlot ? item.mealSlot === mealSlot : true;
+        }
+        // Fallback for older records: match by date + dish ids in scope.
+        const dishSet = new Set(uniqueDishIds);
+        return dishSet.has(item.dishId) && item.mealDate === mealDateKey;
+    }), [leftoverItems, mealDateKey, mealSlot, scheduledMealId, uniqueDishIds]);
     const [drafts, setDrafts] = useState<Record<string, LeftoverDishDraft>>({});
     const [feedback, setFeedback] = useState<Record<string, Record<string, CookingSessionMemberFeedback>>>({});
 
@@ -276,6 +285,10 @@ export const MealCompletionLeftoverModal: React.FC<MealCompletionLeftoverModalPr
                 eatBy: dayjs().add(draft.eatInDays, 'day').endOf('day').toISOString(),
                 note: draft.note.trim() || undefined,
                 status: 'available',
+                scheduledMealId,
+                mealSlot,
+                mealDate: mealDateKey,
+                mealTitle: title,
             }));
             saved += 1;
         });
@@ -338,6 +351,31 @@ export const MealCompletionLeftoverModal: React.FC<MealCompletionLeftoverModalPr
                         <div style={{ marginTop: 8 }}>{renderFeedbackTags(dishId)}</div>
                     </Box>;
                 })}
+                {mealLeftovers.length > 0 && <Box style={{ width: '100%', boxSizing: 'border-box', border: '1px solid rgba(82,196,26,0.20)', borderRadius: 8, background: '#f6ffed', padding: 10 }}>
+                    <Stack align='center' gap={6} style={{ marginBottom: 8 }}>
+                        <RestOutlined style={{ color: '#52c41a' }} />
+                        <Typography.Text strong style={{ color: '#135200', fontSize: 13, lineHeight: '18px' }}>Phần còn lại đã ghi nhận</Typography.Text>
+                    </Stack>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 7, width: '100%' }}>
+                        {mealLeftovers.map(leftover => {
+                            const eatBy = leftover.eatBy ? dayjs(leftover.eatBy) : null;
+                            const statusLabel = leftover.status === 'finished' ? 'Đã ăn hết' : leftover.status === 'discarded' ? 'Đã bỏ' : 'Còn';
+                            const statusColor = leftover.status === 'finished' ? 'default' : leftover.status === 'discarded' ? 'red' : 'green';
+                            return <Box key={leftover.id} style={{ width: '100%', boxSizing: 'border-box', border: '1px solid rgba(15,23,42,0.06)', borderRadius: 6, background: '#fff', padding: 9 }}>
+                                <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) auto', gap: 8, alignItems: 'flex-start', width: '100%' }}>
+                                    <div style={{ minWidth: 0 }}>
+                                        <Typography.Text strong style={{ display: 'block', color: '#111827', fontSize: 13, lineHeight: '18px', overflowWrap: 'anywhere' }}>{leftover.dishName}</Typography.Text>
+                                        <Typography.Text type='secondary' style={{ display: 'block', fontSize: 12, lineHeight: '17px', marginTop: 2 }}>
+                                            {leftover.portions} phần{eatBy ? ` · ăn trước ${eatBy.format('DD/MM')}` : ''}
+                                        </Typography.Text>
+                                        {leftover.note && <Typography.Text style={{ display: 'block', color: '#475569', fontSize: 12, lineHeight: '17px', marginTop: 4, overflowWrap: 'anywhere' }}>{leftover.note}</Typography.Text>}
+                                    </div>
+                                    <Tag color={statusColor} style={{ marginRight: 0, flexShrink: 0 }}>{statusLabel}</Tag>
+                                </div>
+                            </Box>;
+                        })}
+                    </div>
+                </Box>}
                 <Button fullwidth onClick={onClose}>Đóng</Button>
             </div> : <div style={{ display: 'flex', flexDirection: 'column', gap: 10, width: '100%' }}>
                 {uniqueDishIds.map(dishId => {

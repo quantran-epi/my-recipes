@@ -43,6 +43,12 @@ const toDayjs = (value?: Date | string | Dayjs): Dayjs => {
     return (parsed.isValid() ? parsed : dayjs()).startOf('day');
 };
 
+const stripActionPrefix = (title?: string): string => {
+    const trimmed = title?.trim();
+    if (!trimmed) return '';
+    return trimmed.replace(/^(Phản hồi|Hoàn tất|Nấu)\s+(bữa\s+(sáng|trưa|tối)|bữa ăn|cả ngày|thực đơn)\s*[-:·]\s*/i, '').trim();
+};
+
 const FILTER_OPTIONS: Array<{ value: CookingSessionMemberFeedback; label: string; icon: React.ReactNode; color: string }> = [
     { value: 'liked', label: 'Thích', icon: <SmileOutlined />, color: 'green' },
     { value: 'neutral', label: 'Bình thường', icon: <MehOutlined />, color: 'blue' },
@@ -121,7 +127,7 @@ export const MemberDishFeedbackHistoryWidget: React.FC<MemberDishFeedbackHistory
         const reaction = selectedMemberId ? record.memberFeedback?.[selectedMemberId] : undefined;
         if (!reaction) return null;
         const slot = record.mealSlot ? slotLabelByValue[record.mealSlot] : 'Bữa ăn';
-        const mealName = record.mealTitle?.trim() || 'Thực đơn';
+        const mealName = stripActionPrefix(record.mealTitle) || 'Thực đơn';
         const dateLabel = dayjs(record.mealDate).format('DD/MM/YYYY');
         const subtitle = `${slot} · ${mealName} · ${dateLabel}`;
         return <Box key={record.id} style={{ width: '100%', boxSizing: 'border-box', border: '1px solid rgba(15,23,42,0.07)', borderRadius: 8, background: '#fff', padding: 9 }}>

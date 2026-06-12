@@ -76,6 +76,13 @@ export type SmartPlannerMealSlotDishRange = {
 
 export type SmartPlannerMealSlotDishRanges = Record<PlannerMealSlot, SmartPlannerMealSlotDishRange>;
 
+export type SmartPlannerSlotTagRequirement = {
+    tag: string;
+    min: number;
+}
+
+export type SmartPlannerMealSlotTagRequirements = Record<PlannerMealSlot, SmartPlannerSlotTagRequirement[]>;
+
 export type SmartPlannerDayItemsBySlot = Record<PlannerMealSlot, PlannedDish[]>;
 
 export type SmartPlannerDayAlternative = {
@@ -160,6 +167,7 @@ export type BuildSmartPlannerInput = {
     inventoryAwareBudget: boolean;
     advancedEnabled?: boolean;
     mealSlotDishRanges?: SmartPlannerMealSlotDishRanges;
+    mealSlotTagRequirements?: SmartPlannerMealSlotTagRequirements;
     shuffleAlternatives?: boolean;
     dishes: Dishes[];
     ingredients: Ingredient[];
@@ -293,6 +301,29 @@ const getMealSlotDishRanges = (input: BuildSmartPlannerInput): SmartPlannerMealS
     dinner: normalizeMealSlotDishRange(input.mealSlotDishRanges?.dinner ?? DEFAULT_MEAL_SLOT_DISH_RANGES.dinner),
 });
 
+const normalizeSlotTagRequirements = (requirements?: SmartPlannerSlotTagRequirement[]): SmartPlannerSlotTagRequirement[] => {
+    if (!Array.isArray(requirements)) return [];
+    const collapsed = new Map<string, number>();
+    requirements.forEach(item => {
+        const tag = String(item?.tag ?? '').trim();
+        const min = Math.max(0, Math.min(MEAL_SLOT_DISH_RANGE_MAX, Math.round(Number(item?.min ?? 0))));
+        if (!tag || min <= 0) return;
+        collapsed.set(tag, Math.max(collapsed.get(tag) ?? 0, min));
+    });
+    return Array.from(collapsed.entries()).map(([tag, min]) => ({ tag, min }));
+};
+
+const getMealSlotTagRequirements = (input: BuildSmartPlannerInput): SmartPlannerMealSlotTagRequirements => ({
+    breakfast: normalizeSlotTagRequirements(input.mealSlotTagRequirements?.breakfast),
+    lunch: normalizeSlotTagRequirements(input.mealSlotTagRequirements?.lunch),
+    dinner: normalizeSlotTagRequirements(input.mealSlotTagRequirements?.dinner),
+});
+
+const getSlotTagMinTotal = (requirements: SmartPlannerSlotTagRequirement[]): number =>
+    requirements.reduce((sum, requirement) => sum + Math.max(0, requirement.min), 0);
+
+const dishHasTag = (dish: Dishes, tag: string): boolean => Array.isArray(dish.tags) && dish.tags.some(item => item === tag);
+
 const getRandomDishCount = (range: SmartPlannerMealSlotDishRange): number => {
     if (range.max <= range.min) return range.min;
     return range.min + Math.floor(Math.random() * (range.max - range.min + 1));
@@ -332,6 +363,7 @@ const normalizePlannerInput = (input: BuildSmartPlannerInput): BuildSmartPlanner
         requiredExpiringIngredientIds: advancedEnabled ? input.requiredExpiringIngredientIds : [],
         inventoryAwareBudget: advancedEnabled ? input.inventoryAwareBudget : true,
         mealSlotDishRanges: getMealSlotDishRanges(input),
+        mealSlotTagRequirements: getMealSlotTagRequirements(input),
     };
 };
 
@@ -891,27 +923,55 @@ const getComboDiversityScore = (best: PlannerDayCombo, combo: PlannerDayCombo, i
     );
 };
 
-const selectSlotItems = (candidates: PlannedDish[], targetCount: number, usedDishIds: Set<string>, variantIndex: number, randomize: boolean): PlannedDish[] => {
+const selectSlotItems = (
+    candidates: PlannedDish[],
+    targetCount: number,
+    usedDishIds: Set<string>,
+    variantIndex: number,
+    randomize: boolean,
+    tagRequirements: SmartPlannerSlotTagRequirement[] = [],
+): PlannedDish[] => {
     const selected: PlannedDish[] = [];
     const selectedIds = new Set<string>();
 
-    for (let itemIndex = 0; itemIndex < targetCount; itemIndex += 1) {
-        const available = candidates.filter(item => !usedDishIds.has(item.dish.id) && !selectedIds.has(item.dish.id));
-        if (available.length === 0) break;
-
-        let picked = available[0];
+    const pickFrom = (pool: PlannedDish[], localIndex: number): PlannedDish | undefined => {
+        if (pool.length === 0) return undefined;
         if (randomize) {
-            const samplePool = available.slice(0, SHUFFLE_POOL_LIMIT);
+            const samplePool = pool.slice(0, SHUFFLE_POOL_LIMIT);
             const totalWeight = samplePool.reduce((sum, item) => sum + Math.max(1, item.score), 0);
             let roll = Math.random() * totalWeight;
             for (let i = 0; i < samplePool.length; i += 1) {
                 roll -= Math.max(1, samplePool[i].score);
-                if (roll <= 0) { picked = samplePool[i]; break; }
+                if (roll <= 0) return samplePool[i];
             }
-        } else {
-            picked = available[Math.min(available.length - 1, variantIndex + itemIndex)] ?? available[0];
+            return samplePool[0];
         }
+        return pool[Math.min(pool.length - 1, variantIndex + localIndex)] ?? pool[0];
+    };
 
+    const isAvailable = (item: PlannedDish): boolean => !usedDishIds.has(item.dish.id) && !selectedIds.has(item.dish.id);
+
+    // First pass: satisfy tag minimums. Each requirement asks for `min` dishes carrying that tag.
+    tagRequirements.forEach(requirement => {
+        const tagged = candidates.filter(item => isAvailable(item) && dishHasTag(item.dish, requirement.tag));
+        const alreadyMatching = selected.filter(item => dishHasTag(item.dish, requirement.tag)).length;
+        const needed = Math.max(0, requirement.min - alreadyMatching);
+        for (let i = 0; i < needed; i += 1) {
+            if (selected.length >= targetCount) return;
+            const pool = tagged.filter(isAvailable);
+            const picked = pickFrom(pool, i);
+            if (!picked) break;
+            selected.push(picked);
+            selectedIds.add(picked.dish.id);
+            usedDishIds.add(picked.dish.id);
+        }
+    });
+
+    // Second pass: fill remaining slots with top-scored dishes regardless of tag.
+    for (let itemIndex = selected.length; itemIndex < targetCount; itemIndex += 1) {
+        const pool = candidates.filter(isAvailable);
+        const picked = pickFrom(pool, itemIndex);
+        if (!picked) break;
         selected.push(picked);
         selectedIds.add(picked.dish.id);
         usedDishIds.add(picked.dish.id);
@@ -930,18 +990,30 @@ const buildComboFromCandidates = (
     const itemsBySlot = createEmptyItemsBySlot();
     const usedDishIds = new Set<string>();
     const warnings: string[] = [];
+    const tagRequirementsBySlot = getMealSlotTagRequirements(input);
 
     PLANNER_MEAL_SLOTS.forEach(slot => {
-        const targetCount = getRandomDishCount(ranges[slot]);
+        const range = ranges[slot];
+        const tagRequirements = tagRequirementsBySlot[slot];
+        const tagMinTotal = getSlotTagMinTotal(tagRequirements);
+        const adjustedMin = Math.max(range.min, tagMinTotal);
+        const adjustedMax = Math.max(range.max, adjustedMin);
+        const targetCount = getRandomDishCount({ min: adjustedMin, max: adjustedMax });
         if (targetCount <= 0) return;
 
-        const selected = selectSlotItems(candidatesBySlot[slot], targetCount, usedDishIds, variantIndex % Math.max(1, candidatesBySlot[slot].length), randomize);
+        const selected = selectSlotItems(candidatesBySlot[slot], targetCount, usedDishIds, variantIndex % Math.max(1, candidatesBySlot[slot].length), randomize, tagRequirements);
         itemsBySlot[slot] = selected;
 
+        const slotLabel = slot === 'breakfast' ? 'bữa sáng' : slot === 'lunch' ? 'bữa trưa' : 'bữa tối';
         if (selected.length < targetCount) {
-            const label = slot === 'breakfast' ? 'bữa sáng' : slot === 'lunch' ? 'bữa trưa' : 'bữa tối';
-            warnings.push(`${label} chỉ có ${selected.length}/${targetCount} món phù hợp`);
+            warnings.push(`${slotLabel} chỉ có ${selected.length}/${targetCount} món phù hợp`);
         }
+        tagRequirements.forEach(requirement => {
+            const matched = selected.filter(item => dishHasTag(item.dish, requirement.tag)).length;
+            if (matched < requirement.min) {
+                warnings.push(`${slotLabel} cần ${requirement.min} món "${requirement.tag}" nhưng chỉ có ${matched}`);
+            }
+        });
     });
 
     const items = flattenItemsBySlot(itemsBySlot);

@@ -36,6 +36,7 @@ import HouseIcon from "../../assets/icons/house.png";
 import FamilyIcon from "../../assets/icons/family.png";
 import DietPlanIcon from "../../assets/icons/diet-plan.png";
 import ChatIcon from "../../assets/icons/chat.png";
+import FoodPreparationIcon from "../../assets/icons/food-preparation.png";
 import DishesIcon from "../../assets/icons/noodles.png";
 import ShoppingListIcon from "../../assets/icons/shoppingList.png";
 import IngredientIcon from "../../assets/icons/vegetable.png";
@@ -486,6 +487,7 @@ const SidebarDrawer = ({ buttonStyle }: { buttonStyle?: React.CSSProperties }) =
                 { key: 'dishSuggester', href: RootRoutes.AuthorizedRoutes.DishSuggester(), icon: SuggesterIcon, label: 'Nấu gì?' },
                 { key: 'meals', href: RootRoutes.AuthorizedRoutes.ScheduledMealRoutes.List(), icon: DietPlanIcon, label: 'Thực đơn' },
                 { key: 'dishFeedback', href: RootRoutes.AuthorizedRoutes.ScheduledMealRoutes.FeedbackHistory(), icon: ChatIcon, label: 'Phản hồi món' },
+                { key: 'leftovers', href: RootRoutes.AuthorizedRoutes.ScheduledMealRoutes.Leftovers(), icon: FoodPreparationIcon, label: 'Phần còn lại' },
                 { key: 'shoppingList', href: RootRoutes.AuthorizedRoutes.ShoppingListRoutes.List(), icon: ShoppingListIcon, label: 'Lịch mua sắm' },
                 { key: 'expensePlanner', href: RootRoutes.AuthorizedRoutes.ExpensePlanner(), icon: BudgetIcon, label: 'Tính chi phí' },
             ],
