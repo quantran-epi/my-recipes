@@ -6,7 +6,7 @@ import { getHouseholdHealthStatusMeta } from '@common/Helpers/HouseholdHealthHel
 import type { HouseholdDishSuitability } from '@common/Helpers/HouseholdSuitabilityHelper';
 import { IngredientPriceHelper } from '@common/Helpers/IngredientPriceHelper';
 import { NutritionGoalHelper, type NutritionGoalMatch } from '@common/Helpers/NutritionGoalHelper';
-import { ActionButton, Button } from '@components/Button';
+import { Button } from '@components/Button';
 import { Collapse } from '@components/Collapse';
 import { Dropdown } from '@components/Dropdown';
 import { createSelectedOptionsDropdownRender, renderResponsiveTagPlaceholder } from '@components/Form/Select';
@@ -1207,7 +1207,7 @@ export const SmartMealPlannerScreen: React.FC = () => {
         title='Chi tiết gợi ý món'
         width={760}
         destroyOnClose
-        footer={<ActionButton onClick={() => setDetailSelection(undefined)}>Đóng</ActionButton>}
+        footer={<Button onClick={() => setDetailSelection(undefined)}>Đóng</Button>}
         bodyStyle={{ background: '#f8fafc' }}
     >
         <Stack className='smart-planner-detail-modal' direction='column' gap={12} fullwidth>
@@ -1281,16 +1281,14 @@ export const SmartMealPlannerScreen: React.FC = () => {
                     {detailSelection.item.scoreDetails.map(detail => {
                         const methodologyKey = `score-method-${detail.label}`;
                         const methodology = SCORE_METHODOLOGY[detail.label];
-                        return <Box key={`${detail.label}-${detail.value}`} style={{ width: '100%', boxSizing: 'border-box', border: '1px solid rgba(15,23,42,0.07)', borderRadius: 8, background: '#f8fafc', padding: 10 }}>
+                        return <Box key={`${detail.label}-${detail.value}`} style={{ width: '100%', boxSizing: 'border-box', border: '1px solid rgba(15,23,42,0.07)', borderRadius: 8, background: '#f8fafc', padding: methodology ? '10px 44px 10px 10px' : 10, position: 'relative' }}>
+                            {methodology && <Button type='text' aria-label={`Cách tính ${detail.label}`} icon={<QuestionCircleOutlined />} onClick={() => _toggleHelp(methodologyKey)} style={{ position: 'absolute', top: 8, right: 8, width: 28, height: 28, paddingInline: 0, borderRadius: 999, color: openHelpKey === methodologyKey ? '#13a8a8' : '#9ca3af' }} />}
                             <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'flex-start', gap: 8, width: '100%' }}>
                                 <div style={{ minWidth: 0, flex: '1 1 220px' }}>
                                     <Typography.Text strong style={{ display: 'block', color: '#111827', fontSize: 13, lineHeight: '18px' }}>{detail.label}</Typography.Text>
                                     <Typography.Text style={{ display: 'block', color: '#334155', fontSize: 12, lineHeight: '17px', marginTop: 2 }}>{detail.value}</Typography.Text>
                                 </div>
-                                <Stack align='center' gap={4} style={{ flexShrink: 0 }}>
-                                    <Tag color={getImpactColor(detail.impact)} style={{ marginRight: 0 }}>{formatImpact(detail.impact)}</Tag>
-                                    {methodology && <Button type='text' aria-label={`Cách tính ${detail.label}`} icon={<QuestionCircleOutlined />} onClick={() => _toggleHelp(methodologyKey)} style={{ width: 28, height: 28, paddingInline: 0, borderRadius: 999, color: openHelpKey === methodologyKey ? '#13a8a8' : '#9ca3af' }} />}
-                                </Stack>
+                                <Tag color={getImpactColor(detail.impact)} style={{ marginRight: 0, flexShrink: 0 }}>{formatImpact(detail.impact)}</Tag>
                             </div>
                             <Typography.Text type='secondary' style={{ display: 'block', fontSize: 12, lineHeight: '18px', marginTop: 7 }}>{detail.description}</Typography.Text>
                             {methodology && openHelpKey === methodologyKey && <Box style={{ marginTop: 8, padding: '8px 10px', borderRadius: 6, background: 'rgba(19,168,168,0.08)', border: '1px solid rgba(19,168,168,0.18)' }}>
@@ -1380,7 +1378,7 @@ export const SmartMealPlannerScreen: React.FC = () => {
         width={720}
         destroyOnClose
         footer={<Stack justify='flex-end' gap={8}>
-            <ActionButton onClick={() => setShoppingPreviewOpen(false)}>Hủy</ActionButton>
+            <Button onClick={() => setShoppingPreviewOpen(false)}>Hủy</Button>
             <Button type='primary' icon={<CheckCircleOutlined />} onClick={_createScheduledMeals}>Tạo thực đơn</Button>
         </Stack>}
         bodyStyle={{ background: '#f8fafc' }}
@@ -1517,7 +1515,7 @@ export const SmartMealPlannerScreen: React.FC = () => {
         width={620}
         destroyOnClose
         footer={<Stack justify='flex-end' gap={8}>
-            <ActionButton onClick={() => setMealRangeModalOpen(false)}>Hủy</ActionButton>
+            <Button onClick={() => setMealRangeModalOpen(false)}>Hủy</Button>
             <Button type='primary' icon={<ThunderboltOutlined />} onClick={_confirmMealRangeModal}>Gợi ý</Button>
         </Stack>}
         bodyStyle={{ background: '#f8fafc' }}
@@ -1802,7 +1800,7 @@ export const SmartMealPlannerScreen: React.FC = () => {
                     </React.Fragment> : <React.Fragment>
                         <Stack justify='space-between' align='center' gap={8} wrap='wrap'>
                             <Typography.Text type='secondary' style={{ fontSize: 12, lineHeight: '18px' }}>Mỗi ngày có vài phương án. Bấm đổi để bốc tổ hợp món hợp lệ khác.</Typography.Text>
-                            <ActionButton tone='primary' icon={<ThunderboltOutlined />} disabled={isSuggesting} onClick={() => _suggestMeals(true)}>Đổi phương án khác</ActionButton>
+                            <Button type='primary' icon={<ThunderboltOutlined />} disabled={isSuggesting} onClick={() => _suggestMeals(true)}>Đổi phương án khác</Button>
                         </Stack>
                         {plannedDays.map(day => <Box key={day.date.format('YYYY-MM-DD')} style={{ border: '1px solid rgba(19,168,168,0.12)', borderRadius: 8, padding: 10, background: '#fff' }}>
                             <Stack align='center' gap={8} style={{ marginBottom: 10 }}>

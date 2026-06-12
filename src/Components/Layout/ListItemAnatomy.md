@@ -88,14 +88,14 @@ This is a **layout contract**, not a CSS reset. Each list keeps its own backgrou
 
 **TRAIL** is one element — a score percentage, status pill, or primary metric. Not a stack of mini-elements.
 
-**ACTION ROW** is for secondary actions only. Page-level primary CTAs go elsewhere (header). Use `<ActionButton>` for everything in this row.
+**ACTION ROW** is for secondary actions inside a repeated item. Page-level, section-level, and modal actions go elsewhere and use the normal Button family.
 
 ---
 
 ## ActionButton tones
 
 ```tsx
-<ActionButton tone='default'>Đóng</ActionButton>
+<ActionButton tone='default'>Bỏ lọc</ActionButton>
 <ActionButton tone='primary'>Mở chi tiết</ActionButton>
 <ActionButton tone='success' icon={<CheckCircleOutlined />}>Đã xong</ActionButton>
 <ActionButton tone='warning' icon={<WarningOutlined />}>Cảnh báo</ActionButton>
@@ -104,7 +104,7 @@ This is a **layout contract**, not a CSS reset. Each list keeps its own backgrou
 
 | Tone | Color | Use for |
 | --- | --- | --- |
-| `default` | slate gray | Đóng, Bỏ lọc, neutral toggle |
+| `default` | slate gray | Bỏ lọc, neutral toggle |
 | `primary` | blue | Mở chi tiết, navigate-to-source actions |
 | `success` | green | Đã xong, completion confirmations |
 | `warning` | amber | Cần xử lý, attention markers |
@@ -113,15 +113,16 @@ This is a **layout contract**, not a CSS reset. Each list keeps its own backgrou
 **USE `ActionButton` for:**
 
 - Inline list-row actions (Ăn 1 phần / Đã hết / Bỏ)
-- Section secondary actions (Mở cao nhất, Xem tất cả)
-- Card footer actions (Mở chi tiết, Sửa, Sao chép)
+- Repeated item action rows (Mở chi tiết, Sửa, Sao chép)
 
 **DO NOT use ActionButton for:**
 
 - Page header primary CTAs — use ant-d primary button
 - Search/filter input affordances — belong to their host input
 - Modal footer buttons — use the normal Button family
+- Modal close/cancel/save actions — use the normal Button family
 - Form submit buttons — use ant-d `type='primary'`
+- Section-level and page-level CTAs — use the normal Button family
 - Floating action buttons or fixed bottom bars — different visual rhythm
 - Icon-only overflow buttons (`MoreOutlined` dropdown trigger) — keep as square normal buttons
 

@@ -28,13 +28,14 @@ interface ActionButtonProps {
 }
 
 /**
- * Standard secondary action button used across lists, cards, and section footers.
+ * Standard compact action button used in repeated item action rows.
  * Compact pill action button with semantic-color-tinted border and neutral background.
  *
- * USE for: inline list-row actions, section secondary actions, and compact card footer actions.
+ * USE for: inline actions inside list items and repeated item rows.
  *
  * DO NOT use for: page header primary CTAs, search/filter input affordances,
- * form submit buttons, modal footer buttons, mid-flow primary actions, page-header buttons, search affordances.
+ * modal footer buttons, close/cancel/save actions, form submit buttons, section CTAs,
+ * mid-flow primary actions, page-header buttons, search affordances.
  *
  * See `.planning/quick/260612-uxn-ui-ux-list-and-button-normalization/` for the contract.
  */
