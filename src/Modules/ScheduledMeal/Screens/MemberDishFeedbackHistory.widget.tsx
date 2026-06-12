@@ -1,4 +1,4 @@
-import { CalendarOutlined, CloseCircleOutlined, FilterOutlined, FrownOutlined, HistoryOutlined, MehOutlined, SmileOutlined, TeamOutlined } from '@ant-design/icons';
+import { CalendarOutlined, CloseCircleOutlined, FrownOutlined, HistoryOutlined, MehOutlined, SmileOutlined, TeamOutlined } from '@ant-design/icons';
 import { Box } from '@components/Layout/Box';
 import { Stack } from '@components/Layout/Stack';
 import { Tag } from '@components/Tag';
@@ -168,10 +168,6 @@ export const MemberDishFeedbackHistoryWidget: React.FC<MemberDishFeedbackHistory
         </div>
 
         <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 6, marginBottom: 10 }}>
-            <Stack align='center' gap={5} style={{ flexShrink: 0, color: '#6b7280', fontSize: 12 }}>
-                <FilterOutlined />
-                <Typography.Text type='secondary' style={{ fontSize: 12 }}>Lọc nhanh</Typography.Text>
-            </Stack>
             {FILTER_OPTIONS.map(option => {
                 const active = reactionFilters.has(option.value);
                 return <Tag.CheckableTag
