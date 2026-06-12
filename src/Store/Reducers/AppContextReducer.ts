@@ -1,6 +1,6 @@
 import { PayloadAction, createSlice } from '@reduxjs/toolkit'
 import { IngredientPriceCurrency, IngredientUnit } from '@store/Models/Ingredient';
-import { ScheduledMeal } from '@store/Models/ScheduledMeal';
+import { ScheduledMeal, ScheduledMealSlotKey } from '@store/Models/ScheduledMeal';
 
 export type WeeklyMealTemplateDay = {
     offset: number;
@@ -58,7 +58,19 @@ export type HouseholdPreferenceProfile = {
     memberIds?: string[];
     memberNames?: string[];
     notes?: string[];
+    mealSlotTimes?: MealSlotTimes;
 }
+
+export type MealSlotTimeKey = ScheduledMealSlotKey;
+
+export type MealSlotClock = {
+    hour: number;
+    minute: number;
+}
+
+export type MealSlotTimes = Record<MealSlotTimeKey, MealSlotClock>;
+
+export type PrepTaskCompletionMap = Record<string, string>;
 
 export type HouseholdMemberProfile = {
     id: string;
@@ -106,6 +118,12 @@ export const DEFAULT_HOUSEHOLD_PREFERENCE_PROFILE: HouseholdPreferenceProfile = 
     avoidedTags: [],
 };
 
+export const DEFAULT_MEAL_SLOT_TIMES: MealSlotTimes = {
+    breakfast: { hour: 7, minute: 0 },
+    lunch: { hour: 12, minute: 0 },
+    dinner: { hour: 19, minute: 0 },
+};
+
 export interface AppContextState {
     loading: boolean;
     currentFeatureName: string;
@@ -120,6 +138,7 @@ export interface AppContextState {
     selectedHouseholdMemberIds?: string[];
     currentHouseholdMemberId?: string;
     leftoverTrackerItems?: LeftoverTrackerItem[];
+    prepTaskCompletions?: PrepTaskCompletionMap;
 }
 
 const initialState: AppContextState = {
@@ -136,6 +155,7 @@ const initialState: AppContextState = {
     selectedHouseholdMemberIds: [],
     currentHouseholdMemberId: undefined,
     leftoverTrackerItems: [],
+    prepTaskCompletions: {},
 }
 
 const rememberName = (current: string[] | undefined, name: string): string[] => {
@@ -173,6 +193,22 @@ const normalizeStringList = (value: unknown, max = 80): string[] => Array.isArra
 
 const normalizeTagList = (value: unknown): string[] => normalizeStringList(value, 20);
 
+const normalizeMealSlotClock = (value: unknown, fallback: MealSlotClock): MealSlotClock => {
+    const source = value as Partial<MealSlotClock> | undefined;
+    const hour = Number(source?.hour);
+    const minute = Number(source?.minute);
+    return {
+        hour: Number.isFinite(hour) && hour >= 0 && hour <= 23 ? Math.round(hour) : fallback.hour,
+        minute: Number.isFinite(minute) && minute >= 0 && minute <= 59 ? Math.round(minute) : fallback.minute,
+    };
+};
+
+export const normalizeMealSlotTimes = (value?: Partial<Record<MealSlotTimeKey, Partial<MealSlotClock>>> | null): MealSlotTimes => ({
+    breakfast: normalizeMealSlotClock(value?.breakfast, DEFAULT_MEAL_SLOT_TIMES.breakfast),
+    lunch: normalizeMealSlotClock(value?.lunch, DEFAULT_MEAL_SLOT_TIMES.lunch),
+    dinner: normalizeMealSlotClock(value?.dinner, DEFAULT_MEAL_SLOT_TIMES.dinner),
+});
+
 export const normalizeHouseholdPreferenceProfile = (profile?: Partial<HouseholdPreferenceProfile> | null): HouseholdPreferenceProfile => ({
     servingCount: normalizePositiveNumber(profile?.servingCount, DEFAULT_HOUSEHOLD_PREFERENCE_PROFILE.servingCount, 24),
     maxCookMinutes: normalizePositiveNumber(profile?.maxCookMinutes, DEFAULT_HOUSEHOLD_PREFERENCE_PROFILE.maxCookMinutes, 480),
@@ -191,6 +227,7 @@ export const normalizeHouseholdPreferenceProfile = (profile?: Partial<HouseholdP
     memberIds: normalizeStringList(profile?.memberIds, 30),
     memberNames: normalizeStringList(profile?.memberNames, 30),
     notes: normalizeStringList(profile?.notes, 30),
+    mealSlotTimes: normalizeMealSlotTimes(profile?.mealSlotTimes),
 });
 
 export const normalizeHouseholdMemberProfile = (profile: Partial<HouseholdMemberProfile>): HouseholdMemberProfile => {
@@ -269,6 +306,14 @@ const normalizePortions = (value: unknown): number => {
     const parsed = Number(value);
     if (!Number.isFinite(parsed) || parsed <= 0) return 0;
     return Math.round(parsed * 10) / 10;
+}
+
+const prunePrepTaskCompletions = (completions: PrepTaskCompletionMap | undefined, now = new Date()): PrepTaskCompletionMap => {
+    const cutoff = now.getTime() - 3 * 24 * 60 * 60 * 1000;
+    return Object.fromEntries(Object.entries(completions ?? {}).filter(([, completedAt]) => {
+        const value = new Date(completedAt).getTime();
+        return Number.isFinite(value) && value >= cutoff;
+    }));
 }
 
 export const appContextSlice = createSlice({
@@ -360,6 +405,18 @@ export const appContextSlice = createSlice({
             const memberId = String(action.payload ?? '').trim();
             state.currentHouseholdMemberId = memberId && memberIds.has(memberId) ? memberId : undefined;
         },
+        markPrepTaskDone: (state, action: PayloadAction<string>) => {
+            const now = new Date();
+            state.prepTaskCompletions = {
+                ...prunePrepTaskCompletions(state.prepTaskCompletions, now),
+                [action.payload]: now.toISOString(),
+            };
+        },
+        unmarkPrepTaskDone: (state, action: PayloadAction<string>) => {
+            const current = prunePrepTaskCompletions(state.prepTaskCompletions);
+            delete current[action.payload];
+            state.prepTaskCompletions = current;
+        },
         addLeftoverTrackerItem: (state, action: PayloadAction<LeftoverTrackerItem>) => {
             const portions = normalizePortions(action.payload.portions);
             if (portions <= 0) return;
@@ -398,6 +455,8 @@ export const {
     removeHouseholdMemberProfile,
     setSelectedHouseholdMemberIds,
     setCurrentHouseholdMemberId,
+    markPrepTaskDone,
+    unmarkPrepTaskDone,
     addLeftoverTrackerItem,
     eatLeftoverPortion,
     finishLeftoverItem,

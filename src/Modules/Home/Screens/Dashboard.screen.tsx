@@ -12,6 +12,7 @@ import { Tag } from '@components/Tag';
 import { Typography } from '@components/Typography';
 import { useScheduledCalculation, useScreenTitle } from '@hooks';
 import { DishScorer, ScoredDish } from '@modules/DishSuggester/Helpers/DishScorer';
+import { PrepTasksWidget } from '@modules/ScheduledMeal/Screens/PrepTasks.widget';
 import { RootRoutes } from '@routing/RootRoutes';
 import { Ingredient, IngredientInventory, IngredientUnit, InventoryBatch } from '@store/Models/Ingredient';
 import { InventoryHealthConfig } from '@store/Models/SharedConfig';
@@ -722,6 +723,16 @@ export const DashboardScreen = () => {
         />
 
         <WeeklyOverviewCard items={weekOverview} />
+
+        <Section
+            title='Cần chuẩn bị'
+            subtitle='Việc cần làm trước cho bữa hôm nay và ngày mai.'
+            icon={<ClockCircleOutlined />}
+            tone='#13a8a8'
+            action={<Button type='link' onClick={() => openRoute(RootRoutes.AuthorizedRoutes.ScheduledMealRoutes.PrepTasks())}>Mở</Button>}
+        >
+            <PrepTasksWidget compact onSeeAll={() => openRoute(RootRoutes.AuthorizedRoutes.ScheduledMealRoutes.PrepTasks())} />
+        </Section>
 
         <Section
             title='Hôm nay'

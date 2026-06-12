@@ -4,7 +4,7 @@
  */
 import { RootState } from "@store/Store";
 import { DEFAULT_SHARED_CONFIG, normalizeSharedConfig } from "@store/Models/SharedConfig";
-import { buildHouseholdPreferenceProfile, getSelectedHouseholdMembers, normalizeHouseholdMembers } from "@store/Reducers/AppContextReducer";
+import { buildHouseholdPreferenceProfile, getSelectedHouseholdMembers, normalizeHouseholdMembers, normalizeMealSlotTimes } from "@store/Reducers/AppContextReducer";
 import { normalizeHouseholdHealthState } from "@store/Reducers/HouseholdHealthReducer";
 import type { HouseholdHealthRecord } from "@store/Reducers/HouseholdHealthReducer";
 import { createSelector } from "reselect";
@@ -112,6 +112,11 @@ export const selectHouseholdPreferenceProfile = createSelector(
     [selectAppContext, selectSelectedHouseholdMembers],
     (appContext, selectedMembers) => buildHouseholdPreferenceProfile(appContext.householdPreferenceProfile, selectedMembers)
 );
+export const selectMealSlotTimes = createSelector(
+    [selectHouseholdPreferenceProfile],
+    profile => normalizeMealSlotTimes(profile.mealSlotTimes)
+);
+export const selectPrepTaskCompletions = (state: RootState) => state.personal.appContext.prepTaskCompletions ?? {};
 export const selectLeftoverTrackerItems = (state: RootState) => state.personal.appContext.leftoverTrackerItems ?? [];
 
 export const selectShoppingListsById = createSelector(

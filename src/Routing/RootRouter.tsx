@@ -23,6 +23,7 @@ import { ScheduledMealRouter } from "@modules/ScheduledMeal/Routing/ScheduledMea
 import { ScheduledMealListScreen } from "@modules/ScheduledMeal/Screens/ScheduledMealList.screen";
 import { MemberDishFeedbackHistoryScreen } from "@modules/ScheduledMeal/Screens/MemberDishFeedbackHistory.screen";
 import { LeftoverManagementScreen } from "@modules/ScheduledMeal/Screens/LeftoverManagement.screen";
+import { PrepTasksScreen } from "@modules/ScheduledMeal/Screens/PrepTasks.screen";
 import { DishExpensePlannerScreen } from "@modules/Dishes/Screens/DishExpensePlanner.screen";
 import { DishSuggesterPageScreen } from "@modules/DishSuggester/Screens/DishSuggesterPage.screen";
 import { HouseholdProfilesScreen } from "@modules/Home/Screens/HouseholdProfiles.screen";
@@ -65,6 +66,7 @@ export const RootRouter = () => {
                     <Route path={RootRoutes.AuthorizedRoutes.ScheduledMealRoutes.List()} element={<ScheduledMealListScreen />} />
                     <Route path={RootRoutes.AuthorizedRoutes.ScheduledMealRoutes.FeedbackHistory()} element={<MemberDishFeedbackHistoryScreen />} />
                     <Route path={RootRoutes.AuthorizedRoutes.ScheduledMealRoutes.Leftovers()} element={<LeftoverManagementScreen />} />
+                    <Route path={RootRoutes.AuthorizedRoutes.ScheduledMealRoutes.PrepTasks()} element={<PrepTasksScreen />} />
                 </Route>
             </Route>
         </Routes>
