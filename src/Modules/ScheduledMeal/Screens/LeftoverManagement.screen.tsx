@@ -1,11 +1,10 @@
 import { CheckCircleOutlined, DeleteOutlined, FilterOutlined, FireOutlined, RestOutlined, RollbackOutlined, SearchOutlined } from '@ant-design/icons';
-import { Button } from '@components/Button';
+import { ActionButton } from '@components/Button';
 import { Box } from '@components/Layout/Box';
 import { Stack } from '@components/Layout/Stack';
 import { useMessage } from '@components/Message';
 import { useModal } from '@components/Modal/ModalProvider';
 import { Tag } from '@components/Tag';
-import { Tooltip } from '@components/Tootip';
 import { Typography } from '@components/Typography';
 import { useScreenTitle } from '@hooks';
 import { LeftoverTrackerItem, LeftoverTrackerItemStatus, discardLeftoverItem, eatLeftoverPortion, finishLeftoverItem } from '@store/Reducers/AppContextReducer';
@@ -55,31 +54,6 @@ const formatStoredAt = (stored?: string): string => {
     return `Đã lưu ${dayjs(stored).format('DD/MM HH:mm')}`;
 };
 
-const leftoverActionBarStyle: React.CSSProperties = {
-    display: 'inline-flex',
-    alignItems: 'center',
-    gap: 6,
-    padding: 4,
-    border: '1px solid rgba(15,23,42,0.08)',
-    borderRadius: 8,
-    background: '#f8fafc',
-};
-
-const leftoverActionButtonStyle: React.CSSProperties = {
-    width: 32,
-    height: 30,
-    paddingInline: 0,
-    color: '#475569',
-    borderColor: 'rgba(15,23,42,0.12)',
-    background: '#fff',
-};
-
-const leftoverDangerActionButtonStyle: React.CSSProperties = {
-    ...leftoverActionButtonStyle,
-    color: '#cf1322',
-    borderColor: 'rgba(207,19,34,0.22)',
-};
-
 const LeftoverItemRow: React.FC<{
     item: LeftoverTrackerItem;
     onEatOne: () => void;
@@ -111,17 +85,9 @@ const LeftoverItemRow: React.FC<{
                     <Tag color={visual.color} style={{ marginInlineEnd: 0, flexShrink: 0 }}>{visual.label}</Tag>
                 </div>
                 {item.status === 'available' && <Stack wrap='wrap' gap={6} style={{ marginTop: 10 }}>
-                    <div style={leftoverActionBarStyle} aria-label='Thao tác phần còn lại'>
-                        <Tooltip title='Ăn 1 phần'>
-                            <Button aria-label='Ăn 1 phần' icon={<RollbackOutlined />} onClick={onEatOne} style={leftoverActionButtonStyle} />
-                        </Tooltip>
-                        <Tooltip title='Đã hết'>
-                            <Button aria-label='Đã hết' icon={<CheckCircleOutlined />} onClick={onFinish} style={leftoverActionButtonStyle} />
-                        </Tooltip>
-                        <Tooltip title='Bỏ'>
-                            <Button aria-label='Bỏ' icon={<DeleteOutlined />} danger onClick={onDiscard} style={leftoverDangerActionButtonStyle} />
-                        </Tooltip>
-                    </div>
+                    <ActionButton tone='success' icon={<RollbackOutlined />} onClick={onEatOne}>Ăn 1 phần</ActionButton>
+                    <ActionButton tone='primary' icon={<CheckCircleOutlined />} onClick={onFinish}>Đã hết</ActionButton>
+                    <ActionButton tone='danger' icon={<DeleteOutlined />} onClick={onDiscard}>Bỏ</ActionButton>
                 </Stack>}
             </div>
         </div>
