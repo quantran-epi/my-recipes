@@ -22,6 +22,7 @@ import { useScreenTitle } from '@hooks';
 import { DishImageWidget } from '@modules/Dishes/Screens/DishesManageIngredient/DishImage.widget';
 import { ShoppingListAddWidget } from '@modules/ShoppingList/Screens/ShoppingListAdd.widget';
 import { SmartPlannerEngine, type SmartPlannerCookNowCategory, type SmartPlannerDishRecommendation, type SmartPlannerMealSlot, type SmartPlannerMealSlotDishRanges, type SmartPlannerMealSlotTagRequirements, type SmartPlannerPlanResult, type SmartPlannerPlanSummary, type SmartPlannerPriority } from '@modules/ScheduledMeal/Helpers/SmartPlannerEngine';
+import { ScheduledMealSlotStateHelper } from '@modules/ScheduledMeal/Helpers/ScheduledMealSlotStateHelper';
 import { Dishes } from '@store/Models/Dishes';
 import { IngredientUnit } from '@store/Models/Ingredient';
 import { ScheduledMeal } from '@store/Models/ScheduledMeal';
@@ -942,15 +943,21 @@ export const SmartMealPlannerScreen: React.FC = () => {
     };
 
     const _appendToScheduledMeal = (date: Dayjs, itemsBySlot: Partial<Record<MealSlot, Array<{ dish: Dishes }>>>): 'created' | 'updated' | 'empty' => {
-        const dishIds = mealSlots.flatMap(slot => itemsBySlot[slot]?.map(item => item.dish.id) ?? []);
+        const existing = scheduledMeals.find(meal => dayjs(meal.plannedDate).isSame(date, 'day'));
+        const writableItemsBySlot = existing
+            ? mealSlots.reduce((result, slot) => {
+                result[slot] = ScheduledMealSlotStateHelper.getSlotState(existing, slot) === 'skipped' ? [] : (itemsBySlot[slot] ?? []);
+                return result;
+            }, {} as Partial<Record<MealSlot, Array<{ dish: Dishes }>>>)
+            : itemsBySlot;
+        const dishIds = mealSlots.flatMap(slot => writableItemsBySlot[slot]?.map(item => item.dish.id) ?? []);
         if (dishIds.length === 0) return 'empty';
 
         const dishServings = dishIds.reduce((result, dishId) => ({ ...result, [dishId]: targetServings }), {} as Record<string, number>);
-        const existing = scheduledMeals.find(meal => dayjs(meal.plannedDate).isSame(date, 'day'));
         if (existing) {
             const nextMeals = mealSlots.reduce((result, slot) => {
                 const current = existing.meals?.[slot] ?? [];
-                const nextDishIds = itemsBySlot[slot]?.map(item => item.dish.id) ?? [];
+                const nextDishIds = writableItemsBySlot[slot]?.map(item => item.dish.id) ?? [];
                 result[slot] = nextDishIds.length > 0 ? Array.from(new Set([...current, ...nextDishIds])) : current;
                 return result;
             }, { breakfast: [], lunch: [], dinner: [] } as ScheduledMeal['meals']);
@@ -966,9 +973,9 @@ export const SmartMealPlannerScreen: React.FC = () => {
         }
 
         const meals: ScheduledMeal['meals'] = {
-            breakfast: itemsBySlot.breakfast?.map(item => item.dish.id) ?? [],
-            lunch: itemsBySlot.lunch?.map(item => item.dish.id) ?? [],
-            dinner: itemsBySlot.dinner?.map(item => item.dish.id) ?? [],
+            breakfast: writableItemsBySlot.breakfast?.map(item => item.dish.id) ?? [],
+            lunch: writableItemsBySlot.lunch?.map(item => item.dish.id) ?? [],
+            dinner: writableItemsBySlot.dinner?.map(item => item.dish.id) ?? [],
         };
         const name = `Thực đơn thông minh - ${date.format('DD/MM')}`;
         dispatch(addScheduledMeal({

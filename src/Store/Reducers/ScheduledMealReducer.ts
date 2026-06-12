@@ -1,6 +1,6 @@
 import type { PayloadAction } from '@reduxjs/toolkit';
 import { createSlice } from '@reduxjs/toolkit';
-import { ScheduledMeal } from '@store/Models/ScheduledMeal';
+import { ScheduledMeal, ScheduledMealSkipMarker, ScheduledMealSlotKey } from '@store/Models/ScheduledMeal';
 
 // export type ShoppingListAddDishesParams = {
 //     shoppingList: ShoppingList;
@@ -30,6 +30,18 @@ export const ScheduledMealSlice = createSlice({
                 return e;
             })
         },
+        markSkipMeal: (state, action: PayloadAction<{ mealId: string; slot: ScheduledMealSlotKey; marker: ScheduledMealSkipMarker }>) => {
+            const meal = state.scheduledMeals.find(item => item.id === action.payload.mealId);
+            if (!meal) return;
+            if (!meal.skipMeals) meal.skipMeals = {};
+            meal.skipMeals[action.payload.slot] = action.payload.marker;
+            meal.meals[action.payload.slot] = [];
+        },
+        unmarkSkipMeal: (state, action: PayloadAction<{ mealId: string; slot: ScheduledMealSlotKey }>) => {
+            const meal = state.scheduledMeals.find(item => item.id === action.payload.mealId);
+            if (!meal?.skipMeals) return;
+            delete meal.skipMeals[action.payload.slot];
+        },
         remove: (state, action: PayloadAction<string[]>) => {
             state.scheduledMeals = state.scheduledMeals.filter(dish => !action.payload.includes(dish.id));
         },
@@ -50,6 +62,15 @@ export const ScheduledMealSlice = createSlice({
 })
 
 // Action creators are generated for each case reducer function
-export const { add: addScheduledMeal, edit: editScheduledMeal, remove: removeScheduledMeal, toggleSelectedMeals, removeAllSelectedMeals, reset: resetScheduleMeals} = ScheduledMealSlice.actions
+export const {
+    add: addScheduledMeal,
+    edit: editScheduledMeal,
+    markSkipMeal,
+    unmarkSkipMeal,
+    remove: removeScheduledMeal,
+    toggleSelectedMeals,
+    removeAllSelectedMeals,
+    reset: resetScheduleMeals
+} = ScheduledMealSlice.actions
 
 export default ScheduledMealSlice.reducer

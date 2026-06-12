@@ -2,7 +2,7 @@ import type { PayloadAction } from '@reduxjs/toolkit';
 import { createSlice } from '@reduxjs/toolkit';
 import { DishIngredientAmountMealMeta, Dishes } from '@store/Models/Dishes';
 import { Ingredient, IngredientInventory, IngredientPriceCurrency, IngredientUnit } from '@store/Models/Ingredient';
-import { ScheduledMeal } from '@store/Models/ScheduledMeal';
+import { ScheduledMeal, ScheduledMealSlotKey } from '@store/Models/ScheduledMeal';
 import { ShoppingList, ShoppingListCompletionImport, ShoppingListIngredientAmount, ShoppingListIngredientGroup } from '@store/Models/ShoppingList';
 import { InventoryHealthConfig } from '@store/Models/SharedConfig';
 import { IngredientUnitHelper } from '@common/Helpers/IngredientUnitHelper';
@@ -69,6 +69,8 @@ const initialState: ShoppingListState = {
     shoppingLists: []
 }
 
+const scheduledMealSlots: ScheduledMealSlotKey[] = ['breakfast', 'lunch', 'dinner'];
+
 export const ShoppingListIngredientHelpers = {
     getIncludedDishesRecursive: (curDish: Dishes, allDishes: Dishes[]) => {
         if (curDish.includeDishes.length === 0) return [];
@@ -134,7 +136,7 @@ export const ShoppingListSlice = createSlice({
                     let ingredientAmountsFromMeals: ShoppingListIngredientAmount[] = [];
                     allMeals.forEach(meal => {
                         const mealMeta = { id: meal.id, plannedDate: dayjs(meal.plannedDate).toDate() } as DishIngredientAmountMealMeta;
-                        let dishIdsFromThisMeal = [...meal.meals.breakfast, ...meal.meals.lunch, ...meal.meals.dinner].flat();
+                        let dishIdsFromThisMeal = scheduledMealSlots.flatMap(slot => meal.skipMeals?.[slot] ? [] : (meal.meals?.[slot] ?? []));
 
                         dishIdsFromThisMeal.forEach(dishId => {
                             const dish = action.payload.allDishes.find(d1 => d1.id === dishId);

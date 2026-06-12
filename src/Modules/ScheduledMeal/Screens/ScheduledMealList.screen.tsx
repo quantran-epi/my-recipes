@@ -13,10 +13,10 @@ import { useMessage } from "@components/Message";
 import { Tooltip } from "@components/Tootip";
 import { Typography } from "@components/Typography";
 import { useScreenTitle, useToggle } from "@hooks";
-import { ScheduledMeal } from "@store/Models/ScheduledMeal";
+import { ScheduledMeal, ScheduledMealSkipReason, ScheduledMealSlotKey } from "@store/Models/ScheduledMeal";
 import type { CookingMealFeedbackSlot } from "@store/Models/CookingSession";
 import { rememberScheduledMealName, WeeklyMealTemplate } from "@store/Reducers/AppContextReducer";
-import { addScheduledMeal, removeScheduledMeal, toggleSelectedMeals } from "@store/Reducers/ScheduledMealReducer";
+import { addScheduledMeal, removeScheduledMeal, toggleSelectedMeals, unmarkSkipMeal } from "@store/Reducers/ScheduledMealReducer";
 import { selectDishFeedbackHistory, selectDishNameById, selectScheduledMeals, selectSelectedMealIds, selectWeeklyMealTemplates } from "@store/Selectors";
 import { Calendar, DatePicker, Select, Tag } from "antd";
 import { SelectInfo } from "antd/es/calendar/generateCalendar";
@@ -42,6 +42,8 @@ import { CheckboxChangeEvent } from "antd/es/checkbox";
 import { RootRoutes } from "@routing/RootRoutes";
 import { MealCompletionLeftoverModal, ScheduledMealCookingModal, getScheduledMealDishIds } from "./ScheduledMealCooking.widget";
 import { MemberDishFeedbackHistoryWidget } from "./MemberDishFeedbackHistory.widget";
+import { ScheduledMealSlotStateHelper, SCHEDULED_MEAL_SKIP_REASON_META } from "../Helpers/ScheduledMealSlotStateHelper";
+import { ScheduledMealMarkSkipModal } from "./ScheduledMealMarkSkipModal";
 
 const getMealDateKey = (value: Date | string) => moment(value).format("YYYY-MM-DD");
 
@@ -75,6 +77,8 @@ type MealTemplateScope = 'day' | 'week';
 const getMondayStart = (value: Dayjs) => value.startOf("week").startOf("day");
 
 const getTemplateScope = (template: WeeklyMealTemplate): MealTemplateScope => template.scope ?? (template.days.length > 1 ? 'week' : 'day');
+
+const mealSlotKeys: ScheduledMealSlotKey[] = ['breakfast', 'lunch', 'dinner'];
 
 const topToolCardStyle: React.CSSProperties = {
     background: "linear-gradient(135deg, #ffffff 0%, #fbf9ff 100%)",
@@ -299,11 +303,9 @@ export const ScheduledMealListScreen = () => {
     };
 
     const mealsToday = _findScheduledMealsByDate(selectedDate);
-    const allDayDishIds = useMemo(() => getScheduledMealDishIds(mealsToday.flatMap(meal => [
-        ...meal.meals.breakfast,
-        ...meal.meals.lunch,
-        ...meal.meals.dinner,
-    ])), [mealsToday]);
+    const allDayDishIds = useMemo(() => getScheduledMealDishIds(mealsToday.flatMap(meal => mealSlotKeys.flatMap(slot => (
+        ScheduledMealSlotStateHelper.getSlotState(meal, slot) === 'skipped' ? [] : meal.meals[slot]
+    )))), [mealsToday]);
     const allDayDishServings = useMemo(() => mealsToday.reduce((result, meal) => ({
         ...result,
         ...(meal.dishServings ?? {}),
@@ -615,6 +617,7 @@ export const ScheduledMealItem = ({ item, selected, dishNameById, onDelete }: { 
     const [completionOpen, setCompletionOpen] = useState(false);
     const [completionScope, setCompletionScope] = useState<{ title: string; dishIds: string[]; mealSlot?: CookingMealFeedbackSlot; readonly?: boolean }>({ title: '', dishIds: [] });
     const [copyDate, setCopyDate] = useState<Dayjs | null>(null);
+    const [skipScope, setSkipScope] = useState<{ slot: ScheduledMealSlotKey; reason: ScheduledMealSkipReason }>();
     const feedbackHistory = useSelector(selectDishFeedbackHistory);
     const dispatch = useDispatch();
 
@@ -653,6 +656,17 @@ export const ScheduledMealItem = ({ item, selected, dishNameById, onDelete }: { 
     };
 
     const _onMoreActionClick = (e) => {
+        const key = String(e.key);
+        if (key.startsWith('skip-')) {
+            const [, slot, reason] = key.split('-') as [string, ScheduledMealSlotKey, ScheduledMealSkipReason | 'unmark'];
+            if (reason === 'unmark') {
+                dispatch(unmarkSkipMeal({ mealId: item.id, slot }));
+                return;
+            }
+            setSkipScope({ slot, reason });
+            return;
+        }
+
         switch (e.key) {
             case "cook": _openCooking(`Nấu thực đơn - ${item.name}`, allDishIds); break;
             case "cook-breakfast": _openCooking(`Nấu bữa sáng - ${item.name}`, item.meals.breakfast, 'breakfast'); break;
@@ -668,7 +682,7 @@ export const ScheduledMealItem = ({ item, selected, dishNameById, onDelete }: { 
         }
     };
 
-    const mealGroups: Array<{ slot: 'breakfast' | 'lunch' | 'dinner'; icon: string; label: string; dishIds: string[]; color: string; background: string; border: string }> = [
+    const mealGroups: Array<{ slot: ScheduledMealSlotKey; icon: string; label: string; dishIds: string[]; color: string; background: string; border: string }> = [
         { slot: 'breakfast', icon: MorningIcon, label: "Sáng", dishIds: item.meals.breakfast, color: "#faad14", background: "#fffbe6", border: "#ffe58f" },
         { slot: 'lunch', icon: NoonIcon, label: "Trưa", dishIds: item.meals.lunch, color: "#d46b08", background: "#fff7e6", border: "#ffd591" },
         { slot: 'dinner', icon: NightIcon, label: "Tối", dishIds: item.meals.dinner, color: "#531dab", background: "#f9f0ff", border: "#efdbff" },
@@ -692,6 +706,21 @@ export const ScheduledMealItem = ({ item, selected, dishNameById, onDelete }: { 
         lunch: lunchFeedbackDone,
         dinner: dinnerFeedbackDone,
     };
+    const skipMenuItems = mealGroups.flatMap(group => {
+        const marker = item.skipMeals?.[group.slot];
+        if (marker) {
+            return [{
+                label: `Bỏ đánh dấu ${group.label.toLowerCase()}`,
+                key: `skip-${group.slot}-unmark`,
+                icon: SCHEDULED_MEAL_SKIP_REASON_META[marker.reason].icon,
+            }];
+        }
+        return Object.entries(SCHEDULED_MEAL_SKIP_REASON_META).map(([reason, meta]) => ({
+            label: `${group.label}: ${meta.label}`,
+            key: `skip-${group.slot}-${reason}`,
+            icon: meta.icon,
+        }));
+    });
     const filledMealGroups = mealGroups.filter(group => group.dishIds.length > 0);
     const isFinishedMeal = filledMealGroups.length > 0 && filledMealGroups.every(group => feedbackDoneBySlot[group.slot]);
     const totalDishCount = allDishIds.length;
@@ -703,8 +732,32 @@ export const ScheduledMealItem = ({ item, selected, dishNameById, onDelete }: { 
             : { label: "Sắp tới", color: "#389e0d", background: "#f6ffed", border: "#b7eb8f" };
     const railColor = selected ? "#1677ff" : plannedStatus.color;
 
-    const MealRow = ({ icon, label, dishIds, color, background, border, finished }: { icon: string; label: string; dishIds: string[]; color: string; background: string; border: string; finished: boolean }) => (
-        <Box style={{ border: `1px solid ${border}`, borderRadius: 8, background, padding: "8px 9px", minWidth: 0 }}>
+    const MealRow = ({ slot, icon, label, dishIds, color, background, border, finished }: { slot: ScheduledMealSlotKey; icon: string; label: string; dishIds: string[]; color: string; background: string; border: string; finished: boolean }) => {
+        const skipMarker = item.skipMeals?.[slot];
+        if (skipMarker) {
+            const meta = ScheduledMealSlotStateHelper.getReasonMeta(skipMarker.reason);
+            return <Box style={{ border: `1px dashed ${meta.border}`, borderRadius: 8, background: meta.background, padding: "8px 9px", minWidth: 0 }}>
+                <div style={{ display: "grid", gridTemplateColumns: "auto minmax(0, 1fr) auto", gap: 7, alignItems: "start" }}>
+                    <span style={{ color: meta.color, display: "inline-flex", alignItems: "center", justifyContent: "center", paddingTop: 2 }}>{meta.icon}</span>
+                    <div style={{ minWidth: 0 }}>
+                        <Typography.Text strong style={{ display: "block", fontSize: 13, color: meta.color, lineHeight: "18px" }}>{label} · {meta.label}</Typography.Text>
+                        {skipMarker.note && <Typography.Text style={{ display: "block", fontSize: 12, lineHeight: "18px", color: "#111827", marginTop: 2, overflowWrap: "anywhere" }}>{skipMarker.note}</Typography.Text>}
+                        <Tooltip title="Thời điểm đánh dấu — không ảnh hưởng đến tính toán, chỉ để tham khảo.">
+                            <Typography.Text type="secondary" style={{ display: "block", fontSize: 11, lineHeight: "16px", marginTop: 3 }}>
+                                Đánh dấu lúc {ScheduledMealSlotStateHelper.formatMarkedAt(skipMarker.markedAt)}
+                            </Typography.Text>
+                        </Tooltip>
+                    </div>
+                    <Tooltip title="Quay lại trạng thái chưa lập — bạn có thể thêm món hoặc đánh dấu lại sau.">
+                        <Button type="link" onClick={() => dispatch(unmarkSkipMeal({ mealId: item.id, slot }))} style={{ paddingInline: 0, height: 22, fontSize: 12 }}>
+                            Bỏ đánh dấu
+                        </Button>
+                    </Tooltip>
+                </div>
+            </Box>;
+        }
+
+        return <Box style={{ border: `1px solid ${border}`, borderRadius: 8, background, padding: "8px 9px", minWidth: 0 }}>
             <div style={{ display: "grid", gridTemplateColumns: "auto minmax(0, 1fr) auto", gap: 7, alignItems: "center", marginBottom: 6 }}>
                 <Image src={icon} preview={false} width={15} style={{ marginBottom: 2 }} />
                 <Typography.Text strong style={{ fontSize: 13, color, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{label}</Typography.Text>
@@ -729,8 +782,8 @@ export const ScheduledMealItem = ({ item, selected, dishNameById, onDelete }: { 
                     {dishIds.length > 3 && <Tag style={{ fontSize: 11, padding: "1px 7px", margin: 0, borderRadius: 10 }}>+{dishIds.length - 3}</Tag>}
                 </Stack>
             )}
-        </Box>
-    );
+        </Box>;
+    };
 
     return (
         <React.Fragment>
@@ -769,6 +822,8 @@ export const ScheduledMealItem = ({ item, selected, dishNameById, onDelete }: { 
                                     { label: breakfastFeedbackDone ? "Xem phản hồi bữa sáng" : "Hoàn tất bữa sáng", key: "complete-breakfast", icon: breakfastFeedbackDone ? <EyeOutlined /> : <RestOutlined />, disabled: item.meals.breakfast.length === 0 || (isFutureMeal && !breakfastFeedbackDone) },
                                     { label: lunchFeedbackDone ? "Xem phản hồi bữa trưa" : "Hoàn tất bữa trưa", key: "complete-lunch", icon: lunchFeedbackDone ? <EyeOutlined /> : <RestOutlined />, disabled: item.meals.lunch.length === 0 || (isFutureMeal && !lunchFeedbackDone) },
                                     { label: dinnerFeedbackDone ? "Xem phản hồi bữa tối" : "Hoàn tất bữa tối", key: "complete-dinner", icon: dinnerFeedbackDone ? <EyeOutlined /> : <RestOutlined />, disabled: item.meals.dinner.length === 0 || (isFutureMeal && !dinnerFeedbackDone) },
+                                    { type: "divider" },
+                                    { label: "Đánh dấu không nấu", key: "mark-skip-menu", icon: <RestOutlined />, children: skipMenuItems },
                                     { label: "Chi tiết", key: "detail", icon: <CalendarOutlined /> },
                                     { type: "divider" },
                                     { label: "Sao chép", key: "copy", icon: <CopyOutlined /> },
@@ -786,10 +841,18 @@ export const ScheduledMealItem = ({ item, selected, dishNameById, onDelete }: { 
 
                 <div style={{ padding: 10, minWidth: 0, display: "flex", flexDirection: "column", gap: 9 }}>
                     <div style={{ display: "grid", gridTemplateColumns: "minmax(0, 1fr)", gap: 7 }}>
-                        {mealGroups.map(group => <MealRow key={group.label} icon={group.icon} label={group.label} dishIds={group.dishIds} color={group.color} background={group.background} border={group.border} finished={group.dishIds.length > 0 && feedbackDoneBySlot[group.slot]} />)}
+                        {mealGroups.map(group => <MealRow key={group.label} slot={group.slot} icon={group.icon} label={group.label} dishIds={group.dishIds} color={group.color} background={group.background} border={group.border} finished={group.dishIds.length > 0 && feedbackDoneBySlot[group.slot]} />)}
                     </div>
                 </div>
             </Box>
+
+            <ScheduledMealMarkSkipModal
+                open={Boolean(skipScope)}
+                meal={item}
+                slot={skipScope?.slot}
+                initialReason={skipScope?.reason}
+                onClose={() => setSkipScope(undefined)}
+            />
 
             <ScheduledMealCookingModal
                 open={cookingOpen}
