@@ -1,7 +1,7 @@
 {
   "files": {
     "main.css": "/my-recipes/static/css/main.87da95ed.css",
-    "main.js": "/my-recipes/static/js/main.09f29a74.js",
+    "main.js": "/my-recipes/static/js/main.cdafc620.js",
     "static/js/672.a6238ee7.chunk.js": "/my-recipes/static/js/672.a6238ee7.chunk.js",
     "static/js/720.f14f2b05.chunk.js": "/my-recipes/static/js/720.f14f2b05.chunk.js",
     "static/js/206.82a4e427.chunk.js": "/my-recipes/static/js/206.82a4e427.chunk.js",
@@ -18,6 +18,7 @@
     "service-worker.js": "/my-recipes/service-worker.js",
     "static/media/night.png": "/my-recipes/static/media/night.1bfbd92981bc5bc48482.png",
     "static/media/cooking.png": "/my-recipes/static/media/cooking.74b847a79919accf12c1.png",
+    "static/media/chat.png": "/my-recipes/static/media/chat.e5420b11b2d873315252.png",
     "static/media/layout.png": "/my-recipes/static/media/layout.5cf9cee6f365d76d7b7b.png",
     "static/media/diet-plan.png": "/my-recipes/static/media/diet-plan.f1e61a0af3923d052cea.png",
     "static/media/done.png": "/my-recipes/static/media/done.815a1f74cff7ec5e25c2.png",
@@ -37,6 +38,6 @@
   },
   "entrypoints": [
     "static/css/main.87da95ed.css",
-    "static/js/main.09f29a74.js"
+    "static/js/main.cdafc620.js"
   ]
 }
