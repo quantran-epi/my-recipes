@@ -41,6 +41,7 @@ import { Checkbox } from "@components/Form/Checkbox";
 import { CheckboxChangeEvent } from "antd/es/checkbox";
 import { RootRoutes } from "@routing/RootRoutes";
 import { MealCompletionLeftoverModal, ScheduledMealCookingModal, getScheduledMealDishIds } from "./ScheduledMealCooking.widget";
+import { MemberDishFeedbackHistoryWidget } from "./MemberDishFeedbackHistory.widget";
 
 const getMealDateKey = (value: Date | string) => moment(value).format("YYYY-MM-DD");
 
@@ -612,7 +613,7 @@ export const ScheduledMealItem = ({ item, selected, dishNameById, onDelete }: { 
     const [cookingToken, setCookingToken] = useState(0);
     const [cookingScope, setCookingScope] = useState<{ title: string; dishIds: string[]; mealSlot?: CookingMealFeedbackSlot }>({ title: '', dishIds: [] });
     const [completionOpen, setCompletionOpen] = useState(false);
-    const [completionScope, setCompletionScope] = useState<{ title: string; dishIds: string[]; mealSlot?: CookingMealFeedbackSlot }>({ title: '', dishIds: [] });
+    const [completionScope, setCompletionScope] = useState<{ title: string; dishIds: string[]; mealSlot?: CookingMealFeedbackSlot; readonly?: boolean }>({ title: '', dishIds: [] });
     const [copyDate, setCopyDate] = useState<Dayjs | null>(null);
     const feedbackHistory = useSelector(selectDishFeedbackHistory);
     const dispatch = useDispatch();
@@ -646,8 +647,8 @@ export const ScheduledMealItem = ({ item, selected, dishNameById, onDelete }: { 
         setCookingOpen(true);
     };
 
-    const _openCompletion = (title: string, dishIds: string[], mealSlot?: CookingMealFeedbackSlot) => {
-        setCompletionScope({ title, dishIds: getScheduledMealDishIds(dishIds), mealSlot });
+    const _openCompletion = (title: string, dishIds: string[], mealSlot?: CookingMealFeedbackSlot, readonly = false) => {
+        setCompletionScope({ title, dishIds: getScheduledMealDishIds(dishIds), mealSlot, readonly });
         setCompletionOpen(true);
     };
 
@@ -657,9 +658,9 @@ export const ScheduledMealItem = ({ item, selected, dishNameById, onDelete }: { 
             case "cook-breakfast": _openCooking(`Nấu bữa sáng - ${item.name}`, item.meals.breakfast, 'breakfast'); break;
             case "cook-lunch": _openCooking(`Nấu bữa trưa - ${item.name}`, item.meals.lunch, 'lunch'); break;
             case "cook-dinner": _openCooking(`Nấu bữa tối - ${item.name}`, item.meals.dinner, 'dinner'); break;
-            case "complete-breakfast": _openCompletion(`Hoàn tất bữa sáng - ${item.name}`, item.meals.breakfast, 'breakfast'); break;
-            case "complete-lunch": _openCompletion(`Hoàn tất bữa trưa - ${item.name}`, item.meals.lunch, 'lunch'); break;
-            case "complete-dinner": _openCompletion(`Hoàn tất bữa tối - ${item.name}`, item.meals.dinner, 'dinner'); break;
+            case "complete-breakfast": _openCompletion(`${breakfastFeedbackDone ? 'Phản hồi bữa sáng' : 'Hoàn tất bữa sáng'} - ${item.name}`, item.meals.breakfast, 'breakfast', breakfastFeedbackDone); break;
+            case "complete-lunch": _openCompletion(`${lunchFeedbackDone ? 'Phản hồi bữa trưa' : 'Hoàn tất bữa trưa'} - ${item.name}`, item.meals.lunch, 'lunch', lunchFeedbackDone); break;
+            case "complete-dinner": _openCompletion(`${dinnerFeedbackDone ? 'Phản hồi bữa tối' : 'Hoàn tất bữa tối'} - ${item.name}`, item.meals.dinner, 'dinner', dinnerFeedbackDone); break;
             case "detail": toggleMealModal.show(); break;
             case "copy": toggleCopyModal.show(); break;
             case "edit": toggleEditModal.show(); break;
@@ -685,6 +686,14 @@ export const ScheduledMealItem = ({ item, selected, dishNameById, onDelete }: { 
     const breakfastFeedbackDone = _hasMealFeedback(item.meals.breakfast, 'breakfast');
     const lunchFeedbackDone = _hasMealFeedback(item.meals.lunch, 'lunch');
     const dinnerFeedbackDone = _hasMealFeedback(item.meals.dinner, 'dinner');
+    const isFutureMeal = dayjs(item.plannedDate).isAfter(dayjs(), "day");
+    const feedbackDoneBySlot: Record<'breakfast' | 'lunch' | 'dinner', boolean> = {
+        breakfast: breakfastFeedbackDone,
+        lunch: lunchFeedbackDone,
+        dinner: dinnerFeedbackDone,
+    };
+    const filledMealGroups = mealGroups.filter(group => group.dishIds.length > 0);
+    const isFinishedMeal = filledMealGroups.length > 0 && filledMealGroups.every(group => feedbackDoneBySlot[group.slot]);
     const totalDishCount = allDishIds.length;
     const uniqueDishCount = new Set(allDishIds).size;
     const plannedStatus = dayjs(item.plannedDate).isSame(dayjs(), "day")
@@ -750,13 +759,13 @@ export const ScheduledMealItem = ({ item, selected, dishNameById, onDelete }: { 
                                     { label: "Nấu bữa sáng", key: "cook-breakfast", icon: <FireOutlined />, disabled: item.meals.breakfast.length === 0 },
                                     { label: "Nấu bữa trưa", key: "cook-lunch", icon: <FireOutlined />, disabled: item.meals.lunch.length === 0 },
                                     { label: "Nấu bữa tối", key: "cook-dinner", icon: <FireOutlined />, disabled: item.meals.dinner.length === 0 },
-                                    { label: breakfastFeedbackDone ? "Xem/sửa phản hồi bữa sáng" : "Hoàn tất bữa sáng", key: "complete-breakfast", icon: breakfastFeedbackDone ? <EyeOutlined /> : <RestOutlined />, disabled: item.meals.breakfast.length === 0 },
-                                    { label: lunchFeedbackDone ? "Xem/sửa phản hồi bữa trưa" : "Hoàn tất bữa trưa", key: "complete-lunch", icon: lunchFeedbackDone ? <EyeOutlined /> : <RestOutlined />, disabled: item.meals.lunch.length === 0 },
-                                    { label: dinnerFeedbackDone ? "Xem/sửa phản hồi bữa tối" : "Hoàn tất bữa tối", key: "complete-dinner", icon: dinnerFeedbackDone ? <EyeOutlined /> : <RestOutlined />, disabled: item.meals.dinner.length === 0 },
+                                    { label: breakfastFeedbackDone ? "Xem phản hồi bữa sáng" : "Hoàn tất bữa sáng", key: "complete-breakfast", icon: breakfastFeedbackDone ? <EyeOutlined /> : <RestOutlined />, disabled: item.meals.breakfast.length === 0 || (isFutureMeal && !breakfastFeedbackDone) },
+                                    { label: lunchFeedbackDone ? "Xem phản hồi bữa trưa" : "Hoàn tất bữa trưa", key: "complete-lunch", icon: lunchFeedbackDone ? <EyeOutlined /> : <RestOutlined />, disabled: item.meals.lunch.length === 0 || (isFutureMeal && !lunchFeedbackDone) },
+                                    { label: dinnerFeedbackDone ? "Xem phản hồi bữa tối" : "Hoàn tất bữa tối", key: "complete-dinner", icon: dinnerFeedbackDone ? <EyeOutlined /> : <RestOutlined />, disabled: item.meals.dinner.length === 0 || (isFutureMeal && !dinnerFeedbackDone) },
                                     { label: "Chi tiết", key: "detail", icon: <CalendarOutlined /> },
                                     { type: "divider" },
                                     { label: "Sao chép", key: "copy", icon: <CopyOutlined /> },
-                                    { label: "Sửa", key: "edit", icon: <EditOutlined /> },
+                                    { label: isFinishedMeal ? "Đã hoàn tất, chỉ xem" : "Sửa", key: "edit", icon: <EditOutlined />, disabled: isFinishedMeal },
                                     { type: "divider" },
                                     { label: "Xóa", key: "delete", icon: <DeleteOutlined />, danger: true },
                                 ],
@@ -794,6 +803,7 @@ export const ScheduledMealItem = ({ item, selected, dishNameById, onDelete }: { 
                 scheduledMealId={item.id}
                 mealSlot={completionScope.mealSlot}
                 mealDate={item.plannedDate}
+                readonly={completionScope.readonly}
                 onClose={() => setCompletionOpen(false)}
             />
 
@@ -828,6 +838,9 @@ export const ScheduledMealItem = ({ item, selected, dishNameById, onDelete }: { 
                 <DeferredModalContent active={toggleMealModal.value} minHeight={220}>
                     <Box style={{ maxHeight: 550, overflowY: "auto" }}>
                         <ShoppingListMealDetailWidget mealId={item.id} />
+                        <Box style={{ marginTop: 10 }}>
+                            <MemberDishFeedbackHistoryWidget lockedDate={item.plannedDate} compact maxRows={8} />
+                        </Box>
                     </Box>
                 </DeferredModalContent>
             </Modal>}

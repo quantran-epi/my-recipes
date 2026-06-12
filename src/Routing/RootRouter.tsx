@@ -21,6 +21,7 @@ import { TemplatesScreen } from "@modules/Home/Screens/Templates.screen";
 import { UserGuideScreen } from "@modules/Home/Screens/UserGuide.screen";
 import { ScheduledMealRouter } from "@modules/ScheduledMeal/Routing/ScheduledMealRouter";
 import { ScheduledMealListScreen } from "@modules/ScheduledMeal/Screens/ScheduledMealList.screen";
+import { MemberDishFeedbackHistoryScreen } from "@modules/ScheduledMeal/Screens/MemberDishFeedbackHistory.screen";
 import { DishExpensePlannerScreen } from "@modules/Dishes/Screens/DishExpensePlanner.screen";
 import { DishSuggesterPageScreen } from "@modules/DishSuggester/Screens/DishSuggesterPage.screen";
 import { HouseholdProfilesScreen } from "@modules/Home/Screens/HouseholdProfiles.screen";
@@ -61,6 +62,7 @@ export const RootRouter = () => {
                 </Route>
                 <Route path={RootRoutes.AuthorizedRoutes.ScheduledMealRoutes.Root()} element={<ScheduledMealRouter />}>
                     <Route path={RootRoutes.AuthorizedRoutes.ScheduledMealRoutes.List()} element={<ScheduledMealListScreen />} />
+                    <Route path={RootRoutes.AuthorizedRoutes.ScheduledMealRoutes.FeedbackHistory()} element={<MemberDishFeedbackHistoryScreen />} />
                 </Route>
             </Route>
         </Routes>

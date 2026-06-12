@@ -1,7 +1,8 @@
 import { RouteHelpers } from "@common/Helpers/RouteHelper"
 
 const ScheduledMealRoutes = RouteHelpers.CreateRoutes('/scheduledMeal', (scheduledMealRoot) => ({
-    List: () => RouteHelpers.CreateRoute(scheduledMealRoot, ["list"])
+    List: () => RouteHelpers.CreateRoute(scheduledMealRoot, ["list"]),
+    FeedbackHistory: () => RouteHelpers.CreateRoute(scheduledMealRoot, ["feedback-history"])
 }))
 
 export default ScheduledMealRoutes
