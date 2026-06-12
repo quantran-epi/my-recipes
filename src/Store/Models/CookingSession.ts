@@ -19,6 +19,21 @@ export type CookingTimer = {
     soundEnabled: boolean;                        // user mute toggle, default true
 }
 
+// Per-step countdown that lives only while a step with `timerMinutes > 0` is active.
+// Persisted on the session so refresh/reopen can resume or fire end-event correctly.
+export type ActiveStepTimerStatus = "running" | "paused" | "done" | "dismissed";
+
+export type ActiveStepTimer = {
+    stepIndex: number;            // index into CookingSession.steps for the step being timed
+    stepContent: string;           // snapshot to label the step even if the dish is later edited
+    phaseKey?: DishDurationPhaseKey;
+    startedAt: string;             // ISO; only meaningful while running
+    plannedSeconds: number;        // total countdown duration after extensions
+    accumulatedSeconds: number;    // frozen elapsed time when paused
+    unattended: boolean;
+    status: ActiveStepTimerStatus;
+}
+
 export type CookingSessionIngredientProgress = {
     ingredientId: string;
     status: CookingSessionIngredientStatus;
@@ -87,4 +102,5 @@ export type CookingSession = {
     notes?: string;
     memberFeedback?: Record<string, CookingSessionMemberFeedback>;
     timer?: CookingTimer;
+    activeStepTimer?: ActiveStepTimer;
 }

@@ -1,7 +1,7 @@
 import type { PayloadAction } from '@reduxjs/toolkit';
 import { createSlice } from '@reduxjs/toolkit';
 import { Ingredient } from '@store/Models/Ingredient';
-import { CookingMealFeedbackHistoryRecord, CookingMealFeedbackSlot, CookingSession, CookingSessionIngredientStatus, CookingSessionMemberFeedback, CookingTimer, DishCookTimeStat, DishFeedbackStat } from '@store/Models/CookingSession';
+import { ActiveStepTimer, CookingMealFeedbackHistoryRecord, CookingMealFeedbackSlot, CookingSession, CookingSessionIngredientStatus, CookingSessionMemberFeedback, CookingTimer, DishCookTimeStat, DishFeedbackStat } from '@store/Models/CookingSession';
 import { DishDurationPhaseKey } from '@store/Models/Dishes';
 import { nanoid } from 'nanoid';
 
@@ -59,6 +59,16 @@ const finalizeRunningSegment = (timer: CookingTimer): void => {
     const phase = timer.phases.find(p => p.phaseKey === timer.activePhaseKey);
     if (phase) phase.accumulatedSeconds += elapsedSeconds;
     timer.phaseStartedAt = null;
+}
+
+// Same idea as finalizeRunningSegment but for the per-step timer slice. Safe no-op when
+// paused/done/dismissed.
+const finalizeStepRunningSegment = (timer: ActiveStepTimer): void => {
+    if (timer.status !== "running") return;
+    const startedMs = Date.parse(timer.startedAt);
+    if (!Number.isFinite(startedMs)) return;
+    const elapsedSeconds = Math.max(0, Math.round((Date.now() - startedMs) / 1000));
+    timer.accumulatedSeconds += elapsedSeconds;
 }
 
 export type FinishCookingParams = {
@@ -210,6 +220,58 @@ export const CookingSessionSlice = createSlice({
             if (!s?.timer) return;
             s.timer.soundEnabled = !s.timer.soundEnabled;
         },
+        startStepTimer: (state, action: PayloadAction<{ sessionId: string; stepIndex: number; stepContent: string; phaseKey?: DishDurationPhaseKey; minutes: number; unattended: boolean }>) => {
+            const s = state.sessions.find(s => s.id === action.payload.sessionId);
+            if (!s) return;
+            const minutes = Math.max(1, Math.min(600, Math.round(action.payload.minutes)));
+            // Don't restart if already running for the same step.
+            if (s.activeStepTimer && s.activeStepTimer.stepIndex === action.payload.stepIndex && s.activeStepTimer.status === "running") return;
+            s.activeStepTimer = {
+                stepIndex: action.payload.stepIndex,
+                stepContent: action.payload.stepContent,
+                phaseKey: action.payload.phaseKey,
+                startedAt: new Date().toISOString(),
+                plannedSeconds: minutes * 60,
+                accumulatedSeconds: 0,
+                unattended: action.payload.unattended,
+                status: "running",
+            };
+        },
+        pauseStepTimer: (state, action: PayloadAction<{ sessionId: string }>) => {
+            const s = state.sessions.find(s => s.id === action.payload.sessionId);
+            if (!s?.activeStepTimer || s.activeStepTimer.status !== "running") return;
+            finalizeStepRunningSegment(s.activeStepTimer);
+            s.activeStepTimer.status = "paused";
+        },
+        resumeStepTimer: (state, action: PayloadAction<{ sessionId: string }>) => {
+            const s = state.sessions.find(s => s.id === action.payload.sessionId);
+            if (!s?.activeStepTimer || s.activeStepTimer.status !== "paused") return;
+            s.activeStepTimer.startedAt = new Date().toISOString();
+            s.activeStepTimer.status = "running";
+        },
+        extendStepTimer: (state, action: PayloadAction<{ sessionId: string; minutes: number }>) => {
+            const s = state.sessions.find(s => s.id === action.payload.sessionId);
+            if (!s?.activeStepTimer) return;
+            const add = Math.max(1, Math.round(action.payload.minutes)) * 60;
+            s.activeStepTimer.plannedSeconds += add;
+        },
+        completeStepTimer: (state, action: PayloadAction<{ sessionId: string }>) => {
+            const s = state.sessions.find(s => s.id === action.payload.sessionId);
+            if (!s?.activeStepTimer) return;
+            finalizeStepRunningSegment(s.activeStepTimer);
+            s.activeStepTimer.status = "done";
+        },
+        dismissStepTimer: (state, action: PayloadAction<{ sessionId: string }>) => {
+            const s = state.sessions.find(s => s.id === action.payload.sessionId);
+            if (!s?.activeStepTimer) return;
+            finalizeStepRunningSegment(s.activeStepTimer);
+            s.activeStepTimer.status = "dismissed";
+        },
+        clearStepTimer: (state, action: PayloadAction<{ sessionId: string }>) => {
+            const s = state.sessions.find(s => s.id === action.payload.sessionId);
+            if (!s) return;
+            s.activeStepTimer = undefined;
+        },
         recordCookTime: (state, action: PayloadAction<{ dishId: string; totalMinutes: number; phaseMinutes?: Partial<Record<DishDurationPhaseKey, number>> }>) => {
             const { dishId, totalMinutes, phaseMinutes } = action.payload;
             if (!dishId || !Number.isFinite(totalMinutes) || totalMinutes <= 0) return;
@@ -324,6 +386,13 @@ export const {
     resumeTimer: resumeCookingTimer,
     advancePhase: advanceCookingPhase,
     toggleTimerSound: toggleCookingTimerSound,
+    startStepTimer,
+    pauseStepTimer,
+    resumeStepTimer,
+    extendStepTimer,
+    completeStepTimer,
+    dismissStepTimer,
+    clearStepTimer,
     recordCookTime,
     recordDishFeedback,
     saveMealFeedbackHistory,

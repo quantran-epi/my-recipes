@@ -1,4 +1,4 @@
-import { ArrowLeftOutlined, ArrowRightOutlined, CheckCircleOutlined, ShoppingCartOutlined, PlayCircleOutlined } from "@ant-design/icons";
+import { ArrowLeftOutlined, ArrowRightOutlined, CheckCircleOutlined, ShoppingCartOutlined, PlayCircleOutlined, BellOutlined, NotificationOutlined } from "@ant-design/icons";
 import { DishDurationHelper } from "@common/Helpers/DishDurationHelper";
 import { DishServingHelper } from '@common/Helpers/DishServingHelper';
 import { InventoryHelper } from "@common/Helpers/InventoryHelper";
@@ -14,7 +14,7 @@ import { Typography } from "@components/Typography";
 import { useToggle } from "@hooks";
 import { ShoppingListAddWidget } from "@modules/ShoppingList/Screens/ShoppingListAdd.widget";
 import { RootRoutes } from "@routing/RootRoutes";
-import { Dishes } from "@store/Models/Dishes";
+import { Dishes, DishesStep } from "@store/Models/Dishes";
 import { Ingredient } from "@store/Models/Ingredient";
 import { CookingSession, CookingSessionIngredientStatus } from "@store/Models/CookingSession";
 import {
@@ -25,7 +25,9 @@ import {
     toggleCookingStepComplete,
 } from "@store/Reducers/CookingSessionReducer";
 import { useCookingTimer } from "./useCookingTimer";
+import { useStepTimer } from "./useStepTimer";
 import { CookingTimerCard } from "./CookingTimerCard.widget";
+import { StepTimerCard } from "./StepTimerCard.widget";
 import {
     selectCookingSessions,
     selectCookTimeStats,
@@ -74,6 +76,24 @@ const collectAllSteps = (
     return [...fromIncluded, ...(dish.steps ?? []).map(s => s.content)];
 };
 
+// Same shape as collectAllSteps but keeps the full DishesStep so phase + timer fields survive into
+// the cooking session view. Steps are listed by `order` per-dish; included dishes come first to
+// match collectAllSteps' ordering.
+const collectAllStepObjects = (
+    dish: Dishes,
+    dishesById: Map<string, Dishes>,
+    visited = new Set<string>()
+): DishesStep[] => {
+    if (visited.has(dish.id)) return [];
+    visited.add(dish.id);
+    const fromIncluded = (dish.includeDishes ?? []).flatMap(id => {
+        const d = dishesById.get(id);
+        return d ? collectAllStepObjects(d, dishesById, visited) : [];
+    });
+    const ownSorted = [...(dish.steps ?? [])].sort((a, b) => a.order - b.order);
+    return [...fromIncluded, ...ownSorted];
+};
+
 const getSessionIngredientStatus = (session: CookingSession | undefined, ingredientId: string): CookingSessionIngredientStatus => {
     return session?.ingredients?.find(item => item.ingredientId === ingredientId)?.status ?? "needed";
 };
@@ -104,11 +124,33 @@ export const CookingSessionWidget: React.FunctionComponent<CookingSessionWidgetP
     const session = activeSession;
     const activeTargetServings = session?.targetServings ?? targetServings;
     const steps = useMemo(() => collectAllSteps(dish, dishesById), [dish, dishesById]);
+    const stepObjects = useMemo(() => collectAllStepObjects(dish, dishesById), [dish, dishesById]);
     const sessionSteps = session?.steps ?? [];
     const totalSteps = sessionSteps.length;
     const currentIndex = Math.min(session?.currentStepIndex ?? 0, Math.max(0, totalSteps - 1));
     const completedStepSet = useMemo(() => new Set(session?.completedStepIndexes ?? []), [session?.completedStepIndexes]);
     const timerView = useCookingTimer(session);
+    const currentStepObject = stepObjects[currentIndex];
+    const stepTimer = useStepTimer(session, dish.name, currentStepObject);
+
+    // Auto-start a step's timer when the user advances to it. We only start once per step (the
+    // hook tracks the last started key) so reopening or pausing/resuming doesn't restart.
+    useEffect(() => {
+        if (!session) return;
+        if (!currentStepObject) return;
+        if (!currentStepObject.timerMinutes || currentStepObject.timerMinutes < 1) return;
+        if (completedStepSet.has(currentIndex)) return;
+        stepTimer.autoStartFor(currentStepObject, currentIndex);
+    }, [session, currentStepObject, currentIndex, completedStepSet, stepTimer]);
+
+    // When the user changes step, hide a stale done/dismissed timer card so the next step starts clean.
+    useEffect(() => {
+        if (!session) return;
+        const active = session.activeStepTimer;
+        if (active && active.stepIndex !== currentIndex && (active.status === "done" || active.status === "dismissed")) {
+            stepTimer.clear();
+        }
+    }, [session, currentIndex, stepTimer]);
 
     const rows = useMemo<CookingIngredientRow[]>(() => {
         const amounts = DishServingHelper.collectIngredientAmounts(dish, allDishes, { targetServings: activeTargetServings });
@@ -232,6 +274,9 @@ export const CookingSessionWidget: React.FunctionComponent<CookingSessionWidgetP
         const isLast = currentIndex === totalSteps - 1;
         const currentStepDone = completedStepSet.has(currentIndex);
         const stepProgressPercent = totalSteps > 0 ? Math.round(((currentIndex + 1) / totalSteps) * 100) : 0;
+        const currentStepHasTimer = Boolean(currentStepObject?.timerMinutes && currentStepObject.timerMinutes >= 1);
+        const showStepTimer = stepTimer.view.hasTimer && !stepTimer.view.isFinished && stepTimer.view.stepIndex === currentIndex;
+        const currentPhaseMeta = currentStepObject?.phaseKey ? DishDurationHelper.getPhase(currentStepObject.phaseKey) : null;
 
         return <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
             <div style={{ border: '1px solid #f0f0f0', borderRadius: 8, background: '#fafafa', padding: 10 }}>
@@ -243,6 +288,8 @@ export const CookingSessionWidget: React.FunctionComponent<CookingSessionWidgetP
                 <CookingTimerCard timer={timerView} onAdvanceLast={() => { timerView.advance(); setShowFinish(true); }} />
             )}
 
+            {showStepTimer && <StepTimerCard timer={stepTimer.view} />}
+
             {totalSteps > 0 && <Box style={{ background: "#fffbe6", border: "1px solid #ffd591", borderRadius: 8, padding: "16px 14px" }}>
                 <Stack justify="space-between" align="center" gap={8} style={{ marginBottom: 10 }}>
                     <Button aria-label="Bước trước" icon={<ArrowLeftOutlined />} disabled={currentIndex === 0} onClick={_onPrev} style={{ width: 38, paddingInline: 0 }} />
@@ -250,6 +297,22 @@ export const CookingSessionWidget: React.FunctionComponent<CookingSessionWidgetP
                     <Button aria-label="Bước sau" icon={<ArrowRightOutlined />} disabled={isLast} onClick={_onNext} style={{ width: 38, paddingInline: 0 }} />
                 </Stack>
                 <Progress percent={stepProgressPercent} showInfo={false} strokeColor="#fa8c16" trailColor="rgba(250,140,22,0.16)" style={{ marginBottom: 10 }} />
+                {currentPhaseMeta && <Stack gap={6} align="center" style={{ marginBottom: 6 }}>
+                    <span style={{
+                        display: "inline-block",
+                        width: 10,
+                        height: 10,
+                        borderRadius: "50%",
+                        background: currentPhaseMeta.color,
+                    }} />
+                    <Typography.Text style={{ fontSize: 12, color: currentPhaseMeta.color, fontWeight: 600 }}>
+                        {currentPhaseMeta.label}
+                    </Typography.Text>
+                    {currentStepHasTimer && <Typography.Text type="secondary" style={{ fontSize: 12 }}>
+                        · <BellOutlined /> {currentStepObject?.timerMinutes}'
+                        {currentStepObject?.unattended ? <> · <NotificationOutlined /> rảnh tay</> : null}
+                    </Typography.Text>}
+                </Stack>}
                 <Typography.Text style={{ fontSize: 16, lineHeight: "24px", display: "block", overflowWrap: "anywhere" }}>
                     {sessionSteps[currentIndex]}
                 </Typography.Text>
@@ -258,6 +321,14 @@ export const CookingSessionWidget: React.FunctionComponent<CookingSessionWidgetP
                     <Switch checked={currentStepDone} checkedChildren="Xong" unCheckedChildren="Chưa" onChange={() => dispatch(toggleCookingStepComplete({ sessionId: session.id, stepIndex: currentIndex }))} />
                 </Stack>
             </Box>}
+
+            {stepObjects.some(s => s.phaseKey || s.timerMinutes) && <StepListWithRail
+                stepObjects={stepObjects}
+                sessionSteps={sessionSteps}
+                currentIndex={currentIndex}
+                completedStepSet={completedStepSet}
+                onStepClick={(idx) => dispatch(setStepCooking({ sessionId: session.id, stepIndex: idx }))}
+            />}
 
             {lackingIngredientIds.length > 0 && <Box style={{ background: '#fff7e6', border: '1px solid #ffd591', borderRadius: 8, padding: '8px 12px', fontSize: 12, color: '#d46b08' }}>
                 Thiếu {lackingIngredientIds.length} nguyên liệu.
@@ -361,4 +432,84 @@ export const CookingSessionWidget: React.FunctionComponent<CookingSessionWidgetP
             </DeferredModalContent>
         </Modal>}
     </React.Fragment>;
+};
+
+type StepListWithRailProps = {
+    stepObjects: DishesStep[];
+    sessionSteps: string[];
+    currentIndex: number;
+    completedStepSet: Set<number>;
+    onStepClick: (index: number) => void;
+}
+
+// Compact step rundown with phase color rail. Lives below the active step card so the user can
+// see what's coming and jump back, without expanding the active step area itself.
+const StepListWithRail: React.FunctionComponent<StepListWithRailProps> = ({
+    stepObjects, sessionSteps, currentIndex, completedStepSet, onStepClick,
+}) => {
+    return <Box style={{ border: "1px solid #f0f0f0", borderRadius: 8, padding: 10, background: "#fff" }}>
+        <Typography.Text strong style={{ display: "block", marginBottom: 6, fontSize: 13 }}>Các bước</Typography.Text>
+        <Box style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+            {sessionSteps.map((stepText, idx) => {
+                // Match by index; sessionSteps is the snapshot taken at startCooking and may be longer
+                // than stepObjects (when included-dish step content is flattened) — fall back to the
+                // text when the dish step doesn't exist anymore.
+                const stepObject = stepObjects[idx];
+                const phaseMeta = stepObject?.phaseKey ? DishDurationHelper.getPhase(stepObject.phaseKey) : null;
+                const isActive = idx === currentIndex;
+                const isDone = completedStepSet.has(idx);
+                const railColor = phaseMeta?.color ?? "#d9d9d9";
+                return <button
+                    key={idx}
+                    type="button"
+                    onClick={() => onStepClick(idx)}
+                    style={{
+                        textAlign: "left",
+                        display: "grid",
+                        gridTemplateColumns: "6px auto minmax(0, 1fr) auto",
+                        alignItems: "center",
+                        gap: 8,
+                        padding: "6px 8px",
+                        borderRadius: 6,
+                        border: isActive ? `1px solid ${railColor}` : "1px solid transparent",
+                        background: isActive ? (phaseMeta?.background ?? "#fafafa") : "transparent",
+                        cursor: "pointer",
+                    }}
+                >
+                    <span style={{
+                        width: 6,
+                        height: 24,
+                        borderRadius: 3,
+                        background: railColor,
+                        opacity: isDone ? 0.4 : 1,
+                    }} />
+                    <Typography.Text style={{ fontSize: 11, color: "#8c8c8c", fontVariantNumeric: "tabular-nums" }}>
+                        {idx + 1}.
+                    </Typography.Text>
+                    <Typography.Text
+                        style={{
+                            fontSize: 13,
+                            lineHeight: "18px",
+                            color: isDone ? "#bfbfbf" : "#262626",
+                            textDecoration: isDone ? "line-through" : "none",
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                            whiteSpace: "nowrap",
+                            fontWeight: isActive ? 600 : 400,
+                        }}
+                    >
+                        {stepObject?.content ?? stepText}
+                    </Typography.Text>
+                    <Stack gap={4} align="center" style={{ flexShrink: 0 }}>
+                        {stepObject?.timerMinutes ? <Typography.Text type="secondary" style={{ fontSize: 11, display: "inline-flex", alignItems: "center", gap: 2 }}>
+                            <BellOutlined /> {stepObject.timerMinutes}'
+                        </Typography.Text> : null}
+                        {stepObject?.unattended ? <Typography.Text type="secondary" style={{ fontSize: 11 }}>
+                            <NotificationOutlined />
+                        </Typography.Text> : null}
+                    </Stack>
+                </button>;
+            })}
+        </Box>
+    </Box>;
 };

@@ -37,6 +37,12 @@ export type DishesStep = {
     order: number;
     isDone: boolean;
     required: boolean;
+    // Optional binding to a duration phase so the cooking session can color/group steps.
+    phaseKey?: DishDurationPhaseKey;
+    // If set (>= 1), step has its own countdown timer in minutes.
+    timerMinutes?: number;
+    // Only meaningful when timerMinutes is set; fires a system notification + vibration when done.
+    unattended?: boolean;
 }
 
 export type DishDurationPhaseKey = "unfreeze" | "prepare" | "cooking" | "serve" | "cooldown";
