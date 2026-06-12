@@ -6,7 +6,7 @@ import { IngredientNutritionHelper } from '@common/Helpers/IngredientNutritionHe
 import { IngredientPriceHelper } from '@common/Helpers/IngredientPriceHelper';
 import { IngredientUnitHelper } from '@common/Helpers/IngredientUnitHelper';
 import { InventoryHelper } from '@common/Helpers/InventoryHelper';
-import { Button } from '@components/Button';
+import { ActionButton, Button } from '@components/Button';
 import { Empty } from '@components/Empty';
 import { Box } from '@components/Layout/Box';
 import { Stack } from '@components/Layout/Stack';
@@ -525,7 +525,7 @@ const InsightCard: React.FunctionComponent<{ title: string; value: string; detai
                 <Typography.Text type='secondary' style={{ display: 'block', fontSize: 11, lineHeight: '15px' }}>{title}</Typography.Text>
                 <Typography.Text strong style={{ display: 'block', color: '#111827', fontSize: 15, lineHeight: '19px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{value}</Typography.Text>
             </div>
-            {actionLabel && onOpen && <Button onClick={onOpen} style={{ height: 28, padding: '0 9px', borderRadius: 999, color: tone, borderColor: `${tone}33`, fontWeight: 650, fontSize: 11, lineHeight: '16px', alignSelf: 'center' }}>{actionLabel}</Button>}
+            {actionLabel && onOpen && <ActionButton onClick={onOpen} style={{ alignSelf: 'center', color: tone, borderColor: `${tone}33` }}>{actionLabel}</ActionButton>}
         </div>
         <Typography.Text type='secondary' style={{ display: 'block', fontSize: 12, lineHeight: '17px', minHeight: 34 }}>{detail}</Typography.Text>
     </Box>;
@@ -587,8 +587,8 @@ const ExpenseSignalCard: React.FunctionComponent<{
         </Box>}
 
         <Stack gap={6} wrap='wrap' justify='flex-end'>
-            {highestShoppingCost && onOpenHighest && <Button onClick={onOpenHighest} style={{ height: 28, padding: '0 9px', borderRadius: 999, color: '#0958d9', borderColor: 'rgba(9,88,217,0.30)', fontWeight: 650, fontSize: 11 }}>Mở cao nhất</Button>}
-            <Button onClick={onOpenShopping} style={{ height: 28, padding: '0 9px', borderRadius: 999, color: '#0958d9', borderColor: 'rgba(9,88,217,0.30)', fontWeight: 650, fontSize: 11 }}>Mua sắm</Button>
+            {highestShoppingCost && onOpenHighest && <ActionButton tone='primary' onClick={onOpenHighest}>Mở cao nhất</ActionButton>}
+            <ActionButton tone='primary' onClick={onOpenShopping}>Mua sắm</ActionButton>
         </Stack>
     </Box>;
 }
@@ -1010,7 +1010,7 @@ export const DashboardAnalyticsScreen = () => {
                             </div>
                         </button>)}
                     </div>
-                    <Button onClick={() => openRoute(RootRoutes.AuthorizedRoutes.ShoppingListRoutes.List())} style={{ borderRadius: 999, color: '#0958d9', borderColor: 'rgba(9,88,217,0.30)', fontWeight: 700 }}>Mở mua sắm</Button>
+                    <ActionButton tone='primary' onClick={() => openRoute(RootRoutes.AuthorizedRoutes.ShoppingListRoutes.List())}>Mở mua sắm</ActionButton>
                 </div>}
             </SectionCard>
 
