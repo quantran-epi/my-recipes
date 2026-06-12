@@ -617,7 +617,7 @@ export const ScheduledMealItem = ({ item, selected, dishNameById, onDelete }: { 
     const [completionOpen, setCompletionOpen] = useState(false);
     const [completionScope, setCompletionScope] = useState<{ title: string; dishIds: string[]; mealSlot?: CookingMealFeedbackSlot; readonly?: boolean }>({ title: '', dishIds: [] });
     const [copyDate, setCopyDate] = useState<Dayjs | null>(null);
-    const [skipScope, setSkipScope] = useState<{ slot: ScheduledMealSlotKey; reason: ScheduledMealSkipReason }>();
+    const [skipScope, setSkipScope] = useState<{ slot?: ScheduledMealSlotKey; reason: ScheduledMealSkipReason }>();
     const feedbackHistory = useSelector(selectDishFeedbackHistory);
     const dispatch = useDispatch();
 
@@ -656,17 +656,6 @@ export const ScheduledMealItem = ({ item, selected, dishNameById, onDelete }: { 
     };
 
     const _onMoreActionClick = (e) => {
-        const key = String(e.key);
-        if (key.startsWith('skip-')) {
-            const [, slot, reason] = key.split('-') as [string, ScheduledMealSlotKey, ScheduledMealSkipReason | 'unmark'];
-            if (reason === 'unmark') {
-                dispatch(unmarkSkipMeal({ mealId: item.id, slot }));
-                return;
-            }
-            setSkipScope({ slot, reason });
-            return;
-        }
-
         switch (e.key) {
             case "cook": _openCooking(`Nấu thực đơn - ${item.name}`, allDishIds); break;
             case "cook-breakfast": _openCooking(`Nấu bữa sáng - ${item.name}`, item.meals.breakfast, 'breakfast'); break;
@@ -675,6 +664,7 @@ export const ScheduledMealItem = ({ item, selected, dishNameById, onDelete }: { 
             case "complete-breakfast": _openCompletion(`${breakfastFeedbackDone ? 'Phản hồi bữa sáng' : 'Hoàn tất bữa sáng'} - ${item.name}`, item.meals.breakfast, 'breakfast', breakfastFeedbackDone); break;
             case "complete-lunch": _openCompletion(`${lunchFeedbackDone ? 'Phản hồi bữa trưa' : 'Hoàn tất bữa trưa'} - ${item.name}`, item.meals.lunch, 'lunch', lunchFeedbackDone); break;
             case "complete-dinner": _openCompletion(`${dinnerFeedbackDone ? 'Phản hồi bữa tối' : 'Hoàn tất bữa tối'} - ${item.name}`, item.meals.dinner, 'dinner', dinnerFeedbackDone); break;
+            case "mark-skip": setSkipScope({ reason: 'eatOut' }); break;
             case "detail": toggleMealModal.show(); break;
             case "copy": toggleCopyModal.show(); break;
             case "edit": toggleEditModal.show(); break;
@@ -706,21 +696,7 @@ export const ScheduledMealItem = ({ item, selected, dishNameById, onDelete }: { 
         lunch: lunchFeedbackDone,
         dinner: dinnerFeedbackDone,
     };
-    const skipMenuItems = mealGroups.flatMap(group => {
-        const marker = item.skipMeals?.[group.slot];
-        if (marker) {
-            return [{
-                label: `Bỏ đánh dấu ${group.label.toLowerCase()}`,
-                key: `skip-${group.slot}-unmark`,
-                icon: SCHEDULED_MEAL_SKIP_REASON_META[marker.reason].icon,
-            }];
-        }
-        return Object.entries(SCHEDULED_MEAL_SKIP_REASON_META).map(([reason, meta]) => ({
-            label: `${group.label}: ${meta.label}`,
-            key: `skip-${group.slot}-${reason}`,
-            icon: meta.icon,
-        }));
-    });
+    const hasAnyUnmarkedSlot = mealGroups.some(group => !item.skipMeals?.[group.slot]);
     const filledMealGroups = mealGroups.filter(group => group.dishIds.length > 0);
     const isFinishedMeal = filledMealGroups.length > 0 && filledMealGroups.every(group => feedbackDoneBySlot[group.slot]);
     const totalDishCount = allDishIds.length;
@@ -823,7 +799,7 @@ export const ScheduledMealItem = ({ item, selected, dishNameById, onDelete }: { 
                                     { label: lunchFeedbackDone ? "Xem phản hồi bữa trưa" : "Hoàn tất bữa trưa", key: "complete-lunch", icon: lunchFeedbackDone ? <EyeOutlined /> : <RestOutlined />, disabled: item.meals.lunch.length === 0 || (isFutureMeal && !lunchFeedbackDone) },
                                     { label: dinnerFeedbackDone ? "Xem phản hồi bữa tối" : "Hoàn tất bữa tối", key: "complete-dinner", icon: dinnerFeedbackDone ? <EyeOutlined /> : <RestOutlined />, disabled: item.meals.dinner.length === 0 || (isFutureMeal && !dinnerFeedbackDone) },
                                     { type: "divider" },
-                                    { label: "Đánh dấu không nấu", key: "mark-skip-menu", icon: <RestOutlined />, children: skipMenuItems },
+                                    { label: "Đánh dấu không nấu", key: "mark-skip", icon: <RestOutlined />, disabled: !hasAnyUnmarkedSlot },
                                     { label: "Chi tiết", key: "detail", icon: <CalendarOutlined /> },
                                     { type: "divider" },
                                     { label: "Sao chép", key: "copy", icon: <CopyOutlined /> },

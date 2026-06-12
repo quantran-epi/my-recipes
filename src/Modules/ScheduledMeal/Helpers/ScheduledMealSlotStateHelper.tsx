@@ -1,5 +1,5 @@
 import React from 'react';
-import { CoffeeOutlined, EllipsisOutlined, RestOutlined, ShopOutlined } from '@ant-design/icons';
+import { RestOutlined, ShopOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import { ScheduledMeal, ScheduledMealSkipReason, ScheduledMealSlotKey } from '@store/Models/ScheduledMeal';
 
@@ -36,22 +36,6 @@ export const SCHEDULED_MEAL_SKIP_REASON_META: Record<ScheduledMealSkipReason, Sc
         color: '#389e0d',
         background: '#f6ffed',
         border: '#b7eb8f',
-    },
-    skip: {
-        label: 'Nghỉ tự nấu',
-        icon: React.createElement(CoffeeOutlined),
-        description: 'Không nấu bữa này.',
-        color: '#fa8c16',
-        background: '#fff7e6',
-        border: '#ffd591',
-    },
-    other: {
-        label: 'Khác',
-        icon: React.createElement(EllipsisOutlined),
-        description: 'Lý do khác.',
-        color: '#8c8c8c',
-        background: '#fafafa',
-        border: '#d9d9d9',
     },
 };
 

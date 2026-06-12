@@ -2,7 +2,7 @@ export type ScheduledMealDishServings = Record<string, number>;
 
 export type ScheduledMealSlotKey = 'breakfast' | 'lunch' | 'dinner';
 
-export type ScheduledMealSkipReason = 'eatOut' | 'leftover' | 'skip' | 'other';
+export type ScheduledMealSkipReason = 'eatOut' | 'leftover';
 
 export type ScheduledMealSkipMarker = {
     reason: ScheduledMealSkipReason;
