@@ -4,7 +4,7 @@ import { DateHelpers } from '@common/Helpers/DateHelper';
 import { IngredientPriceHelper } from '@common/Helpers/IngredientPriceHelper';
 import { IngredientUnitHelper } from '@common/Helpers/IngredientUnitHelper';
 import { InventoryHelper } from '@common/Helpers/InventoryHelper';
-import { Button } from '@components/Button';
+import { ActionButton, Button } from '@components/Button';
 import { Empty } from '@components/Empty';
 import { Box } from '@components/Layout/Box';
 import { Stack } from '@components/Layout/Stack';
@@ -404,23 +404,19 @@ const ActionRow: React.FunctionComponent<{
     onOpen: () => void;
 }> = ({ testId, title, description, accent, icon, right, tags, onOpen }) => {
     return <button className='dashboard-action-row' data-testid={testId} onClick={onOpen} style={{ width: '100%', border: 0, background: 'transparent', padding: 0, textAlign: 'left', cursor: 'pointer' }}>
-        <div className='dashboard-action-card' style={{ display: 'grid', gridTemplateColumns: '5px minmax(0, 1fr)', border: '1px solid rgba(116,54,220,0.10)', borderRadius: 8, background: '#fff', overflow: 'hidden', boxShadow: '0 6px 18px rgba(74,48,130,0.07)', transition: 'border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease' }}>
-            <div style={{ background: accent }} />
-            <div style={{ padding: '10px 11px', minWidth: 0 }}>
-                <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) auto', gap: 8, alignItems: 'start' }}>
-                    <div style={{ minWidth: 0 }}>
-                        <Typography.Text strong style={{ display: 'block', color: '#111827', fontSize: 14.5, lineHeight: '20px', overflowWrap: 'anywhere' }}>
-                            {icon && <span style={{ color: accent, marginRight: 6 }}>{icon}</span>}{title}
-                        </Typography.Text>
-                        <Typography.Text type='secondary' style={{ display: 'block', fontSize: 12.5, lineHeight: '17px', marginTop: 2, overflowWrap: 'anywhere' }}>{description}</Typography.Text>
-                    </div>
-                    <Stack align='center' gap={6} style={{ flexShrink: 0 }}>
-                        {right}
-                        <RightOutlined style={{ color: '#bfbfbf', fontSize: 12 }} />
-                    </Stack>
+        <div className='dashboard-action-card' style={{ border: '1px solid rgba(15,23,42,0.08)', borderRadius: 8, background: '#fff', padding: '11px 12px', boxShadow: '0 6px 16px rgba(15,23,42,0.05)', transition: 'border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease', minWidth: 0 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'auto minmax(0, 1fr) auto', gap: 9, alignItems: 'start' }}>
+                {icon && <span style={{ width: 32, height: 32, borderRadius: 8, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', color: accent, background: `${accent}14`, border: `1px solid ${accent}24`, flexShrink: 0 }}>{icon}</span>}
+                <div style={{ minWidth: 0 }}>
+                    <Typography.Text strong style={{ display: 'block', color: '#111827', fontSize: 14.5, lineHeight: '20px', overflowWrap: 'anywhere' }}>{title}</Typography.Text>
+                    <Typography.Text type='secondary' style={{ display: 'block', fontSize: 12.5, lineHeight: '17px', marginTop: 2, overflowWrap: 'anywhere' }}>{description}</Typography.Text>
                 </div>
-                {tags && <Stack wrap='wrap' gap={5} style={{ marginTop: 8 }}>{tags}</Stack>}
+                <Stack align='center' gap={6} style={{ flexShrink: 0 }}>
+                    {right}
+                    <RightOutlined style={{ color: '#bfbfbf', fontSize: 12 }} />
+                </Stack>
             </div>
+            {tags && <Stack wrap='wrap' gap={5} style={{ marginTop: 8 }}>{tags}</Stack>}
         </div>
     </button>;
 }
@@ -519,26 +515,20 @@ const LeftoverRow: React.FunctionComponent<{
         ? 'Nên ăn ngày mai'
         : `Nên ăn trong ${daysLeft} ngày`;
 
-    return <Box style={{ border: '1px solid rgba(116,54,220,0.10)', borderRadius: 8, background: '#fff', overflow: 'hidden', boxShadow: '0 6px 18px rgba(74,48,130,0.07)' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: '5px minmax(0, 1fr)', minWidth: 0 }}>
-            <div style={{ background: accent }} />
-            <div style={{ padding: '10px 11px', minWidth: 0 }}>
-                <Stack justify='space-between' align='flex-start' gap={8}>
-                    <button type='button' onClick={onOpen} style={{ minWidth: 0, flex: 1, border: 0, background: 'transparent', padding: 0, textAlign: 'left', cursor: 'pointer' }}>
-                        <Typography.Text strong style={{ display: 'block', color: '#111827', fontSize: 14.5, lineHeight: '20px', overflowWrap: 'anywhere' }}>
-                            <FireOutlined style={{ color: accent, marginRight: 6 }} />{item.dishName}
-                        </Typography.Text>
-                        <Typography.Text type='secondary' style={{ display: 'block', fontSize: 12.5, lineHeight: '17px', marginTop: 2 }}>{item.portions} phần còn lại · {eatByLabel}</Typography.Text>
-                    </button>
-                    <Tag color={daysLeft !== null && daysLeft < 0 ? 'red' : daysLeft !== null && daysLeft <= 1 ? 'orange' : 'green'} style={{ marginInlineEnd: 0, flexShrink: 0 }}>{item.portions} phần</Tag>
-                </Stack>
-                <Stack wrap='wrap' gap={6} style={{ marginTop: 9 }}>
-                    <Button onClick={onEatOne} style={{ borderRadius: 999 }}>Ăn 1 phần</Button>
-                    <Button onClick={onFinish} style={{ borderRadius: 999 }}>Đã hết</Button>
-                    <Button icon={<DeleteOutlined />} danger onClick={onDiscard} style={{ borderRadius: 999 }}>Bỏ</Button>
-                </Stack>
-            </div>
+    return <Box style={{ border: '1px solid rgba(15,23,42,0.08)', borderRadius: 8, background: '#fff', padding: '11px 12px', boxShadow: '0 6px 16px rgba(15,23,42,0.05)', minWidth: 0 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'auto minmax(0, 1fr) auto', gap: 9, alignItems: 'start' }}>
+            <span style={{ width: 32, height: 32, borderRadius: 8, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', color: accent, background: `${accent}14`, border: `1px solid ${accent}24`, flexShrink: 0 }}><FireOutlined /></span>
+            <button type='button' onClick={onOpen} style={{ minWidth: 0, border: 0, background: 'transparent', padding: 0, textAlign: 'left', cursor: 'pointer' }}>
+                <Typography.Text strong style={{ display: 'block', color: '#111827', fontSize: 14.5, lineHeight: '20px', overflowWrap: 'anywhere' }}>{item.dishName}</Typography.Text>
+                <Typography.Text type='secondary' style={{ display: 'block', fontSize: 12.5, lineHeight: '17px', marginTop: 2 }}>{item.portions} phần còn lại · {eatByLabel}</Typography.Text>
+            </button>
+            <Tag color={daysLeft !== null && daysLeft < 0 ? 'red' : daysLeft !== null && daysLeft <= 1 ? 'orange' : 'green'} style={{ marginInlineEnd: 0, flexShrink: 0 }}>{item.portions} phần</Tag>
         </div>
+        <Stack wrap='wrap' gap={6} style={{ marginTop: 9 }}>
+            <ActionButton tone='success' onClick={onEatOne}>Ăn 1 phần</ActionButton>
+            <ActionButton tone='primary' onClick={onFinish}>Đã hết</ActionButton>
+            <ActionButton tone='danger' icon={<DeleteOutlined />} onClick={onDiscard}>Bỏ</ActionButton>
+        </Stack>
     </Box>;
 }
 
