@@ -11,7 +11,7 @@ import { Ingredient, IngredientInventory, IngredientUnit } from '@store/Models/I
 import { ScheduledMeal } from '@store/Models/ScheduledMeal';
 import { InventoryHealthConfig, NutritionGoal } from '@store/Models/SharedConfig';
 import { CookingSession, DishFeedbackStat } from '@store/Models/CookingSession';
-import { HouseholdMemberProfile } from '@store/Reducers/AppContextReducer';
+import { HouseholdMemberProfile, LeftoverTrackerItem } from '@store/Reducers/AppContextReducer';
 import dayjs, { Dayjs } from 'dayjs';
 
 export type SmartPlannerScope = 'cook_now' | 'day' | 'week';
@@ -21,7 +21,7 @@ export type SmartPlannerShoppingMode = 'no_shopping' | 'small_top_up' | 'normal'
 // One key per scoring dimension. Selecting a priority weights that dimension and
 // turns on its companion behaviour (variety de-dupe, expiring-stock bonus). An
 // empty list means "balance everything" and falls back to DEFAULT_WEIGHTS.
-export type SmartPlannerPriority = 'budget' | 'time' | 'nutrition' | 'household' | 'inventory' | 'variety';
+export type SmartPlannerPriority = 'budget' | 'time' | 'nutrition' | 'household' | 'inventory' | 'variety' | 'leftover';
 
 export type SmartPlannerScoreDetail = {
     label: string;
@@ -65,6 +65,14 @@ export type SmartPlannerDishRecommendation = {
     totalMinutes?: number;
     urgentIngredientCount: number;
     scoreDetails: SmartPlannerScoreDetail[];
+    leftoverSource?: {
+        leftoverId: string;
+        portions: number;
+        eatByLabel: string;
+        sourceMealLabel: string;
+        storedAtLabel: string;
+        note?: string;
+    };
 }
 
 export type PlannedDish = SmartPlannerDishRecommendation;
@@ -180,6 +188,7 @@ export type BuildSmartPlannerInput = {
     scheduledMeals: ScheduledMeal[];
     cookingSessions: CookingSession[];
     dishFeedback: Record<string, DishFeedbackStat>;
+    availableLeftovers?: LeftoverTrackerItem[];
 }
 
 type PlannerWeights = {
@@ -189,6 +198,7 @@ type PlannerWeights = {
     budget: number;
     time: number;
     variety: number;
+    leftover: number;
 }
 
 type UsageContext = {
@@ -217,6 +227,10 @@ const DAY_COMBO_POOL_LIMIT = 42;
 const SHUFFLE_POOL_LIMIT = 36;
 const MEAL_SLOT_DISH_RANGE_MAX = 6;
 const METHOD_TAGS = ['Nướng', 'Chiên', 'Hấp', 'Luộc', 'Xào', 'Salad'];
+const LEFTOVER_EXPIRY_WINDOW_DAYS = 2;
+const LEFTOVER_BASE_SCORE = 78;
+const LEFTOVER_URGENT_BOOST = 8;
+const LEFTOVER_MEDIUM_BOOST = 4;
 
 const DEFAULT_MEAL_SLOT_DISH_RANGES: SmartPlannerMealSlotDishRanges = {
     breakfast: { min: 1, max: 1 },
@@ -241,6 +255,7 @@ const DEFAULT_WEIGHTS: PlannerWeights = {
     budget: 0.15,
     time: 0.15,
     variety: 0.10,
+    leftover: 0.08,
 };
 
 const clamp = (value: number) => Math.max(0, Math.min(100, Math.round(value)));
@@ -254,6 +269,7 @@ const normalizeWeights = (weights: PlannerWeights): PlannerWeights => {
         budget: weights.budget / total,
         time: weights.time / total,
         variety: weights.variety / total,
+        leftover: weights.leftover / total,
     };
 };
 
@@ -274,6 +290,7 @@ const getPriorityWeights = (priorities: SmartPlannerPriority[]): PlannerWeights 
         budget: selected.has('budget') ? DEFAULT_WEIGHTS.budget : 0,
         time: selected.has('time') ? DEFAULT_WEIGHTS.time : 0,
         variety: selected.has('variety') ? DEFAULT_WEIGHTS.variety : VARIETY_FLOOR_WEIGHT,
+        leftover: selected.has('leftover') ? DEFAULT_WEIGHTS.leftover : 0,
     };
     return normalizeWeights(weights);
 };
@@ -774,6 +791,110 @@ const scoreDish = (
     };
 };
 
+const getMealSlotLabel = (slot?: string): string => {
+    if (slot === 'breakfast') return 'Bữa sáng';
+    if (slot === 'lunch') return 'Bữa trưa';
+    if (slot === 'dinner') return 'Bữa tối';
+    return 'Bữa ăn';
+};
+
+const getLeftoverEatByLabel = (eatBy: string | undefined, targetDate: Dayjs): { label: string; daysLeft: number } => {
+    if (!eatBy) return { label: 'Không ghi hạn', daysLeft: 99 };
+    const daysLeft = dayjs(eatBy).startOf('day').diff(targetDate.startOf('day'), 'day');
+    if (daysLeft <= 0) return { label: 'Hôm nay', daysLeft };
+    if (daysLeft === 1) return { label: 'Mai', daysLeft };
+    return { label: `Còn ${daysLeft} ngày`, daysLeft };
+};
+
+const getLeftoverSourceMealLabel = (item: LeftoverTrackerItem): string => {
+    if (item.mealTitle) return item.mealTitle;
+    const slot = getMealSlotLabel(item.mealSlot);
+    if (item.mealDate) return `${slot} · ${dayjs(item.mealDate).format('DD/MM')}`;
+    return 'Phần còn lại đã lưu';
+};
+
+const buildLeftoverPlannedDish = (
+    dish: Dishes,
+    item: LeftoverTrackerItem,
+    slot: PlannerMealSlot,
+    targetDate: Dayjs,
+    targetServings: number,
+    dishesById: Map<string, Dishes>,
+    weights: PlannerWeights,
+): PlannedDish => {
+    const eatBy = getLeftoverEatByLabel(item.eatBy, targetDate);
+    const urgencyBoost = eatBy.daysLeft <= 1 ? LEFTOVER_URGENT_BOOST : eatBy.daysLeft <= 2 ? LEFTOVER_MEDIUM_BOOST : 0;
+    const slotScore = clamp(68 + getSlotScore(dish, slot, dishesById).score * 2);
+    const portionWarning = item.portions < targetServings ? `Chỉ đủ ${item.portions} phần` : undefined;
+    const score = clamp(LEFTOVER_BASE_SCORE + urgencyBoost + Math.round((slotScore - 68) * 0.12));
+    const detail = buildScoreDetail(
+        'Tận dụng đồ thừa',
+        `${item.portions} phần · ${eatBy.label}`,
+        score,
+        Math.max(weights.leftover, DEFAULT_WEIGHTS.leftover),
+        `Món lấy từ phần còn lại đã ghi nhận (${getLeftoverSourceMealLabel(item)}). Chi phí mua thêm bằng 0 và được cộng điểm khi gần hết hạn.`,
+    );
+
+    return {
+        dish,
+        score,
+        reasons: Array.from(new Set(['phần còn lại', eatBy.label, '0đ'])),
+        warnings: portionWarning ? [portionWarning] : [],
+        costLabel: '0đ',
+        costAverage: 0,
+        shoppingCostLabel: '0đ',
+        shoppingCostAverage: 0,
+        missingIngredientCount: 0,
+        missingRequiredIngredientCount: 0,
+        missingRows: [],
+        missingIngredientRows: [],
+        totalMinutes: 5,
+        urgentIngredientCount: 0,
+        scoreDetails: [detail],
+        leftoverSource: {
+            leftoverId: item.id,
+            portions: item.portions,
+            eatByLabel: eatBy.label,
+            sourceMealLabel: getLeftoverSourceMealLabel(item),
+            storedAtLabel: dayjs(item.storedAt).isValid() ? dayjs(item.storedAt).format('HH:mm DD/MM') : 'Không rõ',
+            note: item.note,
+        },
+    };
+};
+
+const getLeftoverCandidatesForSlot = (
+    slot: PlannerMealSlot,
+    targetDate: Dayjs,
+    input: BuildSmartPlannerInput,
+    dishesById: Map<string, Dishes>,
+    targetServings: number,
+    weights: PlannerWeights,
+): PlannedDish[] => {
+    if (!input.priorities.includes('leftover')) return [];
+    const windowEnd = targetDate.add(LEFTOVER_EXPIRY_WINDOW_DAYS, 'day').endOf('day');
+    return (input.availableLeftovers ?? [])
+        .filter(item => item.status === 'available' && item.portions > 0)
+        .filter(item => !item.mealSlot || item.mealSlot === slot)
+        .filter(item => !item.eatBy || !dayjs(item.eatBy).isBefore(targetDate.startOf('day'), 'day'))
+        .filter(item => !item.eatBy || dayjs(item.eatBy).isBefore(windowEnd) || dayjs(item.eatBy).isSame(windowEnd, 'day'))
+        .filter(item => item.portions >= targetServings * 0.5)
+        .map(item => {
+            const dish = dishesById.get(item.dishId);
+            if (!dish) return null;
+            return buildLeftoverPlannedDish(dish, item, slot, targetDate, targetServings, dishesById, weights);
+        })
+        .filter((item): item is PlannedDish => Boolean(item))
+        .sort((a, b) => {
+            const leftEatBy = input.availableLeftovers?.find(item => item.id === a.leftoverSource?.leftoverId)?.eatBy;
+            const rightEatBy = input.availableLeftovers?.find(item => item.id === b.leftoverSource?.leftoverId)?.eatBy;
+            return dayjs(leftEatBy ?? '2999-12-31').valueOf() - dayjs(rightEatBy ?? '2999-12-31').valueOf() || b.score - a.score;
+        });
+};
+
+const isMealSlotSkippedOnDate = (input: BuildSmartPlannerInput, date: Dayjs, slot: PlannerMealSlot): boolean => {
+    return input.scheduledMeals.some(meal => dayjs(meal.plannedDate).isSame(date, 'day') && Boolean(meal.skipMeals?.[slot]));
+};
+
 const getTargetServings = (members: HouseholdMemberProfile[]): number => Math.max(1, Math.round(members.reduce((sum, member) => sum + (member.portionPreference ?? 1), 0) || 2));
 
 const createUsageContext = (): UsageContext => ({
@@ -883,6 +1004,7 @@ const applyDailyBudgetToDay = (itemsBySlot: Partial<Record<PlannerMealSlot, Plan
 const buildAlternative = (itemsBySlot: Partial<Record<PlannerMealSlot, PlannedDish[]>>, index: number, input: BuildSmartPlannerInput, comboWarnings: string[] = []): SmartPlannerDayAlternative => {
     const withBudget = applyDailyBudgetToDay(itemsBySlot, input);
     const items = flattenItemsBySlot(withBudget);
+    const leftoverCount = items.filter(item => Boolean(item.leftoverSource)).length;
     const totalCostAverage = items.reduce((sum, item) => sum + (item.costAverage ?? 0), 0);
     const shoppingCostAverage = items.reduce((sum, item) => sum + (item.shoppingCostAverage ?? 0), 0);
     const nutritionScores = items.map(item => item.nutritionMatch?.score).filter((value): value is number => value !== undefined);
@@ -890,7 +1012,7 @@ const buildAlternative = (itemsBySlot: Partial<Record<PlannerMealSlot, PlannedDi
     const missingRows = aggregateShoppingRows(items.flatMap(item => item.missingRows ?? []));
     return {
         id: `alt-${index + 1}-${items.map(item => item.dish.id).join('-')}`,
-        label: `Phương án ${index + 1}`,
+        label: leftoverCount > 0 && index === 0 ? 'Ăn nốt phần dư' : leftoverCount > 0 ? `Phương án ${index + 1} · có đồ thừa` : `Phương án ${index + 1}`,
         itemsBySlot: withBudget,
         breakfast: withBudget.breakfast[0],
         lunch: withBudget.lunch[0],
@@ -902,7 +1024,7 @@ const buildAlternative = (itemsBySlot: Partial<Record<PlannerMealSlot, PlannedDi
         shoppingCostLabel: IngredientPriceHelper.formatCurrency(shoppingCostAverage),
         nutritionScore: nutritionScores.length > 0 ? Math.round(nutritionScores.reduce((sum, value) => sum + value, 0) / nutritionScores.length * 100) : undefined,
         suitabilityScore: suitabilityScores.length > 0 ? Math.round(suitabilityScores.reduce((sum, value) => sum + value, 0) / suitabilityScores.length) : undefined,
-        reasons: Array.from(new Set(items.flatMap(item => item.reasons))).slice(0, 5),
+        reasons: Array.from(new Set([...items.flatMap(item => item.reasons), ...(leftoverCount > 0 ? [`${leftoverCount} món còn lại`] : [])])).slice(0, 5),
         warnings: Array.from(new Set([...comboWarnings, ...items.flatMap(item => item.warnings)])).slice(0, 6),
         missingRows,
     };
@@ -1088,13 +1210,16 @@ const buildPlannedDays = (input: BuildSmartPlannerInput, targetServings: number,
     const dayCount = input.scope === 'week' ? 7 : 1;
     const ranges = getMealSlotDishRanges(input);
 
-    const buildSlotCandidates = (slot: PlannerMealSlot): PlannedDish[] => {
+    const buildSlotCandidates = (slot: PlannerMealSlot, targetDate: Dayjs): PlannedDish[] => {
+        if (isMealSlotSkippedOnDate(input, targetDate, slot)) return [];
         const ranked = buildRecommendations(input, usage, targetServings, weights, slot);
+        const leftoverCandidates = getLeftoverCandidatesForSlot(slot, targetDate, input, new Map(input.dishes.map(dish => [dish.id, dish])), targetServings, weights);
         const byId = new Map<string, PlannedDish>();
         const addCandidate = (item: PlannedDish) => {
             if (!byId.has(item.dish.id)) byId.set(item.dish.id, item);
         };
 
+        leftoverCandidates.forEach(addCandidate);
         ranked.slice(0, BASE_CANDIDATE_LIMIT).forEach(addCandidate);
 
         if (isPriorityActive(input.priorities, 'budget')) {
@@ -1108,11 +1233,11 @@ const buildPlannedDays = (input: BuildSmartPlannerInput, targetServings: number,
         return Array.from(byId.values()).sort((a, b) => b.score - a.score || a.dish.name.localeCompare(b.dish.name));
     };
 
-    const pickDayAlternatives = (): SmartPlannerDayAlternative[] => {
+    const pickDayAlternatives = (targetDate: Dayjs): SmartPlannerDayAlternative[] => {
         const candidatesBySlot: Record<PlannerMealSlot, PlannedDish[]> = {
-            breakfast: buildSlotCandidates('breakfast'),
-            lunch: buildSlotCandidates('lunch'),
-            dinner: buildSlotCandidates('dinner'),
+            breakfast: buildSlotCandidates('breakfast', targetDate),
+            lunch: buildSlotCandidates('lunch', targetDate),
+            dinner: buildSlotCandidates('dinner', targetDate),
         };
         const comboMap = new Map<string, PlannerDayCombo>();
 
@@ -1126,11 +1251,12 @@ const buildPlannedDays = (input: BuildSmartPlannerInput, targetServings: number,
     };
 
     return Array.from({ length: dayCount }).map((_, index) => {
-        const alternatives = pickDayAlternatives();
+        const date = input.startDate.add(index, 'day').startOf('day');
+        const alternatives = pickDayAlternatives(date);
         const picked = alternatives[0];
         if (picked) getAlternativeItems(picked).forEach(item => addUsage(usage, item.dish, input.dishes));
         return {
-            date: input.startDate.add(index, 'day').startOf('day'),
+            date,
             alternatives,
             selectedAlternativeId: picked?.id,
             itemsBySlot: picked?.itemsBySlot,

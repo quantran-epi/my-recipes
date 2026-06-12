@@ -146,7 +146,7 @@ When the user says "implement `260612-eos`" (or any single ID), just run that fe
 Update this section as features land:
 
 - [x] 1 — `eos` Eat-out / skip-slot marking
-- [ ] 2 — `lap` Leftover-aware smart planner
+- [x] 2 — `lap` Leftover-aware smart planner
 - [ ] 3 — `prr` Prep task reminders
 - [ ] 4 — `cad` Cooking analytics dashboard
 - [ ] 5 — `pst` Per-step cook timer integration

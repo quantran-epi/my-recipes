@@ -1,4 +1,4 @@
-import { AppstoreOutlined, BarChartOutlined, CalendarOutlined, CheckCircleOutlined, ClockCircleOutlined, DollarCircleOutlined, ExclamationCircleOutlined, EyeOutlined, FilterOutlined, MinusOutlined, MoreOutlined, PlayCircleOutlined, PlusOutlined, QuestionCircleOutlined, ShoppingCartOutlined, SlidersOutlined, StopOutlined, TeamOutlined, ThunderboltOutlined } from '@ant-design/icons';
+import { AppstoreOutlined, BarChartOutlined, CalendarOutlined, CheckCircleOutlined, ClockCircleOutlined, DollarCircleOutlined, ExclamationCircleOutlined, EyeOutlined, FilterOutlined, MinusOutlined, MoreOutlined, PlayCircleOutlined, PlusOutlined, QuestionCircleOutlined, RestOutlined, ShoppingCartOutlined, SlidersOutlined, StopOutlined, TeamOutlined, ThunderboltOutlined } from '@ant-design/icons';
 import { DateHelpers } from '@common/Helpers/DateHelper';
 import { DishDurationHelper } from '@common/Helpers/DishDurationHelper';
 import { DishServingHelper } from '@common/Helpers/DishServingHelper';
@@ -29,7 +29,7 @@ import { ScheduledMeal } from '@store/Models/ScheduledMeal';
 import { rememberScheduledMealName } from '@store/Reducers/AppContextReducer';
 import { startCooking } from '@store/Reducers/CookingSessionReducer';
 import { addScheduledMeal, editScheduledMeal } from '@store/Reducers/ScheduledMealReducer';
-import { selectCookingSessions, selectDishes, selectDishesById, selectDishFeedback, selectHouseholdHealthProfiles, selectHouseholdMembers, selectIngredients, selectIngredientsById, selectInventory, selectInventoryHealthConfig, selectNutritionGoals, selectScheduledMeals, selectSelectedHouseholdMemberIds } from '@store/Selectors';
+import { selectCookingSessions, selectDishes, selectDishesById, selectDishFeedback, selectHouseholdHealthProfiles, selectHouseholdMembers, selectIngredients, selectIngredientsById, selectInventory, selectInventoryHealthConfig, selectLeftoverTrackerItems, selectNutritionGoals, selectScheduledMeals, selectSelectedHouseholdMemberIds } from '@store/Selectors';
 import { DatePicker, Empty, InputNumber, Select, Segmented, Spin, Switch } from 'antd';
 import dayjs, { Dayjs } from 'dayjs';
 import { nanoid } from 'nanoid';
@@ -49,6 +49,7 @@ const SCORE_METHODOLOGY: Record<string, string> = {
     'Mục tiêu dinh dưỡng': 'So sánh dinh dưỡng mỗi phần ăn với mục tiêu đã chọn. Thiếu dữ liệu dinh dưỡng làm giảm độ tin cậy.',
     'Độ hợp nhà mình': 'Tính hồ sơ các thành viên đang chọn và phản hồi nấu ăn đã lưu. Dị ứng và nguyên liệu chặn cứng được lọc trước khi chấm điểm.',
     'Đa dạng thực đơn': 'Dựa trên lịch nấu/lịch ăn gần đây và các món đã chọn trong lần lập hiện tại. Chế độ nhiều đa dạng trừ điểm lặp mạnh hơn.',
+    'Tận dụng đồ thừa': 'Món lấy từ phần còn lại đã ghi nhận. Điểm nền 78 vì gia đình đã ăn món này gần đây nên hợp khẩu vị. Cộng thêm điểm khi món sắp hết hạn để ưu tiên dùng trước. Chi phí và nguyên liệu mua thêm đều bằng 0.',
 };
 
 type PlannerScope = 'cook_now' | 'day' | 'week';
@@ -96,6 +97,14 @@ type PlannedDish = {
     totalMinutes?: number;
     urgentIngredientCount?: number;
     scoreDetails: PlannerScoreDetail[];
+    leftoverSource?: {
+        leftoverId: string;
+        portions: number;
+        eatByLabel: string;
+        sourceMealLabel: string;
+        storedAtLabel: string;
+        note?: string;
+    };
 }
 
 type PlannedDayItemsBySlot = Record<MealSlot, PlannedDish[]>;
@@ -604,6 +613,7 @@ const priorityOptions: Array<{ value: SmartPlannerPriority; label: string; icon:
     { value: 'nutrition', label: 'Lành mạnh', icon: <BarChartOutlined />, hint: 'Theo mục tiêu dinh dưỡng thành viên' },
     { value: 'household', label: 'Hợp khẩu vị nhà', icon: <TeamOutlined />, hint: 'Ưu tiên khẩu vị cả nhà' },
     { value: 'inventory', label: 'Dùng đồ sẵn có', icon: <ShoppingCartOutlined />, hint: 'Có sẵn và gần hết hạn trước' },
+    { value: 'leftover', label: 'Tận dụng đồ thừa', icon: <RestOutlined />, hint: 'Ưu tiên ăn phần còn lại từ bữa cũ' },
     { value: 'variety', label: 'Đa dạng món', icon: <ThunderboltOutlined />, hint: 'Ít lặp trong ngày hoặc tuần' },
 ];
 
@@ -710,6 +720,7 @@ export const SmartMealPlannerScreen: React.FC = () => {
     const cookingSessions = useSelector(selectCookingSessions);
     const dishFeedback = useSelector(selectDishFeedback);
     const dishesById = useSelector(selectDishesById);
+    const leftoverItems = useSelector(selectLeftoverTrackerItems);
     const [scope, setScope] = useState<PlannerScope>('cook_now');
     const routeDateValue = searchParams.get('date');
     const [startDate, setStartDate] = useState<Dayjs>(() => parseRouteDate(routeDateValue));
@@ -726,7 +737,7 @@ export const SmartMealPlannerScreen: React.FC = () => {
     const [mealRangeModalOpen, setMealRangeModalOpen] = useState(false);
     const [pendingShuffleAlternatives, setPendingShuffleAlternatives] = useState(false);
     const [memberIds, setMemberIds] = useState<string[]>(() => selectedHouseholdMemberIds);
-    const [priorities, setPriorities] = useState<SmartPlannerPriority[]>([]);
+    const [priorities, setPriorities] = useState<SmartPlannerPriority[]>(['leftover']);
     const [plannedDays, setPlannedDays] = useState<PlannedDay[]>([]);
     const [rankedRecommendations, setRankedRecommendations] = useState<SmartPlannerDishRecommendation[]>([]);
     const [planSummary, setPlanSummary] = useState<SmartPlannerPlanSummary>();
@@ -832,7 +843,8 @@ export const SmartMealPlannerScreen: React.FC = () => {
         scheduledMeals,
         cookingSessions,
         dishFeedback,
-    }), [advancedEnabled, avoidDishIds, avoidIngredientIds, cookNowMealSlot, cookingSessions, dishFeedback, dailyBudget, dishes, ingredients, ingredientsById, inventoryAwareBudget, inventoryConfig, inventoryItems, maxExtraSpend, mealSlotDishRanges, mealSlotTagRequirements, nutritionGoals, priorities, scheduledMeals, scope, selectedMembers, selectedNutritionGoalId, startDate, weeklyBudget]);
+        availableLeftovers: leftoverItems,
+    }), [advancedEnabled, avoidDishIds, avoidIngredientIds, cookNowMealSlot, cookingSessions, dishFeedback, dailyBudget, dishes, ingredients, ingredientsById, inventoryAwareBudget, inventoryConfig, inventoryItems, leftoverItems, maxExtraSpend, mealSlotDishRanges, mealSlotTagRequirements, nutritionGoals, priorities, scheduledMeals, scope, selectedMembers, selectedNutritionGoalId, startDate, weeklyBudget]);
 
     const visibleCookNowRecommendations = useMemo(() => {
         const dismissed = new Set(dismissedDishIds);
@@ -1095,7 +1107,9 @@ export const SmartMealPlannerScreen: React.FC = () => {
                     <div className='smart-planner-result-facts'>
                         {item.totalMinutes !== undefined && item.totalMinutes > 0 && <span><ClockCircleOutlined />{DishDurationHelper.formatMinutes(item.totalMinutes)}</span>}
                         {item.shoppingCostLabel && <span><ShoppingCartOutlined />Mua {item.shoppingCostLabel}</span>}
+                        {item.leftoverSource && <span><RestOutlined />{item.leftoverSource.eatByLabel} · {item.leftoverSource.portions} phần</span>}
                     </div>
+                    {item.leftoverSource && <Tag style={{ margin: '4px 0 0', color: '#389e0d', background: '#f6ffed', borderColor: '#b7eb8f' }}>Phần còn lại</Tag>}
                     {item.reasons.length > 0 && <span className='smart-planner-result-reason'>{item.reasons.join(' · ')}</span>}
                 </div>
                 <Tag color={getScoreColor(item.score)} style={{ marginRight: 0 }}>{item.score}%</Tag>
@@ -1241,6 +1255,22 @@ export const SmartMealPlannerScreen: React.FC = () => {
                         </Stack>
                     </Box>)}
                 </div>
+            </DetailSection>}
+
+            {detailSelection.item.leftoverSource && <DetailSection
+                title='Phần còn lại'
+                description='Món này được lấy từ phần còn lại của bữa trước. Hâm lại là dùng được, không cần mua thêm nguyên liệu.'
+            >
+                <Box style={{ width: '100%', boxSizing: 'border-box', border: '1px solid #b7eb8f', borderRadius: 8, background: '#f6ffed', padding: 10 }}>
+                    <Stack wrap='wrap' gap={6} style={{ marginBottom: 8 }}>
+                        <Tag style={{ marginRight: 0, color: '#389e0d', background: '#fff', borderColor: '#b7eb8f' }}>Nguồn: {detailSelection.item.leftoverSource.sourceMealLabel}</Tag>
+                        <Tag style={{ marginRight: 0, color: '#389e0d', background: '#fff', borderColor: '#b7eb8f' }}>Còn {detailSelection.item.leftoverSource.portions} phần</Tag>
+                        <Tag style={{ marginRight: 0, color: '#389e0d', background: '#fff', borderColor: '#b7eb8f' }}>Hết hạn: {detailSelection.item.leftoverSource.eatByLabel}</Tag>
+                    </Stack>
+                    <Typography.Text type='secondary' style={{ display: 'block', fontSize: 12, lineHeight: '18px' }}>
+                        Lưu lúc {detailSelection.item.leftoverSource.storedAtLabel}{detailSelection.item.leftoverSource.note ? ` · ${detailSelection.item.leftoverSource.note}` : ''}
+                    </Typography.Text>
+                </Box>
             </DetailSection>}
 
             <DetailSection
