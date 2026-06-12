@@ -6,7 +6,7 @@ import { IngredientNutritionHelper } from '@common/Helpers/IngredientNutritionHe
 import { IngredientPriceHelper } from '@common/Helpers/IngredientPriceHelper';
 import { IngredientUnitHelper } from '@common/Helpers/IngredientUnitHelper';
 import { InventoryHelper } from '@common/Helpers/InventoryHelper';
-import { ActionButton, Button } from '@components/Button';
+import { ActionButton } from '@components/Button';
 import { Empty } from '@components/Empty';
 import { Box } from '@components/Layout/Box';
 import { Stack } from '@components/Layout/Stack';
@@ -467,27 +467,13 @@ const SectionCard: React.FunctionComponent<{ title: string; subtitle: string; he
                         <Typography.Text type='secondary' style={{ display: 'block', fontSize: 12, lineHeight: '16px', marginTop: 2 }}>{subtitle}</Typography.Text>
                     </div>
                 </Stack>
-                <button
-                    type='button'
+                <ActionButton
                     aria-label={`Mô tả ${title}`}
                     aria-expanded={showHelp}
+                    icon={<QuestionCircleOutlined />}
                     onClick={() => setShowHelp(value => !value)}
-                    style={{
-                        width: 32,
-                        height: 32,
-                        borderRadius: 999,
-                        border: `1px solid ${tone}2e`,
-                        background: showHelp ? `${tone}16` : '#fff',
-                        color: tone,
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        cursor: 'pointer',
-                        flexShrink: 0,
-                    }}
-                >
-                    <QuestionCircleOutlined />
-                </button>
+                    style={{ flexShrink: 0, color: tone, borderColor: `${tone}2e`, background: showHelp ? `${tone}16` : '#fff' }}
+                />
             </Stack>
             {showHelp && <Box style={{ marginBottom: 12, padding: '10px 11px', borderRadius: 8, border: `1px solid ${tone}24`, background: `${tone}0d` }}>
                 {(Array.isArray(helpText) ? helpText : [helpText]).map((line, index) => <Typography.Text key={index} style={{ display: 'block', color: '#2f2545', fontSize: 12, lineHeight: '18px', marginTop: index === 0 ? 0 : 7 }}>{line}</Typography.Text>)}
@@ -551,15 +537,13 @@ const ExpenseSignalCard: React.FunctionComponent<{
                 <Typography.Text type='secondary' style={{ display: 'block', fontSize: 11, lineHeight: '15px' }}>Chi phí còn cần mua</Typography.Text>
                 <Typography.Text strong style={{ display: 'block', color: '#111827', fontSize: 16, lineHeight: '20px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{totalLabel}</Typography.Text>
             </div>
-            <button
-                type='button'
+            <ActionButton
                 aria-label='Mô tả chi phí còn cần mua'
                 aria-expanded={showHelp}
+                icon={<QuestionCircleOutlined />}
                 onClick={() => setShowHelp(value => !value)}
-                style={{ width: 30, height: 30, borderRadius: 999, border: '1px solid rgba(9,88,217,0.22)', background: showHelp ? '#e6f4ff' : '#fff', color: '#0958d9', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', padding: 0 }}
-            >
-                <QuestionCircleOutlined />
-            </button>
+                style={{ color: '#0958d9', borderColor: 'rgba(9,88,217,0.22)', background: showHelp ? '#e6f4ff' : '#fff' }}
+            />
         </div>
 
         <Box style={{ border: '1px solid #e6f4ff', borderRadius: 8, background: '#f7fbff', padding: '8px 9px', marginBottom: 8 }}>
@@ -846,12 +830,12 @@ export const DashboardAnalyticsScreen = () => {
         </SectionCard>
 
         <section style={{ border: '1px solid rgba(19,168,168,0.12)', borderRadius: 8, background: 'linear-gradient(180deg, #f0fffd 0%, #ffffff 84%)', padding: 12, boxShadow: '0 10px 28px rgba(15,118,110,0.08)' }}>
-            <Stack justify='space-between' align='flex-start' gap={10} style={{ marginBottom: 12 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr)', gap: 10, marginBottom: 12 }}>
                 <div style={{ minWidth: 0 }}>
                     <Typography.Text strong style={{ display: 'block', color: '#0f766e', fontSize: 17, lineHeight: '22px' }}>Phân tích nấu nướng</Typography.Text>
                     <Typography.Text type='secondary' style={{ display: 'block', fontSize: 12, lineHeight: '17px', marginTop: 2 }}>Dữ liệu nấu nướng và khẩu vị từ phiên nấu thực tế.</Typography.Text>
                 </div>
-                <Stack wrap='wrap' gap={8} justify='flex-end' style={{ flexShrink: 0 }}>
+                <Stack wrap='wrap' gap={8} justify='flex-start' style={{ minWidth: 0 }}>
                     <Segmented
                         value={cookingRange}
                         onChange={value => setCookingRange(value as AnalyticsTimeRange)}
@@ -871,7 +855,7 @@ export const DashboardAnalyticsScreen = () => {
                         style={{ minWidth: 180 }}
                     />
                 </Stack>
-            </Stack>
+            </div>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(300px, 100%), 1fr))', gap: 10 }}>
                 <TopCookedDishesCard rows={topCookedDishes} openHelpKey={cookingHelpKey} onToggleHelp={toggleCookingHelp} />
                 <StaleDishesCard rows={staleDishes} openHelpKey={cookingHelpKey} onToggleHelp={toggleCookingHelp} />

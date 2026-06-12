@@ -1,6 +1,6 @@
-import { CheckCircleOutlined, ClockCircleOutlined, QuestionCircleOutlined, WarningOutlined } from '@ant-design/icons';
+import { CheckCircleOutlined, QuestionCircleOutlined, WarningOutlined } from '@ant-design/icons';
 import { DishDurationHelper } from '@common/Helpers/DishDurationHelper';
-import { Button } from '@components/Button';
+import { ActionButton } from '@components/Button';
 import { Box } from '@components/Layout/Box';
 import { Stack } from '@components/Layout/Stack';
 import { Tag } from '@components/Tag';
@@ -73,11 +73,11 @@ const PrepTaskRow: React.FC<{ task: PrepTask; doneAt?: string; compact?: boolean
                     {compact && <Typography.Text strong style={{ color: dueSoon ? '#fa541c' : tone.color, fontSize: 13 }}>{task.startAt.format('HH:mm')}</Typography.Text>}
                     <Tag style={{ marginRight: 0, color: tone.color, background: tone.background, borderColor: tone.border }}>{task.phaseLabel} · {DishDurationHelper.formatMinutes(task.minutes)}</Tag>
                     {dueSoon && <Tag color={urgent ? 'red' : 'orange'} style={{ marginRight: 0 }}>{urgent ? 'Cần làm ngay' : 'Sắp đến giờ'}</Tag>}
-                    <Button type='text' aria-label='Cách tính việc chuẩn bị' icon={<QuestionCircleOutlined />} onClick={() => setHelpOpen(value => !value)} style={{ width: 26, height: 26, paddingInline: 0, borderRadius: 999, color: helpOpen ? '#13a8a8' : '#9ca3af' }} />
+                    <ActionButton aria-label='Cách tính việc chuẩn bị' aria-expanded={helpOpen} icon={<QuestionCircleOutlined />} onClick={() => setHelpOpen(value => !value)} style={{ color: helpOpen ? '#13a8a8' : '#64748b', borderColor: helpOpen ? 'rgba(19,168,168,0.32)' : 'rgba(15,23,42,0.14)', background: helpOpen ? 'rgba(19,168,168,0.08)' : '#fff' }} />
                 </Stack>
                 <Typography.Text strong style={{ display: 'block', color: done ? '#8c8c8c' : '#111827', fontSize: 13, lineHeight: '18px', marginTop: 4, textDecoration: done ? 'line-through' : undefined, overflowWrap: 'anywhere' }}>{task.dishName}</Typography.Text>
                 <Typography.Text type='secondary' style={{ display: 'block', fontSize: 12, lineHeight: '17px', marginTop: 2 }}>
-                    {task.slotLabel} · {task.mealName} · {DishDurationHelper.formatMinutes(task.leadMinutes)} trước nấu
+                    {task.slotLabel} · {task.mealName} · {DishDurationHelper.formatMinutes(task.leadMinutes)} trước bữa
                 </Typography.Text>
                 {doneAt && <Typography.Text type='secondary' style={{ display: 'block', fontSize: 11.5, lineHeight: '16px', marginTop: 4 }}>Hoàn tất lúc {dayjs(doneAt).format('HH:mm DD/MM')}</Typography.Text>}
                 {helpOpen && <Box style={{ marginTop: 8, padding: '8px 10px', borderRadius: 6, background: 'rgba(19,168,168,0.08)', border: '1px solid rgba(19,168,168,0.18)' }}>
@@ -115,9 +115,9 @@ export const PrepTasksWidget: React.FC<PrepTasksWidgetProps> = ({ compact, windo
                 {group.tasks.map(task => <PrepTaskRow key={task.id} task={task} compact={compact} doneAt={completions[task.id]} />)}
             </Stack>
         </div>)}
-        {compact && tasks.length > visibleTasks.length && onSeeAll && <Button type='link' onClick={onSeeAll} style={{ paddingInline: 0, alignSelf: 'flex-start' }}>
+        {compact && tasks.length > visibleTasks.length && onSeeAll && <ActionButton tone='primary' onClick={onSeeAll} style={{ alignSelf: 'flex-start' }}>
             Xem tất cả {tasks.length} việc chuẩn bị
-        </Button>}
+        </ActionButton>}
         {compact && tasks.length > 0 && tasks.some(task => !completions[task.id] && task.startAt.diff(dayjs(), 'minute') <= 60) && <Typography.Text type='secondary' style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 11.5 }}>
             <WarningOutlined style={{ color: '#fa8c16' }} /> Có việc sắp đến giờ trong 1 giờ tới.
         </Typography.Text>}

@@ -22,18 +22,19 @@ interface ActionButtonProps {
     style?: React.CSSProperties;
     className?: string;
     'aria-label'?: string;
+    'aria-expanded'?: boolean;
     htmlType?: 'button' | 'submit' | 'reset';
 }
 
 /**
  * Standard secondary action button used across lists, cards, and section footers.
- * Compact pill, semantic-color-tinted border, neutral background.
+ * Compact 32px action button with semantic-color-tinted border and neutral background.
  *
  * USE for: inline list-row actions, section secondary actions, card footer actions,
  * modal secondary footers, empty-state CTAs.
  *
  * DO NOT use for: page header primary CTAs, search/filter input affordances,
- * form submit buttons, mid-flow primary actions, icon-only mini buttons.
+ * form submit buttons, mid-flow primary actions, page-header buttons, search affordances.
  *
  * See `.planning/quick/260612-uxn-ui-ux-list-and-button-normalization/` for the contract.
  */
@@ -43,14 +44,24 @@ export const ActionButton: FC<ActionButtonProps> = ({
     onClick,
     disabled,
     children,
-    height = 28,
-    fontSize = 11,
+    height = 32,
+    fontSize = 12,
     style,
     className,
     htmlType,
     'aria-label': ariaLabel,
+    'aria-expanded': ariaExpanded,
 }) => {
     const palette = TONE_PALETTE[tone];
+    const iconOnly = Boolean(icon) && React.Children.count(children) === 0;
+    const {
+        height: _ignoredHeight,
+        borderRadius: _ignoredBorderRadius,
+        padding: _ignoredPadding,
+        paddingInline: _ignoredPaddingInline,
+        width: requestedWidth,
+        ...styleOverrides
+    } = style ?? {};
     return <AntButton
         onClick={onClick}
         disabled={disabled}
@@ -58,10 +69,12 @@ export const ActionButton: FC<ActionButtonProps> = ({
         className={className}
         htmlType={htmlType}
         aria-label={ariaLabel}
+        aria-expanded={ariaExpanded}
         style={{
             height,
-            padding: '0 9px',
-            borderRadius: 999,
+            width: iconOnly ? height : requestedWidth,
+            padding: iconOnly ? 0 : '0 10px',
+            borderRadius: 8,
             color: palette.color,
             borderColor: palette.border,
             fontWeight: 650,
@@ -71,7 +84,7 @@ export const ActionButton: FC<ActionButtonProps> = ({
             alignItems: 'center',
             justifyContent: 'center',
             gap: 5,
-            ...style,
+            ...styleOverrides,
         }}
     >{children}</AntButton>;
 };

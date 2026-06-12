@@ -120,7 +120,7 @@ export const PrepTaskHelper = {
                             startAt: timing.startAt,
                             minutes: timing.minutes,
                             leadMinutes: timing.leadMinutes,
-                            description: `${phase.shortLabel} ${dish.name} (${SLOT_LABELS[slot]} · ${DishDurationHelper.formatMinutes(timing.leadMinutes)} trước nấu)`,
+                            description: `${phase.shortLabel} ${dish.name} (${SLOT_LABELS[slot]} · ${DishDurationHelper.formatMinutes(timing.leadMinutes)} trước bữa)`,
                             methodology: `${SLOT_LABELS[slot]} dự kiến lúc ${formatClock(slotAt)} ngày ${formatDate(slotAt)}. Món ${dish.name} cần ${phaseList}. Trừ ngược chuỗi này nên bắt đầu ${phase.shortLabel.toLowerCase()} lúc ${formatClock(timing.startAt)}.`,
                         }];
                     });

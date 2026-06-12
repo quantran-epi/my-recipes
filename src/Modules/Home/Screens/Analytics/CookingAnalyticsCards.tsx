@@ -1,6 +1,6 @@
-import { ClockCircleOutlined, FireOutlined, QuestionCircleOutlined } from '@ant-design/icons';
+import { QuestionCircleOutlined } from '@ant-design/icons';
 import { DishDurationHelper } from '@common/Helpers/DishDurationHelper';
-import { Button } from '@components/Button';
+import { ActionButton } from '@components/Button';
 import { Empty } from '@components/Empty';
 import { Box } from '@components/Layout/Box';
 import { Stack } from '@components/Layout/Stack';
@@ -43,7 +43,7 @@ const AnalyticsCard: React.FC<{ title: string; subtitle: string; help: string; h
             <Typography.Text strong style={{ display: 'block', color: '#111827', fontSize: 14, lineHeight: '19px' }}>{title}</Typography.Text>
             <Typography.Text type='secondary' style={{ display: 'block', fontSize: 12, lineHeight: '17px', marginTop: 2 }}>{subtitle}</Typography.Text>
         </div>
-        <Button type='text' aria-label={`Giải thích ${title}`} icon={<QuestionCircleOutlined />} onClick={() => onToggleHelp(helpKey)} style={{ width: 28, height: 28, paddingInline: 0, borderRadius: 999, color: openHelpKey === helpKey ? '#13a8a8' : '#9ca3af' }} />
+        <ActionButton aria-label={`Giải thích ${title}`} aria-expanded={openHelpKey === helpKey} icon={<QuestionCircleOutlined />} onClick={() => onToggleHelp(helpKey)} style={{ color: openHelpKey === helpKey ? '#13a8a8' : '#64748b', borderColor: openHelpKey === helpKey ? 'rgba(19,168,168,0.32)' : 'rgba(15,23,42,0.14)', background: openHelpKey === helpKey ? 'rgba(19,168,168,0.08)' : '#fff' }} />
     </Stack>
     {openHelpKey === helpKey && <Box style={{ marginTop: 8, padding: '8px 10px', borderRadius: 6, background: 'rgba(19,168,168,0.08)', border: '1px solid rgba(19,168,168,0.18)' }}>
         <Typography.Text type='secondary' style={{ display: 'block', fontSize: 12, lineHeight: '18px' }}>{help}</Typography.Text>
@@ -106,8 +106,10 @@ export const MemberFeedbackCard: React.FC<{ rows: MemberFeedbackBreakdown[]; ope
 </AnalyticsCard>;
 
 export const CookingActivityCard: React.FC<{ rows: CookingActivityCell[]; openHelpKey?: string; onToggleHelp: (key: string) => void }> = ({ rows, openHelpKey, onToggleHelp }) => <AnalyticsCard title='Hoạt động nấu nướng' subtitle='Ô đậm hơn khi nấu nhiều hơn' help='Số phiên nấu mỗi ngày. Ô đậm = nấu nhiều, ô nhạt = nấu ít hoặc không nấu.' helpKey='activity' openHelpKey={openHelpKey} onToggleHelp={onToggleHelp}>
-    {rows.length === 0 ? <EmptyCard text='Chưa có phiên nấu nào trong khoảng thời gian này.' /> : <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 14px)', gap: 4, alignItems: 'center' }}>
-        {rows.map(row => <span key={row.date} title={`${dayjs(row.date).format('DD/MM/YYYY')}: ${row.sessionCount} phiên`} style={{ width: 14, height: 14, borderRadius: 4, background: row.sessionCount <= 0 ? '#f1f5f9' : row.sessionCount === 1 ? '#b7eb8f' : '#389e0d', border: '1px solid rgba(15,23,42,0.05)' }} />)}
+    {rows.length === 0 ? <EmptyCard text='Chưa có phiên nấu nào trong khoảng thời gian này.' /> : <div style={{ overflowX: 'auto', paddingBottom: 2 }}>
+        <div style={{ display: 'grid', gridAutoFlow: 'column', gridTemplateRows: 'repeat(7, 14px)', gridAutoColumns: 14, gap: 4, alignItems: 'center', width: 'max-content', minWidth: '100%' }}>
+            {rows.map(row => <span key={row.date} title={`${dayjs(row.date).format('DD/MM/YYYY')}: ${row.sessionCount} phiên`} style={{ width: 14, height: 14, borderRadius: 4, background: row.sessionCount <= 0 ? '#f1f5f9' : row.sessionCount === 1 ? '#b7eb8f' : '#389e0d', border: '1px solid rgba(15,23,42,0.05)' }} />)}
+        </div>
     </div>}
 </AnalyticsCard>;
 
