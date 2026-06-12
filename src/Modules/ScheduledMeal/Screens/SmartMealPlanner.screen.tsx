@@ -1193,7 +1193,7 @@ export const SmartMealPlannerScreen: React.FC = () => {
                         const methodologyKey = `score-method-${detail.label}`;
                         const methodology = SCORE_METHODOLOGY[detail.label];
                         return <Box key={`${detail.label}-${detail.value}`} style={{ border: '1px solid rgba(15,23,42,0.07)', borderRadius: 8, background: '#f8fafc', padding: 10 }}>
-                            <Stack justify='space-between' align='flex-start' gap={8} wrap='wrap' style={{ width: '100%' }}>
+                            <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'flex-start', gap: 8, width: '100%' }}>
                                 <div style={{ minWidth: 0, flex: '1 1 220px' }}>
                                     <Typography.Text strong style={{ display: 'block', color: '#111827', fontSize: 13, lineHeight: '18px' }}>{detail.label}</Typography.Text>
                                     <Typography.Text style={{ display: 'block', color: '#334155', fontSize: 12, lineHeight: '17px', marginTop: 2 }}>{detail.value}</Typography.Text>
@@ -1202,7 +1202,7 @@ export const SmartMealPlannerScreen: React.FC = () => {
                                     <Tag color={getImpactColor(detail.impact)} style={{ marginRight: 0 }}>{formatImpact(detail.impact)}</Tag>
                                     {methodology && <Button type='text' aria-label={`Cách tính ${detail.label}`} icon={<QuestionCircleOutlined />} onClick={() => _toggleHelp(methodologyKey)} style={{ width: 28, height: 28, paddingInline: 0, borderRadius: 999, color: openHelpKey === methodologyKey ? '#13a8a8' : '#9ca3af' }} />}
                                 </Stack>
-                            </Stack>
+                            </div>
                             <Typography.Text type='secondary' style={{ display: 'block', fontSize: 12, lineHeight: '18px', marginTop: 7 }}>{detail.description}</Typography.Text>
                             {methodology && openHelpKey === methodologyKey && <Box style={{ marginTop: 8, padding: '8px 10px', borderRadius: 6, background: 'rgba(19,168,168,0.08)', border: '1px solid rgba(19,168,168,0.18)' }}>
                                 <Typography.Text style={{ display: 'block', fontSize: 11, fontWeight: 650, color: '#0f766e', lineHeight: '15px', marginBottom: 3 }}>Cách tính tiêu chí này</Typography.Text>
@@ -1234,13 +1234,13 @@ export const SmartMealPlannerScreen: React.FC = () => {
                     {detailSelection.item.nutritionMatch.criteria.map(row => {
                         const actual = NutritionGoalHelper.formatNutrientValue(row.criterion.nutrient, row.value);
                         return <Box key={`${row.criterion.nutrient}-${row.label}`} style={{ border: '1px solid rgba(15,23,42,0.07)', borderRadius: 8, background: '#f8fafc', padding: 10 }}>
-                            <Stack justify='space-between' align='flex-start' gap={8} wrap='wrap' style={{ width: '100%' }}>
+                            <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'flex-start', gap: 8, width: '100%' }}>
                                 <div style={{ minWidth: 0, flex: '1 1 220px' }}>
                                     <Typography.Text strong style={{ display: 'block', color: '#111827', fontSize: 13, lineHeight: '18px' }}>{row.label}</Typography.Text>
                                     <Typography.Text style={{ display: 'block', color: '#334155', fontSize: 12, lineHeight: '17px', marginTop: 2 }}>Giá trị món: {actual}</Typography.Text>
                                 </div>
-                                <Tag color={row.matched ? 'green' : 'orange'} style={{ marginRight: 0 }}>{row.matched ? 'Đạt' : `${formatRatioPercent(row.score)} gần đạt`}</Tag>
-                            </Stack>
+                                <Tag color={row.matched ? 'green' : 'orange'} style={{ marginRight: 0, flexShrink: 0 }}>{row.matched ? 'Đạt' : `${formatRatioPercent(row.score)} gần đạt`}</Tag>
+                            </div>
                             <Typography.Text type='secondary' style={{ display: 'block', fontSize: 12, lineHeight: '18px', marginTop: 7 }}>Tiêu chí này so giá trị thực tế của món với ngưỡng mục tiêu. Nếu chưa đạt, phần trăm cho biết món đang gần ngưỡng đến mức nào.</Typography.Text>
                         </Box>;
                     })}
@@ -1257,13 +1257,13 @@ export const SmartMealPlannerScreen: React.FC = () => {
                         <Tag color={detailSelection.item.suitability.warningCount > 0 ? 'volcano' : 'green'} style={{ marginRight: 0 }}>{detailSelection.item.suitability.warningCount} lưu ý</Tag>
                     </Stack>
                     {detailSelection.item.suitability.members.map(memberResult => <Box key={memberResult.member.id} style={{ border: '1px solid rgba(15,23,42,0.07)', borderRadius: 8, background: '#f8fafc', padding: 10 }}>
-                        <Stack justify='space-between' align='flex-start' gap={8} wrap='wrap' style={{ width: '100%' }}>
+                        <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'flex-start', gap: 8, width: '100%' }}>
                             <div style={{ minWidth: 0, flex: '1 1 220px' }}>
                                 <Typography.Text strong style={{ display: 'block', color: '#111827', fontSize: 13, lineHeight: '18px' }}>{memberResult.member.name}</Typography.Text>
                                 <Typography.Text type='secondary' style={{ display: 'block', fontSize: 12, lineHeight: '18px', marginTop: 2 }}>Điểm này so món với món thích/tránh, nguyên liệu thích/tránh, tag món và mục tiêu riêng của thành viên.</Typography.Text>
                             </div>
-                            <Tag color={memberResult.tone === 'success' ? 'green' : memberResult.tone === 'warning' ? 'orange' : 'blue'} style={{ marginRight: 0 }}>{formatPercent(memberResult.score)}</Tag>
-                        </Stack>
+                            <Tag color={memberResult.tone === 'success' ? 'green' : memberResult.tone === 'warning' ? 'orange' : 'blue'} style={{ marginRight: 0, flexShrink: 0 }}>{formatPercent(memberResult.score)}</Tag>
+                        </div>
                         <Stack wrap='wrap' gap={5} style={{ marginTop: 8 }}>
                             {(memberResult.positives.length > 0 ? memberResult.positives : ['Không có điểm cộng rõ ràng']).map(text => <Tag key={`positive-${text}`} color='green' style={{ marginRight: 0 }}>{text}</Tag>)}
                             {memberResult.warnings.map(text => <Tag key={`warning-${text}`} color='volcano' style={{ marginRight: 0 }}>{text}</Tag>)}
