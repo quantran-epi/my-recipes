@@ -14,18 +14,21 @@ import { Tag } from '@components/Tag';
 import { Typography } from '@components/Typography';
 import { useScheduledCalculation, useScreenTitle } from '@hooks';
 import { DishScorer, ScoredDish } from '@modules/DishSuggester/Helpers/DishScorer';
+import { AnalyticsTimeRange, CookingAnalyticsHelper } from '@modules/ScheduledMeal/Helpers/CookingAnalyticsHelper';
 import { RootRoutes } from '@routing/RootRoutes';
 import { Dishes } from '@store/Models/Dishes';
 import { Ingredient, IngredientInventory, IngredientUnit, InventoryBatch } from '@store/Models/Ingredient';
 import { InventoryHealthConfig } from '@store/Models/SharedConfig';
 import { ShoppingList, ShoppingListIngredientGroup } from '@store/Models/ShoppingList';
 import { IngredientPriceHistoryEntry, IngredientPriceMemory } from '@store/Reducers/AppContextReducer';
-import { selectDishes, selectIngredientPriceHistory, selectIngredientPriceMemory, selectIngredients, selectIngredientsById, selectInventory, selectInventoryHealthConfig, selectScheduledMeals, selectShoppingLists } from '@store/Selectors';
+import { selectCookingSessions, selectCookTimeStats, selectDishFeedbackHistory, selectDishes, selectDishesById, selectHouseholdMembers, selectIngredientPriceHistory, selectIngredientPriceMemory, selectIngredients, selectIngredientsById, selectInventory, selectInventoryHealthConfig, selectLeftoverTrackerItems, selectScheduledMeals, selectShoppingLists } from '@store/Selectors';
+import { Segmented, Select } from 'antd';
 import moment from 'moment';
 import React, { useMemo } from 'react';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { Bar, BarChart, CartesianGrid, Cell, Legend, Pie, PieChart, ResponsiveContainer, Tooltip as ChartTooltip, XAxis, YAxis } from 'recharts';
+import { CookTimeAccuracyCard, CookingActivityCard, LeftoverEfficiencyCard, MemberFeedbackCard, StaleDishesCard, TopCookedDishesCard } from './Analytics/CookingAnalyticsCards';
 
 type UrgentInventoryItem = {
     ingredientId: string;
@@ -595,17 +598,42 @@ export const DashboardAnalyticsScreen = () => {
     const ingredients = useSelector(selectIngredients);
     const ingredientsById = useSelector(selectIngredientsById);
     const dishes = useSelector(selectDishes);
+    const dishesById = useSelector(selectDishesById);
     const inventoryItems = useSelector(selectInventory);
     const inventoryConfig = useSelector(selectInventoryHealthConfig);
     const shoppingLists = useSelector(selectShoppingLists);
     const scheduledMeals = useSelector(selectScheduledMeals);
     const ingredientPriceMemory = useSelector(selectIngredientPriceMemory);
     const ingredientPriceHistory = useSelector(selectIngredientPriceHistory);
+    const cookingSessions = useSelector(selectCookingSessions);
+    const cookTimeStats = useSelector(selectCookTimeStats);
+    const dishFeedbackHistory = useSelector(selectDishFeedbackHistory);
+    const householdMembers = useSelector(selectHouseholdMembers);
+    const leftoverTrackerItems = useSelector(selectLeftoverTrackerItems);
+    const [cookingRange, setCookingRange] = React.useState<AnalyticsTimeRange>('90d');
+    const [cookingMemberId, setCookingMemberId] = React.useState<string | undefined>();
+    const [cookingHelpKey, setCookingHelpKey] = React.useState<string>();
     useScreenTitle({ value: 'Phân tích', deps: [] });
 
     const openRoute = React.useCallback((href: string) => {
         React.startTransition(() => navigate(href));
     }, [navigate]);
+
+    const toggleCookingHelp = React.useCallback((key: string) => {
+        setCookingHelpKey(current => current === key ? undefined : key);
+    }, []);
+
+    const cookingFilters = useMemo(() => ({
+        range: cookingRange,
+        memberId: cookingMemberId,
+    }), [cookingMemberId, cookingRange]);
+    const cookingMemberOptions = useMemo(() => householdMembers.map(member => ({ label: member.name, value: member.id })), [householdMembers]);
+    const topCookedDishes = useMemo(() => CookingAnalyticsHelper.getTopCookedDishes(cookingSessions, dishesById, cookingFilters), [cookingFilters, cookingSessions, dishesById]);
+    const staleDishes = useMemo(() => CookingAnalyticsHelper.getStaleDishes(dishes, cookingSessions), [cookingSessions, dishes]);
+    const cookTimeAccuracy = useMemo(() => CookingAnalyticsHelper.getCookTimeAccuracy(cookTimeStats, dishesById), [cookTimeStats, dishesById]);
+    const memberFeedbackBreakdown = useMemo(() => CookingAnalyticsHelper.getMemberFeedbackBreakdown(dishFeedbackHistory, householdMembers, cookingFilters), [cookingFilters, dishFeedbackHistory, householdMembers]);
+    const cookingActivity = useMemo(() => CookingAnalyticsHelper.getCookingActivity(cookingSessions, cookingFilters), [cookingFilters, cookingSessions]);
+    const leftoverEfficiency = useMemo(() => CookingAnalyticsHelper.getLeftoverEfficiency(leftoverTrackerItems, cookingFilters), [cookingFilters, leftoverTrackerItems]);
 
     const openShoppingLists = useMemo(() => shoppingLists
         .filter(item => !item.completedAt)
@@ -816,6 +844,43 @@ export const DashboardAnalyticsScreen = () => {
                 />
             </div>
         </SectionCard>
+
+        <section style={{ border: '1px solid rgba(19,168,168,0.12)', borderRadius: 8, background: 'linear-gradient(180deg, #f0fffd 0%, #ffffff 84%)', padding: 12, boxShadow: '0 10px 28px rgba(15,118,110,0.08)' }}>
+            <Stack justify='space-between' align='flex-start' gap={10} style={{ marginBottom: 12 }}>
+                <div style={{ minWidth: 0 }}>
+                    <Typography.Text strong style={{ display: 'block', color: '#0f766e', fontSize: 17, lineHeight: '22px' }}>Phân tích nấu nướng</Typography.Text>
+                    <Typography.Text type='secondary' style={{ display: 'block', fontSize: 12, lineHeight: '17px', marginTop: 2 }}>Dữ liệu nấu nướng và khẩu vị từ phiên nấu thực tế.</Typography.Text>
+                </div>
+                <Stack wrap='wrap' gap={8} justify='flex-end' style={{ flexShrink: 0 }}>
+                    <Segmented
+                        value={cookingRange}
+                        onChange={value => setCookingRange(value as AnalyticsTimeRange)}
+                        options={[
+                            { label: '7 ngày', value: '7d' },
+                            { label: '30 ngày', value: '30d' },
+                            { label: '90 ngày', value: '90d' },
+                            { label: 'Tất cả', value: 'all' },
+                        ]}
+                    />
+                    <Select
+                        allowClear
+                        placeholder='Tất cả thành viên'
+                        value={cookingMemberId}
+                        options={cookingMemberOptions}
+                        onChange={value => setCookingMemberId(value)}
+                        style={{ minWidth: 180 }}
+                    />
+                </Stack>
+            </Stack>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(300px, 100%), 1fr))', gap: 10 }}>
+                <TopCookedDishesCard rows={topCookedDishes} openHelpKey={cookingHelpKey} onToggleHelp={toggleCookingHelp} />
+                <StaleDishesCard rows={staleDishes} openHelpKey={cookingHelpKey} onToggleHelp={toggleCookingHelp} />
+                <CookTimeAccuracyCard rows={cookTimeAccuracy} openHelpKey={cookingHelpKey} onToggleHelp={toggleCookingHelp} />
+                <MemberFeedbackCard rows={memberFeedbackBreakdown} openHelpKey={cookingHelpKey} onToggleHelp={toggleCookingHelp} />
+                <CookingActivityCard rows={cookingActivity} openHelpKey={cookingHelpKey} onToggleHelp={toggleCookingHelp} />
+                <LeftoverEfficiencyCard rows={leftoverEfficiency} openHelpKey={cookingHelpKey} onToggleHelp={toggleCookingHelp} />
+            </div>
+        </section>
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 12 }}>
             <SectionCard title='Áp lực chuẩn bị 7 ngày' subtitle='Ngày nào đang dồn cả nấu ăn và mua sắm.' helpText={analyticsHelp.planLoad} icon={<BarChartOutlined />} tone='#7436dc'>

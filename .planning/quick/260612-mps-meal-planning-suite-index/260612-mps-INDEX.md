@@ -148,7 +148,7 @@ Update this section as features land:
 - [x] 1 — `eos` Eat-out / skip-slot marking
 - [x] 2 — `lap` Leftover-aware smart planner
 - [x] 3 — `prr` Prep task reminders
-- [ ] 4 — `cad` Cooking analytics dashboard
+- [x] 4 — `cad` Cooking analytics dashboard
 - [ ] 5 — `pst` Per-step cook timer integration
 
 When all five are checked, the suite is complete.
