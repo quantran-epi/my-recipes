@@ -4,7 +4,7 @@ import {
 } from "@ant-design/icons";
 import { DateHelpers } from "@common/Helpers/DateHelper";
 import { Badge } from "@components/Badge";
-import { Button } from "@components/Button";
+import { ActionButton, Button } from "@components/Button";
 import { Dropdown } from "@components/Dropdown";
 import { Space } from "@components/Layout/Space";
 import { Stack } from "@components/Layout/Stack";
@@ -749,9 +749,9 @@ export const ScheduledMealItem = ({ item, selected, dishNameById, onDelete }: { 
                         </Tooltip>
                     </div>
                     <Tooltip title="Quay lại trạng thái chưa lập — bạn có thể thêm món hoặc đánh dấu lại sau.">
-                        <Button type="link" onClick={() => dispatch(unmarkSkipMeal({ mealId: item.id, slot }))} style={{ paddingInline: 0, height: 22, fontSize: 12 }}>
+                        <ActionButton onClick={() => dispatch(unmarkSkipMeal({ mealId: item.id, slot }))}>
                             Bỏ đánh dấu
-                        </Button>
+                        </ActionButton>
                     </Tooltip>
                 </div>
             </Box>;
