@@ -69,9 +69,19 @@ export type SmartPlannerDishRecommendation = {
 
 export type PlannedDish = SmartPlannerDishRecommendation;
 
+export type SmartPlannerMealSlotDishRange = {
+    min: number;
+    max: number;
+}
+
+export type SmartPlannerMealSlotDishRanges = Record<PlannerMealSlot, SmartPlannerMealSlotDishRange>;
+
+export type SmartPlannerDayItemsBySlot = Record<PlannerMealSlot, PlannedDish[]>;
+
 export type SmartPlannerDayAlternative = {
     id: string;
     label: string;
+    itemsBySlot: SmartPlannerDayItemsBySlot;
     breakfast?: PlannedDish;
     lunch?: PlannedDish;
     dinner?: PlannedDish;
@@ -93,6 +103,7 @@ export type SmartPlannerPlannedDay = {
     date: Dayjs;
     alternatives?: SmartPlannerDayAlternative[];
     selectedAlternativeId?: string;
+    itemsBySlot?: SmartPlannerDayItemsBySlot;
     breakfast?: PlannedDish;
     lunch?: PlannedDish;
     dinner?: PlannedDish;
@@ -147,6 +158,8 @@ export type BuildSmartPlannerInput = {
     avoidedIngredientIds: string[];
     requiredExpiringIngredientIds: string[];
     inventoryAwareBudget: boolean;
+    advancedEnabled?: boolean;
+    mealSlotDishRanges?: SmartPlannerMealSlotDishRanges;
     shuffleAlternatives?: boolean;
     dishes: Dishes[];
     ingredients: Ingredient[];
@@ -191,8 +204,16 @@ const PLANNER_MEAL_SLOTS: PlannerMealSlot[] = ['breakfast', 'lunch', 'dinner'];
 const ALTERNATIVE_COUNT = 3;
 const BASE_CANDIDATE_LIMIT = 18;
 const LOW_COST_CANDIDATE_LIMIT = 10;
-const SHUFFLE_POOL_LIMIT = 24;
+const DAY_COMBO_POOL_LIMIT = 42;
+const SHUFFLE_POOL_LIMIT = 36;
+const MEAL_SLOT_DISH_RANGE_MAX = 6;
 const METHOD_TAGS = ['Nướng', 'Chiên', 'Hấp', 'Luộc', 'Xào', 'Salad'];
+
+const DEFAULT_MEAL_SLOT_DISH_RANGES: SmartPlannerMealSlotDishRanges = {
+    breakfast: { min: 1, max: 1 },
+    lunch: { min: 1, max: 1 },
+    dinner: { min: 1, max: 1 },
+};
 
 const CATEGORY_DEFINITIONS: Array<Omit<SmartPlannerCookNowCategory, 'recommendation'>> = [
     { key: 'best_overall', label: 'Tốt nhất', description: 'Điểm tổng hợp cao nhất theo các tiêu chí đang chọn.' },
@@ -259,6 +280,60 @@ const getSummaryAverage = (summary: { min: number; max: number; pricedCount: num
 };
 
 const formatPercent = (value: number): string => `${Math.round(value)}%`;
+
+const normalizeMealSlotDishRange = (range?: Partial<SmartPlannerMealSlotDishRange>): SmartPlannerMealSlotDishRange => {
+    const min = Math.max(0, Math.min(MEAL_SLOT_DISH_RANGE_MAX, Math.round(Number(range?.min ?? 1))));
+    const max = Math.max(0, Math.min(MEAL_SLOT_DISH_RANGE_MAX, Math.round(Number(range?.max ?? min))));
+    return max < min ? { min: max, max: min } : { min, max };
+};
+
+const getMealSlotDishRanges = (input: BuildSmartPlannerInput): SmartPlannerMealSlotDishRanges => ({
+    breakfast: normalizeMealSlotDishRange(input.mealSlotDishRanges?.breakfast ?? DEFAULT_MEAL_SLOT_DISH_RANGES.breakfast),
+    lunch: normalizeMealSlotDishRange(input.mealSlotDishRanges?.lunch ?? DEFAULT_MEAL_SLOT_DISH_RANGES.lunch),
+    dinner: normalizeMealSlotDishRange(input.mealSlotDishRanges?.dinner ?? DEFAULT_MEAL_SLOT_DISH_RANGES.dinner),
+});
+
+const getRandomDishCount = (range: SmartPlannerMealSlotDishRange): number => {
+    if (range.max <= range.min) return range.min;
+    return range.min + Math.floor(Math.random() * (range.max - range.min + 1));
+};
+
+const createEmptyItemsBySlot = (): SmartPlannerDayItemsBySlot => ({
+    breakfast: [],
+    lunch: [],
+    dinner: [],
+});
+
+const normalizeItemsBySlot = (itemsBySlot?: Partial<Record<PlannerMealSlot, PlannedDish | PlannedDish[]>>): SmartPlannerDayItemsBySlot => PLANNER_MEAL_SLOTS.reduce((result, slot) => {
+    const raw = itemsBySlot?.[slot];
+    result[slot] = Array.isArray(raw) ? raw.filter(Boolean) : raw ? [raw] : [];
+    return result;
+}, createEmptyItemsBySlot());
+
+const flattenItemsBySlot = (itemsBySlot: SmartPlannerDayItemsBySlot): PlannedDish[] => PLANNER_MEAL_SLOTS.flatMap(slot => itemsBySlot[slot]);
+
+const getComboKey = (itemsBySlot: SmartPlannerDayItemsBySlot): string => PLANNER_MEAL_SLOTS
+    .map(slot => `${slot}:${itemsBySlot[slot].map(item => item.dish.id).join(',')}`)
+    .join('|');
+
+const normalizePlannerInput = (input: BuildSmartPlannerInput): BuildSmartPlannerInput => {
+    const advancedEnabled = input.advancedEnabled === true;
+    return {
+        ...input,
+        advancedEnabled,
+        dailyBudget: advancedEnabled ? input.dailyBudget : undefined,
+        weeklyBudget: advancedEnabled ? input.weeklyBudget : undefined,
+        maxCookMinutes: advancedEnabled ? input.maxCookMinutes : undefined,
+        strictTime: advancedEnabled ? input.strictTime : false,
+        shoppingMode: advancedEnabled ? input.shoppingMode : 'normal',
+        maxExtraSpend: advancedEnabled ? input.maxExtraSpend : undefined,
+        requiredTags: advancedEnabled ? input.requiredTags : [],
+        avoidedIngredientIds: advancedEnabled ? input.avoidedIngredientIds : [],
+        requiredExpiringIngredientIds: advancedEnabled ? input.requiredExpiringIngredientIds : [],
+        inventoryAwareBudget: advancedEnabled ? input.inventoryAwareBudget : true,
+        mealSlotDishRanges: getMealSlotDishRanges(input),
+    };
+};
 
 export const getSmartPlannerDishIngredientIds = (dish: Dishes, dishes: Dishes[]): string[] => {
     return Array.from(new Set(DishServingHelper.collectIngredientAmounts(dish, dishes).map(item => item.ingredientId)));
@@ -330,7 +405,11 @@ export const aggregateShoppingRows = (rows: ShoppingPreviewRow[]): ShoppingPrevi
     return Array.from(grouped.values()).sort((a, b) => a.name.localeCompare(b.name));
 };
 
-export const getAlternativeItems = (alternative: SmartPlannerDayAlternative): PlannedDish[] => [alternative.breakfast, alternative.lunch, alternative.dinner].filter((item): item is PlannedDish => Boolean(item));
+export const getAlternativeItems = (alternative: SmartPlannerDayAlternative): PlannedDish[] => {
+    const slotItems = alternative.itemsBySlot ? flattenItemsBySlot(alternative.itemsBySlot) : [];
+    if (slotItems.length > 0) return slotItems;
+    return [alternative.breakfast, alternative.lunch, alternative.dinner].filter((item): item is PlannedDish => Boolean(item));
+};
 
 const getSlotScore = (dish: Dishes, slot: PlannerMealSlot | 'any', dishesById: Map<string, Dishes>): { score: number; reason?: string } => {
     const tags = dish.tags ?? [];
@@ -350,18 +429,25 @@ const getMethodTags = (dish: Dishes): string[] => (dish.tags ?? []).filter(tag =
 
 const getPrimaryIngredientIds = (dish: Dishes, dishes: Dishes[]): string[] => getSmartPlannerDishIngredientIds(dish, dishes).slice(0, 3);
 
-const getBudgetScore = (costAverage: number | undefined, referenceBudget: number, missingPriceCount: number): number => {
+const getBudgetScore = (costAverage: number | undefined, referenceBudget: number | undefined, missingPriceCount: number): number => {
     if (costAverage === undefined) return missingPriceCount > 0 ? 42 : 70;
-    if (referenceBudget <= 0) return 74;
+    if (!referenceBudget || referenceBudget <= 0) {
+        if (costAverage <= 0) return 100;
+        if (costAverage <= 30000) return 96;
+        if (costAverage <= 70000) return 88;
+        if (costAverage <= 120000) return 76;
+        if (costAverage <= 220000) return 62;
+        return clamp(62 - Math.min(34, (costAverage - 220000) / 12000));
+    }
     if (costAverage <= referenceBudget) return 100;
     const ratio = costAverage / referenceBudget;
     return clamp(100 - Math.min(70, (ratio - 1) * 72));
 };
 
 const getInventoryScore = (cost: DishCostInfo, preferExpiring: boolean): number => {
-    let score = cost.missingRequiredIngredientCount === 0 ? 94 : Math.max(35, 84 - cost.missingRequiredIngredientCount * 17 - cost.missingIngredientCount * 6);
-    if (cost.shoppingCostAverage === 0) score += 8;
-    if (cost.urgentIngredientCount > 0) score += preferExpiring ? Math.min(18, cost.urgentIngredientCount * 8) : Math.min(8, cost.urgentIngredientCount * 4);
+    let score = cost.missingRequiredIngredientCount === 0 ? 88 : Math.max(32, 82 - cost.missingRequiredIngredientCount * 18 - cost.missingIngredientCount * 7);
+    if (cost.shoppingCostAverage === 0) score += 12;
+    if (cost.urgentIngredientCount > 0) score += preferExpiring ? Math.min(28, cost.urgentIngredientCount * 11) : Math.min(10, cost.urgentIngredientCount * 4);
     return clamp(score);
 };
 
@@ -530,13 +616,16 @@ const scoreDish = (
     if (cost.urgentIngredientCount > 0) inventoryParts.push(`dùng ${cost.urgentIngredientCount} đồ sắp hết hạn${enabledCriteria.has('inventory') ? ' nên được cộng điểm ưu tiên' : ''}`);
     details.push(buildScoreDetail('Tồn kho và đồ sắp hết hạn', cost.shoppingCostAverage === 0 ? 'Có đủ theo tồn kho hiện tại' : `Cần mua ${cost.shoppingCostLabel ?? 'thiếu giá'}`, inventoryScore, weights.inventory, inventoryParts.join(', ') + '.'));
 
-    const budgetReference = input.scope === 'cook_now'
-        ? Math.max(1, input.maxExtraSpend ?? input.dailyBudget ?? 100000)
-        : Math.max(1, (input.dailyBudget ?? 150000) / 3);
+    const budgetReference = input.advancedEnabled
+        ? input.scope === 'cook_now'
+            ? Math.max(1, input.maxExtraSpend ?? input.dailyBudget ?? 100000)
+            : input.dailyBudget ? Math.max(1, input.dailyBudget / 3) : undefined
+        : undefined;
     const budgetCost = input.inventoryAwareBudget ? cost.shoppingCostAverage : cost.costAverage;
     const budgetScore = enabledCriteria.has('budget') ? getBudgetScore(budgetCost, budgetReference, cost.missingPriceCount) : 62;
     if (enabledCriteria.has('budget')) {
         if (budgetCost === undefined || cost.missingPriceCount > 0) warnings.push('Thiếu dữ liệu giá');
+        else if (!budgetReference) reasons.push(input.inventoryAwareBudget ? 'ít phải mua thêm' : 'chi phí thấp');
         else if (budgetCost <= budgetReference) reasons.push(input.inventoryAwareBudget ? 'vừa tiền mua thêm' : 'vừa ngân sách');
     }
     const budgetCostLabelText = input.inventoryAwareBudget ? 'phần cần mua thêm' : 'tổng chi phí';
@@ -544,6 +633,8 @@ const scoreDish = (
         ? 'Tiêu chí Ngân sách đang tắt, nên chi phí món không ảnh hưởng mạnh đến xếp hạng.'
         : budgetCost === undefined || cost.missingPriceCount > 0
             ? `Thiếu giá cho ${cost.missingPriceCount} nguyên liệu nên chi phí chưa chắc chắn và bị giảm độ tin cậy.`
+            : !budgetReference
+                ? `Đang ưu tiên tiết kiệm theo ${budgetCostLabelText} ~${IngredientPriceHelper.formatCurrency(budgetCost)}; chưa bật ngân sách nâng cao nên không so với giới hạn tiền ngày hay tuần.`
             : budgetCost <= budgetReference
                 ? `Mức ${budgetCostLabelText} ~${IngredientPriceHelper.formatCurrency(budgetCost)} nằm trong tham chiếu ~${IngredientPriceHelper.formatCurrency(budgetReference)} nên được cộng điểm.`
                 : `Mức ${budgetCostLabelText} ~${IngredientPriceHelper.formatCurrency(budgetCost)} vượt tham chiếu ~${IngredientPriceHelper.formatCurrency(budgetReference)} nên bị trừ điểm.`;
@@ -698,45 +789,54 @@ const getDailyBudgetScore = (items: PlannedDish[], input: BuildSmartPlannerInput
     return { dayBudget, dayCostAverage, dayCostLabel, dayShoppingCostAverage, dayShoppingCostLabel, budgetCostAverage, budgetCostLabel, impact, reason, description };
 };
 
-const applyDailyBudgetToDay = (itemsBySlot: Partial<Record<PlannerMealSlot, PlannedDish>>, input: BuildSmartPlannerInput): Partial<Record<PlannerMealSlot, PlannedDish>> => {
-    if (!isPriorityActive(input.priorities, 'budget')) return itemsBySlot;
-    const items = PLANNER_MEAL_SLOTS.map(slot => itemsBySlot[slot]).filter((item): item is PlannedDish => Boolean(item));
-    if (items.length === 0) return itemsBySlot;
+type PlannerDayCombo = {
+    itemsBySlot: SmartPlannerDayItemsBySlot;
+    score: number;
+    overage: number;
+    key: string;
+    warnings: string[];
+}
+
+const applyDailyBudgetToDay = (itemsBySlot: Partial<Record<PlannerMealSlot, PlannedDish[]>>, input: BuildSmartPlannerInput): SmartPlannerDayItemsBySlot => {
+    const normalized = normalizeItemsBySlot(itemsBySlot);
+    if (!input.advancedEnabled || !input.dailyBudget || !isPriorityActive(input.priorities, 'budget')) return normalized;
+    const items = flattenItemsBySlot(normalized);
+    if (items.length === 0) return normalized;
 
     const dailyBudgetScore = getDailyBudgetScore(items, input);
     const perDishImpact = dailyBudgetScore.impact / items.length;
 
     return PLANNER_MEAL_SLOTS.reduce((result, slot) => {
-        const item = itemsBySlot[slot];
-        if (!item) return result;
-        const itemCostLabel = item.costLabel ?? 'thiếu dữ liệu giá';
-        result[slot] = {
-            ...item,
-            score: clamp(item.score + perDishImpact),
-            dayCostLabel: dailyBudgetScore.dayCostLabel,
-            dayCostAverage: dailyBudgetScore.dayCostAverage,
-            dayShoppingCostLabel: dailyBudgetScore.dayShoppingCostLabel,
-            dayShoppingCostAverage: dailyBudgetScore.dayShoppingCostAverage,
-            dayBudget: dailyBudgetScore.dayBudget,
-            reasons: Array.from(new Set([...item.reasons, dailyBudgetScore.reason])).slice(0, 5),
-            warnings: item.warnings,
-            scoreDetails: [
-                ...item.scoreDetails,
-                {
-                    label: 'Ngân sách ngày',
-                    value: `${input.inventoryAwareBudget ? 'Cần mua' : 'Tổng ngày'} ${dailyBudgetScore.budgetCostLabel} / ngân sách ${IngredientPriceHelper.formatCurrency(dailyBudgetScore.dayBudget)}; món này ${itemCostLabel}`,
-                    impact: perDishImpact,
-                    description: dailyBudgetScore.description,
-                },
-            ],
-        };
+        result[slot] = normalized[slot].map(item => {
+            const itemCostLabel = item.costLabel ?? 'thiếu dữ liệu giá';
+            return {
+                ...item,
+                score: clamp(item.score + perDishImpact),
+                dayCostLabel: dailyBudgetScore.dayCostLabel,
+                dayCostAverage: dailyBudgetScore.dayCostAverage,
+                dayShoppingCostLabel: dailyBudgetScore.dayShoppingCostLabel,
+                dayShoppingCostAverage: dailyBudgetScore.dayShoppingCostAverage,
+                dayBudget: dailyBudgetScore.dayBudget,
+                reasons: Array.from(new Set([...item.reasons, dailyBudgetScore.reason])).slice(0, 5),
+                warnings: item.warnings,
+                scoreDetails: [
+                    ...item.scoreDetails,
+                    {
+                        label: 'Ngân sách ngày',
+                        value: `${input.inventoryAwareBudget ? 'Cần mua' : 'Tổng ngày'} ${dailyBudgetScore.budgetCostLabel} / ngân sách ${IngredientPriceHelper.formatCurrency(dailyBudgetScore.dayBudget)}; món này ${itemCostLabel}`,
+                        impact: perDishImpact,
+                        description: dailyBudgetScore.description,
+                    },
+                ],
+            };
+        });
         return result;
-    }, {} as Partial<Record<PlannerMealSlot, PlannedDish>>);
+    }, createEmptyItemsBySlot());
 };
 
-const buildAlternative = (itemsBySlot: Partial<Record<PlannerMealSlot, PlannedDish>>, index: number, input: BuildSmartPlannerInput): SmartPlannerDayAlternative => {
+const buildAlternative = (itemsBySlot: Partial<Record<PlannerMealSlot, PlannedDish[]>>, index: number, input: BuildSmartPlannerInput, comboWarnings: string[] = []): SmartPlannerDayAlternative => {
     const withBudget = applyDailyBudgetToDay(itemsBySlot, input);
-    const items = PLANNER_MEAL_SLOTS.map(slot => withBudget[slot]).filter((item): item is PlannedDish => Boolean(item));
+    const items = flattenItemsBySlot(withBudget);
     const totalCostAverage = items.reduce((sum, item) => sum + (item.costAverage ?? 0), 0);
     const shoppingCostAverage = items.reduce((sum, item) => sum + (item.shoppingCostAverage ?? 0), 0);
     const nutritionScores = items.map(item => item.nutritionMatch?.score).filter((value): value is number => value !== undefined);
@@ -745,9 +845,10 @@ const buildAlternative = (itemsBySlot: Partial<Record<PlannerMealSlot, PlannedDi
     return {
         id: `alt-${index + 1}-${items.map(item => item.dish.id).join('-')}`,
         label: `Phương án ${index + 1}`,
-        breakfast: withBudget.breakfast,
-        lunch: withBudget.lunch,
-        dinner: withBudget.dinner,
+        itemsBySlot: withBudget,
+        breakfast: withBudget.breakfast[0],
+        lunch: withBudget.lunch[0],
+        dinner: withBudget.dinner[0],
         totalScore: clamp(items.reduce((sum, item) => sum + item.score, 0) / Math.max(1, items.length)),
         totalCostAverage,
         totalCostLabel: IngredientPriceHelper.formatCurrency(totalCostAverage),
@@ -756,14 +857,150 @@ const buildAlternative = (itemsBySlot: Partial<Record<PlannerMealSlot, PlannedDi
         nutritionScore: nutritionScores.length > 0 ? Math.round(nutritionScores.reduce((sum, value) => sum + value, 0) / nutritionScores.length * 100) : undefined,
         suitabilityScore: suitabilityScores.length > 0 ? Math.round(suitabilityScores.reduce((sum, value) => sum + value, 0) / suitabilityScores.length) : undefined,
         reasons: Array.from(new Set(items.flatMap(item => item.reasons))).slice(0, 5),
-        warnings: Array.from(new Set(items.flatMap(item => item.warnings))).slice(0, 6),
+        warnings: Array.from(new Set([...comboWarnings, ...items.flatMap(item => item.warnings)])).slice(0, 6),
         missingRows,
     };
+};
+
+const getDifferenceRatio = (left: Set<string>, right: Set<string>): number => {
+    const union = new Set([...Array.from(left), ...Array.from(right)]);
+    if (union.size === 0) return 0;
+    const intersectionCount = Array.from(left).filter(item => right.has(item)).length;
+    return 1 - intersectionCount / union.size;
+};
+
+const getComboDiversityScore = (best: PlannerDayCombo, combo: PlannerDayCombo, input: BuildSmartPlannerInput): number => {
+    const bestItems = flattenItemsBySlot(best.itemsBySlot);
+    const comboItems = flattenItemsBySlot(combo.itemsBySlot);
+    const bestDishIds = new Set(bestItems.map(item => item.dish.id));
+    const comboDishIds = new Set(comboItems.map(item => item.dish.id));
+    const bestIngredients = new Set(bestItems.flatMap(item => getPrimaryIngredientIds(item.dish, input.dishes)));
+    const comboIngredients = new Set(comboItems.flatMap(item => getPrimaryIngredientIds(item.dish, input.dishes)));
+    const bestMethods = new Set(bestItems.flatMap(item => getMethodTags(item.dish)));
+    const comboMethods = new Set(comboItems.flatMap(item => getMethodTags(item.dish)));
+    const slotShapeDiff = PLANNER_MEAL_SLOTS.reduce((sum, slot) => {
+        const maxCount = Math.max(1, best.itemsBySlot[slot].length, combo.itemsBySlot[slot].length);
+        return sum + Math.abs(best.itemsBySlot[slot].length - combo.itemsBySlot[slot].length) / maxCount;
+    }, 0) / PLANNER_MEAL_SLOTS.length;
+
+    return clamp(
+        getDifferenceRatio(bestDishIds, comboDishIds) * 48
+        + getDifferenceRatio(bestIngredients, comboIngredients) * 26
+        + getDifferenceRatio(bestMethods, comboMethods) * 16
+        + slotShapeDiff * 10,
+    );
+};
+
+const selectSlotItems = (candidates: PlannedDish[], targetCount: number, usedDishIds: Set<string>, variantIndex: number, randomize: boolean): PlannedDish[] => {
+    const selected: PlannedDish[] = [];
+    const selectedIds = new Set<string>();
+
+    for (let itemIndex = 0; itemIndex < targetCount; itemIndex += 1) {
+        const available = candidates.filter(item => !usedDishIds.has(item.dish.id) && !selectedIds.has(item.dish.id));
+        if (available.length === 0) break;
+
+        let picked = available[0];
+        if (randomize) {
+            const samplePool = available.slice(0, SHUFFLE_POOL_LIMIT);
+            const totalWeight = samplePool.reduce((sum, item) => sum + Math.max(1, item.score), 0);
+            let roll = Math.random() * totalWeight;
+            for (let i = 0; i < samplePool.length; i += 1) {
+                roll -= Math.max(1, samplePool[i].score);
+                if (roll <= 0) { picked = samplePool[i]; break; }
+            }
+        } else {
+            picked = available[Math.min(available.length - 1, variantIndex + itemIndex)] ?? available[0];
+        }
+
+        selected.push(picked);
+        selectedIds.add(picked.dish.id);
+        usedDishIds.add(picked.dish.id);
+    }
+
+    return selected;
+};
+
+const buildComboFromCandidates = (
+    candidatesBySlot: Record<PlannerMealSlot, PlannedDish[]>,
+    ranges: SmartPlannerMealSlotDishRanges,
+    input: BuildSmartPlannerInput,
+    variantIndex: number,
+    randomize: boolean,
+): PlannerDayCombo | null => {
+    const itemsBySlot = createEmptyItemsBySlot();
+    const usedDishIds = new Set<string>();
+    const warnings: string[] = [];
+
+    PLANNER_MEAL_SLOTS.forEach(slot => {
+        const targetCount = getRandomDishCount(ranges[slot]);
+        if (targetCount <= 0) return;
+
+        const selected = selectSlotItems(candidatesBySlot[slot], targetCount, usedDishIds, variantIndex % Math.max(1, candidatesBySlot[slot].length), randomize);
+        itemsBySlot[slot] = selected;
+
+        if (selected.length < targetCount) {
+            const label = slot === 'breakfast' ? 'bữa sáng' : slot === 'lunch' ? 'bữa trưa' : 'bữa tối';
+            warnings.push(`${label} chỉ có ${selected.length}/${targetCount} món phù hợp`);
+        }
+    });
+
+    const items = flattenItemsBySlot(itemsBySlot);
+    if (items.length === 0) return null;
+
+    const dailyBudgetScore = input.advancedEnabled && input.dailyBudget && isPriorityActive(input.priorities, 'budget')
+        ? getDailyBudgetScore(items, input)
+        : undefined;
+    const averageScore = items.reduce((sum, item) => sum + item.score, 0) / items.length;
+    const score = clamp(averageScore + (dailyBudgetScore?.impact ?? 0) / items.length);
+    const overage = dailyBudgetScore ? Math.max(0, dailyBudgetScore.budgetCostAverage - dailyBudgetScore.dayBudget) : 0;
+
+    return {
+        itemsBySlot,
+        score,
+        overage,
+        key: getComboKey(itemsBySlot),
+        warnings,
+    };
+};
+
+const pickAlternativeCombos = (pool: PlannerDayCombo[], input: BuildSmartPlannerInput): PlannerDayCombo[] => {
+    if (!input.shuffleAlternatives) return pool.slice(0, ALTERNATIVE_COUNT);
+
+    const best = pool[0];
+    if (!best) return [];
+
+    const selected: PlannerDayCombo[] = [best];
+    const qualityFloor = best.score - 25;
+    const topBandSize = Math.max(1, Math.ceil(pool.length * 0.2));
+    let samplePool = pool.slice(1).filter((combo, index) => combo.score >= qualityFloor && (combo.score <= best.score - 3 || index >= topBandSize));
+    if (samplePool.length < ALTERNATIVE_COUNT - 1) samplePool = pool.slice(1).filter(combo => combo.score >= qualityFloor);
+    if (samplePool.length < ALTERNATIVE_COUNT - 1) samplePool = pool.slice(1);
+
+    while (selected.length < ALTERNATIVE_COUNT && samplePool.length > 0) {
+        const totalWeight = samplePool.reduce((sum, combo) => {
+            const diversity = getComboDiversityScore(best, combo, input);
+            const scoreWeight = Math.max(1, combo.score - Math.max(0, qualityFloor) + 1);
+            return sum + scoreWeight * (1 + diversity / 45);
+        }, 0);
+        let roll = Math.random() * totalWeight;
+        let pickedIndex = samplePool.length - 1;
+        for (let i = 0; i < samplePool.length; i += 1) {
+            const diversity = getComboDiversityScore(best, samplePool[i], input);
+            const scoreWeight = Math.max(1, samplePool[i].score - Math.max(0, qualityFloor) + 1);
+            roll -= scoreWeight * (1 + diversity / 45);
+            if (roll <= 0) { pickedIndex = i; break; }
+        }
+        const [picked] = samplePool.splice(pickedIndex, 1);
+        selected.push(picked);
+    }
+
+    return selected;
 };
 
 const buildPlannedDays = (input: BuildSmartPlannerInput, targetServings: number, weights: PlannerWeights): SmartPlannerPlannedDay[] => {
     const usage = createUsageContext();
     const dayCount = input.scope === 'week' ? 7 : 1;
+    const ranges = getMealSlotDishRanges(input);
 
     const buildSlotCandidates = (slot: PlannerMealSlot): PlannedDish[] => {
         const ranked = buildRecommendations(input, usage, targetServings, weights, slot);
@@ -786,65 +1023,20 @@ const buildPlannedDays = (input: BuildSmartPlannerInput, targetServings: number,
     };
 
     const pickDayAlternatives = (): SmartPlannerDayAlternative[] => {
-        const breakfastCandidates = buildSlotCandidates('breakfast');
-        const lunchCandidates = buildSlotCandidates('lunch');
-        const dinnerCandidates = buildSlotCandidates('dinner');
-
-        const collectRankedCombos = (allowDuplicateDishes: boolean) => {
-            const combos: Array<{ itemsBySlot: Partial<Record<PlannerMealSlot, PlannedDish>>; score: number; overage: number; key: string }> = [];
-
-            breakfastCandidates.forEach(breakfast => {
-                lunchCandidates.forEach(lunch => {
-                    dinnerCandidates.forEach(dinner => {
-                        const items = [breakfast, lunch, dinner].filter(Boolean);
-                        const ids = items.map(item => item.dish.id);
-                        if (!allowDuplicateDishes && new Set(ids).size !== ids.length) return;
-
-                        const dailyBudgetScore = isPriorityActive(input.priorities, 'budget') ? getDailyBudgetScore(items, input) : undefined;
-                        const score = items.reduce((sum, item) => sum + item.score, 0) + (dailyBudgetScore?.impact ?? 0);
-                        const overage = dailyBudgetScore ? Math.max(0, dailyBudgetScore.budgetCostAverage - dailyBudgetScore.dayBudget) : 0;
-                        combos.push({ itemsBySlot: { breakfast, lunch, dinner }, score, overage, key: ids.join('|') });
-                    });
-                });
-            });
-
-            return combos.sort((a, b) => b.score - a.score || a.overage - b.overage);
+        const candidatesBySlot: Record<PlannerMealSlot, PlannedDish[]> = {
+            breakfast: buildSlotCandidates('breakfast'),
+            lunch: buildSlotCandidates('lunch'),
+            dinner: buildSlotCandidates('dinner'),
         };
+        const comboMap = new Map<string, PlannerDayCombo>();
 
-        const comboMap = new Map<string, { itemsBySlot: Partial<Record<PlannerMealSlot, PlannedDish>>; score: number; overage: number; key: string }>();
-
-        if (input.shuffleAlternatives) {
-            // Re-roll: keep the single best combo as an anchor, then fill the remaining
-            // slots by weighted random sampling from the viable pool (higher score = higher
-            // odds). This surfaces different valid combinations each generate without losing
-            // the top option or dropping into low-quality picks.
-            const pool = [...collectRankedCombos(false), ...collectRankedCombos(true)]
-                .filter((combo, index, all) => all.findIndex(other => other.key === combo.key) === index);
-            const best = pool[0];
-            if (best) comboMap.set(best.key, best);
-
-            const samplePool = pool.slice(1, SHUFFLE_POOL_LIMIT);
-            while (comboMap.size < ALTERNATIVE_COUNT && samplePool.length > 0) {
-                const totalWeight = samplePool.reduce((sum, combo) => sum + Math.max(1, combo.score), 0);
-                let roll = Math.random() * totalWeight;
-                let pickedIndex = samplePool.length - 1;
-                for (let i = 0; i < samplePool.length; i++) {
-                    roll -= Math.max(1, samplePool[i].score);
-                    if (roll <= 0) { pickedIndex = i; break; }
-                }
-                const [picked] = samplePool.splice(pickedIndex, 1);
-                if (!comboMap.has(picked.key)) comboMap.set(picked.key, picked);
-            }
-        } else {
-            [...collectRankedCombos(false), ...collectRankedCombos(true)].forEach(combo => {
-                if (comboMap.size >= ALTERNATIVE_COUNT) return;
-                if (!comboMap.has(combo.key)) comboMap.set(combo.key, combo);
-            });
+        for (let index = 0; index < DAY_COMBO_POOL_LIMIT; index += 1) {
+            const combo = buildComboFromCandidates(candidatesBySlot, ranges, input, index, input.shuffleAlternatives || index >= ALTERNATIVE_COUNT);
+            if (combo && !comboMap.has(combo.key)) comboMap.set(combo.key, combo);
         }
 
-        return Array.from(comboMap.values())
-            .sort((a, b) => b.score - a.score || a.overage - b.overage)
-            .map((combo, index) => buildAlternative(combo.itemsBySlot, index, input));
+        const pool = Array.from(comboMap.values()).sort((a, b) => b.score - a.score || a.overage - b.overage);
+        return pickAlternativeCombos(pool, input).map((combo, index) => buildAlternative(combo.itemsBySlot, index, input, combo.warnings));
     };
 
     return Array.from({ length: dayCount }).map((_, index) => {
@@ -855,6 +1047,7 @@ const buildPlannedDays = (input: BuildSmartPlannerInput, targetServings: number,
             date: input.startDate.add(index, 'day').startOf('day'),
             alternatives,
             selectedAlternativeId: picked?.id,
+            itemsBySlot: picked?.itemsBySlot,
             breakfast: picked?.breakfast,
             lunch: picked?.lunch,
             dinner: picked?.dinner,
@@ -931,11 +1124,14 @@ const buildSummaryFromDays = (days: SmartPlannerPlannedDay[], input: BuildSmartP
     const items = alternatives.flatMap(getAlternativeItems);
     const repeatedDishWarnings = new Map<string, number>();
     items.forEach(item => repeatedDishWarnings.set(item.dish.id, (repeatedDishWarnings.get(item.dish.id) ?? 0) + 1));
-    const warnings = Array.from(repeatedDishWarnings.entries())
+    const warnings = [
+        ...Array.from(repeatedDishWarnings.entries())
         .filter(([, count]) => count > 1)
-        .map(([dishId, count]) => `Món ${items.find(item => item.dish.id === dishId)?.dish.name ?? dishId} lặp ${count} lần`);
+        .map(([dishId, count]) => `Món ${items.find(item => item.dish.id === dishId)?.dish.name ?? dishId} lặp ${count} lần`),
+        ...alternatives.flatMap(alternative => alternative.warnings),
+    ];
     const summary = buildSummaryFromItems(items, warnings);
-    if (input.scope === 'week' && input.weeklyBudget && summary.shoppingCostAverage > input.weeklyBudget) {
+    if (input.advancedEnabled && input.scope === 'week' && input.weeklyBudget && summary.shoppingCostAverage > input.weeklyBudget) {
         return {
             ...summary,
             warnings: [...summary.warnings, `Vượt ngân sách tuần ${IngredientPriceHelper.formatCurrency(input.weeklyBudget)}`].slice(0, 8),
@@ -945,7 +1141,8 @@ const buildSummaryFromDays = (days: SmartPlannerPlannedDay[], input: BuildSmartP
     return summary;
 };
 
-export const buildSmartPlannerResult = (input: BuildSmartPlannerInput): SmartPlannerPlanResult => {
+export const buildSmartPlannerResult = (rawInput: BuildSmartPlannerInput): SmartPlannerPlanResult => {
+    const input = normalizePlannerInput(rawInput);
     const weights = getPriorityWeights(input.priorities);
     const targetServings = getTargetServings(input.members);
     const usage = createUsageContext();
