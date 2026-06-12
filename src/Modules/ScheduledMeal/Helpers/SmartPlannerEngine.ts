@@ -23,6 +23,11 @@ export type SmartPlannerShoppingMode = 'no_shopping' | 'small_top_up' | 'normal'
 // empty list means "balance everything" and falls back to DEFAULT_WEIGHTS.
 export type SmartPlannerPriority = 'budget' | 'time' | 'nutrition' | 'household' | 'inventory' | 'variety' | 'leftover';
 
+export const getSmartPlannerWeekStart = (value: Dayjs): Dayjs => {
+    const daysSinceMonday = (value.day() + 6) % 7;
+    return value.startOf('day').subtract(daysSinceMonday, 'day');
+};
+
 export type SmartPlannerScoreDetail = {
     label: string;
     value: string;
@@ -369,6 +374,7 @@ const normalizePlannerInput = (input: BuildSmartPlannerInput): BuildSmartPlanner
     const advancedEnabled = input.advancedEnabled === true;
     return {
         ...input,
+        startDate: input.scope === 'week' ? getSmartPlannerWeekStart(input.startDate) : input.startDate.startOf('day'),
         advancedEnabled,
         dailyBudget: advancedEnabled ? input.dailyBudget : undefined,
         weeklyBudget: advancedEnabled ? input.weeklyBudget : undefined,

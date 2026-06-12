@@ -21,7 +21,7 @@ import { Typography } from '@components/Typography';
 import { useScreenTitle } from '@hooks';
 import { DishImageWidget } from '@modules/Dishes/Screens/DishesManageIngredient/DishImage.widget';
 import { ShoppingListAddWidget } from '@modules/ShoppingList/Screens/ShoppingListAdd.widget';
-import { SmartPlannerEngine, type SmartPlannerCookNowCategory, type SmartPlannerDishRecommendation, type SmartPlannerMealSlot, type SmartPlannerMealSlotDishRanges, type SmartPlannerMealSlotTagRequirements, type SmartPlannerPlanResult, type SmartPlannerPlanSummary, type SmartPlannerPriority } from '@modules/ScheduledMeal/Helpers/SmartPlannerEngine';
+import { getSmartPlannerWeekStart, SmartPlannerEngine, type SmartPlannerCookNowCategory, type SmartPlannerDishRecommendation, type SmartPlannerMealSlot, type SmartPlannerMealSlotDishRanges, type SmartPlannerMealSlotTagRequirements, type SmartPlannerPlanResult, type SmartPlannerPlanSummary, type SmartPlannerPriority } from '@modules/ScheduledMeal/Helpers/SmartPlannerEngine';
 import { ScheduledMealSlotStateHelper } from '@modules/ScheduledMeal/Helpers/ScheduledMealSlotStateHelper';
 import { Dishes } from '@store/Models/Dishes';
 import { IngredientUnit } from '@store/Models/Ingredient';
@@ -645,6 +645,10 @@ const parseRouteDate = (value: string | null): Dayjs => {
     return (parsed.isValid() ? parsed : dayjs()).startOf('day');
 };
 
+const getPlannerStartDate = (scope: PlannerScope, value: Dayjs): Dayjs => (
+    scope === 'week' ? getSmartPlannerWeekStart(value) : value.startOf('day')
+);
+
 const aggregateShoppingRows = (rows: ShoppingPreviewRow[]): ShoppingPreviewRow[] => {
     const grouped = new Map<string, ShoppingPreviewRow>();
     rows.forEach(row => {
@@ -813,7 +817,7 @@ export const SmartMealPlannerScreen: React.FC = () => {
 
     const _buildSmartPlannerResult = React.useCallback((shuffleAlternatives = false): SmartPlannerPlanResult => SmartPlannerEngine.buildSmartPlannerResult({
         scope,
-        startDate,
+        startDate: getPlannerStartDate(scope, startDate),
         memberIds: selectedMembers.map(member => member.id),
         mealSlots: scope === 'cook_now' ? [cookNowMealSlot] : ['breakfast', 'lunch', 'dinner'],
         dailyBudget: advancedEnabled ? dailyBudget : undefined,
@@ -1604,7 +1608,12 @@ export const SmartMealPlannerScreen: React.FC = () => {
                 <div className='smart-planner-controls'>
                     <div className='smart-planner-section'>
                         <div className='smart-planner-section-title'><AppstoreOutlined /> Bạn muốn lập gì?</div>
-                        <Segmented block value={scope} onChange={value => { setScope(value as PlannerScope); _clearSuggestions(); }} options={plannerModeOptions} />
+                        <Segmented block value={scope} onChange={value => {
+                            const nextScope = value as PlannerScope;
+                            setScope(nextScope);
+                            setStartDate(current => getPlannerStartDate(nextScope, current));
+                            _clearSuggestions();
+                        }} options={plannerModeOptions} />
                         <Typography.Text type='secondary' style={{ display: 'block', fontSize: 11, lineHeight: '16px', marginTop: 6 }}>
                             {scope === 'cook_now' ? 'Gợi ý món tốt nhất để nấu ngay bây giờ.' : scope === 'day' ? 'Lập sáng, trưa, tối cho một ngày và áp vào lịch.' : 'Lập cả tuần với đa dạng món và xem trước mua sắm.'}
                         </Typography.Text>
@@ -1614,8 +1623,10 @@ export const SmartMealPlannerScreen: React.FC = () => {
                                 <Select value={cookNowMealSlot} onChange={value => { setCookNowMealSlot(value); _clearSuggestions(); }} options={cookNowSlotOptions} style={{ width: '100%' }} />
                             </div>}
                             <div>
-                                <PlannerFieldLabel helpKey='date' label={scope === 'cook_now' ? 'Ngày' : 'Ngày bắt đầu'}>Ngày đầu tiên để gợi ý thực đơn. Nếu chọn một tuần, các ngày sau sẽ tự chạy tiếp từ ngày này.</PlannerFieldLabel>
-                                <DatePicker value={startDate} onChange={value => { if (value) { setStartDate(value.startOf('day')); _clearSuggestions(); } }} format='DD/MM/YYYY' style={{ width: '100%' }} />
+                                <PlannerFieldLabel helpKey='date' label={scope === 'week' ? 'Tuần bắt đầu' : scope === 'cook_now' ? 'Ngày' : 'Ngày bắt đầu'}>
+                                    {scope === 'week' ? 'Tuần luôn chạy từ thứ hai đến chủ nhật. Chọn bất kỳ ngày nào trong tuần, planner sẽ tự dùng thứ hai của tuần đó.' : 'Ngày đầu tiên để gợi ý thực đơn.'}
+                                </PlannerFieldLabel>
+                                <DatePicker value={getPlannerStartDate(scope, startDate)} onChange={value => { if (value) { setStartDate(getPlannerStartDate(scope, value)); _clearSuggestions(); } }} format='DD/MM/YYYY' style={{ width: '100%' }} />
                             </div>
                             <div>
                                 <PlannerFieldLabel helpKey='members' label={<><TeamOutlined /> Ăn cùng</>}>Chọn người ăn cùng để tính khẩu phần, món thích, món tránh và mục tiêu riêng của từng người.</PlannerFieldLabel>
