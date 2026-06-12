@@ -3,9 +3,9 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: ready
-stopped_at: Completed quick task 260612-es2
-last_updated: "2026-06-12T04:10:52Z"
-last_activity: 2026-06-12 -- Completed quick task 260612-es2: Smart Planner advanced activation, meal ranges, priority behavior, shuffle variety, and deploy
+stopped_at: Completed quick task 260612-u7s
+last_updated: "2026-06-12T14:48:44Z"
+last_activity: 2026-06-12 -- Completed quick task 260612-u7s: Restore clarified button contract for Smart Planner and Dish Suggester
 progress:
   total_phases: 5
   completed_phases: 4
@@ -28,7 +28,7 @@ See: .planning/PROJECT.md (updated 2026-06-05)
 Phase: 5 (release-gate-and-product-guardrails) — READY
 Plan: Not started
 Status: Phase 04 complete; ready for Phase 05
-Last activity: 2026-06-12 -- Completed quick task 260612-es2: Smart Planner advanced activation, meal ranges, priority behavior, shuffle variety, and deploy
+Last activity: 2026-06-12 -- Completed quick task 260612-u7s: Restore clarified button contract for Smart Planner and Dish Suggester
 
 Progress: [████████░░] 80%
 
@@ -36,6 +36,7 @@ Progress: [████████░░] 80%
 
 | Date | Task | Artifact |
 |------|------|----------|
+| 2026-06-12 | Restore clarified button contract for Smart Planner and Dish Suggester | `.planning/quick/260612-u7s-restore-clarified-button-contract-for-sm/260612-u7s-SUMMARY.md` |
 | 2026-06-12 | Smart Planner advanced activation, meal ranges, priority behavior, shuffle variety, and deploy | `.planning/quick/260612-es2-plan-smart-planner-advanced-activation-m/260612-es2-SUMMARY.md` |
 | 2026-06-12 | UI fixes for Smart Planner dish detail widths, household health label alignment, scheduled meal finished feedback view/edit, feedback history, and deploy | `.planning/quick/260612-dob-ui-fixes-for-smart-planner-dish-detail-w/260612-dob-SUMMARY.md` |
 | 2026-06-11 | Add suggested cuisine variety desserts and dish image URLs | `.planning/quick/260611-ty0-add-suggested-cuisine-variety-desserts-a/260611-ty0-SUMMARY.md` |

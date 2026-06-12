@@ -19,7 +19,7 @@ interface ActionButtonProps {
     children?: ReactNode;
     height?: number;
     fontSize?: number;
-    shape?: 'square' | 'circle';
+    shape?: 'circle';
     style?: React.CSSProperties;
     className?: string;
     'aria-label'?: string;
@@ -29,13 +29,12 @@ interface ActionButtonProps {
 
 /**
  * Standard secondary action button used across lists, cards, and section footers.
- * Compact 32px action button with semantic-color-tinted border and neutral background.
+ * Compact pill action button with semantic-color-tinted border and neutral background.
  *
- * USE for: inline list-row actions, section secondary actions, card footer actions,
- * modal secondary footers, empty-state CTAs.
+ * USE for: inline list-row actions, section secondary actions, and compact card footer actions.
  *
  * DO NOT use for: page header primary CTAs, search/filter input affordances,
- * form submit buttons, mid-flow primary actions, page-header buttons, search affordances.
+ * form submit buttons, modal footer buttons, mid-flow primary actions, page-header buttons, search affordances.
  *
  * See `.planning/quick/260612-uxn-ui-ux-list-and-button-normalization/` for the contract.
  */
@@ -45,9 +44,9 @@ export const ActionButton: FC<ActionButtonProps> = ({
     onClick,
     disabled,
     children,
-    height = 32,
-    fontSize = 12,
-    shape = 'square',
+    height = 28,
+    fontSize = 11,
+    shape,
     style,
     className,
     htmlType,
@@ -56,15 +55,9 @@ export const ActionButton: FC<ActionButtonProps> = ({
 }) => {
     const palette = TONE_PALETTE[tone];
     const iconOnly = Boolean(icon) && React.Children.count(children) === 0;
-    const borderRadius = iconOnly && shape === 'circle' ? 999 : 8;
-    const {
-        height: _ignoredHeight,
-        borderRadius: _ignoredBorderRadius,
-        padding: _ignoredPadding,
-        paddingInline: _ignoredPaddingInline,
-        width: requestedWidth,
-        ...styleOverrides
-    } = style ?? {};
+    const circleStyle = iconOnly && shape === 'circle'
+        ? { width: height, padding: 0, borderRadius: 999 }
+        : {};
     return <AntButton
         onClick={onClick}
         disabled={disabled}
@@ -75,9 +68,8 @@ export const ActionButton: FC<ActionButtonProps> = ({
         aria-expanded={ariaExpanded}
         style={{
             height,
-            width: iconOnly ? height : requestedWidth,
-            padding: iconOnly ? 0 : '0 10px',
-            borderRadius,
+            padding: '0 9px',
+            borderRadius: 999,
             color: palette.color,
             borderColor: palette.border,
             fontWeight: 650,
@@ -87,7 +79,8 @@ export const ActionButton: FC<ActionButtonProps> = ({
             alignItems: 'center',
             justifyContent: 'center',
             gap: 5,
-            ...styleOverrides,
+            ...circleStyle,
+            ...style,
         }}
     >{children}</AntButton>;
 };

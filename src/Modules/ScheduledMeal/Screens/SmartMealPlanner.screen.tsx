@@ -1442,7 +1442,7 @@ export const SmartMealPlannerScreen: React.FC = () => {
         width={520}
         destroyOnClose
         footer={<Stack justify='flex-end' gap={8}>
-            <ActionButton onClick={() => setScheduleSelection(undefined)}>Hủy</ActionButton>
+            <Button onClick={() => setScheduleSelection(undefined)}>Hủy</Button>
             <Button type='primary' icon={<CalendarOutlined />} onClick={_scheduleCookNowSelection}>Lên lịch</Button>
         </Stack>}
     >

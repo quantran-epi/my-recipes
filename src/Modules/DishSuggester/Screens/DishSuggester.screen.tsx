@@ -411,12 +411,12 @@ export const DishSuggesterScreen: React.FC<DishSuggesterScreenProps> = ({ open, 
         if (!pageInline) _onClose();
     };
 
-    const actionButtonStyle: React.CSSProperties = {
-        width: 40,
-        height: 40,
-        minWidth: 40,
+    const bottomMenuButtonStyle: React.CSSProperties = {
+        width: 32,
+        height: 32,
+        minWidth: 32,
         paddingInline: 0,
-        borderRadius: 14,
+        borderRadius: 8,
         display: "inline-flex",
         alignItems: "center",
         justifyContent: "center",
@@ -437,7 +437,7 @@ export const DishSuggesterScreen: React.FC<DishSuggesterScreenProps> = ({ open, 
         color: count > 0 ? "#1677ff" : "#8c8c8c",
         fontSize: 13,
         fontWeight: 700,
-        lineHeight: "40px",
+        lineHeight: "32px",
         whiteSpace: "nowrap",
     });
 
@@ -489,7 +489,7 @@ export const DishSuggesterScreen: React.FC<DishSuggesterScreenProps> = ({ open, 
                     aria-label={`Thao tác khác cho ${dishIds.length} món`}
                     data-testid="dish-suggester-more-actions-button"
                     icon={<MoreOutlined />}
-                    style={actionButtonStyle}
+                    style={bottomMenuButtonStyle}
                 />
             </Dropdown>
         </Stack>;

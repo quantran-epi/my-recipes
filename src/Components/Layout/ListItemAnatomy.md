@@ -115,16 +115,15 @@ This is a **layout contract**, not a CSS reset. Each list keeps its own backgrou
 - Inline list-row actions (Ăn 1 phần / Đã hết / Bỏ)
 - Section secondary actions (Mở cao nhất, Xem tất cả)
 - Card footer actions (Mở chi tiết, Sửa, Sao chép)
-- Modal secondary footer buttons (Hủy, alongside primary Lưu)
-- Empty-state CTAs (Thêm món đầu tiên)
 
 **DO NOT use ActionButton for:**
 
 - Page header primary CTAs — use ant-d primary button
 - Search/filter input affordances — belong to their host input
+- Modal footer buttons — use the normal Button family
 - Form submit buttons — use ant-d `type='primary'`
 - Floating action buttons or fixed bottom bars — different visual rhythm
-- Icon-only mini buttons (`MoreOutlined` dropdown trigger, `?` toggle) — keep as `Button type='text'`
+- Icon-only overflow buttons (`MoreOutlined` dropdown trigger) — keep as square normal buttons
 
 ---
 
