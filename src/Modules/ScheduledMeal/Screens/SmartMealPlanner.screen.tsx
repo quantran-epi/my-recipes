@@ -169,7 +169,19 @@ const DEFAULT_MEAL_SLOT_TAG_REQUIREMENTS: SmartPlannerMealSlotTagRequirements = 
     dinner: [],
 };
 
-const TAG_REQUIREMENT_OPTIONS = ['Món chính', 'Canh', 'Món phụ', 'Tráng miệng', 'Khai vị', 'Đồ uống', 'Salad'];
+const collectDishTagOptions = (dishes: Dishes[]): string[] => {
+    const counts = new Map<string, number>();
+    dishes.forEach(dish => {
+        (dish.tags ?? []).forEach(tag => {
+            const trimmed = tag.trim();
+            if (!trimmed) return;
+            counts.set(trimmed, (counts.get(trimmed) ?? 0) + 1);
+        });
+    });
+    return Array.from(counts.entries())
+        .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0], 'vi'))
+        .map(([tag]) => tag);
+};
 
 const pageCss = `
 .smart-planner-page {
@@ -740,6 +752,7 @@ export const SmartMealPlannerScreen: React.FC = () => {
     const selectedNutritionGoalId = useMemo(() => selectedMembers.find(member => Boolean(member.nutritionGoalId))?.nutritionGoalId ?? nutritionGoals[0]?.id, [nutritionGoals, selectedMembers]);
     const memberOptions = useMemo(() => members.map(member => ({ value: member.id, label: member.name })), [members]);
     const ingredientOptions = useMemo(() => ingredients.map(ingredient => ({ value: ingredient.id, label: ingredient.name })), [ingredients]);
+    const tagRequirementOptions = useMemo(() => collectDishTagOptions(dishes), [dishes]);
     const targetServings = Math.max(1, Math.round(selectedMembers.reduce((sum, member) => sum + (member.portionPreference ?? 1), 0) || 2));
 
     const _clearSuggestions = React.useCallback(() => {
@@ -1493,8 +1506,8 @@ export const SmartMealPlannerScreen: React.FC = () => {
                             <Typography.Text strong style={{ fontSize: 12, lineHeight: '17px', color: '#334155' }}>Bắt buộc có loại món</Typography.Text>
                             <Typography.Text type='secondary' style={{ fontSize: 11, lineHeight: '16px' }}>Tổng yêu cầu: {tagMinTotal} món</Typography.Text>
                         </Stack>
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 6 }}>
-                            {TAG_REQUIREMENT_OPTIONS.map(tag => {
+                        {tagRequirementOptions.length === 0 ? <Typography.Text type='secondary' style={{ display: 'block', fontSize: 11, lineHeight: '16px' }}>Chưa có món nào gắn nhãn. Thêm tag cho món trong trang Món ăn để dùng tính năng này.</Typography.Text> : <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 6 }}>
+                            {tagRequirementOptions.map(tag => {
                                 const value = tagRequirements.find(item => item.tag === tag)?.min ?? 0;
                                 const active = value > 0;
                                 return <Stack key={tag} justify='space-between' align='center' gap={6} style={{ padding: '6px 8px', borderRadius: 6, border: `1px solid ${active ? 'rgba(19,168,168,0.40)' : 'rgba(15,23,42,0.08)'}`, background: active ? '#e6fffb' : '#f8fafc' }}>
@@ -1506,7 +1519,7 @@ export const SmartMealPlannerScreen: React.FC = () => {
                                     </Stack>
                                 </Stack>;
                             })}
-                        </div>
+                        </div>}
                         {tagMinTotal > range.max && <Typography.Text style={{ display: 'block', color: '#ad4e00', fontSize: 11, lineHeight: '16px', marginTop: 6 }}>Yêu cầu loại món vượt quá max ({tagMinTotal} &gt; {range.max}) — planner sẽ tự nâng max khi gợi ý.</Typography.Text>}
                     </div>
                 </Box>;
