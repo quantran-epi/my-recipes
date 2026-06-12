@@ -3,9 +3,9 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: ready
-stopped_at: Completed quick task 260612-une
-last_updated: "2026-06-12T15:04:04Z"
-last_activity: 2026-06-12 -- Completed quick task 260612-une: Fix Smart Planner week planning Monday to Sunday
+stopped_at: Completed quick task 260612-uti
+last_updated: "2026-06-12T15:11:25Z"
+last_activity: 2026-06-12 -- Completed quick task 260612-uti: Fix Smart Planner meal slot dish card width and fact rows
 progress:
   total_phases: 5
   completed_phases: 4
@@ -28,7 +28,7 @@ See: .planning/PROJECT.md (updated 2026-06-05)
 Phase: 5 (release-gate-and-product-guardrails) — READY
 Plan: Not started
 Status: Phase 04 complete; ready for Phase 05
-Last activity: 2026-06-12 -- Completed quick task 260612-une: Fix Smart Planner week planning Monday to Sunday
+Last activity: 2026-06-12 -- Completed quick task 260612-uti: Fix Smart Planner meal slot dish card width and fact rows
 
 Progress: [████████░░] 80%
 
@@ -36,6 +36,7 @@ Progress: [████████░░] 80%
 
 | Date | Task | Artifact |
 |------|------|----------|
+| 2026-06-12 | Fix Smart Planner meal slot dish card width and fact rows | `.planning/quick/260612-uti-fix-smart-planner-meal-slot-dish-card-wi/260612-uti-SUMMARY.md` |
 | 2026-06-12 | Fix Smart Planner week planning Monday to Sunday | `.planning/quick/260612-une-fix-smart-planner-week-planning-monday-t/260612-une-SUMMARY.md` |
 | 2026-06-12 | Fix Smart Planner modal button contract and detail help placement | `.planning/quick/260612-uey-fix-smart-planner-modal-button-contract-/260612-uey-SUMMARY.md` |
 | 2026-06-12 | Restore clarified button contract for Smart Planner and Dish Suggester | `.planning/quick/260612-u7s-restore-clarified-button-contract-for-sm/260612-u7s-SUMMARY.md` |

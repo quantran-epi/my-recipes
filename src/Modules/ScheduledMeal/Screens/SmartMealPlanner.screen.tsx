@@ -559,6 +559,54 @@ const pageCss = `
     color: #0f766e;
     margin-right: 3px;
 }
+.smart-planner-slot-card {
+    width: 100%;
+    box-sizing: border-box;
+}
+.smart-planner-slot-card .smart-planner-result-name {
+    display: block;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.smart-planner-slot-facts {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-height: 34px;
+    color: #475569;
+    font-size: 12px;
+    line-height: 16px;
+    margin-top: 4px;
+}
+.smart-planner-slot-fact {
+    display: flex;
+    align-items: center;
+    min-width: 0;
+    width: 100%;
+    white-space: nowrap;
+}
+.smart-planner-slot-fact .anticon {
+    color: #0f766e;
+    flex: 0 0 auto;
+    margin-right: 4px;
+}
+.smart-planner-slot-fact-text {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.smart-planner-slot-dish-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    width: 100%;
+    min-width: 0;
+}
+.smart-planner-slot-dish-list > * {
+    width: 100%;
+}
 .smart-planner-result-reason {
     display: block;
     color: #64748b;
@@ -1086,12 +1134,18 @@ export const SmartMealPlannerScreen: React.FC = () => {
         <div style={{ marginTop: 10 }}>{children}</div>
     </Box>;
 
+    const _renderSlotFact = (icon: React.ReactNode, label: string) => <span className='smart-planner-slot-fact'>
+        {icon}
+        <span className='smart-planner-slot-fact-text'>{label}</span>
+    </span>;
+
     const PlannerDishCard = ({ item, slot, date }: { item?: PlannedDish; slot: MealSlot; date: Dayjs }) => {
         const meta = mealSlotMeta[slot];
-        if (!item) return <Box style={{ border: `1px dashed ${meta.border}`, borderRadius: 8, padding: 10, background: '#fafafa' }}>
+        if (!item) return <Box className='smart-planner-slot-card' style={{ border: `1px dashed ${meta.border}`, borderRadius: 8, padding: 10, background: '#fafafa' }}>
             <Typography.Text type='secondary'>Chưa có gợi ý</Typography.Text>
         </Box>;
         return <Box
+            className='smart-planner-slot-card'
             role='button'
             tabIndex={0}
             aria-label={`Xem chi tiết gợi ý ${item.dish.name}`}
@@ -1108,10 +1162,10 @@ export const SmartMealPlannerScreen: React.FC = () => {
                 <DishImageWidget src={item.dish.image} width={46} height={46} borderRadius={8} fallbackIconSize={24} showBrokenLabel={false} />
                 <div style={{ minWidth: 0 }}>
                     <span className='smart-planner-result-name'>{item.dish.name}</span>
-                    <div className='smart-planner-result-facts'>
-                        {item.totalMinutes !== undefined && item.totalMinutes > 0 && <span><ClockCircleOutlined />{DishDurationHelper.formatMinutes(item.totalMinutes)}</span>}
-                        {item.shoppingCostLabel && <span><ShoppingCartOutlined />Mua {item.shoppingCostLabel}</span>}
-                        {item.leftoverSource && <span><RestOutlined />{item.leftoverSource.eatByLabel} · {item.leftoverSource.portions} phần</span>}
+                    <div className='smart-planner-slot-facts'>
+                        {item.totalMinutes !== undefined && item.totalMinutes > 0 && _renderSlotFact(<ClockCircleOutlined />, DishDurationHelper.formatMinutes(item.totalMinutes))}
+                        {item.shoppingCostLabel && _renderSlotFact(<ShoppingCartOutlined />, `Mua ${item.shoppingCostLabel}`)}
+                        {item.leftoverSource && _renderSlotFact(<RestOutlined />, `${item.leftoverSource.eatByLabel} · ${item.leftoverSource.portions} phần`)}
                     </div>
                     {item.leftoverSource && <Tag style={{ margin: '4px 0 0', color: '#389e0d', background: '#f6ffed', borderColor: '#b7eb8f' }}>Phần còn lại</Tag>}
                     {item.reasons.length > 0 && <span className='smart-planner-result-reason'>{item.reasons.join(' · ')}</span>}
@@ -1827,9 +1881,9 @@ export const SmartMealPlannerScreen: React.FC = () => {
                                         <Typography.Text strong style={{ display: 'block', color: mealSlotMeta[slot].tone, fontSize: 12, lineHeight: '16px', marginBottom: 5 }}>{mealSlotMeta[slot].label}</Typography.Text>
                                         {getDayItemsBySlot(day)[slot].length === 0
                                             ? <PlannerDishCard slot={slot} date={day.date} />
-                                            : <Stack direction='column' gap={6} style={{ width: '100%' }}>
+                                            : <div className='smart-planner-slot-dish-list'>
                                                 {getDayItemsBySlot(day)[slot].map(item => <PlannerDishCard key={`${slot}-${item.dish.id}`} item={item} slot={slot} date={day.date} />)}
-                                            </Stack>}
+                                            </div>}
                                     </div>)}
                                 </div>
                             </>}
