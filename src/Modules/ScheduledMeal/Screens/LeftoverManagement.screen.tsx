@@ -3,6 +3,7 @@ import { Button } from '@components/Button';
 import { Box } from '@components/Layout/Box';
 import { Stack } from '@components/Layout/Stack';
 import { useMessage } from '@components/Message';
+import { useModal } from '@components/Modal/ModalProvider';
 import { Tag } from '@components/Tag';
 import { Tooltip } from '@components/Tootip';
 import { Typography } from '@components/Typography';
@@ -36,6 +37,8 @@ const STATUS_OPTIONS: Array<{ value: StatusFilter; label: string }> = [
     { value: 'finished', label: 'Đã hết' },
     { value: 'discarded', label: 'Đã bỏ' },
 ];
+
+const LEFTOVER_CONFIRM_Z_INDEX = 5200;
 
 const getStatusVisual = (item: LeftoverTrackerItem) => {
     if (item.status === 'discarded') return { color: 'default', label: 'Đã bỏ', accent: '#9ca3af', background: '#f3f4f6', border: '#e5e7eb' };
@@ -129,6 +132,7 @@ export const LeftoverManagementScreen: React.FC = () => {
     useScreenTitle({ value: 'Phần còn lại', deps: [] });
     const dispatch = useDispatch();
     const message = useMessage();
+    const modal = useModal();
     const items = useSelector(selectLeftoverTrackerItems);
     const [statusFilter, setStatusFilter] = useState<StatusFilter>('available');
     const [search, setSearch] = useState('');
@@ -167,9 +171,36 @@ export const LeftoverManagementScreen: React.FC = () => {
         };
     }, [items]);
 
-    const _onEatOne = (id: string) => { dispatch(eatLeftoverPortion(id)); message.success('Đã ghi nhận 1 phần'); };
-    const _onFinish = (id: string) => { dispatch(finishLeftoverItem(id)); message.success('Đã đánh dấu hết'); };
-    const _onDiscard = (id: string) => { dispatch(discardLeftoverItem(id)); message.success('Đã bỏ phần này'); };
+    const _confirmLeftoverAction = (item: LeftoverTrackerItem, action: 'eat' | 'finish' | 'discard') => {
+        const config = action === 'eat'
+            ? {
+                title: 'Xác nhận ăn 1 phần?',
+                content: `Ghi nhận đã ăn 1 phần "${item.dishName}". Còn lại ${Math.max(0, item.portions - 1)} phần sau khi lưu.`,
+                okText: 'Ăn 1 phần',
+                onOk: () => { dispatch(eatLeftoverPortion(item.id)); message.success('Đã ghi nhận 1 phần'); },
+            }
+            : action === 'finish'
+                ? {
+                    title: 'Đánh dấu đã hết?',
+                    content: `"${item.dishName}" sẽ được chuyển sang trạng thái đã hết.`,
+                    okText: 'Đã hết',
+                    onOk: () => { dispatch(finishLeftoverItem(item.id)); message.success('Đã đánh dấu hết'); },
+                }
+                : {
+                    title: 'Bỏ phần còn lại?',
+                    content: `"${item.dishName}" sẽ được đánh dấu đã bỏ và không còn nằm trong phần đang còn.`,
+                    okText: 'Bỏ',
+                    onOk: () => { dispatch(discardLeftoverItem(item.id)); message.success('Đã bỏ phần này'); },
+                    okButtonProps: { danger: true },
+                };
+
+        modal.confirm({
+            ...config,
+            cancelText: 'Hủy',
+            centered: true,
+            zIndex: LEFTOVER_CONFIRM_Z_INDEX,
+        });
+    };
 
     return <Box style={{ width: 'min(920px, calc(100vw - 24px))', margin: '0 auto', padding: '0 0 96px' }}>
         <Box style={{ border: '1px solid rgba(56,158,13,0.18)', borderRadius: 8, background: 'linear-gradient(135deg, #ffffff 0%, #f6ffed 100%)', padding: 12, marginBottom: 12, boxShadow: '0 10px 26px rgba(15,23,42,0.07)' }}>
@@ -232,9 +263,9 @@ export const LeftoverManagementScreen: React.FC = () => {
             {filtered.map(item => <LeftoverItemRow
                 key={item.id}
                 item={item}
-                onEatOne={() => _onEatOne(item.id)}
-                onFinish={() => _onFinish(item.id)}
-                onDiscard={() => _onDiscard(item.id)}
+                onEatOne={() => _confirmLeftoverAction(item, 'eat')}
+                onFinish={() => _confirmLeftoverAction(item, 'finish')}
+                onDiscard={() => _confirmLeftoverAction(item, 'discard')}
             />)}
         </div>}
     </Box>;

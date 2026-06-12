@@ -21,7 +21,7 @@ import { Typography } from '@components/Typography';
 import { useScreenTitle } from '@hooks';
 import { DishImageWidget } from '@modules/Dishes/Screens/DishesManageIngredient/DishImage.widget';
 import { ShoppingListAddWidget } from '@modules/ShoppingList/Screens/ShoppingListAdd.widget';
-import { SmartPlannerEngine, type SmartPlannerCookNowCategory, type SmartPlannerDishRecommendation, type SmartPlannerMealSlot, type SmartPlannerMealSlotDishRanges, type SmartPlannerMealSlotTagRequirements, type SmartPlannerPlanResult, type SmartPlannerPlanSummary, type SmartPlannerPriority, type SmartPlannerSlotTagRequirement } from '@modules/ScheduledMeal/Helpers/SmartPlannerEngine';
+import { SmartPlannerEngine, type SmartPlannerCookNowCategory, type SmartPlannerDishRecommendation, type SmartPlannerMealSlot, type SmartPlannerMealSlotDishRanges, type SmartPlannerMealSlotTagRequirements, type SmartPlannerPlanResult, type SmartPlannerPlanSummary, type SmartPlannerPriority } from '@modules/ScheduledMeal/Helpers/SmartPlannerEngine';
 import { Dishes } from '@store/Models/Dishes';
 import { IngredientUnit } from '@store/Models/Ingredient';
 import { ScheduledMeal } from '@store/Models/ScheduledMeal';
@@ -718,6 +718,7 @@ export const SmartMealPlannerScreen: React.FC = () => {
     const [inventoryAwareBudget, setInventoryAwareBudget] = useState(true);
     const [maxExtraSpend, setMaxExtraSpend] = useState<number | undefined>(100000);
     const [cookNowMealSlot, setCookNowMealSlot] = useState<SmartPlannerMealSlot>('any');
+    const [avoidDishIds, setAvoidDishIds] = useState<string[]>([]);
     const [avoidIngredientIds, setAvoidIngredientIds] = useState<string[]>([]);
     const [mealSlotDishRanges, setMealSlotDishRanges] = useState<SmartPlannerMealSlotDishRanges>(DEFAULT_MEAL_SLOT_DISH_RANGES);
     const [mealSlotTagRequirements, setMealSlotTagRequirements] = useState<SmartPlannerMealSlotTagRequirements>(DEFAULT_MEAL_SLOT_TAG_REQUIREMENTS);
@@ -751,6 +752,7 @@ export const SmartMealPlannerScreen: React.FC = () => {
 
     const selectedNutritionGoalId = useMemo(() => selectedMembers.find(member => Boolean(member.nutritionGoalId))?.nutritionGoalId ?? nutritionGoals[0]?.id, [nutritionGoals, selectedMembers]);
     const memberOptions = useMemo(() => members.map(member => ({ value: member.id, label: member.name })), [members]);
+    const dishOptions = useMemo(() => dishes.map(dish => ({ value: dish.id, label: dish.name })), [dishes]);
     const ingredientOptions = useMemo(() => ingredients.map(ingredient => ({ value: ingredient.id, label: ingredient.name })), [ingredients]);
     const tagRequirementOptions = useMemo(() => collectDishTagOptions(dishes), [dishes]);
     const targetServings = Math.max(1, Math.round(selectedMembers.reduce((sum, member) => sum + (member.portionPreference ?? 1), 0) || 2));
@@ -811,6 +813,7 @@ export const SmartMealPlannerScreen: React.FC = () => {
         nutritionGoalId: selectedNutritionGoalId,
         priorities,
         requiredTags: [],
+        avoidedDishIds: advancedEnabled ? avoidDishIds : [],
         avoidedIngredientIds: advancedEnabled ? avoidIngredientIds : [],
         requiredExpiringIngredientIds: [],
         inventoryAwareBudget: advancedEnabled ? inventoryAwareBudget : true,
@@ -828,7 +831,7 @@ export const SmartMealPlannerScreen: React.FC = () => {
         scheduledMeals,
         cookingSessions,
         dishFeedback,
-    }), [advancedEnabled, avoidIngredientIds, cookNowMealSlot, cookingSessions, dishFeedback, dailyBudget, dishes, ingredients, ingredientsById, inventoryAwareBudget, inventoryConfig, inventoryItems, maxExtraSpend, mealSlotDishRanges, mealSlotTagRequirements, nutritionGoals, priorities, scheduledMeals, scope, selectedMembers, selectedNutritionGoalId, startDate, weeklyBudget]);
+    }), [advancedEnabled, avoidDishIds, avoidIngredientIds, cookNowMealSlot, cookingSessions, dishFeedback, dailyBudget, dishes, ingredients, ingredientsById, inventoryAwareBudget, inventoryConfig, inventoryItems, maxExtraSpend, mealSlotDishRanges, mealSlotTagRequirements, nutritionGoals, priorities, scheduledMeals, scope, selectedMembers, selectedNutritionGoalId, startDate, weeklyBudget]);
 
     const visibleCookNowRecommendations = useMemo(() => {
         const dismissed = new Set(dismissedDishIds);
@@ -1493,35 +1496,44 @@ export const SmartMealPlannerScreen: React.FC = () => {
                 const tagMinTotal = tagRequirements.reduce((sum, item) => sum + Math.max(0, item.min), 0);
                 return <Box key={slot} style={{ border: `1px solid ${meta.border}`, borderRadius: 8, background: '#fff', padding: 12 }}>
                     <Stack justify='space-between' align='center' gap={10} wrap='wrap' style={{ width: '100%' }}>
-                        <Tag style={{ marginRight: 0, color: meta.tone, background: meta.background, borderColor: meta.border, minWidth: 52, textAlign: 'center' }}>{meta.label}</Tag>
+                        <Stack align='center' gap={6} wrap='wrap' style={{ minWidth: 0 }}>
+                            <Tag style={{ marginRight: 0, color: meta.tone, background: meta.background, borderColor: meta.border, minWidth: 52, textAlign: 'center' }}>{meta.label}</Tag>
+                            <Tag color='blue' style={{ marginRight: 0 }}>{range.min}-{range.max} món</Tag>
+                            {tagMinTotal > 0 && <Tag color='cyan' style={{ marginRight: 0 }}>{tagMinTotal} món bắt buộc</Tag>}
+                        </Stack>
                         <Stack align='center' gap={10} wrap='wrap'>
                             {renderStepperControl('Min', range.min, () => _stepMealSlotDishRange(slot, 'min', -1), () => _stepMealSlotDishRange(slot, 'min', 1), range.min <= 0, range.min >= MEAL_SLOT_RANGE_MAX)}
                             {renderStepperControl('Max', range.max, () => _stepMealSlotDishRange(slot, 'max', -1), () => _stepMealSlotDishRange(slot, 'max', 1), range.max <= 0, range.max >= MEAL_SLOT_RANGE_MAX)}
-                            <Tag color='blue' style={{ marginRight: 0 }}>{range.min}-{range.max} món</Tag>
                         </Stack>
                     </Stack>
 
-                    <div style={{ marginTop: 10, paddingTop: 10, borderTop: '1px dashed rgba(15,23,42,0.08)' }}>
-                        <Stack align='center' justify='space-between' gap={6} wrap='wrap' style={{ marginBottom: 7 }}>
-                            <Typography.Text strong style={{ fontSize: 12, lineHeight: '17px', color: '#334155' }}>Bắt buộc có loại món</Typography.Text>
-                            <Typography.Text type='secondary' style={{ fontSize: 11, lineHeight: '16px' }}>Tổng yêu cầu: {tagMinTotal} món</Typography.Text>
-                        </Stack>
-                        {tagRequirementOptions.length === 0 ? <Typography.Text type='secondary' style={{ display: 'block', fontSize: 11, lineHeight: '16px' }}>Chưa có món nào gắn nhãn. Thêm tag cho món trong trang Món ăn để dùng tính năng này.</Typography.Text> : <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 6 }}>
-                            {tagRequirementOptions.map(tag => {
-                                const value = tagRequirements.find(item => item.tag === tag)?.min ?? 0;
-                                const active = value > 0;
-                                return <Stack key={tag} justify='space-between' align='center' gap={6} style={{ padding: '6px 8px', borderRadius: 6, border: `1px solid ${active ? 'rgba(19,168,168,0.40)' : 'rgba(15,23,42,0.08)'}`, background: active ? '#e6fffb' : '#f8fafc' }}>
-                                    <Typography.Text style={{ fontSize: 12, lineHeight: '17px', color: active ? '#0f766e' : '#475569', overflowWrap: 'anywhere' }}>{tag}</Typography.Text>
-                                    <Stack align='center' gap={3} style={{ flexShrink: 0 }}>
-                                        <Button aria-label={`Giảm yêu cầu ${tag}`} icon={<MinusOutlined />} disabled={value <= 0} onClick={() => _stepSlotTagRequirement(slot, tag, -1)} style={{ width: 24, height: 24, paddingInline: 0, borderRadius: 999, display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }} />
-                                        <span style={{ minWidth: 18, textAlign: 'center', fontSize: 12, fontWeight: 700, color: active ? '#0f766e' : '#9ca3af' }}>{value}</span>
-                                        <Button aria-label={`Tăng yêu cầu ${tag}`} icon={<PlusOutlined />} disabled={value >= MEAL_SLOT_RANGE_MAX} onClick={() => _stepSlotTagRequirement(slot, tag, 1)} style={{ width: 24, height: 24, paddingInline: 0, borderRadius: 999, display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }} />
-                                    </Stack>
-                                </Stack>;
-                            })}
-                        </div>}
-                        {tagMinTotal > range.max && <Typography.Text style={{ display: 'block', color: '#ad4e00', fontSize: 11, lineHeight: '16px', marginTop: 6 }}>Yêu cầu loại món vượt quá max ({tagMinTotal} &gt; {range.max}) — planner sẽ tự nâng max khi gợi ý.</Typography.Text>}
-                    </div>
+                    <Collapse
+                        ghost
+                        size='small'
+                        style={{ marginTop: 10, paddingTop: 8, borderTop: '1px dashed rgba(15,23,42,0.08)' }}
+                        items={[{
+                            key: `${slot}-tags`,
+                            label: <Stack align='center' justify='space-between' gap={6} wrap='wrap' style={{ width: '100%' }}>
+                                <Typography.Text strong style={{ fontSize: 12, lineHeight: '17px', color: '#334155' }}>Bắt buộc có loại món</Typography.Text>
+                                <Typography.Text type='secondary' style={{ fontSize: 11, lineHeight: '16px' }}>Tổng yêu cầu: {tagMinTotal} món</Typography.Text>
+                            </Stack>,
+                            children: tagRequirementOptions.length === 0 ? <Typography.Text type='secondary' style={{ display: 'block', fontSize: 11, lineHeight: '16px' }}>Chưa có món nào gắn nhãn. Thêm tag cho món trong trang Món ăn để dùng tính năng này.</Typography.Text> : <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 6 }}>
+                                {tagRequirementOptions.map(tag => {
+                                    const value = tagRequirements.find(item => item.tag === tag)?.min ?? 0;
+                                    const active = value > 0;
+                                    return <Stack key={tag} justify='space-between' align='center' gap={6} style={{ padding: '6px 8px', borderRadius: 6, border: `1px solid ${active ? 'rgba(19,168,168,0.40)' : 'rgba(15,23,42,0.08)'}`, background: active ? '#e6fffb' : '#f8fafc' }}>
+                                        <Typography.Text style={{ fontSize: 12, lineHeight: '17px', color: active ? '#0f766e' : '#475569', overflowWrap: 'anywhere' }}>{tag}</Typography.Text>
+                                        <Stack align='center' gap={3} style={{ flexShrink: 0 }}>
+                                            <Button aria-label={`Giảm yêu cầu ${tag}`} icon={<MinusOutlined />} disabled={value <= 0} onClick={() => _stepSlotTagRequirement(slot, tag, -1)} style={{ width: 24, height: 24, paddingInline: 0, borderRadius: 999, display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }} />
+                                            <span style={{ minWidth: 18, textAlign: 'center', fontSize: 12, fontWeight: 700, color: active ? '#0f766e' : '#9ca3af' }}>{value}</span>
+                                            <Button aria-label={`Tăng yêu cầu ${tag}`} icon={<PlusOutlined />} disabled={value >= MEAL_SLOT_RANGE_MAX} onClick={() => _stepSlotTagRequirement(slot, tag, 1)} style={{ width: 24, height: 24, paddingInline: 0, borderRadius: 999, display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }} />
+                                        </Stack>
+                                    </Stack>;
+                                })}
+                            </div>,
+                        }]}
+                    />
+                    {tagMinTotal > range.max && <Typography.Text style={{ display: 'block', color: '#ad4e00', fontSize: 11, lineHeight: '16px', marginTop: 6 }}>Yêu cầu loại món vượt quá max ({tagMinTotal} &gt; {range.max}) — planner sẽ tự nâng max khi gợi ý.</Typography.Text>}
                 </Box>;
             })}
             {getMealSlotRangeError(mealSlotDishRanges) && <Box style={{ border: '1px solid #ffd591', borderRadius: 8, background: '#fff7e6', padding: 9 }}>
@@ -1609,11 +1621,11 @@ export const SmartMealPlannerScreen: React.FC = () => {
                             key: 'advanced',
                             label: <span className='smart-planner-advanced-head'>
                                 <span className='smart-planner-advanced-title'><SlidersOutlined /> Tinh chỉnh nâng cao</span>
-                                <span className='smart-planner-advanced-sub'>{advancedEnabled ? 'Đang dùng ngân sách, tồn kho và loại trừ rõ ràng' : 'Đang tắt; planner bỏ qua toàn bộ thiết lập nâng cao'}</span>
+                                <span className='smart-planner-advanced-sub'>{advancedEnabled ? 'Đang dùng ngân sách, tồn kho và loại trừ món/nguyên liệu' : 'Đang tắt; planner bỏ qua toàn bộ thiết lập nâng cao'}</span>
                             </span>,
                             children: <>
-                                <Box style={{ border: '1px solid rgba(19,168,168,0.16)', background: advancedEnabled ? '#ecfdf5' : '#f8fafc', borderRadius: 8, padding: 10 }}>
-                                    <PlannerFieldLabel helpKey='advanced-enabled' label={<><SlidersOutlined /> Dùng thiết lập nâng cao</>}>Khi tắt, planner bỏ qua ngân sách ngày/tuần, giới hạn mua thêm, công tắc dùng dữ liệu tồn kho và danh sách loại trừ trong phần này. Dị ứng và chặn cứng trong hồ sơ thành viên vẫn luôn được áp dụng.</PlannerFieldLabel>
+                                <Box style={{ border: '1px solid rgba(19,168,168,0.16)', background: advancedEnabled ? '#ecfdf5' : '#f8fafc', borderRadius: 8, padding: 10, marginBottom: advancedEnabled ? 12 : 0 }}>
+                                    <PlannerFieldLabel helpKey='advanced-enabled' label={<><SlidersOutlined /> Dùng thiết lập nâng cao</>}>Khi tắt, planner bỏ qua ngân sách ngày/tuần, giới hạn mua thêm, công tắc dùng dữ liệu tồn kho và danh sách loại trừ món/nguyên liệu trong phần này. Dị ứng và chặn cứng trong hồ sơ thành viên vẫn luôn được áp dụng.</PlannerFieldLabel>
                                     <div className='smart-planner-toggle-row'>
                                         <Typography.Text style={{ fontSize: 12, lineHeight: '18px', color: '#334155' }}>{advancedEnabled ? 'Đang áp dụng thiết lập nâng cao' : 'Đang bỏ qua thiết lập nâng cao'}</Typography.Text>
                                         <Switch checked={advancedEnabled} onChange={checked => { setAdvancedEnabled(checked); _clearSuggestions(); }} />
@@ -1648,11 +1660,19 @@ export const SmartMealPlannerScreen: React.FC = () => {
 
                                     <div className='smart-planner-adv-group'>
                                         <p className='smart-planner-adv-group-title'>Loại trừ rõ ràng</p>
-                                        <PlannerFieldLabel helpKey='avoid-ingredients' label={<><FilterOutlined /> Loại trừ nguyên liệu</>}>Món chứa bất kỳ nguyên liệu nào ở đây sẽ bị loại khỏi gợi ý. Đây là bộ lọc rõ ràng của lần lập thực đơn này.</PlannerFieldLabel>
-                                        <Select mode='multiple' allowClear maxTagCount='responsive' maxTagPlaceholder={renderResponsiveTagPlaceholder} dropdownRender={createSelectedOptionsDropdownRender({ mode: 'multiple', value: avoidIngredientIds, options: ingredientOptions })} value={avoidIngredientIds} onChange={value => { setAvoidIngredientIds(value); _clearSuggestions(); }} options={ingredientOptions} placeholder='Chọn nguyên liệu cần loại trừ' style={{ width: '100%' }} />
+                                        <div className='smart-planner-adv-grid'>
+                                            <div>
+                                                <PlannerFieldLabel helpKey='avoid-dishes' label={<><StopOutlined /> Loại trừ món</>}>Món được chọn ở đây sẽ bị loại khỏi gợi ý. Nếu một món khác ghép món này vào công thức, món đó cũng bị loại.</PlannerFieldLabel>
+                                                <Select mode='multiple' allowClear maxTagCount='responsive' maxTagPlaceholder={renderResponsiveTagPlaceholder} dropdownRender={createSelectedOptionsDropdownRender({ mode: 'multiple', value: avoidDishIds, options: dishOptions })} value={avoidDishIds} onChange={value => { setAvoidDishIds(value); _clearSuggestions(); }} options={dishOptions} placeholder='Chọn món cần loại trừ' style={{ width: '100%' }} />
+                                            </div>
+                                            <div>
+                                                <PlannerFieldLabel helpKey='avoid-ingredients' label={<><FilterOutlined /> Loại trừ nguyên liệu</>}>Món chứa bất kỳ nguyên liệu nào ở đây sẽ bị loại khỏi gợi ý. Đây là bộ lọc rõ ràng của lần lập thực đơn này.</PlannerFieldLabel>
+                                                <Select mode='multiple' allowClear maxTagCount='responsive' maxTagPlaceholder={renderResponsiveTagPlaceholder} dropdownRender={createSelectedOptionsDropdownRender({ mode: 'multiple', value: avoidIngredientIds, options: ingredientOptions })} value={avoidIngredientIds} onChange={value => { setAvoidIngredientIds(value); _clearSuggestions(); }} options={ingredientOptions} placeholder='Chọn nguyên liệu cần loại trừ' style={{ width: '100%' }} />
+                                            </div>
+                                        </div>
                                     </div>
                                 </> : <Box style={{ marginTop: 10, border: '1px dashed rgba(15,23,42,0.14)', borderRadius: 8, background: '#fff', padding: 10 }}>
-                                    <Typography.Text type='secondary' style={{ display: 'block', fontSize: 12, lineHeight: '18px' }}>Các ưu tiên nhanh phía trên vẫn hoạt động. Riêng ngân sách nâng cao, giới hạn mua thêm, công tắc dùng tồn kho và loại trừ nguyên liệu đang được bỏ qua.</Typography.Text>
+                                    <Typography.Text type='secondary' style={{ display: 'block', fontSize: 12, lineHeight: '18px' }}>Các ưu tiên nhanh phía trên vẫn hoạt động. Riêng ngân sách nâng cao, giới hạn mua thêm, công tắc dùng tồn kho và loại trừ món/nguyên liệu đang được bỏ qua.</Typography.Text>
                                 </Box>}
                             </>,
                         }]}

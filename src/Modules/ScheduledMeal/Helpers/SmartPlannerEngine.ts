@@ -162,6 +162,7 @@ export type BuildSmartPlannerInput = {
     nutritionGoalId?: string;
     priorities: SmartPlannerPriority[];
     requiredTags: string[];
+    avoidedDishIds: string[];
     avoidedIngredientIds: string[];
     requiredExpiringIngredientIds: string[];
     inventoryAwareBudget: boolean;
@@ -359,7 +360,8 @@ const normalizePlannerInput = (input: BuildSmartPlannerInput): BuildSmartPlanner
         shoppingMode: advancedEnabled ? input.shoppingMode : 'normal',
         maxExtraSpend: advancedEnabled ? input.maxExtraSpend : undefined,
         requiredTags: advancedEnabled ? input.requiredTags : [],
-        avoidedIngredientIds: advancedEnabled ? input.avoidedIngredientIds : [],
+        avoidedDishIds: advancedEnabled ? (input.avoidedDishIds ?? []) : [],
+        avoidedIngredientIds: advancedEnabled ? (input.avoidedIngredientIds ?? []) : [],
         requiredExpiringIngredientIds: advancedEnabled ? input.requiredExpiringIngredientIds : [],
         inventoryAwareBudget: advancedEnabled ? input.inventoryAwareBudget : true,
         mealSlotDishRanges: getMealSlotDishRanges(input),
@@ -567,15 +569,27 @@ const getVarietyScore = (dish: Dishes, input: BuildSmartPlannerInput, usage: Usa
     };
 };
 
+const getDishTreeIds = (dish: Dishes, dishes: Dishes[], visited = new Set<string>()): string[] => {
+    if (visited.has(dish.id)) return [];
+    visited.add(dish.id);
+    return [dish.id, ...(dish.includeDishes ?? []).flatMap(id => {
+        const included = dishes.find(item => item.id === id);
+        return included ? getDishTreeIds(included, dishes, visited) : [id];
+    })];
+};
+
 const getHardBlockReasons = (dish: Dishes, input: BuildSmartPlannerInput, cost: DishCostInfo, minutes: number): string[] => {
     const ingredientIds = new Set(getSmartPlannerDishIngredientIds(dish, input.dishes));
     const tags = new Set(dish.tags ?? []);
+    const avoidedDishIds = input.avoidedDishIds ?? [];
+    const dishIds = avoidedDishIds.length > 0 ? new Set(getDishTreeIds(dish, input.dishes)) : null;
     const hardSafetyReasons = HouseholdSuitabilityHelper.getHardBlockReasons(dish, input.members, input.dishes, input.ingredientsById);
     const blockers = [...hardSafetyReasons];
     const shoppingMode = input.shoppingMode;
 
     if (shoppingMode === 'no_shopping' && cost.missingRequiredIngredientCount > 0) blockers.push('Thiếu nguyên liệu bắt buộc trong chế độ không đi mua');
     if (input.strictTime && input.maxCookMinutes && (minutes <= 0 || minutes > input.maxCookMinutes)) blockers.push('Vượt thời gian nấu tối đa');
+    if (dishIds && avoidedDishIds.some(id => dishIds.has(id))) blockers.push('Có món trong danh sách chặn');
     if (input.avoidedIngredientIds.length > 0 && input.avoidedIngredientIds.some(id => ingredientIds.has(id))) blockers.push('Có nguyên liệu trong danh sách chặn');
     if (input.requiredExpiringIngredientIds.length > 0 && input.requiredExpiringIngredientIds.some(id => !ingredientIds.has(id))) blockers.push('Không dùng đủ nguyên liệu sắp hết hạn bắt buộc');
     if (input.requiredTags.length > 0 && input.requiredTags.some(tag => !tags.has(tag))) blockers.push('Không có tag món bắt buộc');
