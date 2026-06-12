@@ -6,7 +6,7 @@ import { getHouseholdHealthStatusMeta } from '@common/Helpers/HouseholdHealthHel
 import type { HouseholdDishSuitability } from '@common/Helpers/HouseholdSuitabilityHelper';
 import { IngredientPriceHelper } from '@common/Helpers/IngredientPriceHelper';
 import { NutritionGoalHelper, type NutritionGoalMatch } from '@common/Helpers/NutritionGoalHelper';
-import { Button } from '@components/Button';
+import { ActionButton, Button } from '@components/Button';
 import { Collapse } from '@components/Collapse';
 import { Dropdown } from '@components/Dropdown';
 import { createSelectedOptionsDropdownRender, renderResponsiveTagPlaceholder } from '@components/Form/Select';
@@ -1207,7 +1207,7 @@ export const SmartMealPlannerScreen: React.FC = () => {
         title='Chi tiết gợi ý món'
         width={760}
         destroyOnClose
-        footer={<Button onClick={() => setDetailSelection(undefined)}>Đóng</Button>}
+        footer={<ActionButton onClick={() => setDetailSelection(undefined)}>Đóng</ActionButton>}
         bodyStyle={{ background: '#f8fafc' }}
     >
         <Stack className='smart-planner-detail-modal' direction='column' gap={12} fullwidth>
@@ -1380,7 +1380,7 @@ export const SmartMealPlannerScreen: React.FC = () => {
         width={720}
         destroyOnClose
         footer={<Stack justify='flex-end' gap={8}>
-            <Button onClick={() => setShoppingPreviewOpen(false)}>Hủy</Button>
+            <ActionButton onClick={() => setShoppingPreviewOpen(false)}>Hủy</ActionButton>
             <Button type='primary' icon={<CheckCircleOutlined />} onClick={_createScheduledMeals}>Tạo thực đơn</Button>
         </Stack>}
         bodyStyle={{ background: '#f8fafc' }}
@@ -1442,7 +1442,7 @@ export const SmartMealPlannerScreen: React.FC = () => {
         width={520}
         destroyOnClose
         footer={<Stack justify='flex-end' gap={8}>
-            <Button onClick={() => setScheduleSelection(undefined)}>Hủy</Button>
+            <ActionButton onClick={() => setScheduleSelection(undefined)}>Hủy</ActionButton>
             <Button type='primary' icon={<CalendarOutlined />} onClick={_scheduleCookNowSelection}>Lên lịch</Button>
         </Stack>}
     >
@@ -1517,7 +1517,7 @@ export const SmartMealPlannerScreen: React.FC = () => {
         width={620}
         destroyOnClose
         footer={<Stack justify='flex-end' gap={8}>
-            <Button onClick={() => setMealRangeModalOpen(false)}>Hủy</Button>
+            <ActionButton onClick={() => setMealRangeModalOpen(false)}>Hủy</ActionButton>
             <Button type='primary' icon={<ThunderboltOutlined />} onClick={_confirmMealRangeModal}>Gợi ý</Button>
         </Stack>}
         bodyStyle={{ background: '#f8fafc' }}
@@ -1802,7 +1802,7 @@ export const SmartMealPlannerScreen: React.FC = () => {
                     </React.Fragment> : <React.Fragment>
                         <Stack justify='space-between' align='center' gap={8} wrap='wrap'>
                             <Typography.Text type='secondary' style={{ fontSize: 12, lineHeight: '18px' }}>Mỗi ngày có vài phương án. Bấm đổi để bốc tổ hợp món hợp lệ khác.</Typography.Text>
-                            <Button icon={<ThunderboltOutlined />} loading={isSuggesting} onClick={() => _suggestMeals(true)}>Đổi phương án khác</Button>
+                            <ActionButton tone='primary' icon={<ThunderboltOutlined />} disabled={isSuggesting} onClick={() => _suggestMeals(true)}>Đổi phương án khác</ActionButton>
                         </Stack>
                         {plannedDays.map(day => <Box key={day.date.format('YYYY-MM-DD')} style={{ border: '1px solid rgba(19,168,168,0.12)', borderRadius: 8, padding: 10, background: '#fff' }}>
                             <Stack align='center' gap={8} style={{ marginBottom: 10 }}>
