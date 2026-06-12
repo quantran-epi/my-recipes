@@ -73,7 +73,7 @@ const PrepTaskRow: React.FC<{ task: PrepTask; doneAt?: string; compact?: boolean
                     {compact && <Typography.Text strong style={{ color: dueSoon ? '#fa541c' : tone.color, fontSize: 13 }}>{task.startAt.format('HH:mm')}</Typography.Text>}
                     <Tag style={{ marginRight: 0, color: tone.color, background: tone.background, borderColor: tone.border }}>{task.phaseLabel} · {DishDurationHelper.formatMinutes(task.minutes)}</Tag>
                     {dueSoon && <Tag color={urgent ? 'red' : 'orange'} style={{ marginRight: 0 }}>{urgent ? 'Cần làm ngay' : 'Sắp đến giờ'}</Tag>}
-                    <ActionButton aria-label='Cách tính việc chuẩn bị' aria-expanded={helpOpen} icon={<QuestionCircleOutlined />} onClick={() => setHelpOpen(value => !value)} style={{ color: helpOpen ? '#13a8a8' : '#64748b', borderColor: helpOpen ? 'rgba(19,168,168,0.32)' : 'rgba(15,23,42,0.14)', background: helpOpen ? 'rgba(19,168,168,0.08)' : '#fff' }} />
+                    <ActionButton shape='circle' aria-label='Cách tính việc chuẩn bị' aria-expanded={helpOpen} icon={<QuestionCircleOutlined />} onClick={() => setHelpOpen(value => !value)} style={{ color: helpOpen ? '#13a8a8' : '#64748b', borderColor: helpOpen ? 'rgba(19,168,168,0.32)' : 'rgba(15,23,42,0.14)', background: helpOpen ? 'rgba(19,168,168,0.08)' : '#fff' }} />
                 </Stack>
                 <Typography.Text strong style={{ display: 'block', color: done ? '#8c8c8c' : '#111827', fontSize: 13, lineHeight: '18px', marginTop: 4, textDecoration: done ? 'line-through' : undefined, overflowWrap: 'anywhere' }}>{task.dishName}</Typography.Text>
                 <Typography.Text type='secondary' style={{ display: 'block', fontSize: 12, lineHeight: '17px', marginTop: 2 }}>

@@ -468,6 +468,7 @@ const SectionCard: React.FunctionComponent<{ title: string; subtitle: string; he
                     </div>
                 </Stack>
                 <ActionButton
+                    shape='circle'
                     aria-label={`Mô tả ${title}`}
                     aria-expanded={showHelp}
                     icon={<QuestionCircleOutlined />}
@@ -538,6 +539,7 @@ const ExpenseSignalCard: React.FunctionComponent<{
                 <Typography.Text strong style={{ display: 'block', color: '#111827', fontSize: 16, lineHeight: '20px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{totalLabel}</Typography.Text>
             </div>
             <ActionButton
+                shape='circle'
                 aria-label='Mô tả chi phí còn cần mua'
                 aria-expanded={showHelp}
                 icon={<QuestionCircleOutlined />}

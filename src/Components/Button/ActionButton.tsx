@@ -19,6 +19,7 @@ interface ActionButtonProps {
     children?: ReactNode;
     height?: number;
     fontSize?: number;
+    shape?: 'square' | 'circle';
     style?: React.CSSProperties;
     className?: string;
     'aria-label'?: string;
@@ -46,6 +47,7 @@ export const ActionButton: FC<ActionButtonProps> = ({
     children,
     height = 32,
     fontSize = 12,
+    shape = 'square',
     style,
     className,
     htmlType,
@@ -54,6 +56,7 @@ export const ActionButton: FC<ActionButtonProps> = ({
 }) => {
     const palette = TONE_PALETTE[tone];
     const iconOnly = Boolean(icon) && React.Children.count(children) === 0;
+    const borderRadius = iconOnly && shape === 'circle' ? 999 : 8;
     const {
         height: _ignoredHeight,
         borderRadius: _ignoredBorderRadius,
@@ -74,7 +77,7 @@ export const ActionButton: FC<ActionButtonProps> = ({
             height,
             width: iconOnly ? height : requestedWidth,
             padding: iconOnly ? 0 : '0 10px',
-            borderRadius: 8,
+            borderRadius,
             color: palette.color,
             borderColor: palette.border,
             fontWeight: 650,

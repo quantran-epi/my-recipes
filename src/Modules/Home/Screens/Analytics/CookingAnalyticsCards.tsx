@@ -43,7 +43,7 @@ const AnalyticsCard: React.FC<{ title: string; subtitle: string; help: string; h
             <Typography.Text strong style={{ display: 'block', color: '#111827', fontSize: 14, lineHeight: '19px' }}>{title}</Typography.Text>
             <Typography.Text type='secondary' style={{ display: 'block', fontSize: 12, lineHeight: '17px', marginTop: 2 }}>{subtitle}</Typography.Text>
         </div>
-        <ActionButton aria-label={`Giải thích ${title}`} aria-expanded={openHelpKey === helpKey} icon={<QuestionCircleOutlined />} onClick={() => onToggleHelp(helpKey)} style={{ color: openHelpKey === helpKey ? '#13a8a8' : '#64748b', borderColor: openHelpKey === helpKey ? 'rgba(19,168,168,0.32)' : 'rgba(15,23,42,0.14)', background: openHelpKey === helpKey ? 'rgba(19,168,168,0.08)' : '#fff' }} />
+        <ActionButton shape='circle' aria-label={`Giải thích ${title}`} aria-expanded={openHelpKey === helpKey} icon={<QuestionCircleOutlined />} onClick={() => onToggleHelp(helpKey)} style={{ color: openHelpKey === helpKey ? '#13a8a8' : '#64748b', borderColor: openHelpKey === helpKey ? 'rgba(19,168,168,0.32)' : 'rgba(15,23,42,0.14)', background: openHelpKey === helpKey ? 'rgba(19,168,168,0.08)' : '#fff' }} />
     </Stack>
     {openHelpKey === helpKey && <Box style={{ marginTop: 8, padding: '8px 10px', borderRadius: 6, background: 'rgba(19,168,168,0.08)', border: '1px solid rgba(19,168,168,0.18)' }}>
         <Typography.Text type='secondary' style={{ display: 'block', fontSize: 12, lineHeight: '18px' }}>{help}</Typography.Text>
