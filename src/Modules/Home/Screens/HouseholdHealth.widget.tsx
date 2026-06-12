@@ -439,13 +439,13 @@ export const HouseholdHealthWidget: React.FC<{ member: HouseholdMemberProfile }>
     return <Stack direction='column' gap={14} style={{ width: '100%' }}>
         <style>{healthCss}</style>
         <Box style={{ border: '1px solid rgba(15,23,42,0.08)', borderRadius: 8, background: '#fff', padding: 12 }}>
-            <Stack justify='space-between' align='flex-start' gap={8} wrap='wrap' style={{ marginBottom: 10, width: '100%' }}>
-                <Stack align='center' gap={8} style={{ minWidth: 0, justifyContent: 'flex-start', textAlign: 'left' }}>
+            <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 8, flexWrap: 'wrap', marginBottom: 10, width: '100%' }}>
+                <div style={{ minWidth: 0, display: 'flex', alignItems: 'center', justifyContent: 'flex-start', gap: 8, textAlign: 'left' }}>
                     <HeartOutlined style={{ color: getHouseholdHealthStatusMeta(draft.status).tone }} />
-                    <Typography.Text strong style={{ color: '#111827' }}>Hồ sơ sức khỏe</Typography.Text>
-                </Stack>
+                    <Typography.Text strong style={{ display: 'block', color: '#111827', textAlign: 'left' }}>Hồ sơ sức khỏe</Typography.Text>
+                </div>
                 <HouseholdHealthStatusTag status={draft.status} note={draft.statusNote} />
-            </Stack>
+            </div>
 
             <div style={fieldListStyle}>
                 <div style={{ ...fieldRowStyle, borderTop: 0, paddingTop: 0 }}>

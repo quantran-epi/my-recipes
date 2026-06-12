@@ -356,10 +356,22 @@ const pageCss = `
     overflow-wrap: anywhere;
 }
 .smart-planner-summary {
+    width: 100%;
+    box-sizing: border-box;
     border: 1px solid rgba(19,168,168,0.18);
     border-radius: 12px;
     background: linear-gradient(180deg, #f0fdfa 0%, #ffffff 100%);
     padding: 14px;
+}
+.smart-planner-detail-modal {
+    width: 100%;
+}
+.smart-planner-detail-modal > .ant-space-item {
+    width: 100%;
+}
+.smart-planner-detail-section {
+    width: 100%;
+    box-sizing: border-box;
 }
 .smart-planner-ranking-head {
     display: flex;
@@ -952,7 +964,7 @@ export const SmartMealPlannerScreen: React.FC = () => {
         {openHelpKey === helpKey && <div className='smart-planner-field-help'>{children}</div>}
     </>;
 
-    const DetailSection = ({ title, description, children }: { title: React.ReactNode; description: React.ReactNode; children: React.ReactNode }) => <Box style={{ border: '1px solid rgba(15,23,42,0.08)', borderRadius: 8, padding: 12, background: '#fff' }}>
+    const DetailSection = ({ title, description, children }: { title: React.ReactNode; description: React.ReactNode; children: React.ReactNode }) => <Box className='smart-planner-detail-section' style={{ border: '1px solid rgba(15,23,42,0.08)', borderRadius: 8, padding: 12, background: '#fff' }}>
         <Typography.Text strong style={{ display: 'block', color: '#111827', fontSize: 14, lineHeight: '19px' }}>{title}</Typography.Text>
         <Typography.Text type='secondary' style={{ display: 'block', fontSize: 12, lineHeight: '18px', marginTop: 3 }}>{description}</Typography.Text>
         <div style={{ marginTop: 10 }}>{children}</div>
@@ -1084,8 +1096,8 @@ export const SmartMealPlannerScreen: React.FC = () => {
         footer={<Button onClick={() => setDetailSelection(undefined)}>Đóng</Button>}
         bodyStyle={{ background: '#f8fafc' }}
     >
-        <Stack direction='column' gap={12} style={{ width: '100%' }}>
-            <Box data-testid='smart-planner-suggestion-detail-modal' style={{ display: 'grid', gridTemplateColumns: '56px minmax(0, 1fr)', gap: 12, alignItems: 'start' }}>
+        <Stack className='smart-planner-detail-modal' direction='column' gap={12} fullwidth>
+            <Box data-testid='smart-planner-suggestion-detail-modal' style={{ display: 'grid', gridTemplateColumns: '56px minmax(0, 1fr)', gap: 12, alignItems: 'start', width: '100%', boxSizing: 'border-box' }}>
                 <DishImageWidget src={detailSelection.item.dish.image} width={56} height={56} borderRadius={8} fallbackIconSize={28} showBrokenLabel={false} />
                 <div style={{ minWidth: 0 }}>
                     <Stack wrap='wrap' align='center' gap={6}>

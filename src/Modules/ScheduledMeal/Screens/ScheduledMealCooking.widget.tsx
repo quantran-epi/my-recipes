@@ -1,24 +1,67 @@
-import { CheckCircleOutlined, FireOutlined, RestOutlined } from '@ant-design/icons';
+import { CheckCircleOutlined, EyeOutlined, FireOutlined, HistoryOutlined, RestOutlined } from '@ant-design/icons';
 import { DishServingHelper } from '@common/Helpers/DishServingHelper';
 import { Button } from '@components/Button';
 import { Box } from '@components/Layout/Box';
 import { Stack } from '@components/Layout/Stack';
 import { useMessage } from '@components/Message';
 import { DeferredModalContent, Modal } from '@components/Modal';
+import { Tag } from '@components/Tag';
 import { Typography } from '@components/Typography';
 import { CookingSessionWidget } from '@modules/Dishes/Screens/CookingSession.widget';
 import { Dishes } from '@store/Models/Dishes';
-import { CookingSessionMemberFeedback } from '@store/Models/CookingSession';
+import { CookingMealFeedbackHistoryRecord, CookingMealFeedbackSlot, CookingSessionMemberFeedback } from '@store/Models/CookingSession';
 import { addLeftoverTrackerItem } from '@store/Reducers/AppContextReducer';
-import { recordDishFeedback, startCooking } from '@store/Reducers/CookingSessionReducer';
-import { selectCookingSessions, selectDishes, selectDishesById, selectSelectedHouseholdMembers } from '@store/Selectors';
-import { Input, InputNumber, Select, Switch } from 'antd';
+import { saveMealFeedbackHistory, startCooking } from '@store/Reducers/CookingSessionReducer';
+import { selectCookingSessions, selectDishFeedbackHistory, selectDishes, selectDishesById, selectSelectedHouseholdMembers } from '@store/Selectors';
+import { DatePicker, Empty, Input, InputNumber, Select, Switch } from 'antd';
 import dayjs from 'dayjs';
 import { nanoid } from 'nanoid';
 import React, { useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
 export const getScheduledMealDishIds = (dishIds: string[]): string[] => Array.from(new Set(dishIds.filter(Boolean)));
+
+const getMealDateKey = (value?: Date | string) => dayjs(value ?? new Date()).format('YYYY-MM-DD');
+
+const feedbackOptions: Array<{ value: CookingSessionMemberFeedback; label: string }> = [
+    { value: 'liked', label: 'Thích' },
+    { value: 'neutral', label: 'Bình thường' },
+    { value: 'disliked', label: 'Không hợp' },
+];
+
+const feedbackLabelByValue: Record<CookingSessionMemberFeedback, string> = feedbackOptions.reduce((result, option) => ({
+    ...result,
+    [option.value]: option.label,
+}), {} as Record<CookingSessionMemberFeedback, string>);
+
+const feedbackColorByValue: Record<CookingSessionMemberFeedback, string> = {
+    liked: 'green',
+    neutral: 'blue',
+    disliked: 'volcano',
+};
+
+const findMealFeedbackRecord = (
+    history: CookingMealFeedbackHistoryRecord[],
+    dishId: string,
+    context: { scheduledMealId?: string; mealSlot?: CookingMealFeedbackSlot; mealDate?: Date | string; mealTitle?: string },
+): CookingMealFeedbackHistoryRecord | undefined => {
+    const mealDate = getMealDateKey(context.mealDate);
+    return history.find(record => {
+        if (context.scheduledMealId && context.mealSlot) {
+            return record.scheduledMealId === context.scheduledMealId
+                && record.mealSlot === context.mealSlot
+                && record.dishId === dishId;
+        }
+        if (context.scheduledMealId) {
+            return record.scheduledMealId === context.scheduledMealId
+                && record.dishId === dishId
+                && record.mealDate === mealDate;
+        }
+        return record.dishId === dishId
+            && record.mealDate === mealDate
+            && (!context.mealTitle || record.mealTitle === context.mealTitle);
+    });
+};
 
 const collectAllSteps = (dish: Dishes, dishesById: Map<string, Dishes>, visited = new Set<string>()): string[] => {
     if (visited.has(dish.id)) return [];
@@ -36,10 +79,13 @@ type ScheduledMealCookingModalProps = {
     dishIds: string[];
     dishServings?: Record<string, number>;
     autoStartToken?: number;
+    scheduledMealId?: string;
+    mealSlot?: CookingMealFeedbackSlot;
+    mealDate?: Date | string;
     onClose: () => void;
 }
 
-export const ScheduledMealCookingModal: React.FC<ScheduledMealCookingModalProps> = ({ open, title, dishIds, dishServings, onClose }) => {
+export const ScheduledMealCookingModal: React.FC<ScheduledMealCookingModalProps> = ({ open, title, dishIds, dishServings, scheduledMealId, mealSlot, mealDate, onClose }) => {
     const dispatch = useDispatch();
     const allDishes = useSelector(selectDishes);
     const dishesById = useSelector(selectDishesById);
@@ -47,6 +93,8 @@ export const ScheduledMealCookingModal: React.FC<ScheduledMealCookingModalProps>
     const selectedMembers = useSelector(selectSelectedHouseholdMembers);
     const [focusedDishId, setFocusedDishId] = useState<string>();
     const [cookingOpen, setCookingOpen] = useState(false);
+    const [feedbackOpen, setFeedbackOpen] = useState(false);
+    const [feedbackScope, setFeedbackScope] = useState<{ title: string; dishIds: string[] }>({ title: '', dishIds: [] });
     const uniqueDishIds = useMemo(() => getScheduledMealDishIds(dishIds), [dishIds]);
     const activeSessionByDishId = useMemo(() => new Map(sessions.filter(session => session.status === 'cooking').map(session => [session.dishId, session])), [sessions]);
     const finishedDishIds = useMemo(() => new Set(sessions.filter(session => session.status === 'finished').map(session => session.dishId)), [sessions]);
@@ -69,8 +117,14 @@ export const ScheduledMealCookingModal: React.FC<ScheduledMealCookingModalProps>
 
     const _openDish = (dishId: string) => {
         const hasActive = activeSessionByDishId.has(dishId);
-        const force = finishedDishIds.has(dishId) && !hasActive;
-        if (!hasActive) _startDish(dishId, force);
+        const finished = finishedDishIds.has(dishId) && !hasActive;
+        if (finished) {
+            const dish = dishesById.get(dishId);
+            setFeedbackScope({ title: `Phản hồi món - ${dish?.name ?? 'Đã nấu'}`, dishIds: [dishId] });
+            setFeedbackOpen(true);
+            return;
+        }
+        if (!hasActive) _startDish(dishId);
         setFocusedDishId(dishId);
         setCookingOpen(true);
     };
@@ -111,8 +165,8 @@ export const ScheduledMealCookingModal: React.FC<ScheduledMealCookingModalProps>
                                     <Typography.Text strong style={{ display: 'block', color: '#111827', lineHeight: '19px', overflowWrap: 'anywhere' }}>{dish.name}</Typography.Text>
                                     <Typography.Text type='secondary' style={{ display: 'block', fontSize: 12, lineHeight: '17px', marginTop: 2 }}>{statusLabel}{dishServings?.[dishId] ? ` · ${dishServings[dishId]} phần` : ''}</Typography.Text>
                                 </div>
-                                <Button type={session ? 'primary' : 'default'} icon={<FireOutlined />} onClick={() => _openDish(dishId)} style={actionStyle}>
-                                    {session ? 'Tiếp tục' : finished ? 'Nấu lại' : 'Bắt đầu'}
+                                <Button type={session ? 'primary' : 'default'} icon={finished && !session ? <EyeOutlined /> : <FireOutlined />} onClick={() => _openDish(dishId)} style={actionStyle}>
+                                    {session ? 'Tiếp tục' : finished ? 'Phản hồi' : 'Bắt đầu'}
                                 </Button>
                             </div>
                         </Box>;
@@ -134,6 +188,16 @@ export const ScheduledMealCookingModal: React.FC<ScheduledMealCookingModalProps>
                 {focusedDish ? <CookingSessionWidget dish={focusedDish} onDone={() => setCookingOpen(false)} /> : null}
             </DeferredModalContent>
         </Modal>
+
+        <MealCompletionLeftoverModal
+            open={feedbackOpen}
+            title={feedbackScope.title}
+            dishIds={feedbackScope.dishIds}
+            scheduledMealId={scheduledMealId}
+            mealSlot={mealSlot ?? 'dish'}
+            mealDate={mealDate}
+            onClose={() => setFeedbackOpen(false)}
+        />
     </React.Fragment>;
 };
 
@@ -141,6 +205,9 @@ type MealCompletionLeftoverModalProps = {
     open: boolean;
     title: string;
     dishIds: string[];
+    scheduledMealId?: string;
+    mealSlot?: CookingMealFeedbackSlot;
+    mealDate?: Date | string;
     onClose: () => void;
 }
 
@@ -151,27 +218,35 @@ type LeftoverDishDraft = {
     note: string;
 }
 
-export const MealCompletionLeftoverModal: React.FC<MealCompletionLeftoverModalProps> = ({ open, title, dishIds, onClose }) => {
+export const MealCompletionLeftoverModal: React.FC<MealCompletionLeftoverModalProps> = ({ open, title, dishIds, scheduledMealId, mealSlot, mealDate, onClose }) => {
     const dispatch = useDispatch();
     const message = useMessage();
     const dishesById = useSelector(selectDishesById);
     const members = useSelector(selectSelectedHouseholdMembers);
+    const feedbackHistory = useSelector(selectDishFeedbackHistory);
     const uniqueDishIds = useMemo(() => getScheduledMealDishIds(dishIds), [dishIds]);
+    const mealDateKey = useMemo(() => getMealDateKey(mealDate), [mealDate]);
+    const mealDateValue = useMemo(() => dayjs(mealDateKey), [mealDateKey]);
     const [drafts, setDrafts] = useState<Record<string, LeftoverDishDraft>>({});
-    // dishId → memberId → reaction, captured after eating. Aggregated into the durable
-    // dish-feedback store on save (one recordDishFeedback dispatch per member rating).
     const [feedback, setFeedback] = useState<Record<string, Record<string, CookingSessionMemberFeedback>>>({});
+    const [historyMemberId, setHistoryMemberId] = useState<string>();
+    const [historyDate, setHistoryDate] = useState(() => mealDateValue);
 
     React.useEffect(() => {
         if (!open) return;
         setDrafts(Object.fromEntries(uniqueDishIds.map(id => [id, { enabled: false, portions: 1, eatInDays: 2, note: '' }])));
-        setFeedback({});
-    }, [open, uniqueDishIds]);
+        setFeedback(Object.fromEntries(uniqueDishIds.map(id => {
+            const record = findMealFeedbackRecord(feedbackHistory, id, { scheduledMealId, mealSlot, mealDate, mealTitle: title });
+            return [id, record?.memberFeedback ?? {}];
+        })));
+        setHistoryDate(mealDateValue);
+        setHistoryMemberId(current => current && members.some(member => member.id === current) ? current : members[0]?.id);
+    }, [feedbackHistory, mealDate, mealDateValue, mealSlot, members, open, scheduledMealId, title, uniqueDishIds]);
 
-    const _setFeedback = (dishId: string, memberId: string, value: CookingSessionMemberFeedback) => {
+    const _setFeedback = (dishId: string, memberId: string, value?: CookingSessionMemberFeedback) => {
         setFeedback(current => ({
             ...current,
-            [dishId]: { ...(current[dishId] ?? {}), [memberId]: value },
+            [dishId]: Object.fromEntries(Object.entries({ ...(current[dishId] ?? {}), [memberId]: value }).filter(([, reaction]) => Boolean(reaction))) as Record<string, CookingSessionMemberFeedback>,
         }));
     };
 
@@ -207,13 +282,22 @@ export const MealCompletionLeftoverModal: React.FC<MealCompletionLeftoverModalPr
             }));
             saved += 1;
         });
-        // Aggregate each member's reaction into the durable per-dish feedback store.
+        // Save editable per-meal feedback history and keep per-dish aggregate feedback in sync.
         let rated = 0;
         uniqueDishIds.forEach(dishId => {
-            Object.entries(feedback[dishId] ?? {}).forEach(([memberId, reaction]) => {
-                dispatch(recordDishFeedback({ dishId, memberId, feedback: reaction }));
-                rated += 1;
-            });
+            const dish = dishesById.get(dishId);
+            if (!dish) return;
+            const memberFeedback = feedback[dishId] ?? {};
+            rated += Object.keys(memberFeedback).length;
+            dispatch(saveMealFeedbackHistory({
+                scheduledMealId,
+                mealSlot,
+                mealDate: mealDateKey,
+                mealTitle: title,
+                dishId,
+                dishName: dish.name,
+                memberFeedback,
+            }));
         });
         const parts: string[] = [];
         if (saved > 0) parts.push(`${saved} món còn lại`);
@@ -223,6 +307,15 @@ export const MealCompletionLeftoverModal: React.FC<MealCompletionLeftoverModalPr
     };
 
     const enabledCount = uniqueDishIds.filter(dishId => drafts[dishId]?.enabled).length;
+    const memberNameById = useMemo(() => new Map(members.map(member => [member.id, member.name])), [members]);
+    const historyRows = useMemo(() => {
+        const selectedDateKey = historyDate.format('YYYY-MM-DD');
+        return feedbackHistory
+            .filter(record => record.mealDate === selectedDateKey)
+            .filter(record => historyMemberId ? Boolean(record.memberFeedback?.[historyMemberId]) : Object.keys(record.memberFeedback ?? {}).length > 0)
+            .slice()
+            .sort((a, b) => new Date(b.updatedAt).valueOf() - new Date(a.updatedAt).valueOf());
+    }, [feedbackHistory, historyDate, historyMemberId]);
 
     return <Modal
         open={open}
@@ -237,6 +330,39 @@ export const MealCompletionLeftoverModal: React.FC<MealCompletionLeftoverModalPr
             {uniqueDishIds.length === 0 ? <Box style={{ textAlign: 'center', padding: '24px 0' }}>
                 <Typography.Text type='secondary'>Không có món để lưu phần còn lại.</Typography.Text>
             </Box> : <div style={{ display: 'flex', flexDirection: 'column', gap: 10, width: '100%' }}>
+                {members.length > 0 && <Box style={{ width: '100%', boxSizing: 'border-box', border: '1px solid rgba(15,23,42,0.08)', borderRadius: 8, background: '#f8fafc', padding: 10 }}>
+                    <Stack align='center' gap={7} style={{ marginBottom: 8 }}>
+                        <HistoryOutlined style={{ color: '#1677ff' }} />
+                        <Typography.Text strong style={{ color: '#111827', fontSize: 13 }}>Lịch sử phản hồi</Typography.Text>
+                    </Stack>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(132px, 160px)', gap: 8, width: '100%' }}>
+                        <Select
+                            value={historyMemberId}
+                            onChange={setHistoryMemberId}
+                            options={members.map(member => ({ value: member.id, label: member.name }))}
+                            placeholder='Thành viên'
+                            style={{ width: '100%' }}
+                        />
+                        <DatePicker value={historyDate} onChange={value => value && setHistoryDate(value)} format='DD/MM/YYYY' style={{ width: '100%' }} />
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 7, marginTop: 9 }}>
+                        {historyRows.length === 0 ? <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description='Chưa có phản hồi ngày này' /> : historyRows.slice(0, 8).map(record => {
+                            const selectedFeedback = historyMemberId ? record.memberFeedback?.[historyMemberId] : undefined;
+                            const feedbackEntries = selectedFeedback
+                                ? [[historyMemberId, selectedFeedback] as [string, CookingSessionMemberFeedback]]
+                                : Object.entries(record.memberFeedback ?? {}) as [string, CookingSessionMemberFeedback][];
+                            return <Box key={record.id} style={{ border: '1px solid rgba(15,23,42,0.07)', borderRadius: 8, background: '#fff', padding: 9 }}>
+                                <Typography.Text strong style={{ display: 'block', color: '#111827', fontSize: 13, lineHeight: '18px', overflowWrap: 'anywhere' }}>{record.dishName}</Typography.Text>
+                                <Typography.Text type='secondary' style={{ display: 'block', fontSize: 12, lineHeight: '17px', marginTop: 2 }}>{record.mealTitle ?? 'Bữa ăn'} · {dayjs(record.mealDate).format('DD/MM/YYYY')}</Typography.Text>
+                                <Stack wrap='wrap' gap={5} style={{ marginTop: 7 }}>
+                                    {feedbackEntries.map(([memberId, reaction]) => <Tag key={`${record.id}-${memberId}`} color={feedbackColorByValue[reaction]} style={{ marginRight: 0 }}>
+                                        {memberNameById.get(memberId) ?? 'Thành viên'}: {feedbackLabelByValue[reaction]}
+                                    </Tag>)}
+                                </Stack>
+                            </Box>;
+                        })}
+                    </div>
+                </Box>}
                 {uniqueDishIds.map(dishId => {
                     const dish = dishesById.get(dishId);
                     const draft = drafts[dishId] ?? { enabled: false, portions: 1, eatInDays: 2, note: '' };
@@ -267,15 +393,12 @@ export const MealCompletionLeftoverModal: React.FC<MealCompletionLeftoverModalPr
                                     <Typography.Text style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{member.name}</Typography.Text>
                                     <Select
                                         size='small'
+                                        allowClear
                                         value={feedback[dishId]?.[member.id]}
                                         placeholder='Chọn'
                                         style={{ width: '100%' }}
                                         onChange={value => _setFeedback(dishId, member.id, value)}
-                                        options={[
-                                            { value: 'liked', label: 'Thích' },
-                                            { value: 'neutral', label: 'Bình thường' },
-                                            { value: 'disliked', label: 'Không hợp' },
-                                        ]}
+                                        options={feedbackOptions}
                                     />
                                 </div>)}
                             </div>

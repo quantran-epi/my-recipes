@@ -1,13 +1,34 @@
 import type { PayloadAction } from '@reduxjs/toolkit';
 import { createSlice } from '@reduxjs/toolkit';
 import { Ingredient } from '@store/Models/Ingredient';
-import { CookingSession, CookingSessionIngredientStatus, CookingSessionMemberFeedback, CookingTimer, DishCookTimeStat, DishFeedbackStat } from '@store/Models/CookingSession';
+import { CookingMealFeedbackHistoryRecord, CookingMealFeedbackSlot, CookingSession, CookingSessionIngredientStatus, CookingSessionMemberFeedback, CookingTimer, DishCookTimeStat, DishFeedbackStat } from '@store/Models/CookingSession';
 import { DishDurationPhaseKey } from '@store/Models/Dishes';
 import { nanoid } from 'nanoid';
 
 // Weight on the newest sample. Higher = adapts faster to recent cooks; lower = smoother.
 const COOK_TIME_EMA_ALPHA = 0.4;
 const emaRound = (next: number, prev: number): number => Math.round(COOK_TIME_EMA_ALPHA * next + (1 - COOK_TIME_EMA_ALPHA) * prev);
+const FEEDBACK_VALUES: CookingSessionMemberFeedback[] = ['liked', 'neutral', 'disliked'];
+
+const isMemberFeedback = (value: unknown): value is CookingSessionMemberFeedback => FEEDBACK_VALUES.includes(value as CookingSessionMemberFeedback);
+
+const normalizeMemberFeedback = (feedback?: Record<string, CookingSessionMemberFeedback | undefined>): Record<string, CookingSessionMemberFeedback> => {
+    return Object.fromEntries(
+        Object.entries(feedback ?? {})
+            .filter(([memberId, value]) => Boolean(memberId) && isMemberFeedback(value))
+    ) as Record<string, CookingSessionMemberFeedback>;
+};
+
+const adjustDishFeedbackTally = (state: CookingSessionState, dishId: string, memberId: string, feedback: CookingSessionMemberFeedback, amount: 1 | -1) => {
+    if (!dishId || !memberId) return;
+    const store = state.dishFeedback ?? (state.dishFeedback = {});
+    const stat = store[dishId] ?? { dishId, members: {}, updatedAt: '' };
+    const tally = stat.members[memberId] ?? { liked: 0, neutral: 0, disliked: 0 };
+    tally[feedback] = Math.max(0, tally[feedback] + amount);
+    stat.members[memberId] = tally;
+    stat.updatedAt = new Date().toISOString();
+    store[dishId] = stat;
+};
 
 export type CookingTimerPhaseInput = {
     phaseKey: DishDurationPhaseKey;
@@ -51,12 +72,14 @@ export interface CookingSessionState {
     sessions: CookingSession[];
     cookTimeStats?: Record<string, DishCookTimeStat>; // durable per-dish learned times, keyed by dishId
     dishFeedback?: Record<string, DishFeedbackStat>;   // durable per-dish household feedback, keyed by dishId
+    dishFeedbackHistory?: CookingMealFeedbackHistoryRecord[];
 }
 
 const initialState: CookingSessionState = {
     sessions: [],
     cookTimeStats: {},
     dishFeedback: {},
+    dishFeedbackHistory: [],
 }
 
 export const CookingSessionSlice = createSlice({
@@ -222,16 +245,64 @@ export const CookingSessionSlice = createSlice({
         },
         recordDishFeedback: (state, action: PayloadAction<{ dishId: string; memberId: string; feedback: CookingSessionMemberFeedback }>) => {
             const { dishId, memberId, feedback } = action.payload;
-            if (!dishId || !memberId) return;
-            const store = state.dishFeedback ?? (state.dishFeedback = {});
-            const stat = store[dishId] ?? { dishId, members: {}, updatedAt: '' };
-            const tally = stat.members[memberId] ?? { liked: 0, neutral: 0, disliked: 0 };
-            if (feedback === 'liked') tally.liked += 1;
-            else if (feedback === 'neutral') tally.neutral += 1;
-            else if (feedback === 'disliked') tally.disliked += 1;
-            stat.members[memberId] = tally;
-            stat.updatedAt = new Date().toISOString();
-            store[dishId] = stat;
+            adjustDishFeedbackTally(state, dishId, memberId, feedback, 1);
+        },
+        saveMealFeedbackHistory: (state, action: PayloadAction<{
+            id?: string;
+            dishId: string;
+            dishName: string;
+            scheduledMealId?: string;
+            mealSlot?: CookingMealFeedbackSlot;
+            mealTitle?: string;
+            mealDate: string;
+            memberFeedback?: Record<string, CookingSessionMemberFeedback | undefined>;
+        }>) => {
+            const { dishId, scheduledMealId, mealSlot } = action.payload;
+            if (!dishId) return;
+
+            const history = state.dishFeedbackHistory ?? (state.dishFeedbackHistory = []);
+            const existingIndex = history.findIndex(record => {
+                if (action.payload.id && record.id === action.payload.id) return true;
+                if (scheduledMealId && mealSlot) {
+                    return record.scheduledMealId === scheduledMealId
+                        && record.mealSlot === mealSlot
+                        && record.dishId === dishId;
+                }
+                if (scheduledMealId) {
+                    return record.scheduledMealId === scheduledMealId
+                        && record.dishId === dishId
+                        && record.mealDate === action.payload.mealDate;
+                }
+                return record.dishId === dishId
+                    && record.mealDate === action.payload.mealDate
+                    && record.mealTitle === action.payload.mealTitle;
+            });
+            const existing = existingIndex >= 0 ? history[existingIndex] : undefined;
+            Object.entries(existing?.memberFeedback ?? {}).forEach(([memberId, feedback]) => {
+                adjustDishFeedbackTally(state, dishId, memberId, feedback, -1);
+            });
+
+            const memberFeedback = normalizeMemberFeedback(action.payload.memberFeedback);
+            Object.entries(memberFeedback).forEach(([memberId, feedback]) => {
+                adjustDishFeedbackTally(state, dishId, memberId, feedback, 1);
+            });
+
+            const now = new Date().toISOString();
+            const nextRecord: CookingMealFeedbackHistoryRecord = {
+                id: existing?.id ?? action.payload.id ?? nanoid(10),
+                dishId,
+                dishName: action.payload.dishName || existing?.dishName || dishId,
+                scheduledMealId,
+                mealSlot,
+                mealTitle: action.payload.mealTitle,
+                mealDate: action.payload.mealDate,
+                memberFeedback,
+                createdAt: existing?.createdAt ?? now,
+                updatedAt: now,
+            };
+
+            if (existingIndex >= 0) history[existingIndex] = nextRecord;
+            else history.push(nextRecord);
         },
         clearFinished: (state) => {
             state.sessions = state.sessions.filter(s => s.status === "cooking");
@@ -253,8 +324,9 @@ export const {
     resumeTimer: resumeCookingTimer,
     advancePhase: advanceCookingPhase,
     toggleTimerSound: toggleCookingTimerSound,
-    recordCookTime: recordCookTime,
-    recordDishFeedback: recordDishFeedback,
+    recordCookTime,
+    recordDishFeedback,
+    saveMealFeedbackHistory,
     clearFinished: clearCookingHistory,
 } = CookingSessionSlice.actions;
 export default CookingSessionSlice.reducer;

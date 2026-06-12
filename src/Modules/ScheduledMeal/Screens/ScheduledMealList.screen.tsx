@@ -1,6 +1,6 @@
 import {
     CalendarOutlined, CopyOutlined, DeleteOutlined, EditOutlined,
-    FireOutlined, LeftOutlined, MoreOutlined, PlusOutlined, RestOutlined, RightOutlined, ShoppingCartOutlined
+    EyeOutlined, FireOutlined, LeftOutlined, MoreOutlined, PlusOutlined, RestOutlined, RightOutlined, ShoppingCartOutlined
 } from "@ant-design/icons";
 import { DateHelpers } from "@common/Helpers/DateHelper";
 import { Badge } from "@components/Badge";
@@ -14,9 +14,10 @@ import { Tooltip } from "@components/Tootip";
 import { Typography } from "@components/Typography";
 import { useScreenTitle, useToggle } from "@hooks";
 import { ScheduledMeal } from "@store/Models/ScheduledMeal";
+import type { CookingMealFeedbackSlot } from "@store/Models/CookingSession";
 import { rememberScheduledMealName, WeeklyMealTemplate } from "@store/Reducers/AppContextReducer";
 import { addScheduledMeal, removeScheduledMeal, toggleSelectedMeals } from "@store/Reducers/ScheduledMealReducer";
-import { selectDishNameById, selectScheduledMeals, selectSelectedMealIds, selectWeeklyMealTemplates } from "@store/Selectors";
+import { selectDishFeedbackHistory, selectDishNameById, selectScheduledMeals, selectSelectedMealIds, selectWeeklyMealTemplates } from "@store/Selectors";
 import { Calendar, DatePicker, Select, Tag } from "antd";
 import { SelectInfo } from "antd/es/calendar/generateCalendar";
 import dayjs, { Dayjs } from "dayjs";
@@ -473,6 +474,8 @@ export const ScheduledMealListScreen = () => {
                 dishIds={allDayDishIds}
                 dishServings={allDayDishServings}
                 autoStartToken={dayCookingToken}
+                mealSlot="day"
+                mealDate={selectedDate}
                 onClose={() => setDayCookingOpen(false)}
             />
 
@@ -607,10 +610,11 @@ export const ScheduledMealItem = ({ item, selected, dishNameById, onDelete }: { 
     const toggleDeleteConfirm = useToggle({ defaultValue: false });
     const [cookingOpen, setCookingOpen] = useState(false);
     const [cookingToken, setCookingToken] = useState(0);
-    const [cookingScope, setCookingScope] = useState<{ title: string; dishIds: string[] }>({ title: '', dishIds: [] });
+    const [cookingScope, setCookingScope] = useState<{ title: string; dishIds: string[]; mealSlot?: CookingMealFeedbackSlot }>({ title: '', dishIds: [] });
     const [completionOpen, setCompletionOpen] = useState(false);
-    const [completionScope, setCompletionScope] = useState<{ title: string; dishIds: string[] }>({ title: '', dishIds: [] });
+    const [completionScope, setCompletionScope] = useState<{ title: string; dishIds: string[]; mealSlot?: CookingMealFeedbackSlot }>({ title: '', dishIds: [] });
     const [copyDate, setCopyDate] = useState<Dayjs | null>(null);
+    const feedbackHistory = useSelector(selectDishFeedbackHistory);
     const dispatch = useDispatch();
 
     const _dishName = (id: string) => dishNameById.get(id) ?? id;
@@ -636,26 +640,26 @@ export const ScheduledMealItem = ({ item, selected, dishNameById, onDelete }: { 
         setCopyDate(null);
     };
 
-    const _openCooking = (title: string, dishIds: string[]) => {
-        setCookingScope({ title, dishIds: getScheduledMealDishIds(dishIds) });
+    const _openCooking = (title: string, dishIds: string[], mealSlot?: CookingMealFeedbackSlot) => {
+        setCookingScope({ title, dishIds: getScheduledMealDishIds(dishIds), mealSlot });
         setCookingToken(Date.now());
         setCookingOpen(true);
     };
 
-    const _openCompletion = (title: string, dishIds: string[]) => {
-        setCompletionScope({ title, dishIds: getScheduledMealDishIds(dishIds) });
+    const _openCompletion = (title: string, dishIds: string[], mealSlot?: CookingMealFeedbackSlot) => {
+        setCompletionScope({ title, dishIds: getScheduledMealDishIds(dishIds), mealSlot });
         setCompletionOpen(true);
     };
 
     const _onMoreActionClick = (e) => {
         switch (e.key) {
             case "cook": _openCooking(`Nấu thực đơn - ${item.name}`, allDishIds); break;
-            case "cook-breakfast": _openCooking(`Nấu bữa sáng - ${item.name}`, item.meals.breakfast); break;
-            case "cook-lunch": _openCooking(`Nấu bữa trưa - ${item.name}`, item.meals.lunch); break;
-            case "cook-dinner": _openCooking(`Nấu bữa tối - ${item.name}`, item.meals.dinner); break;
-            case "complete-breakfast": _openCompletion(`Hoàn tất bữa sáng - ${item.name}`, item.meals.breakfast); break;
-            case "complete-lunch": _openCompletion(`Hoàn tất bữa trưa - ${item.name}`, item.meals.lunch); break;
-            case "complete-dinner": _openCompletion(`Hoàn tất bữa tối - ${item.name}`, item.meals.dinner); break;
+            case "cook-breakfast": _openCooking(`Nấu bữa sáng - ${item.name}`, item.meals.breakfast, 'breakfast'); break;
+            case "cook-lunch": _openCooking(`Nấu bữa trưa - ${item.name}`, item.meals.lunch, 'lunch'); break;
+            case "cook-dinner": _openCooking(`Nấu bữa tối - ${item.name}`, item.meals.dinner, 'dinner'); break;
+            case "complete-breakfast": _openCompletion(`Hoàn tất bữa sáng - ${item.name}`, item.meals.breakfast, 'breakfast'); break;
+            case "complete-lunch": _openCompletion(`Hoàn tất bữa trưa - ${item.name}`, item.meals.lunch, 'lunch'); break;
+            case "complete-dinner": _openCompletion(`Hoàn tất bữa tối - ${item.name}`, item.meals.dinner, 'dinner'); break;
             case "detail": toggleMealModal.show(); break;
             case "copy": toggleCopyModal.show(); break;
             case "edit": toggleEditModal.show(); break;
@@ -669,6 +673,18 @@ export const ScheduledMealItem = ({ item, selected, dishNameById, onDelete }: { 
         { icon: NightIcon, label: "Tối", dishIds: item.meals.dinner, color: "#531dab", background: "#f9f0ff", border: "#efdbff" },
     ];
     const allDishIds = mealGroups.flatMap(group => group.dishIds);
+    const mealDateKey = moment(item.plannedDate).format("YYYY-MM-DD");
+    const _hasMealFeedback = (dishIds: string[], mealSlot: CookingMealFeedbackSlot) => {
+        const uniqueDishIds = new Set(getScheduledMealDishIds(dishIds));
+        if (uniqueDishIds.size === 0) return false;
+        return feedbackHistory.some(record => record.scheduledMealId === item.id
+            && record.mealSlot === mealSlot
+            && record.mealDate === mealDateKey
+            && uniqueDishIds.has(record.dishId));
+    };
+    const breakfastFeedbackDone = _hasMealFeedback(item.meals.breakfast, 'breakfast');
+    const lunchFeedbackDone = _hasMealFeedback(item.meals.lunch, 'lunch');
+    const dinnerFeedbackDone = _hasMealFeedback(item.meals.dinner, 'dinner');
     const totalDishCount = allDishIds.length;
     const uniqueDishCount = new Set(allDishIds).size;
     const plannedStatus = dayjs(item.plannedDate).isSame(dayjs(), "day")
@@ -734,9 +750,9 @@ export const ScheduledMealItem = ({ item, selected, dishNameById, onDelete }: { 
                                     { label: "Nấu bữa sáng", key: "cook-breakfast", icon: <FireOutlined />, disabled: item.meals.breakfast.length === 0 },
                                     { label: "Nấu bữa trưa", key: "cook-lunch", icon: <FireOutlined />, disabled: item.meals.lunch.length === 0 },
                                     { label: "Nấu bữa tối", key: "cook-dinner", icon: <FireOutlined />, disabled: item.meals.dinner.length === 0 },
-                                    { label: "Hoàn tất bữa sáng", key: "complete-breakfast", icon: <RestOutlined />, disabled: item.meals.breakfast.length === 0 },
-                                    { label: "Hoàn tất bữa trưa", key: "complete-lunch", icon: <RestOutlined />, disabled: item.meals.lunch.length === 0 },
-                                    { label: "Hoàn tất bữa tối", key: "complete-dinner", icon: <RestOutlined />, disabled: item.meals.dinner.length === 0 },
+                                    { label: breakfastFeedbackDone ? "Xem/sửa phản hồi bữa sáng" : "Hoàn tất bữa sáng", key: "complete-breakfast", icon: breakfastFeedbackDone ? <EyeOutlined /> : <RestOutlined />, disabled: item.meals.breakfast.length === 0 },
+                                    { label: lunchFeedbackDone ? "Xem/sửa phản hồi bữa trưa" : "Hoàn tất bữa trưa", key: "complete-lunch", icon: lunchFeedbackDone ? <EyeOutlined /> : <RestOutlined />, disabled: item.meals.lunch.length === 0 },
+                                    { label: dinnerFeedbackDone ? "Xem/sửa phản hồi bữa tối" : "Hoàn tất bữa tối", key: "complete-dinner", icon: dinnerFeedbackDone ? <EyeOutlined /> : <RestOutlined />, disabled: item.meals.dinner.length === 0 },
                                     { label: "Chi tiết", key: "detail", icon: <CalendarOutlined /> },
                                     { type: "divider" },
                                     { label: "Sao chép", key: "copy", icon: <CopyOutlined /> },
@@ -765,6 +781,9 @@ export const ScheduledMealItem = ({ item, selected, dishNameById, onDelete }: { 
                 dishIds={cookingScope.dishIds}
                 dishServings={item.dishServings}
                 autoStartToken={cookingToken}
+                scheduledMealId={item.id}
+                mealSlot={cookingScope.mealSlot}
+                mealDate={item.plannedDate}
                 onClose={() => setCookingOpen(false)}
             />
 
@@ -772,6 +791,9 @@ export const ScheduledMealItem = ({ item, selected, dishNameById, onDelete }: { 
                 open={completionOpen}
                 title={completionScope.title}
                 dishIds={completionScope.dishIds}
+                scheduledMealId={item.id}
+                mealSlot={completionScope.mealSlot}
+                mealDate={item.plannedDate}
                 onClose={() => setCompletionOpen(false)}
             />
 

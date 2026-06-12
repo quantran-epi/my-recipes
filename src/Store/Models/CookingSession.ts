@@ -27,6 +27,8 @@ export type CookingSessionIngredientProgress = {
 
 export type CookingSessionMemberFeedback = "liked" | "neutral" | "disliked";
 
+export type CookingMealFeedbackSlot = "breakfast" | "lunch" | "dinner" | "day" | "dish";
+
 // Per-member reaction tally for one dish, accumulated across meals.
 export type MemberFeedbackTally = {
     liked: number;
@@ -41,6 +43,19 @@ export type MemberFeedbackTally = {
 export type DishFeedbackStat = {
     dishId: string;
     members: Record<string, MemberFeedbackTally>; // keyed by householdMemberId
+    updatedAt: string;
+}
+
+export type CookingMealFeedbackHistoryRecord = {
+    id: string;
+    dishId: string;
+    dishName: string;
+    scheduledMealId?: string;
+    mealSlot?: CookingMealFeedbackSlot;
+    mealTitle?: string;
+    mealDate: string; // YYYY-MM-DD
+    memberFeedback: Record<string, CookingSessionMemberFeedback>;
+    createdAt: string;
     updatedAt: string;
 }
 
