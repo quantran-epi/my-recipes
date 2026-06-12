@@ -149,7 +149,7 @@ Update this section as features land:
 - [x] 2 — `lap` Leftover-aware smart planner
 - [x] 3 — `prr` Prep task reminders
 - [x] 4 — `cad` Cooking analytics dashboard
-- [ ] 5 — `pst` Per-step cook timer integration
+- [x] 5 — `pst` Per-step cook timer integration
 
 When all five are checked, the suite is complete.
 
