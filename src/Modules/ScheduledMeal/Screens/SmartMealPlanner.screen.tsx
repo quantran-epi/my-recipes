@@ -1,4 +1,4 @@
-import { AppstoreOutlined, BarChartOutlined, CalendarOutlined, CheckCircleOutlined, ClockCircleOutlined, DollarCircleOutlined, ExclamationCircleOutlined, EyeOutlined, FilterOutlined, MinusOutlined, MoreOutlined, PlayCircleOutlined, PlusOutlined, QuestionCircleOutlined, RestOutlined, ShoppingCartOutlined, SlidersOutlined, StopOutlined, TeamOutlined, ThunderboltOutlined } from '@ant-design/icons';
+import { AppstoreOutlined, BarChartOutlined, CalendarOutlined, CheckCircleOutlined, ClockCircleOutlined, DollarCircleOutlined, ExclamationCircleOutlined, EyeOutlined, FilterOutlined, MinusOutlined, MoreOutlined, PlayCircleOutlined, PlusOutlined, QuestionCircleOutlined, RestOutlined, SaveOutlined, ShoppingCartOutlined, SlidersOutlined, StopOutlined, TeamOutlined, ThunderboltOutlined } from '@ant-design/icons';
 import { DateHelpers } from '@common/Helpers/DateHelper';
 import { DishDurationHelper } from '@common/Helpers/DishDurationHelper';
 import { DishServingHelper } from '@common/Helpers/DishServingHelper';
@@ -26,10 +26,12 @@ import { ScheduledMealSlotStateHelper } from '@modules/ScheduledMeal/Helpers/Sch
 import { Dishes } from '@store/Models/Dishes';
 import { IngredientUnit } from '@store/Models/Ingredient';
 import { ScheduledMeal } from '@store/Models/ScheduledMeal';
+import { SmartPlannerTemplate } from '@store/Models/SmartPlannerTemplate';
 import { rememberScheduledMealName } from '@store/Reducers/AppContextReducer';
 import { startCooking } from '@store/Reducers/CookingSessionReducer';
 import { addScheduledMeal, editScheduledMeal } from '@store/Reducers/ScheduledMealReducer';
-import { selectCookingSessions, selectDishes, selectDishesById, selectDishFeedback, selectHouseholdHealthProfiles, selectHouseholdMembers, selectIngredients, selectIngredientsById, selectInventory, selectInventoryHealthConfig, selectLeftoverTrackerItems, selectNutritionGoals, selectScheduledMeals, selectSelectedHouseholdMemberIds } from '@store/Selectors';
+import { addSmartPlannerTemplate, removeSmartPlannerTemplate } from '@store/Reducers/SmartPlannerTemplateReducer';
+import { selectCookingSessions, selectDishes, selectDishesById, selectDishFeedback, selectHouseholdHealthProfiles, selectHouseholdMembers, selectIngredients, selectIngredientsById, selectInventory, selectInventoryHealthConfig, selectLeftoverTrackerItems, selectNutritionGoals, selectScheduledMeals, selectSelectedHouseholdMemberIds, selectSmartPlannerTemplates } from '@store/Selectors';
 import { DatePicker, Empty, InputNumber, Select, Segmented, Spin, Switch } from 'antd';
 import dayjs, { Dayjs } from 'dayjs';
 import { nanoid } from 'nanoid';
@@ -773,6 +775,7 @@ export const SmartMealPlannerScreen: React.FC = () => {
     const dishFeedback = useSelector(selectDishFeedback);
     const dishesById = useSelector(selectDishesById);
     const leftoverItems = useSelector(selectLeftoverTrackerItems);
+    const smartPlannerTemplates = useSelector(selectSmartPlannerTemplates);
     const [scope, setScope] = useState<PlannerScope>('cook_now');
     const routeDateValue = searchParams.get('date');
     const [startDate, setStartDate] = useState<Dayjs>(() => parseRouteDate(routeDateValue));
@@ -982,6 +985,49 @@ export const SmartMealPlannerScreen: React.FC = () => {
 
         setMealRangeModalOpen(false);
         _runSuggestion(pendingShuffleAlternatives);
+    };
+
+    // Apply a saved template: populate both modal configs. Stale tag requirements (tags whose dish
+    // no longer carries the tag) are dropped so an applied template never references deleted tags.
+    const _applySmartPlannerTemplate = (template: SmartPlannerTemplate) => {
+        const validTags = new Set(tagRequirementOptions);
+        const sanitizedTagRequirements = Object.fromEntries(
+            Object.entries(template.mealSlotTagRequirements)
+                .map(([slot, requirements]) => [slot, (requirements ?? []).filter(item => validTags.has(item.tag))])
+        ) as SmartPlannerMealSlotTagRequirements;
+        setMealSlotDishRanges(template.mealSlotDishRanges);
+        setMealSlotTagRequirements(sanitizedTagRequirements);
+        _clearSuggestions();
+        message.success(`Đã áp dụng mẫu "${template.name}"`);
+    };
+
+    // Save the current per-slot ranges + tag requirements as a named template.
+    const _saveSmartPlannerTemplate = () => {
+        modal.prompt({
+            title: 'Lưu cấu hình hiện tại thành mẫu',
+            require: true,
+            requireMessage: 'Vui lòng nhập tên mẫu',
+            okText: 'Lưu mẫu',
+            onOk: (value: string) => {
+                const name = value.trim();
+                if (!name) {
+                    message.error('Vui lòng nhập tên mẫu');
+                    return;
+                }
+                dispatch(addSmartPlannerTemplate({
+                    id: nanoid(10),
+                    name,
+                    createdAt: new Date().toISOString(),
+                    mealSlotDishRanges,
+                    mealSlotTagRequirements,
+                }));
+                message.success(`Đã lưu mẫu "${name}"`);
+            },
+        });
+    };
+
+    const _removeSmartPlannerTemplate = (id: string) => {
+        dispatch(removeSmartPlannerTemplate({ id }));
     };
 
     const _onPriorityToggle = (value: SmartPlannerPriority) => {
@@ -1582,6 +1628,20 @@ export const SmartMealPlannerScreen: React.FC = () => {
             <Typography.Text type='secondary' style={{ display: 'block', fontSize: 12, lineHeight: '18px' }}>
                 Planner sẽ chọn ngẫu nhiên số món trong khoảng min-max cho từng bữa mỗi ngày. Có thể yêu cầu mỗi bữa phải có ít nhất một số món thuộc loại nhất định, ví dụ trưa cần một món chính và một canh.
             </Typography.Text>
+            <Box style={{ border: '1px solid rgba(15,23,42,0.08)', borderRadius: 8, background: '#fff', padding: 12 }}>
+                <Stack justify='space-between' align='center' gap={8} wrap='wrap' style={{ width: '100%', marginBottom: smartPlannerTemplates.length > 0 ? 8 : 0 }}>
+                    <Typography.Text strong style={{ fontSize: 12, lineHeight: '17px', color: '#334155' }}>Mẫu đã lưu</Typography.Text>
+                    <Button icon={<SaveOutlined />} onClick={_saveSmartPlannerTemplate}>Lưu thành mẫu</Button>
+                </Stack>
+                {smartPlannerTemplates.length === 0
+                    ? <Typography.Text type='secondary' style={{ display: 'block', fontSize: 11, lineHeight: '16px' }}>Chưa có mẫu nào. Lưu cấu hình hiện tại để dùng lại nhanh sau này.</Typography.Text>
+                    : <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                        {smartPlannerTemplates.map(template => <Stack key={template.id} align='center' gap={4} style={{ padding: '4px 4px 4px 10px', borderRadius: 999, border: '1px solid rgba(19,168,168,0.40)', background: '#e6fffb' }}>
+                            <button type='button' onClick={() => _applySmartPlannerTemplate(template)} style={{ border: 'none', background: 'transparent', cursor: 'pointer', padding: 0, fontSize: 12, color: '#0f766e', fontWeight: 600 }}>{template.name}</button>
+                            <Button aria-label={`Xóa mẫu ${template.name}`} type='text' icon={<MinusOutlined />} onClick={() => _removeSmartPlannerTemplate(template.id)} style={{ width: 20, height: 20, paddingInline: 0, minWidth: 0, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', color: '#9ca3af' }} />
+                        </Stack>)}
+                    </div>}
+            </Box>
             {mealSlots.map(slot => {
                 const meta = mealSlotMeta[slot];
                 const range = mealSlotDishRanges[slot];
