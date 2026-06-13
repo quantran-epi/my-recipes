@@ -18,6 +18,25 @@ test.describe('Dish detail and serving scale', () => {
 
     await servingInput.fill('1');
     await expect(chickenRow).toContainText('Cần 250g');
+
+    await page.getByRole('button', { name: /Nấu dù thiếu nguyên liệu/ }).click();
+
+    await expect(chickenRow).toContainText('Còn 100g/250g');
+    await expect(chickenRow).toContainText('Thiếu 150g');
+    await expect(page.getByTestId(`cooking-ingredient-used-toggle-${TEST_IDS.ingredients.chicken}`)).toBeDisabled();
+  });
+
+  test('keeps the cooking timer when starting from a scheduled meal', async ({ page }) => {
+    await page.goto('scheduledMeal/list');
+
+    await expect(page.getByText('Com ga regression').first()).toBeVisible();
+    await page.getByRole('button', { name: /Nấu cả ngày/ }).click();
+
+    const dayCookingModal = page.getByRole('dialog').filter({ hasText: /Nấu cả ngày/ });
+    await expect(dayCookingModal).toContainText('Com ga regression');
+    await dayCookingModal.getByRole('button', { name: 'Bắt đầu' }).click();
+
+    await expect(page.getByText('Dự kiến sơ chế 15 phút')).toBeVisible();
   });
 
   test('opens read-only dish detail from shopping-list dishes tab and can navigate to the detail page', async ({ page }) => {

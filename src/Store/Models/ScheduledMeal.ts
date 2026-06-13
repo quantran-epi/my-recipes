@@ -7,6 +7,7 @@ export type ScheduledMealSkipReason = 'eatOut' | 'leftover';
 export type ScheduledMealSkipMarker = {
     reason: ScheduledMealSkipReason;
     note?: string;
+    leftoverItemIds?: string[];   // for reason='leftover': which tracked leftover items were used
     markedAt: string;
 };
 
@@ -25,8 +26,10 @@ export type ScheduledMeal = {
     name: string;
     plannedDate: Date;
     meals: Record<ScheduledMealSlotKey, string[]>;
+    memberIds?: string[];                                         // undefined/[] = for everyone
     skipMeals?: ScheduledMealSkipSlots;
     cookedSlots?: Partial<Record<ScheduledMealSlotKey, boolean>>;
+    eatenSlots?: Partial<Record<ScheduledMealSlotKey, boolean>>;  // explicit "eaten/completed" toggle, mirrors cookedSlots
     actualMeals?: Partial<Record<ScheduledMealSlotKey, ScheduledMealActualRecord>>;
     dishServings?: ScheduledMealDishServings;
     createdDate: Date;

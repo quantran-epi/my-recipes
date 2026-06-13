@@ -6,9 +6,12 @@ import { DeferredModalContent, Modal } from '@components/Modal';
 import { Typography } from '@components/Typography';
 import { ScheduledMeal, ScheduledMealSkipReason, ScheduledMealSlotKey } from '@store/Models/ScheduledMeal';
 import { markSkipMeal } from '@store/Reducers/ScheduledMealReducer';
-import { Input } from 'antd';
+import { eatLeftoverServings } from '@store/Reducers/AppContextReducer';
+import { selectLeftoverTrackerItems } from '@store/Selectors';
+import { Input, Select } from 'antd';
+import dayjs from 'dayjs';
 import React, { useEffect, useMemo, useState } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import {
     SCHEDULED_MEAL_SKIP_REASON_META,
     SCHEDULED_MEAL_SLOT_LABELS,
@@ -29,13 +32,20 @@ const SLOT_KEYS: ScheduledMealSlotKey[] = ['breakfast', 'lunch', 'dinner'];
 export const ScheduledMealMarkSkipModal: React.FC<ScheduledMealMarkSkipModalProps> = ({ open, meal, slot, initialReason = 'eatOut', onClose }) => {
     const dispatch = useDispatch();
     const message = useMessage();
+    const leftoverItems = useSelector(selectLeftoverTrackerItems);
     const [reason, setReason] = useState<ScheduledMealSkipReason>(initialReason);
     const [note, setNote] = useState('');
     const [selectedSlot, setSelectedSlot] = useState<ScheduledMealSlotKey | undefined>(slot);
+    const [leftoverIds, setLeftoverIds] = useState<string[]>([]);
 
     const availableSlots = useMemo(
         () => SLOT_KEYS.filter(key => !meal?.skipMeals?.[key]),
         [meal],
+    );
+
+    const availableLeftovers = useMemo(
+        () => leftoverItems.filter(item => item.status === 'available' && item.portions > 0),
+        [leftoverItems],
     );
 
     useEffect(() => {
@@ -43,6 +53,7 @@ export const ScheduledMealMarkSkipModal: React.FC<ScheduledMealMarkSkipModalProp
         setReason(initialReason);
         setNote('');
         setSelectedSlot(slot ?? availableSlots[0]);
+        setLeftoverIds([]);
     }, [initialReason, open, slot, availableSlots]);
 
     const activeSlot = selectedSlot;
@@ -51,12 +62,16 @@ export const ScheduledMealMarkSkipModal: React.FC<ScheduledMealMarkSkipModalProp
 
     const _confirm = () => {
         if (!meal || !activeSlot) return;
+        const usedLeftoverIds = reason === 'leftover' ? leftoverIds : [];
+        // Deduct one portion from each chosen leftover so the tracker reflects that it was used.
+        usedLeftoverIds.forEach(id => dispatch(eatLeftoverServings({ id, count: 1 })));
         dispatch(markSkipMeal({
             mealId: meal.id,
             slot: activeSlot,
             marker: {
                 reason,
                 note: note.trim() || undefined,
+                leftoverItemIds: usedLeftoverIds.length > 0 ? usedLeftoverIds : undefined,
                 markedAt: new Date().toISOString(),
             },
         }));
@@ -110,7 +125,7 @@ export const ScheduledMealMarkSkipModal: React.FC<ScheduledMealMarkSkipModalProp
 
                 {plannedDishCount > 0 && <Box style={{ border: '1px solid #ffd591', background: '#fff7e6', borderRadius: 8, padding: 10 }}>
                     <Typography.Text style={{ display: 'block', color: '#ad4e00', fontSize: 12, lineHeight: '18px' }}>
-                        {slotLabel} đang có {plannedDishCount} món. Khi đánh dấu không nấu, các món trong bữa sẽ được xoá khỏi slot này.
+                        {slotLabel} đang có {plannedDishCount} món đã lên kế hoạch. Khi đánh dấu không nấu, các món vẫn được giữ để đối chiếu kế hoạch với thực tế.
                     </Typography.Text>
                 </Box>}
 
@@ -147,6 +162,29 @@ export const ScheduledMealMarkSkipModal: React.FC<ScheduledMealMarkSkipModalProp
                         })}
                     </Stack>
                 </div>
+
+                {reason === 'leftover' && <div>
+                    <Typography.Text strong style={{ display: 'block', fontSize: 12, marginBottom: 8 }}>Dùng phần dư nào?</Typography.Text>
+                    {availableLeftovers.length === 0 ? (
+                        <Typography.Text type="secondary" style={{ fontSize: 12 }}>Chưa có phần dư nào trong kho.</Typography.Text>
+                    ) : (
+                        <Select
+                            mode="multiple"
+                            allowClear
+                            value={leftoverIds}
+                            onChange={setLeftoverIds}
+                            placeholder="Chọn phần dư đã dùng"
+                            style={{ width: '100%' }}
+                            options={availableLeftovers.map(item => ({
+                                value: item.id,
+                                label: `${item.dishName} · ${item.portions} phần${item.eatBy ? ` · ăn trước ${dayjs(item.eatBy).format('DD/MM')}` : ''}`,
+                            }))}
+                        />
+                    )}
+                    {leftoverIds.length > 0 && <Typography.Text type="secondary" style={{ display: 'block', fontSize: 12, marginTop: 6 }}>
+                        Mỗi phần dư được chọn sẽ trừ 1 suất khỏi kho.
+                    </Typography.Text>}
+                </div>}
 
                 <div>
                     <Typography.Text strong style={{ display: 'block', fontSize: 12, marginBottom: 6 }}>Ghi chú (tuỳ chọn)</Typography.Text>

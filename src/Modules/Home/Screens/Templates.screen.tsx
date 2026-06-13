@@ -46,6 +46,7 @@ import { useScreenTitle } from '@hooks';
 import { RootRoutes } from '@routing/RootRoutes';
 import { ScheduledMealMealPlanner } from '@modules/ScheduledMeal/Screens/ScheduledMealMealPlanner.widget';
 import { SmartPlannerTemplatesManager } from '@modules/ScheduledMeal/Screens/SmartPlannerTemplates.screen';
+import { HouseholdMemberPicker } from '@modules/ScheduledMeal/Components/HouseholdMemberPicker';
 
 type MealKey = keyof ScheduledMeal['meals'];
 
@@ -249,6 +250,7 @@ export const TemplatesScreen = () => {
     const [mealSourceWeek, setMealSourceWeek] = useState<Dayjs>(getMondayStart(dayjs()));
     const [scratchDay, setScratchDay] = useState<WeeklyMealTemplateDay>(() => createEmptyTemplateDay(0));
     const [scratchWeek, setScratchWeek] = useState<WeeklyMealTemplateDay[]>(() => createEmptyTemplateWeek());
+    const [mealTemplateMemberIds, setMealTemplateMemberIds] = useState<string[]>([]);
     const [templateApplyTarget, setTemplateApplyTarget] = useState<WeeklyMealTemplate | null>(null);
     const [mealApplyDate, setMealApplyDate] = useState<Dayjs>(dayjs().startOf('day'));
     const [mealApplyWeek, setMealApplyWeek] = useState<Dayjs>(getMondayStart(dayjs()));
@@ -285,6 +287,7 @@ export const TemplatesScreen = () => {
         setMealSourceWeek(week);
         setScratchDay(createEmptyTemplateDay(0));
         setScratchWeek(createEmptyTemplateWeek());
+        setMealTemplateMemberIds([]);
         setMealCreatorOpen(true);
     };
 
@@ -302,6 +305,7 @@ export const TemplatesScreen = () => {
         setMealTemplateCreateMode('scratch');
         setScratchDay({ ...(template.days[0] ?? createEmptyTemplateDay(0)), offset: 0 });
         setScratchWeek(createEmptyTemplateWeek().map(day => daysByOffset.get(day.offset) ?? day));
+        setMealTemplateMemberIds(template.memberIds ?? []);
         setMealCreatorOpen(true);
     };
 
@@ -389,6 +393,7 @@ export const TemplatesScreen = () => {
             id: mealTemplateEditId ?? `meal-template-${nanoid(8)}`,
             name: mealTemplateName.trim() || getDefaultMealTemplateName(mealTemplateScope, mealSourceWeek),
             scope: mealTemplateScope,
+            memberIds: mealTemplateMemberIds,
             days,
             createdAt: existingTemplate?.createdAt ?? now,
             updatedAt: now,
@@ -408,6 +413,7 @@ export const TemplatesScreen = () => {
                 id: `${template.id}-${nanoid(8)}`,
                 name,
                 meals: day.meals,
+                memberIds: template.memberIds ?? [],
                 dishServings: day.dishServings ?? {},
                 plannedDate,
                 createdDate: new Date(),
@@ -695,6 +701,14 @@ export const TemplatesScreen = () => {
                             </Select>
                         </div>
                     </div>
+
+                    <Box style={{ marginBottom: 10 }}>
+                        <HouseholdMemberPicker
+                            label='Cho ai ăn? (để trống = cả nhà)'
+                            value={mealTemplateMemberIds}
+                            onChange={setMealTemplateMemberIds}
+                        />
+                    </Box>
 
                     {mealTemplateCreateMode === 'existing' && mealTemplateScope === 'day' && <div style={fieldGridStyle}>
                         <div>

@@ -12,6 +12,7 @@ export type WeeklyMealTemplate = {
     id: string;
     name: string;
     scope?: 'day' | 'week';
+    memberIds?: string[];   // whole-template member binding; undefined/[] = for everyone
     days: WeeklyMealTemplateDay[];
     createdAt: string;
     updatedAt: string;
@@ -337,7 +338,11 @@ export const appContextSlice = createSlice({
         },
         upsertWeeklyMealTemplate: (state, action: PayloadAction<WeeklyMealTemplate>) => {
             const templates = state.weeklyMealTemplates ?? [];
-            state.weeklyMealTemplates = [action.payload, ...templates.filter(item => item.id !== action.payload.id)]
+            const normalized: WeeklyMealTemplate = {
+                ...action.payload,
+                memberIds: normalizeStringList(action.payload.memberIds, 30),
+            };
+            state.weeklyMealTemplates = [normalized, ...templates.filter(item => item.id !== normalized.id)]
                 .sort((a, b) => new Date(b.updatedAt).valueOf() - new Date(a.updatedAt).valueOf());
         },
         removeWeeklyMealTemplate: (state, action: PayloadAction<string>) => {

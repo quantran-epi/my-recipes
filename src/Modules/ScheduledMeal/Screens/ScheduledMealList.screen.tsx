@@ -1,10 +1,10 @@
 import {
-    CalendarOutlined, CheckCircleFilled, CopyOutlined, DeleteOutlined, EditOutlined,
-    EyeOutlined, FireOutlined, LeftOutlined, MoreOutlined, PlusOutlined, RestOutlined, RightOutlined, ShoppingCartOutlined
+    CalendarOutlined, CopyOutlined, DeleteOutlined, EditOutlined,
+    FireOutlined, LeftOutlined, MoreOutlined, PlusOutlined, RightOutlined, ShoppingCartOutlined, TeamOutlined
 } from "@ant-design/icons";
 import { DateHelpers } from "@common/Helpers/DateHelper";
 import { Badge } from "@components/Badge";
-import { ActionButton, Button } from "@components/Button";
+import { Button } from "@components/Button";
 import { Dropdown } from "@components/Dropdown";
 import { Space } from "@components/Layout/Space";
 import { Stack } from "@components/Layout/Stack";
@@ -13,12 +13,11 @@ import { useMessage } from "@components/Message";
 import { Tooltip } from "@components/Tootip";
 import { Typography } from "@components/Typography";
 import { useScreenTitle, useToggle } from "@hooks";
-import { ScheduledMeal, ScheduledMealSkipReason, ScheduledMealSlotKey } from "@store/Models/ScheduledMeal";
-import type { CookingMealFeedbackSlot } from "@store/Models/CookingSession";
+import { ScheduledMeal, ScheduledMealSlotKey } from "@store/Models/ScheduledMeal";
 import { rememberScheduledMealName, WeeklyMealTemplate } from "@store/Reducers/AppContextReducer";
-import { addScheduledMeal, removeScheduledMeal, setMealSlotCooked, toggleSelectedMeals, unmarkSkipMeal } from "@store/Reducers/ScheduledMealReducer";
-import { selectAvailableServingsByDishKind, selectDishFeedbackHistory, selectDishNameById, selectScheduledMeals, selectSelectedMealIds, selectWeeklyMealTemplates } from "@store/Selectors";
-import { Calendar, DatePicker, Select, Switch, Tag } from "antd";
+import { addScheduledMeal, removeScheduledMeal, toggleSelectedMeals } from "@store/Reducers/ScheduledMealReducer";
+import { selectAvailableServingsByDishKind, selectDishNameById, selectHouseholdMembers, selectScheduledMeals, selectSelectedMealIds, selectWeeklyMealTemplates } from "@store/Selectors";
+import { Calendar, DatePicker, Select, Tag } from "antd";
 import { SelectInfo } from "antd/es/calendar/generateCalendar";
 import dayjs, { Dayjs } from "dayjs";
 import { nanoid } from "nanoid";
@@ -29,9 +28,6 @@ import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { ScheduledMealAddWidget } from "./ScheduledMealAdd.widget";
 import { ScheduledMealEditWidget } from "./ScheduledMealEdit.widget";
-import MorningIcon from "../../../../assets/icons/sunrise.png";
-import NightIcon from "../../../../assets/icons/night.png";
-import NoonIcon from "../../../../assets/icons/time.png";
 import DietPlanIcon from "../../../../assets/icons/diet-plan.png";
 import { Image } from "@components/Image";
 import { Box } from "@components/Layout/Box";
@@ -40,10 +36,10 @@ import { ShoppingListAddWidget } from "@modules/ShoppingList/Screens/ShoppingLis
 import { Checkbox } from "@components/Form/Checkbox";
 import { CheckboxChangeEvent } from "antd/es/checkbox";
 import { RootRoutes } from "@routing/RootRoutes";
-import { MealCompletionLeftoverModal, ScheduledMealCookingModal, getScheduledMealDishIds } from "./ScheduledMealCooking.widget";
+import { ScheduledMealCookingModal, getScheduledMealDishIds } from "./ScheduledMealCooking.widget";
 import { MemberDishFeedbackHistoryWidget } from "./MemberDishFeedbackHistory.widget";
-import { ScheduledMealSlotStateHelper, SCHEDULED_MEAL_SKIP_REASON_META } from "../Helpers/ScheduledMealSlotStateHelper";
-import { ScheduledMealMarkSkipModal } from "./ScheduledMealMarkSkipModal";
+import { ScheduledMealSlotStateHelper, buildDaySlotAggregates, DaySlotAggregate } from "../Helpers/ScheduledMealSlotStateHelper";
+import { ScheduledMealSlotDetailModal, SLOT_META } from "./ScheduledMealSlotDetail.modal";
 
 const getMealDateKey = (value: Date | string) => moment(value).format("YYYY-MM-DD");
 
@@ -231,11 +227,14 @@ export const ScheduledMealListScreen = () => {
     const [templateApplyMode, setTemplateApplyMode] = useState<MealTemplateScope>('day');
     const [templateApplyWeek, setTemplateApplyWeek] = useState<Dayjs>(getMondayStart(dayjs()));
     const [selectedTemplateId, setSelectedTemplateId] = useState<string | undefined>();
+    const [detailSlot, setDetailSlot] = useState<ScheduledMealSlotKey>();
+    const [planListOpen, setPlanListOpen] = useState(false);
 
     const scheduledMeals = useSelector(selectScheduledMeals);
     const selectedMealIds = useSelector(selectSelectedMealIds);
     const dishNameById = useSelector(selectDishNameById);
     const mealTemplates = useSelector(selectWeeklyMealTemplates);
+    const servingsByDishKind = useSelector(selectAvailableServingsByDishKind);
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const message = useMessage();
@@ -303,6 +302,7 @@ export const ScheduledMealListScreen = () => {
     };
 
     const mealsToday = _findScheduledMealsByDate(selectedDate);
+    const slotAggregates = useMemo(() => buildDaySlotAggregates(mealsToday), [mealsToday]);
     const allDayDishIds = useMemo(() => getScheduledMealDishIds(mealsToday.flatMap(meal => mealSlotKeys.flatMap(slot => (
         ScheduledMealSlotStateHelper.getSlotState(meal, slot) === 'skipped' ? [] : meal.meals[slot]
     )))), [mealsToday]);
@@ -322,6 +322,7 @@ export const ScheduledMealListScreen = () => {
                 id: `${selectedTemplate.id}-${nanoid(8)}`,
                 name,
                 meals: day.meals,
+                memberIds: selectedTemplate.memberIds ?? [],
                 dishServings: day.dishServings ?? {},
                 plannedDate,
                 createdDate: new Date(),
@@ -449,9 +450,35 @@ export const ScheduledMealListScreen = () => {
                         <Typography.Text type="secondary">Chưa có thực đơn trong ngày này</Typography.Text>
                     </Box>
                 ) : (
-                    mealsToday.map(item => (
-                        <ScheduledMealItem key={item.id} item={item} selected={selectedMealIds.has(item.id)} dishNameById={dishNameById} onDelete={_onDelete} />
-                    ))
+                    <React.Fragment>
+                        <div style={{ display: "grid", gridTemplateColumns: "minmax(0, 1fr)", gap: 8 }}>
+                            {mealSlotKeys.map(slot => (
+                                <SlotSummaryCard
+                                    key={slot}
+                                    aggregate={slotAggregates[slot]}
+                                    dishNameById={dishNameById}
+                                    servingsByDishKind={servingsByDishKind}
+                                    onOpen={() => setDetailSlot(slot)}
+                                />
+                            ))}
+                        </div>
+
+                        <Box style={{ marginTop: 10 }}>
+                            <Button
+                                type="text"
+                                icon={<TeamOutlined />}
+                                onClick={() => setPlanListOpen(value => !value)}
+                                style={{ width: "100%", justifyContent: "center", color: "#5e2bbf", borderRadius: 8, border: "1px solid rgba(116,54,220,0.14)", background: "rgba(255,255,255,0.86)" }}
+                            >
+                                {planListOpen ? "Ẩn danh sách kế hoạch" : `Xem theo kế hoạch (${mealsToday.length})`}
+                            </Button>
+                            {planListOpen && <Stack direction="column" align="stretch" gap={8} style={{ marginTop: 8 }}>
+                                {mealsToday.map(item => (
+                                    <ScheduledMealPlanRow key={item.id} item={item} selected={selectedMealIds.has(item.id)} dishNameById={dishNameById} onDelete={_onDelete} />
+                                ))}
+                            </Stack>}
+                        </Box>
+                    </React.Fragment>
                 )}
             </Box>
 
@@ -601,32 +628,96 @@ export const ScheduledMealListScreen = () => {
                 )}
                 </DeferredModalContent>
             </Modal>
+
+            {detailSlot && <ScheduledMealSlotDetailModal
+                open={Boolean(detailSlot)}
+                date={selectedDate}
+                slot={detailSlot}
+                meals={mealsToday}
+                onClose={() => setDetailSlot(undefined)}
+            />}
         </React.Fragment>
     );
 };
 
-// ─── Meal item ────────────────────────────────────────────────────────────────
-export const ScheduledMealItem = ({ item, selected, dishNameById, onDelete }: { item: ScheduledMeal; selected: boolean; dishNameById: Map<string, string>; onDelete: (item: ScheduledMeal) => void }) => {
+// ─── Slot summary card ──────────────────────────────────────────────────────
+const SlotSummaryCard = ({ aggregate, dishNameById, servingsByDishKind, onOpen }: {
+    aggregate: DaySlotAggregate;
+    dishNameById: Map<string, string>;
+    servingsByDishKind: Map<string, { fresh: number; leftover: number }>;
+    onOpen: () => void;
+}) => {
+    const meta = SLOT_META[aggregate.slot];
+    const dishIds = aggregate.allDishIds;
+    const _dishName = (id: string) => dishNameById.get(id) ?? id;
+    const _formatStock = (id: string): string | null => {
+        const stock = servingsByDishKind.get(id);
+        if (!stock) return null;
+        const total = stock.fresh + stock.leftover;
+        if (total <= 0) return null;
+        if (stock.fresh > 0 && stock.leftover > 0) return `${stock.fresh} mới · ${stock.leftover} dư`;
+        return `${total} phần`;
+    };
+
+    return <Box
+        onClick={onOpen}
+        className="scheduled-meal-card"
+        style={{ cursor: "pointer", border: `1px solid ${meta.border}`, borderRadius: 8, background: `linear-gradient(135deg, #fff 0%, ${meta.background} 100%)`, padding: 12, boxShadow: "0 6px 18px rgba(15,23,42,0.06)" }}
+    >
+        <div style={{ display: "grid", gridTemplateColumns: "auto minmax(0, 1fr) auto", gap: 9, alignItems: "center", marginBottom: dishIds.length > 0 || aggregate.skippedCount > 0 ? 9 : 0 }}>
+            <span style={{ width: 34, height: 34, borderRadius: 8, display: "inline-flex", alignItems: "center", justifyContent: "center", background: "rgba(255,255,255,0.86)", border: `1px solid ${meta.border}`, flexShrink: 0 }}>
+                <Image src={meta.icon} preview={false} width={19} style={{ marginBottom: 2 }} />
+            </span>
+            <div style={{ minWidth: 0 }}>
+                <Typography.Text strong style={{ display: "block", color: meta.color, fontSize: 15, lineHeight: "20px" }}>{meta.label}</Typography.Text>
+                <Typography.Text type="secondary" style={{ display: "block", fontSize: 12, lineHeight: "16px" }}>
+                    {dishIds.length} món · {aggregate.planCount} kế hoạch
+                </Typography.Text>
+            </div>
+            <RightOutlined style={{ color: meta.color, fontSize: 13 }} />
+        </div>
+
+        {(dishIds.length > 0 || aggregate.cookedCount > 0 || aggregate.eatenCount > 0 || aggregate.skippedCount > 0) && <Stack wrap="wrap" gap={5} style={{ marginBottom: dishIds.length > 0 ? 8 : 0 }}>
+            {aggregate.cookedCount > 0 && <Tag color="orange" style={{ marginInlineEnd: 0, fontSize: 11 }}>{aggregate.cookedCount}/{aggregate.planCount} đã nấu</Tag>}
+            {aggregate.eatenCount > 0 && <Tag color="green" style={{ marginInlineEnd: 0, fontSize: 11 }}>{aggregate.eatenCount}/{aggregate.planCount} đã ăn</Tag>}
+            {aggregate.skippedCount > 0 && <Tag style={{ marginInlineEnd: 0, fontSize: 11 }}>{aggregate.skippedCount} không nấu</Tag>}
+        </Stack>}
+
+        {dishIds.length === 0 ? (
+            <Typography.Text type="secondary" style={{ display: "block", fontSize: 12 }}>Chưa có món</Typography.Text>
+        ) : <Stack wrap="wrap" gap={5}>
+            {dishIds.slice(0, 4).map((id, index) => {
+                const stock = _formatStock(id);
+                return <Tag key={`${id}-${index}`} style={{ marginInlineEnd: 0, fontSize: 11, borderRadius: 10, maxWidth: "100%", overflow: "hidden", textOverflow: "ellipsis" }}>
+                    {_dishName(id)}{stock ? ` · còn ${stock}` : ""}
+                </Tag>;
+            })}
+            {dishIds.length > 4 && <Tag style={{ marginInlineEnd: 0, fontSize: 11, borderRadius: 10 }}>+{dishIds.length - 4}</Tag>}
+        </Stack>}
+    </Box>;
+};
+
+// ─── Slim plan row (toggleable list) ─────────────────────────────────────────
+// One compact row per meal plan: name, member chips, per-slot dish counts, and the
+// management dropdown (detail / copy / edit / delete). Cooking, completion and skip
+// actions now live in the slot detail modal, scoped per plan-item.
+const slotCountLabels: Array<{ slot: ScheduledMealSlotKey; label: string }> = [
+    { slot: 'breakfast', label: 'Sáng' },
+    { slot: 'lunch', label: 'Trưa' },
+    { slot: 'dinner', label: 'Tối' },
+];
+
+const ScheduledMealPlanRow = ({ item, selected, dishNameById, onDelete }: { item: ScheduledMeal; selected: boolean; dishNameById: Map<string, string>; onDelete: (item: ScheduledMeal) => void }) => {
     const toggleEditModal = useToggle({ defaultValue: false });
     const toggleMealModal = useToggle({ defaultValue: false });
     const toggleCopyModal = useToggle({ defaultValue: false });
     const toggleDeleteConfirm = useToggle({ defaultValue: false });
-    const [cookingOpen, setCookingOpen] = useState(false);
-    const [cookingToken, setCookingToken] = useState(0);
-    const [cookingScope, setCookingScope] = useState<{ title: string; dishIds: string[]; mealSlot?: CookingMealFeedbackSlot }>({ title: '', dishIds: [] });
-    const [completionOpen, setCompletionOpen] = useState(false);
-    const [completionScope, setCompletionScope] = useState<{ title: string; dishIds: string[]; mealSlot?: CookingMealFeedbackSlot; readonly?: boolean }>({ title: '', dishIds: [] });
     const [copyDate, setCopyDate] = useState<Dayjs | null>(null);
-    const [skipScope, setSkipScope] = useState<{ slot?: ScheduledMealSlotKey; reason: ScheduledMealSkipReason }>();
-    const feedbackHistory = useSelector(selectDishFeedbackHistory);
-    const servingsByDishKind = useSelector(selectAvailableServingsByDishKind);
+    const householdMembers = useSelector(selectHouseholdMembers);
     const dispatch = useDispatch();
 
-    const _dishName = (id: string) => dishNameById.get(id) ?? id;
-    const _dishLabel = (id: string) => {
-        const servings = item.dishServings?.[id];
-        return servings ? `${_dishName(id)} (${servings} phần)` : _dishName(id);
-    };
+    const memberNameById = useMemo(() => new Map(householdMembers.map(member => [member.id, member.name])), [householdMembers]);
+    const memberIds = (item.memberIds ?? []).filter(id => memberNameById.has(id));
 
     const _onToggleSelect = (e: CheckboxChangeEvent) => {
         dispatch(toggleSelectedMeals({ ids: [item.id], selected: e.target.checked }));
@@ -645,27 +736,8 @@ export const ScheduledMealItem = ({ item, selected, dishNameById, onDelete }: { 
         setCopyDate(null);
     };
 
-    const _openCooking = (title: string, dishIds: string[], mealSlot?: CookingMealFeedbackSlot) => {
-        setCookingScope({ title, dishIds: getScheduledMealDishIds(dishIds), mealSlot });
-        setCookingToken(Date.now());
-        setCookingOpen(true);
-    };
-
-    const _openCompletion = (title: string, dishIds: string[], mealSlot?: CookingMealFeedbackSlot, readonly = false) => {
-        setCompletionScope({ title, dishIds: getScheduledMealDishIds(dishIds), mealSlot, readonly });
-        setCompletionOpen(true);
-    };
-
     const _onMoreActionClick = (e) => {
         switch (e.key) {
-            case "cook": _openCooking(`Nấu thực đơn - ${item.name}`, allDishIds); break;
-            case "cook-breakfast": _openCooking(`Nấu bữa sáng - ${item.name}`, item.meals.breakfast, 'breakfast'); break;
-            case "cook-lunch": _openCooking(`Nấu bữa trưa - ${item.name}`, item.meals.lunch, 'lunch'); break;
-            case "cook-dinner": _openCooking(`Nấu bữa tối - ${item.name}`, item.meals.dinner, 'dinner'); break;
-            case "complete-breakfast": _openCompletion(`${breakfastFeedbackDone ? 'Phản hồi bữa sáng' : 'Hoàn tất bữa sáng'} - ${item.name}`, item.meals.breakfast, 'breakfast', breakfastFeedbackDone); break;
-            case "complete-lunch": _openCompletion(`${lunchFeedbackDone ? 'Phản hồi bữa trưa' : 'Hoàn tất bữa trưa'} - ${item.name}`, item.meals.lunch, 'lunch', lunchFeedbackDone); break;
-            case "complete-dinner": _openCompletion(`${dinnerFeedbackDone ? 'Phản hồi bữa tối' : 'Hoàn tất bữa tối'} - ${item.name}`, item.meals.dinner, 'dinner', dinnerFeedbackDone); break;
-            case "mark-skip": setSkipScope({ reason: 'eatOut' }); break;
             case "detail": toggleMealModal.show(); break;
             case "copy": toggleCopyModal.show(); break;
             case "edit": toggleEditModal.show(); break;
@@ -673,225 +745,49 @@ export const ScheduledMealItem = ({ item, selected, dishNameById, onDelete }: { 
         }
     };
 
-    const mealGroups: Array<{ slot: ScheduledMealSlotKey; icon: string; label: string; dishIds: string[]; color: string; background: string; border: string }> = [
-        { slot: 'breakfast', icon: MorningIcon, label: "Sáng", dishIds: item.meals.breakfast, color: "#faad14", background: "#fffbe6", border: "#ffe58f" },
-        { slot: 'lunch', icon: NoonIcon, label: "Trưa", dishIds: item.meals.lunch, color: "#d46b08", background: "#fff7e6", border: "#ffd591" },
-        { slot: 'dinner', icon: NightIcon, label: "Tối", dishIds: item.meals.dinner, color: "#531dab", background: "#f9f0ff", border: "#efdbff" },
-    ];
-    const allDishIds = mealGroups.flatMap(group => group.dishIds);
-    const mealDateKey = moment(item.plannedDate).format("YYYY-MM-DD");
-    const _hasMealFeedback = (dishIds: string[], mealSlot: CookingMealFeedbackSlot) => {
-        const uniqueDishIds = new Set(getScheduledMealDishIds(dishIds));
-        if (uniqueDishIds.size === 0) return false;
-        return feedbackHistory.some(record => record.scheduledMealId === item.id
-            && record.mealSlot === mealSlot
-            && record.mealDate === mealDateKey
-            && uniqueDishIds.has(record.dishId));
-    };
-    const breakfastFeedbackDone = _hasMealFeedback(item.meals.breakfast, 'breakfast');
-    const lunchFeedbackDone = _hasMealFeedback(item.meals.lunch, 'lunch');
-    const dinnerFeedbackDone = _hasMealFeedback(item.meals.dinner, 'dinner');
-    const isFutureMeal = dayjs(item.plannedDate).isAfter(dayjs(), "day");
-    const feedbackDoneBySlot: Record<'breakfast' | 'lunch' | 'dinner', boolean> = {
-        breakfast: breakfastFeedbackDone,
-        lunch: lunchFeedbackDone,
-        dinner: dinnerFeedbackDone,
-    };
-    const hasAnyUnmarkedSlot = mealGroups.some(group => !item.skipMeals?.[group.slot]);
-    const filledMealGroups = mealGroups.filter(group => group.dishIds.length > 0);
-    const isFinishedMeal = filledMealGroups.length > 0 && filledMealGroups.every(group => feedbackDoneBySlot[group.slot]);
-    const totalDishCount = allDishIds.length;
-    const uniqueDishCount = new Set(allDishIds).size;
-    const plannedStatus = dayjs(item.plannedDate).isSame(dayjs(), "day")
-        ? { label: "Hôm nay", color: "#1677ff", background: "#e6f4ff", border: "#91caff" }
-        : dayjs(item.plannedDate).isBefore(dayjs(), "day")
-            ? { label: "Đã qua", color: "#8c8c8c", background: "#fafafa", border: "#d9d9d9" }
-            : { label: "Sắp tới", color: "#389e0d", background: "#f6ffed", border: "#b7eb8f" };
-    const railColor = selected ? "#1677ff" : plannedStatus.color;
-
-    // Per-dish available servings (fresh + leftover) drawn from the leftover/serving stock selector.
-    const _dishServingStock = (dishId: string) => servingsByDishKind.get(dishId) ?? { fresh: 0, leftover: 0 };
-    const _formatDishServings = (dishId: string): string | null => {
-        const stock = _dishServingStock(dishId);
-        const total = stock.fresh + stock.leftover;
-        if (total <= 0) return null;
-        if (stock.fresh > 0 && stock.leftover > 0) return `${stock.fresh} mới · ${stock.leftover} dư`;
-        return `${total} phần`;
-    };
-
-    const MealRow = ({ slot, icon, label, dishIds, color, background, border, finished }: { slot: ScheduledMealSlotKey; icon: string; label: string; dishIds: string[]; color: string; background: string; border: string; finished: boolean }) => {
-        const skipMarker = item.skipMeals?.[slot];
-        if (skipMarker) {
-            const meta = ScheduledMealSlotStateHelper.getReasonMeta(skipMarker.reason);
-            return <Box style={{ border: `1px dashed ${meta.border}`, borderRadius: 8, background: meta.background, padding: "8px 9px", minWidth: 0 }}>
-                <div style={{ display: "grid", gridTemplateColumns: "auto minmax(0, 1fr) auto", gap: 7, alignItems: "start" }}>
-                    <span style={{ color: meta.color, display: "inline-flex", alignItems: "center", justifyContent: "center", paddingTop: 2 }}>{meta.icon}</span>
-                    <div style={{ minWidth: 0 }}>
-                        <Typography.Text strong style={{ display: "block", fontSize: 13, color: meta.color, lineHeight: "18px" }}>{label} · {meta.label}</Typography.Text>
-                        {skipMarker.note && <Typography.Text style={{ display: "block", fontSize: 12, lineHeight: "18px", color: "#111827", marginTop: 2, overflowWrap: "anywhere" }}>{skipMarker.note}</Typography.Text>}
-                        <Tooltip title="Thời điểm đánh dấu — không ảnh hưởng đến tính toán, chỉ để tham khảo.">
-                            <Typography.Text type="secondary" style={{ display: "block", fontSize: 11, lineHeight: "16px", marginTop: 3 }}>
-                                Đánh dấu lúc {ScheduledMealSlotStateHelper.formatMarkedAt(skipMarker.markedAt)}
-                            </Typography.Text>
-                        </Tooltip>
-                    </div>
-                    <Tooltip title="Quay lại trạng thái chưa lập — bạn có thể thêm món hoặc đánh dấu lại sau.">
-                        <ActionButton onClick={() => dispatch(unmarkSkipMeal({ mealId: item.id, slot }))}>
-                            Bỏ đánh dấu
-                        </ActionButton>
-                    </Tooltip>
-                </div>
-            </Box>;
-        }
-
-        const cooked = Boolean(item.cookedSlots?.[slot]);
-        return <Box style={{ border: `1px solid ${border}`, borderRadius: 8, background, padding: "8px 9px", minWidth: 0 }}>
-            <div style={{ display: "grid", gridTemplateColumns: "auto minmax(0, 1fr) auto", gap: 7, alignItems: "center", marginBottom: 6 }}>
-                <Image src={icon} preview={false} width={15} style={{ marginBottom: 2 }} />
-                <Typography.Text strong style={{ fontSize: 13, color, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{label}</Typography.Text>
-                <Stack align="center" gap={5} style={{ flexShrink: 0 }}>
-                    {finished && <Tooltip title="Đã hoàn tất, có phản hồi">
-                        <span style={{ display: "inline-flex", alignItems: "center", gap: 3, padding: "1px 7px", borderRadius: 999, background: "#f6ffed", color: "#389e0d", border: "1px solid #b7eb8f", fontSize: 10.5, lineHeight: "16px", fontWeight: 700 }}>
-                            <CheckCircleFilled style={{ fontSize: 11 }} />Đã xong
-                        </span>
-                    </Tooltip>}
-                    <Typography.Text type="secondary" style={{ fontSize: 11, whiteSpace: "nowrap" }}>{dishIds.length} món</Typography.Text>
-                </Stack>
-            </div>
-            {dishIds.length > 0 && <Stack align="center" justify="space-between" gap={6} style={{ marginBottom: 7 }}>
-                <Typography.Text type="secondary" style={{ fontSize: 11, lineHeight: "16px" }}>Tình trạng nấu</Typography.Text>
-                <Switch
-                    size="small"
-                    checked={cooked}
-                    checkedChildren="Đã nấu"
-                    unCheckedChildren="Chưa nấu"
-                    onChange={checked => dispatch(setMealSlotCooked({ mealId: item.id, slot, cooked: checked }))}
-                />
-            </Stack>}
-            {dishIds.length === 0 ? (
-                <Typography.Text type="secondary" style={{ display: "block", fontSize: 12, lineHeight: "18px" }}>Chưa chọn</Typography.Text>
-            ) : (
-                <Stack wrap="wrap" gap={4}>
-                    {dishIds.slice(0, 3).map((id, index) => {
-                        const servingLabel = _formatDishServings(id);
-                        return <Tag key={`${id}-${index}`} style={{ maxWidth: "100%", fontSize: 11, padding: "1px 7px", margin: 0, borderRadius: 10, overflow: "hidden", textOverflow: "ellipsis" }}>
-                            {_dishLabel(id)}{servingLabel ? ` · còn ${servingLabel}` : ""}
-                        </Tag>;
-                    })}
-                    {dishIds.length > 3 && <Tag style={{ fontSize: 11, padding: "1px 7px", margin: 0, borderRadius: 10 }}>+{dishIds.length - 3}</Tag>}
-                </Stack>
-            )}
-            {(() => {
-                const actual = item.actualMeals?.[slot];
-                if (!actual) return null;
-                const plannedSet = new Set(getScheduledMealDishIds(dishIds));
-                const actualIds = actual.dishIds ?? [];
-                const differs = actualIds.length !== plannedSet.size || actualIds.some(id => !plannedSet.has(id));
-                if (!differs) return null;
-                const actualNames = actualIds.map(id => _dishName(id)).join(", ");
-                return <Tooltip title={actual.note ? `${actualNames}${actual.note ? ` — ${actual.note}` : ""}` : actualNames}>
-                    <Tag color="gold" style={{ marginTop: 6, marginRight: 0, fontSize: 11, padding: "1px 7px", borderRadius: 10, maxWidth: "100%", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                        Thực tế khác kế hoạch{actualNames ? `: ${actualNames}` : ""}
-                    </Tag>
-                </Tooltip>;
-            })()}
-        </Box>;
-    };
-
     return (
         <React.Fragment>
             <Box className="scheduled-meal-card" style={{
                 borderRadius: 8,
-                border: `1px solid ${selected ? "rgba(22,119,255,0.42)" : "rgba(116,54,220,0.10)"}`,
+                border: `1px solid ${selected ? "rgba(22,119,255,0.42)" : "rgba(116,54,220,0.12)"}`,
                 background: selected ? "#f0f7ff" : "#fff",
-                marginBottom: 10,
-                overflow: "hidden",
-                boxShadow: "0 10px 28px rgba(74,48,130,0.10)",
+                padding: "10px 11px",
+                boxShadow: "0 6px 16px rgba(74,48,130,0.06)",
             }}>
-                <div style={{ display: "grid", gridTemplateColumns: "5px minmax(0, 1fr)", background: `linear-gradient(90deg, ${railColor}14 0%, rgba(255,255,255,0.96) 74%)`, borderBottom: "1px solid rgba(116,54,220,0.09)" }}>
-                    <div style={{ background: railColor }} />
-                    <div style={{ padding: "12px 12px 10px", minWidth: 0 }}>
-                        <div style={{ display: "grid", gridTemplateColumns: "auto minmax(0, 1fr) auto", gap: 8, alignItems: "start" }}>
-                            <Checkbox checked={selected} onChange={_onToggleSelect} style={{ marginTop: 4, marginRight: 0 }} />
-                            <div style={{ minWidth: 0 }}>
-                                <Tooltip title={item.name}>
-                                    <Typography.Paragraph style={{ marginBottom: 2, color: "#111827", fontWeight: 800, lineHeight: "22px", fontSize: 15.5 }} ellipsis={{ rows: 2 }}>
-                                        {item.name}
-                                    </Typography.Paragraph>
-                                </Tooltip>
-                                <Space size={5} wrap>
-                                    <span style={{ padding: "1px 7px", borderRadius: 999, background: plannedStatus.background, color: plannedStatus.color, border: `1px solid ${plannedStatus.border}`, fontSize: 11, lineHeight: "18px", fontWeight: 650 }}>{plannedStatus.label}</span>
-                                    <Typography.Text type="secondary" style={{ fontSize: 12 }}>{moment(item.plannedDate).format("DD/MM/YYYY")}</Typography.Text>
-                                    <Typography.Text type="secondary" style={{ fontSize: 12 }}>{totalDishCount} lượt món</Typography.Text>
-                                    {uniqueDishCount !== totalDishCount && <Typography.Text type="secondary" style={{ fontSize: 12 }}>{uniqueDishCount} món khác nhau</Typography.Text>}
-                                </Space>
-                            </div>
-                            <Dropdown menu={{
-                                items: [
-                                    { label: "Nấu thực đơn", key: "cook", icon: <FireOutlined />, disabled: allDishIds.length === 0 },
-                                    { label: "Nấu bữa sáng", key: "cook-breakfast", icon: <FireOutlined />, disabled: item.meals.breakfast.length === 0 },
-                                    { label: "Nấu bữa trưa", key: "cook-lunch", icon: <FireOutlined />, disabled: item.meals.lunch.length === 0 },
-                                    { label: "Nấu bữa tối", key: "cook-dinner", icon: <FireOutlined />, disabled: item.meals.dinner.length === 0 },
-                                    { label: breakfastFeedbackDone ? "Xem phản hồi bữa sáng" : "Hoàn tất bữa sáng", key: "complete-breakfast", icon: breakfastFeedbackDone ? <EyeOutlined /> : <RestOutlined />, disabled: item.meals.breakfast.length === 0 || (isFutureMeal && !breakfastFeedbackDone) },
-                                    { label: lunchFeedbackDone ? "Xem phản hồi bữa trưa" : "Hoàn tất bữa trưa", key: "complete-lunch", icon: lunchFeedbackDone ? <EyeOutlined /> : <RestOutlined />, disabled: item.meals.lunch.length === 0 || (isFutureMeal && !lunchFeedbackDone) },
-                                    { label: dinnerFeedbackDone ? "Xem phản hồi bữa tối" : "Hoàn tất bữa tối", key: "complete-dinner", icon: dinnerFeedbackDone ? <EyeOutlined /> : <RestOutlined />, disabled: item.meals.dinner.length === 0 || (isFutureMeal && !dinnerFeedbackDone) },
-                                    { type: "divider" },
-                                    { label: "Đánh dấu không nấu", key: "mark-skip", icon: <RestOutlined />, disabled: !hasAnyUnmarkedSlot },
-                                    { label: "Chi tiết", key: "detail", icon: <CalendarOutlined /> },
-                                    { type: "divider" },
-                                    { label: "Sao chép", key: "copy", icon: <CopyOutlined /> },
-                                    { label: isFinishedMeal ? "Đã hoàn tất, chỉ xem" : "Sửa", key: "edit", icon: <EditOutlined />, disabled: isFinishedMeal },
-                                    { type: "divider" },
-                                    { label: "Xóa", key: "delete", icon: <DeleteOutlined />, danger: true },
-                                ],
-                                onClick: _onMoreActionClick,
-                            }} placement="bottomRight">
-                                <Button aria-label="Thao tác thực đơn" type="text" icon={<MoreOutlined />} style={mealItemMenuButtonStyle} />
-                            </Dropdown>
-                        </div>
+                <div style={{ display: "grid", gridTemplateColumns: "auto minmax(0, 1fr) auto", gap: 8, alignItems: "start" }}>
+                    <Checkbox checked={selected} onChange={_onToggleSelect} style={{ marginTop: 2, marginRight: 0 }} />
+                    <div style={{ minWidth: 0 }}>
+                        <Typography.Text strong style={{ display: "block", color: "#111827", fontSize: 14, lineHeight: "19px", overflowWrap: "anywhere" }}>{item.name}</Typography.Text>
+                        <Stack wrap="wrap" gap={5} style={{ marginTop: 5 }}>
+                            {memberIds.length === 0
+                                ? <Tag icon={<TeamOutlined />} style={{ marginInlineEnd: 0, fontSize: 11 }}>Cả nhà</Tag>
+                                : memberIds.map(id => <Tag key={id} color="purple" style={{ marginInlineEnd: 0, fontSize: 11 }}>{memberNameById.get(id)}</Tag>)}
+                        </Stack>
+                        <Stack wrap="wrap" gap={6} style={{ marginTop: 6 }}>
+                            {slotCountLabels.map(({ slot, label }) => {
+                                const skipped = Boolean(item.skipMeals?.[slot]);
+                                const count = (item.meals?.[slot] ?? []).length;
+                                return <Typography.Text key={slot} type="secondary" style={{ fontSize: 12 }}>
+                                    {label}: {skipped ? "không nấu" : `${count} món`}
+                                </Typography.Text>;
+                            })}
+                        </Stack>
                     </div>
-                </div>
-
-                <div style={{ padding: 10, minWidth: 0, display: "flex", flexDirection: "column", gap: 9 }}>
-                    <div style={{ display: "grid", gridTemplateColumns: "minmax(0, 1fr)", gap: 7 }}>
-                        {mealGroups.map(group => <MealRow key={group.label} slot={group.slot} icon={group.icon} label={group.label} dishIds={group.dishIds} color={group.color} background={group.background} border={group.border} finished={group.dishIds.length > 0 && feedbackDoneBySlot[group.slot]} />)}
-                    </div>
+                    <Dropdown menu={{
+                        items: [
+                            { label: "Chi tiết", key: "detail", icon: <CalendarOutlined /> },
+                            { label: "Sao chép", key: "copy", icon: <CopyOutlined /> },
+                            { label: "Sửa", key: "edit", icon: <EditOutlined /> },
+                            { type: "divider" },
+                            { label: "Xóa", key: "delete", icon: <DeleteOutlined />, danger: true },
+                        ],
+                        onClick: _onMoreActionClick,
+                    }} placement="bottomRight">
+                        <Button aria-label="Thao tác thực đơn" type="text" icon={<MoreOutlined />} style={mealItemMenuButtonStyle} />
+                    </Dropdown>
                 </div>
             </Box>
 
-            <ScheduledMealMarkSkipModal
-                open={Boolean(skipScope)}
-                meal={item}
-                slot={skipScope?.slot}
-                initialReason={skipScope?.reason}
-                onClose={() => setSkipScope(undefined)}
-            />
-
-            <ScheduledMealCookingModal
-                open={cookingOpen}
-                title={cookingScope.title}
-                dishIds={cookingScope.dishIds}
-                dishServings={item.dishServings}
-                autoStartToken={cookingToken}
-                scheduledMealId={item.id}
-                mealSlot={cookingScope.mealSlot}
-                mealDate={item.plannedDate}
-                onClose={() => setCookingOpen(false)}
-            />
-
-            <MealCompletionLeftoverModal
-                open={completionOpen}
-                title={completionScope.title}
-                dishIds={completionScope.dishIds}
-                dishServings={item.dishServings}
-                scheduledMealId={item.id}
-                mealSlot={completionScope.mealSlot}
-                mealDate={item.plannedDate}
-                readonly={completionScope.readonly}
-                onClose={() => setCompletionOpen(false)}
-            />
-
-            {/* Edit */}
             {toggleEditModal.value && <Modal
                 open={toggleEditModal.value}
                 title={<Space>
@@ -907,7 +803,6 @@ export const ScheduledMealItem = ({ item, selected, dishNameById, onDelete }: { 
                 </DeferredModalContent>
             </Modal>}
 
-            {/* Meal detail */}
             {toggleMealModal.value && <Modal
                 style={{ top: 50 }}
                 open={toggleMealModal.value}
@@ -929,7 +824,6 @@ export const ScheduledMealItem = ({ item, selected, dishNameById, onDelete }: { 
                 </DeferredModalContent>
             </Modal>}
 
-            {/* Copy to another day */}
             {toggleCopyModal.value && <Modal
                 open={toggleCopyModal.value}
                 title={<Space>
@@ -958,6 +852,7 @@ export const ScheduledMealItem = ({ item, selected, dishNameById, onDelete }: { 
                 </Box>
                 </DeferredModalContent>
             </Modal>}
+
             {toggleDeleteConfirm.value && <Modal
                 open={toggleDeleteConfirm.value}
                 title={<Space><DeleteOutlined style={{ color: "red" }} />Xác nhận xóa</Space>}

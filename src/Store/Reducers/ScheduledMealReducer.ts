@@ -34,8 +34,9 @@ export const ScheduledMealSlice = createSlice({
             const meal = state.scheduledMeals.find(item => item.id === action.payload.mealId);
             if (!meal) return;
             if (!meal.skipMeals) meal.skipMeals = {};
+            // Keep the planned dishes intact under the skip marker — consumers guard on the
+            // marker's presence, and preserving them powers the planned-vs-reality view.
             meal.skipMeals[action.payload.slot] = action.payload.marker;
-            meal.meals[action.payload.slot] = [];
         },
         unmarkSkipMeal: (state, action: PayloadAction<{ mealId: string; slot: ScheduledMealSlotKey }>) => {
             const meal = state.scheduledMeals.find(item => item.id === action.payload.mealId);
@@ -48,6 +49,13 @@ export const ScheduledMealSlice = createSlice({
             if (!meal.cookedSlots) meal.cookedSlots = {};
             if (action.payload.cooked) meal.cookedSlots[action.payload.slot] = true;
             else delete meal.cookedSlots[action.payload.slot];
+        },
+        setMealSlotEaten: (state, action: PayloadAction<{ mealId: string; slot: ScheduledMealSlotKey; eaten: boolean }>) => {
+            const meal = state.scheduledMeals.find(item => item.id === action.payload.mealId);
+            if (!meal) return;
+            if (!meal.eatenSlots) meal.eatenSlots = {};
+            if (action.payload.eaten) meal.eatenSlots[action.payload.slot] = true;
+            else delete meal.eatenSlots[action.payload.slot];
         },
         setMealSlotActual: (state, action: PayloadAction<{ mealId: string; slot: ScheduledMealSlotKey; record: ScheduledMealActualRecord }>) => {
             const meal = state.scheduledMeals.find(item => item.id === action.payload.mealId);
@@ -81,6 +89,7 @@ export const {
     markSkipMeal,
     unmarkSkipMeal,
     setMealSlotCooked,
+    setMealSlotEaten,
     setMealSlotActual,
     remove: removeScheduledMeal,
     toggleSelectedMeals,

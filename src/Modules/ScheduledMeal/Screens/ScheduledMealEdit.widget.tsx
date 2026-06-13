@@ -16,6 +16,8 @@ import { useMemo } from "react"
 import { useDispatch, useSelector } from "react-redux"
 import { ScheduledMealEstimateSummary } from "./ScheduledMealEstimateSummary.widget"
 import { ScheduledMealMealPlanner } from "./ScheduledMealMealPlanner.widget"
+import { HouseholdMemberPicker } from "@modules/ScheduledMeal/Components/HouseholdMemberPicker"
+import { Box } from "@components/Layout/Box"
 
 const buildNameOptions = (names: string[]) => {
     const uniqueNames = Array.from(new Map(names
@@ -51,8 +53,10 @@ export const ScheduledMealEditWidget = ({ item, onDone }) => {
             id: { name: ObjectPropertyHelper.nameof(defaultValues, e => e.id), noMarkup: true },
             name: { label: "Tên gợi nhớ", name: ObjectPropertyHelper.nameof(defaultValues, e => e.name) },
             meals: { name: ObjectPropertyHelper.nameof(defaultValues, e => e.meals), noMarkup: true },
+            memberIds: { name: ObjectPropertyHelper.nameof(defaultValues, e => e.memberIds), noMarkup: true },
             skipMeals: { name: ObjectPropertyHelper.nameof(defaultValues, e => e.skipMeals), noMarkup: true },
             cookedSlots: { name: ObjectPropertyHelper.nameof(defaultValues, e => e.cookedSlots), noMarkup: true },
+            eatenSlots: { name: ObjectPropertyHelper.nameof(defaultValues, e => e.eatenSlots), noMarkup: true },
             actualMeals: { name: ObjectPropertyHelper.nameof(defaultValues, e => e.actualMeals), noMarkup: true },
             dishServings: { name: ObjectPropertyHelper.nameof(defaultValues, e => e.dishServings), noMarkup: true },
             createdDate: { name: ObjectPropertyHelper.nameof(defaultValues, e => e.createdDate), noMarkup: true },
@@ -75,6 +79,7 @@ export const ScheduledMealEditWidget = ({ item, onDone }) => {
 
     const meals = SmartForm.useWatch("meals", editScheduledMealForm.form);
     const dishServings = SmartForm.useWatch("dishServings", editScheduledMealForm.form) ?? {};
+    const memberIds = SmartForm.useWatch("memberIds", editScheduledMealForm.form) ?? [];
     const selectedDishIds = useMemo(() => Object.values(meals ?? { breakfast: [], lunch: [], dinner: [] }).flat(), [meals]);
 
     const _onSave = () => {
@@ -97,6 +102,13 @@ export const ScheduledMealEditWidget = ({ item, onDone }) => {
                 filterOption={(inputValue, option) => (option?.value ?? "").toString().toLowerCase().includes(inputValue.toLowerCase())}
             />
         </SmartForm.Item>
+        <Box style={{ marginBottom: 12 }}>
+            <HouseholdMemberPicker
+                label="Cho ai ăn? (để trống = cả nhà)"
+                value={memberIds}
+                onChange={ids => editScheduledMealForm.form.setFieldsValue({ memberIds: ids })}
+            />
+        </Box>
         <ScheduledMealMealPlanner meals={meals} dishServings={dishServings} dishes={dishes} onMealsChange={_onMealsChange} />
         <SmartForm.Item {...editScheduledMealForm.itemDefinitions.plannedDate}>
             <DatePicker style={{ width: "100%" }} placeholder="Chọn ngày" format={"DD/MM/YYYY"} />
