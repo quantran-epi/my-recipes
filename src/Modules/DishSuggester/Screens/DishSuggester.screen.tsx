@@ -39,6 +39,7 @@ import { RootRoutes } from "@routing/RootRoutes";
 import { NutritionGoal as SharedNutritionGoal } from "@store/Models/SharedConfig";
 import { setSelectedHouseholdMemberIds } from "@store/Reducers/AppContextReducer";
 import { startCooking } from "@store/Reducers/CookingSessionReducer";
+import { useCookingTimer } from "@modules/Dishes/Screens/useCookingTimer";
 
 type Mode = "ingredients" | "inventory" | "duration" | "nutrition";
 type SuggesterActionMode = "navigate" | "modal";
@@ -128,6 +129,11 @@ export const DishSuggesterScreen: React.FC<DishSuggesterScreenProps> = ({ open, 
     const nutritionGoals = useSelector(selectNutritionGoals);
     const householdMembers = useSelector(selectHouseholdMembers);
     const selectedHouseholdMemberIds = useSelector(selectSelectedHouseholdMemberIds);
+
+    // Reuse the same cooking-timer hook the CookingSession widget uses purely for its audio-unlock
+    // gesture (no session needed) so the suggestor-launched cook can ring its first phase chime
+    // under the browser autoplay policy, identical to the other cooking entry points.
+    const cookingTimer = useCookingTimer(undefined);
 
     const [mode, setMode] = useState<Mode>(initialMode ?? "ingredients");
     const [step, setStep] = useState(0);
@@ -396,8 +402,16 @@ export const DishSuggesterScreen: React.FC<DishSuggesterScreenProps> = ({ open, 
             .filter((dish): dish is Dishes => Boolean(dish));
         if (targetDishes.length === 0) return;
         const memberIds = selectedHouseholdMemberIds.length > 0 ? selectedHouseholdMemberIds : householdMembers.map(member => member.id);
+        // Track whether any dish has active duration phases so we can unlock audio within this tap
+        // (autoplay policy) exactly like CookingSession.widget._onStartCooking does.
+        let anyTimerPhases = false;
         targetDishes.forEach(dish => {
             const ingredientIds = Array.from(new Set(DishServingHelper.collectIngredientAmounts(dish, dishes).map(row => row.ingredientId)));
+            // The live timer uses the top-level dish's own active duration phases — identical to the
+            // CookingSession and ScheduledMealCooking entry points — so the countdown UI appears.
+            const timerPhases = DishDurationHelper.getActiveItems(dish.duration)
+                .map(item => ({ phaseKey: item.phase.key, plannedMinutes: item.minutes }));
+            if (timerPhases.length > 0) anyTimerPhases = true;
             dispatch(startCooking({
                 dishId: dish.id,
                 dishName: dish.name,
@@ -405,8 +419,11 @@ export const DishSuggesterScreen: React.FC<DishSuggesterScreenProps> = ({ open, 
                 steps: collectAllCookingSteps(dish, dishesById),
                 ingredientIds,
                 householdMemberIds: memberIds,
+                timerPhases,
             }));
         });
+        // Unlock audio within this tap so the first phase's expiry chime can play under autoplay policy.
+        if (anyTimerPhases) cookingTimer.unlockAudio();
         message.success(targetDishes.length === 1 ? `Đã bắt đầu nấu ${targetDishes[0].name}` : `Đã bắt đầu nấu ${targetDishes.length} món`);
         if (!pageInline) _onClose();
     };
