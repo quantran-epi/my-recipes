@@ -28,7 +28,7 @@ See: .planning/PROJECT.md (updated 2026-06-05)
 Phase: 5 (release-gate-and-product-guardrails) — READY
 Plan: Not started
 Status: Phase 04 complete; ready for Phase 05
-Last activity: 2026-06-13 -- Completed quick task 260613-ea9: Dish serving inventory with fresh vs leftover kinds
+Last activity: 2026-06-13 -- Completed quick task 260613-f6m: Cooking countdown audio fix, ingredient availability guard, smart planner templates
 
 Progress: [████████░░] 80%
 
@@ -36,6 +36,7 @@ Progress: [████████░░] 80%
 
 | Date | Task | Artifact |
 |------|------|----------|
+| 2026-06-13 | Cooking countdown audio fix, ingredient availability guard, smart planner templates | `.planning/quick/260613-f6m-cooking-session-countdown-ingredient-ava/260613-f6m-SUMMARY.md` |
 | 2026-06-13 | Dish serving inventory with fresh vs leftover kinds | `.planning/quick/260613-ea9-dish-serving-inventory-with-fresh-vs-lef/260613-ea9-SUMMARY.md` |
 | 2026-06-12 | Fix Smart Planner meal slot dish card width and fact rows | `.planning/quick/260612-uti-fix-smart-planner-meal-slot-dish-card-wi/260612-uti-SUMMARY.md` |
 | 2026-06-12 | Fix Smart Planner week planning Monday to Sunday | `.planning/quick/260612-une-fix-smart-planner-week-planning-monday-t/260612-une-SUMMARY.md` |
