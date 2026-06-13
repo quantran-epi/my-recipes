@@ -7,7 +7,7 @@ import { useModal } from '@components/Modal/ModalProvider';
 import { Tag } from '@components/Tag';
 import { Typography } from '@components/Typography';
 import { useScreenTitle } from '@hooks';
-import { LeftoverTrackerItem, LeftoverTrackerItemStatus, discardLeftoverItem, eatLeftoverPortion, finishLeftoverItem } from '@store/Reducers/AppContextReducer';
+import { DishServingKind, LeftoverTrackerItem, LeftoverTrackerItemStatus, discardLeftoverItem, eatLeftoverPortion, finishLeftoverItem } from '@store/Reducers/AppContextReducer';
 import { selectLeftoverTrackerItems } from '@store/Selectors';
 import { Empty, Input, Segmented } from 'antd';
 import dayjs from 'dayjs';
@@ -37,6 +37,20 @@ const STATUS_OPTIONS: Array<{ value: StatusFilter; label: string }> = [
     { value: 'discarded', label: 'Đã bỏ' },
 ];
 
+type KindFilter = 'all' | DishServingKind;
+
+const KIND_OPTIONS: Array<{ value: KindFilter; label: string }> = [
+    { value: 'all', label: 'Tất cả' },
+    { value: 'fresh', label: 'Mới nấu' },
+    { value: 'leftover', label: 'Phần dư' },
+];
+
+const itemKind = (item: LeftoverTrackerItem): DishServingKind => item.kind === 'fresh' ? 'fresh' : 'leftover';
+
+const getKindVisual = (item: LeftoverTrackerItem) => itemKind(item) === 'fresh'
+    ? { color: 'volcano', label: 'Mới nấu' }
+    : { color: 'gold', label: 'Phần dư' };
+
 const LEFTOVER_CONFIRM_Z_INDEX = 5200;
 
 const getStatusVisual = (item: LeftoverTrackerItem) => {
@@ -61,6 +75,7 @@ const LeftoverItemRow: React.FC<{
     onDiscard: () => void;
 }> = ({ item, onEatOne, onFinish, onDiscard }) => {
     const visual = getStatusVisual(item);
+    const kindVisual = getKindVisual(item);
     const slot = item.mealSlot ? slotLabel[item.mealSlot] ?? 'Bữa ăn' : null;
     const mealName = stripActionPrefix(item.mealTitle);
     const mealDate = item.mealDate ? dayjs(item.mealDate).format('DD/MM/YYYY') : null;
@@ -82,7 +97,10 @@ const LeftoverItemRow: React.FC<{
                         {item.note && <Typography.Text style={{ display: 'block', color: '#475569', fontSize: 12, lineHeight: '17px', marginTop: 4, overflowWrap: 'anywhere' }}>{item.note}</Typography.Text>}
                         {item.storedAt && <Typography.Text type='secondary' style={{ display: 'block', fontSize: 11, lineHeight: '16px', marginTop: 4 }}>{formatStoredAt(item.storedAt)}</Typography.Text>}
                     </div>
-                    <Tag color={visual.color} style={{ marginInlineEnd: 0, flexShrink: 0 }}>{visual.label}</Tag>
+                    <Stack direction='column' align='flex-end' gap={4} style={{ flexShrink: 0 }}>
+                        <Tag color={kindVisual.color} style={{ marginInlineEnd: 0 }}>{kindVisual.label}</Tag>
+                        <Tag color={visual.color} style={{ marginInlineEnd: 0 }}>{visual.label}</Tag>
+                    </Stack>
                 </div>
                 {item.status === 'available' && <Stack wrap='wrap' gap={6} style={{ marginTop: 10 }}>
                     <ActionButton tone='success' icon={<RollbackOutlined />} onClick={onEatOne}>Ăn 1 phần</ActionButton>
@@ -101,12 +119,14 @@ export const LeftoverManagementScreen: React.FC = () => {
     const modal = useModal();
     const items = useSelector(selectLeftoverTrackerItems);
     const [statusFilter, setStatusFilter] = useState<StatusFilter>('available');
+    const [kindFilter, setKindFilter] = useState<KindFilter>('all');
     const [search, setSearch] = useState('');
 
     const filtered = useMemo(() => {
         const query = search.trim().toLowerCase();
         return items.filter(item => {
             if (statusFilter !== 'all' && item.status !== statusFilter) return false;
+            if (kindFilter !== 'all' && itemKind(item) !== kindFilter) return false;
             if (!query) return true;
             const haystack = [item.dishName, item.note, stripActionPrefix(item.mealTitle), item.mealSlot ? slotLabel[item.mealSlot] : ''].filter(Boolean).join(' ').toLowerCase();
             return haystack.includes(query);
@@ -119,7 +139,7 @@ export const LeftoverManagementScreen: React.FC = () => {
             const bTime = b.eatBy ? dayjs(b.eatBy).valueOf() : dayjs(b.storedAt).valueOf();
             return aTime - bTime;
         });
-    }, [items, search, statusFilter]);
+    }, [items, search, statusFilter, kindFilter]);
 
     const stats = useMemo(() => {
         const available = items.filter(item => item.status === 'available');
@@ -214,6 +234,12 @@ export const LeftoverManagementScreen: React.FC = () => {
                         value={statusFilter}
                         onChange={value => setStatusFilter(value as StatusFilter)}
                         options={STATUS_OPTIONS.map(option => ({ label: option.label, value: option.value }))}
+                        style={{ background: '#f8fafc' }}
+                    />
+                    <Segmented
+                        value={kindFilter}
+                        onChange={value => setKindFilter(value as KindFilter)}
+                        options={KIND_OPTIONS.map(option => ({ label: option.label, value: option.value }))}
                         style={{ background: '#f8fafc' }}
                     />
                 </Stack>

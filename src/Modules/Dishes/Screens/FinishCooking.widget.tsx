@@ -12,6 +12,8 @@ import { DishDurationHelper } from "@common/Helpers/DishDurationHelper";
 import { cancelCooking, finishCooking, recordCookTime } from "@store/Reducers/CookingSessionReducer";
 import { updateDishDuration } from "@store/Reducers/DishesReducer";
 import { deductInventory } from "@store/Reducers/InventoryReducer";
+import { addLeftoverTrackerItem } from "@store/Reducers/AppContextReducer";
+import { nanoid } from "nanoid";
 import { DishDuration, DishDurationPhaseKey } from "@store/Models/Dishes";
 import { selectDishes, selectDishesById, selectIngredientsById, selectInventory, selectInventoryHealthConfig } from "@store/Selectors";
 import moment from "moment";
@@ -96,6 +98,11 @@ export const FinishCookingWidget: React.FunctionComponent<FinishCookingWidgetPro
 
     const cookTimeDelta = cookTime.plannedMinutes > 0 ? cookTime.totalMinutes - cookTime.plannedMinutes : 0;
 
+    const producedServings = useMemo(
+        () => DishServingHelper.normalizeTargetServings(session.targetServings, DishServingHelper.getBaseServings(dish)),
+        [session.targetServings, dish],
+    );
+
     const _onFinish = () => {
         deductions.forEach(d => dispatch(deductInventory({
             ingredientId: d.id,
@@ -109,6 +116,18 @@ export const FinishCookingWidget: React.FunctionComponent<FinishCookingWidgetPro
                 dishId: session.dishId,
                 totalMinutes: cookTime.totalMinutes,
                 phaseMinutes: cookTime.phaseMinutes,
+            }));
+        }
+        if (producedServings > 0) {
+            dispatch(addLeftoverTrackerItem({
+                id: nanoid(10),
+                dishId: session.dishId,
+                dishName: dish?.name ?? session.dishName,
+                portions: producedServings,
+                storedAt: new Date().toISOString(),
+                status: 'available',
+                kind: 'fresh',
+                cookingSessionId: session.id,
             }));
         }
         dispatch(finishCooking(session.id));
@@ -206,6 +225,12 @@ export const FinishCookingWidget: React.FunctionComponent<FinishCookingWidgetPro
                 </Popconfirm>
             )}
         </div>}
+
+        {producedServings > 0 && (
+            <Typography.Text type="secondary" style={{ display: 'block', fontSize: 12, marginBottom: 8 }}>
+                Đã thêm {producedServings} phần mới nấu vào kho phần ăn
+            </Typography.Text>
+        )}
 
         <Stack direction="column" style={{ gap: 8, marginTop: 12 }}>
             <Button fullwidth icon={<CloseCircleOutlined />} danger onClick={_onCancel}>
