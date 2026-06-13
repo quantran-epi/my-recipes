@@ -3,9 +3,9 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: ready
-stopped_at: Completed quick task 260613-gfm
-last_updated: "2026-06-13T00:00:00Z"
-last_activity: 2026-06-13 -- Completed quick task 260613-gfm: Unified cooking sessions, leftover actions, tag-count templates page, meal-slot cooked state
+stopped_at: Completed quick task 260613-iqz
+last_updated: "2026-06-13T06:30:00Z"
+last_activity: 2026-06-13 -- Completed quick task 260613-iqz: Cook-member prompt at session start, finish/leftover modal at zero servings with planned-vs-reality, full-width tag-count template UI moved into reuse-template page, deploy
 progress:
   total_phases: 5
   completed_phases: 4
@@ -28,7 +28,7 @@ See: .planning/PROJECT.md (updated 2026-06-05)
 Phase: 5 (release-gate-and-product-guardrails) — READY
 Plan: Not started
 Status: Phase 04 complete; ready for Phase 05
-Last activity: 2026-06-13 -- Completed quick task 260613-gfm: Unified cooking sessions, leftover actions (eat-part/eat-all/discard + manual add), tag-count templates page, meal-slot cooked state
+Last activity: 2026-06-13 -- Completed quick task 260613-iqz: Cook-member prompt at session start; finish/leftover modal opens at zero servings with planned-vs-reality recording; full-width tag-count template UI moved into reuse-template page; deploy
 
 Progress: [████████░░] 80%
 
@@ -36,6 +36,7 @@ Progress: [████████░░] 80%
 
 | Date | Task | Artifact |
 |------|------|----------|
+| 2026-06-13 | Cook-member prompt at session start, finish/leftover modal at zero servings with planned-vs-reality, full-width tag-count template UI moved into reuse-template page, deploy | `.planning/quick/260613-iqz-cooking-session-member-prompt-meal-slot-/260613-iqz-SUMMARY.md` |
 | 2026-06-13 | Unified cooking sessions, leftover actions (eat-part/eat-all/discard + manual add), tag-count templates page, meal-slot cooked state | `.planning/quick/260613-gfm-cooking-sessions-leftover-actions-tag-co/260613-gfm-SUMMARY.md` |
 | 2026-06-13 | Cooking countdown audio fix, ingredient availability guard, smart planner templates | `.planning/quick/260613-f6m-cooking-session-countdown-ingredient-ava/260613-f6m-SUMMARY.md` |
 | 2026-06-13 | Dish serving inventory with fresh vs leftover kinds | `.planning/quick/260613-ea9-dish-serving-inventory-with-fresh-vs-lef/260613-ea9-SUMMARY.md` |
