@@ -39,7 +39,7 @@ import {
     selectSelectedHouseholdMembers,
 } from "@store/Selectors";
 import { Progress, Space, Switch } from "antd";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import ShoppingListIcon from "../../../../assets/icons/shoppingList.png";
@@ -113,6 +113,10 @@ export const CookingSessionWidget: React.FunctionComponent<CookingSessionWidgetP
     const toggleShoppingList = useToggle();
     const [phase, setPhase] = useState<"prep" | "cooking">("prep");
     const [showFinish, setShowFinish] = useState(false);
+    // Tracks the session id whose audio we've already unlocked, so the scheduled-path fallback
+    // (below) fires at most once per session and never double-unlocks the direct path where
+    // _onStartCooking already unlocked within the start tap.
+    const audioUnlockedSessionIdRef = useRef<string | null>(null);
     const baseServings = DishServingHelper.getBaseServings(dish);
     const [targetServings, setTargetServings] = useState<number>(() => baseServings);
 
@@ -153,6 +157,20 @@ export const CookingSessionWidget: React.FunctionComponent<CookingSessionWidgetP
             stepTimer.clear();
         }
     }, [session, currentIndex, stepTimer]);
+
+    // Scheduled-meal path fallback: there, ScheduledMealCookingModal dispatches startCooking (with
+    // timer phases) BEFORE this widget mounts, so the widget enters the cooking view via the
+    // activeSession branch and _onStartCooking — the only place that calls timerView.unlockAudio()
+    // within the start tap — never runs. Without unlocking, the AudioContext stays suspended and the
+    // phase-expiry alarm is silent. We unlock here once per session as a fallback. On the direct path
+    // _onStartCooking already unlocked (phase === "cooking" and the ref is set there), so this no-ops.
+    useEffect(() => {
+        if (phase === "cooking") return;            // direct path already unlocked in the start tap
+        if (!session || !timerView.hasTimer) return; // nothing to ring for
+        if (audioUnlockedSessionIdRef.current === session.id) return; // already unlocked this session
+        audioUnlockedSessionIdRef.current = session.id;
+        timerView.unlockAudio();
+    }, [phase, session, timerView]);
 
     const rows = useMemo<CookingIngredientRow[]>(() => {
         const amounts = DishServingHelper.collectIngredientAmounts(dish, allDishes, { targetServings: activeTargetServings });
