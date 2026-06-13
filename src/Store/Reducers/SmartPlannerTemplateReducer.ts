@@ -31,6 +31,18 @@ export const smartPlannerTemplateSlice = createSlice({
             if (!next) return;
             state.templates = [next, ...state.templates.filter(template => template.id !== next.id)].slice(0, MAX_TEMPLATES);
         },
+        // Replace the matching template in place (preserving its list position) so editing a saved
+        // template doesn't reorder the list the way addSmartPlannerTemplate's prepend would.
+        updateSmartPlannerTemplate: (state, action: PayloadAction<SmartPlannerTemplate>) => {
+            const next = normalizeTemplate(action.payload);
+            if (!next) return;
+            const index = state.templates.findIndex(template => template.id === next.id);
+            if (index < 0) {
+                state.templates = [next, ...state.templates].slice(0, MAX_TEMPLATES);
+                return;
+            }
+            state.templates[index] = next;
+        },
         removeSmartPlannerTemplate: (state, action: PayloadAction<{ id: string }>) => {
             state.templates = state.templates.filter(template => template.id !== action.payload.id);
         },
@@ -39,6 +51,7 @@ export const smartPlannerTemplateSlice = createSlice({
 
 export const {
     addSmartPlannerTemplate,
+    updateSmartPlannerTemplate,
     removeSmartPlannerTemplate,
 } = smartPlannerTemplateSlice.actions;
 

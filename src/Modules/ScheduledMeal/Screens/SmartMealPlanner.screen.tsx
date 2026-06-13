@@ -1601,6 +1601,23 @@ export const SmartMealPlannerScreen: React.FC = () => {
         />
     </Modal> : null;
 
+    // Compact per-slot detail of a saved template: dish-count range + required tag counts. Reused
+    // by the collapsible template section in the picker modal (and mirrors the template page cards).
+    const renderTemplateDetail = (template: SmartPlannerTemplate) => <Stack direction='column' gap={6} style={{ width: '100%' }}>
+        {mealSlots.map(slot => {
+            const meta = mealSlotMeta[slot];
+            const range = template.mealSlotDishRanges[slot] ?? { min: 0, max: 0 };
+            const tagRequirements = (template.mealSlotTagRequirements[slot] ?? []).filter(item => item.min > 0);
+            return <Box key={slot} style={{ border: `1px solid ${meta.border}`, borderRadius: 8, background: meta.background, padding: '7px 9px' }}>
+                <Stack align='center' gap={6} wrap='wrap' style={{ width: '100%' }}>
+                    <Tag style={{ marginRight: 0, color: meta.tone, background: '#fff', borderColor: meta.border, minWidth: 48, textAlign: 'center' }}>{meta.label}</Tag>
+                    <Tag color='blue' style={{ marginRight: 0 }}>{range.min}-{range.max} món</Tag>
+                    {tagRequirements.map(item => <Tag key={item.tag} color='cyan' style={{ marginRight: 0 }}>{item.tag}: {item.min}</Tag>)}
+                </Stack>
+            </Box>;
+        })}
+    </Stack>;
+
     const renderStepperControl = (label: string, value: number, onDecrement: () => void, onIncrement: () => void, decrementDisabled: boolean, incrementDisabled: boolean) => (
         <Stack align='center' gap={4} style={{ flexShrink: 0 }}>
             <Typography.Text style={{ fontSize: 12, lineHeight: '18px', color: '#475569' }}>{label}</Typography.Text>
@@ -1629,18 +1646,35 @@ export const SmartMealPlannerScreen: React.FC = () => {
                 Planner sẽ chọn ngẫu nhiên số món trong khoảng min-max cho từng bữa mỗi ngày. Có thể yêu cầu mỗi bữa phải có ít nhất một số món thuộc loại nhất định, ví dụ trưa cần một món chính và một canh.
             </Typography.Text>
             <Box style={{ border: '1px solid rgba(15,23,42,0.08)', borderRadius: 8, background: '#fff', padding: 12 }}>
-                <Stack justify='space-between' align='center' gap={8} wrap='wrap' style={{ width: '100%', marginBottom: smartPlannerTemplates.length > 0 ? 8 : 0 }}>
+                <Stack justify='space-between' align='center' gap={8} wrap='wrap' style={{ width: '100%', marginBottom: 8 }}>
                     <Typography.Text strong style={{ fontSize: 12, lineHeight: '17px', color: '#334155' }}>Mẫu đã lưu</Typography.Text>
                     <Button icon={<SaveOutlined />} onClick={_saveSmartPlannerTemplate}>Lưu thành mẫu</Button>
                 </Stack>
                 {smartPlannerTemplates.length === 0
                     ? <Typography.Text type='secondary' style={{ display: 'block', fontSize: 11, lineHeight: '16px' }}>Chưa có mẫu nào. Lưu cấu hình hiện tại để dùng lại nhanh sau này.</Typography.Text>
-                    : <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-                        {smartPlannerTemplates.map(template => <Stack key={template.id} align='center' gap={4} style={{ padding: '4px 4px 4px 10px', borderRadius: 999, border: '1px solid rgba(19,168,168,0.40)', background: '#e6fffb' }}>
-                            <button type='button' onClick={() => _applySmartPlannerTemplate(template)} style={{ border: 'none', background: 'transparent', cursor: 'pointer', padding: 0, fontSize: 12, color: '#0f766e', fontWeight: 600 }}>{template.name}</button>
-                            <Button aria-label={`Xóa mẫu ${template.name}`} type='text' icon={<MinusOutlined />} onClick={() => _removeSmartPlannerTemplate(template.id)} style={{ width: 20, height: 20, paddingInline: 0, minWidth: 0, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', color: '#9ca3af' }} />
-                        </Stack>)}
-                    </div>}
+                    : <Collapse
+                        ghost
+                        size='small'
+                        items={smartPlannerTemplates.map(template => ({
+                            key: template.id,
+                            label: <Stack justify='space-between' align='center' gap={6} wrap='wrap' style={{ width: '100%' }}>
+                                <Typography.Text strong style={{ fontSize: 12, lineHeight: '17px', color: '#0f766e', overflowWrap: 'anywhere' }}>{template.name}</Typography.Text>
+                                <Button
+                                    aria-label={`Xóa mẫu ${template.name}`}
+                                    type='text'
+                                    icon={<MinusOutlined />}
+                                    onClick={event => { event.stopPropagation(); _removeSmartPlannerTemplate(template.id); }}
+                                    style={{ width: 24, height: 24, paddingInline: 0, minWidth: 0, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', color: '#9ca3af' }}
+                                />
+                            </Stack>,
+                            children: <Stack direction='column' gap={8} style={{ width: '100%' }}>
+                                {renderTemplateDetail(template)}
+                                <Stack justify='flex-end' style={{ width: '100%' }}>
+                                    <Button type='primary' icon={<CheckCircleOutlined />} onClick={() => _applySmartPlannerTemplate(template)}>Áp dụng</Button>
+                                </Stack>
+                            </Stack>,
+                        }))}
+                    />}
             </Box>
             {mealSlots.map(slot => {
                 const meta = mealSlotMeta[slot];

@@ -4,7 +4,8 @@ const ScheduledMealRoutes = RouteHelpers.CreateRoutes('/scheduledMeal', (schedul
     List: () => RouteHelpers.CreateRoute(scheduledMealRoot, ["list"]),
     FeedbackHistory: () => RouteHelpers.CreateRoute(scheduledMealRoot, ["feedback-history"]),
     Leftovers: () => RouteHelpers.CreateRoute(scheduledMealRoot, ["leftovers"]),
-    PrepTasks: () => RouteHelpers.CreateRoute(scheduledMealRoot, ["prep-tasks"])
+    PrepTasks: () => RouteHelpers.CreateRoute(scheduledMealRoot, ["prep-tasks"]),
+    Templates: () => RouteHelpers.CreateRoute(scheduledMealRoot, ["dish-count-templates"])
 }))
 
 export default ScheduledMealRoutes
