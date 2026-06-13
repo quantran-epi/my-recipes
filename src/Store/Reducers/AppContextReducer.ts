@@ -94,6 +94,8 @@ export type HouseholdMemberProfile = {
 
 export type LeftoverTrackerItemStatus = 'available' | 'finished' | 'discarded';
 
+export type DishServingKind = 'fresh' | 'leftover';
+
 export type LeftoverTrackerItem = {
     id: string;
     dishId: string;
@@ -108,6 +110,7 @@ export type LeftoverTrackerItem = {
     mealDate?: string;
     mealTitle?: string;
     status: LeftoverTrackerItemStatus;
+    kind?: DishServingKind;
 }
 
 export const DEFAULT_HOUSEHOLD_PREFERENCE_PROFILE: HouseholdPreferenceProfile = {
@@ -308,6 +311,8 @@ const normalizePortions = (value: unknown): number => {
     return Math.round(parsed * 10) / 10;
 }
 
+export const normalizeKind = (value: unknown): DishServingKind => value === 'fresh' ? 'fresh' : 'leftover';
+
 const prunePrepTaskCompletions = (completions: PrepTaskCompletionMap | undefined, now = new Date()): PrepTaskCompletionMap => {
     const cutoff = now.getTime() - 3 * 24 * 60 * 60 * 1000;
     return Object.fromEntries(Object.entries(completions ?? {}).filter(([, completedAt]) => {
@@ -421,9 +426,34 @@ export const appContextSlice = createSlice({
             const portions = normalizePortions(action.payload.portions);
             if (portions <= 0) return;
             const current = state.leftoverTrackerItems ?? [];
-            const nextItem: LeftoverTrackerItem = { ...action.payload, portions, status: 'available' };
+            const nextItem: LeftoverTrackerItem = { ...action.payload, portions, status: 'available', kind: normalizeKind(action.payload.kind) };
             state.leftoverTrackerItems = [nextItem, ...current]
                 .slice(0, 80);
+        },
+        consumeDishServings: (state, action: PayloadAction<{ dishId: string; portions: number; kind: DishServingKind }>) => {
+            let remaining = normalizePortions(action.payload.portions);
+            if (remaining <= 0) return;
+            const { dishId, kind } = action.payload;
+            const items = state.leftoverTrackerItems ?? [];
+            const order = items
+                .map((item, index) => ({ item, index }))
+                .filter(({ item }) => item.dishId === dishId && normalizeKind(item.kind) === kind && item.status === 'available')
+                .sort((a, b) => {
+                    const aKey = new Date(a.item.eatBy ?? a.item.storedAt).valueOf();
+                    const bKey = new Date(b.item.eatBy ?? b.item.storedAt).valueOf();
+                    return aKey - bKey;
+                });
+            for (const { item } of order) {
+                if (remaining <= 0) break;
+                const deduct = Math.min(remaining, item.portions);
+                const nextPortions = normalizePortions(item.portions - deduct);
+                item.portions = nextPortions;
+                if (nextPortions <= 0) {
+                    item.portions = 0;
+                    item.status = 'finished';
+                }
+                remaining = normalizePortions(remaining - deduct);
+            }
         },
         eatLeftoverPortion: (state, action: PayloadAction<string>) => {
             state.leftoverTrackerItems = (state.leftoverTrackerItems ?? []).map(item => {
@@ -458,6 +488,7 @@ export const {
     markPrepTaskDone,
     unmarkPrepTaskDone,
     addLeftoverTrackerItem,
+    consumeDishServings,
     eatLeftoverPortion,
     finishLeftoverItem,
     discardLeftoverItem,

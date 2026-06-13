@@ -4,7 +4,7 @@
  */
 import { RootState } from "@store/Store";
 import { DEFAULT_SHARED_CONFIG, normalizeSharedConfig } from "@store/Models/SharedConfig";
-import { buildHouseholdPreferenceProfile, getSelectedHouseholdMembers, normalizeHouseholdMembers, normalizeMealSlotTimes } from "@store/Reducers/AppContextReducer";
+import { buildHouseholdPreferenceProfile, getSelectedHouseholdMembers, normalizeHouseholdMembers, normalizeKind, normalizeMealSlotTimes } from "@store/Reducers/AppContextReducer";
 import { normalizeHouseholdHealthState } from "@store/Reducers/HouseholdHealthReducer";
 import type { HouseholdHealthRecord } from "@store/Reducers/HouseholdHealthReducer";
 import { createSelector } from "reselect";
@@ -118,6 +118,23 @@ export const selectMealSlotTimes = createSelector(
 );
 export const selectPrepTaskCompletions = (state: RootState) => state.personal.appContext.prepTaskCompletions ?? {};
 export const selectLeftoverTrackerItems = (state: RootState) => state.personal.appContext.leftoverTrackerItems ?? [];
+
+export const selectAvailableServingsByDishKind = createSelector(
+    [selectLeftoverTrackerItems],
+    items => {
+        const map = new Map<string, { fresh: number; leftover: number }>();
+        items.forEach(item => {
+            if (item.status !== 'available') return;
+            const portions = Number(item.portions);
+            if (!Number.isFinite(portions) || portions <= 0) return;
+            const kind = normalizeKind(item.kind);
+            const current = map.get(item.dishId) ?? { fresh: 0, leftover: 0 };
+            current[kind] += portions;
+            map.set(item.dishId, current);
+        });
+        return map;
+    }
+);
 
 export const selectShoppingListsById = createSelector(
     [selectShoppingLists],
