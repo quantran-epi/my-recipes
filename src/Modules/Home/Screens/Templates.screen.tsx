@@ -1,4 +1,4 @@
-import { CalendarOutlined, DeleteOutlined, EditOutlined, EyeOutlined, MoreOutlined, PlayCircleOutlined, PlusOutlined, SaveOutlined, ShoppingCartOutlined } from '@ant-design/icons';
+import { CalendarOutlined, DeleteOutlined, EditOutlined, EyeOutlined, LayoutOutlined, MoreOutlined, PlayCircleOutlined, PlusOutlined, SaveOutlined, ShoppingCartOutlined } from '@ant-design/icons';
 import { DateHelpers } from '@common/Helpers/DateHelper';
 import { Button } from '@components/Button';
 import { Dropdown } from '@components/Dropdown';
@@ -45,6 +45,7 @@ import { DeferredModalContent, Modal } from '@components/Modal';
 import { useScreenTitle } from '@hooks';
 import { RootRoutes } from '@routing/RootRoutes';
 import { ScheduledMealMealPlanner } from '@modules/ScheduledMeal/Screens/ScheduledMealMealPlanner.widget';
+import { SmartPlannerTemplatesManager } from '@modules/ScheduledMeal/Screens/SmartPlannerTemplates.screen';
 
 type MealKey = keyof ScheduledMeal['meals'];
 
@@ -596,6 +597,15 @@ export const TemplatesScreen = () => {
                         </div>
                     </Box>)}
                 </Stack>}
+            </div>
+        </section>
+
+        <section style={sectionStyle}>
+            <div style={sectionHeaderStyle}>
+                <SectionTitle icon={<LayoutOutlined />} title='Mẫu số món' subtitle='Số món mỗi bữa và loại món bắt buộc để áp dụng nhanh.' />
+            </div>
+            <div style={bodyStyle}>
+                <SmartPlannerTemplatesManager />
             </div>
         </section>
 

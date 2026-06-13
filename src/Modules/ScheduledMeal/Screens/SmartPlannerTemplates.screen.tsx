@@ -115,8 +115,9 @@ const TemplateDetail: React.FC<{ template: { mealSlotDishRanges: SmartPlannerMea
     </Stack>
 );
 
-export const SmartPlannerTemplatesScreen: React.FC = () => {
-    useScreenTitle({ value: 'Mẫu số món', deps: [] });
+// Self-contained template management UI (list + create/edit modal + handlers) without the page hero.
+// Rendered both inside the standalone screen and as a section of the reuse-template page.
+export const SmartPlannerTemplatesManager: React.FC = () => {
     const dispatch = useDispatch();
     const message = useMessage();
     const modal = useModal();
@@ -298,21 +299,11 @@ export const SmartPlannerTemplatesScreen: React.FC = () => {
         </Stack>
     </Modal> : null;
 
-    return <Box style={{ width: 'min(920px, calc(100vw - 24px))', margin: '0 auto', padding: '0 0 96px' }}>
+    return <Box style={{ width: '100%' }}>
         {editModal}
-        <Box style={{ border: '1px solid rgba(196,105,22,0.18)', borderRadius: 8, background: 'linear-gradient(135deg, #ffffff 0%, #fff7e6 100%)', padding: 12, marginBottom: 12, boxShadow: '0 10px 26px rgba(15,23,42,0.07)' }}>
-            <Stack align='center' gap={9} style={{ width: '100%' }}>
-                <span style={{ width: 42, height: 42, borderRadius: 10, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', background: '#fff7e6', color: '#d46b08', border: '1px solid #ffd591', flexShrink: 0 }}>
-                    <LayoutOutlined />
-                </span>
-                <div style={{ minWidth: 0, flex: 1 }}>
-                    <Typography.Text style={{ display: 'block', color: '#d46b08', fontSize: 12, lineHeight: '16px', fontWeight: 800 }}>Lập thực đơn</Typography.Text>
-                    <Typography.Text strong style={{ display: 'block', color: '#111827', fontSize: 22, lineHeight: '28px' }}>Mẫu số món</Typography.Text>
-                    <Typography.Text type='secondary' style={{ display: 'block', fontSize: 12, lineHeight: '18px', marginTop: 3 }}>Tạo và quản lý các mẫu số món mỗi bữa cùng yêu cầu loại món để áp dụng nhanh khi lập thực đơn.</Typography.Text>
-                </div>
-                <Button type='primary' icon={<PlusOutlined />} onClick={_openCreate} style={{ flexShrink: 0 }}>Tạo mẫu</Button>
-            </Stack>
-        </Box>
+        <Stack justify='flex-end' style={{ width: '100%', marginBottom: 12 }}>
+            <Button type='primary' icon={<PlusOutlined />} onClick={_openCreate} style={{ flexShrink: 0 }}>Tạo mẫu</Button>
+        </Stack>
 
         {templates.length === 0 ? <Box style={{ border: '1px dashed #d9d9d9', borderRadius: 8, background: '#fafafa', padding: '28px 12px' }}>
             <Empty
@@ -331,6 +322,27 @@ export const SmartPlannerTemplatesScreen: React.FC = () => {
                 <TemplateDetail template={template} />
             </Box>)}
         </div>}
+    </Box>;
+};
+
+// Standalone route screen: page hero + the shared manager. Kept functional (unlinked from drawer)
+// so the route still resolves if reached directly.
+export const SmartPlannerTemplatesScreen: React.FC = () => {
+    useScreenTitle({ value: 'Mẫu số món', deps: [] });
+    return <Box style={{ width: 'min(920px, calc(100vw - 24px))', margin: '0 auto', padding: '0 0 96px' }}>
+        <Box style={{ border: '1px solid rgba(196,105,22,0.18)', borderRadius: 8, background: 'linear-gradient(135deg, #ffffff 0%, #fff7e6 100%)', padding: 12, marginBottom: 12, boxShadow: '0 10px 26px rgba(15,23,42,0.07)' }}>
+            <Stack align='center' gap={9} style={{ width: '100%' }}>
+                <span style={{ width: 42, height: 42, borderRadius: 10, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', background: '#fff7e6', color: '#d46b08', border: '1px solid #ffd591', flexShrink: 0 }}>
+                    <LayoutOutlined />
+                </span>
+                <div style={{ minWidth: 0, flex: 1 }}>
+                    <Typography.Text style={{ display: 'block', color: '#d46b08', fontSize: 12, lineHeight: '16px', fontWeight: 800 }}>Lập thực đơn</Typography.Text>
+                    <Typography.Text strong style={{ display: 'block', color: '#111827', fontSize: 22, lineHeight: '28px' }}>Mẫu số món</Typography.Text>
+                    <Typography.Text type='secondary' style={{ display: 'block', fontSize: 12, lineHeight: '18px', marginTop: 3 }}>Tạo và quản lý các mẫu số món mỗi bữa cùng yêu cầu loại món để áp dụng nhanh khi lập thực đơn.</Typography.Text>
+                </div>
+            </Stack>
+        </Box>
+        <SmartPlannerTemplatesManager />
     </Box>;
 };
 

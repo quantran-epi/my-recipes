@@ -491,7 +491,6 @@ const SidebarDrawer = ({ buttonStyle }: { buttonStyle?: React.CSSProperties }) =
                 { key: 'dishFeedback', href: RootRoutes.AuthorizedRoutes.ScheduledMealRoutes.FeedbackHistory(), icon: ChatIcon, label: 'Phản hồi món' },
                 { key: 'leftovers', href: RootRoutes.AuthorizedRoutes.ScheduledMealRoutes.Leftovers(), icon: LeftoverIcon, label: 'Phần còn lại' },
                 { key: 'prepTasks', href: RootRoutes.AuthorizedRoutes.ScheduledMealRoutes.PrepTasks(), icon: PrepTaskIcon, label: 'Việc chuẩn bị' },
-                { key: 'dishCountTemplates', href: RootRoutes.AuthorizedRoutes.ScheduledMealRoutes.Templates(), icon: LayoutIcon, label: 'Mẫu số món' },
                 { key: 'shoppingList', href: RootRoutes.AuthorizedRoutes.ShoppingListRoutes.List(), icon: ShoppingListIcon, label: 'Lịch mua sắm' },
                 { key: 'expensePlanner', href: RootRoutes.AuthorizedRoutes.ExpensePlanner(), icon: BudgetIcon, label: 'Tính chi phí' },
             ],
