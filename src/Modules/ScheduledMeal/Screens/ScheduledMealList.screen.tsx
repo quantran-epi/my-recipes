@@ -846,6 +846,7 @@ export const ScheduledMealItem = ({ item, selected, dishNameById, onDelete }: { 
                 open={completionOpen}
                 title={completionScope.title}
                 dishIds={completionScope.dishIds}
+                dishServings={item.dishServings}
                 scheduledMealId={item.id}
                 mealSlot={completionScope.mealSlot}
                 mealDate={item.plannedDate}

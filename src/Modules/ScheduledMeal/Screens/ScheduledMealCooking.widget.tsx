@@ -1,4 +1,5 @@
 import { CheckCircleOutlined, EyeOutlined, FireOutlined, RestOutlined } from '@ant-design/icons';
+import { DishDurationHelper } from '@common/Helpers/DishDurationHelper';
 import { DishServingHelper } from '@common/Helpers/DishServingHelper';
 import { Button } from '@components/Button';
 import { Box } from '@components/Layout/Box';
@@ -10,10 +11,10 @@ import { Typography } from '@components/Typography';
 import { CookingSessionWidget } from '@modules/Dishes/Screens/CookingSession.widget';
 import { Dishes } from '@store/Models/Dishes';
 import { CookingMealFeedbackHistoryRecord, CookingMealFeedbackSlot, CookingSessionMemberFeedback } from '@store/Models/CookingSession';
-import { addLeftoverTrackerItem } from '@store/Reducers/AppContextReducer';
+import { addLeftoverTrackerItem, consumeDishServings, DishServingKind } from '@store/Reducers/AppContextReducer';
 import { saveMealFeedbackHistory, startCooking } from '@store/Reducers/CookingSessionReducer';
-import { selectCookingSessions, selectDishFeedbackHistory, selectDishes, selectDishesById, selectLeftoverTrackerItems, selectSelectedHouseholdMembers } from '@store/Selectors';
-import { Input, InputNumber, Select, Switch } from 'antd';
+import { selectAvailableServingsByDishKind, selectCookingSessions, selectDishFeedbackHistory, selectDishes, selectDishesById, selectLeftoverTrackerItems, selectSelectedHouseholdMembers } from '@store/Selectors';
+import { Input, InputNumber, Segmented, Select, Switch } from 'antd';
 import dayjs from 'dayjs';
 import { nanoid } from 'nanoid';
 import React, { useMemo, useState } from 'react';
@@ -104,6 +105,8 @@ export const ScheduledMealCookingModal: React.FC<ScheduledMealCookingModalProps>
         if (!dish) return;
         if (!force && (activeSessionByDishId.has(dishId) || finishedDishIds.has(dishId))) return;
         const targetServings = dishServings?.[dishId] ?? DishServingHelper.getBaseServings(dish);
+        const timerPhases = DishDurationHelper.getActiveItems(dish.duration)
+            .map(item => ({ phaseKey: item.phase.key, plannedMinutes: item.minutes }));
         dispatch(startCooking({
             dishId: dish.id,
             dishName: dish.name,
@@ -112,6 +115,7 @@ export const ScheduledMealCookingModal: React.FC<ScheduledMealCookingModalProps>
             steps: collectAllSteps(dish, dishesById),
             ingredientIds: Array.from(new Set(DishServingHelper.collectIngredientAmounts(dish, allDishes, { targetServings }).map(item => item.ingredientId))),
             householdMemberIds: selectedMembers.map(member => member.id),
+            timerPhases,
         }));
     }, [activeSessionByDishId, allDishes, dishServings, dishesById, dispatch, finishedDishIds, selectedMembers]);
 
@@ -193,6 +197,7 @@ export const ScheduledMealCookingModal: React.FC<ScheduledMealCookingModalProps>
             open={feedbackOpen}
             title={feedbackScope.title}
             dishIds={feedbackScope.dishIds}
+            dishServings={dishServings}
             scheduledMealId={scheduledMealId}
             mealSlot={mealSlot ?? 'dish'}
             mealDate={mealDate}
@@ -205,6 +210,7 @@ type MealCompletionLeftoverModalProps = {
     open: boolean;
     title: string;
     dishIds: string[];
+    dishServings?: Record<string, number>;
     scheduledMealId?: string;
     mealSlot?: CookingMealFeedbackSlot;
     mealDate?: Date | string;
@@ -219,13 +225,14 @@ type LeftoverDishDraft = {
     note: string;
 }
 
-export const MealCompletionLeftoverModal: React.FC<MealCompletionLeftoverModalProps> = ({ open, title, dishIds, scheduledMealId, mealSlot, mealDate, readonly, onClose }) => {
+export const MealCompletionLeftoverModal: React.FC<MealCompletionLeftoverModalProps> = ({ open, title, dishIds, dishServings, scheduledMealId, mealSlot, mealDate, readonly, onClose }) => {
     const dispatch = useDispatch();
     const message = useMessage();
     const dishesById = useSelector(selectDishesById);
     const members = useSelector(selectSelectedHouseholdMembers);
     const feedbackHistory = useSelector(selectDishFeedbackHistory);
     const leftoverItems = useSelector(selectLeftoverTrackerItems);
+    const servingsByDishKind = useSelector(selectAvailableServingsByDishKind);
     const uniqueDishIds = useMemo(() => getScheduledMealDishIds(dishIds), [dishIds]);
     const mealDateKey = useMemo(() => getMealDateKey(mealDate), [mealDate]);
     const mealDateValue = useMemo(() => dayjs(mealDateKey), [mealDateKey]);
@@ -239,6 +246,14 @@ export const MealCompletionLeftoverModal: React.FC<MealCompletionLeftoverModalPr
     }), [leftoverItems, mealDateKey, mealSlot, scheduledMealId, uniqueDishIds]);
     const [drafts, setDrafts] = useState<Record<string, LeftoverDishDraft>>({});
     const [feedback, setFeedback] = useState<Record<string, Record<string, CookingSessionMemberFeedback>>>({});
+    const [consumeKind, setConsumeKind] = useState<Record<string, DishServingKind>>({});
+    const [consumeCount, setConsumeCount] = useState<Record<string, number>>({});
+
+    const availableForKind = React.useCallback((dishId: string, kind: DishServingKind): number => {
+        const stock = servingsByDishKind.get(dishId);
+        if (!stock) return 0;
+        return kind === 'fresh' ? stock.fresh : stock.leftover;
+    }, [servingsByDishKind]);
 
     React.useEffect(() => {
         if (!open) return;
@@ -247,7 +262,21 @@ export const MealCompletionLeftoverModal: React.FC<MealCompletionLeftoverModalPr
             const record = findMealFeedbackRecord(feedbackHistory, id, { scheduledMealId, mealSlot, mealDate, mealTitle: title });
             return [id, record?.memberFeedback ?? {}];
         })));
-    }, [feedbackHistory, mealDate, mealDateValue, mealSlot, members, open, scheduledMealId, title, uniqueDishIds]);
+        const nextConsumeKind: Record<string, DishServingKind> = {};
+        const nextConsumeCount: Record<string, number> = {};
+        uniqueDishIds.forEach(id => {
+            const stock = servingsByDishKind.get(id);
+            if (!stock || (stock.fresh <= 0 && stock.leftover <= 0)) return;
+            const kind: DishServingKind = stock.fresh > 0 ? 'fresh' : 'leftover';
+            const available = kind === 'fresh' ? stock.fresh : stock.leftover;
+            const dish = dishesById.get(id);
+            const defaultServings = dishServings?.[id] ?? DishServingHelper.getBaseServings(dish);
+            nextConsumeKind[id] = kind;
+            nextConsumeCount[id] = Math.min(available, defaultServings);
+        });
+        setConsumeKind(nextConsumeKind);
+        setConsumeCount(nextConsumeCount);
+    }, [dishServings, dishesById, feedbackHistory, mealDate, mealDateValue, mealSlot, members, open, scheduledMealId, servingsByDishKind, title, uniqueDishIds]);
 
     const _setFeedback = (dishId: string, memberId: string, value?: CookingSessionMemberFeedback) => {
         setFeedback(current => ({
@@ -268,6 +297,22 @@ export const MealCompletionLeftoverModal: React.FC<MealCompletionLeftoverModalPr
                 ...patch,
             },
         }));
+    };
+
+    const _setConsumeKind = (dishId: string, kind: DishServingKind) => {
+        setConsumeKind(current => ({ ...current, [dishId]: kind }));
+        setConsumeCount(current => {
+            const available = availableForKind(dishId, kind);
+            const previous = current[dishId] ?? 0;
+            return { ...current, [dishId]: Math.min(available, previous > 0 ? previous : available) };
+        });
+    };
+
+    const _setConsumeCount = (dishId: string, value: number) => {
+        const kind = consumeKind[dishId] ?? 'leftover';
+        const available = availableForKind(dishId, kind);
+        const next = Number.isFinite(value) && value > 0 ? Math.min(available, value) : 0;
+        setConsumeCount(current => ({ ...current, [dishId]: next }));
     };
 
     const _save = () => {
@@ -309,8 +354,23 @@ export const MealCompletionLeftoverModal: React.FC<MealCompletionLeftoverModalPr
                 memberFeedback,
             }));
         });
+        // Draw down the dish serving inventory for the chosen kind (fresh vs leftover).
+        let totalConsumed = 0;
+        uniqueDishIds.forEach(dishId => {
+            const kind = consumeKind[dishId];
+            if (!kind) return;
+            const requested = Number(consumeCount[dishId] ?? 0);
+            if (!Number.isFinite(requested) || requested <= 0) return;
+            const available = availableForKind(dishId, kind);
+            if (available <= 0) return;
+            const portions = Math.min(requested, available);
+            if (portions <= 0) return;
+            dispatch(consumeDishServings({ dishId, portions, kind }));
+            totalConsumed += portions;
+        });
         const parts: string[] = [];
         if (saved > 0) parts.push(`${saved} món còn lại`);
+        if (totalConsumed > 0) parts.push(`${totalConsumed} phần đã dùng`);
         if (rated > 0) parts.push(`${rated} phản hồi`);
         message.success(parts.length > 0 ? `Đã lưu ${parts.join(' · ')}` : 'Đã hoàn tất bữa ăn');
         onClose();
@@ -401,6 +461,42 @@ export const MealCompletionLeftoverModal: React.FC<MealCompletionLeftoverModalPr
                                 <Input.TextArea value={draft.note} onChange={event => _updateDraft(dishId, { note: event.target.value })} placeholder='Ví dụ: để hộp ngăn mát, phần cho bữa trưa mai...' autoSize={{ minRows: 2, maxRows: 4 }} />
                             </div>
                         </div>}
+                        {(() => {
+                            const stock = servingsByDishKind.get(dishId);
+                            if (!stock || (stock.fresh <= 0 && stock.leftover <= 0)) return null;
+                            const bothKinds = stock.fresh > 0 && stock.leftover > 0;
+                            const chosenKind: DishServingKind = consumeKind[dishId] ?? (stock.fresh > 0 ? 'fresh' : 'leftover');
+                            const maxForKind = availableForKind(dishId, chosenKind);
+                            const count = consumeCount[dishId] ?? 0;
+                            return <div style={{ marginTop: 10, paddingTop: 10, borderTop: '1px dashed rgba(82,196,26,0.4)' }}>
+                                <Stack align='center' gap={6} style={{ marginBottom: 6 }}>
+                                    <RestOutlined style={{ color: '#52c41a' }} />
+                                    <Typography.Text strong style={{ display: 'block', fontSize: 12 }}>Dùng từ kho phần ăn</Typography.Text>
+                                </Stack>
+                                <Typography.Text type='secondary' style={{ display: 'block', fontSize: 12, marginBottom: 6 }}>
+                                    Còn {stock.fresh} phần mới nấu · {stock.leftover} phần dư
+                                </Typography.Text>
+                                <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(120px, 150px)', gap: 8, alignItems: 'flex-end' }}>
+                                    <div style={{ minWidth: 0 }}>
+                                        <Typography.Text strong style={{ display: 'block', fontSize: 12, marginBottom: 5 }}>Loại phần dùng</Typography.Text>
+                                        {bothKinds ? (
+                                            <Segmented
+                                                value={chosenKind}
+                                                onChange={value => _setConsumeKind(dishId, value as DishServingKind)}
+                                                options={[{ label: 'Mới nấu', value: 'fresh' }, { label: 'Phần dư', value: 'leftover' }]}
+                                                block
+                                            />
+                                        ) : (
+                                            <Tag color={chosenKind === 'fresh' ? 'volcano' : 'gold'} style={{ marginInlineEnd: 0 }}>{chosenKind === 'fresh' ? 'Mới nấu' : 'Phần dư'}</Tag>
+                                        )}
+                                    </div>
+                                    <div>
+                                        <Typography.Text strong style={{ display: 'block', fontSize: 12, marginBottom: 5 }}>Số phần dùng</Typography.Text>
+                                        <InputNumber min={0} max={maxForKind} step={0.5} value={count} addonAfter='phần' onChange={value => _setConsumeCount(dishId, Number(value ?? 0))} style={{ width: '100%' }} />
+                                    </div>
+                                </div>
+                            </div>;
+                        })()}
                         {members.length > 0 && <div style={{ marginTop: 10, paddingTop: 10, borderTop: '1px solid rgba(15,23,42,0.06)' }}>
                             <Typography.Text strong style={{ display: 'block', fontSize: 12, marginBottom: 6 }}>Mọi người thấy sao?</Typography.Text>
                             <div style={{ display: 'flex', flexDirection: 'column', gap: 7 }}>
