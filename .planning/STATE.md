@@ -3,9 +3,9 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: ready
-stopped_at: Completed quick task 260613-ea9
+stopped_at: Completed quick task 260613-gfm
 last_updated: "2026-06-13T00:00:00Z"
-last_activity: 2026-06-13 -- Completed quick task 260613-ea9: Dish serving inventory with fresh vs leftover kinds
+last_activity: 2026-06-13 -- Completed quick task 260613-gfm: Unified cooking sessions, leftover actions, tag-count templates page, meal-slot cooked state
 progress:
   total_phases: 5
   completed_phases: 4
@@ -28,7 +28,7 @@ See: .planning/PROJECT.md (updated 2026-06-05)
 Phase: 5 (release-gate-and-product-guardrails) — READY
 Plan: Not started
 Status: Phase 04 complete; ready for Phase 05
-Last activity: 2026-06-13 -- Completed quick task 260613-f6m: Cooking countdown audio fix, ingredient availability guard, smart planner templates
+Last activity: 2026-06-13 -- Completed quick task 260613-gfm: Unified cooking sessions, leftover actions (eat-part/eat-all/discard + manual add), tag-count templates page, meal-slot cooked state
 
 Progress: [████████░░] 80%
 
@@ -36,6 +36,7 @@ Progress: [████████░░] 80%
 
 | Date | Task | Artifact |
 |------|------|----------|
+| 2026-06-13 | Unified cooking sessions, leftover actions (eat-part/eat-all/discard + manual add), tag-count templates page, meal-slot cooked state | `.planning/quick/260613-gfm-cooking-sessions-leftover-actions-tag-co/260613-gfm-SUMMARY.md` |
 | 2026-06-13 | Cooking countdown audio fix, ingredient availability guard, smart planner templates | `.planning/quick/260613-f6m-cooking-session-countdown-ingredient-ava/260613-f6m-SUMMARY.md` |
 | 2026-06-13 | Dish serving inventory with fresh vs leftover kinds | `.planning/quick/260613-ea9-dish-serving-inventory-with-fresh-vs-lef/260613-ea9-SUMMARY.md` |
 | 2026-06-12 | Fix Smart Planner meal slot dish card width and fact rows | `.planning/quick/260612-uti-fix-smart-planner-meal-slot-dish-card-wi/260612-uti-SUMMARY.md` |
