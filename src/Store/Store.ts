@@ -10,6 +10,7 @@ import CookingSessionReducer from "./Reducers/CookingSessionReducer";
 import InventoryReducer from "./Reducers/InventoryReducer";
 import SharedConfigReducer from "./Reducers/SharedConfigReducer";
 import HouseholdHealthReducer from "./Reducers/HouseholdHealthReducer";
+import SmartPlannerTemplateReducer from "./Reducers/SmartPlannerTemplateReducer";
 
 // Shared data: ingredients + dishes — published by admin, synced by users
 const sharedReducer = combineReducers({
@@ -26,6 +27,7 @@ const personalReducer = combineReducers({
     scheduledMeal: ScheduledMealReducer,
     cookingSession: CookingSessionReducer,
     householdHealth: HouseholdHealthReducer,
+    smartPlannerTemplate: SmartPlannerTemplateReducer,
 });
 
 const sharedPersistConfig = {

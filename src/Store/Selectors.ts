@@ -50,6 +50,8 @@ export const selectCookTimeStats = (state: RootState) => state.personal.cookingS
 export const selectDishFeedback = (state: RootState) => state.personal.cookingSession.dishFeedback ?? {};
 export const selectDishFeedbackHistory = (state: RootState) => state.personal.cookingSession.dishFeedbackHistory ?? [];
 export const selectAppContext = (state: RootState) => state.personal.appContext;
+// `?? []` tolerates devices whose persisted personal blob predates the smartPlannerTemplate slice.
+export const selectSmartPlannerTemplates = (state: RootState) => state.personal.smartPlannerTemplate?.templates ?? [];
 export const selectHouseholdHealthState = createSelector(
     [(state: RootState) => state.personal.householdHealth],
     householdHealth => normalizeHouseholdHealthState(householdHealth)
