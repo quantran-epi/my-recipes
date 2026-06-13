@@ -718,10 +718,6 @@ export const ScheduledMealItem = ({ item, selected, dishNameById, onDelete }: { 
         if (stock.fresh > 0 && stock.leftover > 0) return `${stock.fresh} mới · ${stock.leftover} dư`;
         return `${total} phần`;
     };
-    const _slotHasAvailableServings = (dishIds: string[]) => getScheduledMealDishIds(dishIds).some(id => {
-        const stock = _dishServingStock(id);
-        return stock.fresh + stock.leftover > 0;
-    });
 
     const MealRow = ({ slot, icon, label, dishIds, color, background, border, finished }: { slot: ScheduledMealSlotKey; icon: string; label: string; dishIds: string[]; color: string; background: string; border: string; finished: boolean }) => {
         const skipMarker = item.skipMeals?.[slot];
@@ -785,6 +781,20 @@ export const ScheduledMealItem = ({ item, selected, dishNameById, onDelete }: { 
                     {dishIds.length > 3 && <Tag style={{ fontSize: 11, padding: "1px 7px", margin: 0, borderRadius: 10 }}>+{dishIds.length - 3}</Tag>}
                 </Stack>
             )}
+            {(() => {
+                const actual = item.actualMeals?.[slot];
+                if (!actual) return null;
+                const plannedSet = new Set(getScheduledMealDishIds(dishIds));
+                const actualIds = actual.dishIds ?? [];
+                const differs = actualIds.length !== plannedSet.size || actualIds.some(id => !plannedSet.has(id));
+                if (!differs) return null;
+                const actualNames = actualIds.map(id => _dishName(id)).join(", ");
+                return <Tooltip title={actual.note ? `${actualNames}${actual.note ? ` — ${actual.note}` : ""}` : actualNames}>
+                    <Tag color="gold" style={{ marginTop: 6, marginRight: 0, fontSize: 11, padding: "1px 7px", borderRadius: 10, maxWidth: "100%", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                        Thực tế khác kế hoạch{actualNames ? `: ${actualNames}` : ""}
+                    </Tag>
+                </Tooltip>;
+            })()}
         </Box>;
     };
 
@@ -822,9 +832,9 @@ export const ScheduledMealItem = ({ item, selected, dishNameById, onDelete }: { 
                                     { label: "Nấu bữa sáng", key: "cook-breakfast", icon: <FireOutlined />, disabled: item.meals.breakfast.length === 0 },
                                     { label: "Nấu bữa trưa", key: "cook-lunch", icon: <FireOutlined />, disabled: item.meals.lunch.length === 0 },
                                     { label: "Nấu bữa tối", key: "cook-dinner", icon: <FireOutlined />, disabled: item.meals.dinner.length === 0 },
-                                    { label: breakfastFeedbackDone ? "Xem phản hồi bữa sáng" : "Hoàn tất bữa sáng", key: "complete-breakfast", icon: breakfastFeedbackDone ? <EyeOutlined /> : <RestOutlined />, disabled: item.meals.breakfast.length === 0 || (isFutureMeal && !breakfastFeedbackDone) || (!breakfastFeedbackDone && item.meals.breakfast.length > 0 && !_slotHasAvailableServings(item.meals.breakfast)) },
-                                    { label: lunchFeedbackDone ? "Xem phản hồi bữa trưa" : "Hoàn tất bữa trưa", key: "complete-lunch", icon: lunchFeedbackDone ? <EyeOutlined /> : <RestOutlined />, disabled: item.meals.lunch.length === 0 || (isFutureMeal && !lunchFeedbackDone) || (!lunchFeedbackDone && item.meals.lunch.length > 0 && !_slotHasAvailableServings(item.meals.lunch)) },
-                                    { label: dinnerFeedbackDone ? "Xem phản hồi bữa tối" : "Hoàn tất bữa tối", key: "complete-dinner", icon: dinnerFeedbackDone ? <EyeOutlined /> : <RestOutlined />, disabled: item.meals.dinner.length === 0 || (isFutureMeal && !dinnerFeedbackDone) || (!dinnerFeedbackDone && item.meals.dinner.length > 0 && !_slotHasAvailableServings(item.meals.dinner)) },
+                                    { label: breakfastFeedbackDone ? "Xem phản hồi bữa sáng" : "Hoàn tất bữa sáng", key: "complete-breakfast", icon: breakfastFeedbackDone ? <EyeOutlined /> : <RestOutlined />, disabled: item.meals.breakfast.length === 0 || (isFutureMeal && !breakfastFeedbackDone) },
+                                    { label: lunchFeedbackDone ? "Xem phản hồi bữa trưa" : "Hoàn tất bữa trưa", key: "complete-lunch", icon: lunchFeedbackDone ? <EyeOutlined /> : <RestOutlined />, disabled: item.meals.lunch.length === 0 || (isFutureMeal && !lunchFeedbackDone) },
+                                    { label: dinnerFeedbackDone ? "Xem phản hồi bữa tối" : "Hoàn tất bữa tối", key: "complete-dinner", icon: dinnerFeedbackDone ? <EyeOutlined /> : <RestOutlined />, disabled: item.meals.dinner.length === 0 || (isFutureMeal && !dinnerFeedbackDone) },
                                     { type: "divider" },
                                     { label: "Đánh dấu không nấu", key: "mark-skip", icon: <RestOutlined />, disabled: !hasAnyUnmarkedSlot },
                                     { label: "Chi tiết", key: "detail", icon: <CalendarOutlined /> },

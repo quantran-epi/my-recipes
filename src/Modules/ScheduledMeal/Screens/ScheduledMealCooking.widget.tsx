@@ -11,9 +11,11 @@ import { Typography } from '@components/Typography';
 import { CookingSessionWidget } from '@modules/Dishes/Screens/CookingSession.widget';
 import { Dishes } from '@store/Models/Dishes';
 import { CookingMealFeedbackHistoryRecord, CookingMealFeedbackSlot, CookingSessionMemberFeedback } from '@store/Models/CookingSession';
-import { addLeftoverTrackerItem, consumeDishServings, DishServingKind } from '@store/Reducers/AppContextReducer';
+import { addLeftoverTrackerItem, consumeDishServings, DishServingKind, eatLeftoverServings } from '@store/Reducers/AppContextReducer';
 import { saveMealFeedbackHistory, startCooking } from '@store/Reducers/CookingSessionReducer';
-import { selectAvailableServingsByDishKind, selectCookingSessions, selectDishFeedbackHistory, selectDishes, selectDishesById, selectLeftoverTrackerItems, selectSelectedHouseholdMembers } from '@store/Selectors';
+import { setMealSlotActual } from '@store/Reducers/ScheduledMealReducer';
+import { ScheduledMealActualRecord, ScheduledMealSlotKey } from '@store/Models/ScheduledMeal';
+import { selectAvailableServingsByDishKind, selectCookingSessions, selectDishFeedbackHistory, selectDishes, selectDishesById, selectLeftoverTrackerItems, selectScheduledMeals, selectSelectedHouseholdMembers } from '@store/Selectors';
 import { Input, InputNumber, Segmented, Select, Switch } from 'antd';
 import dayjs from 'dayjs';
 import { nanoid } from 'nanoid';
@@ -244,6 +246,7 @@ export const MealCompletionLeftoverModal: React.FC<MealCompletionLeftoverModalPr
     const feedbackHistory = useSelector(selectDishFeedbackHistory);
     const leftoverItems = useSelector(selectLeftoverTrackerItems);
     const servingsByDishKind = useSelector(selectAvailableServingsByDishKind);
+    const scheduledMeals = useSelector(selectScheduledMeals);
     const uniqueDishIds = useMemo(() => getScheduledMealDishIds(dishIds), [dishIds]);
     const mealDateKey = useMemo(() => getMealDateKey(mealDate), [mealDate]);
     const mealDateValue = useMemo(() => dayjs(mealDateKey), [mealDateKey]);
@@ -259,6 +262,13 @@ export const MealCompletionLeftoverModal: React.FC<MealCompletionLeftoverModalPr
     const [feedback, setFeedback] = useState<Record<string, Record<string, CookingSessionMemberFeedback>>>({});
     const [consumeKind, setConsumeKind] = useState<Record<string, DishServingKind>>({});
     const [consumeCount, setConsumeCount] = useState<Record<string, number>>({});
+    // Planned-vs-reality: did the household eat the planned dishes, or something else / a leftover?
+    const [actualMode, setActualMode] = useState<'planned' | 'other'>('planned');
+    const [actualOtherDishIds, setActualOtherDishIds] = useState<string[]>([]);
+    const [actualNote, setActualNote] = useState('');
+
+    // The planned-vs-reality control only applies to a concrete meal slot on a saved ScheduledMeal.
+    const realSlot: ScheduledMealSlotKey | undefined = (scheduledMealId && (mealSlot === 'breakfast' || mealSlot === 'lunch' || mealSlot === 'dinner')) ? mealSlot : undefined;
 
     const availableForKind = React.useCallback((dishId: string, kind: DishServingKind): number => {
         const stock = servingsByDishKind.get(dishId);
@@ -287,7 +297,20 @@ export const MealCompletionLeftoverModal: React.FC<MealCompletionLeftoverModalPr
         });
         setConsumeKind(nextConsumeKind);
         setConsumeCount(nextConsumeCount);
-    }, [dishServings, dishesById, feedbackHistory, mealDate, mealDateValue, mealSlot, members, open, scheduledMealId, servingsByDishKind, title, uniqueDishIds]);
+        // Pre-fill the planned-vs-reality control from any previously saved actual record for this slot.
+        const existingActual = realSlot ? scheduledMeals.find(meal => meal.id === scheduledMealId)?.actualMeals?.[realSlot] : undefined;
+        if (existingActual) {
+            const plannedSet = new Set(uniqueDishIds);
+            const differs = existingActual.dishIds.length !== uniqueDishIds.length || existingActual.dishIds.some(id => !plannedSet.has(id));
+            setActualMode(differs ? 'other' : 'planned');
+            setActualOtherDishIds(differs ? existingActual.dishIds : []);
+            setActualNote(existingActual.note ?? '');
+        } else {
+            setActualMode('planned');
+            setActualOtherDishIds([]);
+            setActualNote('');
+        }
+    }, [dishServings, dishesById, feedbackHistory, mealDate, mealDateValue, mealSlot, members, open, realSlot, scheduledMealId, scheduledMeals, servingsByDishKind, title, uniqueDishIds]);
 
     const _setFeedback = (dishId: string, memberId: string, value?: CookingSessionMemberFeedback) => {
         setFeedback(current => ({
@@ -379,16 +402,63 @@ export const MealCompletionLeftoverModal: React.FC<MealCompletionLeftoverModalPr
             dispatch(consumeDishServings({ dishId, portions, kind }));
             totalConsumed += portions;
         });
+        // Planned-vs-reality: record what was actually eaten when it differs from the plan, on a real
+        // ScheduledMeal slot. When "other" maps to tracked leftover items, also draw those down.
+        let actualRecorded = false;
+        if (realSlot) {
+            const actualDishIds = actualMode === 'planned' ? uniqueDishIds : Array.from(new Set(actualOtherDishIds.filter(Boolean)));
+            const plannedSet = new Set(uniqueDishIds);
+            const differs = actualMode === 'other'
+                && (actualDishIds.length !== uniqueDishIds.length || actualDishIds.some(id => !plannedSet.has(id)));
+            if (differs) {
+                const leftoverItemIds = actualDishIds.flatMap(dishId => {
+                    const matched = mealLeftovers.filter(item => item.dishId === dishId && item.status === 'available');
+                    return matched.map(item => item.id);
+                });
+                // Eat one portion from any matched leftover items so the tracker reflects reality.
+                leftoverItemIds.forEach(id => dispatch(eatLeftoverServings({ id, count: 1 })));
+                dispatch(setMealSlotActual({
+                    mealId: scheduledMealId!,
+                    slot: realSlot,
+                    record: {
+                        dishIds: actualDishIds,
+                        leftoverItemIds: leftoverItemIds.length > 0 ? leftoverItemIds : undefined,
+                        note: actualNote.trim() || undefined,
+                        recordedAt: new Date().toISOString(),
+                    },
+                }));
+                actualRecorded = true;
+            }
+        }
         const parts: string[] = [];
         if (saved > 0) parts.push(`${saved} món còn lại`);
         if (totalConsumed > 0) parts.push(`${totalConsumed} phần đã dùng`);
         if (rated > 0) parts.push(`${rated} phản hồi`);
+        if (actualRecorded) parts.push('thực tế đã ăn');
         message.success(parts.length > 0 ? `Đã lưu ${parts.join(' · ')}` : 'Đã hoàn tất bữa ăn');
         onClose();
     };
 
     const enabledCount = uniqueDishIds.filter(dishId => drafts[dishId]?.enabled).length;
     const memberNameById = useMemo(() => new Map(members.map(member => [member.id, member.name])), [members]);
+    // Options for "ate something else": dishes that currently have servings in inventory (fresh or
+    // leftover) plus any tracked leftover items, so the user can record a reality that differs from plan.
+    const actualOtherOptions = useMemo(() => {
+        const seen = new Set<string>();
+        const options: Array<{ value: string; label: string }> = [];
+        const pushOption = (dishId: string, fallbackName?: string) => {
+            if (!dishId || seen.has(dishId)) return;
+            seen.add(dishId);
+            const name = dishesById.get(dishId)?.name ?? fallbackName ?? dishId;
+            options.push({ value: dishId, label: name });
+        };
+        Array.from(servingsByDishKind.keys()).forEach(dishId => {
+            const stock = servingsByDishKind.get(dishId);
+            if (stock && (stock.fresh > 0 || stock.leftover > 0)) pushOption(dishId);
+        });
+        leftoverItems.filter(item => item.status === 'available').forEach(item => pushOption(item.dishId, item.dishName));
+        return options;
+    }, [servingsByDishKind, leftoverItems, dishesById]);
     const renderFeedbackTags = (dishId: string) => {
         const entries = Object.entries(feedback[dishId] ?? {}) as [string, CookingSessionMemberFeedback][];
         if (entries.length === 0) return <Typography.Text type='secondary' style={{ fontSize: 12 }}>Chưa có phản hồi đã lưu</Typography.Text>;
@@ -449,6 +519,37 @@ export const MealCompletionLeftoverModal: React.FC<MealCompletionLeftoverModalPr
                 </Box>}
                 <Button fullwidth onClick={onClose}>Đóng</Button>
             </div> : <div style={{ display: 'flex', flexDirection: 'column', gap: 10, width: '100%' }}>
+                {realSlot && <Box style={{ width: '100%', boxSizing: 'border-box', border: '1px solid rgba(250,173,20,0.30)', borderRadius: 8, background: '#fffbe6', padding: 10 }}>
+                    <Stack align='center' gap={6} style={{ marginBottom: 8 }}>
+                        <RestOutlined style={{ color: '#d48806' }} />
+                        <Typography.Text strong style={{ fontSize: 13, color: '#874d00' }}>Thực tế đã ăn</Typography.Text>
+                    </Stack>
+                    <Segmented
+                        value={actualMode}
+                        onChange={value => setActualMode(value as 'planned' | 'other')}
+                        options={[{ label: 'Đúng món đã lên kế hoạch', value: 'planned' }, { label: 'Món khác / phần dư', value: 'other' }]}
+                        block
+                    />
+                    {actualMode === 'other' && <div style={{ marginTop: 10 }}>
+                        <Typography.Text strong style={{ display: 'block', fontSize: 12, marginBottom: 5 }}>Đã ăn món gì?</Typography.Text>
+                        <Select
+                            mode='multiple'
+                            allowClear
+                            value={actualOtherDishIds}
+                            onChange={setActualOtherDishIds}
+                            placeholder='Chọn món hoặc phần dư đã ăn'
+                            options={actualOtherOptions}
+                            style={{ width: '100%' }}
+                        />
+                        <Input.TextArea
+                            value={actualNote}
+                            onChange={event => setActualNote(event.target.value)}
+                            placeholder='Ghi chú thêm (không bắt buộc)'
+                            autoSize={{ minRows: 1, maxRows: 3 }}
+                            style={{ marginTop: 8 }}
+                        />
+                    </div>}
+                </Box>}
                 {uniqueDishIds.map(dishId => {
                     const dish = dishesById.get(dishId);
                     const draft = drafts[dishId] ?? { enabled: false, portions: 1, eatInDays: 2, note: '' };

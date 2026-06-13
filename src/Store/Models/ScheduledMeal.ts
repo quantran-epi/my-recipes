@@ -12,6 +12,14 @@ export type ScheduledMealSkipMarker = {
 
 export type ScheduledMealSkipSlots = Partial<Record<ScheduledMealSlotKey, ScheduledMealSkipMarker>>;
 
+// What was actually eaten for a slot, which may differ from the planned dishes (planned-vs-reality).
+export type ScheduledMealActualRecord = {
+    dishIds: string[];
+    leftoverItemIds?: string[];
+    note?: string;
+    recordedAt: string;
+};
+
 export type ScheduledMeal = {
     id: string;
     name: string;
@@ -19,6 +27,7 @@ export type ScheduledMeal = {
     meals: Record<ScheduledMealSlotKey, string[]>;
     skipMeals?: ScheduledMealSkipSlots;
     cookedSlots?: Partial<Record<ScheduledMealSlotKey, boolean>>;
+    actualMeals?: Partial<Record<ScheduledMealSlotKey, ScheduledMealActualRecord>>;
     dishServings?: ScheduledMealDishServings;
     createdDate: Date;
 }

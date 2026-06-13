@@ -1,6 +1,6 @@
 import type { PayloadAction } from '@reduxjs/toolkit';
 import { createSlice } from '@reduxjs/toolkit';
-import { ScheduledMeal, ScheduledMealSkipMarker, ScheduledMealSlotKey } from '@store/Models/ScheduledMeal';
+import { ScheduledMeal, ScheduledMealActualRecord, ScheduledMealSkipMarker, ScheduledMealSlotKey } from '@store/Models/ScheduledMeal';
 
 // export type ShoppingListAddDishesParams = {
 //     shoppingList: ShoppingList;
@@ -49,6 +49,12 @@ export const ScheduledMealSlice = createSlice({
             if (action.payload.cooked) meal.cookedSlots[action.payload.slot] = true;
             else delete meal.cookedSlots[action.payload.slot];
         },
+        setMealSlotActual: (state, action: PayloadAction<{ mealId: string; slot: ScheduledMealSlotKey; record: ScheduledMealActualRecord }>) => {
+            const meal = state.scheduledMeals.find(item => item.id === action.payload.mealId);
+            if (!meal) return;
+            if (!meal.actualMeals) meal.actualMeals = {};
+            meal.actualMeals[action.payload.slot] = action.payload.record;
+        },
         remove: (state, action: PayloadAction<string[]>) => {
             state.scheduledMeals = state.scheduledMeals.filter(dish => !action.payload.includes(dish.id));
         },
@@ -75,6 +81,7 @@ export const {
     markSkipMeal,
     unmarkSkipMeal,
     setMealSlotCooked,
+    setMealSlotActual,
     remove: removeScheduledMeal,
     toggleSelectedMeals,
     removeAllSelectedMeals,
