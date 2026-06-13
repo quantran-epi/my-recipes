@@ -755,7 +755,7 @@ export const DashboardScreen = () => {
                     onOpen={() => openRoute(RootRoutes.AuthorizedRoutes.DishesRoutes.ManageIngredient(item.dishId))}
                     onEatOne={() => dispatch(eatLeftoverPortion(item.id))}
                     onFinish={() => dispatch(finishLeftoverItem(item.id))}
-                    onDiscard={() => dispatch(discardLeftoverItem(item.id))}
+                    onDiscard={() => dispatch(discardLeftoverItem({ id: item.id }))}
                 />)}
         </Section>
 

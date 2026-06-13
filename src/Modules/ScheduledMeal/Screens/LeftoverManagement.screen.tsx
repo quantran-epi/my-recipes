@@ -1,16 +1,18 @@
-import { CheckCircleOutlined, DeleteOutlined, FilterOutlined, FireOutlined, RestOutlined, RollbackOutlined, SearchOutlined } from '@ant-design/icons';
-import { ActionButton } from '@components/Button';
+import { CheckCircleOutlined, DeleteOutlined, FireOutlined, PlusOutlined, RestOutlined, RollbackOutlined, SearchOutlined } from '@ant-design/icons';
+import { ActionButton, Button } from '@components/Button';
 import { Box } from '@components/Layout/Box';
 import { Stack } from '@components/Layout/Stack';
 import { useMessage } from '@components/Message';
+import { Modal } from '@components/Modal';
 import { useModal } from '@components/Modal/ModalProvider';
 import { Tag } from '@components/Tag';
 import { Typography } from '@components/Typography';
-import { useScreenTitle } from '@hooks';
-import { DishServingKind, LeftoverTrackerItem, LeftoverTrackerItemStatus, discardLeftoverItem, eatLeftoverPortion, finishLeftoverItem } from '@store/Reducers/AppContextReducer';
-import { selectLeftoverTrackerItems } from '@store/Selectors';
-import { Empty, Input, Segmented } from 'antd';
+import { useScreenTitle, useToggle } from '@hooks';
+import { DishServingKind, LeftoverTrackerItem, LeftoverTrackerItemStatus, addLeftoverTrackerItem, discardLeftoverItem, eatLeftoverServings, finishLeftoverItem } from '@store/Reducers/AppContextReducer';
+import { selectDishes, selectLeftoverTrackerItems } from '@store/Selectors';
+import { Empty, Input, InputNumber, Segmented, Select } from 'antd';
 import dayjs from 'dayjs';
+import { nanoid } from 'nanoid';
 import React, { useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
@@ -45,6 +47,14 @@ const KIND_OPTIONS: Array<{ value: KindFilter; label: string }> = [
     { value: 'leftover', label: 'Phần dư' },
 ];
 
+// Day-offset options for the "ăn trước" picker, mirroring MealCompletionLeftoverModal.
+const EAT_BY_OPTIONS: Array<{ value: number; label: string }> = [
+    { value: 1, label: 'Ngày mai' },
+    { value: 2, label: '2 ngày' },
+    { value: 3, label: '3 ngày' },
+    { value: 5, label: '5 ngày' },
+];
+
 const itemKind = (item: LeftoverTrackerItem): DishServingKind => item.kind === 'fresh' ? 'fresh' : 'leftover';
 
 const getKindVisual = (item: LeftoverTrackerItem) => itemKind(item) === 'fresh'
@@ -70,10 +80,10 @@ const formatStoredAt = (stored?: string): string => {
 
 const LeftoverItemRow: React.FC<{
     item: LeftoverTrackerItem;
-    onEatOne: () => void;
+    onEatPart: () => void;
     onFinish: () => void;
     onDiscard: () => void;
-}> = ({ item, onEatOne, onFinish, onDiscard }) => {
+}> = ({ item, onEatPart, onFinish, onDiscard }) => {
     const visual = getStatusVisual(item);
     const kindVisual = getKindVisual(item);
     const slot = item.mealSlot ? slotLabel[item.mealSlot] ?? 'Bữa ăn' : null;
@@ -95,6 +105,7 @@ const LeftoverItemRow: React.FC<{
                         </Typography.Text>
                         {mealLine && <Typography.Text type='secondary' style={{ display: 'block', fontSize: 12, lineHeight: '17px', marginTop: 2, overflowWrap: 'anywhere' }}>{mealLine}</Typography.Text>}
                         {item.note && <Typography.Text style={{ display: 'block', color: '#475569', fontSize: 12, lineHeight: '17px', marginTop: 4, overflowWrap: 'anywhere' }}>{item.note}</Typography.Text>}
+                        {item.status === 'discarded' && item.discardReason && <Typography.Text style={{ display: 'block', color: '#9ca3af', fontSize: 12, lineHeight: '17px', marginTop: 4, overflowWrap: 'anywhere' }}>Lý do bỏ: {item.discardReason}</Typography.Text>}
                         {item.storedAt && <Typography.Text type='secondary' style={{ display: 'block', fontSize: 11, lineHeight: '16px', marginTop: 4 }}>{formatStoredAt(item.storedAt)}</Typography.Text>}
                     </div>
                     <Stack direction='column' align='flex-end' gap={4} style={{ flexShrink: 0 }}>
@@ -103,7 +114,7 @@ const LeftoverItemRow: React.FC<{
                     </Stack>
                 </div>
                 {item.status === 'available' && <Stack wrap='wrap' gap={6} style={{ marginTop: 10 }}>
-                    <ActionButton tone='success' icon={<RollbackOutlined />} onClick={onEatOne}>Ăn 1 phần</ActionButton>
+                    <ActionButton tone='success' icon={<RollbackOutlined />} onClick={onEatPart}>Ăn một phần</ActionButton>
                     <ActionButton tone='primary' icon={<CheckCircleOutlined />} onClick={onFinish}>Đã hết</ActionButton>
                     <ActionButton tone='danger' icon={<DeleteOutlined />} onClick={onDiscard}>Bỏ</ActionButton>
                 </Stack>}
@@ -112,15 +123,46 @@ const LeftoverItemRow: React.FC<{
     </Box>;
 };
 
+type AddLeftoverForm = {
+    dishId?: string;
+    customName: string;
+    portions: number;
+    eatInDays: number;
+    kind: DishServingKind;
+    note: string;
+};
+
+const createAddForm = (): AddLeftoverForm => ({
+    dishId: undefined,
+    customName: '',
+    portions: 1,
+    eatInDays: 2,
+    kind: 'leftover',
+    note: '',
+});
+
 export const LeftoverManagementScreen: React.FC = () => {
     useScreenTitle({ value: 'Phần còn lại', deps: [] });
     const dispatch = useDispatch();
     const message = useMessage();
     const modal = useModal();
     const items = useSelector(selectLeftoverTrackerItems);
+    const dishes = useSelector(selectDishes);
     const [statusFilter, setStatusFilter] = useState<StatusFilter>('available');
     const [kindFilter, setKindFilter] = useState<KindFilter>('all');
     const [search, setSearch] = useState('');
+
+    // Eat-part-of modal state (which item, and how many servings were eaten).
+    const [eatPartItem, setEatPartItem] = useState<LeftoverTrackerItem | null>(null);
+    const [eatPartCount, setEatPartCount] = useState<number>(1);
+    // Discard modal state (which item, and the optional reason).
+    const [discardItem, setDiscardItem] = useState<LeftoverTrackerItem | null>(null);
+    const [discardReason, setDiscardReason] = useState<string>('');
+    // Manual-add modal.
+    const addModal = useToggle();
+    const [addForm, setAddForm] = useState<AddLeftoverForm>(createAddForm);
+
+    const dishOptions = useMemo(() => dishes.map(dish => ({ value: dish.id, label: dish.name })), [dishes]);
 
     const filtered = useMemo(() => {
         const query = search.trim().toLowerCase();
@@ -157,48 +199,96 @@ export const LeftoverManagementScreen: React.FC = () => {
         };
     }, [items]);
 
-    const _confirmLeftoverAction = (item: LeftoverTrackerItem, action: 'eat' | 'finish' | 'discard') => {
-        const config = action === 'eat'
-            ? {
-                title: 'Xác nhận ăn 1 phần?',
-                content: `Ghi nhận đã ăn 1 phần "${item.dishName}". Còn lại ${Math.max(0, item.portions - 1)} phần sau khi lưu.`,
-                okText: 'Ăn 1 phần',
-                onOk: () => { dispatch(eatLeftoverPortion(item.id)); message.success('Đã ghi nhận 1 phần'); },
-            }
-            : action === 'finish'
-                ? {
-                    title: 'Đánh dấu đã hết?',
-                    content: `"${item.dishName}" sẽ được chuyển sang trạng thái đã hết.`,
-                    okText: 'Đã hết',
-                    onOk: () => { dispatch(finishLeftoverItem(item.id)); message.success('Đã đánh dấu hết'); },
-                }
-                : {
-                    title: 'Bỏ phần còn lại?',
-                    content: `"${item.dishName}" sẽ được đánh dấu đã bỏ và không còn nằm trong phần đang còn.`,
-                    okText: 'Bỏ',
-                    onOk: () => { dispatch(discardLeftoverItem(item.id)); message.success('Đã bỏ phần này'); },
-                    okButtonProps: { danger: true },
-                };
+    const _openEatPart = (item: LeftoverTrackerItem) => {
+        setEatPartItem(item);
+        setEatPartCount(Math.min(1, item.portions));
+    };
 
+    const _confirmEatPart = () => {
+        if (!eatPartItem) return;
+        const count = Math.max(0, Math.min(eatPartCount, eatPartItem.portions));
+        if (count <= 0) {
+            message.error('Số phần đã ăn phải lớn hơn 0');
+            return;
+        }
+        dispatch(eatLeftoverServings({ id: eatPartItem.id, count }));
+        message.success(`Đã ghi nhận ăn ${count} phần`);
+        setEatPartItem(null);
+    };
+
+    const _confirmFinish = (item: LeftoverTrackerItem) => {
         modal.confirm({
-            ...config,
+            title: 'Đánh dấu đã hết?',
+            content: `"${item.dishName}" sẽ được chuyển sang trạng thái đã hết.`,
+            okText: 'Đã hết',
             cancelText: 'Hủy',
             centered: true,
             zIndex: LEFTOVER_CONFIRM_Z_INDEX,
+            onOk: () => { dispatch(finishLeftoverItem(item.id)); message.success('Đã đánh dấu hết'); },
         });
+    };
+
+    const _openDiscard = (item: LeftoverTrackerItem) => {
+        setDiscardItem(item);
+        setDiscardReason('');
+    };
+
+    const _confirmDiscard = () => {
+        if (!discardItem) return;
+        dispatch(discardLeftoverItem({ id: discardItem.id, reason: discardReason }));
+        message.success('Đã bỏ phần này');
+        setDiscardItem(null);
+    };
+
+    const _updateAddForm = (patch: Partial<AddLeftoverForm>) => setAddForm(current => ({ ...current, ...patch }));
+
+    const _openAddModal = () => {
+        setAddForm(createAddForm());
+        addModal.show();
+    };
+
+    const _submitAdd = () => {
+        const selectedDish = addForm.dishId ? dishes.find(dish => dish.id === addForm.dishId) : undefined;
+        const dishName = (selectedDish?.name ?? addForm.customName).trim();
+        if (!dishName) {
+            message.error('Chọn món hoặc nhập tên phần còn lại');
+            return;
+        }
+        const portions = Number(addForm.portions);
+        if (!Number.isFinite(portions) || portions <= 0) {
+            message.error('Số phần phải lớn hơn 0');
+            return;
+        }
+        const now = dayjs();
+        dispatch(addLeftoverTrackerItem({
+            id: nanoid(10),
+            dishId: selectedDish?.id ?? nanoid(10),
+            dishName,
+            portions,
+            storedAt: now.toISOString(),
+            eatBy: now.add(addForm.eatInDays, 'day').toISOString(),
+            note: addForm.note.trim() || undefined,
+            kind: addForm.kind,
+            status: 'available',
+        }));
+        message.success(`Đã thêm "${dishName}" vào phần còn lại`);
+        addModal.hide();
     };
 
     return <Box style={{ width: 'min(920px, calc(100vw - 24px))', margin: '0 auto', padding: '0 0 96px' }}>
         <Box style={{ border: '1px solid rgba(56,158,13,0.18)', borderRadius: 8, background: 'linear-gradient(135deg, #ffffff 0%, #f6ffed 100%)', padding: 12, marginBottom: 12, boxShadow: '0 10px 26px rgba(15,23,42,0.07)' }}>
-            <Stack align='center' gap={9} style={{ width: '100%' }}>
-                <span style={{ width: 42, height: 42, borderRadius: 10, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', background: '#f6ffed', color: '#389e0d', border: '1px solid #b7eb8f', flexShrink: 0 }}>
-                    <RestOutlined />
-                </span>
-                <div style={{ minWidth: 0 }}>
-                    <Typography.Text style={{ display: 'block', color: '#389e0d', fontSize: 12, lineHeight: '16px', fontWeight: 800 }}>Tủ lạnh</Typography.Text>
-                    <Typography.Text strong style={{ display: 'block', color: '#111827', fontSize: 22, lineHeight: '28px' }}>Quản lý phần còn lại</Typography.Text>
-                    <Typography.Text type='secondary' style={{ display: 'block', fontSize: 12, lineHeight: '18px', marginTop: 3 }}>Theo dõi món còn dư, ghi nhận khi ăn dần và xử lý phần quá hạn.</Typography.Text>
-                </div>
+            <Stack justify='space-between' align='center' gap={9} wrap='wrap' style={{ width: '100%' }}>
+                <Stack align='center' gap={9} style={{ minWidth: 0 }}>
+                    <span style={{ width: 42, height: 42, borderRadius: 10, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', background: '#f6ffed', color: '#389e0d', border: '1px solid #b7eb8f', flexShrink: 0 }}>
+                        <RestOutlined />
+                    </span>
+                    <div style={{ minWidth: 0 }}>
+                        <Typography.Text style={{ display: 'block', color: '#389e0d', fontSize: 12, lineHeight: '16px', fontWeight: 800 }}>Tủ lạnh</Typography.Text>
+                        <Typography.Text strong style={{ display: 'block', color: '#111827', fontSize: 22, lineHeight: '28px' }}>Quản lý phần còn lại</Typography.Text>
+                        <Typography.Text type='secondary' style={{ display: 'block', fontSize: 12, lineHeight: '18px', marginTop: 3 }}>Theo dõi món còn dư, ghi nhận khi ăn dần và xử lý phần quá hạn.</Typography.Text>
+                    </div>
+                </Stack>
+                <Button type='primary' icon={<PlusOutlined />} onClick={_openAddModal}>Thêm phần còn lại</Button>
             </Stack>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 8, marginTop: 12 }}>
                 <Box style={{ border: '1px solid rgba(15,23,42,0.06)', borderRadius: 8, background: '#fff', padding: 10 }}>
@@ -229,7 +319,6 @@ export const LeftoverManagementScreen: React.FC = () => {
                     onChange={event => setSearch(event.target.value)}
                 />
                 <Stack align='center' gap={6} wrap='wrap' style={{ width: '100%' }}>
-                    <FilterOutlined style={{ color: '#6b7280' }} />
                     <Segmented
                         value={statusFilter}
                         onChange={value => setStatusFilter(value as StatusFilter)}
@@ -255,11 +344,135 @@ export const LeftoverManagementScreen: React.FC = () => {
             {filtered.map(item => <LeftoverItemRow
                 key={item.id}
                 item={item}
-                onEatOne={() => _confirmLeftoverAction(item, 'eat')}
-                onFinish={() => _confirmLeftoverAction(item, 'finish')}
-                onDiscard={() => _confirmLeftoverAction(item, 'discard')}
+                onEatPart={() => _openEatPart(item)}
+                onFinish={() => _confirmFinish(item)}
+                onDiscard={() => _openDiscard(item)}
             />)}
         </div>}
+
+        {/* ── Eat part-of modal ── */}
+        <Modal
+            open={Boolean(eatPartItem)}
+            onCancel={() => setEatPartItem(null)}
+            title='Ăn một phần'
+            okText='Ghi nhận'
+            cancelText='Hủy'
+            centered
+            destroyOnClose
+            zIndex={LEFTOVER_CONFIRM_Z_INDEX}
+            onOk={_confirmEatPart}
+        >
+            {eatPartItem && <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                <Typography.Text type='secondary' style={{ fontSize: 13, lineHeight: '19px' }}>
+                    "{eatPartItem.dishName}" còn {eatPartItem.portions} phần. Nhập số phần đã ăn để trừ khỏi phần còn lại.
+                </Typography.Text>
+                <div>
+                    <Typography.Text strong style={{ display: 'block', fontSize: 12, marginBottom: 5 }}>Số phần đã ăn</Typography.Text>
+                    <InputNumber
+                        min={0.5}
+                        step={0.5}
+                        max={eatPartItem.portions}
+                        value={eatPartCount}
+                        addonAfter='phần'
+                        onChange={value => setEatPartCount(Number(value ?? 0))}
+                        style={{ width: '100%' }}
+                    />
+                </div>
+            </div>}
+        </Modal>
+
+        {/* ── Discard (throw away) modal ── */}
+        <Modal
+            open={Boolean(discardItem)}
+            onCancel={() => setDiscardItem(null)}
+            title='Bỏ phần còn lại'
+            okText='Bỏ'
+            cancelText='Hủy'
+            centered
+            destroyOnClose
+            okButtonProps={{ danger: true }}
+            zIndex={LEFTOVER_CONFIRM_Z_INDEX}
+            onOk={_confirmDiscard}
+        >
+            {discardItem && <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                <Typography.Text type='secondary' style={{ fontSize: 13, lineHeight: '19px' }}>
+                    "{discardItem.dishName}" sẽ được đánh dấu đã bỏ và không còn nằm trong phần đang còn.
+                </Typography.Text>
+                <div>
+                    <Typography.Text strong style={{ display: 'block', fontSize: 12, marginBottom: 5 }}>Lý do bỏ (tuỳ chọn)</Typography.Text>
+                    <Input.TextArea
+                        value={discardReason}
+                        onChange={event => setDiscardReason(event.target.value)}
+                        placeholder='Ví dụ: để quá lâu, có mùi lạ, không còn ngon...'
+                        autoSize={{ minRows: 2, maxRows: 4 }}
+                    />
+                </div>
+            </div>}
+        </Modal>
+
+        {/* ── Manual add modal ── */}
+        <Modal
+            open={addModal.value}
+            onCancel={addModal.hide}
+            title='Thêm phần còn lại'
+            okText='Thêm'
+            cancelText='Hủy'
+            centered
+            destroyOnClose
+            onOk={_submitAdd}
+        >
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                <div>
+                    <Typography.Text strong style={{ display: 'block', fontSize: 12, marginBottom: 5 }}>Món có sẵn</Typography.Text>
+                    <Select
+                        allowClear
+                        showSearch
+                        optionFilterProp='label'
+                        placeholder='Chọn món trong danh sách'
+                        value={addForm.dishId}
+                        onChange={value => _updateAddForm({ dishId: value })}
+                        options={dishOptions}
+                        style={{ width: '100%' }}
+                    />
+                </div>
+                {!addForm.dishId && <div>
+                    <Typography.Text strong style={{ display: 'block', fontSize: 12, marginBottom: 5 }}>Hoặc nhập tên món</Typography.Text>
+                    <Input
+                        value={addForm.customName}
+                        onChange={event => _updateAddForm({ customName: event.target.value })}
+                        placeholder='Ví dụ: cơm chiên mua ngoài'
+                    />
+                </div>}
+                <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(140px, 170px)', gap: 8 }}>
+                    <div>
+                        <Typography.Text strong style={{ display: 'block', fontSize: 12, marginBottom: 5 }}>Số phần</Typography.Text>
+                        <InputNumber min={0.5} step={0.5} max={99} value={addForm.portions} addonAfter='phần' onChange={value => _updateAddForm({ portions: Number(value ?? 0) })} style={{ width: '100%' }} />
+                    </div>
+                    <div>
+                        <Typography.Text strong style={{ display: 'block', fontSize: 12, marginBottom: 5 }}>Ăn trước</Typography.Text>
+                        <Select value={addForm.eatInDays} onChange={value => _updateAddForm({ eatInDays: value })} options={EAT_BY_OPTIONS} style={{ width: '100%' }} />
+                    </div>
+                </div>
+                <div>
+                    <Typography.Text strong style={{ display: 'block', fontSize: 12, marginBottom: 5 }}>Loại phần</Typography.Text>
+                    <Segmented
+                        value={addForm.kind}
+                        onChange={value => _updateAddForm({ kind: value as DishServingKind })}
+                        options={[{ label: 'Phần dư', value: 'leftover' }, { label: 'Mới nấu', value: 'fresh' }]}
+                        block
+                    />
+                </div>
+                <div>
+                    <Typography.Text strong style={{ display: 'block', fontSize: 12, marginBottom: 5 }}>Ghi chú</Typography.Text>
+                    <Input.TextArea
+                        value={addForm.note}
+                        onChange={event => _updateAddForm({ note: event.target.value })}
+                        placeholder='Ví dụ: để hộp ngăn mát, phần cho bữa trưa mai...'
+                        autoSize={{ minRows: 2, maxRows: 4 }}
+                    />
+                </div>
+            </div>
+        </Modal>
     </Box>;
 };
 

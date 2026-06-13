@@ -111,6 +111,7 @@ export type LeftoverTrackerItem = {
     mealTitle?: string;
     status: LeftoverTrackerItemStatus;
     kind?: DishServingKind;
+    discardReason?: string;
 }
 
 export const DEFAULT_HOUSEHOLD_PREFERENCE_PROFILE: HouseholdPreferenceProfile = {
@@ -462,11 +463,21 @@ export const appContextSlice = createSlice({
                 return { ...item, portions, status: portions > 0 ? 'available' : 'finished' };
             });
         },
+        eatLeftoverServings: (state, action: PayloadAction<{ id: string; count: number }>) => {
+            const eat = normalizePortions(action.payload.count);
+            if (eat <= 0) return;
+            state.leftoverTrackerItems = (state.leftoverTrackerItems ?? []).map(item => {
+                if (item.id !== action.payload.id || item.status !== 'available') return item;
+                const portions = Math.max(0, normalizePortions(item.portions - eat));
+                return { ...item, portions, status: portions > 0 ? 'available' : 'finished' };
+            });
+        },
         finishLeftoverItem: (state, action: PayloadAction<string>) => {
             state.leftoverTrackerItems = (state.leftoverTrackerItems ?? []).map(item => item.id === action.payload ? { ...item, portions: 0, status: 'finished' } : item);
         },
-        discardLeftoverItem: (state, action: PayloadAction<string>) => {
-            state.leftoverTrackerItems = (state.leftoverTrackerItems ?? []).map(item => item.id === action.payload ? { ...item, status: 'discarded' } : item);
+        discardLeftoverItem: (state, action: PayloadAction<{ id: string; reason?: string }>) => {
+            const reason = action.payload.reason?.trim();
+            state.leftoverTrackerItems = (state.leftoverTrackerItems ?? []).map(item => item.id === action.payload.id ? { ...item, status: 'discarded', discardReason: reason || undefined } : item);
         }
     }
 })
@@ -490,6 +501,7 @@ export const {
     addLeftoverTrackerItem,
     consumeDishServings,
     eatLeftoverPortion,
+    eatLeftoverServings,
     finishLeftoverItem,
     discardLeftoverItem,
 } = appContextSlice.actions
