@@ -1,4 +1,4 @@
-import { DeleteOutlined, EditOutlined, LayoutOutlined, MinusOutlined, PlusOutlined, SaveOutlined } from '@ant-design/icons';
+import { ClockCircleOutlined, CoffeeOutlined, DeleteOutlined, EditOutlined, LayoutOutlined, MinusOutlined, NumberOutlined, PlusOutlined, RestOutlined, SaveOutlined, TagsOutlined } from '@ant-design/icons';
 import { Button } from '@components/Button';
 import { Box } from '@components/Layout/Box';
 import { Stack } from '@components/Layout/Stack';
@@ -26,6 +26,13 @@ const mealSlotMeta: Record<PlannerMealSlot, { label: string; tone: string; backg
     breakfast: { label: 'Sáng', tone: '#d48806', background: '#fffbe6', border: '#ffe58f' },
     lunch: { label: 'Trưa', tone: '#d46b08', background: '#fff7e6', border: '#ffd591' },
     dinner: { label: 'Tối', tone: '#531dab', background: '#f9f0ff', border: '#efdbff' },
+};
+
+// Leading meal-time icon per slot, tinted with the slot tone for a clearer at-a-glance hierarchy.
+const mealSlotIcon: Record<PlannerMealSlot, React.ReactNode> = {
+    breakfast: <CoffeeOutlined />,
+    lunch: <ClockCircleOutlined />,
+    dinner: <RestOutlined />,
 };
 
 const DEFAULT_MEAL_SLOT_DISH_RANGES: SmartPlannerMealSlotDishRanges = {
@@ -87,20 +94,21 @@ const renderStepperControl = (label: string, value: number, onDecrement: () => v
 );
 
 const TemplateDetail: React.FC<{ template: { mealSlotDishRanges: SmartPlannerMealSlotDishRanges; mealSlotTagRequirements: SmartPlannerMealSlotTagRequirements } }> = ({ template }) => (
-    <Stack direction='column' gap={8} style={{ width: '100%' }}>
+    <Stack direction='column' align='stretch' gap={8} style={{ width: '100%' }}>
         {mealSlots.map(slot => {
             const meta = mealSlotMeta[slot];
             const range = template.mealSlotDishRanges[slot];
             const tagRequirements = template.mealSlotTagRequirements[slot] ?? [];
             const tagMinTotal = tagRequirements.reduce((sum, item) => sum + Math.max(0, item.min), 0);
-            return <Box key={slot} style={{ border: `1px solid ${meta.border}`, borderRadius: 8, background: meta.background, padding: '8px 10px' }}>
-                <Stack align='center' gap={6} wrap='wrap' style={{ width: '100%' }}>
-                    <Tag style={{ marginRight: 0, color: meta.tone, background: '#fff', borderColor: meta.border, minWidth: 52, textAlign: 'center' }}>{meta.label}</Tag>
-                    <Tag color='blue' style={{ marginRight: 0 }}>{range.min}-{range.max} món</Tag>
-                    {tagMinTotal > 0 && <Tag color='cyan' style={{ marginRight: 0 }}>{tagMinTotal} món bắt buộc</Tag>}
+            return <Box key={slot} style={{ width: '100%', boxSizing: 'border-box', border: `1px solid ${meta.border}`, borderRadius: 8, background: meta.background, padding: '9px 11px' }}>
+                <Stack align='center' gap={9} wrap='wrap' style={{ width: '100%' }}>
+                    <span style={{ width: 30, height: 30, borderRadius: 8, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', color: meta.tone, background: '#fff', border: `1px solid ${meta.border}`, fontSize: 16, flexShrink: 0 }}>{mealSlotIcon[slot]}</span>
+                    <Typography.Text strong style={{ fontSize: 14, lineHeight: '20px', color: meta.tone, flex: 1, minWidth: 0 }}>{meta.label}</Typography.Text>
+                    <Tag color='blue' icon={<NumberOutlined />} style={{ marginRight: 0 }}>{range.min}-{range.max} món</Tag>
+                    {tagMinTotal > 0 && <Tag color='cyan' icon={<TagsOutlined />} style={{ marginRight: 0 }}>{tagMinTotal} loại bắt buộc</Tag>}
                 </Stack>
-                {tagRequirements.length > 0 && <Stack wrap='wrap' gap={5} style={{ marginTop: 7 }}>
-                    {tagRequirements.filter(item => item.min > 0).map(item => <Tag key={item.tag} style={{ marginRight: 0, color: '#0f766e', background: '#e6fffb', borderColor: 'rgba(19,168,168,0.40)' }}>{item.tag}: {item.min}</Tag>)}
+                {tagRequirements.filter(item => item.min > 0).length > 0 && <Stack wrap='wrap' gap={5} style={{ marginTop: 8 }}>
+                    {tagRequirements.filter(item => item.min > 0).map(item => <Tag key={item.tag} icon={<TagsOutlined />} style={{ marginRight: 0, color: '#0f766e', background: '#e6fffb', borderColor: 'rgba(19,168,168,0.40)' }}>{item.tag}: {item.min}</Tag>)}
                 </Stack>}
             </Box>;
         })}
@@ -231,7 +239,7 @@ export const SmartPlannerTemplatesScreen: React.FC = () => {
         </Stack>}
         bodyStyle={{ background: '#f8fafc' }}
     >
-        <Stack direction='column' gap={10} style={{ width: '100%' }}>
+        <Stack direction='column' align='stretch' gap={10} style={{ width: '100%' }}>
             <div style={{ width: '100%' }}>
                 <Typography.Text strong style={{ display: 'block', marginBottom: 6 }}>Tên mẫu</Typography.Text>
                 <Input
@@ -245,12 +253,13 @@ export const SmartPlannerTemplatesScreen: React.FC = () => {
                 const range = draft.mealSlotDishRanges[slot];
                 const tagRequirements = draft.mealSlotTagRequirements[slot] ?? [];
                 const tagMinTotal = tagRequirements.reduce((sum, item) => sum + Math.max(0, item.min), 0);
-                return <Box key={slot} style={{ border: `1px solid ${meta.border}`, borderRadius: 8, background: '#fff', padding: 12 }}>
+                return <Box key={slot} style={{ width: '100%', boxSizing: 'border-box', border: `1px solid ${meta.border}`, borderRadius: 8, background: '#fff', padding: 12 }}>
                     <Stack justify='space-between' align='center' gap={10} wrap='wrap' style={{ width: '100%' }}>
                         <Stack align='center' gap={6} wrap='wrap' style={{ minWidth: 0 }}>
+                            <span style={{ width: 28, height: 28, borderRadius: 8, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', color: meta.tone, background: meta.background, border: `1px solid ${meta.border}`, flexShrink: 0, fontSize: 15 }}>{mealSlotIcon[slot]}</span>
                             <Tag style={{ marginRight: 0, color: meta.tone, background: meta.background, borderColor: meta.border, minWidth: 52, textAlign: 'center' }}>{meta.label}</Tag>
-                            <Tag color='blue' style={{ marginRight: 0 }}>{range.min}-{range.max} món</Tag>
-                            {tagMinTotal > 0 && <Tag color='cyan' style={{ marginRight: 0 }}>{tagMinTotal} món bắt buộc</Tag>}
+                            <Tag color='blue' icon={<NumberOutlined />} style={{ marginRight: 0 }}>{range.min}-{range.max} món</Tag>
+                            {tagMinTotal > 0 && <Tag color='cyan' icon={<TagsOutlined />} style={{ marginRight: 0 }}>{tagMinTotal} món bắt buộc</Tag>}
                         </Stack>
                         <Stack align='center' gap={10} wrap='wrap'>
                             {renderStepperControl('Min', range.min, () => _stepDishRange(slot, 'min', -1), () => _stepDishRange(slot, 'min', 1), range.min <= 0, range.min >= MEAL_SLOT_RANGE_MAX)}

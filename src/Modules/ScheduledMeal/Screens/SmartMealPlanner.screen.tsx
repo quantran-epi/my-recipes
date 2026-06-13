@@ -1,4 +1,4 @@
-import { AppstoreOutlined, BarChartOutlined, CalendarOutlined, CheckCircleOutlined, ClockCircleOutlined, DollarCircleOutlined, ExclamationCircleOutlined, EyeOutlined, FilterOutlined, MinusOutlined, MoreOutlined, PlayCircleOutlined, PlusOutlined, QuestionCircleOutlined, RestOutlined, SaveOutlined, ShoppingCartOutlined, SlidersOutlined, StopOutlined, TeamOutlined, ThunderboltOutlined } from '@ant-design/icons';
+import { AppstoreOutlined, BarChartOutlined, CalendarOutlined, CheckCircleOutlined, ClockCircleOutlined, CoffeeOutlined, DollarCircleOutlined, ExclamationCircleOutlined, EyeOutlined, FilterOutlined, MinusOutlined, MoreOutlined, NumberOutlined, PlayCircleOutlined, PlusOutlined, QuestionCircleOutlined, RestOutlined, SaveOutlined, ShoppingCartOutlined, SlidersOutlined, StopOutlined, TagsOutlined, TeamOutlined, ThunderboltOutlined } from '@ant-design/icons';
 import { DateHelpers } from '@common/Helpers/DateHelper';
 import { DishDurationHelper } from '@common/Helpers/DishDurationHelper';
 import { DishServingHelper } from '@common/Helpers/DishServingHelper';
@@ -168,6 +168,13 @@ const mealSlotMeta: Record<MealSlot, { label: string; tone: string; background: 
 
 const mealSlots: MealSlot[] = ['breakfast', 'lunch', 'dinner'];
 const MEAL_SLOT_RANGE_MAX = 6;
+
+// Leading meal-time icon per slot, tinted with the slot tone for a clearer at-a-glance hierarchy.
+const mealSlotIcon: Record<MealSlot, React.ReactNode> = {
+    breakfast: <CoffeeOutlined />,
+    lunch: <ClockCircleOutlined />,
+    dinner: <RestOutlined />,
+};
 
 const DEFAULT_MEAL_SLOT_DISH_RANGES: SmartPlannerMealSlotDishRanges = {
     breakfast: { min: 1, max: 1 },
@@ -1603,16 +1610,17 @@ export const SmartMealPlannerScreen: React.FC = () => {
 
     // Compact per-slot detail of a saved template: dish-count range + required tag counts. Reused
     // by the collapsible template section in the picker modal (and mirrors the template page cards).
-    const renderTemplateDetail = (template: SmartPlannerTemplate) => <Stack direction='column' gap={6} style={{ width: '100%' }}>
+    const renderTemplateDetail = (template: SmartPlannerTemplate) => <Stack direction='column' align='stretch' gap={6} style={{ width: '100%' }}>
         {mealSlots.map(slot => {
             const meta = mealSlotMeta[slot];
             const range = template.mealSlotDishRanges[slot] ?? { min: 0, max: 0 };
             const tagRequirements = (template.mealSlotTagRequirements[slot] ?? []).filter(item => item.min > 0);
-            return <Box key={slot} style={{ border: `1px solid ${meta.border}`, borderRadius: 8, background: meta.background, padding: '7px 9px' }}>
-                <Stack align='center' gap={6} wrap='wrap' style={{ width: '100%' }}>
-                    <Tag style={{ marginRight: 0, color: meta.tone, background: '#fff', borderColor: meta.border, minWidth: 48, textAlign: 'center' }}>{meta.label}</Tag>
-                    <Tag color='blue' style={{ marginRight: 0 }}>{range.min}-{range.max} món</Tag>
-                    {tagRequirements.map(item => <Tag key={item.tag} color='cyan' style={{ marginRight: 0 }}>{item.tag}: {item.min}</Tag>)}
+            return <Box key={slot} style={{ width: '100%', boxSizing: 'border-box', border: `1px solid ${meta.border}`, borderRadius: 8, background: meta.background, padding: '8px 10px' }}>
+                <Stack align='center' gap={9} wrap='wrap' style={{ width: '100%' }}>
+                    <span style={{ width: 28, height: 28, borderRadius: 8, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', color: meta.tone, background: '#fff', border: `1px solid ${meta.border}`, fontSize: 15, flexShrink: 0 }}>{mealSlotIcon[slot]}</span>
+                    <Typography.Text strong style={{ fontSize: 14, lineHeight: '20px', color: meta.tone, flex: 1, minWidth: 0 }}>{meta.label}</Typography.Text>
+                    <Tag color='blue' icon={<NumberOutlined />} style={{ marginRight: 0 }}>{range.min}-{range.max} món</Tag>
+                    {tagRequirements.map(item => <Tag key={item.tag} icon={<TagsOutlined />} color='cyan' style={{ marginRight: 0 }}>{item.tag}: {item.min}</Tag>)}
                 </Stack>
             </Box>;
         })}
