@@ -18,6 +18,7 @@ export type ScheduledMeal = {
     plannedDate: Date;
     meals: Record<ScheduledMealSlotKey, string[]>;
     skipMeals?: ScheduledMealSkipSlots;
+    cookedSlots?: Partial<Record<ScheduledMealSlotKey, boolean>>;
     dishServings?: ScheduledMealDishServings;
     createdDate: Date;
 }

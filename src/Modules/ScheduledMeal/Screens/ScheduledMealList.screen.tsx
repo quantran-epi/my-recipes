@@ -16,9 +16,9 @@ import { useScreenTitle, useToggle } from "@hooks";
 import { ScheduledMeal, ScheduledMealSkipReason, ScheduledMealSlotKey } from "@store/Models/ScheduledMeal";
 import type { CookingMealFeedbackSlot } from "@store/Models/CookingSession";
 import { rememberScheduledMealName, WeeklyMealTemplate } from "@store/Reducers/AppContextReducer";
-import { addScheduledMeal, removeScheduledMeal, toggleSelectedMeals, unmarkSkipMeal } from "@store/Reducers/ScheduledMealReducer";
-import { selectDishFeedbackHistory, selectDishNameById, selectScheduledMeals, selectSelectedMealIds, selectWeeklyMealTemplates } from "@store/Selectors";
-import { Calendar, DatePicker, Select, Tag } from "antd";
+import { addScheduledMeal, removeScheduledMeal, setMealSlotCooked, toggleSelectedMeals, unmarkSkipMeal } from "@store/Reducers/ScheduledMealReducer";
+import { selectAvailableServingsByDishKind, selectDishFeedbackHistory, selectDishNameById, selectScheduledMeals, selectSelectedMealIds, selectWeeklyMealTemplates } from "@store/Selectors";
+import { Calendar, DatePicker, Select, Switch, Tag } from "antd";
 import { SelectInfo } from "antd/es/calendar/generateCalendar";
 import dayjs, { Dayjs } from "dayjs";
 import { nanoid } from "nanoid";
@@ -619,6 +619,7 @@ export const ScheduledMealItem = ({ item, selected, dishNameById, onDelete }: { 
     const [copyDate, setCopyDate] = useState<Dayjs | null>(null);
     const [skipScope, setSkipScope] = useState<{ slot?: ScheduledMealSlotKey; reason: ScheduledMealSkipReason }>();
     const feedbackHistory = useSelector(selectDishFeedbackHistory);
+    const servingsByDishKind = useSelector(selectAvailableServingsByDishKind);
     const dispatch = useDispatch();
 
     const _dishName = (id: string) => dishNameById.get(id) ?? id;
@@ -708,6 +709,20 @@ export const ScheduledMealItem = ({ item, selected, dishNameById, onDelete }: { 
             : { label: "Sắp tới", color: "#389e0d", background: "#f6ffed", border: "#b7eb8f" };
     const railColor = selected ? "#1677ff" : plannedStatus.color;
 
+    // Per-dish available servings (fresh + leftover) drawn from the leftover/serving stock selector.
+    const _dishServingStock = (dishId: string) => servingsByDishKind.get(dishId) ?? { fresh: 0, leftover: 0 };
+    const _formatDishServings = (dishId: string): string | null => {
+        const stock = _dishServingStock(dishId);
+        const total = stock.fresh + stock.leftover;
+        if (total <= 0) return null;
+        if (stock.fresh > 0 && stock.leftover > 0) return `${stock.fresh} mới · ${stock.leftover} dư`;
+        return `${total} phần`;
+    };
+    const _slotHasAvailableServings = (dishIds: string[]) => getScheduledMealDishIds(dishIds).some(id => {
+        const stock = _dishServingStock(id);
+        return stock.fresh + stock.leftover > 0;
+    });
+
     const MealRow = ({ slot, icon, label, dishIds, color, background, border, finished }: { slot: ScheduledMealSlotKey; icon: string; label: string; dishIds: string[]; color: string; background: string; border: string; finished: boolean }) => {
         const skipMarker = item.skipMeals?.[slot];
         if (skipMarker) {
@@ -733,6 +748,7 @@ export const ScheduledMealItem = ({ item, selected, dishNameById, onDelete }: { 
             </Box>;
         }
 
+        const cooked = Boolean(item.cookedSlots?.[slot]);
         return <Box style={{ border: `1px solid ${border}`, borderRadius: 8, background, padding: "8px 9px", minWidth: 0 }}>
             <div style={{ display: "grid", gridTemplateColumns: "auto minmax(0, 1fr) auto", gap: 7, alignItems: "center", marginBottom: 6 }}>
                 <Image src={icon} preview={false} width={15} style={{ marginBottom: 2 }} />
@@ -746,15 +762,26 @@ export const ScheduledMealItem = ({ item, selected, dishNameById, onDelete }: { 
                     <Typography.Text type="secondary" style={{ fontSize: 11, whiteSpace: "nowrap" }}>{dishIds.length} món</Typography.Text>
                 </Stack>
             </div>
+            {dishIds.length > 0 && <Stack align="center" justify="space-between" gap={6} style={{ marginBottom: 7 }}>
+                <Typography.Text type="secondary" style={{ fontSize: 11, lineHeight: "16px" }}>Tình trạng nấu</Typography.Text>
+                <Switch
+                    size="small"
+                    checked={cooked}
+                    checkedChildren="Đã nấu"
+                    unCheckedChildren="Chưa nấu"
+                    onChange={checked => dispatch(setMealSlotCooked({ mealId: item.id, slot, cooked: checked }))}
+                />
+            </Stack>}
             {dishIds.length === 0 ? (
                 <Typography.Text type="secondary" style={{ display: "block", fontSize: 12, lineHeight: "18px" }}>Chưa chọn</Typography.Text>
             ) : (
                 <Stack wrap="wrap" gap={4}>
-                    {dishIds.slice(0, 3).map((id, index) => (
-                        <Tag key={`${id}-${index}`} style={{ maxWidth: "100%", fontSize: 11, padding: "1px 7px", margin: 0, borderRadius: 10, overflow: "hidden", textOverflow: "ellipsis" }}>
-                            {_dishLabel(id)}
-                        </Tag>
-                    ))}
+                    {dishIds.slice(0, 3).map((id, index) => {
+                        const servingLabel = _formatDishServings(id);
+                        return <Tag key={`${id}-${index}`} style={{ maxWidth: "100%", fontSize: 11, padding: "1px 7px", margin: 0, borderRadius: 10, overflow: "hidden", textOverflow: "ellipsis" }}>
+                            {_dishLabel(id)}{servingLabel ? ` · còn ${servingLabel}` : ""}
+                        </Tag>;
+                    })}
                     {dishIds.length > 3 && <Tag style={{ fontSize: 11, padding: "1px 7px", margin: 0, borderRadius: 10 }}>+{dishIds.length - 3}</Tag>}
                 </Stack>
             )}
@@ -795,9 +822,9 @@ export const ScheduledMealItem = ({ item, selected, dishNameById, onDelete }: { 
                                     { label: "Nấu bữa sáng", key: "cook-breakfast", icon: <FireOutlined />, disabled: item.meals.breakfast.length === 0 },
                                     { label: "Nấu bữa trưa", key: "cook-lunch", icon: <FireOutlined />, disabled: item.meals.lunch.length === 0 },
                                     { label: "Nấu bữa tối", key: "cook-dinner", icon: <FireOutlined />, disabled: item.meals.dinner.length === 0 },
-                                    { label: breakfastFeedbackDone ? "Xem phản hồi bữa sáng" : "Hoàn tất bữa sáng", key: "complete-breakfast", icon: breakfastFeedbackDone ? <EyeOutlined /> : <RestOutlined />, disabled: item.meals.breakfast.length === 0 || (isFutureMeal && !breakfastFeedbackDone) },
-                                    { label: lunchFeedbackDone ? "Xem phản hồi bữa trưa" : "Hoàn tất bữa trưa", key: "complete-lunch", icon: lunchFeedbackDone ? <EyeOutlined /> : <RestOutlined />, disabled: item.meals.lunch.length === 0 || (isFutureMeal && !lunchFeedbackDone) },
-                                    { label: dinnerFeedbackDone ? "Xem phản hồi bữa tối" : "Hoàn tất bữa tối", key: "complete-dinner", icon: dinnerFeedbackDone ? <EyeOutlined /> : <RestOutlined />, disabled: item.meals.dinner.length === 0 || (isFutureMeal && !dinnerFeedbackDone) },
+                                    { label: breakfastFeedbackDone ? "Xem phản hồi bữa sáng" : "Hoàn tất bữa sáng", key: "complete-breakfast", icon: breakfastFeedbackDone ? <EyeOutlined /> : <RestOutlined />, disabled: item.meals.breakfast.length === 0 || (isFutureMeal && !breakfastFeedbackDone) || (!breakfastFeedbackDone && item.meals.breakfast.length > 0 && !_slotHasAvailableServings(item.meals.breakfast)) },
+                                    { label: lunchFeedbackDone ? "Xem phản hồi bữa trưa" : "Hoàn tất bữa trưa", key: "complete-lunch", icon: lunchFeedbackDone ? <EyeOutlined /> : <RestOutlined />, disabled: item.meals.lunch.length === 0 || (isFutureMeal && !lunchFeedbackDone) || (!lunchFeedbackDone && item.meals.lunch.length > 0 && !_slotHasAvailableServings(item.meals.lunch)) },
+                                    { label: dinnerFeedbackDone ? "Xem phản hồi bữa tối" : "Hoàn tất bữa tối", key: "complete-dinner", icon: dinnerFeedbackDone ? <EyeOutlined /> : <RestOutlined />, disabled: item.meals.dinner.length === 0 || (isFutureMeal && !dinnerFeedbackDone) || (!dinnerFeedbackDone && item.meals.dinner.length > 0 && !_slotHasAvailableServings(item.meals.dinner)) },
                                     { type: "divider" },
                                     { label: "Đánh dấu không nấu", key: "mark-skip", icon: <RestOutlined />, disabled: !hasAnyUnmarkedSlot },
                                     { label: "Chi tiết", key: "detail", icon: <CalendarOutlined /> },

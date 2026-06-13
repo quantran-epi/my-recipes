@@ -42,6 +42,13 @@ export const ScheduledMealSlice = createSlice({
             if (!meal?.skipMeals) return;
             delete meal.skipMeals[action.payload.slot];
         },
+        setMealSlotCooked: (state, action: PayloadAction<{ mealId: string; slot: ScheduledMealSlotKey; cooked: boolean }>) => {
+            const meal = state.scheduledMeals.find(item => item.id === action.payload.mealId);
+            if (!meal) return;
+            if (!meal.cookedSlots) meal.cookedSlots = {};
+            if (action.payload.cooked) meal.cookedSlots[action.payload.slot] = true;
+            else delete meal.cookedSlots[action.payload.slot];
+        },
         remove: (state, action: PayloadAction<string[]>) => {
             state.scheduledMeals = state.scheduledMeals.filter(dish => !action.payload.includes(dish.id));
         },
@@ -67,6 +74,7 @@ export const {
     edit: editScheduledMeal,
     markSkipMeal,
     unmarkSkipMeal,
+    setMealSlotCooked,
     remove: removeScheduledMeal,
     toggleSelectedMeals,
     removeAllSelectedMeals,

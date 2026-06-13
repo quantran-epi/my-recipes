@@ -82,6 +82,7 @@ export const ScheduledMealAddWidget = ({ date, initialName, initialMeals, initia
             name: { label: "Tên gợi nhớ", name: ObjectPropertyHelper.nameof(defaultValues, e => e.name) },
             meals: { name: ObjectPropertyHelper.nameof(defaultValues, e => e.meals), noMarkup: true },
             skipMeals: { name: ObjectPropertyHelper.nameof(defaultValues, e => e.skipMeals), noMarkup: true },
+            cookedSlots: { name: ObjectPropertyHelper.nameof(defaultValues, e => e.cookedSlots), noMarkup: true },
             dishServings: { name: ObjectPropertyHelper.nameof(defaultValues, e => e.dishServings), noMarkup: true },
             createdDate: { name: ObjectPropertyHelper.nameof(defaultValues, e => e.createdDate), noMarkup: true },
             plannedDate: { label: "Ngày kế hoạch", name: ObjectPropertyHelper.nameof(defaultValues, e => e.plannedDate) },
