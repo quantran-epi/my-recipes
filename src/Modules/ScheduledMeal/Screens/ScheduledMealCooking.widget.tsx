@@ -19,6 +19,7 @@ import dayjs from 'dayjs';
 import { nanoid } from 'nanoid';
 import React, { useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { HouseholdMemberPicker } from '@modules/ScheduledMeal/Components/HouseholdMemberPicker';
 
 export const getScheduledMealDishIds = (dishIds: string[]): string[] => Array.from(new Set(dishIds.filter(Boolean)));
 
@@ -94,6 +95,7 @@ export const ScheduledMealCookingModal: React.FC<ScheduledMealCookingModalProps>
     const selectedMembers = useSelector(selectSelectedHouseholdMembers);
     const [focusedDishId, setFocusedDishId] = useState<string>();
     const [cookingOpen, setCookingOpen] = useState(false);
+    const [cookMemberIds, setCookMemberIds] = useState<string[]>(() => selectedMembers.map(member => member.id));
     const [feedbackOpen, setFeedbackOpen] = useState(false);
     const [feedbackScope, setFeedbackScope] = useState<{ title: string; dishIds: string[] }>({ title: '', dishIds: [] });
     const uniqueDishIds = useMemo(() => getScheduledMealDishIds(dishIds), [dishIds]);
@@ -114,10 +116,10 @@ export const ScheduledMealCookingModal: React.FC<ScheduledMealCookingModalProps>
             targetServings,
             steps: collectAllSteps(dish, dishesById),
             ingredientIds: Array.from(new Set(DishServingHelper.collectIngredientAmounts(dish, allDishes, { targetServings }).map(item => item.ingredientId))),
-            householdMemberIds: selectedMembers.map(member => member.id),
+            householdMemberIds: cookMemberIds,
             timerPhases,
         }));
-    }, [activeSessionByDishId, allDishes, dishServings, dishesById, dispatch, finishedDishIds, selectedMembers]);
+    }, [activeSessionByDishId, allDishes, cookMemberIds, dishServings, dishesById, dispatch, finishedDishIds]);
 
     const _openDish = (dishId: string) => {
         const hasActive = activeSessionByDishId.has(dishId);
@@ -132,6 +134,14 @@ export const ScheduledMealCookingModal: React.FC<ScheduledMealCookingModalProps>
         setFocusedDishId(dishId);
         setCookingOpen(true);
     };
+
+    // Re-seed the cook selection from the global selection each time the modal opens, so the
+    // pre-fill stays convenient while still letting the user change who is cooking this meal.
+    React.useEffect(() => {
+        if (!open) return;
+        setCookMemberIds(selectedMembers.map(member => member.id));
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [open]);
 
     const focusedDish = focusedDishId ? dishesById.get(focusedDishId) : undefined;
 
@@ -150,6 +160,7 @@ export const ScheduledMealCookingModal: React.FC<ScheduledMealCookingModalProps>
                 {uniqueDishIds.length === 0 ? <Box style={{ textAlign: 'center', padding: '26px 0' }}>
                     <Typography.Text type='secondary'>Bữa này chưa có món để nấu.</Typography.Text>
                 </Box> : <div style={{ display: 'flex', flexDirection: 'column', gap: 10, width: '100%' }}>
+                    <HouseholdMemberPicker value={cookMemberIds} onChange={setCookMemberIds} label='Người nấu cho bữa này' />
                     {uniqueDishIds.map(dishId => {
                         const dish = dishesById.get(dishId);
                         const session = activeSessionByDishId.get(dishId);

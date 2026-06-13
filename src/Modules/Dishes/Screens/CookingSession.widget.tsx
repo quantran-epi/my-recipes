@@ -45,6 +45,7 @@ import { useNavigate } from "react-router-dom";
 import ShoppingListIcon from "../../../../assets/icons/shoppingList.png";
 import StepsIcon from "../../../../assets/icons/process.png";
 import { FinishCookingWidget } from "./FinishCooking.widget";
+import { HouseholdMemberPicker } from "@modules/ScheduledMeal/Components/HouseholdMemberPicker";
 
 type CookingIngredientRow = {
     ingredient: Ingredient;
@@ -119,11 +120,14 @@ export const CookingSessionWidget: React.FunctionComponent<CookingSessionWidgetP
     const audioUnlockedSessionIdRef = useRef<string | null>(null);
     const baseServings = DishServingHelper.getBaseServings(dish);
     const [targetServings, setTargetServings] = useState<number>(() => baseServings);
+    const [cookMemberIds, setCookMemberIds] = useState<string[]>(() => selectedHouseholdMembers.map(m => m.id));
 
     useEffect(() => {
         setTargetServings(baseServings);
         setPhase("prep");
         setShowFinish(false);
+        setCookMemberIds(selectedHouseholdMembers.map(m => m.id));
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [dish.id, baseServings]);
 
     const activeSession = sessions.find(s => s.dishId === dish.id && s.status === "cooking");
@@ -221,7 +225,7 @@ export const CookingSessionWidget: React.FunctionComponent<CookingSessionWidgetP
             targetServings,
             steps,
             ingredientIds: rows.map(row => row.ingredient.id),
-            householdMemberIds: selectedHouseholdMembers.map(member => member.id),
+            householdMemberIds: cookMemberIds,
             timerPhases,
         }));
         // Unlock audio within this tap so the first phase's expiry chime can play (autoplay policy).
@@ -443,6 +447,10 @@ export const CookingSessionWidget: React.FunctionComponent<CookingSessionWidgetP
             <Image src={StepsIcon} preview={false} width={16} style={{ marginBottom: 2 }} />
             {steps.length} bước hướng dẫn sẽ hiển thị sau khi bắt đầu
         </div>}
+
+        <Box style={{ marginTop: 12, marginBottom: 4, border: "1px solid #f0f0f0", borderRadius: 8, padding: 10, background: "#fff" }}>
+            <HouseholdMemberPicker label="Người nấu" value={cookMemberIds} onChange={setCookMemberIds} />
+        </Box>
 
         <Stack direction="column" style={{ gap: 8, marginTop: 8 }}>
             {!allSufficient && rows.length > 0 && <Button fullwidth icon={<ShoppingCartOutlined />} onClick={toggleShoppingList.show}>
