@@ -35,6 +35,7 @@ import {
     selectDishesById,
     selectIngredientsById,
     selectInventory,
+    selectInventoryHealthConfig,
     selectSelectedHouseholdMembers,
 } from "@store/Selectors";
 import { Progress, Space, Switch } from "antd";
@@ -105,6 +106,7 @@ export const CookingSessionWidget: React.FunctionComponent<CookingSessionWidgetP
     const dishesById = useSelector(selectDishesById);
     const ingredientsById = useSelector(selectIngredientsById);
     const inventoryItems = useSelector(selectInventory);
+    const inventoryConfig = useSelector(selectInventoryHealthConfig);
     const sessions = useSelector(selectCookingSessions);
     const cookTimeStats = useSelector(selectCookTimeStats);
     const selectedHouseholdMembers = useSelector(selectSelectedHouseholdMembers);
@@ -168,11 +170,11 @@ export const CookingSessionWidget: React.FunctionComponent<CookingSessionWidgetP
             if (!ingredient) return null;
             const inv = inventoryItems[ingredientId];
             const required = InventoryHelper.roundAmount(total);
-            const inStock = InventoryHelper.availableAmount(inv, ingredient, required);
+            const inStock = InventoryHelper.availableAmount(inv, ingredient, required, inventoryConfig);
             const lacking = InventoryHelper.roundAmount(Math.max(0, required - inStock));
             return { ingredient, required, unit, inStock, lacking, sufficient: inStock >= required, prepare } as CookingIngredientRow;
         }).filter(Boolean) as CookingIngredientRow[];
-    }, [dish, allDishes, ingredientsById, inventoryItems, activeTargetServings]);
+    }, [dish, allDishes, ingredientsById, inventoryItems, inventoryConfig, activeTargetServings]);
 
     const lackingIngredientIds = rows.filter(r => !r.sufficient).map(r => r.ingredient.id);
     const allSufficient = rows.every(r => r.sufficient);
@@ -219,6 +221,24 @@ export const CookingSessionWidget: React.FunctionComponent<CookingSessionWidgetP
         dispatch(setCookingIngredientStatus({ sessionId: session.id, ingredientId, status }));
     };
 
+    const _formatInventoryAmount = (value: number, unit: string) => `${IngredientUnitHelper.formatAmount(value)}${unit}`;
+
+    const _renderInventoryAvailability = (row: CookingIngredientRow) => {
+        if (row.ingredient.alwaysAvailable) {
+            return <Tag color="green" style={{ marginInlineEnd: 0 }}>Luôn có</Tag>;
+        }
+        if (row.sufficient) {
+            return <Tag color="green" style={{ marginInlineEnd: 0 }}>Đủ ({_formatInventoryAmount(row.inStock, row.unit)})</Tag>;
+        }
+        if (row.inStock > 0) {
+            return <React.Fragment>
+                <Tag color="orange" style={{ marginInlineEnd: 0 }}>Còn {_formatInventoryAmount(row.inStock, row.unit)}/{_formatInventoryAmount(row.required, row.unit)}</Tag>
+                <Tag color="red" style={{ marginInlineEnd: 0 }}>Thiếu {_formatInventoryAmount(row.lacking, row.unit)}</Tag>
+            </React.Fragment>;
+        }
+        return <Tag color="red" style={{ marginInlineEnd: 0 }}>Chưa có</Tag>;
+    };
+
     const _onNext = () => {
         if (!session) return;
         if (currentIndex < totalSteps - 1) dispatch(setStepCooking({ sessionId: session.id, stepIndex: currentIndex + 1 }));
@@ -233,6 +253,7 @@ export const CookingSessionWidget: React.FunctionComponent<CookingSessionWidgetP
         {rows.length === 0 && <Typography.Text type="secondary">Món này chưa có nguyên liệu.</Typography.Text>}
         {rows.map(row => {
             const status = getSessionIngredientStatus(session, row.ingredient.id);
+            const disableUsedToggle = interactive && !row.sufficient && status !== "used";
             return <div key={row.ingredient.id} data-testid={`cooking-ingredient-${row.ingredient.id}`} style={{
                 display: 'grid',
                 gridTemplateColumns: interactive ? 'minmax(0, 1fr) auto' : 'minmax(0, 1fr) auto',
@@ -247,20 +268,23 @@ export const CookingSessionWidget: React.FunctionComponent<CookingSessionWidgetP
                         Cần {IngredientUnitHelper.formatAmount(row.required)}{row.unit}
                         {row.prepare.length > 0 ? ` · ${row.prepare.slice(0, 2).join(", ")}` : ""}
                     </Typography.Text>
+                    {interactive && <Space size={6} wrap style={{ marginTop: 4 }} data-testid={`cooking-ingredient-availability-${row.ingredient.id}`}>
+                        {_renderInventoryAvailability(row)}
+                    </Space>}
                 </Box>
                 {interactive ? <Switch
+                    data-testid={`cooking-ingredient-used-toggle-${row.ingredient.id}`}
+                    aria-label={`Đánh dấu ${row.ingredient.name} đã dùng`}
                     checked={status === "used"}
+                    disabled={disableUsedToggle}
                     checkedChildren="Đã dùng"
                     unCheckedChildren="Chưa"
-                    onChange={checked => _onIngredientStatusChange(row.ingredient.id, checked ? "used" : "needed")}
+                    onChange={checked => {
+                        if (checked && !row.sufficient) return;
+                        _onIngredientStatusChange(row.ingredient.id, checked ? "used" : "needed");
+                    }}
                 /> : <Space size={6}>
-                    {row.ingredient.alwaysAvailable ? (
-                        <Tag color="green" style={{ marginInlineEnd: 0 }}>Luôn có</Tag>
-                    ) : row.sufficient ? (
-                        <Tag color="green" style={{ marginInlineEnd: 0 }}>Đủ ({IngredientUnitHelper.formatAmount(row.inStock)}{row.unit})</Tag>
-                    ) : (
-                        <Tag color="red" style={{ marginInlineEnd: 0 }}>Thiếu {IngredientUnitHelper.formatAmount(row.lacking)}{row.unit}</Tag>
-                    )}
+                    {_renderInventoryAvailability(row)}
                 </Space>}
             </div>;
         })}
