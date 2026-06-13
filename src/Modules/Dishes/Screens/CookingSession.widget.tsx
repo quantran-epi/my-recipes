@@ -38,7 +38,7 @@ import {
     selectInventoryHealthConfig,
     selectSelectedHouseholdMembers,
 } from "@store/Selectors";
-import { Progress, Space, Switch } from "antd";
+import { Progress, Space, Switch, Tooltip } from "antd";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
@@ -290,18 +290,25 @@ export const CookingSessionWidget: React.FunctionComponent<CookingSessionWidgetP
                         {_renderInventoryAvailability(row)}
                     </Space>}
                 </Box>
-                {interactive ? <Switch
-                    data-testid={`cooking-ingredient-used-toggle-${row.ingredient.id}`}
-                    aria-label={`Đánh dấu ${row.ingredient.name} đã dùng`}
-                    checked={status === "used"}
-                    disabled={disableUsedToggle}
-                    checkedChildren="Đã dùng"
-                    unCheckedChildren="Chưa"
-                    onChange={checked => {
-                        if (checked && !row.sufficient) return;
-                        _onIngredientStatusChange(row.ingredient.id, checked ? "used" : "needed");
-                    }}
-                /> : <Space size={6}>
+                {interactive ? <Box style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 3 }}>
+                    <Tooltip title={disableUsedToggle ? "Không đủ trong kho để đánh dấu đã dùng" : ""}>
+                        <Switch
+                            data-testid={`cooking-ingredient-used-toggle-${row.ingredient.id}`}
+                            aria-label={`Đánh dấu ${row.ingredient.name} đã dùng`}
+                            checked={status === "used"}
+                            disabled={disableUsedToggle}
+                            checkedChildren="Đã dùng"
+                            unCheckedChildren="Chưa"
+                            onChange={checked => {
+                                if (checked && !row.sufficient) return;
+                                _onIngredientStatusChange(row.ingredient.id, checked ? "used" : "needed");
+                            }}
+                        />
+                    </Tooltip>
+                    {disableUsedToggle && <Typography.Text data-testid={`cooking-ingredient-used-reason-${row.ingredient.id}`} type="secondary" style={{ fontSize: 11, lineHeight: "14px", color: "#cf1322" }}>
+                        Chưa đủ
+                    </Typography.Text>}
+                </Box> : <Space size={6}>
                     {_renderInventoryAvailability(row)}
                 </Space>}
             </div>;
